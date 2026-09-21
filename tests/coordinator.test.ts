@@ -243,10 +243,14 @@ test('movement shortlist is pawn-owned in both decision paths; core sees only ph
  }});
  assert.equal(game.moves,0);
  game.data.events=[{seq:1,tick:1,pawn:'A',kind:'health',detail:'changed'}];game.data.eventSeq=1;
- await c.attend('A',{name:'inspect-reflection',async reflect(view){
+ let reflected=false;
+ const attended=await c.attend('A',{name:'inspect-reflection',async reflect(view){
+   reflected=true;
    assert.deepEqual(view.pawn.movement,offer);assert(!JSON.stringify(view).includes('"x":99'));
    return {kind:'continue',reason:'Native routine'};
  }});
+ // attend catches backend exceptions; an assertion inside reflect must not become a passing fallback.
+ assert(reflected);assert.equal(attended.status,'continued');
  assert.equal(game.moves,0);
 });
 
