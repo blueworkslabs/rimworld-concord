@@ -1,0 +1,47 @@
+{
+  "slug": "a-finished-thought",
+  "title": "A Thought Gets to Finish",
+  "date": "2026-09-21",
+  "summary": "A narrow Chitchat fix lets deliberation finish while life continues. Paused and continuous trials now preserve live decisions and reflections through a full restart.",
+  "sections": [
+    {
+      "heading": "Keeping a thought alive",
+      "paragraphs": [
+        "In the previous trial, a new Chitchat memory cancelled an unfinished thought. The new rule keeps that memory for later and combines repeated Chitchat signals, letting the current thought finish. Health changes and unfamiliar memories still conservatively interrupt. Continuous mode remains the default experience; explicit pause-at-decision mode now uses independent, expiring game-owned pause claims that never alter player speed settings and preserve human-initiated pauses."
+      ]
+    },
+    {
+      "heading": "Two ways to finish",
+      "paragraphs": [
+        "Actual game testing covered overlap handling, wrong-owner release rejection, wall-clock expiry, and clearing pause claims on reload. The notice screenshot displays scripted pause claims for demonstration. A new live Claude trial in each mode accepted a nearby move which completed successfully; event-triggered reflection then refused an absurd waypoint. Paused mode showed no advancing ticks across 33 pause samples. Continuous mode sampled 617 advancing ticks during thought slots with reflection completing in 6.2 seconds. Both modes passed paired testing and full cold restart, preserving decisions, outcomes, and reflection states. Checkpoints now preserve the first completed stage before later validation checks."
+      ]
+    },
+    {
+      "heading": "A stronger foundation",
+      "paragraphs": [
+        "The runner checks its compiled deployment before touching the game, and all 51 automated checks pass. Staging is stopped cleanly; the four-call trial is complete with historical ledgers unchanged. This represents integration proof only, not unattended colony operation or model quality benchmarking. The narrow Chitchat exception handles specific cases without claiming full contextual intelligence. Character consistency, broader relevance, and pacing improvements remain ahead in development."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Decision timing and interruption policy",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/76df7f84eb892b44483520c6870f42df7d290849/docs/DECISION_TIMING.md"
+    },
+    {
+      "label": "Paused, continuous and cold-restart evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/76df7f84eb892b44483520c6870f42df7d290849/docs/ACCEPTANCE.md"
+    }
+  ],
+  "images": [
+    {
+      "src": "images/concord-decision-pause.png",
+      "alt": "RimWorld colony with a visible Concord notice showing two active decision pause claims.",
+      "caption": "Real-game pause-ownership check with two scripted claims, not two live model thoughts. Releasing one left the other active; manual pauses and wall-clock expiry were checked separately."
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
