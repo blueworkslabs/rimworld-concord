@@ -1,0 +1,29 @@
+{
+  "at": "2026-09-21T20:17:21.854Z",
+  "implementation": "c1abe46389d7c46889a7aa18b38a132aa825201c",
+  "automatedTests": 64,
+  "inferenceCalls": 0,
+  "modCompiledAgainstInstalledAssemblies": true,
+  "gameChecks": [
+    "real native traits, skills and needs populate the self perspective",
+    "refusal does not dispatch a job",
+    "unavailable actor receives an idempotent terminal failure; core still cannot create a pawn job",
+    "duplicate action is idempotent; changed payload with same ID rejected",
+    "accepted intention completes a real native Goto job",
+    "simulation advances while pawn deliberates; activity state clears afterwards",
+    "backend timeout leaves proposal pending and performs no forced fallback job",
+    "infeasible destination reports failure and releases the commitment",
+    "native job events are captured, routed and isolated per pawn",
+    "paired restore rolls back memories/proposals, cancels pending decision and rejects old epoch"
+  ],
+  "coldChecks": [
+    "cold game + coordinator restore preserves identities, character memories and paused state",
+    "unavailable-actor terminal receipt survives full restart and paired restore",
+    "replayed unavailable-actor receipt is unchanged and not duplicated"
+  ],
+  "limitations": [
+    "Actor unavailability exercised with an operator-synthetic actor ID, not an induced natural pawn disappearance.",
+    "Accounting regressions use synthetic transports, fake CLI processes and scratch ledgers; no new paid inference."
+  ],
+  "passed": true
+}
