@@ -1,0 +1,9 @@
+{
+  "at": "2026-09-21T20:38:41.849Z",
+  "phase": "cold",
+  "inferenceCalls": 0,
+  "passed": true,
+  "checks": [
+    "cold paired restore preserves decisions/outcomes and recomputes options in the new epoch"
+  ]
+}

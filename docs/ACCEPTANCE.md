@@ -183,3 +183,13 @@ These follow-up results do not rewrite the earlier mixed-result trial.
 - Reopening the same coordinator while a decision is running is explicitly rejected rather than falsely recording an interruption while allowing the thought to finish. This guards an API misuse pattern, not a newly observed ordinary gameplay failure.
 - Scripted real-game refusal, accepted movement, idempotency, simulation-during-thought, timeout and paired restore passed. Full cold restart preserved character state and the unavailable-actor receipt; replay after restore remained idempotent. The unavailable-actor game check uses an operator-synthetic core ID, not a natural pawn-disappearance event.
 - Independent Codex review covered implementation commit `c1abe46389d7c46889a7aa18b38a132aa825201c` and found no actionable defects. Raw review reports remain private; subsequent publication metadata contains no further behavioral changes.
+
+## Grounded nearby movement — 2026-09-21
+
+- 67 automated checks pass; native mod compiled against the installed game assemblies.
+- [Scripted real-game trial](evidence/movement-game.json): three pawns each returned 12 local options. Queries caused no jobs. An observed counter/revision required fresh consent and completed native movement; another pawn refused a reachable offer without a job. Duplicate action identity and stale-epoch rejection remained enforced.
+- The first attempt caught Unity omitting a nested list in serialization. Explicit per-element serialization fixed the output; the rerun above passed. This was a serialization failure, not a failed model decision.
+- An operator-modified copy of a disposable save drafted one pawn. It exposed an empty unavailable list and rejected its previously offered coordinate using current native actor checks. The original paired save was untouched and restored afterward. This is a synthetic unavailability fixture, not observed combat behavior.
+- Paired restore and [full cold restart](evidence/movement-cold.json) preserved characters, proposals and outcomes, with fresh epoch/tick-stamped options after load. A short polling sample advanced 297 ticks over 5444 ms; this is not a sustained performance benchmark.
+- No new live pawn inference, no changes to exhausted trial ledgers; game/display services stopped. Kimi's diary drafting is separate editorial inference.
+- [Contract and limits](MOVEMENT.md): at most 12 destinations within Manhattan radius 3, with fog/line-of-sight and native reachability checks. Not exhaustive choices, full perception, reservations or a guarantee of safe arrival. Physical options are deliberately shared with the core without private character state.

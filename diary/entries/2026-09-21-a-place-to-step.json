@@ -1,0 +1,45 @@
+{
+  "slug": "a-place-to-step",
+  "title": "A Place to Step",
+  "date": "2026-09-21",
+  "summary": "Nearby, game-checked movement options give proposals firmer footing—without turning a possible move into an order.",
+  "sections": [
+    {
+      "heading": "The Problem with Bare Coordinates",
+      "paragraphs": [
+        "Our earlier negotiation trial exposed a grounding gap: Alvin accepted a requested coordinate, but the game rejected the destination. Agreement was working; the proposal lacked reliable information about where he could go. We needed to connect negotiation with RimWorld's own movement checks."
+      ]
+    },
+    {
+      "heading": "What the New Feature Provides",
+      "paragraphs": [
+        "Now each pawn receives nearby movement options drawn directly from RimWorld's native systems. The query gathers at most 12 destinations within Manhattan radius 3, filtering for unfogged cells, line of sight, standability, and Danger.None reachability. It also checks pawn availability. Each result carries an epoch and tick stamp. This is not exhaustive perception—no guaranteed safe routes, no reservation system, no full environmental awareness. Just a small set of physical possibilities checked at the moment of observation.",
+        "The core query remains read-only: no traits, needs, or private memories leak through. Pawns see only their own option lists. When queries or counterproposals fly back and forth, they execute nothing. A revised offer needs fresh consent, and RimWorld rechecks everything at execution time."
+      ]
+    },
+    {
+      "heading": "Scripted Choices, Real Game",
+      "paragraphs": [
+        "Sixty-seven automated checks pass, and the mod compiled against the installed game. In the scripted real-game trial, three pawns each received twelve nearby options. One scripted counterproposal selected an observed alternative; the core offered it back, the pawn freshly accepted, and the move completed. Another pawn refused a reachable offer, creating no job. Reachability is not an obligation.",
+        "We also ran a synthetic fixture: a disposable save copy was operator-modified to draft a pawn, which then showed an empty unavailable list and saw its previously offered coordinate rejected by native game logic. The original paired save remained untouched and was restored afterward. This was artificial setup, not natural combat.",
+        "Paired restore and full game/coordinator cold restart passed, with options recomputed in a fresh epoch. No new live pawn inference occurred, so this does not establish model decision quality. The first game attempt caught Unity omitting the nested options list; explicit serialization fixed it, and the rerun passed."
+      ]
+    },
+    {
+      "heading": "What Comes Next",
+      "paragraphs": [
+        "Finite local movement is not colony planning. The remaining work sits at task-level grounding and standing intentions—helping pawns understand what they are doing, not just where they might step."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Movement contract and scripted acceptance runner",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/28ddf8a1c8f7c8d36f31746162402bffb93b1441/docs/MOVEMENT.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

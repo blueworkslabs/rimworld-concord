@@ -1,0 +1,33 @@
+{
+  "at": "2026-09-21T20:37:12.404Z",
+  "phase": "game",
+  "inferenceCalls": 0,
+  "passed": true,
+  "checks": [
+    "three bounded owner-specific shortlists; querying creates no action",
+    "observed counter requires fresh consent, completes in native game, duplicate ID creates no extra action",
+    "reachable proposal can still be refused without a job",
+    "paired restore preserves outcomes and rejects an old-epoch movement request",
+    "operator-drafted save copy offers no movement; previously offered coordinate is rejected by native actor revalidation"
+  ],
+  "shortlists": [
+    {
+      "pawn": "Thing_Human405",
+      "options": 12
+    },
+    {
+      "pawn": "Thing_Human408",
+      "options": 12
+    },
+    {
+      "pawn": "Thing_Human411",
+      "options": 12
+    }
+  ],
+  "polling": {
+    "samples": 23,
+    "ticks": 297,
+    "wallMs": 5444
+  },
+  "limitation": "Scripted choices; drafted state is an operator-modified copy of a disposable save, not a naturally occurring interruption. Native reachability is not a route-safety guarantee."
+}
