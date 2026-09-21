@@ -14,7 +14,10 @@ First **scripted** vertical slice implemented, not a playable campaign or live A
 - Duplicate action IDs do not cause duplicate effects; game reload creates a new epoch, rejecting old decisions.
 - Quiescent checkpoints pair an immutable game save/hash with character state; restore forks a timeline.
 - Bounded asynchronous decisions expose `deliberating` activity while native simulation can continue.
-- Backends are replaceable. The shipped backend is **scripted only**, with no model calls or credentials.
+- Self-perspectives include native traits, skills, needs, surviving memories and direct relations.
+- Selected native events are archived, routed and projected only into their owning pawn's experience stream.
+- An expiring in-game thinking badge appears during proposal deliberation without pausing simulation.
+- A bounded Jev appraisal adapter is implemented against the documented API with mocked tests; **live authentication/inference is not yet verified**. Scripted decisions remain the default.
 
 See [acceptance](docs/ACCEPTANCE.md) for measured results and limitations, and [roadmap](docs/ROADMAP.md) for what is not built.
 
@@ -27,7 +30,8 @@ src/coordinator.ts    Proposals, identity binding, decisions, outcomes, checkpoi
 src/store.ts          SQLite state, audit events and paired checkpoint metadata
 src/lab-bridge.ts     Trusted staging transport and separate admin controls
 src/backends.ts       Scripted decisions for repeatable mechanics tests
-src/routing.ts        Initial pure routing policy (not wired to event capture yet)
+src/routing.ts        Native event attention routing
+src/appraisal.ts      Jev question/response validation and separate trial budget ledger
 scripts/lab/          Reused working lab controls; NOT a character tool surface
 adapters/openclaw/    Integration contract; no installed OpenClaw plugin yet
 docs/                 Design decisions, model research, provenance, evidence
@@ -69,6 +73,6 @@ This is an application boundary, **not** a sandbox for hostile plugin code or th
 
 ## Direction
 
-Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The current activity API supports a future deliberation icon; the in-game icon is **not implemented**.
+Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. Event routes are attention records; an autonomous scheduler and live deliberative model are still to come.
 
 See [architecture](docs/ARCHITECTURE.md), [narrative](docs/NARRATIVE.md), and [model access](docs/MODELS.md).

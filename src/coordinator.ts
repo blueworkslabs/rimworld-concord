@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { Decision, Move, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal } from './protocol.js';
+import type { AppraisalView } from './appraisal.js';
+import { route } from './routing.js';
 import { Store } from './store.js';
 
 /** Character handles bind identity in code; backend output cannot choose an actor. */
@@ -37,6 +39,50 @@ export class Coordinator {
     if(!game.loaded || game.world!==this.domain.world || game.epoch!==this.domain.epoch) throw Error('Stale timeline');
     return game;
   }
+  private ingest(game:GameState) {
+    if(game.eventSeq===undefined) return;
+    const cursor=this.domain.eventCursor??0;
+    const events=(game.events??[]).filter(e=>e.seq>cursor).sort((a,b)=>a.seq-b.seq);
+    if(events.length && events[0]!.seq>cursor+1) this.commit('native-event-gap','operator',{from:cursor+1,to:events[0]!.seq-1});
+    for(const event of events) {
+      const character=this.domain.characters[event.pawn];
+      if(!character) continue;
+      const next=route({urgent:event.kind==='health',significant:event.kind==='memory'||event.kind==='health',
+        conflictsWithCommitment:false,routine:event.kind==='job'}).next;
+      const experiences=character.experiences??=[];
+      experiences.push({event,route:next});
+      if(experiences.length>64) experiences.shift();
+      this.domain.eventCursor=event.seq;
+      this.commit('native-event',event.pawn,{event,route:next});
+    }
+    this.domain.eventCursor=game.eventSeq;
+    if(cursor!==game.eventSeq) this.commit('native-cursor','operator',{seq:game.eventSeq});
+  }
+  /** Polling is operator-owned. Routes are durable attention records, not automatic orders. */
+  async observe() {return this.serial(async()=>{this.ingest(await this.current());});}
+  /** Explicit bounded appraisal; important events routed directly to deliberation cannot be downgraded. */
+  async appraise(pawn:string,seq:number,backend:{name:string;assess(view:AppraisalView,signal:AbortSignal):Promise<unknown>},signal:AbortSignal) {
+    const prepared=await this.serial(async()=>{
+      const game=await this.current();this.ingest(game);
+      const character=this.domain.characters[pawn];
+      const experience=character?.experiences?.find(e=>e.event.seq===seq);
+      const own=game.pawns.find(p=>p.id===pawn);
+      if(!own||!character||!experience||experience.route!=='appraisal') throw Error('No eligible appraisal');
+      return {generation:this.generation,view:structuredClone({pawn:own,character,event:experience.event})};
+    });
+    signal.throwIfAborted();
+    const result=z.object({reflectionScore:z.number().finite().min(0).max(1)}).passthrough().parse(await backend.assess(prepared.view,signal));
+    return this.serial(async()=>{
+      signal.throwIfAborted();
+      if(prepared.generation!==this.generation) throw Error('Stale appraisal');
+      await this.current();
+      const experience=this.domain.characters[pawn]?.experiences?.find(e=>e.event.seq===seq);
+      if(!experience||experience.route!=='appraisal') throw Error('Appraisal superseded');
+      experience.route=result.reflectionScore>=0.5?'deliberation':'native';
+      this.commit('appraised',pawn,{seq,backend:backend.name,reflectionScore:result.reflectionScore,route:experience.route});
+      return structuredClone(experience);
+    });
+  }
   inspect() { return structuredClone(this.domain); }
   activity() { return [...this.pending.keys()].map(pawn=>({pawn,status:'deliberating' as const})); }
   core() {
@@ -64,6 +110,7 @@ export class Coordinator {
   private async decide(pawn:string,id:string,backend:DecisionBackend,timeoutMs:number) {
     const prepared=await this.serial(async()=>{
       const game=await this.current();
+      this.ingest(game);
       const p=this.domain.proposals[id];
       if(!p || p.pawn!==pawn) throw Error('Proposal does not belong to pawn');
       if(p.status!=='pending') throw Error('Proposal already decided');
@@ -71,9 +118,14 @@ export class Coordinator {
       if(this.domain.characters[pawn]!.commitment) throw Error('Pawn already committed; reconcile outcome first');
       const own=game.pawns.find(x=>x.id===pawn);
       if(!own) throw Error('Pawn unavailable');
-      const controller=new AbortController(); this.pending.set(pawn,controller);
+      if(!Number.isFinite(timeoutMs)||timeoutMs<1||timeoutMs>115000) throw Error('Decision timeout must be 1..115000 ms');
+      const controller=new AbortController();
+      const activity={epoch:game.epoch,actor:pawn,activityId:randomUUID(),ttlMs:timeoutMs+2000};
+      // UI transport failure must not disable cognition. The game expires orphaned badges.
+      try {await this.game.setActivity?.(activity);} catch {this.commit('indicator-unavailable',pawn,{});}
+      this.pending.set(pawn,controller);
       this.commit('deliberation-started',pawn,{proposal:id,backend:backend.name});
-      return {generation:this.generation,controller,view:structuredClone({pawn:own,character:this.domain.characters[pawn]!,proposal:p})};
+      return {generation:this.generation,controller,activity,view:structuredClone({pawn:own,character:this.domain.characters[pawn]!,proposal:p})};
     });
     let timer:ReturnType<typeof setTimeout>|undefined;
     try {
@@ -107,6 +159,7 @@ export class Coordinator {
     } finally {
       clearTimeout(timer);
       if(this.pending.get(pawn)===prepared.controller) this.pending.delete(pawn);
+      try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* expired or old timeline */ }
     }
   }
   private async dispatch(p:Proposal) {
@@ -120,6 +173,7 @@ export class Coordinator {
   async reconcile() {
     return this.serial(async()=>{
       const game=await this.current();
+      this.ingest(game);
       for(const p of Object.values(this.domain.proposals)) {
         if(!p.actionId) continue;
         const receipt=game.actions.find(a=>a.id===p.actionId);

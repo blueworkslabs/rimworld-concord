@@ -25,11 +25,18 @@ namespace Concord
         // Intentionally NOT serialized: all delayed commands from before a load become stale.
         public readonly string epoch = Guid.NewGuid().ToString("N");
         public List<ActionRecord> actions = new List<ActionRecord>();
+        public List<NativeEvent> events = new List<NativeEvent>();
+        public int eventSeq;
+        private readonly Dictionary<string,Sample> samples=new Dictionary<string,Sample>();
+        public readonly Dictionary<string,Thinking> thinking=new Dictionary<string,Thinking>();
         public WorldState(Game game) { }
         public override void ExposeData() {
             Scribe_Values.Look(ref world,"concordWorld");
             Scribe_Collections.Look(ref actions,"concordActions",LookMode.Deep);
             if(actions==null) actions=new List<ActionRecord>();
+            Scribe_Collections.Look(ref events,"concordEvents",LookMode.Deep);
+            Scribe_Values.Look(ref eventSeq,"concordEventSeq");
+            if(events==null) events=new List<NativeEvent>();
         }
         public void Reconcile() {
             if(Find.CurrentMap==null) return;
@@ -40,9 +47,40 @@ namespace Concord
                 else if(pawn.CurJob==null || pawn.CurJob.loadID!=a.jobId) { a.status="interrupted"; a.reason="Native job changed"; }
             }
         }
-        public override void GameComponentTick() { if(Find.TickManager.TicksGame%15==0) Reconcile(); }
+        private void Emit(string pawn,string kind,string detail) {
+            events.Add(new NativeEvent {seq=++eventSeq,tick=Find.TickManager.TicksGame,pawn=pawn,kind=kind,detail=detail});
+            if(events.Count>256) events.RemoveAt(0);
+        }
+        public void Observe() {
+            if(Find.CurrentMap==null) return;
+            foreach(var p in Find.CurrentMap.mapPawns.FreeColonistsSpawned) {
+                var id=p.GetUniqueLoadID(); var now=Awareness.Read(p); Sample old;
+                if(samples.TryGetValue(id,out old)) {
+                    if(now.job!=old.job) Emit(id,"job",now.job);
+                    if(now.health!=old.health) Emit(id,"health",now.health.ToString());
+                    if(now.food!=old.food) Emit(id,"food",now.food.ToString());
+                    if(now.rest!=old.rest) Emit(id,"rest",now.rest.ToString());
+                    if(now.mood!=old.mood) Emit(id,"mood",now.mood.ToString());
+                    foreach(var m in now.memories) if(!old.memories.Contains(m)) Emit(id,"memory",m.def.defName);
+                }
+                samples[id]=now;
+            }
+        }
+        public override void GameComponentTick() { if(Find.TickManager.TicksGame%30==0) {Reconcile(); Observe();} }
+        public override void GameComponentOnGUI() {
+            if(Find.CurrentMap==null || RimWorld.Planet.WorldRendererUtility.WorldRendered) return;
+            foreach(var p in Find.CurrentMap.mapPawns.FreeColonistsSpawned) {
+                Thinking t;
+                if(!thinking.TryGetValue(p.GetUniqueLoadID(),out t) || Time.realtimeSinceStartup>=t.until) continue;
+                var pos=UI.MapToUIPosition(p.DrawPos);
+                var rect=new Rect(pos.x-14,pos.y-48,28,22);
+                Widgets.DrawBoxSolid(rect,new Color(0.1f,0.3f,0.5f,0.95f));
+                Widgets.Label(rect," ...");
+                TooltipHandler.TipRegion(rect,"Considering a proposal. Native behavior continues.");
+            }
+        }
     }
-    [Serializable] public class Request { public string id,actionId,op,epoch,actor; public int x,z; }
+    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId; public int x,z,ttlMs; }
     [Serializable] public class Response { public string id,error; public bool ok; }
     [Serializable] public class PawnView { public string id,name,job; public int x,z; public float health; }
     [Serializable] public class Snapshot { public string world,epoch; public int ticks; public bool loaded,paused; }
@@ -72,14 +110,15 @@ namespace Concord
         }
         private static string StateJson() {
             if(Current.Game==null || Find.CurrentMap==null) return "{\"loaded\":false,\"pawns\":[],\"actions\":[]}";
-            var w=World(); w.Reconcile();
+            var w=World(); w.Reconcile(); w.Observe();
             var snapshot=new Snapshot {world=w.world,epoch=w.epoch,ticks=Find.TickManager.TicksGame,loaded=true,paused=Find.TickManager.Paused};
             var pawns=Find.CurrentMap.mapPawns.FreeColonistsSpawned.Select(p=>JsonUtility.ToJson(new PawnView {
                 id=p.GetUniqueLoadID(),name=p.LabelShort,job=p.CurJobDef==null?"":p.CurJobDef.defName,
                 x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent
-            }));
+            }).TrimEnd('}')+",\"facts\":"+Awareness.Facts(p)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
-                String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"]}";
+                String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
+                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"]}";
         }
         private static ActionRecord Move(Request r) {
             var w=World();
@@ -119,6 +158,15 @@ namespace Concord
                 var payload=File.ReadAllText(path); File.Delete(path);
                 var r=JsonUtility.FromJson<Request>(payload); response.id=r.id;
                 if(r.op=="move") receipt=JsonUtility.ToJson(Move(r));
+                else if(r.op=="activity") {
+                    var w=World();
+                    if(r.epoch!=w.epoch) throw new Exception("Stale timeline");
+                    if(!Find.CurrentMap.mapPawns.FreeColonistsSpawned.Any(p=>p.GetUniqueLoadID()==r.actor)) throw new Exception("Unknown pawn");
+                    if(String.IsNullOrEmpty(r.activityId) || r.ttlMs<0 || r.ttlMs>120000) throw new Exception("Invalid activity");
+                    Thinking old;
+                    if(r.ttlMs>0) w.thinking[r.actor]=new Thinking {id=r.activityId,until=Time.realtimeSinceStartup+r.ttlMs/1000f};
+                    else if(w.thinking.TryGetValue(r.actor,out old) && old.id==r.activityId) w.thinking.Remove(r.actor);
+                }
                 else if(r.op!="state") throw new Exception("Unsupported domain operation");
                 response.ok=true;
             } catch(Exception e) {response.error=e.Message;}

@@ -34,6 +34,10 @@ try {
    const c=new Coordinator(store,bridge);await c.open();
    const initial=await bridge.state();assert(initial.paused);assert.equal(initial.pawns.length,3);
    const a=initial.pawns[0]!,b=initial.pawns[1]!;
+   assert(a.facts?.some(f=>f.key==='trait'));
+   assert(a.facts?.some(f=>f.key==='need'));
+   assert(a.facts?.some(f=>f.key==='skill'));
+   checks.push('real native traits, skills and needs populate the self perspective');
    const refused=await c.core().propose(a.id,{kind:'move',x:a.x+1,z:a.z},'Move supplies');
    await c.pawn(a.id).decide(refused.id,scripted({kind:'refuse',reason:'I need to finish my existing commitment'}));
    assert.equal((await bridge.state()).actions.length,0);
@@ -64,9 +68,10 @@ try {
    checks.push('accepted intention completes a real native Goto job');
    const q=await c.core().propose(b.id,{kind:'move',x:b.x,z:b.z},'Consider another task');
    await bridge.admin('run');const before=(await bridge.state()).ticks;
-   const slow=c.pawn(b.id).decide(q.id,{name:'delayed-scripted',async decide(){await delay(2000);return {kind:'refuse',reason:'Stay with my current work'};}});
+   const slow=c.pawn(b.id).decide(q.id,{name:'delayed-scripted',async decide(){await delay(4500);return {kind:'refuse',reason:'Stay with my current work'};}});
    await delay(300);assert(c.activity().some(x=>x.pawn===b.id));
    const during=(await bridge.state()).ticks;assert(during>before);
+   await exec('python3',[bridge.root+'/bin/lab.py','screenshot','concord-thinking.png']);
    await slow;await bridge.admin('pause');assert.equal(c.activity().length,0);
    checks.push('simulation advances while pawn deliberates; activity state clears afterwards');
    const off=await c.core().propose(b.id,{kind:'move',x:b.x,z:b.z},'Unavailable backend test');
@@ -77,6 +82,13 @@ try {
    assert.equal(c.inspect().outcomes[badResult.actionId!]!.status,'failed');
    assert.equal(c.inspect().characters[b.id]!.commitment,undefined);
    checks.push('infeasible destination reports failure and releases the commitment');
+   await c.observe();
+   const observed=c.inspect();
+   assert((observed.eventCursor??0)>0);
+   assert(Object.values(observed.characters).some(p=>p.experiences?.some(e=>e.event.kind==='job')));
+   for(const char of Object.values(observed.characters)) assert(char.experiences?.every(e=>e.event.pawn===char.id)??true);
+   output.nativeEvents=observed.eventCursor;
+   checks.push('native job events are captured, routed and isolated per pawn');
    const checkpoint='lab-concord-'+Date.now();
    await c.checkpoint(checkpoint);const saved=c.inspect();
    const future=await c.core().propose(b.id,{kind:'move',x:b.x,z:b.z},'Discarded future');

@@ -8,11 +8,11 @@ The game bridge compiles against the installed game's actual assemblies using Mo
 
 ## Results
 
-- 12 local automated checks pass: actor binding, acceptance/refusal/counterproposal, strict response scope, narrow perspective, interruption outcomes, lost-response reconciliation, bounded timeout, timeline restore/cancellation, duplicate saves, active-checkpoint refusal, reopen, corrupted checkpoint rejection and routing policy.
+- 21 local automated checks pass: actor binding, acceptance/refusal/counterproposal, strict response scope, narrow perspective, interruption outcomes, lost-response reconciliation, bounded timeout, timeline restore/cancellation, duplicate saves, active-checkpoint refusal, reopen, corrupted checkpoint rejection and routing policy.
 - Real game: refusal produces no job; a forged core actor is rejected by the game bridge.
 - Real game: accepted Goto job moves Alvin (`Thing_Human405`) from (82,80) to (90,80), with `completed` receipt and observed destination.
 - Identical action replay does not grow the execution ledger; changed payload with the same ID is rejected.
-- Native ticks advance during a two-second delayed decision, while `activity()` reports deliberating. No icon is drawn yet.
+- Native ticks advance during a 4.5-second delayed decision, while `activity()` reports deliberating. The blue ellipsis badge above Beatrice was visually verified in a real-game screenshot.
 - A timed-out backend leaves its proposal pending, without imposing a new pawn job.
 - An out-of-map destination yields `failed` and releases the commitment.
 - Paired checkpoint restore removes future memories/proposals, cancels in-flight decisions, rejects old epochs and leaves the game paused.
@@ -24,8 +24,17 @@ Raw compact receipts are under [evidence](evidence/). Local generated SQLite dat
 
 Native interruption and lost-response behavior are covered with controlled coordinator tests; no combat, injury or network fault was deliberately induced in the real-game trial. Core authority is enforced by the model-facing handles and trusted dispatch; this is not protection against arbitrary hostile code running as the lab OS user. The bridge actor field is supplied by the trusted coordinator, never by model output.
 
-No live model adapter, fast decision model, whole-map perception filter, narrative quality, gravship travel, structure planning, full colony economy, UI indicator or OpenClaw plugin is claimed. The initial route policy is tested in isolation and is not wired to native event capture. Checkpoints are quiescent only. A supported production daemon/installer, quotas, long-run retention and upgrade migrations remain future work.
+No live inference, whole-map perception filter, narrative quality, gravship travel, structure planning, full colony economy or OpenClaw plugin is claimed. The Jev adapter uses mocked responses in tests; an authenticated transport and live evaluation remain unverified. Checkpoints are quiescent only. A supported production daemon/installer, unattended quotas, long-run retention and upgrade migrations remain future work.
 
 ## Public baseline configuration check
 
 The real-game and cold-restore receipts were regenerated after replacing deployment-specific paths and host checks with explicit environment/profile configuration. Both C# mods were rebuilt against the owned local game assemblies. No live inference or private account configuration is included.
+
+## Pawn-awareness increment
+
+- Native self facts populate the perspective; selected native job changes are captured and routed into the owning pawn's experiences.
+- Per-pawn privacy, deduplication, ring-gap reporting, saved cursor rollback and stale appraisal rejection have automated coverage.
+- Thinking badges have bounded lifetimes, identity/epoch-scoped cleanup and continue-live simulation; the real-game screenshot was visually inspected.
+- Real-game paired restore and a full process restart preserve the new character experience records as well as existing memories.
+- Jev question/response validation and the independent conservative trial ledger have mocked tests for invalid answers, cancellation, uncertain charges, reopen and pricing overrun. No paid call has been made.
+- Native memory acquisition, health changes and badge expiry after a process crash are implemented but not deliberately induced in this real-game trial. See [awareness limits](AWARENESS.md).

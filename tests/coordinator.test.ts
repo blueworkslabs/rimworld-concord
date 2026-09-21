@@ -95,3 +95,49 @@ test('corrupt checkpoint is rejected before game load or memory mutation',async(
   game.validHash=false;await assert.rejects(c.restore('lab-concord-corrupt'),/Hash/);
   assert.deepEqual(c.inspect(),before);assert.equal(game.data.epoch,'epoch');
 });
+
+test('native events are deduplicated, private and restored with their timeline cursor',async()=>{
+ const {c,game,store}=await setup();
+ game.data.events=[{seq:1,tick:30,pawn:'A',kind:'memory',detail:'Helped'}, {seq:2,tick:30,pawn:'B',kind:'mood',detail:'secret'}];game.data.eventSeq=2;
+ await c.observe();await c.observe();
+ assert.equal(c.inspect().characters.A!.experiences!.length,1);
+ assert.equal(c.inspect().characters.A!.experiences![0]!.route,'deliberation');
+ const p=await c.core().propose('A',move,'Help');
+ await c.pawn('A').decide(p.id,{name:'private',async decide(view){assert(!JSON.stringify(view).includes('secret'));return {kind:'refuse',reason:'Rest'};}});
+ await c.checkpoint('lab-concord-events');
+ game.data.events.push({seq:3,tick:60,pawn:'A',kind:'job',detail:'Goto'});game.data.eventSeq=3;await c.observe();
+ await c.restore('lab-concord-events');await c.observe();
+ assert.equal(c.inspect().eventCursor,2);assert.equal(c.inspect().characters.A!.experiences!.length,1);
+ game.data.events=[{seq:300,tick:90,pawn:'A',kind:'job',detail:'Wait'}];game.data.eventSeq=300;await c.observe();await c.observe();
+ assert.equal(store.events().filter(e=>e.event.kind==='native-event-gap').length,1);
+});
+test('indicator has bounded lifetime and clears on refusal and inference timeout',async()=>{
+ const {c,game}=await setup();const activities:{epoch:string;actor:string;activityId:string;ttlMs:number}[]=[];
+ Object.assign(game,{setActivity:async(a:typeof activities[number])=>{activities.push(a);}});
+ const p=await c.core().propose('A',move,'Think');
+ await c.pawn('A').decide(p.id,scripted({kind:'refuse',reason:'No'}));
+ assert(activities[0]!.ttlMs>0);assert.equal(activities[1]!.ttlMs,0);assert.equal(activities[0]!.activityId,activities[1]!.activityId);
+ const q=await c.core().propose('A',move,'Again');
+ await assert.rejects(c.pawn('A').decide(q.id,{name:'offline',decide:()=>new Promise(()=>{})},10));
+ assert.equal(activities.at(-1)!.ttlMs,0);
+ await assert.rejects(c.pawn('A').decide(q.id,accept,Infinity),/timeout/);
+});
+
+test('appraisal uses only the owner perspective, cannot downgrade significant events or command jobs',async()=>{
+ const {c,game}=await setup();
+ game.data.events=[{seq:1,tick:30,pawn:'A',kind:'mood',detail:'low'}, {seq:2,tick:30,pawn:'B',kind:'memory',detail:'private'}];game.data.eventSeq=2;
+ const backend={name:'appraiser',async assess(view:unknown){assert(!JSON.stringify(view).includes('private'));return {reflectionScore:0.8};}};
+ assert.equal((await c.appraise('A',1,backend,new AbortController().signal)).route,'deliberation');
+ await assert.rejects(c.appraise('B',2,backend,new AbortController().signal),/eligible/);
+ assert.equal(game.moves,0);
+});
+test('late appraisal cannot change a restored character',async()=>{
+ const {c,game}=await setup();game.data.events=[{seq:1,tick:1,pawn:'A',kind:'mood',detail:'low'}];game.data.eventSeq=1;
+ await c.observe();await c.checkpoint('lab-concord-appraisal');
+ let release!:(v:unknown)=>void;
+ const p=c.appraise('A',1,{name:'slow',assess:()=>new Promise(r=>release=r)},new AbortController().signal);
+ const rejected=assert.rejects(p,/Stale/);
+ while(!release)await new Promise(r=>setTimeout(r,1));
+ await c.restore('lab-concord-appraisal');release({reflectionScore:1});await rejected;
+ assert.equal(c.inspect().characters.A!.experiences![0]!.route,'appraisal');
+});

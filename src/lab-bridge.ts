@@ -4,7 +4,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { setTimeout as delay } from 'node:timers/promises';
-import type { ActionRequest, GameBridge, GameState, Receipt } from './protocol.js';
+import type { Activity, ActionRequest, GameBridge, GameState, Receipt } from './protocol.js';
 const exec=promisify(execFile);
 
 /** Local trusted staging transport. Caller must own the process lock (scripts/run-lab.sh). */
@@ -12,7 +12,13 @@ export class LabBridge implements GameBridge {
   constructor(readonly root=process.env.RIMWORLD_LAB_ROOT ?? '') {
     if(!root || !root.startsWith('/')) throw Error('Set RIMWORLD_LAB_ROOT to an absolute isolated lab directory');
   }
-  private async request(payload:Record<string,unknown>):Promise<{state:GameState;receipt:Receipt}> {
+  private queue:Promise<unknown>=Promise.resolve();
+  private request(payload:Record<string,unknown>):Promise<{state:GameState;receipt:Receipt}> {
+    const result=this.queue.then(()=>this.exchange(payload));
+    this.queue=result.catch(()=>{}); return result;
+  }
+  async setActivity(activity:Activity) { await this.request({op:'activity',...activity}); }
+  private async exchange(payload:Record<string,unknown>):Promise<{state:GameState;receipt:Receipt}> {
     const request=join(this.root,'concord/request.json');
     try { await access(request); throw Error('Previous domain command pending: inspect before retry'); }
     catch(e) { if((e as NodeJS.ErrnoException).code!=='ENOENT') throw e; }

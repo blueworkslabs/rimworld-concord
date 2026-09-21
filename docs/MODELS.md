@@ -42,3 +42,7 @@ Sources:
 Start with scripted fixtures, then one explicitly configured live backend. Keep secrets in host-owned protected configuration. Set project budgets before unattended paid trials; never silently switch billing routes. Native clients/OpenClaw and Pi remain optional runtime implementations rather than game-protocol dependencies.
 
 Compare rules+LLM with rules+appraisal+LLM on identical recorded perspective episodes. Measure missed escalation, character consistency, actual action outcomes, latency tails, total cost including downstream LLM calls, and timeout recovery.
+
+## Implemented appraisal adapter
+
+`src/appraisal.ts` now implements the System One `noul` request and validates its response, with an injected operator-owned transport. `TrialBudget` keeps conservative call reservations in a separate SQLite ledger that must not roll back with game saves. This has mocked unit coverage only; no live request, latency measurement or character-quality comparison is claimed. See [awareness](AWARENESS.md).
