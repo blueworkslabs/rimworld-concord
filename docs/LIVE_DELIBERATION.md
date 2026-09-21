@@ -97,3 +97,8 @@ separately authorized `reliability-v1` profile uses its own four-attempt ledger 
 explicit `timingMode`. New runs checkpoint after each completed stage, before later
 checks; cold verification reads the selected mode’s manifest. See [decision timing](DECISION_TIMING.md)
 for controls, interruption changes and the follow-up scope.
+
+
+## Three-pawn negotiation follow-up
+
+The separate `negotiation-v1` profile permits six native Claude Max attempts at the unchanged USD 0.10 per-attempt API-equivalent reservation (USD 0.60 total). The completed trial used all six, reported USD 0.087609 estimated subscription usage (not cash), and did not alter prior ledgers. Three real pawn self-views plus labelled authored test preferences yielded two decisions each, including a completed counter/revision/fresh-consent movement exchange. Core replies were scripted; live calls sequential and paused. Paired/cold restore passed without further inference. See [bounded negotiation](NEGOTIATION.md) and [receipt](evidence/negotiation-live.json). No automatic replays, model swaps or expanded allowance.

@@ -196,3 +196,15 @@ test('urgent work takes priority over queued Chitchat and legacy records obey th
  delete state.characters.A!.experiences![0]!.interrupt;store.commit(state,{branch:state.branch,kind:'fixture-old-schema',actor:'operator',data:{}});
  const reopened=new Coordinator(store,game);await reopened.open();assert(!reopened.attentionCandidates().includes('A'));store.close();
 });
+
+test('event-driven revised decision sees only owner negotiation history',async()=>{
+ const {c,game,store}=await setup();
+ const p=await c.core().propose('A',action,'Public offer');await c.pawn('A').decide(p.id,scripted({kind:'counter',reason:'Closer',action:{...action,x:2}}));
+ const other=await c.core().propose('B',action,'Private to B');await c.pawn('B').decide(other.id,scripted({kind:'counter',reason:'B only',action}));
+ const q=await c.core().revise(p.id,'Your alternative');game.event();
+ const result=await c.attend('A',{name:'history',async reflect(v){
+   assert.equal(v.histories?.[q.id]?.[0]?.id,p.id);assert(!JSON.stringify(v).includes('B only'));
+   return {kind:'proposal',proposalId:q.id,decision:{kind:'accept',reason:'Agreed'}};
+ }});
+ assert.equal(result.status,'decided');assert.equal(game.moves,1);store.close();
+});

@@ -1,0 +1,29 @@
+{
+  "at": "2026-09-21T19:01:49.919Z",
+  "kind": "negotiation-cold",
+  "passed": true,
+  "access": "Claude Code native Max login; monetary values are API-equivalent usage estimates, not cash billing",
+  "before": {
+    "attempts": 6,
+    "reservedEquivalentUSD": 0.6000000000000001,
+    "estimatedUsageUSD": 0.08760899999999999
+  },
+  "after": {
+    "attempts": 6,
+    "reservedEquivalentUSD": 0.6000000000000001,
+    "estimatedUsageUSD": 0.08760899999999999
+  },
+  "calls": [],
+  "game": {
+    "at": "2026-09-21T19:01:44.072Z",
+    "kind": "negotiation-cold",
+    "checks": [
+      "cold game/coordinator restore preserves all three private preferences, exchanges, outcomes and lineage without inference"
+    ],
+    "passed": true,
+    "checkpointStage": "six-decisions",
+    "characters": 3,
+    "revisions": 1,
+    "inferenceCalls": 0
+  }
+}

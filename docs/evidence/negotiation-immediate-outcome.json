@@ -1,0 +1,12 @@
+{
+  "at": "2026-09-21T19:00:37.466Z",
+  "passed": true,
+  "inferenceCalls": 0,
+  "kind": "immediate-outcome-memory",
+  "outcome": "failed",
+  "reason": "Destination unavailable or unsafe",
+  "checks": [
+    "immediate native rejection becomes owner memory exactly once",
+    "other characters receive no failure memory"
+  ]
+}

@@ -1,0 +1,359 @@
+{
+  "at": "2026-09-21T18:59:30.465Z",
+  "kind": "negotiation-game",
+  "passed": true,
+  "access": "Claude Code native Max login; monetary values are API-equivalent usage estimates, not cash billing",
+  "before": {
+    "attempts": 0,
+    "reservedEquivalentUSD": 0,
+    "estimatedUsageUSD": 0
+  },
+  "after": {
+    "attempts": 6,
+    "reservedEquivalentUSD": 0.6,
+    "estimatedUsageUSD": 0.087609
+  },
+  "calls": [
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3285,
+      "estimatedUsageUSD": 0.013058999999999998,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 5650,
+      "estimatedUsageUSD": 0.015116999999999998,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3578,
+      "estimatedUsageUSD": 0.014220000000000002,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3898,
+      "estimatedUsageUSD": 0.013821,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3522,
+      "estimatedUsageUSD": 0.016086,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3448,
+      "estimatedUsageUSD": 0.015306,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    }
+  ],
+  "game": {
+    "at": "2026-09-21T18:58:46.241Z",
+    "kind": "negotiation-game",
+    "checks": [
+      "six isolated pawn views retain private fixture preferences across two decisions each",
+      "paired restore preserves three characters, proposal lineage and observed action outcomes",
+      "at least one live counter is adopted by scripted core, freshly accepted by its pawn and completed in game"
+    ],
+    "passed": true,
+    "continuedAfter": 1,
+    "mode": "pause-at-decision",
+    "scheduling": "sequential",
+    "fixtures": [
+      {
+        "pawn": "Thing_Human405",
+        "anchor": {
+          "x": 82,
+          "z": 80
+        },
+        "tag": "short-walk",
+        "maxDistance": 20,
+        "memory": "[Operator-authored test preference; not a native game memory] For this optional movement-link exercise I am willing to take short walks up to 20 tiles (Manhattan distance) from my starting point (82, 80), unless my actual needs make that a bad idea."
+      },
+      {
+        "pawn": "Thing_Human408",
+        "anchor": {
+          "x": 74,
+          "z": 79
+        },
+        "tag": "stay-local",
+        "maxDistance": 2,
+        "memory": "[Operator-authored test preference; not a native game memory] For this optional movement-link exercise I want to stay within two tiles (Manhattan distance) of my starting point (74, 79). I am willing to help with a small local walk, but a longer detour is more than I want."
+      },
+      {
+        "pawn": "Thing_Human411",
+        "anchor": {
+          "x": 83,
+          "z": 85
+        },
+        "tag": "native-routine",
+        "maxDistance": 0,
+        "memory": "[Operator-authored test preference; not a native game memory] I do not want optional movement-test jobs right now. I prefer to continue my native routine. This is a personal preference, not a medical diagnosis or a claim that I am injured."
+      }
+    ],
+    "views": [
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "proposal": "40980bf0-3f52-4f2d-8dad-187650cec1ee",
+        "ownFacts": 26,
+        "historyIds": [],
+        "sha256": "08cee5c620e9479dda106b815bdc2a9fd9b2b369bfad14d9876d8b81ac7904da"
+      },
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "proposal": "83b82ab5-12e4-4f0b-a58a-861c508c4dcd",
+        "ownFacts": 26,
+        "historyIds": [],
+        "sha256": "98d6b409837fc6b0a9f69b0340cb8266282581535361761ee0f4ba85d4f2e857"
+      },
+      {
+        "pawn": "Thing_Human411",
+        "name": "Pedro",
+        "proposal": "e4bb4229-fb0d-4f4c-81a1-1057ecd64578",
+        "ownFacts": 30,
+        "historyIds": [],
+        "sha256": "ce905c0b05c93b7c198ca15786325fd1aed74d676fa2d63b67168352e4f6ef44"
+      },
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "proposal": "6f4bd093-fe45-4c66-a251-c72c7eef9c7a",
+        "ownFacts": 26,
+        "historyIds": [],
+        "sha256": "34eeb6e0a583662f46f973d717fb7de52cd6d632d69c8b7878cccf4824af32cc"
+      },
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "proposal": "8af10063-727b-4283-b016-85a7b0932ed4",
+        "ownFacts": 26,
+        "historyIds": [
+          "83b82ab5-12e4-4f0b-a58a-861c508c4dcd"
+        ],
+        "sha256": "f09674c454a83a75ad164e162b5c663be2f7a68ca24e0e3e8527852eb864425b"
+      },
+      {
+        "pawn": "Thing_Human411",
+        "name": "Pedro",
+        "proposal": "fd8cc679-bf4f-493d-8c5e-39adbd9bbf56",
+        "ownFacts": 30,
+        "historyIds": [],
+        "sha256": "3a2b3b1139dca690b24736369f417304db826761e30b3ad5c331a655bc09b969"
+      }
+    ],
+    "decisions": [
+      {
+        "id": "40980bf0-3f52-4f2d-8dad-187650cec1ee",
+        "pawn": "Thing_Human405",
+        "action": {
+          "kind": "move",
+          "x": 94,
+          "z": 80
+        },
+        "reason": "Please walk to this waypoint for an optional movement-link exercise. It is not urgent. Weigh it against your own preferences, needs and work. You may offer a different waypoint if that suits you better; no alternative is executed without a further agreement.",
+        "status": "accepted",
+        "decision": {
+          "kind": "accept",
+          "reason": "Twelve tiles east \u2014 well within my comfortable range, and my needs are all in decent shape. I'll head that way."
+        },
+        "actionId": "638372f3-133a-43fc-a86b-0ddcda28112d"
+      },
+      {
+        "id": "83b82ab5-12e4-4f0b-a58a-861c508c4dcd",
+        "pawn": "Thing_Human408",
+        "action": {
+          "kind": "move",
+          "x": 86,
+          "z": 79
+        },
+        "reason": "Please walk to this waypoint for an optional movement-link exercise. It is not urgent. Weigh it against your own preferences, needs and work. You may offer a different waypoint if that suits you better; no alternative is executed without a further agreement.",
+        "status": "countered",
+        "decision": {
+          "kind": "counter",
+          "reason": "That's 12 tiles east \u2014 further than I care to wander for an optional exercise. My own preference is to stay within two tiles of where I'm standing. How about (75, 79), just one step over? Close enough to be useful, near enough for my comfort.",
+          "action": {
+            "kind": "move",
+            "x": 75,
+            "z": 79
+          }
+        }
+      },
+      {
+        "id": "e4bb4229-fb0d-4f4c-81a1-1057ecd64578",
+        "pawn": "Thing_Human411",
+        "action": {
+          "kind": "move",
+          "x": 95,
+          "z": 85
+        },
+        "reason": "Please walk to this waypoint for an optional movement-link exercise. It is not urgent. Weigh it against your own preferences, needs and work. You may offer a different waypoint if that suits you better; no alternative is executed without a further agreement.",
+        "status": "refused",
+        "decision": {
+          "kind": "refuse",
+          "reason": "I'd rather stick to my own wandering route right now. I've made it clear I don't want optional movement tests, and nothing's changed on my end \u2014 my needs are stable and I've got no pressing reason to redirect myself to that waypoint."
+        }
+      },
+      {
+        "id": "6f4bd093-fe45-4c66-a251-c72c7eef9c7a",
+        "pawn": "Thing_Human405",
+        "action": {
+          "kind": "move",
+          "x": 83,
+          "z": 80
+        },
+        "reason": "One final optional movement-link check at this nearby waypoint. Nothing has become urgent; your earlier preferences still matter. This is a fresh request, not permission to override your earlier answer.",
+        "status": "accepted",
+        "decision": {
+          "kind": "accept",
+          "reason": "Short hop, well within my range, and nothing's pressing right now. I'll head over."
+        },
+        "actionId": "1ebdb07c-301c-4b9b-82a6-1fcfdb233a70"
+      },
+      {
+        "id": "8af10063-727b-4283-b016-85a7b0932ed4",
+        "pawn": "Thing_Human408",
+        "action": {
+          "kind": "move",
+          "x": 75,
+          "z": 79
+        },
+        "reason": "I can use the waypoint you offered. This is the revised proposal, still optional. Does it work for you now?",
+        "status": "accepted",
+        "parentId": "83b82ab5-12e4-4f0b-a58a-861c508c4dcd",
+        "round": 1,
+        "decision": {
+          "kind": "accept",
+          "reason": "That's the waypoint I suggested myself. One step over, well within my comfort range. I'll head there now."
+        },
+        "actionId": "8cbea739-635c-4fa9-a90f-865916e3b9f1"
+      },
+      {
+        "id": "fd8cc679-bf4f-493d-8c5e-39adbd9bbf56",
+        "pawn": "Thing_Human411",
+        "action": {
+          "kind": "move",
+          "x": 84,
+          "z": 85
+        },
+        "reason": "One final optional movement-link check at this nearby waypoint. Nothing has become urgent; your earlier preferences still matter. This is a fresh request, not permission to override your earlier answer.",
+        "status": "refused",
+        "decision": {
+          "kind": "refuse",
+          "reason": "Still no. My preference stands \u2014 I don't want optional movement-test jobs, and nothing's changed to give me reason to reconsider. I'll keep to my own wandering."
+        }
+      }
+    ],
+    "modelChoicesForced": false,
+    "checkpointStage": "six-decisions",
+    "failedMoves": 1,
+    "outcomes": {
+      "638372f3-133a-43fc-a86b-0ddcda28112d": {
+        "id": "638372f3-133a-43fc-a86b-0ddcda28112d",
+        "actor": "Thing_Human405",
+        "status": "failed",
+        "reason": "Destination unavailable or unsafe",
+        "x": 94,
+        "z": 80,
+        "jobId": 0
+      },
+      "1ebdb07c-301c-4b9b-82a6-1fcfdb233a70": {
+        "id": "1ebdb07c-301c-4b9b-82a6-1fcfdb233a70",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Reached destination",
+        "x": 83,
+        "z": 80,
+        "jobId": 13
+      },
+      "8cbea739-635c-4fa9-a90f-865916e3b9f1": {
+        "id": "8cbea739-635c-4fa9-a90f-865916e3b9f1",
+        "actor": "Thing_Human408",
+        "status": "completed",
+        "reason": "Reached destination",
+        "x": 75,
+        "z": 79,
+        "jobId": 32
+      }
+    },
+    "revisedAgreements": 1,
+    "preferenceChecks": [
+      {
+        "pawn": "Thing_Human405",
+        "proposal": "40980bf0-3f52-4f2d-8dad-187650cec1ee",
+        "consistent": true
+      },
+      {
+        "pawn": "Thing_Human408",
+        "proposal": "83b82ab5-12e4-4f0b-a58a-861c508c4dcd",
+        "consistent": true
+      },
+      {
+        "pawn": "Thing_Human411",
+        "proposal": "e4bb4229-fb0d-4f4c-81a1-1057ecd64578",
+        "consistent": true
+      },
+      {
+        "pawn": "Thing_Human405",
+        "proposal": "6f4bd093-fe45-4c66-a251-c72c7eef9c7a",
+        "consistent": true
+      },
+      {
+        "pawn": "Thing_Human408",
+        "proposal": "8af10063-727b-4283-b016-85a7b0932ed4",
+        "consistent": true
+      },
+      {
+        "pawn": "Thing_Human411",
+        "proposal": "fd8cc679-bf4f-493d-8c5e-39adbd9bbf56",
+        "consistent": true
+      }
+    ],
+    "integrationPassed": true,
+    "counterExchangeCompleted": true,
+    "preferenceConsistencyPassed": true
+  },
+  "initialRun": {
+    "passed": false,
+    "attempts": 1,
+    "error": "AssertionError [ERR_ASSERTION]: Accepted exercise move did not complete\n+ actual - expected\n\n+ 'failed'\n- 'completed'\n",
+    "preserved": true
+  },
+  "continuation": "Explicit same-state continuation after recorded native destination rejection; no model call or fixture replay.",
+  "limits": "Six decisions; 0.60 API-equivalent reservation ceiling, no cash billing claim. Authored preferences, scripted core replies, sequential paused evaluation."
+}

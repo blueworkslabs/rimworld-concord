@@ -81,3 +81,8 @@ The new ledger reserved USD 0.40 API-equivalent usage and reported USD 0.06234 i
 successful completion estimates, not cash charges. Both historical ledgers remained
 byte-for-byte unchanged. No Jev calls or automatic retries occurred. The four-attempt
 allowance is now exhausted. See [timing](DECISION_TIMING.md) and dated acceptance.
+
+
+## Three-pawn negotiation follow-up
+
+The separate `negotiation-v1` profile permits six native Claude Max attempts at the unchanged USD 0.10 per-attempt API-equivalent reservation (USD 0.60 total). The completed trial used all six, reported USD 0.087609 estimated subscription usage (not cash), and did not alter prior ledgers. Three real pawn self-views plus labelled authored test preferences yielded two decisions each, including a completed counter/revision/fresh-consent movement exchange. Core replies were scripted; live calls sequential and paused. Paired/cold restore passed without further inference. See [bounded negotiation](NEGOTIATION.md) and [receipt](evidence/negotiation-live.json). No automatic replays, model swaps or expanded allowance.

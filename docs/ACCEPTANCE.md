@@ -160,3 +160,16 @@ These follow-up results do not rewrite the earlier mixed-result trial.
   three simultaneous live characters, counterproposal negotiation, long-run pacing,
   calibrated model judgment or narrative/personality consistency. The Chitchat
   exception is a narrow policy fix, not a complete attention model.
+
+
+## Three-pawn negotiation — 2026-09-21
+
+- [Live receipt](evidence/negotiation-live.json): six sequential paused native-Claude decisions, with real self-facts and **operator-authored test preferences**, not emergent personalities. First requested walk was 12 tiles; follow-ups adopted counters or requested a one-tile-from-origin check. The core was scripted.
+- Alvin accepted twice: the first target was rejected by the game as unavailable/unsafe; the second move completed. The initial runner stopped on an overly strict completion assertion after one call. Its failed receipt was retained, and an explicit continuation used only the remaining five calls on the same state/ledger. No replay or reroll.
+- Beatrice countered with `(75,79)` instead of the distant target; the core offered that exact alternative back. She freshly accepted and the native job completed. Pedro refused twice and received no Concord job.
+- Six of six decisions respected the predeclared authored-distance/routine rubric. This does not test natural personality emergence, narrative quality, live strategic core reasoning or sustained/concurrent live operation.
+- Paired save/reload and [full cold game/coordinator restart](evidence/negotiation-cold.json) preserved all three characters, six decisions, one revised thread and all action outcomes. Cold restore made zero inference calls; discarded futures remain rejected.
+- [Separate no-inference real-game regression](evidence/negotiation-immediate-outcome.json): an immediately failed dispatch is remembered exactly once by its owner, not other pawns. The correction was applied after the live decisions; their original prompts/evidence were not rewritten.
+- 58 automated checks pass, including three concurrent isolated scripted views, fresh consent/refusal of revisions, round/idempotency limits, private inbox/history, attention-driven revised decisions, restored lineage, partial-run continuation guards and immediate failure memory. No C# changes in this increment.
+- Six-call allowance exhausted: USD 0.60 API-equivalent reserved, USD 0.087609 estimated subscription usage; not cash charges. All three earlier trial ledger hashes remained identical. No Jev calls. Staging stopped cleanly.
+- See [contract, fixture and runner](NEGOTIATION.md). Remaining gap highlighted by the failed move: models need grounded available-action information, not just coordinates and authoritative rejection after acceptance.

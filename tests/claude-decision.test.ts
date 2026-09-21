@@ -36,6 +36,7 @@ test('cancelling a stubborn CLI kills the process group and preserves the attemp
    await writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\nprocess.on("SIGTERM",()=>{});setInterval(()=>{},100);\n',{mode:0o700});
    const options={ledgerPath:join(dir,'trial.db'),scratchRoot:join(dir,'scratch'),binary};backend=new ClaudeDecisionBackend(options);
    await assert.rejects(backend.decide({...view,proposal:{...view.proposal,pawn:'other'}},new AbortController().signal),/ownership/);
+   await assert.rejects(backend.decide({...view,history:[{...view.proposal,pawn:'other'}]},new AbortController().signal),/ownership/);
    assert.equal(backend.summary().attempts,0);
    const abort=new AbortController();const pending=backend.decide(view,abort.signal);const rejected=assert.rejects(pending,/attempt retained/);
    const end=Date.now()+5000;while(Number(backend.summary().attempts)===0&&Date.now()<end)await delay(10);
