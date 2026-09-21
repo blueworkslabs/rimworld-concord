@@ -1,0 +1,17 @@
+name: Foundation checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  coordinator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: bash -n scripts/build-mod.sh scripts/run-lab.sh
+# Real-game and mod builds require privately owned assemblies; intentionally not fetched in CI.

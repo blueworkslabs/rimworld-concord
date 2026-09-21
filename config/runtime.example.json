@@ -1,0 +1,8 @@
+{
+  "backend": "scripted",
+  "gameplayTarget": "continuous",
+  "testMode": "pause-at-decision",
+  "decisionTimeoutMs": 5000,
+  "paidInferenceEnabled": false,
+  "note": "Planning example, not an active configuration loader. Live adapters and budget accounting are not implemented."
+}

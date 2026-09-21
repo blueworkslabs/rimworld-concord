@@ -1,0 +1,14 @@
+[Unit]
+Description=Private accelerated X display for the RimWorld staging lab
+
+[Service]
+Type=simple
+User=root
+Group=REPLACE_WITH_LAB_GROUP
+RuntimeDirectory=rimworld-lab-display
+RuntimeDirectoryMode=0750
+UMask=0027
+ExecStartPre=/usr/bin/python3 /usr/local/libexec/rimworld-lab-display-auth.py
+ExecStart=/usr/lib/xorg/Xorg :91 -config /etc/rimworld-lab/xorg.conf -auth /run/rimworld-lab-display/Xauthority -noreset -nolisten tcp -novtswitch -logfile /var/log/rimworld-lab-Xorg.log
+Restart=no
+TimeoutStopSec=15

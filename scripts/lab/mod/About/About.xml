@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>RimWorld Staging Lab</name>
+  <author>Shellmaster contributors</author>
+  <packageId>shellmaster.staginglab</packageId>
+  <supportedVersions><li>1.6</li></supportedVersions>
+  <description>Private test-only main-thread control and evidence harness. Requires the dedicated staging profile and explicit launch flag. Not the autonomous pawn implementation.</description>
+</ModMetaData>

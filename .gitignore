@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.lab-local/
+.runtime/
+*.db
+*.db-*
+*.dll
+*.pdb
+*.rws
+.env
+.env.*
+!config/*.example.json
+__pycache__/
+*.pyc

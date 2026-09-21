@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+concord_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+: "${RIMWORLD_LAB_ROOT:?Set an absolute isolated lab directory}"
+# Lifetime exclusive owner for both mailboxes. Never run multiple coordinators.
+exec flock -n "$RIMWORLD_LAB_ROOT/concord/coordinator.lock" node "$concord_root/dist/src/acceptance.js" "$@"

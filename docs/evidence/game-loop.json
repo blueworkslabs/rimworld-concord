@@ -1,0 +1,28 @@
+{
+  "at": "2026-09-21T14:22:59.566Z",
+  "phase": "game-loop",
+  "checks": [
+    "refusal does not dispatch a job",
+    "game bridge rejects core as pawn actor",
+    "duplicate action is idempotent; changed payload with same ID rejected",
+    "accepted intention completes a real native Goto job",
+    "simulation advances while pawn deliberates; activity state clears afterwards",
+    "backend timeout leaves proposal pending and performs no forced fallback job",
+    "infeasible destination reports failure and releases the commitment",
+    "paired restore rolls back memories/proposals, cancels pending decision and rejects old epoch"
+  ],
+  "passed": true,
+  "checkpoint": "lab-concord-1790000593598",
+  "events": 27,
+  "pawn": {
+    "id": "Thing_Human405",
+    "from": [
+      82,
+      80
+    ],
+    "to": [
+      90,
+      80
+    ]
+  }
+}

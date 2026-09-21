@@ -1,0 +1,22 @@
+{
+  "name": "rimworld-concord",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared fate, not shared will: an experimental RimWorld character coordinator",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/*.test.js",
+    "lab:acceptance": "npm run build && bash scripts/run-lab.sh"
+  },
+  "dependencies": {
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.15",
+    "typescript": "5.9.3"
+  }
+}

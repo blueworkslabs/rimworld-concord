@@ -1,0 +1,19 @@
+[Unit]
+Description=On-demand RimWorld graphical test lab (shared staging)
+
+[Service]
+Environment=RIMWORLD_LAB_ROOT=%h/rimworld-lab
+Type=simple
+ExecStart=/usr/bin/python3 %h/rimworld-lab/bin/launch.py
+ExecStopPost=/usr/bin/sudo -n /usr/bin/systemctl stop rimworld-lab-display.service
+WorkingDirectory=%h/rimworld-lab
+MemoryMax=4G
+CPUQuota=180%
+TasksMax=256
+Nice=10
+Restart=no
+KillMode=control-group
+TimeoutStopSec=30
+UMask=0077
+StandardOutput=append:%h/rimworld-lab/logs/service.log
+StandardError=append:%h/rimworld-lab/logs/service.log
