@@ -12,3 +12,5 @@ dist/
 !config/*.example.json
 __pycache__/
 *.pyc
+
+.diary-work/
