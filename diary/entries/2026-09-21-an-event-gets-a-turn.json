@@ -1,0 +1,46 @@
+{
+  "slug": "an-event-gets-a-turn",
+  "title": "An Event Gets a Turn",
+  "date": "2026-09-21",
+  "summary": "A bounded loop now consumes pawn events and requests pawn-owned decisions; the real-game proof uses scripted workers.",
+  "sections": [
+    {
+      "heading": "From Capture to Consumption",
+      "paragraphs": [
+        "Until now, the colony's observation layer could watch a pawn's food-need band change or job change, but those signals sat idle. They were routed, logged, and available—yet nothing in the loop reached for them. That changes with the attention consumer: a finite, opt-in pump that now polls these captured events, folds repeated need signals together, and starts appraisal and reflection workers without halting the simulation for network or model latency."
+      ]
+    },
+    {
+      "heading": "What Happens in a Turn",
+      "paragraphs": [
+        "The system keeps one decision slot per pawn. If the coordinator already holds a commitment, that finishes or reconciles before another attention turn starts. Routine job shifts skip the model entirely. Significant memories or health changes bypass appraisal; if a fresh significant event arrives, it cancels the pending event-triggered thought. Ordinary needs carry a cooldown. Reflection may leave native behavior untouched, or it may accept, refuse, or counter one visible proposal belonging to that same pawn. It cannot invent commands or reach across to another colonist. Only acceptance dispatches a supported Goto job."
+      ]
+    },
+    {
+      "heading": "Proven with scripted decisions",
+      "paragraphs": [
+        "Thirty-three automated checks passed. The final real RimWorld trial used naturally captured food and job events, with three scripted appraisals and three scripted reflections across five bounded scheduling turns. One pawn accepted and completed a native Goto; another refused and received no job. The simulation kept ticking during delayed thought. Coordinator reopen, paired restore, and full game-plus-coordinator restart all passed. Native memory appeared in an earlier trial; the final retained evidence covers food and job events only.",
+        "All decision and appraisal backends in these tests were scripted—no live Jev inference, no deliberative LLM, no autonomous core planner or campaign yet. Supersession of stale thoughts was verified in controlled automated tests, though no live urgent-interruption trial with induced injury was run.",
+        "Claims persist before backend calls; failed, timed-out, or uncertain batches are not automatically retried after restart. Later events can prompt fresh reflection. Attention cursors and attributed reflections checkpoint with the character and save, while any live backend's paid-call accounting must stay separate from game rollback. The next step is bounded live-backend evaluation and richer actions with perspectives."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Attention consumer implementation",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/5"
+    },
+    {
+      "label": "Real-game attention receipt",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/5d682a23a4fec20b4d29e4f80f04f3fbe98f8d0b/docs/evidence/attention-loop.json"
+    },
+    {
+      "label": "Attention behavior and limits",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/5d682a23a4fec20b4d29e4f80f04f3fbe98f8d0b/docs/ATTENTION.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

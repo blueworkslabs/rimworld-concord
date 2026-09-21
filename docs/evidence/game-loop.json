@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-21T14:58:56.067Z",
+  "at": "2026-09-21T16:30:47.782Z",
   "phase": "game-loop",
   "checks": [
     "real native traits, skills and needs populate the self perspective",
@@ -14,9 +14,9 @@
     "paired restore rolls back memories/proposals, cancels pending decision and rejects old epoch"
   ],
   "passed": true,
-  "nativeEvents": 10,
-  "checkpoint": "lab-concord-1790002752334",
-  "events": 43,
+  "nativeEvents": 11,
+  "checkpoint": "lab-concord-1790008263469",
+  "events": 45,
   "pawn": {
     "id": "Thing_Human405",
     "from": [

@@ -8,4 +8,4 @@
 - Smooth continuous gameplay is the target; deliberate testing or extended-planning pauses are explicit modes.
 - Run `npm test` for coordinator changes. Mod changes require compilation against the real installed assemblies and relevant staging acceptance. Do not claim live-model, gameplay or UI behavior from mocks alone.
 - Reuse shared staging without running Android and RimWorld together; stop/save tests at handoff. Respect operator-configured maintenance windows.
-- Document unimplemented seams honestly: current appraisals, OpenClaw adapter and in-game deliberation icon are not live integrations.
+- Document unimplemented seams honestly: the appraisal adapter remains mock-tested, the attention consumer is scripted-tested, and the OpenClaw adapter is not an installed integration. The in-game badge is implemented.

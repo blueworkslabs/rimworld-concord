@@ -10,7 +10,7 @@ The game saves a ring of 256 events and a monotonic sequence number. Coordinator
 
 ## Routing versus action
 
-Job changes route to native behaviour, need-band changes to appraisal, and new memories/health-band changes directly to deliberation. These are deliberately coarse initial heuristics, not a calibrated significance model. The route is recorded on the experience. No background loop automatically calls a model or forces an action.
+Job changes route to native behaviour, need-band changes to appraisal, and new memories/health-band changes directly to deliberation. These are deliberately coarse initial heuristics, not a calibrated significance model. The route is recorded on the experience. No background service is started automatically. The opt-in [bounded attention pump](ATTENTION.md) can now consume these records and request pawn-owned responses; it never turns a route into a forced order.
 
 `Coordinator.appraise(pawn, seq, backend, signal)` can assess an eligible appraisal event using only that pawn's perspective. A validated reflection score at or above 0.5 marks it for deliberation; otherwise native behaviour continues. This provisional threshold needs evaluation. Significant events already routed directly to deliberation cannot be downgraded through this method. Late results cannot modify a restored timeline. Appraisal cannot dispatch jobs; proposal acceptance remains a separate pawn decision.
 
@@ -20,10 +20,10 @@ The separate SQLite `TrialBudget` reserves USD 0.002 for each attempt, allows at
 
 ## Visible deliberation
 
-A small blue ellipsis badge appears above a pawn during proposal deliberation. It carries a bounded wall-clock lease (decision timeout plus grace), clears on completion/failure, and expires after a crashed coordinator. Matching activity IDs and timeline epochs prevent stale clears. Badge state is ephemeral, not saved. Native jobs and game time continue unless the operator has paused the game. The badge currently represents **proposal deliberation**, not all pending attention records or strategic core planning.
+A small blue ellipsis badge appears above a pawn during proposal or attention-triggered deliberation. It carries a bounded wall-clock lease (decision timeout plus grace), clears on completion/failure, and expires after a crashed coordinator. Matching activity IDs and timeline epochs prevent stale clears. Badge state is ephemeral, not saved. Native jobs and game time continue unless the operator has paused the game. The badge represents active deliberation, not every queued event, appraisal-only work or strategic core planning.
 
 ## Verification and remaining scope
 
 Unit tests cover ownership filtering, event deduplication/gaps, checkpoint cursor rollback, stale appraisal rejection, indicator cleanup, malformed provider output, conservative spending reservations and provider pricing overruns. Real-game acceptance covers populated self facts, captured/routed native job events, continued ticking with a visible badge, and paired save/reload. New-memory detection, health-band changes and long-run retention are not claimed as induced real-game acceptance cases yet.
 
-Live Jev inference has not been verified. A general LLM backend, attention scheduler, rich conversation/negotiation, standing intentions, core planner and OpenClaw plugin are still future work.
+Live Jev inference has not been verified. A bounded attention scheduler is now scripted-tested. A general LLM backend, rich conversation/negotiation, standing intentions, core planner and OpenClaw plugin are still future work.

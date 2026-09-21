@@ -4,5 +4,11 @@
   "testMode": "pause-at-decision",
   "decisionTimeoutMs": 5000,
   "paidInferenceEnabled": false,
-  "note": "Planning example, not an active configuration loader. Live adapters and budget accounting are not implemented."
+  "note": "Planning example, not an active configuration loader. Attention pump and separate trial ledger exist; live transport/model inference remains unverified. Pump limits do not replace persistent billing quotas.",
+  "attention": {
+    "cooldownTicks": 300,
+    "timeoutMs": 5000,
+    "maxConcurrent": 2,
+    "maxTurns": 12
+  }
 }
