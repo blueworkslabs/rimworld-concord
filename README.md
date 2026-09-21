@@ -8,8 +8,8 @@ An experimental foundation for an ancient AI core and three autonomous colonists
 
 A bounded experimental vertical slice, not a playable campaign or unattended AI colony:
 
-- A core proposes a move; an identity-bound pawn accepts, refuses, or counterproposes.
-- Accepted movement becomes a real native RimWorld job; refusals and counters do not execute it.
+- A core proposes movement or bounded hauling; an identity-bound pawn accepts, refuses, or counterproposes.
+- Accepted movement or hauling becomes a real native RimWorld job; refusals and counters do not execute it.
 - Coordinator persists character memories, commitments and an ordered audit trail in SQLite.
 - Duplicate action IDs do not cause duplicate effects; game reload creates a new epoch, rejecting old decisions.
 - Quiescent checkpoints pair an immutable game save/hash with character state; restore forks a timeline.
@@ -23,6 +23,8 @@ A bounded experimental vertical slice, not a playable campaign or unattended AI 
 - A tool-isolated Claude Code Max backend completed one live pawn decision and real movement. A subsequent reliability trial completed event-triggered refusal in both paused and continuous modes, with paired and cold restore verified. See [live deliberation](docs/LIVE_DELIBERATION.md).
 
 A subsequent [three-pawn negotiation trial](docs/NEGOTIATION.md) completed a live counter → revised offer → fresh acceptance → movement exchange. Three real self-views plus labelled authored preferences were checked over two sequential decisions each; the core replies were scripted. Paired and cold restore passed. This is not emergent-personality evidence.
+
+[Bounded hauling](docs/HAULING.md) adds exact item/storage choices and pawn-owned consent for up to three trips, with withdrawal, needs and expiry stops. Scripted multi-trip/cold-restore checks and a live three-pawn negotiation retained both delivered supplies and a rejected trip. Active-job checkpoints and long-run character quality remain unproven.
 
 Explicit [timing modes](docs/DECISION_TIMING.md) preserve human pauses and let known mundane Chitchat queue without cancelling thought. Continuous play remains the default.
 
@@ -76,7 +78,7 @@ A copied lab-only shutdown save does **not** automatically become a paired Conco
 
 ## Authority and trust
 
-Model backends receive only their own pawn's supplied perspective and proposal. Their typed response cannot choose another actor or access admin operations. Core handles can propose but cannot execute. The coordinator binds pawn identity; the game rejects invalid actors, epochs, duplicate payload mismatches and infeasible movement.
+Model backends receive only their own pawn's supplied perspective and proposal. Their typed response cannot choose another actor or access admin operations. Core handles can propose but cannot execute. The coordinator binds pawn identity; the game rejects invalid actors, epochs, duplicate payload mismatches and infeasible movement or hauling.
 
 This is an application boundary, **not** a sandbox for hostile plugin code or the local operator. The file bridge and SQLite database are trusted local components. Future live runtimes must not inherit shell/file/admin access that bypasses the domain tools. `inspect()` and `LabBridge.admin()` are operator-only. Current perspective filtering is intentionally narrow, not a full sight/hearing/rumour model.
 

@@ -1,0 +1,186 @@
+{
+  "at": "2026-09-21T21:23:51.215Z",
+  "kind": "hauling-counter-replies",
+  "passed": true,
+  "before": {
+    "claude": {
+      "attempts": 3,
+      "reservedEquivalentUSD": 0.30000000000000004,
+      "estimatedUsageUSD": 0.042912
+    },
+    "jev": {
+      "calls": 3,
+      "reservedUSD": 0.006,
+      "reportedUSD": 0.000192192
+    }
+  },
+  "after": {
+    "claude": {
+      "attempts": 6,
+      "reservedEquivalentUSD": 0.6000000000000001,
+      "estimatedUsageUSD": 0.1245645
+    },
+    "jev": {
+      "calls": 3,
+      "reservedUSD": 0.006,
+      "reportedUSD": 0.000192192
+    }
+  },
+  "decisions": [
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3195,
+      "estimatedUsageUSD": 0.027721499999999996,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3332,
+      "estimatedUsageUSD": 0.028606499999999997,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 2929,
+      "estimatedUsageUSD": 0.025324499999999996,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    }
+  ],
+  "appraisals": [],
+  "game": {
+    "at": "2026-09-21T21:22:58.244Z",
+    "passed": true,
+    "offers": [
+      {
+        "pawn": "Thing_Human405",
+        "proposal": "9baf1a16-974f-4d95-bec0-81013717f0ba",
+        "decision": {
+          "kind": "accept",
+          "reason": "That's exactly what I proposed — one trip, ten steel, to the agreed cell. I'll get it done."
+        }
+      },
+      {
+        "pawn": "Thing_Human408",
+        "proposal": "fd36f2f5-8c8c-414b-8bd3-b8cd6e604b6d",
+        "decision": {
+          "kind": "accept",
+          "reason": "That's exactly what I proposed — one trip, ten steel, to the agreed cell. I'm well-rested, food is holding, and the stack is close. I'll get it done."
+        }
+      },
+      {
+        "pawn": "Thing_Human411",
+        "proposal": "f05bb4e5-8b5f-460a-96c3-2dfa3dc44fd3",
+        "decision": {
+          "kind": "accept",
+          "reason": "That's exactly what I proposed — one trip of ten steel to storage. I'll get it done."
+        }
+      }
+    ],
+    "observation": {
+      "wallMs": 30918,
+      "ticks": 1833,
+      "samples": 56,
+      "attention": [],
+      "decisions": 3,
+      "appraisals": 0
+    },
+    "outcomes": [
+      {
+        "id": "1461ae99-d310-4ac0-8089-3dd549416fb4",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_Steel1883",
+        "x": 80,
+        "z": 80,
+        "jobId": 693,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 12601
+      },
+      {
+        "id": "026faec8-e56c-42e5-9cb9-67f0e079700a",
+        "actor": "Thing_Human408",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_Steel1884",
+        "x": 72,
+        "z": 79,
+        "jobId": 694,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 12601
+      },
+      {
+        "id": "37b64721-e6df-4d6e-9b28-4137d4f8689d",
+        "actor": "Thing_Human411",
+        "status": "failed",
+        "reason": "Haul source, storage, needs or reservation unavailable",
+        "kind": "haul",
+        "thing": "Thing_Steel1885",
+        "x": 80,
+        "z": 80,
+        "jobId": 0,
+        "count": 10,
+        "delivered": 0,
+        "untilTick": 0
+      }
+    ],
+    "intentions": [
+      {
+        "pawn": "Thing_Human405",
+        "standing": {
+          "status": "completed",
+          "deadline": 12601,
+          "steps": [
+            "1461ae99-d310-4ac0-8089-3dd549416fb4"
+          ],
+          "reason": "Agreed trips completed"
+        }
+      },
+      {
+        "pawn": "Thing_Human408",
+        "standing": {
+          "status": "completed",
+          "deadline": 12601,
+          "steps": [
+            "026faec8-e56c-42e5-9cb9-67f0e079700a"
+          ],
+          "reason": "Agreed trips completed"
+        }
+      },
+      {
+        "pawn": "Thing_Human411",
+        "standing": {
+          "status": "stopped",
+          "deadline": 12601,
+          "steps": [
+            "37b64721-e6df-4d6e-9b28-4137d4f8689d"
+          ],
+          "reason": "Trip did not complete; no automatic retry"
+        }
+      }
+    ],
+    "pairedRestore": true,
+    "counterFollowup": true,
+    "limitations": "Three-minute initial observation; optional thirty-second exact-counter follow-up within the same six-call allowance. Authored authored fixture; initial offers while paused, then continuous native play. Scripted core, no authored personality overrides. Model errors/cancellations are evidence, not rerolled. Not a long-run character-quality evaluation."
+  },
+  "accounting": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls."
+}

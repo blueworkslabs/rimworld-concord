@@ -1,0 +1,9 @@
+{
+  "at": "2026-09-21T21:16:12.923Z",
+  "phase": "cold",
+  "passed": true,
+  "checks": [
+    "cold restore between trips preserves consent and completes remaining fixed trips without inference"
+  ],
+  "inferenceCalls": 0
+}

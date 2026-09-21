@@ -2,18 +2,25 @@ import { z } from 'zod';
 
 export const Move = z.object({kind:z.literal('move'), x:z.number().int().nonnegative(), z:z.number().int().nonnegative()}).strict();
 export type Move = z.infer<typeof Move>;
+export const Haul = z.object({kind:z.literal('haul'),thing:z.string().min(1).max(120),
+  x:z.number().int().nonnegative(),z:z.number().int().nonnegative(),count:z.number().int().min(1).max(25),
+  trips:z.number().int().min(1).max(3),maxTicks:z.number().int().min(60).max(3600)}).strict();
+export type Haul = z.infer<typeof Haul>;
+export const Action = z.discriminatedUnion('kind',[Move,Haul]);
+export type Action = z.infer<typeof Action>;
+export type HaulingView = {epoch:string;tick:number;status:'available'|'unavailable';options:Haul[]};
 export const Decision = z.discriminatedUnion('kind', [
   z.object({kind:z.literal('accept'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('refuse'),reason:z.string().min(1).max(1000)}).strict(),
-  z.object({kind:z.literal('counter'),reason:z.string().min(1).max(1000),action:Move}).strict()
+  z.object({kind:z.literal('counter'),reason:z.string().min(1).max(1000),action:Action}).strict()
 ]);
 export type Decision = z.infer<typeof Decision>;
 export type Outcome = 'started'|'completed'|'failed'|'interrupted';
 /** Bounded local opportunities, not a route, reservation or future success guarantee. */
 export type MovementView = {epoch:string;tick:number;originX:number;originZ:number;radius:number;
   status:'available'|'unavailable';options:Move[]};
-export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView};
-export type Receipt = {id:string;actor:string;status:Outcome;reason:string;x:number;z:number};
+export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;workReady?:boolean};
+export type Receipt = {id:string;actor:string;status:Outcome;reason:string;x:number;z:number;kind?:string;thing?:string;count?:number;delivered?:number};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
   pawns:Pawn[];actions:Receipt[];events?:NativeEvent[];eventSeq?:number;
@@ -22,12 +29,13 @@ export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail
 export type Attention = {event:NativeEvent;route:'native'|'appraisal'|'deliberation';interrupt?:boolean};
 export type DecisionPause = {epoch:string;actor:string;leaseId:string;ttlMs:number};
 export type Activity = {epoch:string;actor:string;activityId:string;ttlMs:number};
-export type ActionRequest = {id:string;epoch:string;actor:string;action:Move};
+export type ActionRequest = {id:string;epoch:string;actor:string;action:Action;untilTick?:number};
 /** Admin capability: held by the coordinator/runner only, never provided to a character backend. */
 export interface GameBridge {
   state():Promise<GameState>;
   setActivity?(activity:Activity):Promise<void>;
   setDecisionPause?(pause:DecisionPause):Promise<void>;
+  cancel?(request:{epoch:string;actor:string;id:string}):Promise<Receipt>;
   move(request:ActionRequest):Promise<Receipt>;
   save(name:string):Promise<{sha256:string}>;
   load(name:string):Promise<void>;
@@ -37,11 +45,11 @@ export type AttentionProgress = {
   cursor:number;lastAttemptTick?:number;
   last?:{status:'running'|'continued'|'decided'|'native'|'failed'|'interrupted';throughSeq:number;reason:string};
 };
-export type Character = {id:string;name:string;memories:string[];commitment?:string;experiences?:Attention[];
+export type Character = {id:string;name:string;memories:string[];commitment?:string;intention?:string;experiences?:Attention[];
   attention?:AttentionProgress;
   reflections?:{tick:number;throughSeq:number;backend:string;reason:string}[];
 };
-export type Proposal = {id:string;pawn:string;action:Move;reason:string;status:'pending'|'accepted'|'refused'|'countered';decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number};
+export type Proposal = {id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'countered';decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;

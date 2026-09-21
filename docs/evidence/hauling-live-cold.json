@@ -1,0 +1,39 @@
+{
+  "at": "2026-09-21T21:30:04.113Z",
+  "kind": "hauling-live-cold",
+  "passed": true,
+  "before": {
+    "claude": {
+      "attempts": 6,
+      "reservedEquivalentUSD": 0.6000000000000001,
+      "estimatedUsageUSD": 0.1245645
+    },
+    "jev": {
+      "calls": 3,
+      "reservedUSD": 0.006,
+      "reportedUSD": 0.000192192
+    }
+  },
+  "after": {
+    "claude": {
+      "attempts": 6,
+      "reservedEquivalentUSD": 0.6000000000000001,
+      "estimatedUsageUSD": 0.1245645
+    },
+    "jev": {
+      "calls": 3,
+      "reservedUSD": 0.006,
+      "reportedUSD": 0.000192192
+    }
+  },
+  "decisions": [],
+  "appraisals": [],
+  "game": {
+    "at": "2026-09-21T21:29:58.007Z",
+    "passed": true,
+    "offers": [],
+    "coldRestore": true
+  },
+  "accounting": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls.",
+  "testedBehaviorRevision": "acd72fd3a65ce082cd222f82e3d9e13bc13caf2e"
+}

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
-import { Decision, Move, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal } from './protocol.js';
+import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
 import { nativeAttention } from './routing.js';
 import { Store } from './store.js';
@@ -82,7 +82,7 @@ export class Coordinator {
     const config=AttentionOptions.parse(options);
     if(!this.domain) throw Error('Coordinator not opened');
     return Object.values(this.domain.characters).filter(c=>{
-      if(this.pending.has(c.id)||c.commitment) return false;
+      if(this.pending.has(c.id)||(c.commitment&&!c.intention)) return false;
       const events=(c.experiences??[]).filter(e=>e.event.seq>(c.attention?.cursor??0));
       if(!events.length) return false;
       const significant=events.some(e=>e.route==='deliberation');
@@ -110,7 +110,7 @@ export class Coordinator {
       const character=this.domain.characters[pawn];
       const own=game.pawns.find(p=>p.id===pawn);
       if(!own||!character) throw Error('Pawn unavailable');
-      if(this.pending.has(pawn)||character.commitment) return {status:'busy' as const};
+      if(this.pending.has(pawn)||(character.commitment&&!character.intention)) return {status:'busy' as const};
       const events=(character.experiences??[]).filter(e=>e.event.seq>(character.attention?.cursor??0));
       if(!events.length) return {status:'idle' as const};
       const significant=events.some(e=>e.route==='deliberation');
@@ -133,7 +133,7 @@ export class Coordinator {
       this.pending.set(pawn,controller);this.attending.set(pawn,{controller,throughSeq});
       const activity={epoch:game.epoch,actor:pawn,activityId:randomUUID(),ttlMs:config.timeoutMs+2000};
       this.commit('attention-started',pawn,{throughSeq,count:events.length,backend:backend.name,appraiser:significant?null:appraiser?.name});
-      const view=structuredClone({pawn:own,character,events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
+      const view=structuredClone({pawn:own,character,...(character.intention?{intention:this.domain.proposals[character.intention]}:{}),events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
         proposals:Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending').slice(0,8),
         histories:Object.fromEntries(Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending'&&p.parentId).slice(0,8).map(p=>[p.id,this.history(p)]))});
       return {status:'running' as const,generation:this.generation,controller,activity,view,throughSeq,significant};
@@ -168,12 +168,19 @@ export class Coordinator {
           this.commit('attention-appraised',pawn,{throughSeq,reflectionScore:result.score,backend:appraiser!.name});
           return {pawn,status:'native',throughSeq};
         }
-        const reason=result.kind==='continue'?result.reason:result.decision.reason;
+        const reason=result.kind==='proposal'?result.decision.reason:result.reason;
         const reflection={tick:this.observedTick,throughSeq,backend:backend.name,reason};
+        if(result.kind==='withdraw') {
+          await this.withdraw(pawn,result.reason);
+          character.attention!.last={status:'continued',throughSeq,reason};
+          character.reflections=[...(character.reflections??[]),reflection].slice(-16);
+          this.commit('attention-withdrawn',pawn,reflection);
+          return {pawn,status:'continued',throughSeq};
+        }
         if(result.kind==='proposal') {
           if(!prepared.view.proposals.some(p=>p.id===result.proposalId)) throw Error('Proposal outside attention perspective');
           const proposal=this.domain.proposals[result.proposalId];
-          if(!proposal||proposal.pawn!==pawn||proposal.status!=='pending'||character.commitment) throw Error('Attention proposal superseded');
+          if(!proposal||proposal.pawn!==pawn||proposal.status!=='pending'||character.commitment||character.intention) throw Error('Attention proposal superseded');
           character.attention!.last={status:'decided',throughSeq,reason};
           character.reflections=[...(character.reflections??[]),reflection].slice(-16);
           await this.applyDecision(proposal,result.decision);
@@ -231,6 +238,12 @@ export class Coordinator {
   /** Physical movement opportunities and communicated replies only; no private character state. */
   core() {
     return {
+      haulingOptions:(pawn:string)=>this.serial(async()=>{
+        if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
+        const own=(await this.current()).pawns.find(p=>p.id===pawn);
+        if(!own) throw Error('Pawn unavailable');
+        return structuredClone(own.hauling??null);
+      }),
       movementOptions:(pawn:string)=>this.serial(async()=>{
         if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
         const game=await this.current();
@@ -240,7 +253,7 @@ export class Coordinator {
         return structuredClone(own.movement??null);
       }),
       inbox:()=>structuredClone(Object.values(this.domain.proposals).filter(p=>p.status==='countered'&&!p.replyId)),
-      propose:(pawn:string,action:Move,reason:string,id=randomUUID())=>this.serial(async()=>{
+      propose:(pawn:string,action:Action,reason:string,id=randomUUID())=>this.serial(async()=>{
         await this.current();return this.propose(pawn,action,reason,id);
       }),
       revise:(counterId:string,reason:string,id=randomUUID())=>this.serial(async()=>{
@@ -254,8 +267,8 @@ export class Coordinator {
       })
     };
   }
-  private propose(pawn:string,action:Move,reason:string,id:string,parent?:Proposal) {
-    action=Move.parse(action);z.string().uuid().parse(id);
+  private propose(pawn:string,action:Action,reason:string,id:string,parent?:Proposal) {
+    action=Action.parse(action);z.string().uuid().parse(id);
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
     if(!reason.trim()||reason.length>1000) throw Error('Invalid proposal reason');
     const prior=this.domain.proposals[id];
@@ -279,7 +292,7 @@ export class Coordinator {
   }
   pawn(pawn:string) {
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
-    return {decide:(id:string,backend:DecisionBackend,timeoutMs=5000)=>this.decide(pawn,id,backend,timeoutMs)};
+    return {withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000)=>this.decide(pawn,id,backend,timeoutMs)};
   }
   private async decide(pawn:string,id:string,backend:DecisionBackend,timeoutMs:number) {
     const prepared=await this.serial(async()=>{
@@ -289,7 +302,7 @@ export class Coordinator {
       if(!p || p.pawn!==pawn) throw Error('Proposal does not belong to pawn');
       if(p.status!=='pending') throw Error('Proposal already decided');
       if(this.pending.has(pawn)) throw Error('Pawn already deliberating');
-      if(this.domain.characters[pawn]!.commitment) throw Error('Pawn already committed; reconcile outcome first');
+      if(this.domain.characters[pawn]!.commitment||this.domain.characters[pawn]!.intention) throw Error('Pawn already committed; reconcile outcome first');
       const own=game.pawns.find(x=>x.id===pawn);
       if(!own) throw Error('Pawn unavailable');
       if(!Number.isFinite(timeoutMs)||timeoutMs<1||timeoutMs>115000) throw Error('Decision timeout must be 1..115000 ms');
@@ -331,11 +344,16 @@ export class Coordinator {
     }
   }
   private async applyDecision(p:Proposal,result:Decision) {
+    if(result.kind==='accept'&&p.action.kind==='haul'&&!this.game.cancel)throw Error('Hauling requires scoped cancellation');
     p.decision=result;
     p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':'countered';
     this.domain.characters[p.pawn]!.memories.push(`${result.kind}: ${p.reason}; ${result.reason}`);
     if(result.kind==='accept') {
       p.actionId=randomUUID();this.domain.characters[p.pawn]!.commitment=p.actionId;
+      if(p.action.kind==='haul') {
+        p.standing={status:'running',deadline:this.observedTick+p.action.maxTicks,steps:[p.actionId]};
+        this.domain.characters[p.pawn]!.intention=p.id;
+      }
     }
     // Attention completion and pawn intent share the durable state commit before dispatch.
     this.commit('decided',p.pawn,p);
@@ -343,12 +361,13 @@ export class Coordinator {
   }
   private async dispatch(p:Proposal) {
     if(p.status!=='accepted' || !p.actionId) throw Error('Action requires pawn acceptance');
-    const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action});
+    const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline});
     this.domain.outcomes[receipt.id]=receipt;
     if(receipt.status!=='started') {
       delete this.domain.characters[p.pawn]!.commitment;
       this.domain.characters[p.pawn]!.memories.push(`Action ${receipt.status}: ${receipt.reason}`);
     }
+    this.finishStanding(p,receipt.status);
     this.commit('action-outcome',p.pawn,receipt);
   }
   /** Reconcile before retry; a lost response never creates a new action ID. */
@@ -358,6 +377,10 @@ export class Coordinator {
       this.ingest(game);
       for(const p of Object.values(this.domain.proposals)) {
         if(!p.actionId) continue;
+        if(p.standing?.status==='stopped'&&this.domain.characters[p.pawn]!.commitment===p.actionId) {
+          const cancelled=await this.game.cancel!({epoch:this.domain.epoch,actor:p.pawn,id:p.actionId});
+          game.actions=game.actions.filter(a=>a.id!==cancelled.id).concat(cancelled);
+        }
         const receipt=game.actions.find(a=>a.id===p.actionId);
         if(receipt) {
           const previous=this.domain.outcomes[receipt.id];
@@ -367,9 +390,60 @@ export class Coordinator {
               delete this.domain.characters[p.pawn]!.commitment;
               this.domain.characters[p.pawn]!.memories.push(`Action ${receipt.status}: ${receipt.reason}`);
             }
+            this.finishStanding(p,receipt.status);
             this.commit('action-outcome',p.pawn,receipt);
           }
         } else if(!this.domain.outcomes[p.actionId]) await this.dispatch(p);
+      }
+      for(const p of Object.values(this.domain.proposals)) if(p.standing?.status==='running') {
+        const own=game.pawns.find(x=>x.id===p.pawn);
+        if(game.ticks>=p.standing.deadline||!own?.workReady)
+          await this.withdraw(p.pawn,game.ticks>=p.standing.deadline?'Agreed time expired':'Needs or availability require a break');
+      }
+    });
+  }
+  private finishStanding(p:Proposal,status:string) {
+    if(!p.standing||p.standing.status!=='running'||status==='started')return;
+    if(status!=='completed'||(p.action.kind==='haul'&&p.standing.steps.length>=p.action.trips)) {
+      p.standing.status=status==='completed'?'completed':'stopped';
+      p.standing.reason=status==='completed'?'Agreed trips completed':'Trip did not complete; no automatic retry';
+      delete this.domain.characters[p.pawn]!.intention;
+    }
+  }
+  private async withdraw(pawn:string,reason:string) {
+    if(!reason.trim()||reason.length>1000)throw Error('Invalid withdrawal reason');
+    const character=this.domain.characters[pawn]!;
+    const p=this.domain.proposals[character.intention??''];
+    if(!p?.standing||p.standing.status!=='running')throw Error('No running intention');
+    // Persist the stop BEFORE cancellation. Reconciliation retries uncertain cancellation,
+    // never schedules another trip from a stopped intention.
+    p.standing.status='stopped';p.standing.reason=reason;
+    delete character.intention;
+    character.memories.push(`Stopped hauling: ${reason}`);
+    this.commit('intention-stopped',pawn,{proposal:p.id,reason});
+    if(character.commitment&&p.actionId) {
+      const receipt=await this.game.cancel!({epoch:this.domain.epoch,actor:pawn,id:p.actionId});
+      this.domain.outcomes[receipt.id]=receipt;
+      if(receipt.status!=='started')delete character.commitment;
+      this.commit('action-outcome',pawn,receipt);
+    }
+  }
+  /** Explicit operator polling advances only previously accepted, fixed-scope work.
+   * Separate from reconciliation so quiescent between-trip checkpoints are possible. */
+  async advanceIntentions() {
+    await this.reconcile();
+    return this.serial(async()=>{
+      const game=await this.current();
+      for(const p of Object.values(this.domain.proposals)) {
+        if(p.standing?.status!=='running'||p.action.kind!=='haul')continue;
+        const c=this.domain.characters[p.pawn]!;
+        if(c.commitment||this.pending.has(p.pawn))continue;
+        if(game.ticks>=p.standing.deadline||!game.pawns.find(x=>x.id===p.pawn)?.workReady) {
+          await this.withdraw(p.pawn,'Needs, availability or expiry require a break');continue;
+        }
+        p.actionId=randomUUID();p.standing.steps.push(p.actionId);c.commitment=p.actionId;
+        this.commit('intention-trip',p.pawn,{proposal:p.id,action:p.actionId});
+        await this.dispatch(p);
       }
     });
   }
