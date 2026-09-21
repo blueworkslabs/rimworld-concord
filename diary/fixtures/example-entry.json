@@ -1,0 +1,32 @@
+{
+  "fixture": true,
+  "slug": "fixture-first-light",
+  "title": "Fixture: first light on the coordinator",
+  "date": "2026-09-14",
+  "summary": "Placeholder text for developing the diary template. It exercises every field in the entry contract and is never built unless --fixtures is passed.",
+  "sections": [
+    {
+      "heading": "What this fixture is for",
+      "paragraphs": [
+        "This entry exists so the template can be built and reviewed without any real diary content. It is not a project update. The build refuses to include it unless it is explicitly requested.",
+        "Every string here is escaped by the build. <script>alert('this stays literal')</script> & so do ampersands, \"quotes\" and 'apostrophes'."
+      ]
+    },
+    {
+      "heading": "A second section, to check rhythm",
+      "paragraphs": [
+        "Ship logs read best when each section makes one point. Headings carry an amber tab so the eye can find them again after scrolling.",
+        "Paragraph lengths vary on purpose. Some are short.",
+        "Others run longer so the measure, line height and colour of body text can be judged against a realistic wall of prose, including the kind of sentence that keeps adding clauses because the writer is thinking while they type and has not yet decided where the full stop should land."
+      ]
+    }
+  ],
+  "evidence": [
+    {"label": "Example pull request", "url": "https://github.com/blueworkslabs/rimworld-concord/pull/1"},
+    {"label": "Example CI run", "url": "https://github.com/blueworkslabs/rimworld-concord/actions"}
+  ],
+  "images": [
+    {"src": "fixtures/fixture-badge.svg", "alt": "Placeholder illustration: a steel panel with an amber ring and three points.", "caption": "Fixture image. Real entries reference screenshots under diary/images/."}
+  ],
+  "author": {"model": "Fixture text (no model)", "reviewer": "nobody"}
+}

@@ -1,0 +1,116 @@
+/* Concord ship log. Steel panels, one amber instrument: the ship-day stamp. */
+:root{
+  --steel-900:#161B20; --steel-800:#1E252C; --steel-700:#28313A; --steel-500:#46525E; --steel-300:#7C8894;
+  --paper:#E7E3D9; --paper-dim:#B4B0A6;
+  --amber:#E3A33A; --amber-deep:#B57621; --amber-glow:rgba(227,163,58,.14);
+  --measure:38rem;
+  --font:"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",system-ui,sans-serif;
+  --tab:"Segoe UI",Roboto,"Helvetica Neue",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--steel-900);color:var(--paper);font:16px/1.6 var(--font);-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0) 240px),
+    repeating-linear-gradient(180deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),
+    var(--steel-900)}
+a{color:var(--amber);text-decoration-thickness:1px;text-underline-offset:.18em}
+a:hover{color:#F1BE6A}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:2px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--amber);color:#1a1206;padding:.5rem .8rem;border-radius:4px;z-index:10}
+.skip:focus{left:8px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em;background:var(--steel-800);padding:.1em .35em;border-radius:3px}
+
+/* Masthead */
+.mast{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.9rem clamp(1rem,4vw,2.5rem);border-bottom:1px solid var(--steel-700);background:rgba(22,27,32,.9);backdrop-filter:blur(6px)}
+.mast-home{display:flex;align-items:center;gap:.6rem;color:var(--paper);text-decoration:none;font-weight:600;letter-spacing:.01em}
+.mast-home:hover{color:var(--paper)}
+.mark{width:26px;height:26px;color:var(--amber)}
+.mast-nav{display:flex;gap:1.25rem;font-size:.95rem}
+.mast-nav a{color:var(--paper-dim);text-decoration:none}
+.mast-nav a:hover{color:var(--paper)}
+
+.page{flex:1;width:100%;max-width:64rem;margin:0 auto;padding:clamp(1.25rem,4vw,3rem) clamp(1rem,4vw,2.5rem) 3rem}
+
+/* Hero: the ship's name is the loud thing on the index; everything else stays quiet. */
+.hero{max-width:var(--measure);margin-bottom:clamp(2rem,5vw,3.5rem)}
+.hero-kicker{margin:0 0 .5rem;color:var(--amber);font-weight:600}
+.hero-title{margin:0;font-size:clamp(1.9rem,5vw,3rem);line-height:1.1;letter-spacing:-.015em;font-weight:700}
+.hero-title em{font-style:normal;border-bottom:3px solid var(--amber)}
+.hero-lede{color:var(--paper-dim);font-size:1.05rem;margin:1rem 0 .5rem}
+.hero-count{margin:0;color:var(--steel-300);font-size:.9rem}
+.empty{color:var(--paper-dim)}
+
+/* Log list: a rail with a stamp per entry. */
+.log{list-style:none;margin:0;padding:0;position:relative}
+.log::before{content:"";position:absolute;left:6.2rem;top:0;bottom:0;width:1px;background:var(--steel-700)}
+.log-item{display:grid;grid-template-columns:8.6rem 1fr;gap:1.5rem;padding:1.4rem 0;border-bottom:1px solid var(--steel-800);position:relative}
+.log-item:last-child{border-bottom:0}
+.log-item::before{content:"";position:absolute;left:5.9rem;top:1.9rem;width:9px;height:9px;border-radius:50%;background:var(--steel-900);border:2px solid var(--amber)}
+.log-body{max-width:var(--measure);min-width:0}
+.log-title{margin:.1rem 0 .4rem;font-size:1.3rem;line-height:1.25;font-weight:650}
+.log-title a{color:var(--paper);text-decoration:none}
+.log-title a:hover{color:var(--amber)}
+.log-summary{margin:0 0 .5rem;color:var(--paper-dim)}
+.log-meta{margin:0;color:var(--steel-300);font-size:.85rem}
+
+/* The stamp: the one instrument. */
+.stamp{display:inline-grid;grid-template-columns:auto;gap:.15rem;justify-items:start;color:var(--paper);text-decoration:none;padding:.5rem .7rem .55rem;border:1px solid var(--steel-500);border-left:3px solid var(--amber);background:linear-gradient(180deg,var(--amber-glow),transparent 70%),var(--steel-800);border-radius:3px;min-width:7.6rem;max-width:8.6rem}
+a.stamp:hover{border-color:var(--amber);color:var(--paper)}
+.stamp-day{display:flex;flex-direction:column;line-height:1}
+.stamp-k{font-size:.66rem;color:var(--paper-dim);letter-spacing:.02em}
+.stamp-v{font-family:var(--tab);font-variant-numeric:tabular-nums;font-size:1.75rem;font-weight:700;color:var(--amber);letter-spacing:.02em}
+.stamp-q{font-size:.78rem;color:var(--paper);margin-top:.15rem;line-height:1.25}
+.stamp-real{font-size:.72rem;color:var(--paper-dim)}
+.log-item .stamp{align-self:start}
+
+/* Entry page */
+.entry{max-width:var(--measure);margin:0 auto}
+.entry-head{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--steel-700)}
+.entry-head .stamp{margin-bottom:1.1rem;display:inline-grid}
+.entry-head .fixture-flag{display:table;margin-top:.2rem}
+.entry-title{margin:0 0 .75rem;font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.15;letter-spacing:-.01em;font-weight:700}
+.entry-lede{margin:0 0 .75rem;font-size:1.12rem;color:var(--paper-dim);line-height:1.55}
+.entry-author{margin:0;color:var(--steel-300);font-size:.9rem}
+.sec{margin:0 0 1.75rem}
+.sec h2{font-size:1.2rem;margin:0 0 .5rem;font-weight:650;color:var(--paper);padding-left:.75rem;border-left:3px solid var(--amber-deep)}
+.sec p{margin:0 0 .9rem}
+.figures{margin:1.5rem 0 2rem;display:grid;gap:1.25rem}
+.fig{margin:0;background:var(--steel-800);border:1px solid var(--steel-700);border-radius:4px;padding:.5rem}
+.fig img{display:block;width:100%;height:auto;border-radius:2px}
+.fig figcaption{padding:.55rem .25rem .1rem;font-size:.88rem;color:var(--paper-dim)}
+.records{margin:2rem 0;padding:1.1rem 1.25rem 1rem;background:var(--steel-800);border:1px solid var(--steel-700);border-radius:4px}
+.records h2{margin:0 0 .25rem;font-size:1.05rem}
+.records-lede{margin:0 0 .75rem;color:var(--paper-dim);font-size:.92rem}
+.records ul{list-style:none;margin:0;padding:0}
+.records li{display:flex;flex-wrap:wrap;gap:.25rem .8rem;align-items:baseline;padding:.45rem 0;border-top:1px solid var(--steel-700)}
+.records li:first-child{border-top:0}
+.records-host{color:var(--steel-300);font-size:.8rem}
+.entry-nav{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--steel-700)}
+.entry-nav a{display:flex;flex-direction:column;gap:.15rem;text-decoration:none;color:var(--paper)}
+.entry-nav a:hover .nav-t{color:var(--amber)}
+.nav-k{font-size:.78rem;color:var(--paper-dim)}
+.nav-t{font-weight:600}
+.nav-next{text-align:right;align-items:flex-end}
+
+/* Fixture flag: loud on purpose. */
+.fixture-flag{margin:0 0 .4rem;display:inline-block;background:#3a2a10;color:#f3c77a;border:1px dashed var(--amber);padding:.15rem .5rem;font-size:.8rem;border-radius:3px}
+.is-fixture .stamp{border-style:dashed}
+
+/* Footer */
+.foot{border-top:1px solid var(--steel-700);padding:1.5rem clamp(1rem,4vw,2.5rem) 2rem;color:var(--steel-300);font-size:.85rem}
+.foot p{max-width:var(--measure);margin:.3rem auto}
+
+@media (max-width:640px){
+  .mast{flex-wrap:wrap}
+  .log::before,.log-item::before{display:none}
+  .log-item{grid-template-columns:1fr;gap:.75rem}
+  .stamp{grid-template-columns:auto auto;column-gap:.9rem;align-items:end;max-width:none;width:100%}
+  .stamp-q{grid-column:2;margin-top:0}
+  .stamp-real{grid-column:2}
+  .entry-nav{grid-template-columns:1fr}
+  .nav-next{text-align:left;align-items:flex-start}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{body{background:#fff;color:#000}.mast,.foot,.entry-nav{display:none}.stamp{border-color:#000}}

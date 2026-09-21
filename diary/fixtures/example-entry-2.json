@@ -1,0 +1,17 @@
+{
+  "fixture": true,
+  "slug": "fixture-thinking-badge",
+  "title": "Fixture: a pawn that visibly thinks",
+  "date": "2026-09-21",
+  "summary": "Second placeholder so the index shows a rail with two stamps and the entry pages get earlier/later navigation.",
+  "sections": [
+    {
+      "heading": "Only for layout",
+      "paragraphs": [
+        "Two entries a week apart give the ship-day counter something to count and the quadrum date something to change."
+      ]
+    }
+  ],
+  "evidence": [],
+  "author": {"model": "Fixture text (no model)", "reviewer": "nobody"}
+}
