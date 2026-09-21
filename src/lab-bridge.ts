@@ -41,8 +41,9 @@ export class LabBridge implements GameBridge {
   }
   async state():Promise<GameState> {return (await this.request({op:'state'})).state;}
   async move(r:ActionRequest):Promise<Receipt> {
-    return (await this.request({op:'move',actionId:r.id,epoch:r.epoch,actor:r.actor,x:r.action.x,z:r.action.z})).receipt;
+    return (await this.request({op:r.action.kind,...r.action,actionId:r.id,epoch:r.epoch,actor:r.actor,untilTick:r.untilTick})).receipt;
   }
+  async cancel(r:{epoch:string;actor:string;id:string}) {return (await this.request({op:'cancel',epoch:r.epoch,actor:r.actor,actionId:r.id})).receipt;}
   async admin(op:string,name?:string) {
     const {stdout}=await exec('python3',[join(this.root,'bin/lab.py'),'command',op,...name?[name]:[]],{timeout:130000});
     return JSON.parse(stdout);

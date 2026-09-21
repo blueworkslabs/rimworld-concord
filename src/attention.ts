@@ -8,11 +8,12 @@ import type { Coordinator } from './coordinator.js';
  * No raw move, actor override, admin tool, or invented proposal is accepted here.
  */
 export const Reflection=z.discriminatedUnion('kind',[
+  z.object({kind:z.literal('withdraw'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('continue'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('proposal'),proposalId:z.string().uuid(),decision:Decision}).strict()
 ]);
 export type Reflection=z.infer<typeof Reflection>;
-export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];histories?:Record<string,Proposal[]>};
+export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];intention?:Proposal;histories?:Record<string,Proposal[]>};
 export interface AttentionBackend {
   readonly name:string;
   reflect(view:AttentionView,signal:AbortSignal):Promise<unknown>;

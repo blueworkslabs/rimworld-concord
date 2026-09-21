@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs><JobDef><defName>Concord_Haul</defName><driverClass>Concord.JobDriver_ConcordHaul</driverClass><reportString>Hauling agreed supplies.</reportString><casualInterruptible>true</casualInterruptible></JobDef></Defs>
