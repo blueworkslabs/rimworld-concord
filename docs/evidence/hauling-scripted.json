@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-21T21:18:12.035Z",
+  "at": "2026-09-21T21:27:52.067Z",
   "phase": "game",
   "passed": true,
   "checks": [
@@ -25,5 +25,6 @@
       "options": 2
     }
   ],
-  "limitation": "Operator-authored stockpiles, relocated steel and disabled native work priorities. Scripted consent; quiescent between-trip checkpoints only."
+  "limitation": "Operator-authored stockpiles, relocated steel and disabled native work priorities. Scripted consent; quiescent between-trip checkpoints only.",
+  "testedBehaviorRevision": "acd72fd3a65ce082cd222f82e3d9e13bc13caf2e"
 }

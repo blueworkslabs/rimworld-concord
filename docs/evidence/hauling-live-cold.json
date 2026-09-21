@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-21T21:25:42.638Z",
+  "at": "2026-09-21T21:30:04.113Z",
   "kind": "hauling-live-cold",
   "passed": true,
   "before": {
@@ -29,10 +29,11 @@
   "decisions": [],
   "appraisals": [],
   "game": {
-    "at": "2026-09-21T21:25:36.765Z",
+    "at": "2026-09-21T21:29:58.007Z",
     "passed": true,
     "offers": [],
     "coldRestore": true
   },
-  "accounting": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls."
+  "accounting": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls.",
+  "testedBehaviorRevision": "acd72fd3a65ce082cd222f82e3d9e13bc13caf2e"
 }
