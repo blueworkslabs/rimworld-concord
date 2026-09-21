@@ -1,6 +1,6 @@
 # Model access and adapter plan
 
-Checked 2026-09-21. No live inference was used in foundation acceptance. Runtime authentication and billing configuration stay outside this repository.
+Checked 2026-09-21. No live inference was used in foundation acceptance. A later protected synthetic Jev fixture verified transport and response parsing only. Runtime authentication and billing configuration stay outside this repository.
 
 ## Jev on OpenRouter
 
@@ -13,7 +13,7 @@ Confirmed via the model page and the model-specific endpoint:
 - Modality: `text->decisions`
 - Interface: **OpenRouter Decisions API**, not the OpenAI-compatible chat-completions endpoint. A chat SDK/adapter is not sufficient.
 
-The general `/api/v1/models` catalog did not include Jev during the check, while the model-specific endpoint did. Availability checks must account for specialized APIs; absence from the general catalog does not establish absence from OpenRouter. No inference request or account-specific availability test has been made yet.
+The general `/api/v1/models` catalog did not include Jev during the check, while the model-specific endpoint did. Availability checks must account for specialized APIs; absence from the general catalog does not establish absence from OpenRouter. A protected live call later confirmed account-specific access to `POST /api/v1/systemone` for one synthetic appraisal fixture.
 
 Sources:
 - https://openrouter.ai/typesafe/jev-1.13
@@ -45,4 +45,4 @@ Compare rules+LLM with rules+appraisal+LLM on identical recorded perspective epi
 
 ## Implemented appraisal adapter
 
-`src/appraisal.ts` now implements the System One `noul` request and validates its response, with an injected operator-owned transport. `TrialBudget` keeps conservative call reservations in a separate SQLite ledger that must not roll back with game saves. This has mocked unit coverage only; no live request, latency measurement or character-quality comparison is claimed. See [awareness](AWARENESS.md).
+`src/appraisal.ts` now implements the System One `noul` request and validates its response, with an injected operator-owned transport. `TrialBudget` keeps conservative call reservations in a separate SQLite ledger that must not roll back with game saves. Mocked unit coverage covers malformed output, cancellation and budget behavior. One protected live synthetic fixture returned `typesafe/jev-1.13-20260917`, score `0.64`, route `deliberation`, latency `1078ms` and reported cost USD `0.000020244`; see [live evidence](evidence/jev-live.json). A subsequent [real-game trial](evidence/jev-game.json) returned scores `0.23` and `0.21` for captured food and mood events (704ms and 362ms end-to-end API waits). Both retained native behavior. Across the synthetic and game runs, three calls reported USD `0.000133266`; the three-call trial is exhausted, without changing its allowance. This is not a character-quality comparison. See [live operation](LIVE_APPRAISAL.md) and [awareness](AWARENESS.md).

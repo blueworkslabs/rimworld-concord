@@ -1,0 +1,31 @@
+{
+  "kind": "jev-live-synthetic-appraisal",
+  "timestamp": "2026-09-21T17:15:05.812Z",
+  "transport": "OpenRouter System One via protected egress sentinel/proxy",
+  "endpoint": "https://openrouter.ai/api/v1/systemone",
+  "fixture": "synthetic pawn-owned appraisal view; no live RimWorld state or model-authored action",
+  "preflight": {
+    "hasKey": true,
+    "keyIsSentinel": true,
+    "hasHttpsProxy": true,
+    "hasCa": true
+  },
+  "result": {
+    "status": "ok",
+    "model": "typesafe/jev-1.13-20260917",
+    "reflectionScore": 0.64,
+    "route": "deliberation",
+    "latencyMs": 1078,
+    "costUSD": 0.000020244
+  },
+  "budgetSummary": {
+    "calls": 1,
+    "reservedUSD": 0.002,
+    "reportedUSD": 0.000020244
+  },
+  "limits": [
+    "Not a real-game live appraisal run.",
+    "Not a model judgment quality comparison.",
+    "The non-rewindable trial ledger is private runtime state outside Git."
+  ]
+}

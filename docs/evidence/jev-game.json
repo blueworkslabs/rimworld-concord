@@ -1,0 +1,186 @@
+{
+  "at": "2026-09-21T17:27:29.042Z",
+  "kind": "jev-game-trial",
+  "passed": true,
+  "calls": [
+    {
+      "status": "ok",
+      "latencyMs": 704,
+      "reflectionScore": 0.23,
+      "model": "typesafe/jev-1.13-20260917",
+      "costUSD": 4.2924e-05
+    },
+    {
+      "status": "ok",
+      "latencyMs": 362,
+      "reflectionScore": 0.21,
+      "model": "typesafe/jev-1.13-20260917",
+      "costUSD": 7.0098e-05
+    }
+  ],
+  "before": {
+    "calls": 1,
+    "reservedUSD": 0.002,
+    "reportedUSD": 2.0244e-05
+  },
+  "after": {
+    "calls": 3,
+    "reservedUSD": 0.006,
+    "reportedUSD": 0.000133266
+  },
+  "game": {
+    "at": "2026-09-21T17:26:42.652Z",
+    "kind": "jev-live-game-appraisal",
+    "passed": true,
+    "checks": [
+      "two naturally captured pawn-owned event batches pass through live Jev appraisal",
+      "native simulation advances during actual network appraisal; no proposals or jobs dispatched",
+      "coordinator follows each measured score; escalation uses scripted continuation only",
+      "paired restore preserves live attention cursors and character state without another call"
+    ],
+    "appraisals": [
+      {
+        "pawn": "Thing_Human408",
+        "throughSeq": 1,
+        "kinds": [
+          "food"
+        ],
+        "reflectionScore": 0.23,
+        "route": "native"
+      },
+      {
+        "pawn": "Thing_Human408",
+        "throughSeq": 40,
+        "kinds": [
+          "mood"
+        ],
+        "reflectionScore": 0.21,
+        "route": "native"
+      }
+    ],
+    "attempts": 2,
+    "reflections": 4,
+    "ticksDuringAppraisal": 37,
+    "checkpoint": "lab-concord-jev-1790011643429",
+    "attentionResults": [
+      {
+        "status": "native",
+        "throughSeq": 1
+      },
+      {
+        "status": "continued",
+        "throughSeq": 4
+      },
+      {
+        "status": "continued",
+        "throughSeq": 5
+      },
+      {
+        "status": "native",
+        "throughSeq": 6
+      },
+      {
+        "status": "native",
+        "throughSeq": 7
+      },
+      {
+        "status": "native",
+        "throughSeq": 9
+      },
+      {
+        "status": "native",
+        "throughSeq": 10
+      },
+      {
+        "status": "native",
+        "throughSeq": 11
+      },
+      {
+        "status": "native",
+        "throughSeq": 13
+      },
+      {
+        "status": "native",
+        "throughSeq": 14
+      },
+      {
+        "status": "native",
+        "throughSeq": 16
+      },
+      {
+        "status": "native",
+        "throughSeq": 18
+      },
+      {
+        "status": "native",
+        "throughSeq": 19
+      },
+      {
+        "status": "native",
+        "throughSeq": 21
+      },
+      {
+        "status": "native",
+        "throughSeq": 23
+      },
+      {
+        "status": "native",
+        "throughSeq": 24
+      },
+      {
+        "status": "native",
+        "throughSeq": 25
+      },
+      {
+        "status": "native",
+        "throughSeq": 26
+      },
+      {
+        "status": "native",
+        "throughSeq": 27
+      },
+      {
+        "status": "native",
+        "throughSeq": 28
+      },
+      {
+        "status": "native",
+        "throughSeq": 29
+      },
+      {
+        "status": "continued",
+        "throughSeq": 30
+      },
+      {
+        "status": "continued",
+        "throughSeq": 31
+      },
+      {
+        "status": "native",
+        "throughSeq": 33
+      },
+      {
+        "status": "native",
+        "throughSeq": 37
+      },
+      {
+        "status": "native",
+        "throughSeq": 35
+      },
+      {
+        "status": "native",
+        "throughSeq": 39
+      },
+      {
+        "status": "native",
+        "throughSeq": 40
+      }
+    ]
+  },
+  "limits": [
+    "Two real-game appraisals from one pawn, not a quality benchmark.",
+    "Both Jev scores selected native continuation; four other reflections were scripted direct escalations.",
+    "No live deliberative model or model-authored action.",
+    "Three-call trial exhausted; no automatic retries or allowance increase."
+  ]
+}

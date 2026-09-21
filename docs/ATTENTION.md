@@ -82,6 +82,8 @@ none. It also checks live ticking, reopen and paired restore, writing private
 receipts in `.runtime/`. After stopping/restarting the game, run the same script
 with `--cold` to verify persistence in a fresh process. Stop the lab at handoff.
 
-No live Jev or deliberative LLM inference has been verified. Provider transport,
-model judgment quality, long-running operation and unattended billing remain out
-of scope for these scripted acceptance results.
+A subsequent [bounded live-appraisal trial](LIVE_APPRAISAL.md) used two real Jev
+calls on captured food and mood events. Both selected native continuation. Four
+other, directly escalated reflections used a scripted backend. Deliberative LLM
+inference, model judgment quality, long-running operation and unattended billing
+remain unverified.

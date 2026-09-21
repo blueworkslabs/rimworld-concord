@@ -18,7 +18,7 @@ First **scripted** vertical slice implemented, not a playable campaign or live A
 - Selected native events are archived, routed and projected only into their owning pawn's experience stream.
 - An expiring in-game thinking badge appears during proposal or event-triggered deliberation without pausing simulation.
 - A bounded attention pump consumes captured events, coalesces repeated signals and applies pawn-owned responses; verified with scripted backends.
-- A bounded Jev appraisal adapter is implemented against the documented API with mocked tests; **live authentication/inference is not yet verified**. Scripted decisions remain the default.
+- A bounded Jev appraisal adapter is implemented against the documented API with mocked tests, one live synthetic fixture and two real-game live appraisals. Both game scores retained native behavior; deeper decisions remain scripted. See the [bounded live runner](docs/LIVE_APPRAISAL.md).
 
 See [acceptance](docs/ACCEPTANCE.md) for measured results and limitations, and [roadmap](docs/ROADMAP.md) for what is not built.
 

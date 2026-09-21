@@ -19,4 +19,4 @@ Normal maintenance is one decision, one short model request, one factual review 
 
 ## Initial setup status
 
-Fable’s template and the first actual Kimi K2 draft are integrated, with Astra’s factual edits and an inspected scripted-test screenshot. Build settings are in `diary/README.md`. The diary uses model inference for editorial drafting only; the game still has no live-model trial. Deployment is verified separately from a successful local build.
+Fable’s template and the first actual Kimi K2 draft are integrated, with Astra’s factual edits and an inspected scripted-test screenshot. Build settings are in `diary/README.md`. The diary uses separate editorial inference; the game’s later bounded live-appraisal trials are described in their dated entries. Deployment is verified separately from a successful local build.
