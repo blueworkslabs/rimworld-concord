@@ -42,8 +42,12 @@ try {
    await c.pawn(a.id).decide(refused.id,scripted({kind:'refuse',reason:'I need to finish my existing commitment'}));
    assert.equal((await bridge.state()).actions.length,0);
    checks.push('refusal does not dispatch a job');
-   await assert.rejects(bridge.move({id:randomUUID(),epoch:initial.epoch,actor:'core',action:{kind:'move',x:a.x,z:a.z}}),/Actor/);
-   checks.push('game bridge rejects core as pawn actor');
+   const invalidActor={id:randomUUID(),epoch:initial.epoch,actor:'core',action:{kind:'move' as const,x:a.x,z:a.z}};
+   const denied=await bridge.move(invalidActor);assert.equal(denied.status,'failed');
+   assert.deepEqual(await bridge.move(invalidActor),denied);
+   await assert.rejects(bridge.move({...invalidActor,action:{...invalidActor.action,x:a.x+1}}),/collision/);
+   assert(!(await bridge.state()).actions.some(r=>r.actor==='core'&&r.status==='started'));
+   checks.push('unavailable actor receives an idempotent terminal failure; core still cannot create a pawn job');
    let accepted:string|undefined;
    for(const [dx,dz] of [[8,0],[-8,0],[0,8],[0,-8]] as const) {
      const p=await c.core().propose(a.id,{kind:'move',x:a.x+dx,z:a.z+dz},'Please move to the test waypoint');

@@ -45,3 +45,25 @@ test('cancelling a stubborn CLI kills the process group and preserves the attemp
    assert.equal(backend.summary().attempts,1);assert.equal(backend.summary().reservedEquivalentUSD,0.1);
  }finally{backend?.close();await rm(dir,{recursive:true,force:true});}
 });
+
+test('rejected CLI outputs and failed exits retain known charges and lock overruns',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'concord-cli-charge-'));
+ const view={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Wait',health:1},character:{id:'A',name:'Ada',memories:[]},proposal:{id:'d8caec56-f2fa-4b50-a58e-f3a7588a3d20',pawn:'A',action:{kind:'move' as const,x:2,z:1},reason:'test',status:'pending' as const}};
+ try {
+  for(const [i,bad] of [
+   {...result,total_cost_usd:1,structured_output:{decision:{kind:'accept',reason:'spoof',actor:'B'}}},
+   {...result,total_cost_usd:1,subtype:'error_max_turns',is_error:true},
+   {...result,total_cost_usd:.01,structured_output:{}},
+  ].entries()) {
+   const binary=join(dir,'fake-'+i),options={ledgerPath:join(dir,'trial-'+i+'.db'),scratchRoot:join(dir,'scratch'),binary};
+   await writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\n'+
+    'console.log('+JSON.stringify(JSON.stringify(init))+');\nconsole.log('+JSON.stringify(JSON.stringify(bad))+');\nprocess.exitCode='+String(i===1?1:0)+';\n',{mode:0o700});
+   let b=new ClaudeDecisionBackend(options);
+   try {
+    await assert.rejects(b.decide(view,new AbortController().signal),/attempt retained/);
+    assert.equal(b.summary().estimatedUsageUSD,bad.total_cost_usd);b.close();b=new ClaudeDecisionBackend(options);
+    if(bad.total_cost_usd>0.1){await assert.rejects(b.decide(view,new AbortController().signal));assert.equal(b.summary().attempts,1);}
+   }finally{b.close();}
+  }
+ }finally{await rm(dir,{recursive:true,force:true});}
+});

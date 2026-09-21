@@ -126,7 +126,6 @@ namespace Concord
             Guid parsed;
             if(!Guid.TryParse(r.actionId,out parsed)) throw new Exception("Action ID must be UUID");
             var pawn=Find.CurrentMap.mapPawns.FreeColonistsSpawned.FirstOrDefault(p=>p.GetUniqueLoadID()==r.actor);
-            if(pawn==null) throw new Exception("Actor must own a spawned colonist; core cannot execute pawn jobs");
             w.Reconcile();
             var prior=w.actions.FirstOrDefault(a=>a.id==r.actionId);
             if(prior!=null) {
@@ -137,6 +136,7 @@ namespace Concord
             var aNew=new ActionRecord {id=r.actionId,actor=r.actor,x=r.x,z=r.z,status="failed",reason=""};
             w.actions.Add(aNew);
             var cell=new IntVec3(r.x,0,r.z);
+            if(pawn==null) { aNew.reason="Pawn is no longer available on this map"; return aNew; }
             if(pawn.Dead || pawn.Downed || pawn.InMentalState || pawn.Drafted) { aNew.reason="Pawn cannot accept a voluntary job now"; return aNew; }
             if(!cell.InBounds(pawn.Map) || !cell.Standable(pawn.Map) || !pawn.CanReach(cell,PathEndMode.OnCell,Danger.None)) {
                 aNew.reason="Destination unavailable or unsafe"; return aNew;

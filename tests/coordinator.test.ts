@@ -205,3 +205,25 @@ test('immediate dispatch failure becomes owner memory exactly once, not only an 
  assert(!c.inspect().characters.B!.memories.some(m=>m.includes('Destination')));
  const next=await c.core().propose('A',move,'Again');await c.pawn('A').decide(next.id,{name:'aware',async decide(v){assert(v.character.memories.some(m=>m.includes('Destination unavailable')));return {kind:'refuse',reason:'The last destination failed'};}});
 });
+
+test('definitive unavailable-actor receipts clear commitments without blocking other pawns',async()=>{
+ const {game,store,c}=await setup();const normalMove=game.move.bind(game);
+ game.move=async r=>{
+  const old=game.data.actions.find(a=>a.id===r.id);if(old)return structuredClone(old);
+  if(!game.data.pawns.some(p=>p.id===r.actor)){
+   const receipt:Receipt={id:r.id,actor:r.actor,x:r.action.x,z:r.action.z,status:'failed',reason:'Pawn is no longer available on this map'};
+   game.data.actions.push(receipt);return receipt;
+  }
+  return normalMove(r);
+ };
+ try {
+  const p=await c.core().propose('A',move,'Delayed move');
+  const decided=await c.pawn('A').decide(p.id,{name:'disappearance',async decide(){game.data.pawns=game.data.pawns.filter(p=>p.id!=='A');return {kind:'accept',reason:'Old view'};}});
+  assert.equal(c.inspect().outcomes[decided.actionId!]!.status,'failed');assert.equal(c.inspect().characters.A!.commitment,undefined);
+  const q=await c.core().propose('B',move,'Other pawn');await c.pawn('B').decide(q.id,accept);
+  game.data.actions.find(a=>a.actor==='B')!.status='completed';await c.reconcile();await c.reconcile();
+  assert.equal(c.inspect().characters.B!.commitment,undefined);
+  assert.equal(c.inspect().characters.A!.memories.filter(m=>m.startsWith('Action failed:')).length,1);
+  await c.checkpoint('lab-concord-unavailable');
+ }finally{store.close();}
+});

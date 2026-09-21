@@ -173,3 +173,13 @@ These follow-up results do not rewrite the earlier mixed-result trial.
 - 58 automated checks pass, including three concurrent isolated scripted views, fresh consent/refusal of revisions, round/idempotency limits, private inbox/history, attention-driven revised decisions, restored lineage, partial-run continuation guards and immediate failure memory. No C# changes in this increment.
 - Six-call allowance exhausted: USD 0.60 API-equivalent reserved, USD 0.087609 estimated subscription usage; not cash charges. All three earlier trial ledger hashes remained identical. No Jev calls. Staging stopped cleanly.
 - See [contract, fixture and runner](NEGOTIATION.md). Remaining gap highlighted by the failed move: models need grounded available-action information, not just coordinates and authoritative rejection after acceptance.
+
+
+## Correctness regressions — 2026-09-21
+
+- [Verification receipt](evidence/correctness-regressions.json): 64 automated checks pass; mod compiled against the installed game assemblies. No new live inference.
+- Unavailable actors receive durable failed action receipts; replay preserves the same receipt and payload collisions remain rejected. The core cannot execute a pawn job. Coordinator regression coverage checks released commitments, owner-only failure memory and continued reconciliation for another pawn.
+- Reported usage is accounted independently of answer validity, including malformed answers, CLI error results and unsuccessful exits. Settlement and the overrun lock share one atomic SQLite statement. A child-process exit at the statement boundary preserves the lock; historical partial-overrun rows also fail closed. Scratch ledgers only, with existing trial policies unchanged.
+- Reopening the same coordinator while a decision is running is explicitly rejected rather than falsely recording an interruption while allowing the thought to finish. This guards an API misuse pattern, not a newly observed ordinary gameplay failure.
+- Scripted real-game refusal, accepted movement, idempotency, simulation-during-thought, timeout and paired restore passed. Full cold restart preserved character state and the unavailable-actor receipt; replay after restore remained idempotent. The unavailable-actor game check uses an operator-synthetic core ID, not a natural pawn-disappearance event.
+- Independent Codex review covered implementation commit `c1abe46389d7c46889a7aa18b38a132aa825201c` and found no actionable defects. Raw review reports remain private; subsequent publication metadata contains no further behavioral changes.

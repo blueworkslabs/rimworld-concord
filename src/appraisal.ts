@@ -50,13 +50,20 @@ export class TrialBudget {
   } catch(e) {this.db.exec('ROLLBACK');throw e;}
  }
  settle(id:string,cost:number) {
-  const row=this.db.prepare('SELECT reserved FROM attempts WHERE id=?').get(id);
-  if(!row||!Number.isFinite(cost)||cost<0) throw Error('Invalid billing receipt');
-  this.db.prepare("UPDATE attempts SET actual=?,state='settled' WHERE id=?").run(cost,id);
-  // Unexpected pricing locks subsequent calls, even if below the configured run cap.
-  if(cost>Number(row.reserved)) {this.db.prepare("UPDATE attempts SET state='overrun' WHERE id=?").run(id);throw Error('Provider cost exceeded reservation');}
+  if(!Number.isFinite(cost)||cost<0) throw Error('Invalid billing receipt');
+  // One durable statement: a crash cannot separate the charge from its lock.
+  // Repeated receipts can increase accounting, never erase a known charge/overrun.
+  const row=this.db.prepare(`UPDATE attempts SET actual=MAX(COALESCE(actual,0),?),
+    state=CASE WHEN state='overrun' OR MAX(COALESCE(actual,0),?)>reserved
+      THEN 'overrun' ELSE 'settled' END WHERE id=? RETURNING state`).get(cost,cost,id);
+  if(!row) throw Error('Invalid billing receipt');
+  if(row.state==='overrun') throw Error('Provider cost exceeded reservation');
  }
- assertHealthy() {if(this.db.prepare("SELECT id FROM attempts WHERE state='overrun'").get())throw Error('Trial budget locked after pricing overrun');}
+ assertHealthy() {
+  // Also fail closed for a partially settled row written by an older build.
+  if(this.db.prepare("SELECT id FROM attempts WHERE state='overrun' OR actual>reserved").get())
+   throw Error('Trial budget locked after pricing overrun');
+ }
  summary(){return this.db.prepare('SELECT COUNT(*) AS calls,COALESCE(SUM(reserved),0) AS reservedUSD,COALESCE(SUM(actual),0) AS reportedUSD FROM attempts').get();}
  close(){this.db.close();}
 }
@@ -79,8 +86,12 @@ export class JevAppraiser {
   const abort=new Promise<never>((_,reject)=>{onAbort=()=>reject(Error('Appraisal cancelled'));bounded.addEventListener('abort',onAbort,{once:true});});
   try {
    bounded.throwIfAborted();
-   const response=Response.parse(await Promise.race([this.transport(body,bounded),abort]));
-   bounded.throwIfAborted();this.budget.settle(id,response.usage.cost);
+   const raw=await Promise.race([this.transport(body,bounded),abort]);
+   // Billing is independent of answer validity: rejecting a choice does not undo usage.
+   const billing=z.object({usage:z.object({cost:z.number().finite().nonnegative()})}).safeParse(raw);
+   if(billing.success)this.budget.settle(id,billing.data.usage.cost);
+   const response=Response.parse(raw);
+   bounded.throwIfAborted();
    return {reflectionScore:response.answers.reflect.noul,route:response.answers.reflect.noul>=0.5?'deliberation' as const:'native' as const,model:response.model,costUSD:response.usage.cost};
   } finally {bounded.removeEventListener('abort',onAbort);}
  }
