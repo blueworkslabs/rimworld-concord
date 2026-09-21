@@ -13,5 +13,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm test
+      - run: node diary/build.mjs --check
+      - run: node diary/build.mjs
       - run: bash -n scripts/build-mod.sh scripts/run-lab.sh
 # Real-game and mod builds require privately owned assemblies; intentionally not fetched in CI.

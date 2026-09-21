@@ -16,7 +16,7 @@ generated and git-ignored.
 
 Cloudflare Pages: build command `node diary/build.mjs`, output directory
 `diary/dist`. Set `DIARY_BASE` (for example `/diary`) only when the site is
-served below a path; the RSS feed uses it for absolute links.
+served below a path. Set `DIARY_ORIGIN=https://your-site.example` for canonical RSS links; Pages supplies `CF_PAGES_URL` as a fallback. Keep the Pages root directory at the repository root and production branch at `main`. The build command must run on a commit containing `diary/build.mjs`, not the pre-diary commit.
 
 ## Writing an entry
 

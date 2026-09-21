@@ -17,6 +17,7 @@ const SITE = {
   title: 'Concord ship log',
   tagline: 'Development diary for RimWorld Concord',
   repo: 'https://github.com/blueworkslabs/rimworld-concord',
+  origin: process.env.DIARY_ORIGIN ?? process.env.CF_PAGES_URL ?? '',
   base: process.env.DIARY_BASE ?? '', // e.g. '/diary' when served below a path
 };
 const QUADRUMS = ['Aprimay', 'Jugust', 'Septober', 'Decembary'];
@@ -64,7 +65,7 @@ function validate(raw, file) {
 // ---------- helpers ----------
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const attr = esc;
-const href = p => `${SITE.base}${p}`;
+const href = p => `${SITE.origin.replace(/\/$/, '')}${SITE.base}${p}`;
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 function longDate(iso) { const d = new Date(iso + 'T00:00:00Z'); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`; }
 const dayNumber = iso => Math.round(Date.parse(iso + 'T00:00:00Z') / 86_400_000);
@@ -199,7 +200,7 @@ function safeHost(url) { try { return new URL(url).host; } catch { return ''; } 
 function feed(entries) {
   const items = entries.slice(0, 20).map(e => `  <item>
     <title>${esc(e.title)}</title>
-    <link>${esc(SITE.base)}/entries/${esc(e.slug)}/index.html</link>
+    <link>${esc(href(`/entries/${e.slug}/index.html`))}</link>
     <guid isPermaLink="false">concord-diary:${esc(e.slug)}</guid>
     <pubDate>${new Date(e.date + 'T00:00:00Z').toUTCString()}</pubDate>
     <description>${esc(e.summary)}</description>
@@ -251,7 +252,7 @@ async function main() {
   await writeFile(join(OUT, 'index.html'), indexPage(entries, epoch));
   await writeFile(join(OUT, 'feed.xml'), feed(entries));
   await writeFile(join(OUT, 'entries.json'), JSON.stringify(entries.map(({slug, title, date, summary}) => ({slug, title, date, summary})), null, 2) + '\n');
-  await writeFile(join(OUT, '_headers'), 'X-Content-Type-Options: nosniff\nReferrer-Policy: no-referrer\nContent-Security-Policy: default-src \'none\'; img-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'none\'; form-action \'none\'\n');
+  await writeFile(join(OUT, '_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  Content-Security-Policy: default-src \'none\'; img-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'none\'; form-action \'none\'\n');
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
     const dir = join(OUT, 'entries', e.slug);
