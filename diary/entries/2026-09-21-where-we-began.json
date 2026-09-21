@@ -1,0 +1,70 @@
+{
+  "slug": "where-we-began",
+  "title": "Where we began: shared fate, not shared will",
+  "date": "2026-09-21",
+  "summary": "A retrospective opening entry marking the project's design baseline, recorded the same day as the first progress report.",
+  "sections": [
+    {
+      "heading": "A Baseline, Not a Blueprint",
+      "paragraphs": [
+        "We are writing this opening entry retrospectively on 21 September 2026, after publishing our first progress report earlier today. It records the ideas we started with: a dated snapshot of intentions and open questions, not a fixed specification or a promise of how the finished project will feel to play."
+      ]
+    },
+    {
+      "heading": "Why We Started",
+      "paragraphs": [
+        "The seed was simple: RimWorld saves remember fragments of colony life, but not the complete social history that players piece together from scattered events. We wondered whether we could surface those overlooked interactions as small, evidence-backed stories. The question evolved quickly. Could the participants in those stories—colonists, in our case—have something like perspective? Could they hold commitments that persist, make meaningful choices, and disagree with each other instead of simply executing native behaviour while a narrator describes what happened?"
+      ]
+    },
+    {
+      "heading": "What We Agreed",
+      "paragraphs": [
+        "We settled on four protagonists: an ancient AI core and three cognitively enhanced colonists. The proposed campaign, inspired by RimWorld's Odyssey expansion, would have them discover the core in an old gravship; activation would bind their fates and awaken mechanoid pursuit. This was our scenario proposal, not a claim about a finished campaign or about RimWorld's exact vanilla lore.",
+        "The binding would mean shared fate, not shared will. The core could propose strategy, but each pawn would own acceptance, reinterpretation, negotiation, and refusal. Disagreement should follow character priorities and produce genuine alternatives, not random obstruction or dialogue followed by compulsory obedience.",
+        "A native storyteller would supply external pressure initially; an AI storyteller remained optional. Quests might reveal the core's past, explain why mechanoids hunted them, and unlock capabilities—but their content and progression were deliberately left open.",
+        "The human player would start as observer and test director, able to communicate through the core where appropriate. Debug intervention would remain separate from any in-world authority.",
+        "Alongside autonomy, smooth gameplay was the goal. Native routines would continue while pawns deliberated, with a visible indicator showing when someone was thinking. Tests and explicit extended planning might pause the world, but ordinary play would not wait on every decision."
+      ]
+    },
+    {
+      "heading": "How We Thought It Might Work",
+      "paragraphs": [
+        "We sketched a preliminary architecture. The native C# mod would own physical validation and execution—what actually happens in the game world. A standalone TypeScript coordinator with SQLite would own character state, filtered perspectives, commitments, event ordering, scheduling, and paired checkpoints that let us save and reload both game and character states together. Replaceable decision workers would receive only their permitted perspective and supported choices, so no agent could see what their character should not know.",
+        "OpenClaw was planned as an operator interface and optional execution adapter, not as the colony's authoritative memory. Pi's agent runtime remained an optional runtime candidate, not a requirement.",
+        "Three speeds of cognition emerged as our working model: native habits running constantly, bounded contextual appraisal for situations that mattered, and full LLM deliberation for significant decisions. Jev was a candidate for that middle appraisal layer, not a mandatory dependency. Personality would inform all three layers. Significant events could bypass appraisal and trigger deliberation directly. Native execution would not require a model call every tick; saved commitments might eventually guide routine work without fresh deliberation."
+      ]
+    },
+    {
+      "heading": "What We Left Undecided",
+      "paragraphs": [
+        "Much remains open. We have agreed on permanent binding as the premise, but not its mechanics: psychic, technological or hybrid; what information it carries; and what happens after separation, capture, death or damage to the core. The core's history, the reason for mechanoid pursuit, quest progression and possible endings are unwritten. A link carrying deliberate communication rather than private thoughts, and consequences the core cannot weaponize, are design proposals rather than implemented rules.",
+        "The core's authority over ship systems, richer pawn actions beyond our current movement-only interface, which model and runtime to use, interruption rules, and the practical balance between habits and deliberation—all awaited experiment. We noted we should compare rules plus LLM against rules plus Jev plus LLM before making the middle layer a hard requirement."
+      ]
+    },
+    {
+      "heading": "What Existed at This Point",
+      "paragraphs": [
+        "When this baseline was recorded, we had verified: a real-game laboratory environment, a narrow scripted loop of proposal, decision, and movement, paired save and reload capability, selected pawn-specific experiences, and a visible thinking badge. The Jev adapter had been mock-tested only, not connected to live inference. Autonomous attention handling, live in-game inference, strategic core planning, the OpenClaw plugin, and the actual proposed campaign all lay ahead.",
+        "The value of recording this now is precisely that experiments will change our thinking. What seems essential in September may prove unnecessary by winter; what we dismissed as too complex may turn out to be the simpler path. This baseline gives us a place to look back from, to notice which assumptions held and which dissolved on contact with implementation. The real design will emerge from that tension between intention and result."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Recorded project baseline",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/1e42e88a31e796f250ce2f8a059a31661bc1989d/docs/PROJECT_BASELINE.md"
+    },
+    {
+      "label": "Architecture at the project's start",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/4c25c25f982e44ae8750280ba1224fac1e413f32/docs/ARCHITECTURE.md"
+    },
+    {
+      "label": "Initial roadmap",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/4c25c25f982e44ae8750280ba1224fac1e413f32/docs/ROADMAP.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
