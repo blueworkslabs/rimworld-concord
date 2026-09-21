@@ -1,6 +1,7 @@
 /** Operator-only scripted real-game hauling evidence; no inference. */
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {randomUUID} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {Coordinator} from './coordinator.js';
 import {Store} from './store.js';
@@ -49,6 +50,18 @@ try {
   await c.restore(checkpoint);const other=initial.pawns.find(p=>p.id!==pawn.id)!;
   const refusal=await c.core().propose(other.id,action,'Optional hauling');const before=(await b.state()).actions.length;
   await c.pawn(other.id).decide(refusal.id,scripted({kind:'refuse',reason:'Scripted rest preference'}));assert.equal((await b.state()).actions.length,before);checks.push('refusal creates no hauling job');
+  await c.restore(checkpoint);
+  const boundary=await b.state(),testPawn=boundary.pawns.find(p=>p.id!==pawn.id&&p.hauling?.options.length)!;
+  assert(testPawn);const testAction=testPawn.hauling!.options[0]!;
+  const expiredId=randomUUID();
+  const expiring=await b.move({id:expiredId,epoch:boundary.epoch,actor:testPawn.id,action:testAction,untilTick:boundary.ticks+1});
+  assert.equal(expiring.status,'started');await b.admin('run');await delay(750);await b.admin('pause');
+  const expired=(await b.state()).actions.find(a=>a.id===expiredId)!;
+  assert.notEqual(expired.status,'started');assert.notEqual(expired.status,'completed');assert.equal(expired.delivered,0);
+  checks.push('native game stops expired hauling without coordinator polling');
+  const tombstoneId=randomUUID();const tombstone=await b.cancel({id:tombstoneId,epoch:boundary.epoch,actor:testPawn.id});assert.equal(tombstone.status,'interrupted');
+  await assert.rejects(b.move({id:tombstoneId,epoch:boundary.epoch,actor:testPawn.id,action:testAction,untilTick:boundary.ticks+1800}),/collision/);
+  checks.push('cancel-before-dispatch tombstone prevents delayed job creation');
   await c.restore(checkpoint);
   await writeFile(root+'/.runtime/hauling-latest.json',JSON.stringify({db,checkpoint,proposal:proposal.id,epoch:(await b.state()).epoch,characters:saved.characters,proposals:saved.proposals,outcomes:saved.outcomes}));
   receipt.limitation='Operator-authored stockpiles, relocated steel and disabled native work priorities. Scripted consent; quiescent between-trip checkpoints only.';
