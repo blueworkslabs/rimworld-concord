@@ -55,6 +55,14 @@
 - Owner-only pawn views and core physical-only query; consent and dispatch checks unchanged.
 - Scripted grounding and persistence checks; no new live inference or long-run reliability claim.
 
+## Bounded hauling increment
+
+- Local item/storage options and native exact-quantity hauling, with current-state revalidation.
+- Fixed-source/fixed-cell standing consent for at most three trips; needs, expiry, failure and withdrawal stop work.
+- Independent native stop guards, scoped cancellation and cancellation-before-dispatch tombstones.
+- Quiescent between-trip paired/cold restore; active-job checkpoints remain deferred.
+- See [contract and trial scope](HAULING.md). Finite live results are recorded in the acceptance evidence, not inferred from implementation.
+
 ## Next bounded increment
 
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
@@ -62,15 +70,14 @@
 - Extend social-event capture and perceived knowledge; add operator inspection UI.
 - Expand relevance-aware interruption beyond the narrow Chitchat exception; retain urgent supersession.
 - Tune optional consequential-decision pauses from playtests; avoid global stop-start behavior.
-- Expand grounding beyond the nearby movement shortlist toward useful tasks and standing intentions.
 - Extend beyond authored-preference checks toward sustained character behavior and multi-party negotiation.
 
 ## Later
 
 - Compare rules+LLM against rules+Jev+LLM; OpenClaw tool plugin.
-- Pawn-originated goals and richer actions: hauling, rescue, work, conversation.
+- Pawn-originated goals and richer actions: rescue, construction, conversation.
 - Core strategic planning, building/defense proposals, explicit planning pauses.
-- Durable standing intentions, active-job checkpoints, retention and portable installation.
+- Broader standing intentions, active-job checkpoints, retention and portable installation.
 - Gravship scenario, binding mechanics, progression quests and evidence-backed chronicler.
 
 Do not describe placeholder interfaces or design documents as live integrations. Smooth continuous gameplay remains the goal; deterministic-ish paused testing is a development mode.

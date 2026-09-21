@@ -54,3 +54,11 @@ separately from a pawn deciding to stop. `--cold` performs no inference.
 
 This is a bounded integration test, not an evaluation of naturally developed
 personalities, long-run balance or an autonomous strategic core.
+
+If the initial three offers all return unanswered counters, an explicit
+`--reply-counters` follow-up may restore that completed trial checkpoint and offer
+the three exact alternatives back. It requires exactly three retained Claude
+attempts and spends only the remaining three from the **same** ledger, with no
+further appraisals. It observes another thirty seconds and records a separate
+receipt. This is fresh consent to revised offers, not a reroll of earlier answers.
+An interrupted follow-up cannot silently restart from the original checkpoint.
