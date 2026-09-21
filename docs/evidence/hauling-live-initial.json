@@ -1,0 +1,215 @@
+{
+  "at": "2026-09-21T21:22:37.420Z",
+  "kind": "hauling-live",
+  "passed": true,
+  "before": {
+    "claude": {
+      "attempts": 0,
+      "reservedEquivalentUSD": 0,
+      "estimatedUsageUSD": 0
+    },
+    "jev": {
+      "calls": 0,
+      "reservedUSD": 0,
+      "reportedUSD": 0
+    }
+  },
+  "after": {
+    "claude": {
+      "attempts": 3,
+      "reservedEquivalentUSD": 0.30000000000000004,
+      "estimatedUsageUSD": 0.042912
+    },
+    "jev": {
+      "calls": 3,
+      "reservedUSD": 0.006,
+      "reportedUSD": 0.000192192
+    }
+  },
+  "decisions": [
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 5459,
+      "estimatedUsageUSD": 0.01839,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 6873,
+      "estimatedUsageUSD": 0.012115500000000001,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 5014,
+      "estimatedUsageUSD": 0.012406499999999999,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    }
+  ],
+  "appraisals": [
+    {
+      "status": "ok",
+      "elapsedMs": 669,
+      "score": 0.3,
+      "costUSD": 0.000060606
+    },
+    {
+      "status": "ok",
+      "elapsedMs": 484,
+      "score": 0.3,
+      "costUSD": 0.000063504
+    },
+    {
+      "status": "ok",
+      "elapsedMs": 489,
+      "score": 0.35,
+      "costUSD": 0.000068082
+    }
+  ],
+  "game": {
+    "at": "2026-09-21T21:19:05.727Z",
+    "passed": true,
+    "offers": [
+      {
+        "pawn": "Thing_Human405",
+        "proposal": "842e2545-64a0-4ab4-8287-6ed096e261c2",
+        "decision": {
+          "kind": "counter",
+          "reason": "The stack I can see is only listed for a single trip — I won't commit beyond what's observable. Happy to haul one load of ten to storage right now.",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1883",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 1,
+            "maxTicks": 1800
+          }
+        }
+      },
+      {
+        "pawn": "Thing_Human408",
+        "proposal": "3e080cde-3598-47af-baee-9491d3a3e383",
+        "decision": {
+          "kind": "counter",
+          "reason": "Happy to haul that steel — I'm in good shape and it's right nearby. But my observed option only covers 1 trip for this stack, not 2. Countering with what I can actually confirm.",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1884",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 1,
+            "maxTicks": 1800
+          }
+        }
+      },
+      {
+        "pawn": "Thing_Human411",
+        "proposal": "94ffaeaf-46ac-4180-ae98-7b812a7bd94f",
+        "decision": {
+          "kind": "counter",
+          "reason": "My observation of that steel stack only shows a single trip available. I'm happy to haul one load of ten to storage, but I can't commit to two trips on what I've actually seen.",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1885",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 1,
+            "maxTicks": 1800
+          }
+        }
+      }
+    ],
+    "observation": {
+      "wallMs": 180916,
+      "ticks": 10790,
+      "samples": 333,
+      "attention": [
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 1
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 3
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 2
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 4
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 5
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 6
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 8
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 9
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 10
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 12
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 14
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 16
+        }
+      ],
+      "decisions": 3,
+      "appraisals": 3
+    },
+    "outcomes": [],
+    "intentions": [],
+    "pairedRestore": true,
+    "limitations": "Three-minute authored fixture; initial offers while paused, then continuous native play. Scripted core, no authored personality overrides. Model errors/cancellations are evidence, not rerolled. Not a long-run character-quality evaluation."
+  },
+  "accounting": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls."
+}

@@ -193,3 +193,43 @@ These follow-up results do not rewrite the earlier mixed-result trial.
 - Paired restore and [full cold restart](evidence/movement-cold.json) preserved characters, proposals and outcomes, with fresh epoch/tick-stamped options after load. A short polling sample advanced 297 ticks over 5444 ms; this is not a sustained performance benchmark.
 - No new live pawn inference, no changes to exhausted trial ledgers; game/display services stopped. Kimi's diary drafting is separate editorial inference.
 - [Contract and limits](MOVEMENT.md): at most 12 destinations within Manhattan radius 3, with fog/line-of-sight and native reachability checks. Not exhaustive choices, full perception, reservations or a guarantee of safe arrival. Physical options are deliberately shared with the core without private character state.
+
+## Bounded hauling and standing consent (2026-09-21)
+
+The scripted native fixture relocates existing steel, adds steel-only stockpiles
+and disables autonomous work priorities. Actual job-specific drops delivered ten
+units to the exact accepted cell; duplicate requests did not create another trip.
+Withdrawal between trips prevented further work; active withdrawal interrupted
+only the owned job; refusal created no job. Native expiry stopped a trip without
+coordinator polling. A cancellation tombstone prevented a delayed dispatch.
+A full cold restore between trips preserved the original consent and completed
+the remaining two trips without inference. Active-job checkpoints are still not
+supported. See [hauling contract](HAULING.md) and the sanitized evidence.
+
+The initial live observation used three autonomous Claude replies, each countering
+a two-trip offer with one trip because the observed shortlist only described one.
+These were retained, not rerolled. Three Jev appraisals (0.30, 0.30, 0.35) selected
+native continuation. The three-minute observation advanced 10,790 ticks and paired
+restore passed. This phase produced no haul jobs: a counter is not an acceptance.
+The optional exact-counter follow-up uses only the remaining three attempts from
+the same six-call ledger; its outcome is reported separately.
+
+All three exact-counter replies were accepted with fresh live consent. Alvin and
+Beatrice each delivered ten steel. Pedro's dispatch failed the native availability
+check; his proposed cell was the same cell already reserved by Alvin. The failed
+trip stopped rather than retrying. Another thirty seconds advanced 1,833 ticks;
+paired restore retained the full exchange and mixed outcomes. Multi-trip execution
+was established by the scripted test, not by these one-trip live acceptances.
+
+The combined trial used all six Claude attempts, reporting $0.1245645 in native
+Max API-equivalent usage estimates (not cash charges). Three of the six permitted
+Jev calls were used, reporting $0.000192192. Historical ledgers were not changed.
+Routine appraisals did not escalate to live reflection; live mid-job withdrawal
+and naturally developed character consistency are not established by this trial.
+
+A subsequent full game/coordinator restart preserved all six live decisions, both
+completed deliveries and the rejected trip, with unchanged usage ledgers and no
+new inference. The raw review remains private. Review-driven corrections include
+serialized provider cleanup after cancellation and actor lookup across loaded
+maps when reconciling or cancelling a haul. The real-game fixture is single-map;
+this does not claim a multi-map playtest.

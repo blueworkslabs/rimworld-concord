@@ -40,10 +40,13 @@ namespace Concord
             Scribe_Values.Look(ref eventSeq,"concordEventSeq");
             if(events==null) events=new List<NativeEvent>();
         }
+        // Action ownership is independent of the operator's selected/viewed map.
+        public static Pawn FindActor(string id) {
+            return Find.Maps.SelectMany(m=>m.mapPawns.FreeColonistsSpawned).FirstOrDefault(p=>p.GetUniqueLoadID()==id);
+        }
         public void Reconcile() {
-            if(Find.CurrentMap==null) return;
             foreach(var a in actions.Where(a=>a.status=="started")) {
-                var pawn=Find.CurrentMap.mapPawns.FreeColonistsSpawned.FirstOrDefault(p=>p.GetUniqueLoadID()==a.actor);
+                var pawn=FindActor(a.actor);
                 if(pawn==null || pawn.Dead || pawn.Downed) { a.status="interrupted"; a.reason="Pawn unavailable"; }
                 else if(a.kind!="haul" && pawn.Position==new IntVec3(a.x,0,a.z)) { a.status="completed"; a.reason="Reached destination"; }
                 else if(a.kind=="haul" && (!Hauling.Ready(pawn)||Find.TickManager.TicksGame>=a.untilTick)) {
@@ -174,7 +177,7 @@ namespace Concord
             if(a.actor!=r.actor||a.kind!="haul")throw new Exception("No owned haul action");
             if(a.status=="started") {
                 a.status="interrupted";a.reason="Pawn withdrew hauling commitment";
-                var p=Find.CurrentMap.mapPawns.FreeColonistsSpawned.FirstOrDefault(x=>x.GetUniqueLoadID()==r.actor);
+                var p=WorldState.FindActor(r.actor);
                 if(p!=null&&p.CurJob!=null&&p.CurJob.loadID==a.jobId)p.jobs.EndCurrentJob(JobCondition.InterruptForced);
             }
             return a;

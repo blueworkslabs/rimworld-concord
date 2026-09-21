@@ -66,7 +66,7 @@ try{
   const checkpoint='lab-concord-haul-live-'+Date.now();await c.checkpoint(checkpoint);const saved=c.inspect();await c.restore(checkpoint);
   assert.deepEqual(c.inspect().characters,saved.characters);assert.deepEqual(c.inspect().proposals,saved.proposals);assert.deepEqual(c.inspect().outcomes,saved.outcomes);
   await writeFile(root+'/.runtime/hauling-live-latest.json',JSON.stringify({db,checkpoint,epoch:(await b.state()).epoch,characters:saved.characters,proposals:saved.proposals,outcomes:saved.outcomes}));
-  receipt.pairedRestore=true;receipt.counterFollowup=replies;receipt.limitations='Three-minute initial observation; optional thirty-second exact-counter follow-up within the same six-call allowance. Authored authored fixture; initial offers while paused, then continuous native play. Scripted core, no authored personality overrides. Model errors/cancellations are evidence, not rerolled. Not a long-run character-quality evaluation.';
+  receipt.pairedRestore=true;receipt.counterFollowup=replies;receipt.limitations='Three-minute initial observation; optional thirty-second exact-counter follow-up within the same six-call allowance. Authored fixture; initial offers while paused, then continuous native play. Scripted core, no authored personality overrides. Model errors/cancellations are evidence, not rerolled. Not a long-run character-quality evaluation.';
  }
  receipt.passed=true;
 }catch(e){receipt.error=String(e);process.exitCode=1;}
