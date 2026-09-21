@@ -46,3 +46,23 @@ Compare rules+LLM with rules+appraisal+LLM on identical recorded perspective epi
 ## Implemented appraisal adapter
 
 `src/appraisal.ts` now implements the System One `noul` request and validates its response, with an injected operator-owned transport. `TrialBudget` keeps conservative call reservations in a separate SQLite ledger that must not roll back with game saves. Mocked unit coverage covers malformed output, cancellation and budget behavior. One protected live synthetic fixture returned `typesafe/jev-1.13-20260917`, score `0.64`, route `deliberation`, latency `1078ms` and reported cost USD `0.000020244`; see [live evidence](evidence/jev-live.json). A subsequent [real-game trial](evidence/jev-game.json) returned scores `0.23` and `0.21` for captured food and mood events (704ms and 362ms end-to-end API waits). Both retained native behavior. Across the synthetic and game runs, three calls reported USD `0.000133266`; the three-call trial is exhausted, without changing its allowance. This is not a character-quality comparison. See [live operation](LIVE_APPRAISAL.md) and [awareness](AWARENESS.md).
+
+## Native Claude Code deliberation trial
+
+Claude Code 2.1.263 was verified with its normal noninteractive CLI and existing
+first-party Max login, fixed to `claude-sonnet-4-6`. We do not use bare mode, the
+Agent SDK, extracted OAuth tokens or a generic model API. A restricted environment,
+empty tool/MCP configuration, safe mode and stream checks enforce the pawn's
+limited interface. The only advertised tool was `StructuredOutput`.
+
+The synthetic decision took 3133ms; a real-game explicit decision took 3448ms and
+accepted a move that actually completed. A second real-game reflection was
+cancelled after a newer conversation memory arrived; it produced no accepted
+answer. The three-attempt allowance is exhausted and no retry was made. Successful
+responses reported USD 0.021867 total **API-equivalent estimated usage**, not cash
+charges. Cancelled-call usage is unknown; its full reservation remains, bringing
+reserved equivalent usage to USD 0.30. The Jev ledger and paid-call cap are unchanged.
+
+See [runtime controls and operator guide](LIVE_DELIBERATION.md). Native subscription
+rate limits still apply. This result proves a narrow integration, not unlimited
+subscription use, narrative quality or an unattended service.

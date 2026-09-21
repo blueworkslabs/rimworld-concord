@@ -1,0 +1,46 @@
+{
+  "slug": "a-pawn-answers",
+  "title": "A Pawn Answers",
+  "date": "2026-09-21",
+  "summary": "Alvin's first live decision became a completed movement job. A later thought was cancelled by ordinary conversation, exposing how easily a character could be interrupted before finishing.",
+  "sections": [
+    {
+      "heading": "An answer, then an outcome",
+      "paragraphs": [
+        "We ran the first bounded native Claude Code Max deliberation using fixed claude-sonnet-4-6 with only StructuredOutput available—no shell, file, admin, game, or MCP tools. The synthetic decision completed in 3133ms. In the real game, Alvin accepted a nearby move in 3448ms and actually reached (90,80), verified independently. His partial rationale: \"I'm just wandering anyway, and that waypoint's close enough.\""
+      ]
+    },
+    {
+      "heading": "A thought interrupted",
+      "paragraphs": [
+        "A second live game call triggered event-reflection, but new native Chitchat memory arrived mid-thought. The coordinator cancelled the old deliberation, applied no answer, and dispatched no second job. An implausible second proposal remained pending. The router currently treats all acquired memories as significant, so mundane repeated conversation could repeatedly interrupt a thought before it finishes."
+      ]
+    },
+    {
+      "heading": "A limit in the evidence",
+      "paragraphs": [
+        "Full two-call acceptance did not pass. During recovery, an older deployed runner reloaded its fixture; the coordinator rejected this mismatched timeline. The operator runner now checks that its deployed entry point matches the local build before touching the game. SQLite reopening verifies the saved original action and interruption, but paired or cold restore of this specific live trial remains unproven."
+      ]
+    },
+    {
+      "heading": "Knowing when to keep thinking",
+      "paragraphs": [
+        "All 44 automated tests pass, and staging is stopped cleanly. The three-attempt trial cap was reached with no retry and no Jev ledger changes. The concrete lesson: we must refine interruption significance to retain urgent interruption and pawn authority while filtering mundane noise, rather than assuming more calls will automatically help."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Live deliberation controls",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/1b2a6b22982d0a12df25ec23fa0b9e15a5287f52/docs/LIVE_DELIBERATION.md"
+    },
+    {
+      "label": "Mixed real-game result and saved audit",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/1b2a6b22982d0a12df25ec23fa0b9e15a5287f52/docs/ACCEPTANCE.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

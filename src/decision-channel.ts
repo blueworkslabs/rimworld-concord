@@ -1,0 +1,33 @@
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+import { Decision,type Perspective } from './protocol.js';
+import { Reflection,type AttentionView } from './attention.js';
+
+/** Trusted operator SSH relay; no action/admin handles or credentials cross it. */
+export class DecisionChannel {
+ readonly name='claude-sonnet-4-6';
+ private pending?:{id:string;mode:'decision'|'reflection';resolve:(v:unknown)=>void;reject:(e:Error)=>void;cleanup:()=>void};
+ private closed=false;
+ constructor(private send:(value:unknown)=>void){}
+ decide(view:Perspective,signal:AbortSignal){return this.request('decision',view,signal);}
+ reflect(view:AttentionView,signal:AbortSignal){return this.request('reflection',view,signal);}
+ private request(mode:'decision'|'reflection',view:unknown,signal:AbortSignal):Promise<unknown>{
+   signal.throwIfAborted();if(this.closed||this.pending)return Promise.reject(Error('Decision channel unavailable'));
+   const id=randomUUID();
+   return new Promise((resolve,reject)=>{
+     const cancel=()=>{this.pending=undefined;signal.removeEventListener('abort',cancel);
+       try{this.send({type:'decision-cancel',id});}catch{}reject(Error('Decision cancelled'));};
+     this.pending={id,mode,resolve,reject,cleanup:()=>signal.removeEventListener('abort',cancel)};
+     signal.addEventListener('abort',cancel,{once:true});
+     try{this.send({type:'decision-request',id,mode,view});}catch{this.close();}
+   });
+ }
+ receive(raw:unknown){
+   const r=z.object({type:z.literal('decision-result'),id:z.string().uuid(),output:z.unknown().optional(),error:z.literal('Decision unavailable').optional()}).strict().parse(raw);
+   const p=this.pending;if(!p||p.id!==r.id)return;
+   if(r.error!==undefined&&r.output!==undefined)throw Error('Ambiguous decision result');
+   const value=r.error?undefined:(p.mode==='decision'?Decision:Reflection).parse(r.output);
+   p.cleanup();this.pending=undefined;if(r.error)p.reject(Error(r.error));else p.resolve(value);
+ }
+ close(){this.closed=true;this.pending?.cleanup();this.pending?.reject(Error('Decision channel closed'));this.pending=undefined;}
+}

@@ -1,0 +1,63 @@
+{
+  "at": "2026-09-21T17:59:51.444Z",
+  "kind": "claude-game-audit",
+  "passed": true,
+  "access": "Claude Code native Max login; monetary values are API-equivalent usage estimates, not cash billing",
+  "before": {
+    "attempts": 3,
+    "reservedEquivalentUSD": 0.3,
+    "estimatedUsageUSD": 0.021867
+  },
+  "after": {
+    "attempts": 3,
+    "reservedEquivalentUSD": 0.3,
+    "estimatedUsageUSD": 0.021867
+  },
+  "calls": [],
+  "game": {
+    "at": "2026-09-21T17:59:51.090Z",
+    "kind": "claude-game-audit",
+    "checks": [
+      "live accepted proposal completed its movement; interrupted reflection dispatched no second action",
+      "newer significant native experience remains eligible; original failed trial is not retried",
+      "SQLite reopen preserves evidence; mismatched game timeline is rejected without rewriting state"
+    ],
+    "passed": true,
+    "explicit": {
+      "decision": {
+        "kind": "accept",
+        "reason": "I'm just wandering anyway, and that waypoint's close enough. My animals bond keeps me grounded but there's nothing pressing right now. I'll head over."
+      },
+      "outcome": {
+        "id": "30e0bca6-a2be-4ed9-8c2e-cd8703a5486f",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Reached destination",
+        "x": 90,
+        "z": 80,
+        "jobId": 21
+      }
+    },
+    "attention": {
+      "cursor": 10,
+      "lastAttemptTick": 506,
+      "last": {
+        "status": "interrupted",
+        "throughSeq": 10,
+        "reason": "Backend unavailable, cancelled or invalid; continue native behavior"
+      }
+    },
+    "newerEvents": [
+      {
+        "seq": 13,
+        "tick": 729,
+        "pawn": "Thing_Human405",
+        "kind": "memory",
+        "detail": "Chitchat"
+      }
+    ],
+    "pendingProposals": 1,
+    "inferenceCalls": 0,
+    "pairedRestoreVerified": false
+  }
+}

@@ -6,7 +6,7 @@ An experimental foundation for an ancient AI core and three autonomous colonists
 
 ## Status
 
-First **scripted** vertical slice implemented, not a playable campaign or live AI colony:
+A bounded experimental vertical slice, not a playable campaign or unattended AI colony:
 
 - A core proposes a move; an identity-bound pawn accepts, refuses, or counterproposes.
 - Accepted movement becomes a real native RimWorld job; refusals and counters do not execute it.
@@ -18,7 +18,9 @@ First **scripted** vertical slice implemented, not a playable campaign or live A
 - Selected native events are archived, routed and projected only into their owning pawn's experience stream.
 - An expiring in-game thinking badge appears during proposal or event-triggered deliberation without pausing simulation.
 - A bounded attention pump consumes captured events, coalesces repeated signals and applies pawn-owned responses; verified with scripted backends.
-- A bounded Jev appraisal adapter is implemented against the documented API with mocked tests, one live synthetic fixture and two real-game live appraisals. Both game scores retained native behavior; deeper decisions remain scripted. See the [bounded live runner](docs/LIVE_APPRAISAL.md).
+- A bounded Jev appraisal adapter is implemented against the documented API with mocked tests, one live synthetic fixture and two real-game live appraisals. Both game scores retained native behavior. See the [bounded live runner](docs/LIVE_APPRAISAL.md).
+
+- A tool-isolated Claude Code Max backend completed one live pawn decision and real movement. A second, event-triggered thought was interrupted by a newer native memory, leaving its proposal pending. See [live deliberation](docs/LIVE_DELIBERATION.md).
 
 See [acceptance](docs/ACCEPTANCE.md) for measured results and limitations, and [roadmap](docs/ROADMAP.md) for what is not built.
 
@@ -34,6 +36,7 @@ src/backends.ts       Scripted decisions for repeatable mechanics tests
 src/routing.ts        Native event attention routing
 src/attention.ts      Bounded attention pump and reflection response contract
 src/appraisal.ts      Jev question/response validation and separate trial budget ledger
+src/claude-decision.ts Native Claude CLI with tool isolation and bounded trial accounting
 scripts/lab/          Reused working lab controls; NOT a character tool surface
 adapters/openclaw/    Integration contract; no installed OpenClaw plugin yet
 docs/                 Design decisions, model research, provenance, evidence
@@ -75,6 +78,6 @@ This is an application boundary, **not** a sandbox for hostile plugin code or th
 
 ## Direction
 
-Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. An opt-in bounded attention pump now consumes event routes with scripted backends; live deliberative models, long-running operation and broader goals are still to come. See [attention consumption](docs/ATTENTION.md).
+Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. An opt-in bounded attention pump consumes event routes. A first native-client live decision completed a move; a live reflection was cancelled by newer experience. Long-running operation, broader goals and completed live event-driven reflection remain to be proved. See [attention consumption](docs/ATTENTION.md).
 
 See [architecture](docs/ARCHITECTURE.md), [narrative](docs/NARRATIVE.md), and [model access](docs/MODELS.md).
