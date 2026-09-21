@@ -235,15 +235,16 @@ test('movement shortlist is pawn-owned in both decision paths; core sees only ph
  game.data.pawns[1]!.movement={...offer,options:[{kind:'move',x:99,z:99}]};
  const publicView=await c.core().movementOptions('A');assert.deepEqual(publicView,offer);
  publicView!.options[0]!.x=999;assert.equal(game.data.pawns[0]!.movement.options[0]!.x,2);
- const p=await c.core().propose('A',offer.options[0]!,'Grounded request');
+ // ID intentionally contains the other pawn's coordinate digits: IDs are not leaked coordinates.
+ const p=await c.core().propose('A',offer.options[0]!,'Grounded request','00000000-0000-4000-8000-000000000099');
  await c.pawn('A').decide(p.id,{name:'inspect',async decide(view){
-   assert.deepEqual(view.pawn.movement,offer);assert(!JSON.stringify(view).includes('99'));
+   assert.deepEqual(view.pawn.movement,offer);assert(!JSON.stringify(view).includes('"x":99'));
    return {kind:'counter',reason:'Own local alternative',action:view.pawn.movement!.options[0]};
  }});
  assert.equal(game.moves,0);
  game.data.events=[{seq:1,tick:1,pawn:'A',kind:'health',detail:'changed'}];game.data.eventSeq=1;
  await c.attend('A',{name:'inspect-reflection',async reflect(view){
-   assert.deepEqual(view.pawn.movement,offer);assert(!JSON.stringify(view).includes('99'));
+   assert.deepEqual(view.pawn.movement,offer);assert(!JSON.stringify(view).includes('"x":99'));
    return {kind:'continue',reason:'Native routine'};
  }});
  assert.equal(game.moves,0);
