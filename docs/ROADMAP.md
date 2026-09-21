@@ -49,6 +49,12 @@
 - All six met the limited authored-preference rubric; paired/cold restore passed. Not emergent personality, live core strategy or concurrent live-agent evidence.
 - Immediate terminal action failures reach owner memory, verified separately with scripted real-game regression.
 
+## Grounded movement increment
+
+- Bounded, epoch-stamped nearby visible/reachable options from the native game.
+- Owner-only pawn views and core physical-only query; consent and dispatch checks unchanged.
+- Scripted grounding and persistence checks; no new live inference or long-run reliability claim.
+
 ## Next bounded increment
 
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
@@ -56,7 +62,7 @@
 - Extend social-event capture and perceived knowledge; add operator inspection UI.
 - Expand relevance-aware interruption beyond the narrow Chitchat exception; retain urgent supersession.
 - Tune optional consequential-decision pauses from playtests; avoid global stop-start behavior.
-- Ground proposed action choices in available world affordances; avoid offering invalid destinations blindly.
+- Expand grounding beyond the nearby movement shortlist toward useful tasks and standing intentions.
 - Extend beyond authored-preference checks toward sustained character behavior and multi-party negotiation.
 
 ## Later

@@ -15,6 +15,8 @@ The human is initially an observer/test director, communicating through the core
 
 The core creates a proposal for a known pawn. Only the bound pawn handle can decide it. Strict response validation permits acceptance, refusal or a counterproposal; additional fields such as a forged actor/action are rejected. Acceptance persists an action ID before dispatch. An uncertain transport outcome retains that ID; reconciliation queries the game ledger before any retry. Action receipts distinguish started/completed/failed/interrupted. A counterproposal is recorded for further discussion, not automatically executed. The core's communicated-counter inbox excludes private character state. Its bounded `revise` operation adopts the exact alternative into a new pending offer for the same pawn, requiring fresh acceptance; owner-only thread history and lineage persist. See [negotiation](NEGOTIATION.md).
 
+The mod supplies bounded owner-specific [nearby movement observations](MOVEMENT.md), also available to the core as a physical-only read projection. Options are advisory and rechecked at execution; they create no action authority.
+
 The mod currently supports only movement on the current map. It rejects unavailable, downed, mentally breaking or drafted pawns, and unsafe/unreachable destinations. Native game behavior may interrupt an accepted job. Completion means reaching the requested cell, not merely receiving a tool response. The core does not possess the mod transport; actor checks supplement rather than replace coordinator identity binding.
 
 ## Continuity
@@ -37,7 +39,7 @@ Live play is the target. The activity API drives an expiring visual badge above 
 
 ## Scope boundaries
 
-There is no general remote API, hostile code sandbox, full pawn perception system, autonomous core planner, OpenClaw plugin runtime, live model integration, campaign or gravship-control layer in this slice. These should be added incrementally against the same authority and timeline invariants.
+There is no general remote API, hostile code sandbox, full pawn perception system, autonomous core planner, OpenClaw plugin runtime, unattended live model operation, campaign or gravship-control layer in this slice. These should be added incrementally against the same authority and timeline invariants.
 
 
 ### Explicit timing and queued experience
