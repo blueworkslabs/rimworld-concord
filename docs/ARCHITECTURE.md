@@ -31,9 +31,9 @@ Audits retain discarded branches for operators; character views derive only from
 - Fast appraisal assesses bounded contextual choices; Jev is a candidate, not a dependency.
 - Deliberation handles negotiation, novelty and planning, and may later establish bounded standing intentions.
 
-All layers should use consistent traits, relationships, commitments and relevant memories. No confidence score can prevent explicit significant-event escalation. Immediate native reactions and later reflection can both be scheduled for one event. The initial router is a pure policy seam only; broad event capture, personality extraction, appraisal inference and standing-intention execution are not yet implemented.
+All layers should use consistent traits, relationships, commitments and relevant memories. No confidence score can prevent explicit significant-event escalation. Immediate native reactions and later reflection can both be scheduled for one event. Selected native events now feed the routing policy. See [pawn awareness](AWARENESS.md) for sampling, retention and perception limits. Routing produces attention records, not autonomous actions. Jev appraisal has a bounded adapter and mocked tests; live transport validation and standing-intention execution remain pending.
 
-Live play is the target. The activity API identifies deliberating pawns; a visual icon is a later UI task. Expensive calls must be bounded/cancellable, stale results revalidated, and backend failures must not turn into forced obedience. Current fallback leaves the proposal pending and native behavior unchanged. Extended planning pauses should be explicit and visible, not an invisible default for every decision.
+Live play is the target. The activity API drives an expiring visual badge above deliberating pawns. Activity IDs prevent an old completion from clearing a newer badge; epoch validation rejects clears from discarded timelines. Expensive calls must be bounded/cancellable, stale results revalidated, and backend failures must not turn into forced obedience. Current fallback leaves the proposal pending and native behavior unchanged. Extended planning pauses should be explicit and visible, not an invisible default for every decision.
 
 ## Scope boundaries
 

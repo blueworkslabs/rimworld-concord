@@ -9,22 +9,26 @@ export const Decision = z.discriminatedUnion('kind', [
 ]);
 export type Decision = z.infer<typeof Decision>;
 export type Outcome = 'started'|'completed'|'failed'|'interrupted';
-export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:number};
+export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[]};
 export type Receipt = {id:string;actor:string;status:Outcome;reason:string;x:number;z:number};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;
-  pawns:Pawn[];actions:Receipt[];
+  pawns:Pawn[];actions:Receipt[];events?:NativeEvent[];eventSeq?:number;
 };
+export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail:string};
+export type Attention = {event:NativeEvent;route:'native'|'appraisal'|'deliberation'};
+export type Activity = {epoch:string;actor:string;activityId:string;ttlMs:number};
 export type ActionRequest = {id:string;epoch:string;actor:string;action:Move};
 /** Admin capability: held by the coordinator/runner only, never provided to a character backend. */
 export interface GameBridge {
   state():Promise<GameState>;
+  setActivity?(activity:Activity):Promise<void>;
   move(request:ActionRequest):Promise<Receipt>;
   save(name:string):Promise<{sha256:string}>;
   load(name:string):Promise<void>;
   verify(name:string,hash:string):Promise<void>;
 }
-export type Character = {id:string;name:string;memories:string[];commitment?:string};
+export type Character = {id:string;name:string;memories:string[];commitment?:string;experiences?:Attention[]};
 export type Proposal = {id:string;pawn:string;action:Move;reason:string;status:'pending'|'accepted'|'refused'|'countered';decision?:Decision;actionId?:string};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal};
 export interface DecisionBackend {
@@ -32,6 +36,7 @@ export interface DecisionBackend {
   decide(view:Perspective, signal:AbortSignal):Promise<unknown>;
 }
 export type Domain = {
+  eventCursor?:number;
   schema:1;world:string;epoch:string;branch:string;
   characters:Record<string,Character>;proposals:Record<string,Proposal>;
   outcomes:Record<string,Receipt>;

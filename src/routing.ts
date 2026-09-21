@@ -1,4 +1,4 @@
-/** Pure routing policy seam; not yet wired to native event capture. */
+/** Routing policy for captured native events; execution remains separately authorized. */
 export type Trigger = {urgent:boolean;significant:boolean;conflictsWithCommitment:boolean;routine:boolean};
 export type Route = 'native'|'appraisal'|'deliberation';
 export function route(event:Trigger):{immediate:'native'|null;next:Route} {

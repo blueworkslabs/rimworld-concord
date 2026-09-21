@@ -8,4 +8,5 @@ mcs -target:library -out:"$concord_root/mod/Assemblies/Concord.dll" \
   -r:"$concord_managed/Assembly-CSharp.dll" \
   -r:"$concord_managed/UnityEngine.CoreModule.dll" \
   -r:"$concord_managed/UnityEngine.JSONSerializeModule.dll" \
-  "$concord_root/mod/Concord.cs"
+  -r:"$concord_managed/UnityEngine.IMGUIModule.dll" \
+  "$concord_root"/mod/*.cs
