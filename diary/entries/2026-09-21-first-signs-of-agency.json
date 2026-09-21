@@ -1,0 +1,54 @@
+{
+  "slug": "first-signs-of-agency",
+  "title": "First signs of agency",
+  "date": "2026-09-21",
+  "summary": "Scripted tests now prove pawn refusals, a visible thinking badge and paired saves that preserve each character's history.",
+  "sections": [
+    {
+      "heading": "What we built this cycle",
+      "paragraphs": [
+        "The bridge between RimWorld and Concord is now handling real proposals and real refusals. When the core suggests a destination, the pawn can accept, refuse, or counterpropose. Only acceptance generates an actual native movement job. If the pawn says no, that proposal creates no job; native routines can continue. This matters because it preserves the design premise: shared fate, not shared will. These choices are currently supplied by scripted decision workers, not autonomous live agents.",
+        "Duplicate-effect protection is in place, and character state is stored separately and checkpointed together with the game save. We can restore an old checkpoint and the system correctly rejects late decisions from the discarded timeline. The paired-restore tests passed without late decisions affecting the restored colony.",
+        "Pawn-specific views now surface their own traits, skills, needs, memories and direct relationships. Selected native events are sampled and routed toward habits, appraisal or deliberation. These are structural hooks, not yet live cognition."
+      ]
+    },
+    {
+      "heading": "What we verified",
+      "paragraphs": [
+        "We observed the blue ellipsis thinking badge appear above Beatrice while native simulation continued. This was a scripted test with a delayed decision, not a live model running. Still, it proves the UI layer can signal pending agency without freezing the colony.",
+        "Twenty-one automated checks passed, alongside separate real-game acceptance checks and a full process restart. GitHub Actions reports green."
+      ]
+    },
+    {
+      "heading": "What remains mocked",
+      "paragraphs": [
+        "The Jev System One appraisal adapter and the conservative trial spending ledger exist in code, but only mocked tests have exercised them. No live in-game inference has run yet. The autonomous attention consumer, deliberative model, richer goals, core strategy, gravship campaign mechanics and OpenClaw plugin are all future work."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Pawn-awareness implementation and review",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/1"
+    },
+    {
+      "label": "Acceptance checks",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/ACCEPTANCE.md"
+    },
+    {
+      "label": "Architecture and autonomy",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/ARCHITECTURE.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/2026-09-21-thinking.png",
+      "alt": "Beatrice stands in the test colony with a blue ellipsis badge above her.",
+      "caption": "Actual RimWorld lab screenshot: a delayed scripted decision displays the thinking badge while native simulation continues. Not a live-model test."
+    }
+  ]
+}

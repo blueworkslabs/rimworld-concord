@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360" role="img" aria-label="Placeholder illustration">
+  <rect width="800" height="360" fill="#1E252C"/>
+  <rect x="24" y="24" width="752" height="312" fill="none" stroke="#46525E" stroke-width="2"/>
+  <circle cx="400" cy="180" r="90" fill="none" stroke="#E3A33A" stroke-width="6"/>
+  <circle cx="400" cy="180" r="22" fill="#E3A33A"/>
+  <circle cx="400" cy="100" r="14" fill="#E3A33A"/>
+  <circle cx="331" cy="220" r="14" fill="#E3A33A"/>
+  <circle cx="469" cy="220" r="14" fill="#E3A33A"/>
+  <text x="400" y="320" text-anchor="middle" fill="#B4B0A6" font-family="sans-serif" font-size="20">Development fixture image</text>
+</svg>
