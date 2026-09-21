@@ -4,8 +4,8 @@
 - Game truth, character knowledge and operator diagnostics are distinct. Do not feed omniscient inspection into a character prompt.
 - Keep domain IDs, deduplication and timeline invalidation below the model layer. Report actual outcomes, not intent as completion.
 - Keep proprietary game files, runtime saves/databases and credentials out of Git. Use owned local assemblies to compile.
-- Live inference is disabled in the initial scaffold. Do not silently switch billing routes or increase operator-configured provider spending caps. Establish project accounting before unattended paid runs.
+- Live inference is opt-in through finite operator trials, never enabled by default. Do not silently switch billing routes or increase operator-configured provider spending caps. Establish project accounting before unattended paid runs.
 - Smooth continuous gameplay is the target; deliberate testing or extended-planning pauses are explicit modes.
 - Run `npm test` for coordinator changes. Mod changes require compilation against the real installed assemblies and relevant staging acceptance. Do not claim live-model, gameplay or UI behavior from mocks alone.
 - Reuse shared staging without running Android and RimWorld together; stop/save tests at handoff. Respect operator-configured maintenance windows.
-- Document unimplemented seams honestly: the appraisal adapter has mocked tests plus synthetic and bounded real-game live evidence, the attention consumer has live-appraisal but scripted-deliberation evidence, and the OpenClaw adapter is not an installed integration. The in-game badge is implemented.
+- Document unimplemented seams honestly: the appraisal adapter has mocked tests plus synthetic and bounded real-game live evidence, the attention consumer has live-appraisal and live-cancellation evidence; one explicit live pawn decision completed movement, but completed live event-triggered reflection is not yet proved, and the OpenClaw adapter is not an installed integration. The in-game badge is implemented.

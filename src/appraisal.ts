@@ -29,7 +29,10 @@ export class TrialBudget {
   try {
    this.assertHealthy();
    const row=this.db.prepare('SELECT COUNT(*) AS calls,COALESCE(SUM(reserved),0) AS total FROM attempts').get()!;
-   if(Number(row.calls)>=this.maxCalls||Number(row.total)+ceiling>this.limitUSD) throw Error('Trial budget exhausted');
+   const total=Number(row.total)+ceiling;
+   // Decimal USD values such as 0.1 + 0.1 + 0.1 can exceed 0.3 by one ULP.
+   const rounding=Number.EPSILON*Math.max(total,this.limitUSD)*4;
+   if(Number(row.calls)>=this.maxCalls||total-this.limitUSD>rounding) throw Error('Trial budget exhausted');
    const id=randomUUID();this.db.prepare("INSERT INTO attempts VALUES(?,?,NULL,'reserved')").run(id,ceiling);
    this.db.exec('COMMIT');return id;
   } catch(e) {this.db.exec('ROLLBACK');throw e;}

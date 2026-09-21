@@ -1,0 +1,40 @@
+{
+  "at": "2026-09-21T17:54:58.004Z",
+  "kind": "claude-game-trial",
+  "passed": false,
+  "access": "Claude Code native Max login; monetary values are API-equivalent usage estimates, not cash billing",
+  "before": {
+    "attempts": 1,
+    "reservedEquivalentUSD": 0.1,
+    "estimatedUsageUSD": 0.009567
+  },
+  "after": {
+    "attempts": 3,
+    "reservedEquivalentUSD": 0.3,
+    "estimatedUsageUSD": 0.021867
+  },
+  "calls": [
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3448,
+      "estimatedUsageUSD": 0.0123,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    }
+  ],
+  "game": {
+    "at": "2026-09-21T17:54:38.889Z",
+    "kind": "claude-game-decisions",
+    "checks": [
+      "live explicit pawn decision follows the existing validated action contract and reconciles actual outcome"
+    ],
+    "passed": false,
+    "error": "Live game decision acceptance failed; inspect private state"
+  },
+  "limitation": "Full two-call acceptance did not pass: a newer Chitchat memory cancelled reflection. No completed live reflection or paired cold restore is claimed.",
+  "unknownUsage": "Cancelled-call usage has no completion receipt; the full reservation is retained. Reported estimated usage is not a complete total or cash billing."
+}

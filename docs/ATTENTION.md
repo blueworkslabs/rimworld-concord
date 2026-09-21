@@ -2,7 +2,7 @@
 
 The operator can now start a finite attention pump which observes native events,
 coalesces repeated signals, invokes an injected appraisal/reflection backend, and
-applies a pawn-owned response. The verified backends are **scripted**. This is not
+applies a pawn-owned response. Scripted fixtures verify mechanics; later finite trials add live appraisal and a live explicit decision, plus interruption of a live reflection. This is not
 yet a live AI colony, general planner, or automatically installed background service.
 
 ## Processing and authority
@@ -84,6 +84,4 @@ with `--cold` to verify persistence in a fresh process. Stop the lab at handoff.
 
 A subsequent [bounded live-appraisal trial](LIVE_APPRAISAL.md) used two real Jev
 calls on captured food and mood events. Both selected native continuation. Four
-other, directly escalated reflections used a scripted backend. Deliberative LLM
-inference, model judgment quality, long-running operation and unattended billing
-remain unverified.
+other, directly escalated reflections used a scripted backend. A later [live deliberation trial](LIVE_DELIBERATION.md) completed an explicit proposal decision. Its event-triggered reflection was cancelled by a newer Chitchat memory; no model answer or second action was applied. Completed live reflection, model judgment quality, long-running operation and unattended billing remain unverified. The current routing policy treats every acquired memory as significant: ordinary repeated conversation can therefore interrupt thought. This is an observed scheduling limitation, not evidence that Chitchat always deserves deep reflection.

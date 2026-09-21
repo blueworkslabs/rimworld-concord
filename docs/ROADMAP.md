@@ -23,12 +23,21 @@
 - Durable at-most-once attempt receipts, interruption on new significant events, cancellation and paired restoration.
 - Scripted backends only; no live judgment quality or unattended operation claim.
 
+## First live deliberation increment
+
+- Native Claude Code Max route, fixed model, no action-capable tools or customization, strict structured responses.
+- Persistent separate three-attempt usage ledger, bounded subprocess lifetime and process-group cancellation.
+- Synthetic decision and real-game explicit acceptance with completed native movement.
+- Event-triggered live reflection was interrupted by newer conversation memory; no response applied.
+- This is a mixed result, not proof of completed live reflection or narrative quality.
+
 ## Next bounded increment
 
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
-- Live appraisal is connected in the bounded operator lab with independent usage accounting; live deliberation and unattended operation remain next.
+- Live appraisal is connected in the bounded operator lab with independent usage accounting; completed live event-driven reflection and unattended operation remain to be proved.
 - Extend social-event capture and perceived knowledge; add operator inspection UI.
-- Integrate one live decision backend with explicit tool isolation, usage/latency reporting and cancellation.
+- Refine significant-event policy: repeated low-stakes conversation currently interrupts live reflection; preserve urgent supersession without starving ordinary thought.
+- Evaluate completed live event-driven reflection under an explicit next trial allowance.
 - Exercise three independent perspectives and counterproposal negotiation.
 
 ## Later

@@ -85,3 +85,36 @@ The real-game and cold-restore receipts were regenerated after replacing deploym
   call occurs during restore. The lab is stopped cleanly after verification.
 - This proves integration, not judgment quality, action choice or unattended operation.
   See the [operator guide](LIVE_APPRAISAL.md).
+
+## First native-client live deliberation — mixed result
+
+- [Synthetic decision](evidence/claude-live.json) verified native Claude Code Max
+  access, schema validation and tool isolation in 3133ms.
+- [Real-game trial](evidence/claude-game.json): `claude-sonnet-4-6` accepted Alvin's
+  nearby waypoint request in 3448ms. The actual movement completed at (90,80),
+  separately recorded by the game rather than inferred from his answer.
+- The next naturally triggered reflection was interrupted by a newer Chitchat
+  memory (tick 729, after the attempt began at tick 506). No response was applied,
+  no second action was dispatched, and the infeasible second proposal stayed pending.
+  The full two-call acceptance suite therefore **did not pass**. Continued ticking
+  is evidenced by the native event sequence, not a retained sampled TPS measurement.
+- [No-inference audit](evidence/claude-game-audit.json) reopens the original SQLite
+  evidence and confirms the completed action, interrupted attention, pending proposal
+  and newer eligible experience. The game had been reset during a recovery attempt
+  against an older deployed runner; the coordinator rejected the mismatched epoch.
+  The operator driver now checks its deployed entry-point hash before touching the
+  game. **Paired/cold restore of this live trial was not completed.** Prior scripted
+  restore evidence does not fill that gap.
+- 44 automated checks cover the existing mechanics plus native-client route/tool
+  checks, strict output, cancellation of a SIGTERM-resistant subprocess, relay
+  correlation, decimal reservation rounding and rejection of stale deployed runners.
+- Three subscription attempts are reserved permanently (USD 0.30 API-equivalent).
+  The two successful completions reported USD 0.021867 API-equivalent estimated
+  usage, not cash charges. Cancelled-call usage is unknown; its full reservation
+  remains. No extra calls, retries, new allowance or Jev ledger changes followed.
+- The routing limitation is concrete: every new memory is currently significant,
+  so repeated mundane conversation can starve reflection. Urgent supersession must
+  remain, but ordinary conversation needs a better policy before a longer trial.
+- This proves one bounded live proposal decision and real action, plus live
+  cancellation—not completed live event-driven reflection, character quality or
+  unattended operation. See the [operator guide](LIVE_DELIBERATION.md).
