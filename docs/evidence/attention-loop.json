@@ -1,0 +1,44 @@
+{
+  "at": "2026-09-21T16:30:29.776Z",
+  "phase": "attention-loop",
+  "backends": "scripted",
+  "checks": [
+    "real native events automatically trigger scripted appraisal/reflection of only the owning pawn",
+    "attention-owned acceptance completes a real Goto job; refusal dispatches no job",
+    "polling and native simulation continue during delayed thoughts; stop drains outstanding work",
+    "coordinator reopen retains consumption receipts without replaying completed batches",
+    "paired restore rolls back later memory while retaining saved attention cursors and reflections"
+  ],
+  "passed": true,
+  "checkpoint": "lab-concord-attention-1790008241908",
+  "appraisals": 3,
+  "reflections": 3,
+  "ticksWhileThinking": 253,
+  "turns": 5,
+  "nativeKinds": [
+    "food",
+    "job"
+  ],
+  "results": [
+    {
+      "status": "decided",
+      "throughSeq": 1
+    },
+    {
+      "status": "continued",
+      "throughSeq": 2
+    },
+    {
+      "status": "native",
+      "throughSeq": 4
+    },
+    {
+      "status": "decided",
+      "throughSeq": 3
+    },
+    {
+      "status": "native",
+      "throughSeq": 6
+    }
+  ]
+}

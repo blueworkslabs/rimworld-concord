@@ -1,0 +1,9 @@
+{
+  "at": "2026-09-21T16:32:38.518Z",
+  "phase": "attention-cold",
+  "backends": "scripted",
+  "checks": [
+    "cold game/coordinator restart restores consumed attention, reflections and character state together"
+  ],
+  "passed": true
+}

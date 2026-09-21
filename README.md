@@ -16,7 +16,8 @@ First **scripted** vertical slice implemented, not a playable campaign or live A
 - Bounded asynchronous decisions expose `deliberating` activity while native simulation can continue.
 - Self-perspectives include native traits, skills, needs, surviving memories and direct relations.
 - Selected native events are archived, routed and projected only into their owning pawn's experience stream.
-- An expiring in-game thinking badge appears during proposal deliberation without pausing simulation.
+- An expiring in-game thinking badge appears during proposal or event-triggered deliberation without pausing simulation.
+- A bounded attention pump consumes captured events, coalesces repeated signals and applies pawn-owned responses; verified with scripted backends.
 - A bounded Jev appraisal adapter is implemented against the documented API with mocked tests; **live authentication/inference is not yet verified**. Scripted decisions remain the default.
 
 See [acceptance](docs/ACCEPTANCE.md) for measured results and limitations, and [roadmap](docs/ROADMAP.md) for what is not built.
@@ -31,6 +32,7 @@ src/store.ts          SQLite state, audit events and paired checkpoint metadata
 src/lab-bridge.ts     Trusted staging transport and separate admin controls
 src/backends.ts       Scripted decisions for repeatable mechanics tests
 src/routing.ts        Native event attention routing
+src/attention.ts      Bounded attention pump and reflection response contract
 src/appraisal.ts      Jev question/response validation and separate trial budget ledger
 scripts/lab/          Reused working lab controls; NOT a character tool surface
 adapters/openclaw/    Integration contract; no installed OpenClaw plugin yet
@@ -73,6 +75,6 @@ This is an application boundary, **not** a sandbox for hostile plugin code or th
 
 ## Direction
 
-Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. Event routes are attention records; an autonomous scheduler and live deliberative model are still to come.
+Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. An opt-in bounded attention pump now consumes event routes with scripted backends; live deliberative models, long-running operation and broader goals are still to come. See [attention consumption](docs/ATTENTION.md).
 
 See [architecture](docs/ARCHITECTURE.md), [narrative](docs/NARRATIVE.md), and [model access](docs/MODELS.md).

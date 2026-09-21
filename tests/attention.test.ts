@@ -1,0 +1,139 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { setTimeout as delay } from 'node:timers/promises';
+import { Coordinator } from '../src/coordinator.js';
+import { Store } from '../src/store.js';
+import { AttentionPump, type AttentionBackend, type AttentionView } from '../src/attention.js';
+import { scripted } from '../src/backends.js';
+import type { GameBridge, GameState, ActionRequest, Receipt, Activity } from '../src/protocol.js';
+
+class Game implements GameBridge {
+ data:GameState={world:'test',epoch:'start',loaded:true,paused:false,ticks:1000,pawns:[
+  {id:'A',name:'Ada',x:1,z:1,job:'Work',health:1},
+  {id:'B',name:'Bea',x:2,z:2,job:'Sleep',health:1}],actions:[],events:[],eventSeq:0};
+ saved=new Map<string,GameState>();moves=0;activities:Activity[]=[];
+ async state(){return structuredClone(this.data);}
+ async setActivity(a:Activity){this.activities.push(a);}
+ async save(name:string){this.saved.set(name,structuredClone(this.data));return {sha256:'hash'};}
+ async verify(){}
+ async load(name:string){this.data=structuredClone(this.saved.get(name)!);this.data.epoch=randomUUID();}
+ async move(r:ActionRequest):Promise<Receipt>{
+  this.moves++;const receipt:Receipt={id:r.id,actor:r.actor,status:'completed',reason:'arrived',x:r.action.x,z:r.action.z};
+  this.data.actions.push(receipt);return receipt;
+ }
+ event(kind='memory',pawn='A',detail='An experience') {
+  this.data.events!.push({seq:++this.data.eventSeq!,tick:this.data.ticks,pawn,kind,detail});
+ }
+}
+const quiet:AttentionBackend={name:'scripted-quiet',async reflect(){return {kind:'continue',reason:'Continue my existing work'};}};
+const low={name:'scripted-appraisal',async assess(){return {reflectionScore:0.1};}};
+const action={kind:'move' as const,x:8,z:8};
+async function setup(){const game=new Game(),store=new Store(':memory:'),c=new Coordinator(store,game);await c.open();return {game,store,c};}
+async function until(check:()=>boolean){for(let i=0;i<200;i++){if(check())return;await delay(2);}assert.fail('condition not reached');}
+
+test('routine events do not call a model; need bursts coalesce; significant events bypass appraisal',async()=>{
+ const {game,store,c}=await setup();let reflected=0,appraised=0;
+ const backend={name:'count',async reflect(view:AttentionView){reflected++;assert(view.events.every(e=>e.pawn==='A'));return {kind:'continue',reason:'Remember this'};}};
+ const appraiser={name:'count',async assess(view:any){appraised++;assert.equal(view.events.length,1);assert.equal(view.event.detail,'latest');return {reflectionScore:0.1};}};
+ game.event('job');assert.equal((await c.attend('A',backend,appraiser)).status,'native');
+ assert.equal(reflected+appraised,0);
+ for(let i=0;i<10;i++)game.event('need-band','A',i===9?'latest':'old');
+ assert.equal((await c.attend('A',backend,appraiser)).status,'native');assert.equal(appraised,1);assert.equal(reflected,0);
+ game.event('memory');assert.equal((await c.attend('A',backend,appraiser)).status,'continued');
+ assert.equal(reflected,1);assert.equal(appraised,1);assert.equal(game.moves,0);store.close();
+});
+test('cooldown defers new needs but never direct significant events; missing appraisal leaves work pending',async()=>{
+ const {game,store,c}=await setup();game.event('need');
+ assert.equal((await c.attend('A',quiet)).status,'unavailable');assert.equal(c.inspect().characters.A!.attention,undefined);
+ await c.attend('A',quiet,low);game.event('need');
+ assert.equal((await c.attend('A',quiet,low)).status,'cooldown');
+ game.data.ticks+=300;assert.equal((await c.attend('A',quiet,low)).status,'native');
+ game.event('health');assert.equal((await c.attend('A',quiet,low)).status,'continued');store.close();
+});
+test('reflection sees only own proposals and experiences; own refusal and acceptance follow the real action contract',async()=>{
+ const {game,store,c}=await setup();const a=await c.core().propose('A',action,'My task');
+ const b=await c.core().propose('B',action,'Secret task');game.event('memory','B','Secret experience');game.event();
+ assert.equal((await c.attend('A',{name:'reject-foreign',async reflect(view){
+  assert(!JSON.stringify(view).includes('Secret'));return {kind:'proposal',proposalId:b.id,decision:{kind:'accept',reason:'spoof'}};
+ }})).status,'failed');assert.equal(game.moves,0);
+ game.event();await c.attend('A',{name:'refuse',async reflect(){return {kind:'proposal',proposalId:a.id,decision:{kind:'refuse',reason:'Rest first'}};}});
+ assert.equal(c.inspect().proposals[a.id]!.status,'refused');assert.equal(game.moves,0);
+ const p=await c.core().propose('A',action,'A new task');game.event();
+ assert.equal((await c.attend('A',{name:'accept',async reflect(){return {kind:'proposal',proposalId:p.id,decision:{kind:'accept',reason:'I choose this'}};}})).status,'decided');
+ await c.attend('A',quiet);await c.reconcile();assert.equal(game.moves,1);store.close();
+});
+test('forged output cannot bypass pawn acceptance; failure consumes the attempt without an automatic retry',async()=>{
+ const {game,store,c}=await setup();game.event();let calls=0;
+ const backend={name:'invalid',async reflect(){calls++;return {kind:'continue',reason:'quiet',actor:'B',action};}};
+ assert.equal((await c.attend('A',backend)).status,'failed');
+ assert.equal((await c.attend('A',backend)).status,'idle');assert.equal(calls,1);assert.equal(game.moves,0);
+ const reopened=new Coordinator(store,game);await reopened.open();assert.equal((await reopened.attend('A',backend)).status,'idle');store.close();
+});
+test('new significant event cancels an old thought and blocks its late action; fresh batch remains eligible',async()=>{
+ const {game,store,c}=await setup();const p=await c.core().propose('A',action,'Consider');game.event();
+ let release!:(r:unknown)=>void;
+ const task=c.attend('A',{name:'delayed',reflect:()=>new Promise(r=>release=r)});
+ await until(()=>!!release);game.event('health');await c.observe();
+ assert.equal((await task).status,'interrupted');
+ release({kind:'proposal',proposalId:p.id,decision:{kind:'accept',reason:'old information'}});
+ assert.equal(game.moves,0);assert(c.attentionCandidates().includes('A'));
+ await c.attend('A',quiet);assert.equal(c.inspect().characters.A!.attention!.cursor,2);store.close();
+});
+test('fresh-state validation catches significant events even without a concurrent poll',async()=>{
+ const {game,store,c}=await setup();game.event();
+ assert.equal((await c.attend('A',{name:'changes-world',async reflect(){game.event('health');return {kind:'continue',reason:'stale'};}})).status,'interrupted');
+ assert.equal(c.inspect().characters.A!.reflections,undefined);store.close();
+});
+test('timeout/stop free the shared decision slot and indicator even for an uncooperative backend',async()=>{
+ const {game,store,c}=await setup();game.event();
+ assert.equal((await c.attend('A',{name:'offline',reflect:()=>new Promise(()=>{})},undefined,{timeoutMs:15})).status,'interrupted');
+ assert.deepEqual(c.activity(),[]);assert.equal(game.activities.at(-1)!.ttlMs,0);
+ game.event();const pump=new AttentionPump(c,{name:'offline',reflect:()=>new Promise(()=>{})});await pump.poll();
+ await until(()=>c.activity().length===1);await pump.stop();assert.equal(pump.status().pending,0);assert.deepEqual(c.activity(),[]);
+ assert(pump.results.every(r=>r.status!=='failed'));
+ assert.equal(game.moves,0);assert.equal(game.data.paused,false);store.close();
+});
+test('attention shares a per-pawn slot with explicit decisions and waits for existing commitments',async()=>{
+ const {game,store,c}=await setup();game.event();const p=await c.core().propose('A',action,'Help');
+ const stop=new AbortController();const running=c.attend('A',{name:'slow',reflect:()=>new Promise(()=>{})},undefined,{},stop.signal);
+ await until(()=>c.activity().length===1);
+ await assert.rejects(c.pawn('A').decide(p.id,scripted({kind:'accept',reason:'compete'})),/already deliberating/);
+ stop.abort();await running;
+ game.move=async(r)=>({id:r.id,actor:r.actor,status:'started',reason:'working',x:8,z:8});
+ await c.pawn('A').decide(p.id,scripted({kind:'accept',reason:'now free'}));game.event();
+ assert.equal((await c.attend('A',quiet)).status,'busy');store.close();
+});
+test('paired restore rewinds attention with memories but discards the running future',async()=>{
+ const {game,store,c}=await setup();game.event();await c.observe();await c.checkpoint('lab-concord-attention');
+ const original=c.inspect();const p=await c.core().propose('A',action,'Future');let release!:(v:unknown)=>void;
+ const future=c.attend('A',{name:'future',reflect:()=>new Promise(r=>release=r)});await until(()=>!!release);
+ await c.restore('lab-concord-attention');assert.equal((await future).status,'interrupted');
+ release({kind:'proposal',proposalId:p.id,decision:{kind:'accept',reason:'Discard'}});
+ assert.deepEqual(c.inspect().characters,original.characters);assert.equal(game.moves,0);store.close();
+});
+test('restart recovers an interrupted claim without replay; checkpoint of in-flight work is quiescent',async()=>{
+ const {game,store,c}=await setup();game.event();let release!:(v:unknown)=>void;
+ const running=c.attend('A',{name:'hold',reflect:()=>new Promise(r=>release=r)});await until(()=>!!release);
+ // Snapshot a crash boundary without a second live coordinator owning the game.
+ const crashed=c.inspect();await c.checkpoint('lab-concord-claimed');await running;
+ const checkpoint=store.saved('lab-concord-claimed');assert.equal(checkpoint.state.characters.A!.attention!.last!.status,'interrupted');
+ store.commit(crashed,{branch:crashed.branch,kind:'test-crash-boundary',actor:'operator',data:{}});
+ const reopened=new Coordinator(store,game);await reopened.open();
+ assert.equal(reopened.inspect().characters.A!.attention!.last!.status,'interrupted');
+ assert.equal((await reopened.attend('A',quiet)).status,'idle');release({kind:'continue',reason:'old'});store.close();
+});
+test('pump caps concurrent turns, observes while thinking and prioritizes significant events',async()=>{
+ const {game,store,c}=await setup();game.event('need','A');game.event('memory','B');
+ let release!:(v:unknown)=>void,seen='';
+ const pump=new AttentionPump(c,{name:'slow',reflect:view=>{seen=view.pawn.id;return new Promise(r=>release=r);}},low,{}, {maxConcurrent:1,maxTurns:1});
+ await pump.poll();await until(()=>!!release);assert.equal(seen,'B');
+ game.data.ticks++;await pump.poll();assert.equal(pump.status().started,1);assert.equal(game.data.paused,false);
+ release({kind:'continue',reason:'All right'});await pump.drain();await pump.poll();
+ assert.equal(pump.status().started,1);assert.equal(c.inspect().characters.A!.attention,undefined);await pump.stop();store.close();
+});
+test('unconsumed bounded-history loss is explicitly audited',async()=>{
+ const {game,store,c}=await setup();for(let i=0;i<70;i++)game.event();await c.observe();
+ assert.equal(c.inspect().characters.A!.experiences!.length,64);
+ assert.equal(store.events().filter(e=>e.event.kind==='attention-gap').length,6);store.close();
+});

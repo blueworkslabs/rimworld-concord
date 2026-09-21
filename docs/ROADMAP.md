@@ -16,10 +16,17 @@
 - Visible expiring deliberation badge; no automatic pause.
 - Jev System One request/response adapter and conservative persistent trial ledger; mocked validation only.
 
+## Bounded attention increment
+
+- Opt-in finite attention pump: coalescing, cooldown, significant-event bypass and limited concurrency.
+- Pawn-owned reflection can continue native work or accept/refuse/counter one visible pending proposal.
+- Durable at-most-once attempt receipts, interruption on new significant events, cancellation and paired restoration.
+- Scripted backends only; no live judgment quality or unattended operation claim.
+
 ## Next bounded increment
 
 - Verify Jev with an operator-owned protected transport and recorded self-perspectives.
-- Add an attention consumer with coalescing, interruption rules and bounded live decisions.
+- Connect the bounded attention consumer to a live backend with durable usage accounting.
 - Extend social-event capture and perceived knowledge; add operator inspection UI.
 - Integrate one live decision backend with explicit tool isolation, usage/latency reporting and cancellation.
 - Exercise three independent perspectives and counterproposal negotiation.

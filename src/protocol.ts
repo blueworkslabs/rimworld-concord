@@ -28,7 +28,14 @@ export interface GameBridge {
   load(name:string):Promise<void>;
   verify(name:string,hash:string):Promise<void>;
 }
-export type Character = {id:string;name:string;memories:string[];commitment?:string;experiences?:Attention[]};
+export type AttentionProgress = {
+  cursor:number;lastAttemptTick?:number;
+  last?:{status:'running'|'continued'|'decided'|'native'|'failed'|'interrupted';throughSeq:number;reason:string};
+};
+export type Character = {id:string;name:string;memories:string[];commitment?:string;experiences?:Attention[];
+  attention?:AttentionProgress;
+  reflections?:{tick:number;throughSeq:number;backend:string;reason:string}[];
+};
 export type Proposal = {id:string;pawn:string;action:Move;reason:string;status:'pending'|'accepted'|'refused'|'countered';decision?:Decision;actionId?:string};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal};
 export interface DecisionBackend {

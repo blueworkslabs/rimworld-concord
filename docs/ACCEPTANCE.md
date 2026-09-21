@@ -8,7 +8,7 @@ The game bridge compiles against the installed game's actual assemblies using Mo
 
 ## Results
 
-- 21 local automated checks pass: actor binding, acceptance/refusal/counterproposal, strict response scope, narrow perspective, interruption outcomes, lost-response reconciliation, bounded timeout, timeline restore/cancellation, duplicate saves, active-checkpoint refusal, reopen, corrupted checkpoint rejection and routing policy.
+- 33 local automated checks pass, including the 21 foundation/awareness checks and 12 attention-consumer checks described below.
 - Real game: refusal produces no job; a forged core actor is rejected by the game bridge.
 - Real game: accepted Goto job moves Alvin (`Thing_Human405`) from (82,80) to (90,80), with `completed` receipt and observed destination.
 - Identical action replay does not grow the execution ledger; changed payload with the same ID is rejected.
@@ -38,3 +38,28 @@ The real-game and cold-restore receipts were regenerated after replacing deploym
 - Real-game paired restore and a full process restart preserve the new character experience records as well as existing memories.
 - Jev question/response validation and the independent conservative trial ledger have mocked tests for invalid answers, cancellation, uncertain charges, reopen and pricing overrun. No paid call has been made.
 - Native memory acquisition, health changes and badge expiry after a process crash are implemented but not deliberately induced in this real-game trial. See [awareness limits](AWARENESS.md).
+
+## Bounded attention consumer
+
+- Twelve additional automated cases cover coalescing, routine/model separation,
+  significant-event bypass, cooldowns, per-pawn proposal scope, response validation,
+  cancellation on newer significant events, fresh-state revalidation, uncooperative
+  backend timeout/stop, shared decision slots, crash-boundary claim recovery,
+  checkpoint rollback, limited concurrent/total turns and reported attention gaps.
+- Final real-game [attention trial](evidence/attention-loop.json) captured native
+  food/job events. Five bounded scheduling turns included three scripted appraisals
+  and three scripted reflections. A pawn's event-triggered acceptance completed a
+  real native Goto; another pawn's refusal produced no job.
+- Operator samples recorded 253 advancing simulation ticks during active thoughts.
+  This is evidence of continued simulation, not a new TPS/latency benchmark.
+- Reopening the coordinator preserved consumption receipts without replay. Paired
+  restore rolled back subsequent memories and retained saved attention/reflections.
+- A [cold attention restore](evidence/attention-cold.json) passed after restarting
+  the actual game and coordinator. The original game-loop and cold-restore suites
+  also passed again after sharing decision dispatch with the attention path.
+- No model judgment quality, induced injury/urgent-interruption scenario, or long
+  autonomous run is claimed. Significant-event supersession is covered by controlled
+  automated tests; final real-game evidence exercises food/job events. All game-side
+  inference in these trials was scripted. No mod assembly changes were required.
+- The lab and display were stopped cleanly after verification. Live Jev transport,
+  live deliberative models and unattended operation remain unverified.

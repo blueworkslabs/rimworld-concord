@@ -15,5 +15,5 @@ jobs:
       - run: npm test
       - run: node diary/build.mjs --check
       - run: node diary/build.mjs
-      - run: bash -n scripts/build-mod.sh scripts/run-lab.sh
+      - run: bash -n scripts/build-mod.sh scripts/run-lab.sh scripts/run-attention-lab.sh
 # Real-game and mod builds require privately owned assemblies; intentionally not fetched in CI.
