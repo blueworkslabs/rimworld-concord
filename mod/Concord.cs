@@ -76,14 +76,14 @@ namespace Concord
                 var rect=new Rect(pos.x-14,pos.y-48,28,22);
                 Widgets.DrawBoxSolid(rect,new Color(0.1f,0.3f,0.5f,0.95f));
                 Widgets.Label(rect," ...");
-                TooltipHandler.TipRegion(rect,"Considering a proposal. Native behavior continues.");
+                TooltipHandler.TipRegion(rect,DecisionPauses.Count>0?"Considering a proposal. Decision testing pause active.":"Considering a proposal. Native behavior continues.");
             }
         }
     }
-    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId; public int x,z,ttlMs; }
+    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId; public int x,z,ttlMs; }
     [Serializable] public class Response { public string id,error; public bool ok; }
     [Serializable] public class PawnView { public string id,name,job; public int x,z; public float health; }
-    [Serializable] public class Snapshot { public string world,epoch; public int ticks; public bool loaded,paused; }
+    [Serializable] public class Snapshot { public string world,epoch; public int ticks,decisionPauses; public bool loaded,paused,manualPaused; }
 
     [StaticConstructorOnStartup]
     public static class Bootstrap
@@ -111,7 +111,7 @@ namespace Concord
         private static string StateJson() {
             if(Current.Game==null || Find.CurrentMap==null) return "{\"loaded\":false,\"pawns\":[],\"actions\":[]}";
             var w=World(); w.Reconcile(); w.Observe();
-            var snapshot=new Snapshot {world=w.world,epoch=w.epoch,ticks=Find.TickManager.TicksGame,loaded=true,paused=Find.TickManager.Paused};
+            var snapshot=new Snapshot {world=w.world,epoch=w.epoch,ticks=Find.TickManager.TicksGame,loaded=true,paused=Find.TickManager.Paused,manualPaused=Find.TickManager.CurTimeSpeed==TimeSpeed.Paused,decisionPauses=DecisionPauses.Count};
             var pawns=Find.CurrentMap.mapPawns.FreeColonistsSpawned.Select(p=>JsonUtility.ToJson(new PawnView {
                 id=p.GetUniqueLoadID(),name=p.LabelShort,job=p.CurJobDef==null?"":p.CurJobDef.defName,
                 x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent
@@ -149,6 +149,7 @@ namespace Concord
             return aNew;
         }
         public void Update() {
+            DecisionPauses.Update();
             if(Time.realtimeSinceStartup<next || LongEventHandler.ShouldWaitForEvent) return;
             next=Time.realtimeSinceStartup+0.1f;
             var path=Root+"/request.json";
@@ -158,6 +159,7 @@ namespace Concord
                 var payload=File.ReadAllText(path); File.Delete(path);
                 var r=JsonUtility.FromJson<Request>(payload); response.id=r.id;
                 if(r.op=="move") receipt=JsonUtility.ToJson(Move(r));
+                else if(r.op=="decision-pause") {World();DecisionPauses.Set(r.epoch,r.actor,r.leaseId,r.ttlMs);}
                 else if(r.op=="activity") {
                     var w=World();
                     if(r.epoch!=w.epoch) throw new Exception("Stale timeline");

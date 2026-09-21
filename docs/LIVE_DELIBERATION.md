@@ -54,7 +54,7 @@ state outside Git. Run:
 node scripts/run-claude-game.mjs /absolute/path/to/operator-config.json
 ```
 
-The driver first checks that the deployed entry-point hash matches its local build, then acquires the remote coordinator lock. Only perspective JSON and a
+The driver first checks that all deployed compiled coordinator modules match its local build, then acquires the remote coordinator lock. Only perspective JSON and a
 correlated structured reply cross SSH; the game host gets no model credential.
 The disposable `lab-initial` fixture is loaded. Two calls are allowed: one explicit
 nearby movement proposal and one reflection triggered by naturally captured
@@ -88,3 +88,12 @@ before later checks. For the specific interrupted-reflection case, a private
 without inference; it also checks that an unrelated current game timeline is
 rejected. This is not a paired restore. The first live run ended before its paired
 checkpoint and therefore has no verified cold-restore result.
+
+
+## Follow-up reliability trial
+
+The historical three-attempt trial and mixed results above remain unchanged. The
+separately authorized `reliability-v1` profile uses its own four-attempt ledger and
+explicit `timingMode`. New runs checkpoint after each completed stage, before later
+checks; cold verification reads the selected mode’s manifest. See [decision timing](DECISION_TIMING.md)
+for controls, interruption changes and the follow-up scope.

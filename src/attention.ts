@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { nativeAttention } from './routing.js';
 import { Decision, type Attention, type Character, type NativeEvent, type Pawn, type Proposal } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
 import type { Coordinator } from './coordinator.js';
@@ -32,7 +33,7 @@ export type AttentionResult={pawn:string;status:'idle'|'busy'|'cooldown'|'unavai
  */
 export function coalesce(events:Attention[]):Attention[] {
   const latest=new Map<string,Attention>();
-  for(const e of events) latest.set(e.route==='deliberation'?`significant:${e.event.seq}`:e.event.kind,e);
+  for(const e of events) latest.set(e.route==='deliberation'&&(e.interrupt??nativeAttention(e.event).interrupt)?`significant:${e.event.seq}`:`${e.event.kind}:${e.event.kind==='memory'?e.event.detail:''}`,e);
   return [...latest.values()].sort((a,b)=>a.event.seq-b.event.seq);
 }
 

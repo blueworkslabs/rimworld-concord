@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { Decision, Move, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
-import { route } from './routing.js';
+import { nativeAttention } from './routing.js';
 import { Store } from './store.js';
 import { AttentionOptions, Reflection, bounded, coalesce, type AttentionBackend, type AppraisalBackend, type AttentionResult } from './attention.js';
 
@@ -14,7 +14,13 @@ export class Coordinator {
   private pending=new Map<string,AbortController>();
   private attending=new Map<string,{controller:AbortController;throughSeq:number}>();
   private observedTick=0;
-  constructor(private store:Store,private game:GameBridge) {}
+  constructor(private store:Store,private game:GameBridge,private timing:{mode:'continuous'|'pause-at-decision'}={mode:'continuous'}) {
+    if(!['continuous','pause-at-decision'].includes(timing.mode))throw Error('Invalid timing mode');
+    if(timing.mode==='pause-at-decision'&&!game.setDecisionPause)throw Error('Game-owned decision pause unsupported');
+  }
+  private async decisionPause(activity:{epoch:string;actor:string;activityId:string;ttlMs:number},release=false) {
+    if(this.timing.mode==='pause-at-decision')await this.game.setDecisionPause!({epoch:activity.epoch,actor:activity.actor,leaseId:activity.activityId,ttlMs:release?0:activity.ttlMs});
+  }
   private serial<T>(fn:()=>Promise<T>):Promise<T> {
     const result=this.queue.then(fn); this.queue=result.catch(()=>{}); return result;
   }
@@ -53,17 +59,15 @@ export class Coordinator {
     for(const event of events) {
       const character=this.domain.characters[event.pawn];
       if(!character) continue;
-      const next=route({urgent:event.kind==='health',significant:event.kind==='memory'||event.kind==='health',
-        conflictsWithCommitment:false,routine:event.kind==='job'}).next;
+      const {next,interrupt}=nativeAttention(event);
       const experiences=character.experiences??=[];
-      experiences.push({event,route:next});
+      experiences.push({event,route:next,interrupt});
       if(experiences.length>64) {
         const evicted=experiences.shift()!;
         if(evicted.event.seq>(character.attention?.cursor??0)&&evicted.route!=='native')
           this.commit('attention-gap',event.pawn,{seq:evicted.event.seq,kind:evicted.event.kind});
       }
-      const active=this.attending.get(event.pawn);
-      if(next==='deliberation'&&active&&event.seq>active.throughSeq) active.controller.abort();
+      if(interrupt) this.pending.get(event.pawn)?.abort();
       this.domain.eventCursor=event.seq;
       this.commit('native-event',event.pawn,{event,route:next});
     }
@@ -81,13 +85,14 @@ export class Coordinator {
       const events=(c.experiences??[]).filter(e=>e.event.seq>(c.attention?.cursor??0));
       if(!events.length) return false;
       const significant=events.some(e=>e.route==='deliberation');
+      const interrupting=events.some(e=>e.interrupt??nativeAttention(e.event).interrupt);
       const needsModel=events.some(e=>e.route!=='native');
       if(!significant&&needsModel&&!hasAppraiser) return false;
-      return !needsModel||significant||c.attention?.lastAttemptTick===undefined||
+      return !needsModel||interrupting||c.attention?.lastAttemptTick===undefined||
         this.observedTick-c.attention.lastAttemptTick>=config.cooldownTicks;
     }).sort((a,b)=>{
       // Significant signals get the slots before routine needs; oldest attempt wins ties.
-      const priority=(c:typeof a)=>(c.experiences??[]).some(e=>e.event.seq>(c.attention?.cursor??0)&&e.route==='deliberation')?0:1;
+      const priority=(c:typeof a)=>(c.experiences??[]).some(e=>e.event.seq>(c.attention?.cursor??0)&&(e.interrupt??nativeAttention(e.event).interrupt))?0:1;
       return priority(a)-priority(b)||(a.attention?.lastAttemptTick??-1)-(b.attention?.lastAttemptTick??-1)||a.id.localeCompare(b.id);
     }).map(c=>c.id);
   }
@@ -108,9 +113,10 @@ export class Coordinator {
       const events=(character.experiences??[]).filter(e=>e.event.seq>(character.attention?.cursor??0));
       if(!events.length) return {status:'idle' as const};
       const significant=events.some(e=>e.route==='deliberation');
+      const interrupting=events.some(e=>e.interrupt??nativeAttention(e.event).interrupt);
       const needsModel=events.some(e=>e.route!=='native');
       if(needsModel&&!significant&&!appraiser) return {status:'unavailable' as const};
-      if(needsModel&&!significant&&character.attention?.lastAttemptTick!==undefined&&
+      if(needsModel&&!interrupting&&character.attention?.lastAttemptTick!==undefined&&
         game.ticks-character.attention.lastAttemptTick<config.cooldownTicks) return {status:'cooldown' as const};
       const throughSeq=events.at(-1)!.event.seq;
       const progress=character.attention??={cursor:0};
@@ -141,6 +147,8 @@ export class Coordinator {
           combined.throwIfAborted();
           if(score.reflectionScore<0.5) return {kind:'native' as const,score:score.reflectionScore};
         }
+        await this.decisionPause(prepared.activity);
+        combined.throwIfAborted();
         // Only deliberation gets the thinking badge. Appraisal is a bounded fast gate.
         try {await this.game.setActivity?.(prepared.activity);} catch { /* cognition can proceed without UI */ }
         combined.throwIfAborted();
@@ -187,6 +195,7 @@ export class Coordinator {
       });
     } finally {
       clearTimeout(timer);
+      try {await this.decisionPause(prepared.activity,true);} catch { /* game lease expires even if transport is lost */ }
       if(this.pending.get(pawn)===prepared.controller) this.pending.delete(pawn);
       if(this.attending.get(pawn)?.controller===prepared.controller) this.attending.delete(pawn);
       try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* old timeline or expired badge */ }
@@ -261,14 +270,16 @@ export class Coordinator {
     });
     let timer:ReturnType<typeof setTimeout>|undefined;
     try {
-      const abort=new Promise<never>((_,reject)=>{
-        prepared.controller.signal.addEventListener('abort',()=>reject(Error('Decision cancelled')),{once:true});
-        timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
-      });
-      const result=Decision.parse(await Promise.race([backend.decide(prepared.view,prepared.controller.signal),abort]));
+      timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
+      const result=Decision.parse(await bounded(prepared.controller.signal,async()=>{
+        await this.decisionPause(prepared.activity);
+        prepared.controller.signal.throwIfAborted();
+        return backend.decide(prepared.view,prepared.controller.signal);
+      }));
       return await this.serial(async()=>{
         if(prepared.generation!==this.generation || prepared.controller.signal.aborted) throw Error('Stale decision');
-        await this.current();
+        this.ingest(await this.current());
+        prepared.controller.signal.throwIfAborted();
         const p=this.domain.proposals[id]!;
         if(p.status!=='pending') throw Error('Proposal already decided');
         await this.applyDecision(p,result);
@@ -281,6 +292,7 @@ export class Coordinator {
       throw error;
     } finally {
       clearTimeout(timer);
+      try {await this.decisionPause(prepared.activity,true);} catch { /* game lease expires even if transport is lost */ }
       if(this.pending.get(pawn)===prepared.controller) this.pending.delete(pawn);
       try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* expired or old timeline */ }
     }

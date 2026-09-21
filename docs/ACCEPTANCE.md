@@ -118,3 +118,45 @@ The real-game and cold-restore receipts were regenerated after replacing deploym
 - This proves one bounded live proposal decision and real action, plus live
   cancellation—not completed live event-driven reflection, character quality or
   unattended operation. See the [operator guide](LIVE_DELIBERATION.md).
+
+
+## Thought reliability: completed paused and continuous trials
+
+These follow-up results do not rewrite the earlier mixed-result trial.
+
+- [Game-owned pause checks](evidence/decision-pause.json) passed with actual owned
+  overlapping claims, stable ticks, wrong-owner release rejection, manual-speed
+  pause preservation (set through lab controls), wall-clock orphan expiry and
+  old-epoch rejection after load. The pause notice was visually inspected. This
+  test uses scripted claims, not two live model thoughts.
+- [Paused live trial](evidence/reliability-paused.json): Alvin accepted the nearby
+  move in 3253ms and completed it. A naturally acquired event later triggered a
+  4179ms live reflection refusing the unsupported waypoint. Across 33 samples with
+  game pause claims active, tick delta was zero. Paired restore preserved decisions,
+  outcomes and reflection. [Full cold restore](evidence/reliability-paused-cold.json)
+  then passed with one saved reflection, three character records and no stale pause.
+- [Continuous live trial](evidence/reliability-continuous.json): explicit acceptance
+  took 3622ms and the move completed; a 6183ms event-triggered reflection refused the
+  unsupported waypoint. The runner sampled 617 advancing ticks during active
+  deliberation slots and zero decision pause claims. Paired restore and a separate
+  [cold restore](evidence/reliability-continuous-cold.json) passed. Checkpoint/save
+  operations intentionally pause; “continuous” refers to inference, not checkpointing.
+- The two modes ran fresh copies of the same fixture and proposal pattern, but
+  native events and views differed. This is an integration comparison, not a
+  controlled judgment-quality experiment or a general performance benchmark.
+- Stage checkpoints are persisted immediately after explicit decisions and after
+  completed reflection. Compiled-module hashes are compared before a runner can
+  touch the game. Earlier evidence remains intact; no historical failed receipt was
+  changed to a passing result.
+- 51 automated checks pass, covering background-memory queue/coalescing/cooldown,
+  urgent priority, legacy records, explicit-decision invalidation, overlapping pause
+  claims, timeout/error cleanup, rejected pause acquisition and fixed ledger policy.
+  The mod was rebuilt against the privately owned installed game assemblies.
+- All four new Claude subscription attempts succeeded: USD 0.40 API-equivalent
+  reserved, USD 0.06234 estimated usage reported (not cash charges). Restore used
+  no inference. Prior Claude and Jev ledger hashes were unchanged. The new allowance
+  is exhausted, and game/display services were stopped cleanly.
+- Still not proved: general contextual significance, combat-time live judgment,
+  three simultaneous live characters, counterproposal negotiation, long-run pacing,
+  calibrated model judgment or narrative/personality consistency. The Chitchat
+  exception is a narrow policy fix, not a complete attention model.

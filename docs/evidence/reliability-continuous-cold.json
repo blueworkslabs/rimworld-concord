@@ -1,0 +1,30 @@
+{
+  "at": "2026-09-21T18:32:51.103Z",
+  "kind": "claude-game-cold",
+  "passed": true,
+  "access": "Claude Code native Max login; monetary values are API-equivalent usage estimates, not cash billing",
+  "before": {
+    "attempts": 4,
+    "reservedEquivalentUSD": 0.4,
+    "estimatedUsageUSD": 0.06234
+  },
+  "after": {
+    "attempts": 4,
+    "reservedEquivalentUSD": 0.4,
+    "estimatedUsageUSD": 0.06234
+  },
+  "calls": [],
+  "game": {
+    "at": "2026-09-21T18:32:45.188Z",
+    "kind": "claude-game-cold",
+    "timing": "continuous",
+    "checks": [
+      "cold game/coordinator restart restores model decisions, memories and reflection state without inference"
+    ],
+    "passed": true,
+    "checkpointStage": "reflection-complete",
+    "characters": 3,
+    "reflections": 1,
+    "decisionPauses": 0
+  }
+}

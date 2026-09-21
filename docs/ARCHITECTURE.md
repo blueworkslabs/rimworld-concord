@@ -31,10 +31,20 @@ Audits retain discarded branches for operators; character views derive only from
 - Fast appraisal assesses bounded contextual choices; Jev is a candidate, not a dependency.
 - Deliberation handles negotiation, novelty and planning, and may later establish bounded standing intentions.
 
-All layers should use consistent traits, relationships, commitments and relevant memories. No confidence score can prevent explicit significant-event escalation. Immediate native reactions and later reflection can both be scheduled for one event. Selected native events now feed the routing policy. See [pawn awareness](AWARENESS.md) for sampling, retention and perception limits. Routing produces attention records, not orders. An opt-in [bounded attention pump](ATTENTION.md) now consumes them, invokes injected appraisal/reflection backends and applies only pawn-owned responses. Scripted behavior is verified. Jev appraisal has a bounded adapter, mocked tests and one protected synthetic call plus two bounded real-game appraisals. The [split-host live runner](LIVE_APPRAISAL.md) keeps credentials away from the game. A [native Claude CLI backend](LIVE_DELIBERATION.md) now supplies bounded live decisions without action-capable model tools. One explicit live decision completed a move; an event-triggered thought was cancelled on newer experience. Completed live reflection, quality evaluation and standing-intention execution remain pending.
+All layers should use consistent traits, relationships, commitments and relevant memories. No confidence score can prevent explicit significant-event escalation. Immediate native reactions and later reflection can both be scheduled for one event. Selected native events now feed the routing policy. See [pawn awareness](AWARENESS.md) for sampling, retention and perception limits. Routing produces attention records, not orders. An opt-in [bounded attention pump](ATTENTION.md) now consumes them, invokes injected appraisal/reflection backends and applies only pawn-owned responses. Scripted behavior is verified. Jev appraisal has a bounded adapter, mocked tests and one protected synthetic call plus two bounded real-game appraisals. The [split-host live runner](LIVE_APPRAISAL.md) keeps credentials away from the game. A [native Claude CLI backend](LIVE_DELIBERATION.md) now supplies bounded live decisions without action-capable model tools. One explicit live decision completed a move; an event-triggered thought was cancelled on newer experience. The subsequent reliability trial completed live reflection and cold restore in paused and continuous modes. Quality evaluation and standing-intention execution remain pending.
 
 Live play is the target. The activity API drives an expiring visual badge above deliberating pawns. Activity IDs prevent an old completion from clearing a newer badge; epoch validation rejects clears from discarded timelines. Expensive calls must be bounded/cancellable, stale results revalidated, and backend failures must not turn into forced obedience. Current fallback leaves the proposal pending and native behavior unchanged. Extended planning pauses should be explicit and visible, not an invisible default for every decision.
 
 ## Scope boundaries
 
 There is no general remote API, hostile code sandbox, full pawn perception system, autonomous core planner, OpenClaw plugin runtime, live model integration, campaign or gravship-control layer in this slice. These should be added incrementally against the same authority and timeline invariants.
+
+
+### Explicit timing and queued experience
+
+The coordinator defaults to continuous play. An explicit pause-at-decision mode
+uses owner/epoch-scoped game pause claims, not changes to the player's time-speed
+setting. Claims coexist, release independently and expire on wall time even when
+simulation is paused. The model never receives this capability. Known mundane
+Chitchat is retained for background reflection without invalidating current thought;
+other memory/health events retain conservative cancellation. See [timing policy](DECISION_TIMING.md).

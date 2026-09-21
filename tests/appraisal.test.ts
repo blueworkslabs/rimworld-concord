@@ -49,3 +49,13 @@ test('billing reservations survive closing and reopening the ledger',()=>{
   assert.throws(()=>reopened.reserve(0.002),/exhausted/);reopened.close();
  } finally {rmSync(root,{recursive:true,force:true});}
 });
+
+test('a persistent trial cannot be reopened with a larger or differently named allowance',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'concord-policy-')),path=join(dir,'budget.db');
+ try{
+  const budget=new TrialBudget(path,0.4,4,'reliability');budget.reserve(0.1);budget.close();
+  assert.throws(()=>new TrialBudget(path,0.5,5,'reliability'),/policy mismatch/);
+  assert.throws(()=>new TrialBudget(path,0.4,4,'replacement'),/policy mismatch/);
+  const reopened=new TrialBudget(path,0.4,4,'reliability');assert.equal(reopened.summary()!.calls,1);reopened.close();
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});

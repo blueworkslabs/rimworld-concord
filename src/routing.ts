@@ -15,3 +15,12 @@ export function afterAppraisal(a:Appraisal,threshold:number,consequential:boolea
   if(a.choice==='deliberate' || (consequential && a.confidence<threshold)) return 'deliberation';
   return 'native'; // a selected intention still needs normal action validation
 }
+
+/** Conservative first policy: known mundane Chitchat waits; unfamiliar memories
+ * and health changes still supersede thought. This is not semantic appraisal.
+ */
+export function nativeAttention(event:{kind:string;detail:string}):{next:Route;interrupt:boolean} {
+ const significant=event.kind==='memory'||event.kind==='health';
+ return {next:route({urgent:event.kind==='health',significant,conflictsWithCommitment:false,routine:event.kind==='job'}).next,
+   interrupt:significant&&!(event.kind==='memory'&&event.detail==='Chitchat')};
+}

@@ -1,0 +1,91 @@
+{
+  "at": "2026-09-21T18:30:44.415Z",
+  "kind": "claude-game-trial",
+  "passed": true,
+  "access": "Claude Code native Max login; monetary values are API-equivalent usage estimates, not cash billing",
+  "before": {
+    "attempts": 0,
+    "reservedEquivalentUSD": 0,
+    "estimatedUsageUSD": 0
+  },
+  "after": {
+    "attempts": 2,
+    "reservedEquivalentUSD": 0.2,
+    "estimatedUsageUSD": 0.032151
+  },
+  "calls": [
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3253,
+      "estimatedUsageUSD": 0.012294,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "reflection",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 4179,
+      "estimatedUsageUSD": 0.019857,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    }
+  ],
+  "game": {
+    "at": "2026-09-21T18:29:10.396Z",
+    "kind": "claude-game-decisions",
+    "timing": "pause-at-decision",
+    "checks": [
+      "live explicit pawn decision follows the existing validated action contract and reconciles actual outcome",
+      "natural significant event invokes live pawn-owned reflection without Jev or a scripted decision",
+      "game-owned pause holds ticks stable during completed live thought",
+      "paired save/restore preserves model-authored decisions, outcomes and reflection in a new timeline"
+    ],
+    "passed": true,
+    "pawn": "Thing_Human405",
+    "explicit": {
+      "status": "accepted",
+      "decision": {
+        "kind": "accept",
+        "reason": "Just wandering anyway, and eight tiles east is a short stroll. My indoors need is topped off, nothing urgent pulling me elsewhere. I'll head that way."
+      },
+      "outcome": {
+        "status": "completed",
+        "reason": "Reached destination"
+      }
+    },
+    "ticksDuringDeliberation": 0,
+    "activityObserved": true,
+    "checkpoint": "lab-concord-thought-1790015439218",
+    "checkpointStage": "reflection-complete",
+    "reflectionAttempt": {
+      "pawn": "Thing_Human405",
+      "status": "decided",
+      "throughSeq": 46
+    },
+    "reflection": {
+      "status": "decided",
+      "proposalStatus": "refused",
+      "decision": {
+        "kind": "refuse",
+        "reason": "Coordinates 99999, 99999? That's well off any map I've ever seen. No purpose given, no route, no reason to think I could even get there. I'm just wandering contentedly \u2014 I'm not about to chase a ghost waypoint into the void."
+      },
+      "records": [
+        {
+          "tick": 4389,
+          "throughSeq": 46,
+          "backend": "claude-sonnet-4-6",
+          "reason": "Coordinates 99999, 99999? That's well off any map I've ever seen. No purpose given, no route, no reason to think I could even get there. I'm just wandering contentedly \u2014 I'm not about to chase a ghost waypoint into the void."
+        }
+      ]
+    },
+    "leaseSamples": 33,
+    "ticksWhileLeased": 0
+  }
+}

@@ -4,7 +4,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { setTimeout as delay } from 'node:timers/promises';
-import type { Activity, ActionRequest, GameBridge, GameState, Receipt } from './protocol.js';
+import type { Activity, DecisionPause, ActionRequest, GameBridge, GameState, Receipt } from './protocol.js';
 const exec=promisify(execFile);
 
 /** Local trusted staging transport. Caller must own the process lock (scripts/run-lab.sh). */
@@ -17,6 +17,7 @@ export class LabBridge implements GameBridge {
     const result=this.queue.then(()=>this.exchange(payload));
     this.queue=result.catch(()=>{}); return result;
   }
+  async setDecisionPause(pause:DecisionPause) { await this.request({op:'decision-pause',...pause}); }
   async setActivity(activity:Activity) { await this.request({op:'activity',...activity}); }
   private async exchange(payload:Record<string,unknown>):Promise<{state:GameState;receipt:Receipt}> {
     const request=join(this.root,'concord/request.json');

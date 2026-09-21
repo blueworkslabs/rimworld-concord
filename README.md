@@ -20,7 +20,9 @@ A bounded experimental vertical slice, not a playable campaign or unattended AI 
 - A bounded attention pump consumes captured events, coalesces repeated signals and applies pawn-owned responses; verified with scripted backends.
 - A bounded Jev appraisal adapter is implemented against the documented API with mocked tests, one live synthetic fixture and two real-game live appraisals. Both game scores retained native behavior. See the [bounded live runner](docs/LIVE_APPRAISAL.md).
 
-- A tool-isolated Claude Code Max backend completed one live pawn decision and real movement. A second, event-triggered thought was interrupted by a newer native memory, leaving its proposal pending. See [live deliberation](docs/LIVE_DELIBERATION.md).
+- A tool-isolated Claude Code Max backend completed one live pawn decision and real movement. A subsequent reliability trial completed event-triggered refusal in both paused and continuous modes, with paired and cold restore verified. See [live deliberation](docs/LIVE_DELIBERATION.md).
+
+Explicit [timing modes](docs/DECISION_TIMING.md) preserve human pauses and let known mundane Chitchat queue without cancelling thought. Continuous play remains the default.
 
 See [acceptance](docs/ACCEPTANCE.md) for measured results and limitations, and [roadmap](docs/ROADMAP.md) for what is not built.
 
@@ -78,6 +80,6 @@ This is an application boundary, **not** a sandbox for hostile plugin code or th
 
 ## Direction
 
-Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. An opt-in bounded attention pump consumes event routes. A first native-client live decision completed a move; a live reflection was cancelled by newer experience. Long-running operation, broader goals and completed live event-driven reflection remain to be proved. See [attention consumption](docs/ATTENTION.md).
+Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. An opt-in bounded attention pump consumes event routes. Native-client live decisions and reflections now have bounded paused/continuous evidence. Long-running operation and broader goals remain to be proved. See [attention consumption](docs/ATTENTION.md).
 
 See [architecture](docs/ARCHITECTURE.md), [narrative](docs/NARRATIVE.md), and [model access](docs/MODELS.md).

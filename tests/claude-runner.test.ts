@@ -16,6 +16,6 @@ test('mismatched deployed runner fails before game command or inference',async()
    await writeFile(join(dir,'config.json'),JSON.stringify(config));
    await assert.rejects(promisify(execFile)(process.execPath,['scripts/run-claude-game.mjs',join(dir,'config.json'),'--audit'],{env:{...process.env,PATH:dir+':'+process.env.PATH}}),/Remote decision runner differs/);
    assert.equal(await readFile(count,'utf8'),'read\n');
-   const budget=new TrialBudget(config.ledger);assert.equal(budget.summary()!.calls,0);budget.close();
+   const budget=new TrialBudget(config.ledger,0.30,3);assert.equal(budget.summary()!.calls,0);budget.close();
  }finally{await rm(dir,{recursive:true,force:true});}
 });

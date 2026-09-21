@@ -2,7 +2,7 @@
 
 The operator can now start a finite attention pump which observes native events,
 coalesces repeated signals, invokes an injected appraisal/reflection backend, and
-applies a pawn-owned response. Scripted fixtures verify mechanics; later finite trials add live appraisal and a live explicit decision, plus interruption of a live reflection. This is not
+applies a pawn-owned response. Scripted fixtures verify mechanics; later finite trials add live appraisal and deliberation. See the dated acceptance evidence for each run’s results. This is not
 yet a live AI colony, general planner, or automatically installed background service.
 
 ## Processing and authority
@@ -12,7 +12,7 @@ for inference. It starts eligible pawn work up to its concurrent/total-turn limi
 Defaults are two concurrent turns and twelve scheduling attempts per pump instance;
 these are operational limits, **not persistent billing quotas**. The operator must
 continue polling while it runs. `stop()` cancels and drains its work; `drain()` waits
-without cancellation. No game pause is issued by the pump.
+without cancellation. The pump does not select pauses itself. A coordinator configured for pause-at-decision acquires game-owned claims during deliberate inference; continuous mode remains the default.
 
 Each pawn shares one decision slot between explicit proposal decisions and attention
 reflection. Active coordinator commitments defer new attention until their outcomes
@@ -21,13 +21,13 @@ interrupt accepted jobs or implement standing-intention replacement.
 
 - Routine job events are acknowledged without model calls.
 - Pending need signals of the same kind are collapsed to the latest value. Every
-  significant memory/health event is retained in the batch. Original captured
+  interrupting memory/health event is retained in the batch; repeated mundane Chitchat is coalesced. Original captured
   events remain in the audit/experience archive.
 - Need-only batches go through the injected appraiser. A reflection score below
   0.5 retains native behavior; a higher score proceeds to reflection. This remains
   an uncalibrated policy threshold, not a correctness probability.
-- Significant events bypass appraisal and the default 300-tick ordinary cooldown.
-- A new significant event observed during attention cancels that pending result.
+- Memory/health reflection bypasses appraisal. Interrupting events also bypass the default 300-tick cooldown; background Chitchat obeys it.
+- A new interrupting event observed during attention cancels that pending result.
   The next turn sees the new event and retained experiences. Fresh game observation
   also happens before applying a response, even if no concurrent poll occurred.
 
@@ -84,4 +84,4 @@ with `--cold` to verify persistence in a fresh process. Stop the lab at handoff.
 
 A subsequent [bounded live-appraisal trial](LIVE_APPRAISAL.md) used two real Jev
 calls on captured food and mood events. Both selected native continuation. Four
-other, directly escalated reflections used a scripted backend. A later [live deliberation trial](LIVE_DELIBERATION.md) completed an explicit proposal decision. Its event-triggered reflection was cancelled by a newer Chitchat memory; no model answer or second action was applied. Completed live reflection, model judgment quality, long-running operation and unattended billing remain unverified. The current routing policy treats every acquired memory as significant: ordinary repeated conversation can therefore interrupt thought. This is an observed scheduling limitation, not evidence that Chitchat always deserves deep reflection.
+other, directly escalated reflections used a scripted backend. The first [live deliberation trial](LIVE_DELIBERATION.md) completed an explicit proposal decision. Its event-triggered reflection was cancelled by a newer Chitchat memory; no model answer or second action was applied. Completed live reflection was unverified at that point. A later reliability trial completed it in paused and continuous modes with cold restore; model judgment quality, long-running operation and unattended billing remain unverified. That trial exposed a routing limitation: every acquired memory was treated as interrupting. The subsequent [timing policy](DECISION_TIMING.md) distinguishes known mundane Chitchat from conservative interrupting cases; historical receipts are unchanged.
