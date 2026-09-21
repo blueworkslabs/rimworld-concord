@@ -115,7 +115,7 @@ namespace Concord
             var pawns=Find.CurrentMap.mapPawns.FreeColonistsSpawned.Select(p=>JsonUtility.ToJson(new PawnView {
                 id=p.GetUniqueLoadID(),name=p.LabelShort,job=p.CurJobDef==null?"":p.CurJobDef.defName,
                 x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent
-            }).TrimEnd('}')+",\"facts\":"+Awareness.Facts(p)+"}");
+            }).TrimEnd('}')+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
                 String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"]}";
@@ -137,8 +137,8 @@ namespace Concord
             w.actions.Add(aNew);
             var cell=new IntVec3(r.x,0,r.z);
             if(pawn==null) { aNew.reason="Pawn is no longer available on this map"; return aNew; }
-            if(pawn.Dead || pawn.Downed || pawn.InMentalState || pawn.Drafted) { aNew.reason="Pawn cannot accept a voluntary job now"; return aNew; }
-            if(!cell.InBounds(pawn.Map) || !cell.Standable(pawn.Map) || !pawn.CanReach(cell,PathEndMode.OnCell,Danger.None)) {
+            if(!Movement.Available(pawn)) { aNew.reason="Pawn cannot accept a voluntary job now"; return aNew; }
+            if(!Movement.Reachable(pawn,cell)) {
                 aNew.reason="Destination unavailable or unsafe"; return aNew;
             }
             if(pawn.Position==cell) {aNew.status="completed"; aNew.reason="Already at destination"; return aNew;}

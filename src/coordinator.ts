@@ -228,9 +228,17 @@ export class Coordinator {
   }
   inspect() { return structuredClone(this.domain); }
   activity() { return [...this.pending.keys()].map(pawn=>({pawn,status:'deliberating' as const})); }
-  /** Deliberately communicated proposal/reply text only; never character memories or reflections. */
+  /** Physical movement opportunities and communicated replies only; no private character state. */
   core() {
     return {
+      movementOptions:(pawn:string)=>this.serial(async()=>{
+        if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
+        const game=await this.current();
+        const own=game.pawns.find(p=>p.id===pawn);
+        if(!own) throw Error('Pawn unavailable');
+        // Older bridges return null, never a fabricated safe destination.
+        return structuredClone(own.movement??null);
+      }),
       inbox:()=>structuredClone(Object.values(this.domain.proposals).filter(p=>p.status==='countered'&&!p.replyId)),
       propose:(pawn:string,action:Move,reason:string,id=randomUUID())=>this.serial(async()=>{
         await this.current();return this.propose(pawn,action,reason,id);

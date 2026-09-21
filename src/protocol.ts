@@ -9,7 +9,10 @@ export const Decision = z.discriminatedUnion('kind', [
 ]);
 export type Decision = z.infer<typeof Decision>;
 export type Outcome = 'started'|'completed'|'failed'|'interrupted';
-export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[]};
+/** Bounded local opportunities, not a route, reservation or future success guarantee. */
+export type MovementView = {epoch:string;tick:number;originX:number;originZ:number;radius:number;
+  status:'available'|'unavailable';options:Move[]};
+export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView};
 export type Receipt = {id:string;actor:string;status:Outcome;reason:string;x:number;z:number};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;

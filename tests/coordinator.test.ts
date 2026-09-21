@@ -30,7 +30,7 @@ const accept=scripted({kind:'accept',reason:'I choose to help'});
 
 test('core has no execution handle; pawn acceptance executes once; counterpart cannot decide',async()=>{
   const {c,game}=await setup();
-  assert.deepEqual(Object.keys(c.core()),['inbox','propose','revise']);
+  assert.deepEqual(Object.keys(c.core()),['movementOptions','inbox','propose','revise']);
   const id=randomUUID();const p=await c.core().propose('A',move,'Help',id);
   await assert.rejects(c.pawn('B').decide(p.id,accept),/belong/);
   await c.pawn('A').decide(p.id,accept);
@@ -226,4 +226,55 @@ test('definitive unavailable-actor receipts clear commitments without blocking o
   assert.equal(c.inspect().characters.A!.memories.filter(m=>m.startsWith('Action failed:')).length,1);
   await c.checkpoint('lab-concord-unavailable');
  }finally{store.close();}
+});
+
+test('movement shortlist is pawn-owned in both decision paths; core sees only physical opportunities',async()=>{
+ const {c,game}=await setup();
+ const offer={epoch:'epoch',tick:0,originX:1,originZ:1,radius:3,status:'available' as const,options:[{kind:'move' as const,x:2,z:1}]};
+ game.data.pawns[0]!.movement=offer;
+ game.data.pawns[1]!.movement={...offer,options:[{kind:'move',x:99,z:99}]};
+ const publicView=await c.core().movementOptions('A');assert.deepEqual(publicView,offer);
+ publicView!.options[0]!.x=999;assert.equal(game.data.pawns[0]!.movement.options[0]!.x,2);
+ // ID intentionally contains the other pawn's coordinate digits: IDs are not leaked coordinates.
+ const p=await c.core().propose('A',offer.options[0]!,'Grounded request','00000000-0000-4000-8000-000000000099');
+ await c.pawn('A').decide(p.id,{name:'inspect',async decide(view){
+   assert.deepEqual(view.pawn.movement,offer);assert(!JSON.stringify(view).includes('"x":99'));
+   return {kind:'counter',reason:'Own local alternative',action:view.pawn.movement!.options[0]};
+ }});
+ assert.equal(game.moves,0);
+ game.data.events=[{seq:1,tick:1,pawn:'A',kind:'health',detail:'changed'}];game.data.eventSeq=1;
+ let reflected=false;
+ const attended=await c.attend('A',{name:'inspect-reflection',async reflect(view){
+   reflected=true;
+   assert.deepEqual(view.pawn.movement,offer);assert(!JSON.stringify(view).includes('"x":99'));
+   return {kind:'continue',reason:'Native routine'};
+ }});
+ // attend catches backend exceptions; an assertion inside reflect must not become a passing fallback.
+ assert(reflected);assert.equal(attended.status,'continued');
+ assert.equal(game.moves,0);
+});
+
+test('movement observation is fresh and timeline-bound; unavailable and legacy states are not fabricated',async()=>{
+ const {c,game}=await setup();assert.equal(await c.core().movementOptions('A'),null);
+ game.data.pawns[0]!.movement={epoch:'epoch',tick:1,originX:1,originZ:1,radius:3,status:'unavailable',options:[]};
+ assert.deepEqual((await c.core().movementOptions('A'))!.options,[]);
+ await assert.rejects(c.core().movementOptions('stranger'),/Unknown pawn/);
+ game.data.epoch='reloaded';await assert.rejects(c.core().movementOptions('A'),/Stale timeline/);
+});
+
+test('a previously offered destination still requires consent and native revalidation',async()=>{
+ const {c,game}=await setup();
+ game.data.pawns[0]!.movement={epoch:'epoch',tick:0,originX:1,originZ:1,radius:3,status:'available',options:[{kind:'move',x:2,z:1}]};
+ const option=(await c.core().movementOptions('A'))!.options[0]!;
+ const p=await c.core().propose('A',option,'Observed destination');assert.equal(game.moves,0);
+ game.move=async r=>{
+   game.moves++;
+   const receipt:Receipt={id:r.id,actor:r.actor,x:r.action.x,z:r.action.z,status:'failed',reason:'Destination changed since observation'};
+   game.data.actions.push(receipt);return receipt;
+ };
+ const result=await c.pawn('A').decide(p.id,accept);
+ assert.equal(c.inspect().outcomes[result.actionId!]!.status,'failed');
+ assert(c.inspect().characters.A!.memories.some(m=>m.includes('Destination changed')));
+ assert.equal(c.inspect().characters.A!.commitment,undefined);
+ await c.reconcile();assert.equal(game.moves,1);
 });
