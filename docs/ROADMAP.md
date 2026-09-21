@@ -14,7 +14,7 @@
 - Bounded native event archive, per-pawn experience projection, gap reporting and saved cursors.
 - Native/appraisal/deliberation attention routing, with significant-event bypass.
 - Visible expiring deliberation badge; no automatic pause.
-- Jev System One request/response adapter and conservative persistent trial ledger; mocked validation only.
+- Jev System One request/response adapter and conservative persistent trial ledger; mocked validation, one protected synthetic live call and two real-game live appraisals.
 
 ## Bounded attention increment
 
@@ -25,8 +25,8 @@
 
 ## Next bounded increment
 
-- Verify Jev with an operator-owned protected transport and recorded self-perspectives.
-- Connect the bounded attention consumer to a live backend with durable usage accounting.
+- Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
+- Live appraisal is connected in the bounded operator lab with independent usage accounting; live deliberation and unattended operation remain next.
 - Extend social-event capture and perceived knowledge; add operator inspection UI.
 - Integrate one live decision backend with explicit tool isolation, usage/latency reporting and cancellation.
 - Exercise three independent perspectives and counterproposal negotiation.

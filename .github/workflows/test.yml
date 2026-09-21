@@ -13,6 +13,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm test
+      - run: node --check scripts/run-jev-game.mjs
       - run: node diary/build.mjs --check
       - run: node diary/build.mjs
       - run: bash -n scripts/build-mod.sh scripts/run-lab.sh scripts/run-attention-lab.sh

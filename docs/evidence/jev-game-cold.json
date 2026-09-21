@@ -1,0 +1,24 @@
+{
+  "at": "2026-09-21T17:29:06.662Z",
+  "kind": "jev-game-cold",
+  "passed": true,
+  "calls": [],
+  "before": {
+    "calls": 3,
+    "reservedUSD": 0.006,
+    "reportedUSD": 0.000133266
+  },
+  "after": {
+    "calls": 3,
+    "reservedUSD": 0.006,
+    "reportedUSD": 0.000133266
+  },
+  "game": {
+    "at": "2026-09-21T17:29:00.544Z",
+    "kind": "jev-live-game-appraisal",
+    "passed": true,
+    "checks": [
+      "cold restore preserves live-appraised character attention with a new timeline"
+    ]
+  }
+}
