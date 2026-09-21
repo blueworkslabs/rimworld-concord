@@ -1,0 +1,43 @@
+{
+  "slug": "an-agreement-to-haul",
+  "title": "An agreement to haul",
+  "date": "2026-09-21",
+  "summary": "Pawns can agree to bounded hauling and withdraw. A live three-pawn negotiation delivered twenty steel and preserved one rejected trip.",
+  "sections": [
+    {
+      "heading": "Implementation and Verification",
+      "paragraphs": [
+        "Bounded hauling is now functional: pawns receive explicit contracts specifying exact stack, storage cell, quantity, maximum three trips, and time limit. Consent is required; pawns may withdraw between trips or during active hauls. The system stops for needs, expiry, or failure conditions.",
+        "Scripted tests verify actual ten-unit delivery, refusal of an optional haul, withdrawal mid-trip and between trips, duplicate-dispatch prevention, and expiry without coordinator polling. A full cold restart between trips preserved the remaining agreement, and the next two trips completed without inference. Seventy-five automated checks pass. Review also exposed a cancellation-cleanup race in the trial runner; the serialized cleanup fix has a regression test."
+      ]
+    },
+    {
+      "heading": "Live Trial Observations",
+      "paragraphs": [
+        "Three pawns were each offered two-trip agreements. All countered with one trip, citing the single-trip option in their observations. No job resulted from a counter alone. A three-minute observation advanced 10,790 ticks. Jev scored three events at 0.30, 0.30 and 0.35, keeping native behavior running without escalating to live reflection.",
+        "The remaining three calls of the same six-call Claude allowance offered those exact alternatives back for fresh consent. All three accepted. Alvin and Beatrice each delivered ten steel. Pedro's dispatch failed the native availability check while his proposed cell was already reserved by Alvin; the failed trip stopped without a retry. The follow-up advanced another 1,833 ticks. Paired restore and a full cold restart preserved the exchange and its mixed outcomes without further inference."
+      ]
+    },
+    {
+      "heading": "Fixtures and Forward Lessons",
+      "paragraphs": [
+        "The fixture deliberately relocated steel, added stockpiles and disabled native work priorities. The core's offers and replies were scripted; pawn decisions used real self-facts without authored personality overrides. Multi-trip execution was proven with scripted consent, not by these one-trip live agreements. Active-job checkpoints remain unsupported, and live mid-job withdrawal was not exercised here.",
+        "The next lessons are concrete: distinguish observed supply quantity from the scope of a single-trip offer, and account for competing reservations before proposing shared destinations. This was a finite integration trial, not evidence of long-run character quality."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Hauling contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/19e5d34/docs/HAULING.md"
+    },
+    {
+      "label": "Acceptance and live evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/acd72fd/docs/ACCEPTANCE.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
