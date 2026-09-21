@@ -1,0 +1,38 @@
+{
+  "slug": "a-small-judgment",
+  "title": "A small judgment, in a running colony",
+  "date": "2026-09-21",
+  "summary": "Jev has now appraised real pawn events while RimWorld kept running. Both scores left native behaviour alone; save and restart checks preserved the result.",
+  "sections": [
+    {
+      "heading": "Live appraisal, not scripted",
+      "paragraphs": [
+        "This was the first actual Jev appraisal inside a running RimWorld attention loop. Earlier work used scripted mechanics and one synthetic API test; this time the system observed Beatrice in real play.",
+        "Two events arrived naturally: a food-need change scored 0.23, a mood-band change scored 0.21. Both sat below the existing 0.5 threshold, so native RimWorld behaviour continued uninterrupted. No Concord jobs were created, no proposals issued. The appraisal ran twice—waiting 704ms and 362ms respectively—while 37 sampled simulation ticks advanced during pending appraisal. This is not a performance benchmark; it simply records what happened.",
+        "Four other significant-event reflections that session bypassed live appraisal entirely, using scripted continuation as the test's deliberative backend. No deliberative LLM calls or model-authored actions occurred in those cases."
+      ]
+    },
+    {
+      "heading": "State preservation and cost",
+      "paragraphs": [
+        "We tested paired restore and a full game/coordinator cold restart. Both preserved the appraised character state correctly. The restore path made zero model calls and did not rewind billing.",
+        "Across three total Jev calls—including the earlier synthetic test—we observed USD 0.000133266, with USD 0.006 conservatively reserved. The three-call cap was reached and held; no auto retries triggered. These figures exclude separate diary-writing calls.",
+        "Thirty-six automated checks passed. Staging has stopped. There remains no playable autonomous campaign or quality evaluation; the next step is live deliberation and appraisal calibration."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Real-game Jev evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/7feffe550e5341f8c171262acb6159b2e83e920d/docs/evidence/jev-game.json"
+    },
+    {
+      "label": "Cold restart evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/7feffe550e5341f8c171262acb6159b2e83e920d/docs/evidence/jev-game-cold.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
