@@ -66,3 +66,18 @@ reserved equivalent usage to USD 0.30. The Jev ledger and paid-call cap are unch
 See [runtime controls and operator guide](LIVE_DELIBERATION.md). Native subscription
 rate limits still apply. This result proves a narrow integration, not unlimited
 subscription use, narrative quality or an unattended service.
+
+
+## Follow-up thought reliability
+
+A separately bounded four-attempt native Max trial completed two calls per mode:
+paused explicit decision 3253ms and reflection 4179ms; continuous explicit decision
+3622ms and reflection 6183ms. Both accepted the nearby move (completed in-game)
+and refused the implausible waypoint during native-event reflection. Paired and
+cold restore passed separately in each mode. These are individual observations,
+not a model ranking or latency benchmark.
+
+The new ledger reserved USD 0.40 API-equivalent usage and reported USD 0.06234 in
+successful completion estimates, not cash charges. Both historical ledgers remained
+byte-for-byte unchanged. No Jev calls or automatic retries occurred. The four-attempt
+allowance is now exhausted. See [timing](DECISION_TIMING.md) and dated acceptance.

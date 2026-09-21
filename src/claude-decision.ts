@@ -55,9 +55,10 @@ export class ClaudeDecisionBackend {
  private budget:TrialBudget;
  private pending=false;
  // Subscription usage only. This separate trial does not reset the Jev ledger.
- constructor(private options:{ledgerPath:string;scratchRoot:string;binary?:string}) {
+ constructor(private options:{ledgerPath:string;scratchRoot:string;binary?:string;trial?:'reliability-v1'}) {
    if(!isAbsolute(options.ledgerPath)||!isAbsolute(options.scratchRoot))throw Error('Absolute operator paths required');
-   this.budget=new TrialBudget(options.ledgerPath,0.30,3);
+   if(options.trial!==undefined&&options.trial!=='reliability-v1')throw Error('Unknown trial');
+   this.budget=options.trial==='reliability-v1'?new TrialBudget(options.ledgerPath,0.40,4,'claude-reliability-v1'):new TrialBudget(options.ledgerPath,0.30,3);
  }
  summary(){const s=this.budget.summary()!;return {attempts:s.calls,reservedEquivalentUSD:s.reservedUSD,estimatedUsageUSD:s.reportedUSD};}
  close(){if(this.pending)throw Error('Decision still pending');this.budget.close();}

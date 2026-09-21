@@ -137,3 +137,62 @@ test('unconsumed bounded-history loss is explicitly audited',async()=>{
  assert.equal(c.inspect().characters.A!.experiences!.length,64);
  assert.equal(store.events().filter(e=>e.event.kind==='attention-gap').length,6);store.close();
 });
+
+test('Chitchat queues behind a thought, coalesces and obeys cooldown without losing the new experience',async()=>{
+ const {game,store,c}=await setup();game.event('memory','A','Chitchat');let release!:(v:unknown)=>void;
+ const pending=c.attend('A',{name:'slow',reflect:()=>new Promise(r=>release=r)});
+ await until(()=>!!release);game.event('memory','A','Chitchat');game.event('memory','A','Chitchat');await c.observe();
+ release({kind:'continue',reason:'Finish this thought'});assert.equal((await pending).status,'continued');
+ assert.equal(c.inspect().characters.A!.attention!.cursor,1);
+ assert.equal((await c.attend('A',quiet)).status,'cooldown');
+ game.data.ticks+=300;let events=0;
+ assert.equal((await c.attend('A',{name:'coalesced',async reflect(v){events=v.events.length;return {kind:'continue',reason:'Recall conversation'};}})).status,'continued');
+ assert.equal(events,1);assert.equal(c.inspect().characters.A!.experiences!.length,3);store.close();
+});
+test('explicit decisions also reject newly observed health changes without a concurrent poll',async()=>{
+ const {game,store,c}=await setup(),p=await c.core().propose('A',action,'Move');
+ await assert.rejects(c.pawn('A').decide(p.id,{name:'new-danger',async decide(){game.event('health');return {kind:'accept',reason:'Stale'};}}));
+ assert.equal(game.moves,0);assert.equal(c.inspect().proposals[p.id]!.status,'pending');store.close();
+});
+
+class PausingGame extends Game {
+ leases=new Map<string,string>();
+ async setDecisionPause(p:{epoch:string;actor:string;leaseId:string;ttlMs:number}){
+  if(p.epoch!==this.data.epoch)throw Error('Stale pause');
+  if(p.ttlMs)this.leases.set(p.leaseId,p.actor);else this.leases.delete(p.leaseId);
+ }
+ async state(){return {...await super.state(),paused:this.data.paused||this.leases.size>0,manualPaused:this.data.paused,decisionPauses:this.leases.size};}
+}
+test('overlapping thoughts release only their own pauses and preserve a human pause',async()=>{
+ const game=new PausingGame(),store=new Store(':memory:'),c=new Coordinator(store,game,{mode:'pause-at-decision'});await c.open();
+ const a=await c.core().propose('A',action,'A'),b=await c.core().propose('B',action,'B');
+ const replies:Array<(v:unknown)=>void>=[];const backend={name:'slow',decide:()=>new Promise(r=>replies.push(r))};
+ const first=c.pawn('A').decide(a.id,backend),second=c.pawn('B').decide(b.id,backend);
+ await until(()=>replies.length===2);assert.equal(game.leases.size,2);assert((await game.state()).paused);
+ replies[0]!({kind:'refuse',reason:'No'});await first;assert.equal(game.leases.size,1);
+ game.data.paused=true;replies[1]!({kind:'refuse',reason:'No'});await second;
+ assert.equal(game.leases.size,0);assert((await game.state()).paused);store.close();
+});
+test('paused timeout and invalid reflection release claims without applying actions',async()=>{
+ const game=new PausingGame(),store=new Store(':memory:'),c=new Coordinator(store,game,{mode:'pause-at-decision'});await c.open();
+ const p=await c.core().propose('A',action,'A');
+ await assert.rejects(c.pawn('A').decide(p.id,{name:'stuck',decide:()=>new Promise(()=>{})},20));
+ assert.equal(game.leases.size,0);assert.equal((await game.state()).paused,false);
+ game.event();assert.equal((await c.attend('A',{name:'bad',async reflect(){assert((await game.state()).paused);return {kind:'move'};}})).status,'failed');
+ assert.equal(game.leases.size,0);assert.equal(game.moves,0);store.close();
+});
+test('pause acquisition failure prevents inference and unsupported pause mode rejects immediately',async()=>{
+ assert.throws(()=>new Coordinator(new Store(':memory:'),new Game(),{mode:'pause-at-decision'}),/unsupported/);
+ const game=new PausingGame(),store=new Store(':memory:');game.setDecisionPause=async()=>{throw Error('Disconnected');};
+ const c=new Coordinator(store,game,{mode:'pause-at-decision'});await c.open();const p=await c.core().propose('A',action,'A');let calls=0;
+ await assert.rejects(c.pawn('A').decide(p.id,{name:'unused',async decide(){calls++;return {kind:'accept',reason:'No'};}}));
+ assert.equal(calls,0);assert.deepEqual(c.activity(),[]);store.close();
+});
+
+test('urgent work takes priority over queued Chitchat and legacy records obey the current quiet-memory policy',async()=>{
+ const {game,store,c}=await setup();game.event('memory','A','Chitchat');game.event('health','B');await c.observe();
+ assert.deepEqual(c.attentionCandidates(),['B','A']);
+ const state=store.read()!;state.characters.A!.attention={cursor:0,lastAttemptTick:1000};
+ delete state.characters.A!.experiences![0]!.interrupt;store.commit(state,{branch:state.branch,kind:'fixture-old-schema',actor:'operator',data:{}});
+ const reopened=new Coordinator(store,game);await reopened.open();assert(!reopened.attentionCandidates().includes('A'));store.close();
+});

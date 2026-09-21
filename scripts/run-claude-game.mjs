@@ -2,23 +2,26 @@
 import { spawn,execFileSync } from 'node:child_process';
 import { readFile,writeFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
-import { createHash } from 'node:crypto';
 import { ClaudeDecisionBackend } from '../dist/src/claude-decision.js';
 const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.argv.includes('--cold');
 const audit=process.argv.includes('--audit');
+const timing=config.timingMode??'continuous';
+if(!['continuous','pause-at-decision'].includes(timing))throw Error('Invalid timing mode');
 if(cold&&audit)throw Error('Choose cold or audit');
 if(audit&&!(typeof config.auditDB==='string'&&config.auditDB.startsWith(config.remoteRepo+'/.runtime/claude-game-')&&config.auditDB.endsWith('.db')))throw Error('Invalid audit database');
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  ![config.labRoot,config.remoteRepo,config.ledger,config.scratchRoot,config.receipt].every(p=>typeof p==='string'&&p.startsWith('/')))
  throw Error('Invalid operator configuration');
-const backend=new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot}),before=backend.summary();
-if(!cold&&!audit&&Number(before.attempts)>1)throw Error('Two decision trial attempts must remain');
+const backend=new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:config.trial}),before=backend.summary();
+if(!cold&&!audit&&Number(before.attempts)>(config.trial==='reliability-v1'?2:1))throw Error('Two decision trial attempts must remain');
 const quote=s=>"'"+s.replaceAll("'","'\\''")+"'";
 const env=Object.fromEntries(['PATH','HOME','LANG'].filter(k=>process.env[k]).map(k=>[k,process.env[k]]));
-const expectedHash=createHash('sha256').update(await readFile(new URL('../dist/src/claude-game-acceptance.js',import.meta.url))).digest('hex');
-const remoteHash=execFileSync('ssh',['-o','BatchMode=yes','-o','ConnectTimeout=10',config.sshTarget,'sha256sum '+quote(config.remoteRepo+'/dist/src/claude-game-acceptance.js')],{env,timeout:15000,encoding:'utf8'}).split(/\s/)[0];
+// Hash every compiled coordinator module, not only the runner entry point.
+const digestCode="const fs=require('fs'),p=require('path'),h=require('crypto').createHash('sha256'),d=process.argv[1];for(const n of fs.readdirSync(d).filter(n=>n.endsWith('.js')).sort()){h.update(n);h.update(fs.readFileSync(p.join(d,n)));}console.log(h.digest('hex'));";
+const expectedHash=execFileSync(process.execPath,['-e',digestCode,new URL('../dist/src/',import.meta.url).pathname],{env,encoding:'utf8'}).trim();
+const remoteHash=execFileSync('ssh',['-o','BatchMode=yes','-o','ConnectTimeout=10',config.sshTarget,'node -e '+quote(digestCode)+' '+quote(config.remoteRepo+'/dist/src')],{env,timeout:15000,encoding:'utf8'}).trim();
 if(remoteHash!==expectedHash)throw Error('Remote decision runner differs from local build; deploy before running');
-const cmd=`env RIMWORLD_LAB_ROOT=${quote(config.labRoot)} flock -n ${quote(config.labRoot+'/concord/coordinator.lock')} node ${quote(config.remoteRepo+'/dist/src/claude-game-acceptance.js')}${cold?' --cold':audit?' --audit '+quote(config.auditDB):''}`;
+const cmd=`env RIMWORLD_LAB_ROOT=${quote(config.labRoot)} flock -n ${quote(config.labRoot+'/concord/coordinator.lock')} node ${quote(config.remoteRepo+'/dist/src/claude-game-acceptance.js')} --timing=${timing}${config.trial==='reliability-v1'?' --reliability':''}${cold?' --cold':audit?' --audit '+quote(config.auditDB):''}`;
 const child=spawn('ssh',['-o','BatchMode=yes','-o','ConnectTimeout=10',config.sshTarget,cmd],{env,stdio:['pipe','pipe','pipe']});
 let receipt,failed=false;const active=new Map(),seen=new Set(),tasks=[];
 child.stderr.on('data',()=>{});child.stdin.on('error',()=>{failed=true;});

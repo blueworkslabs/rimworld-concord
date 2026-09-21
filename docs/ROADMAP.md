@@ -31,13 +31,22 @@
 - Event-triggered live reflection was interrupted by newer conversation memory; no response applied.
 - This is a mixed result, not proof of completed live reflection or narrative quality.
 
+## Thought reliability increment
+
+- Known mundane Chitchat queues/coalesces without cancelling current thought; health and unfamiliar memories remain conservative interrupts.
+- Explicit continuous/default and pause-at-decision/testing modes with independent game-owned wall-clock pause claims.
+- Overlap, manual pause preservation, orphan expiry and reload verified in the real game.
+- Incremental paired checkpoints and full compiled-coordinator deployment hash preflight.
+- Completed live acceptance/movement and event-triggered refusal in both timing modes; paired and full game/coordinator cold restore verified separately.
+- Separate four-attempt subscription ledger exhausted, with historical trial ledgers unchanged. No long-run quality claim.
+
 ## Next bounded increment
 
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
-- Live appraisal is connected in the bounded operator lab with independent usage accounting; completed live event-driven reflection and unattended operation remain to be proved.
+- Evaluate end-to-end scheduling and sustained character consistency beyond the finite integration trials.
 - Extend social-event capture and perceived knowledge; add operator inspection UI.
-- Refine significant-event policy: repeated low-stakes conversation currently interrupts live reflection; preserve urgent supersession without starving ordinary thought.
-- Evaluate completed live event-driven reflection under an explicit next trial allowance.
+- Expand relevance-aware interruption beyond the narrow Chitchat exception; retain urgent supersession.
+- Tune optional consequential-decision pauses from playtests; avoid global stop-start behavior.
 - Exercise three independent perspectives and counterproposal negotiation.
 
 ## Later

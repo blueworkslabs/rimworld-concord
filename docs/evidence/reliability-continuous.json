@@ -1,0 +1,91 @@
+{
+  "at": "2026-09-21T18:31:54.514Z",
+  "kind": "claude-game-trial",
+  "passed": true,
+  "access": "Claude Code native Max login; monetary values are API-equivalent usage estimates, not cash billing",
+  "before": {
+    "attempts": 2,
+    "reservedEquivalentUSD": 0.2,
+    "estimatedUsageUSD": 0.032151
+  },
+  "after": {
+    "attempts": 4,
+    "reservedEquivalentUSD": 0.4,
+    "estimatedUsageUSD": 0.06234
+  },
+  "calls": [
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3622,
+      "estimatedUsageUSD": 0.012507,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "reflection",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 6183,
+      "estimatedUsageUSD": 0.017682,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    }
+  ],
+  "game": {
+    "at": "2026-09-21T18:31:25.641Z",
+    "kind": "claude-game-decisions",
+    "timing": "continuous",
+    "checks": [
+      "live explicit pawn decision follows the existing validated action contract and reconciles actual outcome",
+      "natural significant event invokes live pawn-owned reflection without Jev or a scripted decision",
+      "native game ticks advance during completed live thought",
+      "paired save/restore preserves model-authored decisions, outcomes and reflection in a new timeline"
+    ],
+    "passed": true,
+    "pawn": "Thing_Human405",
+    "explicit": {
+      "status": "accepted",
+      "decision": {
+        "kind": "accept",
+        "reason": "Just wandering anyway, and I'm in good shape \u2014 well-rested, fed, mood's alright. Strolling east a bit suits me fine. Maybe I'll spot something interesting for the animals out that way."
+      },
+      "outcome": {
+        "status": "completed",
+        "reason": "Reached destination"
+      }
+    },
+    "ticksDuringDeliberation": 617,
+    "activityObserved": true,
+    "checkpoint": "lab-concord-thought-1790015509374",
+    "checkpointStage": "reflection-complete",
+    "reflectionAttempt": {
+      "pawn": "Thing_Human405",
+      "status": "decided",
+      "throughSeq": 12
+    },
+    "reflection": {
+      "status": "decided",
+      "proposalStatus": "refused",
+      "decision": {
+        "kind": "refuse",
+        "reason": "Those coordinates are impossibly far \u2014 likely off the map entirely. No purpose or route was given, and I'm not wandering blind into the unknown. I'll stay nearby where I can keep an eye on my bonded fox and the colony."
+      },
+      "records": [
+        {
+          "tick": 1028,
+          "throughSeq": 12,
+          "backend": "claude-sonnet-4-6",
+          "reason": "Those coordinates are impossibly far \u2014 likely off the map entirely. No purpose or route was given, and I'm not wandering blind into the unknown. I'll stay nearby where I can keep an eye on my bonded fox and the colony."
+        }
+      ]
+    },
+    "leaseSamples": 0,
+    "ticksWhileLeased": 0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "kind": "game-owned-decision-pause",
+  "at": "2026-09-21T18:28:29.988Z",
+  "passed": true,
+  "checks": [
+    "overlapping actor-owned claims hold stable ticks; wrong-owner release rejected; one release leaves the other pause",
+    "manual pause applied during deliberation remains after the last decision claim releases",
+    "orphaned claim expires on wall clock while paused, resuming only the independently selected running speed",
+    "wall-clock expiry cannot undo a pre-existing manual pause",
+    "reload clears old claims; a delayed old-epoch release is rejected"
+  ]
+}

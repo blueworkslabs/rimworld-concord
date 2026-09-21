@@ -18,10 +18,22 @@ const Response=z.object({model:z.string().regex(/^typesafe\/jev-1\.13(?:-|$)/),
  */
 export class TrialBudget {
  private db:DatabaseSync;
- constructor(path:string,private limitUSD=0.02,private maxCalls=3) {
+ constructor(path:string,private limitUSD=0.02,private maxCalls=3,policyId='legacy') {
   if(!Number.isFinite(limitUSD)||limitUSD<=0||!Number.isInteger(maxCalls)||maxCalls<1) throw Error('Invalid trial budget');
   this.db=new DatabaseSync(path);
   this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS attempts(id TEXT PRIMARY KEY,reserved REAL NOT NULL,actual REAL,state TEXT NOT NULL);');
+  this.db.exec('CREATE TABLE IF NOT EXISTS trial_policy(id INTEGER PRIMARY KEY CHECK(id=1),name TEXT NOT NULL,ceiling REAL NOT NULL,calls INTEGER NOT NULL);');
+  this.db.exec('BEGIN IMMEDIATE');
+  try {
+   const policy=this.db.prepare('SELECT * FROM trial_policy WHERE id=1').get();
+   if(policy) {
+    if(policy.name!==policyId||policy.ceiling!==limitUSD||policy.calls!==maxCalls)throw Error('Trial policy mismatch; existing allowance cannot be changed');
+   } else {
+    if(policyId!=='legacy'&&Number(this.db.prepare('SELECT COUNT(*) AS calls FROM attempts').get()!.calls)>0)throw Error('New trial requires its own unused ledger');
+    this.db.prepare('INSERT INTO trial_policy VALUES(1,?,?,?)').run(policyId,limitUSD,maxCalls);
+   }
+   this.db.exec('COMMIT');
+  } catch(e) {this.db.exec('ROLLBACK');this.db.close();throw e;}
  }
  reserve(ceiling:number):string {
   if(!Number.isFinite(ceiling)||ceiling<=0) throw Error('Invalid reservation');
