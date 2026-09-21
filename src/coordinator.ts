@@ -133,7 +133,8 @@ export class Coordinator {
       const activity={epoch:game.epoch,actor:pawn,activityId:randomUUID(),ttlMs:config.timeoutMs+2000};
       this.commit('attention-started',pawn,{throughSeq,count:events.length,backend:backend.name,appraiser:significant?null:appraiser?.name});
       const view=structuredClone({pawn:own,character,events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
-        proposals:Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending').slice(0,8)});
+        proposals:Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending').slice(0,8),
+        histories:Object.fromEntries(Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending'&&p.parentId).slice(0,8).map(p=>[p.id,this.history(p)]))});
       return {status:'running' as const,generation:this.generation,controller,activity,view,throughSeq,significant};
     });
     if(prepared.status!=='running') return {pawn,status:prepared.status,throughSeq:'throughSeq' in prepared?prepared.throughSeq:undefined};
@@ -226,23 +227,46 @@ export class Coordinator {
   }
   inspect() { return structuredClone(this.domain); }
   activity() { return [...this.pending.keys()].map(pawn=>({pawn,status:'deliberating' as const})); }
+  /** Deliberately communicated proposal/reply text only; never character memories or reflections. */
   core() {
-    return {propose:(pawn:string,action:Move,reason:string,id=randomUUID())=>this.serial(async()=>{
-      await this.current();
-      action=Move.parse(action);
-      z.string().uuid().parse(id);
-      if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
-      if(!reason.trim() || reason.length>1000) throw Error('Invalid proposal reason');
-      const prior=this.domain.proposals[id];
-      if(prior) {
-        if(prior.pawn!==pawn || JSON.stringify(prior.action)!==JSON.stringify(action) || prior.reason!==reason) throw Error('Proposal ID collision');
-        return structuredClone(prior);
-      }
-      const p:Proposal={id,pawn,action,reason,status:'pending'};
-      this.domain.proposals[id]=p;
-      this.commit('proposed','core',p);
-      return structuredClone(p);
-    })};
+    return {
+      inbox:()=>structuredClone(Object.values(this.domain.proposals).filter(p=>p.status==='countered'&&!p.replyId)),
+      propose:(pawn:string,action:Move,reason:string,id=randomUUID())=>this.serial(async()=>{
+        await this.current();return this.propose(pawn,action,reason,id);
+      }),
+      revise:(counterId:string,reason:string,id=randomUUID())=>this.serial(async()=>{
+        await this.current();
+        const parent=this.domain.proposals[counterId];
+        if(!parent||parent.status!=='countered'||parent.decision?.kind!=='counter') throw Error('Expected a communicated counterproposal');
+        if((parent.round??0)>=2) throw Error('Negotiation round limit reached');
+        if(parent.replyId&&parent.replyId!==id) throw Error('Counterproposal already answered');
+        // Adopting an alternative only creates a new offer. The pawn must accept it anew.
+        return this.propose(parent.pawn,parent.decision.action,reason,id,parent);
+      })
+    };
+  }
+  private propose(pawn:string,action:Move,reason:string,id:string,parent?:Proposal) {
+    action=Move.parse(action);z.string().uuid().parse(id);
+    if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
+    if(!reason.trim()||reason.length>1000) throw Error('Invalid proposal reason');
+    const prior=this.domain.proposals[id];
+    if(prior) {
+      if(prior.pawn!==pawn||JSON.stringify(prior.action)!==JSON.stringify(action)||prior.reason!==reason||prior.parentId!==parent?.id) throw Error('Proposal ID collision');
+      return structuredClone(prior);
+    }
+    const p:Proposal={id,pawn,action,reason,status:'pending',...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    if(parent)parent.replyId=id;
+    this.domain.proposals[id]=p;this.commit(parent?'proposal-revised':'proposed','core',p);
+    return structuredClone(p);
+  }
+  private history(proposal:Proposal):Proposal[] {
+    const history:Proposal[]=[];let id=proposal.parentId;
+    while(id) {
+      const p=this.domain.proposals[id];
+      if(!p||p.pawn!==proposal.pawn||history.length>=2||history.some(h=>h.id===id))throw Error('Invalid proposal lineage');
+      history.unshift(p);id=p.parentId;
+    }
+    return history;
   }
   pawn(pawn:string) {
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
@@ -266,7 +290,7 @@ export class Coordinator {
       try {await this.game.setActivity?.(activity);} catch {this.commit('indicator-unavailable',pawn,{});}
       this.pending.set(pawn,controller);
       this.commit('deliberation-started',pawn,{proposal:id,backend:backend.name});
-      return {generation:this.generation,controller,activity,view:structuredClone({pawn:own,character:this.domain.characters[pawn]!,proposal:p})};
+      return {generation:this.generation,controller,activity,view:structuredClone({pawn:own,character:this.domain.characters[pawn]!,proposal:p,...(p.parentId?{history:this.history(p)}:{})})};
     });
     let timer:ReturnType<typeof setTimeout>|undefined;
     try {
@@ -312,7 +336,10 @@ export class Coordinator {
     if(p.status!=='accepted' || !p.actionId) throw Error('Action requires pawn acceptance');
     const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action});
     this.domain.outcomes[receipt.id]=receipt;
-    if(receipt.status!=='started') delete this.domain.characters[p.pawn]!.commitment;
+    if(receipt.status!=='started') {
+      delete this.domain.characters[p.pawn]!.commitment;
+      this.domain.characters[p.pawn]!.memories.push(`Action ${receipt.status}: ${receipt.reason}`);
+    }
     this.commit('action-outcome',p.pawn,receipt);
   }
   /** Reconcile before retry; a lost response never creates a new action ID. */

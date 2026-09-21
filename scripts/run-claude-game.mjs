@@ -4,8 +4,12 @@ import { readFile,writeFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
 import { ClaudeDecisionBackend } from '../dist/src/claude-decision.js';
 const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.argv.includes('--cold');
-const audit=process.argv.includes('--audit');
+const audit=process.argv.includes('--audit'),continued=process.argv.includes('--continue');
+const negotiation=config.trial==='negotiation-v1',maxRequests=negotiation?6:2;
+if(continued&&(!negotiation||cold||audit))throw Error('Continuation is only for the same partial negotiation trial');
+if(negotiation&&audit)throw Error('Negotiation uses checkpoint cold restore, not legacy audit');
 const timing=config.timingMode??'continuous';
+if(negotiation&&timing!=='pause-at-decision')throw Error('Negotiation trial requires explicit pause-at-decision mode');
 if(!['continuous','pause-at-decision'].includes(timing))throw Error('Invalid timing mode');
 if(cold&&audit)throw Error('Choose cold or audit');
 if(audit&&!(typeof config.auditDB==='string'&&config.auditDB.startsWith(config.remoteRepo+'/.runtime/claude-game-')&&config.auditDB.endsWith('.db')))throw Error('Invalid audit database');
@@ -13,7 +17,9 @@ if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-'
  ![config.labRoot,config.remoteRepo,config.ledger,config.scratchRoot,config.receipt].every(p=>typeof p==='string'&&p.startsWith('/')))
  throw Error('Invalid operator configuration');
 const backend=new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:config.trial}),before=backend.summary();
-if(!cold&&!audit&&Number(before.attempts)>(config.trial==='reliability-v1'?2:1))throw Error('Two decision trial attempts must remain');
+if(continued&&(!Number.isInteger(before.attempts)||Number(before.attempts)<1||Number(before.attempts)>5))throw Error('No partial negotiation allowance');
+if(negotiation&&!cold&&!continued&&Number(before.attempts)!==0)throw Error('Negotiation trial cannot be replayed');
+if(!negotiation&&!cold&&!audit&&Number(before.attempts)>(config.trial==='reliability-v1'?2:1))throw Error('Two decision trial attempts must remain');
 const quote=s=>"'"+s.replaceAll("'","'\\''")+"'";
 const env=Object.fromEntries(['PATH','HOME','LANG'].filter(k=>process.env[k]).map(k=>[k,process.env[k]]));
 // Hash every compiled coordinator module, not only the runner entry point.
@@ -21,7 +27,7 @@ const digestCode="const fs=require('fs'),p=require('path'),h=require('crypto').c
 const expectedHash=execFileSync(process.execPath,['-e',digestCode,new URL('../dist/src/',import.meta.url).pathname],{env,encoding:'utf8'}).trim();
 const remoteHash=execFileSync('ssh',['-o','BatchMode=yes','-o','ConnectTimeout=10',config.sshTarget,'node -e '+quote(digestCode)+' '+quote(config.remoteRepo+'/dist/src')],{env,timeout:15000,encoding:'utf8'}).trim();
 if(remoteHash!==expectedHash)throw Error('Remote decision runner differs from local build; deploy before running');
-const cmd=`env RIMWORLD_LAB_ROOT=${quote(config.labRoot)} flock -n ${quote(config.labRoot+'/concord/coordinator.lock')} node ${quote(config.remoteRepo+'/dist/src/claude-game-acceptance.js')} --timing=${timing}${config.trial==='reliability-v1'?' --reliability':''}${cold?' --cold':audit?' --audit '+quote(config.auditDB):''}`;
+const cmd=`env RIMWORLD_LAB_ROOT=${quote(config.labRoot)} flock -n ${quote(config.labRoot+'/concord/coordinator.lock')} node ${quote(config.remoteRepo+'/dist/src/'+(negotiation?'negotiation-acceptance.js':'claude-game-acceptance.js'))} --timing=${timing}${config.trial==='reliability-v1'?' --reliability':''}${continued?' --continue='+Number(before.attempts):''}${cold?' --cold':audit?' --audit '+quote(config.auditDB):''}`;
 const child=spawn('ssh',['-o','BatchMode=yes','-o','ConnectTimeout=10',config.sshTarget,cmd],{env,stdio:['pipe','pipe','pipe']});
 let receipt,failed=false;const active=new Map(),seen=new Set(),tasks=[];
 child.stderr.on('data',()=>{});child.stdin.on('error',()=>{failed=true;});
@@ -32,7 +38,7 @@ async function handle(line){
  if(m.type==='receipt'){if(receipt)throw Error();receipt=m.receipt;return;}
  if(!/^[0-9a-f-]{36}$/.test(m.id))throw Error();
  if(m.type==='decision-cancel'){active.get(m.id)?.abort();return;}
- if(cold||audit||m.type!=='decision-request'||!['decision','reflection'].includes(m.mode)||active.size||seen.has(m.id)||seen.size>=2)throw Error();
+ if(cold||audit||m.type!=='decision-request'||!['decision','reflection'].includes(m.mode)||active.size||seen.has(m.id)||seen.size>=maxRequests-(continued?Number(before.attempts):0))throw Error();
  seen.add(m.id);const controller=new AbortController();active.set(m.id,controller);
  try{
    const output=await (m.mode==='decision'?backend.decide(m.view,controller.signal):backend.reflect(m.view,controller.signal));
@@ -41,10 +47,10 @@ async function handle(line){
  finally{active.delete(m.id);}
 }
 input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill();})));
-const timer=setTimeout(()=>{failed=true;child.kill();},420000);
+const timer=setTimeout(()=>{failed=true;child.kill();},negotiation?900000:420000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const controller of active.values())controller.abort();await Promise.all(tasks);
-const result={at:new Date().toISOString(),kind:cold?'claude-game-cold':audit?'claude-game-audit':'claude-game-trial',passed:!failed&&code===0&&receipt?.passed===true,
+const result={at:new Date().toISOString(),kind:negotiation?(cold?'negotiation-cold':'negotiation-game'):cold?'claude-game-cold':audit?'claude-game-audit':'claude-game-trial',passed:!failed&&code===0&&receipt?.passed===true,
  access:'Claude Code native Max login; monetary values are API-equivalent usage estimates, not cash billing',
  before,after:backend.summary(),calls:backend.receipts,game:receipt};backend.close();
 await writeFile(config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;

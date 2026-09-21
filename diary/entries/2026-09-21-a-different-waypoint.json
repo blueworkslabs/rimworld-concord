@@ -1,0 +1,57 @@
+{
+  "slug": "a-different-waypoint",
+  "title": "A Different Waypoint",
+  "date": "2026-09-21",
+  "summary": "Beatrice offers a closer waypoint, accepts the revised request and completes the move. Six live choices test three authored preferences—and expose an unavailable destination.",
+  "sections": [
+    {
+      "heading": "The Counter Inbox",
+      "paragraphs": [
+        "We have rebuilt how proposals circulate. Previously, when a pawn recorded a counterproposal, the thread simply noted the alternative and halted. Now the counter inbox and revise API fold the counter's exact waypoint into a fresh pending offer addressed to the same pawn. Nothing proceeds without renewed consent; refusal or another counter remain possible. We capped revisions at two per thread. The pawn receives its own earlier exchange, while the core sees deliberately communicated replies—not the pawn's private memory archive."
+      ]
+    },
+    {
+      "heading": "What We Actually Tested",
+      "paragraphs": [
+        "Six decisions across three pawns: Alvin, Beatrice, and Pedro. Each received its real self-facts plus a clearly labelled, operator-authored test preference: Alvin was willing to walk twenty tiles or fewer, Beatrice preferred staying within two tiles of her starting point, and Pedro preferred no optional movement. These were test inputs, not native traits or personalities that emerged from play. The request was a twelve-tile move. Each pawn made two sequential live decisions through Claude Sonnet 4.6 on the Max subscription, in paused testing mode. Core replies were scripted, not live strategic reasoning.",
+        "Alvin accepted the initial twelve-tile target; the game returned Destination unavailable or unsafe. The runner wrongly assumed an accepted move must complete, and stopped after one call. We preserved this failure exactly, continuing the remaining five calls from the same game and character state with no reroll or reset. Alvin later accepted a one-tile-from-origin request and completed.",
+        "Beatrice countered with waypoint (75,79); the scripted core offered that exact alternative back, which she accepted and completed. Pedro refused both requests. Six choices satisfied the predeclared authored-distance and routine rubric. This is evidence of mechanical function, not proof of narrative depth or emergent personality."
+      ]
+    },
+    {
+      "heading": "Lineage and Regression",
+      "paragraphs": [
+        "Paired restore and full cold game and coordinator restart passed: three characters, six decisions, their lineages and outcomes intact. Fifty-eight automated tests pass. Separately, we fixed an omission that left immediate action failures out of the pawn's memory even though their outcomes were saved. A scripted real-game regression verified that the owner now remembers that failure exactly once. Live views were not retroactively repaired."
+      ]
+    },
+    {
+      "heading": "What Remains",
+      "paragraphs": [
+        "The six-call allowance is exhausted. Reported API-equivalent subscription usage was USD 0.087609, not a cash charge. All three older trial ledgers are unchanged; no Jev calls were made, and staging is stopped.",
+        "The failed destination points to the next grounding problem: an accepted intention is not necessarily an available action. We still need better information about what a pawn can actually do, and longer tests before making claims about character consistency beyond these authored preferences."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Negotiation contract and trial limits",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/06651ab8967dc5b94f4dd9d8d7519c67fe81f3cd/docs/NEGOTIATION.md"
+    },
+    {
+      "label": "Six live decisions and the preserved first-run failure",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/06651ab8967dc5b94f4dd9d8d7519c67fe81f3cd/docs/evidence/negotiation-live.json"
+    },
+    {
+      "label": "Three-character cold restart",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/06651ab8967dc5b94f4dd9d8d7519c67fe81f3cd/docs/evidence/negotiation-cold.json"
+    },
+    {
+      "label": "Scripted immediate-failure memory regression",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/06651ab8967dc5b94f4dd9d8d7519c67fe81f3cd/docs/evidence/negotiation-immediate-outcome.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

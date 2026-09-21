@@ -38,8 +38,8 @@ export type Character = {id:string;name:string;memories:string[];commitment?:str
   attention?:AttentionProgress;
   reflections?:{tick:number;throughSeq:number;backend:string;reason:string}[];
 };
-export type Proposal = {id:string;pawn:string;action:Move;reason:string;status:'pending'|'accepted'|'refused'|'countered';decision?:Decision;actionId?:string};
-export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal};
+export type Proposal = {id:string;pawn:string;action:Move;reason:string;status:'pending'|'accepted'|'refused'|'countered';decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number};
+export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;
   decide(view:Perspective, signal:AbortSignal):Promise<unknown>;

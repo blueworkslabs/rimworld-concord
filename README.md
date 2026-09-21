@@ -22,6 +22,8 @@ A bounded experimental vertical slice, not a playable campaign or unattended AI 
 
 - A tool-isolated Claude Code Max backend completed one live pawn decision and real movement. A subsequent reliability trial completed event-triggered refusal in both paused and continuous modes, with paired and cold restore verified. See [live deliberation](docs/LIVE_DELIBERATION.md).
 
+A subsequent [three-pawn negotiation trial](docs/NEGOTIATION.md) completed a live counter → revised offer → fresh acceptance → movement exchange. Three real self-views plus labelled authored preferences were checked over two sequential decisions each; the core replies were scripted. Paired and cold restore passed. This is not emergent-personality evidence.
+
 Explicit [timing modes](docs/DECISION_TIMING.md) preserve human pauses and let known mundane Chitchat queue without cancelling thought. Continuous play remains the default.
 
 See [acceptance](docs/ACCEPTANCE.md) for measured results and limitations, and [roadmap](docs/ROADMAP.md) for what is not built.

@@ -12,7 +12,7 @@ export const Reflection=z.discriminatedUnion('kind',[
   z.object({kind:z.literal('proposal'),proposalId:z.string().uuid(),decision:Decision}).strict()
 ]);
 export type Reflection=z.infer<typeof Reflection>;
-export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[]};
+export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];histories?:Record<string,Proposal[]>};
 export interface AttentionBackend {
   readonly name:string;
   reflect(view:AttentionView,signal:AbortSignal):Promise<unknown>;

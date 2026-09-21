@@ -40,6 +40,15 @@
 - Completed live acceptance/movement and event-triggered refusal in both timing modes; paired and full game/coordinator cold restore verified separately.
 - Separate four-attempt subscription ledger exhausted, with historical trial ledgers unchanged. No long-run quality claim.
 
+## Three-pawn negotiation increment
+
+- Communicated counter inbox, exact-alternative revised offers, fresh pawn consent and two-revision thread bound.
+- Owner-only ancestor history in explicit and event-driven views; saved lineage and idempotent replies.
+- Three sequential live pawns, two decisions each, real self-facts plus explicitly authored test preferences.
+- Beatrice countered, accepted the revision and completed movement; Pedro refused twice; Alvin accepted twice, with one rejected destination and one completed move.
+- All six met the limited authored-preference rubric; paired/cold restore passed. Not emergent personality, live core strategy or concurrent live-agent evidence.
+- Immediate terminal action failures reach owner memory, verified separately with scripted real-game regression.
+
 ## Next bounded increment
 
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
@@ -47,7 +56,8 @@
 - Extend social-event capture and perceived knowledge; add operator inspection UI.
 - Expand relevance-aware interruption beyond the narrow Chitchat exception; retain urgent supersession.
 - Tune optional consequential-decision pauses from playtests; avoid global stop-start behavior.
-- Exercise three independent perspectives and counterproposal negotiation.
+- Ground proposed action choices in available world affordances; avoid offering invalid destinations blindly.
+- Extend beyond authored-preference checks toward sustained character behavior and multi-party negotiation.
 
 ## Later
 

@@ -30,7 +30,7 @@ const accept=scripted({kind:'accept',reason:'I choose to help'});
 
 test('core has no execution handle; pawn acceptance executes once; counterpart cannot decide',async()=>{
   const {c,game}=await setup();
-  assert.deepEqual(Object.keys(c.core()),['propose']);
+  assert.deepEqual(Object.keys(c.core()),['inbox','propose','revise']);
   const id=randomUUID();const p=await c.core().propose('A',move,'Help',id);
   await assert.rejects(c.pawn('B').decide(p.id,accept),/belong/);
   await c.pawn('A').decide(p.id,accept);
@@ -140,4 +140,68 @@ test('late appraisal cannot change a restored character',async()=>{
  while(!release)await new Promise(r=>setTimeout(r,1));
  await c.restore('lab-concord-appraisal');release({reflectionScore:1});await rejected;
  assert.equal(c.inspect().characters.A!.experiences![0]!.route,'appraisal');
+});
+
+test('core adoption of a counter is a pending offer; only fresh owner consent executes',async()=>{
+ const {c,game}=await setup();const counter=scripted({kind:'counter',reason:'Closer please',action:{...move,x:2}});
+ const p=await c.core().propose('A',move,'Walk');await c.pawn('A').decide(p.id,counter);
+ const id=randomUUID();const q=await c.core().revise(p.id,'I can use your closer waypoint',id);
+ assert.equal(game.moves,0);assert.equal(q.pawn,'A');assert.equal(q.status,'pending');assert.equal(q.action.x,2);assert.equal(q.parentId,p.id);
+ assert.deepEqual(await c.core().revise(p.id,'I can use your closer waypoint',id),q);
+ await assert.rejects(c.core().revise(p.id,'Another branch'),/already answered/);
+ await assert.rejects(c.core().propose('A',q.action,q.reason,id),/collision/);
+ await assert.rejects(c.pawn('B').decide(q.id,accept),/belong/);
+ await c.pawn('A').decide(q.id,{name:'owner',async decide(v){assert.equal(v.history?.length,1);assert.equal(v.history[0]!.decision?.kind,'counter');return {kind:'accept',reason:'The revised terms work'};}});
+ assert.equal(game.moves,1);assert.equal(game.data.actions[0]!.x,2);
+});
+
+test('revised proposal can still be refused; bounded negotiation cannot loop forever',async()=>{
+ const {c,game}=await setup();let p=await c.core().propose('A',move,'Walk');
+ for(let i=0;i<3;i++) {
+   await c.pawn('A').decide(p.id,scripted({kind:'counter',reason:'Consider this instead',action:{...move,x:2+i}}));
+   if(i<2)p=await c.core().revise(p.id,'New offer');
+ }
+ await assert.rejects(c.core().revise(p.id,'Keep negotiating'),/round limit/);
+ const q=await c.core().propose('B',move,'Walk');await c.pawn('B').decide(q.id,scripted({kind:'counter',reason:'Closer',action:{...move,x:3}}));
+ const revised=await c.core().revise(q.id,'Agreed');await c.pawn('B').decide(revised.id,scripted({kind:'refuse',reason:'I changed my mind'}));
+ await assert.rejects(c.core().revise(revised.id,'Override'),/Expected/);assert.equal(game.moves,0);
+});
+
+test('negotiation inbox excludes private experience; three simultaneous views stay owner-specific',async()=>{
+ const {c,game}=await setup();
+ // Third character in this deterministic transport fixture, without a new production character API.
+ game.data.pawns.push({id:'C',name:'Cee',x:3,z:3,job:'Wait',health:1});
+ const store=new Store(':memory:'),d=new Coordinator(store,game);await d.open();
+ game.data.events=['A','B','C'].map((pawn,i)=>({seq:i+1,tick:1,pawn,kind:'memory',detail:'PRIVATE-'+pawn}));game.data.eventSeq=3;await d.observe();
+ const proposals=await Promise.all(['A','B','C'].map(pawn=>d.core().propose(pawn,move,'Public exercise')));
+ let ready=0;let release!:()=>void;const barrier=new Promise<void>(r=>release=r);
+ await Promise.all(proposals.map(p=>d.pawn(p.pawn).decide(p.id,{name:'isolated',async decide(v){
+   const text=JSON.stringify(v);for(const other of ['A','B','C'].filter(x=>x!==p.pawn))assert(!text.includes('PRIVATE-'+other));
+   if(++ready===3)release();await barrier;
+   return {kind:'counter',reason:'Public shorter route',action:{...move,x:2}};
+ }})));
+ const inbox=d.core().inbox();assert.equal(inbox.length,3);assert(!JSON.stringify(inbox).includes('PRIVATE-'));
+ inbox[0]!.reason='mutated';assert.notEqual(d.core().inbox()[0]!.reason,'mutated');assert.equal(game.moves,0);
+ const q=await d.core().revise(proposals[0]!.id,'Your alternative');
+ await d.pawn(q.pawn).decide(q.id,{name:'history-private',async decide(v){assert(v.history?.every(h=>h.pawn===q.pawn));return {kind:'refuse',reason:'Not now'};}});
+});
+
+test('paired restore preserves negotiation lineage and rejects replies from discarded futures',async()=>{
+ const {c,game,store}=await setup();const p=await c.core().propose('A',move,'Walk');await c.pawn('A').decide(p.id,scripted({kind:'counter',reason:'Closer',action:{...move,x:2}}));
+ await c.checkpoint('lab-concord-negotiation');const future=await c.core().revise(p.id,'Accepted alternative');
+ await c.restore('lab-concord-negotiation');assert.equal(c.inspect().proposals[future.id],undefined);
+ await assert.rejects(c.pawn('A').decide(future.id,accept),/belong/);
+ const q=await c.core().revise(p.id,'Restored alternative');await c.pawn('A').decide(q.id,scripted({kind:'refuse',reason:'No'}));
+ await c.checkpoint('lab-concord-negotiated');const saved=c.inspect();
+ const reopened=new Coordinator(store,game);await reopened.restore('lab-concord-negotiated');assert.deepEqual(reopened.inspect().proposals,saved.proposals);assert.deepEqual(reopened.inspect().characters,saved.characters);
+ assert.equal(game.moves,0);
+});
+
+test('immediate dispatch failure becomes owner memory exactly once, not only an operator receipt',async()=>{
+ const {c,game}=await setup();
+ game.move=async r=>{const receipt:Receipt={id:r.id,actor:r.actor,status:'failed',reason:'Destination unavailable or unsafe',x:r.action.x,z:r.action.z};game.data.actions.push(receipt);return receipt;};
+ const p=await c.core().propose('A',move,'Walk');await c.pawn('A').decide(p.id,accept);await c.reconcile();await c.reconcile();
+ assert.equal(c.inspect().characters.A!.memories.filter(m=>m.includes('Action failed:')).length,1);
+ assert(!c.inspect().characters.B!.memories.some(m=>m.includes('Destination')));
+ const next=await c.core().propose('A',move,'Again');await c.pawn('A').decide(next.id,{name:'aware',async decide(v){assert(v.character.memories.some(m=>m.includes('Destination unavailable')));return {kind:'refuse',reason:'The last destination failed'};}});
 });
