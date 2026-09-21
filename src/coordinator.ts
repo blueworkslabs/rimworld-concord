@@ -29,6 +29,7 @@ export class Coordinator {
   }
   async open() {
     return this.serial(async()=>{
+      if(this.pending.size)throw Error('Cannot reopen while decisions are running');
       const game=await this.game.state();
       if(!game.loaded) throw Error('No loaded game');
       const previous=this.store.read();

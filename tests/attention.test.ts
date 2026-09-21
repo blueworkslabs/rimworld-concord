@@ -208,3 +208,14 @@ test('event-driven revised decision sees only owner negotiation history',async()
  }});
  assert.equal(result.status,'decided');assert.equal(game.moves,1);store.close();
 });
+
+test('reentrant open rejects without falsely interrupting an active thought',async()=>{
+ const {game,store,c}=await setup();game.event();let release!:(r:unknown)=>void;
+ const running=c.attend('A',{name:'delayed',reflect:()=>new Promise(r=>release=r)});
+ try {
+  await until(()=>!!release);await assert.rejects(c.open(),/Cannot reopen/);
+  assert.equal(c.inspect().characters.A!.attention!.last!.status,'running');
+  release({kind:'continue',reason:'Finish the original thought'});assert.equal((await running).status,'continued');
+  await c.open();assert.equal(c.inspect().characters.A!.attention!.last!.status,'continued');
+ }finally{store.close();}
+});

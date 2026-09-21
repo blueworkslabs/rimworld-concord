@@ -87,15 +87,15 @@ export class ClaudeDecisionBackend {
      signal.throwIfAborted();await mkdir(this.options.scratchRoot,{recursive:true});
      const cwd=await mkdtemp(join(this.options.scratchRoot,'pawn-'));
      id=this.budget.reserve(0.10);const began=Date.now();
-     const events=await this.invoke(binary,claudeArgs(mode),prompt,cwd,env,signal);
+     const events=await this.invoke(binary,claudeArgs(mode),prompt,cwd,env,signal,
+       cost=>this.budget.settle(id!,cost));
      const parsed=parseClaudeResult(events.result,mode);signal.throwIfAborted();
-     this.budget.settle(id,parsed.estimatedUsageUSD);
      this.receipts.push({mode,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'ok'});
      return parsed.output;
    } catch {throw Error(id?'Live decision unavailable; attempt retained':'Claude decision preflight failed');}
    finally {this.pending=false;}
  }
- private invoke(binary:string,args:string[],prompt:string,cwd:string,env:NodeJS.ProcessEnv,signal:AbortSignal):Promise<{result:unknown;tools:string[]}> {
+ private invoke(binary:string,args:string[],prompt:string,cwd:string,env:NodeJS.ProcessEnv,signal:AbortSignal,onCost:(cost:number)=>void):Promise<{result:unknown;tools:string[]}> {
    return new Promise((resolve,reject)=>{
      const child=spawn(binary,args,{cwd,env,stdio:['pipe','pipe','pipe'],detached:true});
      let buffer='',bytes=0,result:unknown,init=false,tools:string[]=[],failure=false;
@@ -112,7 +112,12 @@ export class ClaudeDecisionBackend {
            if(event.type==='system'&&event.subtype==='init'){if(init)throw Error();verifyClaudeInit(event);init=true;tools=event.tools;}
            if(event.type==='system'&&String(event.subtype).startsWith('hook_'))throw Error();
            if(event.type==='assistant'&&event.message?.content?.some((c:any)=>c.type==='tool_use'&&c.name!=='StructuredOutput'))throw Error();
-           if(event.type==='result'){if(!init||result)throw Error();result=event;}
+           if(event.type==='result'){
+             // Preserve reported usage even for invalid output, error results, or failed exits.
+             const billing=z.object({total_cost_usd:z.number().finite().nonnegative()}).safeParse(event);
+             if(billing.success)onCost(billing.data.total_cost_usd);
+             if(!init||result)throw Error();result=event;
+           }
          }catch{stop();}
        }
      });

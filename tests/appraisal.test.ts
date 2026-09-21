@@ -59,3 +59,41 @@ test('a persistent trial cannot be reopened with a larger or differently named a
   const reopened=new TrialBudget(path,0.4,4,'reliability');assert.equal(reopened.summary()!.calls,1);reopened.close();
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('invalid answers still account for known charges and persist overrun locks',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'concord-invalid-charge-')),path=join(dir,'budget.db');
+ let budget=new TrialBudget(path);
+ try {
+  await assert.rejects(new JevAppraiser(async()=>reply(2,1),budget).assess(view,new AbortController().signal),/exceeded/);
+  assert.equal(budget.summary()!.reportedUSD,1);budget.close();budget=new TrialBudget(path);
+  assert.throws(()=>budget.reserve(.002),/locked/);
+ }finally{budget.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('old partially settled overruns fail closed and repeated receipts cannot erase charges',()=>{
+ const budget=new TrialBudget(':memory:');
+ try {
+  const id=budget.reserve(.002);
+  (budget as any).db.prepare("UPDATE attempts SET actual=1,state='settled' WHERE id=?").run(id);
+  assert.throws(()=>budget.reserve(.002),/locked/);
+  assert.throws(()=>budget.settle(id,.001),/exceeded/);
+  assert.equal(budget.summary()!.reportedUSD,1);
+  assert.throws(()=>budget.reserve(.002),/locked/);
+ }finally{budget.close();}
+});
+
+test('a process exit after the settlement statement preserves both charge and overrun lock',async()=>{
+ const {spawnSync}=await import('node:child_process');
+ const dir=mkdtempSync(join(tmpdir(),'concord-charge-crash-')),path=join(dir,'budget.db');
+ try {
+  const source=`import {TrialBudget} from ${JSON.stringify(new URL('../src/appraisal.js',import.meta.url).href)};
+   const budget=new TrialBudget(process.argv[1]);const id=budget.reserve(.002);
+   const db=budget.db,prepare=db.prepare.bind(db);
+   db.prepare=sql=>{const statement=prepare(sql);if(sql.startsWith('UPDATE attempts SET actual='))return {get(...args){statement.get(...args);process.exit(86);}};return statement;};
+   budget.settle(id,1);process.exit(87);`;
+  const child=spawnSync(process.execPath,['--input-type=module','-e',source,path],{encoding:'utf8'});
+  assert.equal(child.status,86,child.stderr);
+  const reopened=new TrialBudget(path);
+  try{assert.equal(reopened.summary()!.reportedUSD,1);assert.throws(()=>reopened.reserve(.002),/locked/);}finally{reopened.close();}
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
