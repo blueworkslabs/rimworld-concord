@@ -20,7 +20,7 @@ export function afterAppraisal(a:Appraisal,threshold:number,consequential:boolea
  * and health changes still supersede thought. This is not semantic appraisal.
  */
 export function nativeAttention(event:{kind:string;detail:string}):{next:Route;interrupt:boolean} {
- const significant=event.kind==='memory'||event.kind==='health';
+ const significant=event.kind==='memory'||event.kind==='health'||event.kind==='casualty';
  return {next:route({urgent:event.kind==='health',significant,conflictsWithCommitment:false,routine:event.kind==='job'}).next,
    interrupt:significant&&!(event.kind==='memory'&&event.detail==='Chitchat')};
 }

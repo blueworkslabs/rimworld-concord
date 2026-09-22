@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-22",
+  "kind": "scripted real-game rehearsals, no live inference",
+  "fixture": "Authored anesthesia, relocated steel, storage and medical bed; patient initially outside actor local view. No personality or relationship overrides.",
+  "withdrawBranch": {
+    "discoveredDuringRunningHaulIntention": true,
+    "haulingInterrupted": true,
+    "rescueRequiredFreshOfferAndConsent": true,
+    "completedRescues": 1,
+    "deliveredSteel": 0,
+    "exactPatientBedVerified": true,
+    "pairedRestore": true,
+    "finalHostRetainedResponses": 3
+  },
+  "continueBranch": {
+    "discoveredDuringRunningHaulIntention": true,
+    "completedHaulTrips": 3,
+    "deliveredSteel": 30,
+    "rescueOffers": 0,
+    "pairedRestore": true,
+    "coldRestore": true,
+    "sameDownedPatientSightingCountAfterColdRestore": 1,
+    "inferenceCalls": 0
+  },
+  "bothBranches": {"pausedObservationSamples": 0, "hostDrainConfirmed": true, "cleanupErrors": []},
+  "replayGuard": {"duplicateRunRejected": true, "priorReceiptUnchanged": true},
+  "limitations": "Scripted choices prove mechanisms, not judgment. Cold continuation fixture leaves patient downed nearby. Finite one-actor discovery trial, not sustained attention scheduling or personality evidence. Raw private records retained."
+}

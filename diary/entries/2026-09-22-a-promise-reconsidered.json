@@ -1,0 +1,50 @@
+{
+  "slug": "a-promise-reconsidered",
+  "title": "A Promise Reconsidered",
+  "date": "2026-09-22",
+  "summary": "Alvin withdrew unfinished hauling after noticing Beatrice downed; a social memory then interrupted the separate rescue decision.",
+  "sections": [
+    {
+      "heading": "A reason to reconsider",
+      "paragraphs": [
+        "Alvin was hauling steel when he noticed Beatrice downed nearby. His agreement allowed three trips of ten units each. The first trip finished while he was thinking. After roughly five seconds of deliberation, he withdrew from the remaining commitment. No second or third trip started.",
+        "The new observation reports nearby, visible downed colony mates independently of whether rescue is available. It supplies physical evidence, not a diagnosis or their private thoughts. Saved sightings prevent repeated alerts for the same downed person. Native attention and model-dependent turns now have separate limits."
+      ]
+    },
+    {
+      "heading": "Two possible responses",
+      "paragraphs": [
+        "Scripted game tests exercised both choices. Withdrawal interrupted hauling, then a separate proposal and fresh consent led to delivery into the agreed medical bed. Continuation completed three trips and thirty steel without a rescue offer. Restarting with the patient still downed preserved one sighting rather than creating another alert.",
+        "Live, Alvin chose withdrawal, citing Beatrice's condition. His explanation is recorded model output, not proof of personality or relationship depth. This was an authored fixture: anesthesia, supplies and a bed arranged so the casualty began outside his local view. It tested discovery of an existing casualty, not a naturally occurring emergency. No personality or relationship overrides were added."
+      ]
+    },
+    {
+      "heading": "Fresh consent never arrived",
+      "paragraphs": [
+        "After withdrawal settled, the scripted core made an optional rescue offer. A new DeepTalk memory interrupted that deliberation before a valid answer returned. The unanswered offer was retired. No rescue was accepted or performed; Beatrice remained on the ground. This was cancellation, not refusal, and the trial made no retry.",
+        "Three Claude attempts produced two returned answers and one cancellation. Zero Jev appraisals were needed because casualty discovery took the direct deliberation route. The six-attempt and four-appraisal ceilings stayed unchanged. Observation ended after about sixteen seconds when the branch settled—not two full minutes—with no paused samples after initial negotiation."
+      ]
+    },
+    {
+      "heading": "What survived, and what comes next",
+      "paragraphs": [
+        "Paired and cold restore preserved the live result without further inference: ten steel delivered, remaining hauling withdrawn, rescue unaccepted. All 111 automated checks pass. Independent review caught two evidence-handling defects; both were fixed and re-reviewed.",
+        "The next question is interruption relevance beyond Chitchat. DeepTalk should not automatically invalidate an unrelated rescue decision. That remains unfixed here. The milestone proves a choice changed unfinished work—not that the intended rescue succeeded."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Experiment contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/RECONSIDERATION.md"
+    },
+    {
+      "label": "Acceptance evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/ACCEPTANCE.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

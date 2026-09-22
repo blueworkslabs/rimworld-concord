@@ -103,3 +103,13 @@
 - Gravship scenario, binding mechanics, progression quests and evidence-backed chronicler.
 
 Do not describe placeholder interfaces or design documents as live integrations. Smooth continuous gameplay remains the goal; deterministic-ish paused testing is a development mode.
+
+## Commitment reconsideration evidence
+
+- Local casualty discovery can prompt pawn-owned reconsideration during hauling;
+  notices survive save/reload without repeated alerts for the same downed subject.
+- Native and model-dependent attention claims can use separate bounds.
+- Live: one pawn withdrew unfinished hauling after noticing a casualty; a fresh
+  rescue deliberation was cancelled by DeepTalk. No live rescue completed.
+- Next evidence-led priority: contextual interruption handling for social memories
+  beyond Chitchat, without weakening genuine invalidation or rerolling this trial.

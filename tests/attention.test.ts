@@ -219,3 +219,28 @@ test('reentrant open rejects without falsely interrupting an active thought',asy
   await c.open();assert.equal(c.inspect().characters.A!.attention!.last!.status,'continued');
  }finally{store.close();}
 });
+
+test('split attention preserves model turns after native exhaustion and filters trial actors',async()=>{
+ const {game,store,c}=await setup();let calls=0;
+ const pump=new AttentionPump(c,{name:'count',async reflect(){calls++;return {kind:'continue',reason:'considered'};}},low,{}, {maxConcurrent:1,maxNativeTurns:1,maxModelTurns:1,pawns:['A']});
+ game.event('job');await pump.poll();await pump.drain();game.event('job');game.event('health','B');
+ await pump.poll();await pump.drain();assert.equal(pump.status().started,1);
+ game.event('casualty','A','Observed downed colonist');await pump.poll();await pump.drain();
+ assert.equal(calls,1);assert.equal(pump.status().nativeStarted,1);assert.equal(pump.status().modelStarted,1);
+ assert.equal(c.inspect().characters.B!.attention,undefined);await pump.stop();store.close();
+});
+test('split attention preserves native turns after model exhaustion; low appraisal consumes model allowance',async()=>{
+ const {game,store,c}=await setup();let appraisals=0;
+ const pump=new AttentionPump(c,quiet,{name:'low',async assess(){appraisals++;return {reflectionScore:.1};}}, {},{maxConcurrent:1,maxNativeTurns:1,maxModelTurns:1});
+ game.event('need');await pump.poll();await pump.drain();game.event('job');await pump.poll();await pump.drain();
+ game.data.ticks+=600;game.event('need');await pump.poll();await pump.drain();
+ assert.equal(appraisals,1);assert.equal(pump.status().nativeStarted,1);assert.equal(pump.status().modelStarted,1);await pump.stop();store.close();
+});
+test('fresh casualty cannot escalate a native-only claim across the split budget boundary',async()=>{
+ const {game,store,c}=await setup();let calls=0;game.event('job');await c.observe();
+ assert.deepEqual(c.attentionCandidates({},true,'native'),['A']);game.event('casualty');
+ const backend={name:'count',async reflect(){calls++;return {kind:'continue',reason:'Seen'};}};
+ assert.equal((await c.attend('A',backend,low,{},undefined,'native')).status,'unavailable');
+ assert.equal(calls,0);assert.equal(c.inspect().characters.A!.attention,undefined);
+ assert.equal((await c.attend('A',backend,low,{},undefined,'model')).status,'continued');assert.equal(calls,1);store.close();
+});

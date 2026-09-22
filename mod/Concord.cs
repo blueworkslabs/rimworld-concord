@@ -30,6 +30,7 @@ namespace Concord
         public List<ActionRecord> actions = new List<ActionRecord>();
         public List<NativeEvent> events = new List<NativeEvent>();
         public int eventSeq;
+        public List<CasualtyNotice> casualtyNotices=new List<CasualtyNotice>();
         private readonly Dictionary<string,Sample> samples=new Dictionary<string,Sample>();
         public readonly Dictionary<string,Thinking> thinking=new Dictionary<string,Thinking>();
         public WorldState(Game game) { }
@@ -39,6 +40,8 @@ namespace Concord
             if(actions==null) actions=new List<ActionRecord>();
             Scribe_Collections.Look(ref events,"concordEvents",LookMode.Deep);
             Scribe_Values.Look(ref eventSeq,"concordEventSeq");
+            Scribe_Collections.Look(ref casualtyNotices,"concordCasualtyNotices",LookMode.Deep);
+            if(casualtyNotices==null)casualtyNotices=new List<CasualtyNotice>();
             if(events==null) events=new List<NativeEvent>();
         }
         // Action ownership is independent of the operator's selected/viewed map.
@@ -57,14 +60,24 @@ namespace Concord
                 else if(pawn.CurJob==null || pawn.CurJob.loadID!=a.jobId) { a.status="interrupted"; a.reason="Native job changed"; }
             }
         }
-        private void Emit(string pawn,string kind,string detail) {
-            events.Add(new NativeEvent {seq=++eventSeq,tick=Find.TickManager.TicksGame,pawn=pawn,kind=kind,detail=detail});
+        private void Emit(string pawn,string kind,string detail,string subject="") {
+            events.Add(new NativeEvent {seq=++eventSeq,tick=Find.TickManager.TicksGame,pawn=pawn,kind=kind,detail=detail,subject=subject});
             if(events.Count>256) events.RemoveAt(0);
         }
         public void Observe() {
             if(Find.CurrentMap==null) return;
             foreach(var p in Find.CurrentMap.mapPawns.FreeColonistsSpawned) {
                 var id=p.GetUniqueLoadID(); var now=Awareness.Read(p); Sample old;
+                foreach(var target in Casualties.Visible(p)) {
+                    var tid=target.GetUniqueLoadID();
+                    var known=casualtyNotices.FirstOrDefault(n=>n.observer==id&&n.target==tid);
+                    if(Casualties.NeedsHelp(target)) {
+                        if(known==null) {
+                            casualtyNotices.Add(new CasualtyNotice {observer=id,target=tid});
+                            Emit(id,"casualty","Locally observed downed colonist "+target.LabelShort+" at "+target.Position.x+","+target.Position.z+"; cause and urgency unknown",tid);
+                        }
+                    }else if(known!=null)casualtyNotices.Remove(known);
+                }
                 if(samples.TryGetValue(id,out old)) {
                     if(now.job!=old.job) Emit(id,"job",now.job);
                     if(now.health!=old.health) Emit(id,"health",now.health.ToString());
@@ -125,7 +138,7 @@ namespace Concord
             var pawns=Find.CurrentMap.mapPawns.FreeColonistsSpawned.Select(p=>JsonUtility.ToJson(new PawnView {
                 id=p.GetUniqueLoadID(),name=p.LabelShort,job=p.CurJobDef==null?"":p.CurJobDef.defName,
                 x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent,workReady=Hauling.Ready(p),rescueReady=Rescue.Ready(p),downed=p.Downed,currentBed=p.CurrentBed()==null?"":p.CurrentBed().GetUniqueLoadID(),carrying=p.carryTracker.CarriedThing==null?"":p.carryTracker.CarriedThing.GetUniqueLoadID()
-            }).TrimEnd('}')+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+"}");
+            }).TrimEnd('}')+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
                 String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"]}";
