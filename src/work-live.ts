@@ -9,7 +9,7 @@ import {LabBridge} from './lab-bridge.js';
 import {DecisionChannel} from './decision-channel.js';
 import {AppraisalChannel} from './appraisal-channel.js';
 import {AttentionPump} from './attention.js';
-import {WORK_TRIAL,laterOfferEligible,workSummary,retireUndecided,WorkShutdown} from './work-trial.js';
+import {WORK_TRIAL,laterOfferEligible,workSummary,retireUndecided,WorkShutdown,stopTrialWork} from './work-trial.js';
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
 const runId=process.env.CONCORD_TRIAL_ID;if(!runId||!/^[0-9a-f-]{36}$/.test(runId))throw Error('Run identity required');
 const send=(m:unknown)=>process.stdout.write(JSON.stringify(m)+'\n');
@@ -57,8 +57,9 @@ async function offerRound(pawns:string[],later=false){
   await negotiate(id,pawn);
   const p=c!.inspect().proposals[id]!;
   if(!shutdown.stopped&&p.status==='countered'&&decisions<WORK_TRIAL.decisions){
-   try{const revised=await c!.core().revise(id,'The core offers your exact alternative back. Fresh consent is yours; refusal remains valid.');await negotiate(revised.id,pawn);}
-   catch{offers.push({pawn,id,status:'counter-no-longer-grounded'});}
+   let revised;try{revised=await c!.core().revise(id,'The core offers your exact alternative back. Fresh consent is yours; refusal remains valid.');}
+   catch{offers.push({pawn,id,status:'counter-no-longer-grounded'});continue;}
+   await negotiate(revised.id,pawn);
   }
  }
 }
@@ -85,7 +86,7 @@ try{
    await c.advanceIntentions();
    if(shutdown.stopped)break;
    if(!shutdown.later&&Date.now()-began>=second&&pump.status().pending===0){
-    shutdown.later=offerRound(pawns,true).catch(e=>{receipt.laterError=String(e);}).finally(()=>{laterDone=true;});
+    shutdown.later=offerRound(pawns,true).catch(e=>{receipt.laterError=String(e);void shutdown.stop().catch(e=>{receipt.shutdownError=String(e);});}).finally(()=>{laterDone=true;});
    }
    // Never overlap explicit negotiations with the single decision channel.
    if((!shutdown.later||laterDone)&&decisions<WORK_TRIAL.decisions&&reflections<WORK_TRIAL.reflections&&appraisals<WORK_TRIAL.appraisals)await pump.poll();
@@ -96,9 +97,7 @@ try{
   }
   await shutdown.stop();clearTimeout(deadlineTimer);
   await b.admin('pause');await c.reconcile();
-  const operatorStops:string[]=[];
-  for(const ch of Object.values(c.inspect().characters))if(ch.intention){operatorStops.push(ch.id);await c.pawn(ch.id).withdraw('Operator trial ended; not a pawn-originated choice');}
-  for(const p of Object.values(c.inspect().proposals))if(p.status==='pending')await c.core().withdrawOffer(p.id,'Operator trial ended; offer retired without acceptance');
+  const {operatorStops,errors}=await stopTrialWork(c);if(errors.length)throw Error('Game work cleanup incomplete: '+errors.join('; '));
   await c.reconcile();const finish=await b.state();
   receipt.observation={wallMs:Date.now()-began,ticks:finish.ticks-start.ticks,samples,pausedSamples,thoughtSamples,ticksDuringThought,attention:pump.results,decisions,reflections,appraisals,operatorStops,laterRoundStarted:!!shutdown.later,connected};
   receipt.summary=workSummary(c.inspect());
@@ -111,4 +110,6 @@ try{
  }
  receipt.passed=true;
 }catch(e){receipt.error=String(e);process.exitCode=1;}
-finally{clearTimeout(deadlineTimer);try{await shutdown.stop();}catch(e){receipt.passed=false;receipt.shutdownError=String(e);process.exitCode=1;}try{await b.admin('pause');}catch{}input.close();await record();store?.close();await writeFile(root+'/.runtime/work-live-'+(cold?'cold':'game')+'.json',JSON.stringify(receipt,null,2));send({type:'receipt',receipt});}
+finally{clearTimeout(deadlineTimer);try{await shutdown.stop();}catch(e){receipt.passed=false;receipt.shutdownError=String(e);process.exitCode=1;}try{await b.admin('pause');}catch{}
+ if(c&&!cold){const cleanup=await stopTrialWork(c);receipt.finalCleanup=cleanup;if(cleanup.errors.length){receipt.passed=false;process.exitCode=1;}}
+ input.close();await record();store?.close();await writeFile(root+'/.runtime/work-live-'+(cold?'cold':'game')+'.json',JSON.stringify(receipt,null,2));send({type:'receipt',receipt});}

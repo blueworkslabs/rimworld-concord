@@ -38,3 +38,19 @@ export class WorkShutdown {
   return this.completion;
  }
 }
+
+/** Attempt every owned stop even if another cleanup request failed. Unknown transport
+ * outcomes remain errors, never an assertion that executable work was retired. */
+export async function stopTrialWork(c:import('./coordinator.js').Coordinator){
+ const operatorStops:string[]=[],errors:string[]=[];
+ const attempt=async(fn:()=>Promise<unknown>)=>{try{await fn();}catch(e){errors.push(String(e));}};
+ if(!c.inspect())return {operatorStops,errors};
+ await attempt(()=>c.reconcile());
+ for(const ch of Object.values(c.inspect().characters))if(ch.intention){
+  operatorStops.push(ch.id);await attempt(()=>c.pawn(ch.id).withdraw('Operator trial ended; not a pawn-originated choice'));
+ }
+ for(const p of Object.values(c.inspect().proposals))if(p.status==='pending')
+  await attempt(()=>c.core().withdrawOffer(p.id,'Operator trial ended; offer retired without acceptance'));
+ await attempt(()=>c.reconcile());
+ return {operatorStops,errors};
+}

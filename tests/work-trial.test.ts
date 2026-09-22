@@ -41,3 +41,10 @@ test('retiring a failed offer prevents reflection retry but preserves a durably 
  await assert.rejects(c.pawn('A').decide(accepted.id,{name:'accept',async decide(){return {kind:'accept',reason:'Yes'};}}),/Lost dispatch/);
  await retireUndecided(c,accepted.id,'No retry');assert.equal(c.inspect().proposals[accepted.id]!.status,'accepted');store.close();
 });
+
+test('exceptional game cleanup attempts all withdrawals despite a failed stop',async()=>{
+ const {stopTrialWork}=await import('../src/work-trial.js');const d=domain();d.characters.A!.intention='p';d.characters.B={id:'B',name:'Bee',memories:[],intention:'q'};d.proposals.q={...proposal,id:'q',pawn:'B',status:'pending'};const calls:string[]=[];
+ const fake={inspect:()=>d,async reconcile(){calls.push('reconcile');},pawn:(id:string)=>({async withdraw(){calls.push('withdraw '+id);if(id==='A')throw Error('transport unavailable');}}),core:()=>({async withdrawOffer(id:string){calls.push('retire '+id);}})};
+ const result=await stopTrialWork(fake as any);assert.deepEqual(result.operatorStops,['A','B']);assert.equal(result.errors.length,1);
+ assert.deepEqual(calls,['reconcile','withdraw A','withdraw B','retire q','reconcile']);
+});
