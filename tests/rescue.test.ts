@@ -97,3 +97,43 @@ test('rescue projection shares physical labels but no casualty private fields or
   assert.deepEqual(v.pawn.rescue!.options,[]);assert.deepEqual(v.pawn.rescue!.observations,[]);assert.equal(v.proposals.length,0);assert.equal(v.pawn.facts![0]!.value,'B');checked=true;return {kind:'continue',reason:'Wait'};
  }});assert(checked);assert.equal(result.status,'continued');
 });
+
+test('DeepTalk queues during a rescue question, preserves experience and allows fresh supported consent',async()=>{
+ const {c,data,store,requests}=await setup();const p=await c.core().propose('A',rescue,'Rescue');let release!:(v:unknown)=>void,entered!:()=>void;
+ const ready=new Promise<void>(r=>entered=r);
+ const task=c.pawn('A').decide(p.id,{name:'delayed',decide:()=>{entered();return new Promise(r=>release=r);}});await ready;
+ data.eventSeq=1;data.events=[{seq:1,tick:10,pawn:'A',kind:'memory',detail:'DeepTalk'}];await c.observe();
+ assert.equal(c.activity().length,1);assert.equal(requests.length,0);
+ release({kind:'accept',reason:'The rescue still makes sense'});assert.equal((await task).status,'accepted');assert.equal(requests.length,1);
+ assert.equal(c.inspect().characters.A!.experiences![0]!.event.detail,'DeepTalk');assert.equal(c.inspect().characters.A!.attention,undefined);
+ assert(store.events().some(e=>e.event.kind==='experience-deferred'));store.close();
+});
+test('loss of the specific offered patient/bed cancels a pending rescue even without a native event',async()=>{
+ for(const changed of ['target','bed','map','ready','withdrawn']){
+  const {c,data,store,requests}=await setup(),p=await c.core().propose('A',rescue,'Rescue');let release!:(v:unknown)=>void,entered!:()=>void;
+  const ready=new Promise<void>(r=>entered=r),task=c.pawn('A').decide(p.id,{name:'slow',decide:()=>{entered();return new Promise(r=>release=r);}});
+  const rejected=assert.rejects(task);await ready;
+  const own=data.pawns[0]!;
+  if(changed==='target')own.rescue!.options=own.rescue!.options.map(o=>({...o,target:'other'}));
+  if(changed==='bed')own.rescue!.options=[second];
+  if(changed==='map')own.rescue!.mapId++;
+  if(changed==='ready')own.rescueReady=false;
+  if(changed==='withdrawn')await c.core().withdrawOffer(p.id,'No longer needed');
+  await c.observe();await rejected;release({kind:'accept',reason:'Discard this stale consent'});
+  assert.equal(requests.length,0);assert.equal(c.activity().length,0);assert(store.events().some(e=>e.event.kind==='decision-invalidated'));store.close();
+ }
+});
+test('unrelated rescue option changes do not invalidate this question; fresh final checks work without polling',async()=>{
+ const {c,data,store,requests}=await setup();let p=await c.core().propose('A',rescue,'Rescue');
+ const accepted=await c.pawn('A').decide(p.id,{name:'unrelated-bed',async decide(){data.pawns[0]!.rescue!.options=[rescue];return {kind:'refuse',reason:'I decline the valid offer'};}});
+ assert.equal(accepted.status,'refused');assert.equal(requests.length,0);
+ p=await c.core().propose('A',rescue,'New separate test');
+ await assert.rejects(c.pawn('A').decide(p.id,{name:'target-recovered',async decide(){data.pawns[0]!.rescue!.options=[];return {kind:'accept',reason:'Outdated'};}}));
+ assert.equal(requests.length,0);assert.equal(c.inspect().proposals[p.id]!.decision,undefined);store.close();
+});
+test('reflection cannot accept a rescue whose grounding vanished while it thought',async()=>{
+ const {c,data,store,requests}=await setup(),p=await c.core().propose('A',rescue,'Rescue');
+ data.eventSeq=1;data.events=[{seq:1,tick:10,pawn:'A',kind:'memory',detail:'DeepTalk'}];let ran=false;
+ const result=await c.attend('A',{name:'stale-grounding',async reflect(){ran=true;data.pawns[0]!.rescue!.options=[];return {kind:'proposal',proposalId:p.id,decision:{kind:'accept',reason:'Old observation'}};}});
+ assert(ran);assert.equal(result.status,'failed');assert.equal(requests.length,0);assert.equal(c.inspect().proposals[p.id]!.decision,undefined);store.close();
+});

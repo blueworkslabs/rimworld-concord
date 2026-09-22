@@ -15,7 +15,7 @@ if(process.argv.at(-1).includes('node -e')){console.log(${JSON.stringify(h.diges
 const id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',send=m=>console.log(JSON.stringify(m));
 const input=require('readline').createInterface({input:process.stdin});
 input.on('line',line=>{const m=JSON.parse(line);if(m.type==='decision-result')send({type:'drain',id});else if(m.type==='drained'){process.stdout.write(JSON.stringify({type:'receipt',receipt:{passed:true,decisionApplied:false,reason:'Answer stale after a new event',evidence:'x'.repeat(100000)}})+'\\n',()=>process.exit(0));}});
-send({type:'decision-request',id,mode:'decision',view:{pawn:{id:'A'}}});
+send({type:'decision-request',id,mode:'decision',view:{pawn:{id:'A'},proposal:{action:{kind:'move'}}}});
 `;
   await writeFile(join(dir,'ssh'),fake,{mode:0o700});
   const config={sshTarget:'fixture',labRoot:'/lab',remoteRepo:'/repo',ledger:join(dir,'claude.db'),jevLedger:join(dir,'jev.db'),scratchRoot:dir,receipt:join(dir,'receipt.json')};

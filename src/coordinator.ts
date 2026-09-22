@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
-import { nativeAttention } from './routing.js';
+import {rescueQuestionInvalid} from './decision-validity.js';
+import { nativeAttention,attentionInterrupt } from './routing.js';
 import { Store } from './store.js';
 import {rescueView,planRescue} from './rescue-planning.js';
 import {groundedPawn,haulingView,planHaul} from './haul-planning.js';
@@ -14,6 +15,7 @@ export class Coordinator {
   private queue:Promise<unknown>=Promise.resolve();
   private generation=0;
   private pending=new Map<string,AbortController>();
+  private questions=new Map<string,{controller:AbortController;proposal:string}>();
   private attending=new Map<string,{controller:AbortController;throughSeq:number}>();
   private observedTick=0;
   constructor(private store:Store,private game:GameBridge,private timing:{mode:'continuous'|'pause-at-decision'}={mode:'continuous'}) {
@@ -55,6 +57,14 @@ export class Coordinator {
   }
   private ingest(game:GameState) {
     this.observedTick=game.ticks;
+    for(const [pawn,q] of this.questions) {
+      const p=this.domain.proposals[q.proposal];
+      const reason=p?rescueQuestionInvalid(game,p):'Offer is missing';
+      if(reason&&!q.controller.signal.aborted){
+        this.commit('decision-invalidated',pawn,{proposal:q.proposal,reason});
+        q.controller.abort(Error(reason));
+      }
+    }
     if(game.eventSeq===undefined) return;
     const cursor=this.domain.eventCursor??0;
     const events=(game.events??[]).filter(e=>e.seq>cursor).sort((a,b)=>a.seq-b.seq);
@@ -70,7 +80,13 @@ export class Coordinator {
         if(evicted.event.seq>(character.attention?.cursor??0)&&evicted.route!=='native')
           this.commit('attention-gap',event.pawn,{seq:evicted.event.seq,kind:evicted.event.kind});
       }
-      if(interrupt) this.pending.get(event.pawn)?.abort();
+      const pending=this.pending.get(event.pawn);
+      if(pending&&!pending.signal.aborted) {
+        if(interrupt){
+          this.commit('decision-interrupted',event.pawn,{seq:event.seq,kind:event.kind,reason:'New interrupting experience'});
+          pending.abort(Error('New interrupting experience'));
+        }else if(event.kind==='memory')this.commit('experience-deferred',event.pawn,{seq:event.seq,kind:event.kind,detail:event.detail,reason:'Conversation queued behind current thought'});
+      }
       this.domain.eventCursor=event.seq;
       this.commit('native-event',event.pawn,{event,route:next});
     }
@@ -88,7 +104,7 @@ export class Coordinator {
       const events=(c.experiences??[]).filter(e=>e.event.seq>(c.attention?.cursor??0));
       if(!events.length) return false;
       const significant=events.some(e=>e.route==='deliberation');
-      const interrupting=events.some(e=>e.interrupt??nativeAttention(e.event).interrupt);
+      const interrupting=events.some(e=>attentionInterrupt(e));
       const needsModel=events.some(e=>e.route!=='native');
       if(mode==='native'&&needsModel||mode==='model'&&!needsModel)return false;
       if(!significant&&needsModel&&!hasAppraiser) return false;
@@ -96,7 +112,7 @@ export class Coordinator {
         this.observedTick-c.attention.lastAttemptTick>=config.cooldownTicks;
     }).sort((a,b)=>{
       // Significant signals get the slots before routine needs; oldest attempt wins ties.
-      const priority=(c:typeof a)=>(c.experiences??[]).some(e=>e.event.seq>(c.attention?.cursor??0)&&(e.interrupt??nativeAttention(e.event).interrupt))?0:1;
+      const priority=(c:typeof a)=>(c.experiences??[]).some(e=>e.event.seq>(c.attention?.cursor??0)&&(attentionInterrupt(e)))?0:1;
       return priority(a)-priority(b)||(a.attention?.lastAttemptTick??-1)-(b.attention?.lastAttemptTick??-1)||a.id.localeCompare(b.id);
     }).map(c=>c.id);
   }
@@ -117,7 +133,7 @@ export class Coordinator {
       const events=(character.experiences??[]).filter(e=>e.event.seq>(character.attention?.cursor??0));
       if(!events.length) return {status:'idle' as const};
       const significant=events.some(e=>e.route==='deliberation');
-      const interrupting=events.some(e=>e.interrupt??nativeAttention(e.event).interrupt);
+      const interrupting=events.some(e=>attentionInterrupt(e));
       const needsModel=events.some(e=>e.route!=='native');
       // A native-only scheduling claim must never escalate after fresh ingestion.
       if(mode==='native'&&needsModel||mode==='model'&&!needsModel)return {status:'unavailable' as const};
@@ -164,7 +180,7 @@ export class Coordinator {
       return await this.serial(async()=>{
         combined.throwIfAborted();
         if(prepared.generation!==this.generation) throw Error('Stale attention');
-        this.ingest(await this.current());
+        const fresh=await this.current();this.ingest(fresh);
         combined.throwIfAborted(); // a freshly observed significant event supersedes this result
         const character=this.domain.characters[pawn]!;
         const throughSeq=prepared.throughSeq;
@@ -188,7 +204,7 @@ export class Coordinator {
           if(!proposal||proposal.pawn!==pawn||proposal.status!=='pending'||character.commitment||character.intention) throw Error('Attention proposal superseded');
           character.attention!.last={status:'decided',throughSeq,reason};
           character.reflections=[...(character.reflections??[]),reflection].slice(-16);
-          await this.applyDecision(proposal,result.decision);
+          await this.applyDecision(proposal,result.decision,fresh);
           return {pawn,status:'decided',throughSeq};
         }
         character.attention!.last={status:'continued',throughSeq,reason};
@@ -211,6 +227,7 @@ export class Coordinator {
       clearTimeout(timer);
       try {await this.decisionPause(prepared.activity,true);} catch { /* game lease expires even if transport is lost */ }
       if(this.pending.get(pawn)===prepared.controller) this.pending.delete(pawn);
+      if(this.questions.get(pawn)?.controller===prepared.controller)this.questions.delete(pawn);
       if(this.attending.get(pawn)?.controller===prepared.controller) this.attending.delete(pawn);
       try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* old timeline or expired badge */ }
     }
@@ -329,12 +346,14 @@ export class Coordinator {
       if(this.domain.characters[pawn]!.commitment||this.domain.characters[pawn]!.intention) throw Error('Pawn already committed; reconcile outcome first');
       const own=game.pawns.find(x=>x.id===pawn);
       if(!own) throw Error('Pawn unavailable');
+      if(p.action.kind==='rescue'){const invalid=rescueQuestionInvalid(game,p);if(invalid)throw Error(invalid);}
       if(!Number.isFinite(timeoutMs)||timeoutMs<1||timeoutMs>115000) throw Error('Decision timeout must be 1..115000 ms');
       const controller=new AbortController();
       const activity={epoch:game.epoch,actor:pawn,activityId:randomUUID(),ttlMs:timeoutMs+2000};
       // UI transport failure must not disable cognition. The game expires orphaned badges.
       try {await this.game.setActivity?.(activity);} catch {this.commit('indicator-unavailable',pawn,{});}
       this.pending.set(pawn,controller);
+      if(p.action.kind==='rescue')this.questions.set(pawn,{controller,proposal:id});
       this.commit('deliberation-started',pawn,{proposal:id,backend:backend.name});
       return {generation:this.generation,controller,activity,view:structuredClone({pawn:groundedPawn(this.domain,game,own),character:this.domain.characters[pawn]!,proposal:p,...(p.parentId?{history:this.history(p)}:{})})};
     });
@@ -348,11 +367,12 @@ export class Coordinator {
       }));
       return await this.serial(async()=>{
         if(prepared.generation!==this.generation || prepared.controller.signal.aborted) throw Error('Stale decision');
-        this.ingest(await this.current());
+        const fresh=await this.current();this.ingest(fresh);
         prepared.controller.signal.throwIfAborted();
         const p=this.domain.proposals[id]!;
         if(p.status!=='pending') throw Error('Proposal already decided');
-        await this.applyDecision(p,result);
+        if(this.questions.get(pawn)?.controller===prepared.controller)this.questions.delete(pawn);
+        await this.applyDecision(p,result,fresh);
         return structuredClone(p);
       });
     } catch(error) {
@@ -364,10 +384,12 @@ export class Coordinator {
       clearTimeout(timer);
       try {await this.decisionPause(prepared.activity,true);} catch { /* game lease expires even if transport is lost */ }
       if(this.pending.get(pawn)===prepared.controller) this.pending.delete(pawn);
+      if(this.questions.get(pawn)?.controller===prepared.controller)this.questions.delete(pawn);
       try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* expired or old timeline */ }
     }
   }
-  private async applyDecision(p:Proposal,result:Decision) {
+  private async applyDecision(p:Proposal,result:Decision,fresh:GameState) {
+    if(result.kind==='accept'&&p.action.kind==='rescue'){const invalid=rescueQuestionInvalid(fresh,p);if(invalid)throw Error(invalid);}
     if(result.kind==='accept'&&p.action.kind!=='move'&&!this.game.cancel)throw Error('Work requires scoped cancellation');
     p.decision=result;
     p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':'countered';
@@ -474,7 +496,7 @@ export class Coordinator {
   private cancelDecisions() {
     this.generation++;
     for(const controller of this.pending.values()) controller.abort();
-    this.pending.clear();
+    this.pending.clear();this.questions.clear();
     this.attending.clear();
     this.recoverAttention('Attention cancelled for checkpoint or restore; no automatic retry');
   }

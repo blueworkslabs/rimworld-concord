@@ -12,6 +12,9 @@ import {AttentionPump} from './attention.js';
 import {retireUndecided,WorkShutdown,stopTrialWork} from './work-trial.js';
 import {RECONSIDER_TRIAL as WORK_TRIAL,rescueAfterWithdrawal,reconsiderSummary as workSummary} from './reconsider-trial.js';
 if(process.env.CONCORD_RECONSIDER_LOCKED!=='1')throw Error('Use scripts/run-reconsider-lab.sh game|cold to acquire the staging lock');
+const policy=process.env.CONCORD_TRIAL_POLICY??'reconsider-v1';
+if(!['reconsider-v1','interruption-v1'].includes(policy))throw Error('Unknown trial policy');
+const prefix=policy==='interruption-v1'?'interrupt-live':'reconsider-live';
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
 const runId=process.env.CONCORD_TRIAL_ID;if(!runId||!/^[0-9a-f-]{36}$/.test(runId))throw Error('Run identity required');
 const send=(m:unknown)=>process.stdout.write(JSON.stringify(m)+'\n');
@@ -29,7 +32,7 @@ let drainResolve:(()=>void)|undefined,drainReject:((e:Error)=>void)|undefined;
 const input=createInterface({input:process.stdin,crlfDelay:Infinity});
 input.on('line',line=>{try{if(line.length>32000)throw Error();const m=JSON.parse(line);if(m.type==='drained'&&m.id===runId){drainResolve?.();return;}if(m.type==='decision-result'){pendingThoughts.delete(m.id);decision.receive(m);}else appraisal.receive(m);}catch{connected=false;decision.close();appraisal.close();}});
 input.on('close',()=>{drainReject?.(Error('Host disconnected before drain'));connected=false;decision.close();appraisal.close();});
-const offers:unknown[]=[],receipt:Record<string,unknown>={at:new Date().toISOString(),runId,mode:scripted?'scripted':'live',passed:false,offers};
+const offers:unknown[]=[],receipt:Record<string,unknown>={at:new Date().toISOString(),runId,mode:scripted?'scripted':'live',policy,passed:false,offers};
 let c:Coordinator|undefined,deadlineTimer:ReturnType<typeof setTimeout>|undefined;
 const shutdown=new WorkShutdown(()=>{decision.close();appraisal.close();},async()=>{await pump?.stop();},async()=>{
  if(!connected)throw Error('Host unavailable for cleanup confirmation');
@@ -39,7 +42,7 @@ const shutdown=new WorkShutdown(()=>{decision.close();appraisal.close();},async(
  });
  receipt.hostDrained=true;
 });
-async function record(){await writeFile(root+'/.runtime/reconsider-live-partial.json',JSON.stringify({runId,offers,requests:requestLog,domain:c?.inspect()}));}
+async function record(){await writeFile(root+'/.runtime/'+prefix+'-partial.json',JSON.stringify({runId,offers,requests:requestLog,domain:c?.inspect()}));}
 async function negotiate(id:string,pawn:string){
  if(shutdown.stopped||decisions>=WORK_TRIAL.decisions){offers.push({id,pawn,status:'allowance-ended'});await retireUndecided(c!,id,'Trial limit; no automatic retry');return;}
  const began=Date.now();try{const p=await c!.pawn(pawn).decide(id,decision,90000);offers.push({id,pawn,decision:p.decision,elapsedMs:Date.now()-began});}
@@ -61,7 +64,7 @@ async function offer(pawn:string,action:any,reason:string){
 }
 try{
  if(cold){
-  const saved=JSON.parse(await readFile(root+'/.runtime/reconsider-live-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,scripted?'scripted':'live');
+  const saved=JSON.parse(await readFile(root+'/.runtime/'+prefix+'-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.policy??'reconsider-v1',policy);assert.equal(saved.mode,scripted?'scripted':'live');
   store=new Store(saved.db);c=new Coordinator(store,b);await c.restore(saved.checkpoint);
   assert.deepEqual(c.inspect().characters,saved.domain.characters);assert.deepEqual(c.inspect().proposals,saved.domain.proposals);assert.deepEqual(c.inspect().outcomes,saved.domain.outcomes);assert.notEqual(c.inspect().epoch,saved.domain.epoch);
   const restored=await b.state();assert.equal(restored.pawns.find(p=>p.id===saved.target)?.currentBed,saved.patientBed);
@@ -69,7 +72,7 @@ try{
   receipt.persistedSightings=saved.sightings.length;receipt.coldRestore=true;receipt.summary=workSummary(c.inspect());
  }else{
   const fixture=JSON.parse(await readFile(root+'/.runtime/reconsider-fixture.json','utf8'));await b.load(fixture.name);await b.admin('pause');
-  const db=root+'/.runtime/reconsider-live-'+runId+'.db';store=new Store(db);c=new Coordinator(store,b);await c.open();
+  const db=root+'/.runtime/'+prefix+'-'+runId+'.db';store=new Store(db);c=new Coordinator(store,b);await c.open();
   const initial=await b.state(),pawn=fixture.actor,target=fixture.target,actor=initial.pawns.find(p=>p.id===pawn)!;
   assert(initial.pawns.find(p=>p.id===target)?.downed,'Patient must really be downed');
   assert(!actor.casualties?.observations.some(o=>o.target===target),'No prior local patient observation');
@@ -129,7 +132,8 @@ try{
   const restored=await b.state();assert.deepEqual(restored.events?.filter(e=>e.pawn===pawn&&e.kind==='casualty'&&e.subject===target)??[],sightings);
   const patientBed=finish.pawns.find(p=>p.id===target)?.currentBed;assert.equal(restored.pawns.find(p=>p.id===target)?.currentBed,patientBed);
   receipt.persistedSightings=sightings.length;
-  await writeFile(root+'/.runtime/reconsider-live-latest.json',JSON.stringify({runId,mode:scripted?'scripted':'live',db,checkpoint,domain,pawn,target,patientBed,sightings}));
+  await writeFile(root+'/.runtime/'+prefix+'-latest.json',JSON.stringify({runId,policy,mode:scripted?'scripted':'live',db,checkpoint,domain,pawn,target,patientBed,sightings}));
+  receipt.interruptionAudit=store.events().filter(e=>['decision-invalidated','decision-interrupted','experience-deferred','decision-error'].includes(e.event.kind)).map(e=>e.event);
   receipt.pairedRestore=true;receipt.limits=WORK_TRIAL;receipt.limitations='Authored anesthesia/supplies/bed geometry; no personality or relationship overrides. Patient already downed outside initial local view; discovery, not a new injury. Scripted core. Initial consent paused, discovery/reflection/rescue negotiation continuous. One discovery-triggered model attention turn; preexisting events queue until sighting. Routine and model attention bounded separately. Rescue only follows settled pawn-chosen withdrawal and fresh consent. At most one same-kind counter revision per offer. End when branch settles after 15s or two minutes; no rerolls, no inference continuation after cap. Not a causal character-comparison experiment.';
   if(!connected)throw Error('Host disconnected; partial result retained');
   if(receipt.laterError)throw Error('Later offer round failed; evidence retained');
@@ -138,4 +142,4 @@ try{
 }catch(e){receipt.error=String(e);process.exitCode=1;}
 finally{clearTimeout(deadlineTimer);try{await shutdown.stop();}catch(e){receipt.passed=false;receipt.shutdownError=String(e);process.exitCode=1;}try{await b.admin('pause');}catch{}
  if(c&&!cold){const cleanup=await stopTrialWork(c);receipt.finalCleanup=cleanup;if(cleanup.errors.length){receipt.passed=false;process.exitCode=1;}}
- input.close();await record();store?.close();await writeFile(root+'/.runtime/reconsider-live-'+(cold?'cold':'game')+'.json',JSON.stringify(receipt,null,2));send({type:'receipt',receipt});}
+ input.close();await record();store?.close();await writeFile(root+'/.runtime/'+prefix+'-'+(cold?'cold':'game')+'.json',JSON.stringify(receipt,null,2));send({type:'receipt',receipt});}

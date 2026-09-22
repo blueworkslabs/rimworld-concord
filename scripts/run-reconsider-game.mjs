@@ -1,4 +1,5 @@
 // Finite combined trial on the native-login/protected-egress host. No credentials cross SSH.
+import {setTimeout as delay} from 'node:timers/promises';
 import {randomUUID} from 'node:crypto';
 import {spawn,execFileSync} from 'node:child_process';
 import {readFile,writeFile} from 'node:fs/promises';
@@ -12,8 +13,10 @@ const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.arg
 
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','jevLedger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
-const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0,estimatedUsageUSD:0}),close(){},async decide(){return {kind:'accept',reason:'Scripted dry-run consent'};},async reflect(){return {kind:config.scriptedReflection??'withdraw',reason:'Scripted reconsideration after actual local sighting'};}}:new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:'reconsider-v1'});
-const budget=new TrialBudget(config.jevLedger,.008,4,'jev-reconsider-v1');
+const relevance=process.argv.includes('--relevance'),policy=relevance?'interruption-v1':'reconsider-v1';
+for(const k of ['scriptedReflectionDelayMs','scriptedRescueDelayMs'])if(config[k]!==undefined&&(!Number.isInteger(config[k])||config[k]<0||config[k]>20000))throw Error('Invalid scripted delay');
+const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0,estimatedUsageUSD:0}),close(){},async decide(view,signal){if(view.proposal.action.kind==='rescue')await delay(config.scriptedRescueDelayMs??0,undefined,{signal});return {kind:'accept',reason:'Scripted dry-run consent'};},async reflect(view,signal){await delay(config.scriptedReflectionDelayMs??0,undefined,{signal});return {kind:config.scriptedReflection??'withdraw',reason:'Scripted reconsideration after actual local sighting'};}}:new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:policy});
+const budget=new TrialBudget(config.jevLedger,.008,4,relevance?'jev-interruption-v1':'jev-reconsider-v1');
 const before={claude:backend.summary(),jev:budget.summary()};
 if(!cold&&(before.claude.attempts||before.jev.calls))throw Error('Fresh trial required; no replay or automatic continuation');
 const maxDecisions=6-Number(before.claude.attempts);
@@ -26,8 +29,9 @@ const remote=execFileSync('ssh',['-o','BatchMode=yes',config.sshTarget,'node -e 
 if(local!==remote)throw Error('Remote runner differs from local build');
 const marker=config.receipt+'.started';
 const runId=cold?JSON.parse(await readFile(marker,'utf8')).runId:randomUUID();
-if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
-const command=`env CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-reconsider-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}`;
+if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,policy,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
+if(cold&&(JSON.parse(await readFile(marker,'utf8')).policy??'reconsider-v1')!==policy)throw Error('Cold policy mismatch');
+const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-reconsider-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}`;
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
 const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],appraisals=[],responses=[];
@@ -64,7 +68,7 @@ input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill(
 const timer=setTimeout(()=>{failed=true;child.kill();},1200000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
-const result={at:new Date().toISOString(),kind:cold?'reconsider-live-cold':scripted?'reconsider-scripted':'reconsider-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
+const result={at:new Date().toISOString(),policy,kind:cold?'reconsider-live-cold':scripted?'reconsider-scripted':'reconsider-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
  before,after:{claude:backend.summary(),jev:budget.summary()},decisions:backend.receipts,responses,appraisals,game:receipt,
  accounting:'Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls.'};
 backend.close();budget.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;

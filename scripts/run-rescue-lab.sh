@@ -5,8 +5,10 @@ concord_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 case "${1:-game}" in
   fixture) concord_entry=rescue-fixture; concord_args=() ;;
   game) concord_entry=rescue-acceptance; concord_args=() ;;
+  interruptions) concord_entry=interruption-acceptance; concord_args=() ;;
+  interruptions-cold) concord_entry=interruption-acceptance; concord_args=(--cold) ;;
   cold) concord_entry=rescue-acceptance; concord_args=(--cold) ;;
-  *) echo 'Usage: run-rescue-lab.sh [fixture|game|cold]' >&2; exit 2 ;;
+  *) echo 'Usage: run-rescue-lab.sh [fixture|game|cold|interruptions|interruptions-cold]' >&2; exit 2 ;;
 esac
 if [[ "$RIMWORLD_LAB_ROOT" != /* ]]; then echo 'Absolute lab root required' >&2; exit 2; fi
 # The marker is only set inside the lifetime lock, after successful acquisition.
