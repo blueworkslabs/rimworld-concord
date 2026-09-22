@@ -1,0 +1,48 @@
+{
+  "slug": "luna-contract-probe",
+  "title": "Luna and the Meaning of a Number",
+  "date": "2026-09-22",
+  "summary": "Five valid structured replies, one unsupported explanation: Luna's first offline contract check separates format from grounding.",
+  "sections": [
+    {
+      "heading": "What We Ran",
+      "paragraphs": [
+        "This was a synthetic probe, not live gameplay. Five fixed perspectives went to gpt-5.6-luna through native Codex with ChatGPT subscription authentication: no tools, no game actions, one attempt per case, a sixty-second limit and no rerolls. The cases covered quiet time, noticing a casualty, active hauling, a pending rescue offer and observed recovery. We wanted to test the same contextual decision interface with another model, without mistaking valid output for good judgment."
+      ]
+    },
+    {
+      "heading": "What Passed and What Didn't",
+      "paragraphs": [
+        "All five responses completed and passed both the generated schema and our existing contextual runtime validator. Quiet time and noticing a casualty produced valid choices to continue unchanged. During active hauling, Luna requested a rescue alternative with the supplied IDs and explicitly left the hauling agreement unchanged. In the recovery case, it proposed revising an authored prior concern using the supplied observations, without claiming rescue, treatment or full healing. None of these choices was executed.",
+        "The finding sits in the pending-rescue case. Luna refused—which is allowed—but claimed severe hunger and tiredness as the reason. Food and Rest were both 0.9: nearly full, not nearly empty. That explanation contradicts the supplied state. The response stays in the evidence; need-scale ambiguity is a possible explanation, not a proven cause."
+      ]
+    },
+    {
+      "heading": "Test Coverage and Limits",
+      "paragraphs": [
+        "All 175 automated checks passed, and final independent Codex review found no actionable defects. Median latency was about 4.9 seconds, with a range of 3.0–14.6 including runtime overhead. Reported usage was 13,069 tokens; this is not a price or model-ranking result.",
+        "Five cases cannot establish general character quality, and constrained JSON output does not guarantee factual truth in what a pawn says. Staging never started for this probe. There is no Luna pawn backend installed in the game."
+      ]
+    },
+    {
+      "heading": "Next Step",
+      "paragraphs": [
+        "Next comes clearer meaning for need levels: explicit range and direction, followed by fresh high, low and unknown-state cases. Acceptance, refusal and no change must remain available where appropriate. The aim is accurate understanding, not persuading a pawn to give our preferred answer."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Fixed-snapshot contract and limits",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/MODEL_CONTRACT_PROBE.md"
+    },
+    {
+      "label": "Five-case evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/luna-contract.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

@@ -69,3 +69,11 @@ until a preferred action appears. Keep runtime validation and consent independen
 of model capability. More compliant JSON alone does not prove better judgment.
 
 Model reference: https://learn.chatgpt.com/docs/models
+
+First offline Luna check completed on 2026-09-22: five fixed synthetic cases
+passed contextual schema/runtime validation, but one permitted refusal gave a
+need-state explanation contradicted by nearly full Food/Rest levels. No game
+choices were executed. [Evidence and limits](MODEL_CONTRACT_PROBE.md) separate
+contract compliance from grounding. The next interface check should spell out
+need scale/direction and test high, low and unknown values without requiring a
+preferred choice; it is not yet a model ranking or a cheaper live backend.
