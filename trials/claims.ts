@@ -25,9 +25,9 @@ import {modelPerspective} from '../src/model-perspective.js';
 export const claimsScorerVersion='typed-claims-v1';
 
 const Assertion=z.discriminatedUnion('op',[
- z.object({op:z.literal('eq'),value:z.number(),unit:z.enum(['fraction','percent']).default('fraction'),tolerance:z.number().min(0).max(.05).default(.005)}).strict(),
- z.object({op:z.literal('ne'),value:z.number(),unit:z.enum(['fraction','percent']).default('fraction'),tolerance:z.number().min(0).max(.05).default(.005)}).strict(),
- z.object({op:z.enum(['lt','lte','gt','gte']),value:z.number(),unit:z.enum(['fraction','percent']).default('fraction')}).strict(),
+ z.object({op:z.literal('eq'),value:z.number().finite(),unit:z.enum(['native','fraction','percent']).default('native'),tolerance:z.number().min(0).max(.05).default(.005)}).strict(),
+ z.object({op:z.literal('ne'),value:z.number().finite(),unit:z.enum(['native','fraction','percent']).default('native'),tolerance:z.number().min(0).max(.05).default(.005)}).strict(),
+ z.object({op:z.enum(['lt','lte','gt','gte']),value:z.number().finite(),unit:z.enum(['native','fraction','percent']).default('native')}).strict(),
  z.object({op:z.literal('band'),value:z.enum(['low','moderate','high']),negated:z.boolean().default(false)}).strict(),
  z.object({op:z.literal('is'),value:z.union([z.string().max(120),z.boolean()]),negated:z.boolean().default(false)}).strict(),
  z.object({op:z.literal('unknown')}).strict(),
@@ -45,17 +45,17 @@ export type ParsedClaim=z.output<typeof Claim>;
 export const needBands={low:[0,.35] as const,moderate:[.35,.7] as const,high:[.7,1.0001] as const};
 export function bandOf(fraction:number):'low'|'moderate'|'high'{return fraction<needBands.low[1]?'low':fraction<needBands.moderate[1]?'moderate':'high';}
 
-export type Source={id:string;subject:string;category:'need'|'trait'|'outlook'|'experience'|'supply'|'offer'|'progress'|'casualty'|'pawn';known:boolean;value:number|string|boolean|null;numeric:boolean};
+export type Source={id:string;subject:string;category:'need'|'trait'|'native_fact'|'outlook'|'experience'|'supply'|'offer'|'progress'|'casualty'|'pawn';known:boolean;value:number|string|boolean|null;numeric:boolean};
 
-/** Everything the model was shown, flattened to citable ids. Derived from the same projection, never from game state. */
+/** Supported fields from the model projection, flattened to citable ids. Derived from the same projection, never from game state. */
 export function sourceCatalog(view:AttentionView|Perspective):Source[]{
  const p=modelPerspective(view as AttentionView);const out:Source[]=[];
  for(const n of p.pawn.needs)out.push({id:`pawn.needs.${n.name}.fractionFilled`,subject:n.name,category:'need',known:n.known,value:n.fractionFilled,numeric:true});
- for(const f of p.pawn.facts??[])out.push({id:`pawn.facts.${f.key}.${f.value}`,subject:f.value,category:'trait',known:true,value:f.level,numeric:true});
+ for(const f of p.pawn.facts??[])out.push({id:`pawn.facts.${f.key}.${f.value}`,subject:f.value,category:f.key==='trait'?'trait':'native_fact',known:true,value:f.level,numeric:true});
  for(const k of ['downed','carrying','currentBed','rescueReady','workReady','job'] as const){const v=(p.pawn as any)[k];if(v!==undefined)out.push({id:`pawn.${k}`,subject:k,category:'pawn',known:true,value:v,numeric:typeof v==='number'});}
  (p.character.outlook?.notes??[]).forEach((n,i)=>out.push({id:`character.outlook.notes[${i}]`,subject:n.subject??n.kind,category:'outlook',known:true,value:n.text,numeric:false}));
  for(const x of p.character.experiences??[])out.push({id:`character.experiences.seq:${x.event.seq}`,subject:x.event.kind,category:'experience',known:true,value:x.event.detail,numeric:false});
- for(const s of p.pawn.hauling?.supplies??[]){out.push({id:`pawn.hauling.supplies.${s.thing}.sourceCount`,subject:s.thing,category:'supply',known:true,value:s.sourceCount,numeric:true});out.push({id:`pawn.hauling.supplies.${s.thing}.destinationFree`,subject:s.thing,category:'supply',known:true,value:s.destinationFree,numeric:true});}
+ for(const s of p.pawn.hauling?.supplies??[]){out.push({id:`pawn.hauling.supplies.${s.thing}@${s.x},${s.z}.sourceCount`,subject:s.thing,category:'supply',known:true,value:s.sourceCount,numeric:true});out.push({id:`pawn.hauling.supplies.${s.thing}@${s.x},${s.z}.destinationFree`,subject:s.thing,category:'supply',known:true,value:s.destinationFree,numeric:true});}
  for(const o of p.pawn.casualties?.observations??[])out.push({id:`pawn.casualties.${o.target}`,subject:o.name,category:'casualty',known:true,value:'downed',numeric:false});
  const proposals='proposals' in p?p.proposals:[(p as Perspective).proposal];
  for(const pr of proposals){const a=pr.action as any;for(const k of ['count','trips','maxTicks','thing'])if(a?.[k]!==undefined)out.push({id:`offer.${pr.id}.${k}`,subject:k,category:'offer',known:true,value:a[k],numeric:typeof a[k]==='number'});}
@@ -71,7 +71,6 @@ const FACT_WORDS=/\b(is at|are at|is currently|are currently|currently at|\d+\s*
 
 function compareNumber(assertion:Extract<z.infer<typeof Assertion>,{op:'eq'|'ne'|'lt'|'lte'|'gt'|'gte'}>,reference:number,notes:string[]):'supported'|'contradicted'{
  const v=assertion.unit==='percent'?assertion.value/100:assertion.value;
- if(v<0||v>1&&reference<=1){notes.push('asserted value outside 0..1 for a fill meter');}
  const tol='tolerance' in assertion?assertion.tolerance:0;
  const ok=assertion.op==='eq'?Math.abs(v-reference)<=tol:assertion.op==='ne'?Math.abs(v-reference)>tol:assertion.op==='lt'?reference<v:assertion.op==='lte'?reference<=v:assertion.op==='gt'?reference>v:reference>=v;
  return ok?'supported':'contradicted';
@@ -88,7 +87,7 @@ export function scoreClaim(input:Claim,sources:Source[]):ScoredClaim{
   if(!claim.source)return {claim,verdict:'preference_new',sourceExists:false,notes:['new preference; allowed, not an error']};
   const src=sources.find(s=>s.id===claim.source);
   if(!src)return {claim,verdict:'source_missing',sourceExists:false,notes};
-  if(src.category!=='outlook'&&src.category!=='trait')notes.push('preference cites a non-outlook/non-trait source');
+  if(src.category!=='outlook'&&src.category!=='trait')return {claim,verdict:'irrelevant_source',sourceExists:true,reference:src.value,notes:['preference cites a non-outlook/non-trait source']};
   return {claim,verdict:'preference_sourced',sourceExists:true,reference:src.value,notes};
  }
  const src=sources.find(s=>s.id===claim.source);
@@ -110,6 +109,7 @@ export function scoreClaim(input:Claim,sources:Source[]):ScoredClaim{
   const eq=bandOf(src.value)===a.value;
   return {...base,verdict:(eq!==a.negated)?'supported':'contradicted',sourceExists:true,reference:src.value};
  }
+ if(a.unit!=='native'&&src.category!=='need')return {...base,verdict:'unscorable',sourceExists:true,reference:src.value,notes:[...notes,'fraction/percent units require a need meter; use native for other quantities']};
  return {...base,verdict:compareNumber(a,src.value,notes),sourceExists:true,reference:src.value};
 }
 

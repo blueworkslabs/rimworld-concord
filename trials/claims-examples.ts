@@ -1,7 +1,7 @@
 /**
  * Hand-encoded claims for replies already retained in docs/evidence/outlook-grounding.json.
  * These encodings are AUTHORED by a reviewer to show what the scorer would report if the
- * model had emitted structured claims. They are not model output and prove nothing about
+ * model had emitted structured claims. The structured claims are not model output and prove nothing about
  * either model. Reason text is quoted verbatim from the retained evidence.
  */
 import type {Claim} from './claims.js';
@@ -35,11 +35,11 @@ export const claimExamples:Array<{id:string;model:string;caseId:string;reason:st
   reason:'I can do a shorter nearby haul agreement, while keeping time for my needs.',
   claims:[
    {kind:'preference',text:'keeping time for my needs',source:'character.outlook.notes[0]'},
-   {kind:'fact',text:'the haul is nearby',subject:'wood',source:'pawn.hauling.supplies.wood.sourceCount',assertion:{op:'gt',value:0}},
+   {kind:'fact',text:'the haul is nearby',subject:'wood',source:'pawn.hauling.supplies.wood@4,2.sourceCount',assertion:{op:'gt',value:0}},
   ],
   reviewerNote:'Second claim is deliberately weak: "nearby" is not what sourceCount says. The scorer marks it supported because the assertion (count > 0) is true, which shows the limit: the scorer checks the assertion, not whether the assertion captures the prose. A stricter encoding would cite no field and be unscorable.'},
  {id:'authored-luna-hunger-mixup',model:'gpt-5.6-luna (contract probe, 2026-09-22)',caseId:'probe',
-  reason:'Refused rescue citing severe hunger and tiredness while Food and Rest were both 0.9.',
+  reason:'I am severely hungry and tired, so I cannot safely commit to rescuing Bea.',
   claims:[
    {kind:'fact',text:'severe hunger',subject:'Food',source:'pawn.needs.Food.fractionFilled',assertion:{op:'band',value:'low'}},
    {kind:'fact',text:'tiredness',subject:'Rest',source:'pawn.needs.Rest.fractionFilled',assertion:{op:'band',value:'low'}},

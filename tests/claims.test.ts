@@ -12,7 +12,7 @@ const fact=(text:string,source:string,assertion:any,subject?:string)=>({kind:'fa
 test('source catalog is derived from the model projection and cites only what was shown',()=>{
  const s=sourceCatalog(protect());const ids=s.map(x=>x.id);
  assert(ids.includes(FOOD));assert(ids.includes('character.outlook.notes[0]'));assert(ids.includes('character.experiences.seq:1'));
- assert(ids.includes('pawn.hauling.supplies.wood.sourceCount'));assert(ids.some(i=>i.startsWith('offer.')&&i.endsWith('.trips')));
+ assert(ids.includes('pawn.hauling.supplies.wood@4,2.sourceCount'));assert(ids.some(i=>i.startsWith('offer.')&&i.endsWith('.trips')));
  assert.equal(s.find(x=>x.id===FOOD)!.value,.4);assert.equal(s.find(x=>x.id==='pawn.needs.Mood.fractionFilled')!.known,false);
  assert.equal(sourceCatalog(view('needs-full')).some(x=>x.category==='outlook'),false);
 });
@@ -38,7 +38,7 @@ test('qualitative band words are checkable only for need meters, and negated ban
   fact('I am well fed',FOOD,{op:'band',value:'high'}),
  ],low());
  assert.deepEqual(r.claims.map(c=>c.verdict),['supported','contradicted','contradicted']);
- const supply=scoreClaims([fact('the wood pile is low','pawn.hauling.supplies.wood.sourceCount',{op:'band',value:'low'})],protect());
+ const supply=scoreClaims([fact('the wood pile is low','pawn.hauling.supplies.wood@4,2.sourceCount',{op:'band',value:'low'})],protect());
  assert.equal(supply.claims[0]!.verdict,'unscorable');assert.match(supply.claims[0]!.notes.join(' '),/need meters only/);
 });
 
@@ -86,7 +86,7 @@ test('preferences may cite an outlook note or trait, or be new; new is counted a
   {kind:'preference',text:'I prefer steel',source:'character.outlook.notes[7]'},
   {kind:'preference',text:'I prefer facts',source:FOOD},
  ],protect());
- assert.deepEqual(r.claims.map(c=>c.verdict),['preference_sourced','preference_new','source_missing','preference_sourced']);
+ assert.deepEqual(r.claims.map(c=>c.verdict),['preference_sourced','preference_new','source_missing','irrelevant_source']);
  assert.match(r.claims[3]!.notes.join(' '),/non-outlook/);
  assert.equal(scoreClaims([{kind:'preference',text:'I prefer to eat first',source:'character.outlook.notes[0]'}],view('outlook-empty')).claims[0]!.verdict,'source_missing');
 });
@@ -123,4 +123,37 @@ test('reviewer-encoded examples from retained evidence produce the expected verd
  }
  const collapse=scoreClaim(claimExamples[0]!.claims[3]!,sourceCatalog(low()));
  assert.equal(collapse.verdict,'forecast_unverified');assert.equal(collapse.sourceExists,true);
+});
+
+
+test('supply references include destination identity and are independent of list order',()=>{
+ const v=protect();const first=v.pawn.hauling!.supplies![0]!;
+ v.pawn.hauling!.supplies!.push({...first,x:5,z:2,destinationFree:10});
+ const claim=fact('the second destination has capacity 10','pawn.hauling.supplies.wood@5,2.destinationFree',{op:'eq',value:10});
+ for(let i=0;i<2;i++){
+  const catalog=sourceCatalog(v);assert.equal(new Set(catalog.map(s=>s.id)).size,catalog.length);
+  const r=scoreClaims([claim],v).claims[0]!;assert.equal(r.verdict,'supported');assert.equal(r.reference,10);
+  v.pawn.hauling!.supplies!.reverse();
+ }
+});
+
+test('native skills, memories and relations are not classified as preference traits',()=>{
+ const v=protect();
+ for(const key of ['trait','skill','memory','relation'])v.pawn.facts!.push({key,value:'sample',level:2});
+ for(const key of ['trait','skill','memory','relation']){
+  const source=`pawn.facts.${key}.sample`;
+  const r=scoreClaims([{kind:'preference',text:'I prefer this',source}],v).claims[0]!;
+  assert.equal(r.verdict,key==='trait'?'preference_sourced':'irrelevant_source');
+ }
+});
+
+test('numeric units cannot turn an absolute quantity into a percentage',()=>{
+ const source='pawn.hauling.supplies.wood@4,2.sourceCount';
+ const r=scoreClaims([
+  fact('30 units',source,{op:'eq',value:30}),
+  fact('3000 percent',source,{op:'eq',value:3000,unit:'percent'}),
+  fact('30 as a fraction',source,{op:'eq',value:30,unit:'fraction'}),
+ ],protect());
+ assert.deepEqual(r.claims.map(c=>c.verdict),['supported','unscorable','unscorable']);
+ assert.throws(()=>Claims.parse([fact('infinite',FOOD,{op:'gt',value:Infinity})]));
 });

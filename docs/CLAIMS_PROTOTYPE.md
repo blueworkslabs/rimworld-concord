@@ -38,7 +38,11 @@ without changing its verdict.
 
 `sourceCatalog(view)` flattens the output of `modelPerspective` into citable ids:
 need meters (with `known`), native facts/traits, pawn flags, outlook notes,
-experiences by sequence, hauling supplies, offer fields and agreement progress. It
+experiences by sequence, hauling supplies, offer fields and agreement progress.
+Supply IDs include the source thing and destination coordinates (for example,
+`pawn.hauling.supplies.wood@4,2.destinationFree`), so two destinations cannot alias.
+Only native facts whose key is `trait` are classified as traits. This is a bounded
+field catalog, not every field in the perspective. It
 is derived from the projection the model saw, never from game state, so a claim
 cannot be "supported" by information the pawn was not shown.
 
@@ -52,13 +56,18 @@ One per claim, counted separately, never summed into a score:
 | `contradicted` | fact assertion disagrees with the supplied value |
 | `unknown_reference` | field exists but its value is unknown |
 | `source_missing` | cited id is not in this perspective |
-| `irrelevant_source` | cited id exists but its subject is not the claim's subject |
+| `irrelevant_source` | cited id exists but its subject is not the claim's subject, or a preference cites a non-outlook/non-trait field |
 | `unscorable` | well formed, outside the comparable grammar (trend words, band on non-need, qualitative op on numeric field) |
 | `forecast_unverified` | every forecast |
-| `preference_sourced` | preference cites an existing outlook note or trait |
+| `preference_sourced` | preference cites an existing outlook note or trait; existence/type only, not semantic support |
 | `preference_new` | preference cites nothing |
 
-Assertion grammar: `eq`/`ne` with fraction or percent units and a bounded tolerance,
+Assertion grammar: `eq`/`ne` with a bounded tolerance and `native` (default),
+`fraction`, or `percent` units. Native units mean the supplied numeric field
+units (fractions for needs, counts for supplies, ticks for durations). Explicit
+fraction/percent units apply only to need meters; other fields are unscorable
+under those units. Tolerances are in native units after percent conversion.
+Numeric values must be finite. The other operators are
 `lt`/`lte`/`gt`/`gte`, `band` (`low` < 0.35 ≤ `moderate` < 0.7 ≤ `high`, a scorer
 convention that is not game semantics, need meters only), `is` for
 string/boolean fields, and `unknown`. `band` and `is` accept `negated`.
