@@ -3,6 +3,7 @@ import {LabBridge} from './lab-bridge.js';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {mkdir,writeFile} from 'node:fs/promises';
+if(process.env.CONCORD_RESCUE_LOCKED!=='1')throw Error('Use scripts/run-rescue-lab.sh fixture to acquire the staging lock');
 const b=new LabBridge(),root=new URL('../..',import.meta.url).pathname;
 await b.load('lab-initial');await b.admin('pause');const state=await b.state();
 const rescuer=state.pawns.find(p=>p.rescueReady&&p.movement!.options.length>=8)!;

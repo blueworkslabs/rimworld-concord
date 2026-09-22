@@ -52,9 +52,22 @@ cannot end an unrelated job, and a cancellation tombstone blocks late dispatch.
 
 Quiescent paired saves retain pending plans, decisions and completed outcomes.
 Active rescue checkpointing remains unsupported. Provider budgets never rewind.
-The opt-in `rescue-fixture.js` and `rescue-acceptance.js` operator entry points use
-the existing exclusive staging mailbox lock, no inference backend and no live
-allowance. Fixture preparation creates a new save copy with an anesthetized
+Use the locked launcher on staging after building and starting the lab:
+
+```bash
+bash scripts/run-rescue-lab.sh fixture
+bash scripts/run-rescue-lab.sh game
+# Stop and restart the game before the cold check.
+bash scripts/run-rescue-lab.sh cold
+```
+
+Set `RIMWORLD_LAB_ROOT` to the isolated absolute lab directory. The launcher holds
+the existing exclusive coordinator lock for the entire process, including fixture
+loads and saves. It fails immediately if staging is already owned; direct Node
+invocation without its launcher marker fails before game access. The marker is
+an operator-use guard, not a security boundary against arbitrary shell access.
+These entry points use no inference backend or live allowance.
+Fixture preparation creates a new save copy with an anesthetized
 colonist, medical sleeping spots and disabled native work priorities. It is not
 a naturally occurring injury or a player save. `--cold` verifies the saved result
 after a full game restart without new decisions. See acceptance evidence for

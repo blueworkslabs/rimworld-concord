@@ -8,6 +8,7 @@ import {Store} from './store.js';
 import {LabBridge} from './lab-bridge.js';
 import {scripted} from './backends.js';
 import type {Rescue} from './protocol.js';
+if(process.env.CONCORD_RESCUE_LOCKED!=='1')throw Error('Use scripts/run-rescue-lab.sh game|cold to acquire the staging lock');
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold');
 const checks:string[]=[],receipt:Record<string,unknown>={at:new Date().toISOString(),phase:cold?'cold':'game',passed:false,inferenceCalls:0,checks};
 let store:Store|undefined;
