@@ -19,10 +19,12 @@ future milestone, not the next dependency.
 
 - Keep corrected v2 needs and the matched-outlook bank separate from old evidence.
   Future comparisons must validate full canonical inputs and use fresh finite caps.
-- Build on the completed needs-versus-work scenario with a bounded consequential
-  social exchange; do not return to rescue as the only integration situation.
-- Test durable outlook reuse and one bounded consequential social exchange.
-  Native chatter remains texture; speech and private reflection stay distinct.
+- Build on the bounded addressed exchange with tests of how recipients interpret
+  uncertain or disputed speech. Keep attributed statements distinct from native
+  facts, private outlook revisions and permission to act; see [social contract](SOCIAL_EXCHANGE.md).
+- Test durable outlook reuse without treating a later acceptance as proof of
+  persuasion. A controlled comparison and social-outlook citation design remain
+  separate work; native chatter stays distinct from coordinator-mediated speech.
 - Reassess legibility with a cold reader of an unannotated real public log before
   adding entry kinds. No cold-read result yet.
 - Improve grounding coverage only against a separately versioned, held-out set.

@@ -14,6 +14,7 @@ export const decisionTrials={
  'paced-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-paced-v1'},
  'outlook-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-outlook-v1'},
  'outlook-check-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-outlook-check-v1'},
+ 'social-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-social-v1'},
  'needs-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-needs-v1'},
  'perspective-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-perspective-v1'}
 } as const;

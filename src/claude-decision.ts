@@ -4,12 +4,13 @@ import { mkdtemp,mkdir } from 'node:fs/promises';
 import { join,isAbsolute } from 'node:path';
 import { z } from 'zod';
 import { Decision,type Perspective } from './protocol.js';
-import { type AttentionView } from './attention.js';
+import { type AttentionView,Reflection } from './attention.js';
 import {ReflectionChoice,reflectionChoiceSchema,reflectionFromChoice,validateReflectionChoice} from './reflection-choice.js';
 import {decisionTrials,type DecisionTrial} from './decision-trials.js';
 import {pawnInstructions,modelPrompt} from './model-perspective.js';
 import {promptAccounting} from './prompt-accounting.js';
 import { TrialBudget } from './appraisal.js';
+import {SocialChoice,socialChoiceSchema,socialPrompt,type SocialView} from './social.js';
 
 export const CLAUDE_MODEL='claude-sonnet-4-6';
 const moveAction={type:'object',additionalProperties:false,required:['kind','x','z'],properties:{kind:{const:'move'},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0}}};
@@ -19,9 +20,9 @@ const decision={oneOf:[...['accept','refuse'].map(kind=>({type:'object',addition
  {type:'object',additionalProperties:false,required:['kind','reason','action'],properties:{kind:{const:'counter'},reason:{type:'string',minLength:1,maxLength:1000},action}}]};
 
 
-export function claudeArgs(mode:'decision'|'reflection',view?:AttentionView) {
+export function claudeArgs(mode:'decision'|'reflection'|'social',view?:AttentionView) {
  if(mode==='reflection'&&!view)throw Error('Reflection schema requires a supplied perspective');
- const schema=mode==='decision'?{type:'object',additionalProperties:false,required:['decision'],properties:{decision}}:
+ const schema=mode==='social'?{type:'object',additionalProperties:false,required:['social'],properties:{social:socialChoiceSchema}}:mode==='decision'?{type:'object',additionalProperties:false,required:['decision'],properties:{decision}}:
  {type:'object',additionalProperties:false,required:['reflection'],properties:{reflection:reflectionChoiceSchema(view!,decision)}};
  return ['--print','--safe-mode','--tools','','--disallowedTools','mcp__*','--strict-mcp-config','--mcp-config','{"mcpServers":{}}',
  '--disable-slash-commands','--no-session-persistence','--no-chrome','--permission-mode','dontAsk','--permission-prompts','none',
@@ -41,14 +42,18 @@ export function verifyClaudeInit(event:any) {
    (event.plugins?.length??0)||(event.skills?.length??0)||(event.slash_commands?.length??0))
    throw Error('Claude isolation preflight failed');
 }
-export function parseClaudeResult(event:unknown,mode:'decision'|'reflection') {
+type ParsedClaude<T>={output:T;providerChoice:ReflectionChoice|undefined;estimatedUsageUSD:number;turns:number};
+export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'):ParsedClaude<Decision|Reflection>;
+export function parseClaudeResult(event:unknown,mode:'social'):ParsedClaude<z.infer<typeof SocialChoice>>;
+export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social'):ParsedClaude<Decision|Reflection|z.infer<typeof SocialChoice>>;
+export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social') {
  const result=z.object({type:z.literal('result'),subtype:z.literal('success'),is_error:z.literal(false),
    total_cost_usd:z.number().finite().nonnegative(),structured_output:z.unknown(),
    modelUsage:z.record(z.unknown()),num_turns:z.number().int().min(1).max(2)}).parse(event);
  if(Object.keys(result.modelUsage).some(m=>m!==CLAUDE_MODEL)||!Object.keys(result.modelUsage).length)
    throw Error('Unexpected model route');
  const providerChoice=mode==='reflection'?z.object({reflection:ReflectionChoice}).strict().parse(result.structured_output).reflection:undefined;
- const output=providerChoice?reflectionFromChoice(providerChoice):z.object({decision:Decision}).strict().parse(result.structured_output).decision;
+ const output=mode==='social'?z.object({social:SocialChoice}).strict().parse(result.structured_output).social:providerChoice?reflectionFromChoice(providerChoice):z.object({decision:Decision}).strict().parse(result.structured_output).decision;
  return {output,providerChoice,estimatedUsageUSD:result.total_cost_usd,turns:result.num_turns};
 }
 
@@ -73,18 +78,22 @@ export class ClaudeDecisionBackend {
  close(){if(this.pending)throw Error('Decision still pending');this.budget.close();}
  async decide(view:Perspective,signal:AbortSignal){
    if(view.pawn.id!==view.character.id||view.proposal.pawn!==view.pawn.id||(view.history??[]).some(p=>p.pawn!==view.pawn.id))throw Error('Perspective ownership mismatch');
-   return this.run('decision',view,signal);
+   return Decision.parse(await this.run('decision',view,signal));
  }
  async reflect(view:AttentionView,signal:AbortSignal){
    if(view.pawn.id!==view.character.id||(view.intention&&view.intention.pawn!==view.pawn.id)||view.events.some(e=>e.pawn!==view.pawn.id)||view.proposals.some(p=>p.pawn!==view.pawn.id)||Object.values(view.histories??{}).flat().some(p=>p.pawn!==view.pawn.id))
      throw Error('Perspective ownership mismatch');
-   return this.run('reflection',view,signal);
+   return Reflection.parse(await this.run('reflection',view,signal));
  }
- private async run(mode:'decision'|'reflection',view:unknown,signal:AbortSignal) {
+ async speak(view:SocialView,signal:AbortSignal){
+   if(view.pawn.id!==view.character.id||view.contact.id===view.pawn.id||view.exchange.messages.some(m=>![m.from,m.to].includes(view.pawn.id)))throw Error('Perspective ownership mismatch');
+   return SocialChoice.parse(await this.run('social',view,signal));
+ }
+ private async run(mode:'decision'|'reflection'|'social',view:unknown,signal:AbortSignal) {
    signal.throwIfAborted();if(this.pending)throw Error('Decision backend busy');
    view=structuredClone(view);
    const args=claudeArgs(mode,mode==='reflection'?view as AttentionView:undefined);
-   const prompt=JSON.stringify(modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
+   const prompt=JSON.stringify(mode==='social'?socialPrompt(view as SocialView):modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
    const authoredSize=promptAccounting(args[args.indexOf('--system-prompt')+1]!,prompt,JSON.parse(args[args.indexOf('--json-schema')+1]!));
    this.pending=true;
    // Native client reads its existing login itself. No secret/env copying or extraction.

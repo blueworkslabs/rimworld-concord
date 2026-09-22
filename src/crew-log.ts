@@ -45,6 +45,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
   if(p.decision)add('message',p.pawn,'core',p.id,`${p.decision.kind}: ${p.decision.reason}`,`reply:${p.id}`);
  }
  if(kind==='alternative-requested')add('message',actor,'core',data.id,data.reason,`request:${data.id}`);
+ if(kind==='social-delivered')add('message',data.from,data.to,data.exchangeId,data.text,`social:${data.id}`);
  if(kind==='alternative-declined')add('message','core',data.pawn,data.id,data.replyReason,`decline:${data.id}`);
  if(kind==='offer-withdrawn')add('record','core','observer',data.id,'Pending offer withdrawn; no work authorized.',`retired:${data.id}`);
  if(kind==='intention-stopped')add('record',actor,'observer',data.proposal,'Agreement stopped. Any completed work remains recorded; unfinished work is not completion.',`stopped:${data.proposal}`);

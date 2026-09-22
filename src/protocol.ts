@@ -1,4 +1,5 @@
 import type {PrivateOutlook} from './outlook.js';
+import type {SocialMessage,SocialExchange} from './social.js';
 import type {AgreementProgress,CrewArchive,CrewReport} from './crew-log.js';
 import { z } from 'zod';
 
@@ -55,7 +56,7 @@ export type AttentionProgress = {
   cursor:number;lastAttemptTick?:number;
   last?:{status:'running'|'continued'|'decided'|'native'|'failed'|'interrupted';throughSeq:number;reason:string};
 };
-export type Character = {outlook?:PrivateOutlook;id:string;name:string;memories:string[];commitment?:string;intention?:string;experiences?:Attention[];
+export type Character = {messages?:SocialMessage[];outlook?:PrivateOutlook;id:string;name:string;memories:string[];commitment?:string;intention?:string;experiences?:Attention[];
   attention?:AttentionProgress;
   reflections?:{tick:number;throughSeq:number;backend:string;reason:string}[];
 };
@@ -67,6 +68,7 @@ export interface DecisionBackend {
   decide(view:Perspective, signal:AbortSignal):Promise<unknown>;
 }
 export type Domain = {
+  exchanges?:Record<string,SocialExchange>;
   eventCursor?:number;crew?:CrewArchive;
   schema:1;world:string;epoch:string;branch:string;
   characters:Record<string,Character>;proposals:Record<string,Proposal>;
