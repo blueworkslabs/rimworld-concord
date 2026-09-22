@@ -101,6 +101,7 @@ try{
   await promisify(execFile)('python3',[b.root+'/bin/lab.py','click','1158','782']);
   while(!shutdown.stopped&&Date.now()-began<duration&&connected){
    await c.reconcile();
+   if(shutdown.stopped)break;
    if(negotiationDone&&pump.status().pending===0&&decisions<WORK_TRIAL.decisions){
     const request=pendingObserverRequest(c.inspect(),seenRequests);
     const laterDue=!laterDone&&Date.now()-began>=(scripted?20000:WORK_TRIAL.secondRoundMs);
