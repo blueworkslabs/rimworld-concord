@@ -7,6 +7,14 @@ MODEL='gpt-5.6-luna'
 NATIVE_PROVIDER='concord_native'
 NATIVE_URL='https://chatgpt.com/backend-api/codex'
 CASE_IDS=['quiet','noticed','active-haul','pending-rescue','recovered']
+PERSPECTIVE_IDS=[case+'-r'+str(rep) for rep in (1,2) for case in ['needs-full','needs-low','needs-unknown','social-strain','limited-supplies','recovery']]
+def validate_suite(suite):
+ expected={'concord-contract-v1':CASE_IDS,'concord-perspective-v1':PERSPECTIVE_IDS}.get(suite.get('version'))
+ assert expected and suite.get('authored') is True and [c['id'] for c in suite['cases']]==expected,'Unrecognized fixed suite'
+ if suite['version']=='concord-perspective-v1':
+  canonical=json.loads(subprocess.check_output(['node',str(pathlib.Path(__file__).with_name('export-perspective-cases.mjs'))],text=True))
+  assert suite==canonical,'Frozen case contents differ from this build'
+ return suite['cases']
 def digest(data):return hashlib.sha256(data).hexdigest()
 def toml(value):
  if isinstance(value,dict):return '{'+','.join(k+'='+toml(v) for k,v in value.items())+'}'
@@ -106,7 +114,7 @@ def preflight(root,catalog,cases):
  try:
   client.initialize()
   for case in cases:assert client.run(case)['status']=='completed'
-  assert len(requests)==5
+  assert len(requests)==len(cases)
   (root/'mock-requests.json').write_text(json.dumps(requests,indent=2))
   return {'requests':len(requests),'toolsExposed':0,'modelInference':False}
  finally:client.close();server.shutdown();server.server_close()
@@ -114,12 +122,12 @@ def main():
  parser=argparse.ArgumentParser();parser.add_argument('cases',type=pathlib.Path);parser.add_argument('catalog',type=pathlib.Path);parser.add_argument('output',type=pathlib.Path);parser.add_argument('--live',action='store_true');args=parser.parse_args()
  os.umask(0o077)
  root=args.output.resolve();root.mkdir(parents=True,exist_ok=True);catalog=args.catalog.resolve();catalogHash=validate_catalog(catalog)
- data=args.cases.read_bytes();suite=json.loads(data);assert suite['version']=='concord-contract-v1' and suite['authored'] is True;cases=suite['cases'];assert [c['id'] for c in cases]==CASE_IDS
+ data=args.cases.read_bytes();suite=json.loads(data);cases=validate_suite(suite)
  assert len(data)<200000 and all(len(c['prompt'])<24000 for c in cases)
  marker=root/'started.json'
- with marker.open('x') as f:json.dump({'casesHash':digest(data),'catalogHash':catalogHash,'model':MODEL,'live':args.live,'maxAttempts':5,'caseTimeoutSeconds':60},f)
+ with marker.open('x') as f:json.dump({'casesHash':digest(data),'catalogHash':catalogHash,'model':MODEL,'live':args.live,'maxAttempts':len(cases),'caseTimeoutSeconds':60},f)
  version=subprocess.check_output(['codex','--version'],text=True).strip()
- receipt={'clientVersion':version,'model':MODEL,'live':args.live,'casesHash':digest(data),'catalogHash':catalogHash,'results':[],'attempts':0,'limit':5}
+ receipt={'clientVersion':version,'model':MODEL,'live':args.live,'casesHash':digest(data),'catalogHash':catalogHash,'results':[],'attempts':0,'limit':len(cases)}
  client=None
  def save():
   tmp=root/'receipt.tmp';tmp.write_text(json.dumps(receipt,indent=2));tmp.replace(root/'receipt.json')

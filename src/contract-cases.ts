@@ -1,4 +1,5 @@
 /** Authored, frozen offline cases; no connection to a coordinator or game. */
+import {modelPrompt} from './model-perspective.js';
 import type {AttentionView} from './attention.js';
 import {claudeArgs} from './claude-decision.js';
 import {reflectionChoices,ReflectionChoice,validateReflectionChoice} from './reflection-choice.js';
@@ -39,7 +40,7 @@ export function codexSchema(value:unknown):any{
 }
 export function preparedCases(){return contractCases().map(c=>{
  const args=claudeArgs('reflection',c.view),schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);
- return {...c,instructions:args[args.indexOf('--system-prompt')+1]!,schema:codexSchema(schema),prompt:JSON.stringify({task:'reflection',perspective:c.view,executableChoices:reflectionChoices(c.view)})};
+ return {...c,instructions:args[args.indexOf('--system-prompt')+1]!,schema:codexSchema(schema),prompt:JSON.stringify(modelPrompt('reflection',c.view))};
 });}
 export function checkContractResult(id:string,raw:unknown){
  const c=contractCases().find(c=>c.id===id);if(!c)throw Error('Unknown fixed case');

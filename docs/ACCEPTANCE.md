@@ -676,3 +676,12 @@ zero Jev, no retries;85 historical database/sidecar files unchanged. This is
 formation and reuse evidence, not proof that notes caused the rescue decision.
 Luna model compatibility remains a planned, separate fixed-snapshot evaluation.
 [Contract](CONTEXTUAL_CHOICES.md) · [Evidence](evidence/contextual-choices.json).
+
+
+## Self-describing perspective and broader offline bank (2026-09-22)
+
+181 automated checks, final independent review, mocked native transports and a
+fixed 12-attempt batch per model passed structural/runtime validation. The
+[semantic evidence](evidence/semantic-perspectives.json) separately records
+unsupported prose and the low/unknown fixture readiness confound. No new game,
+persistence or social-consequence result is claimed. See [contract and limits](MODEL_PERSPECTIVE.md).

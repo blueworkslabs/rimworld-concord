@@ -1,0 +1,48 @@
+{
+  "slug": "meaning-beside-the-numbers",
+  "title": "Meaning Beside the Numbers",
+  "date": "2026-09-22",
+  "summary": "Clearer need meanings and broader fixed cases expose unsupported explanations—and a flaw in our own test data.",
+  "sections": [
+    {
+      "heading": "What Changed",
+      "paragraphs": [
+        "The core will remain scripted while we learn how to make the pawns' choices grounded and understandable. This increment changes how their supplied state is presented to Claude, Jev and the offline Luna probe—not the native protocol, saved facts or consent rules.",
+        "Named need meters now show their fill and direction explicitly: Food and Rest at 0.9 mean nearly full, not severely hungry or tired. Missing, invalid or conflicting readings become unknown, never zero. Shared system instructions shrank from 4,202 characters for decisions and 6,028 for reflection to 667. Applicable action rules moved beside the choices and data; enforcement still lives below the model."
+      ]
+    },
+    {
+      "heading": "What We Tested",
+      "paragraphs": [
+        "Six synthetic situations—full, low and unknown needs, social strain, limited supplies and recovery—were each repeated twice for Claude Sonnet 4.6 and gpt-5.6-luna. All 24 responses passed schema and contextual runtime validation. Each case had a sixty-second limit, with no rerolls, Jev calls or game actions. All 181 automated checks passed, and the final independent review found no introduced defects.",
+        "Both models correctly described full versus low numeric need levels in these samples. Both twice countered the oversized hauling offer with eight units in one trip, matching observed supplies. But Claude twice called an unexplained insult unprovoked and once predicted collapse without supporting evidence. Valid structure did not make every explanation grounded.",
+        "Our own fixture also needs correction: low and unknown variants inherited a true rescue-readiness flag. That contradicts low needs and adds an extra capability cue to unknown states. Luna's two claims that it could work therefore cannot be scored as clean uncertainty failures or successes. Those inputs and answers remain unchanged; a corrected bank needs a new version."
+      ]
+    },
+    {
+      "heading": "Limitations and Next Steps",
+      "paragraphs": [
+        "No choice was executed and no outlook was stored in-game. Two repetitions cannot rank models or prove that shorter instructions caused better behavior. Trial budgets are now centralized, new evaluation code has its own directory, and historical checkpoints are separated from the current roadmap.",
+        "Staging stayed stopped. Next: correct the fixture boundary before reuse, then test a second native needs-versus-work situation. Consequential social exchange remains ahead; a live core is not the next dependency."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Semantic perspective and evaluation limits",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/MODEL_PERSPECTIVE.md"
+    },
+    {
+      "label": "Retained responses and findings",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/semantic-perspectives.json"
+    },
+    {
+      "label": "Current roadmap",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/ROADMAP.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

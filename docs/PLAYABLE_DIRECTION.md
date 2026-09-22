@@ -77,3 +77,15 @@ choices were executed. [Evidence and limits](MODEL_CONTRACT_PROBE.md) separate
 contract compliance from grounding. The next interface check should spell out
 need scale/direction and test high, low and unknown values without requiring a
 preferred choice; it is not yet a model ranking or a cheaper live backend.
+
+## Current priority after the outside review (2026-09-22)
+
+Keep the core scripted while we establish grounded pawn behavior; a live core is
+less urgent and remains a later milestone. Prioritize self-describing state and
+choice effects over an ever-growing system prompt, then broaden beyond the
+steel/rescue situation. A small repeated snapshot bank now covers need contrasts,
+social strain and limited supplies as well as recovery. These offline situations
+are not new native gameplay features. See the [current roadmap](ROADMAP.md) and
+[semantic interface/evaluation contract](MODEL_PERSPECTIVE.md). Maintenance should
+support this work: preserve old evidence, centralize trial policies, keep future
+plans separate from historical checkpoints, and avoid an unrelated mass refactor.

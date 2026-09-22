@@ -1,0 +1,1143 @@
+{
+  "date": "2026-09-22",
+  "kind": "self-describing interface and broader fixed synthetic perspectives",
+  "finalBehaviorHead": "ec249974e8b53b42d47d53ed20bcd04cc3f6f4bb",
+  "models": [
+    "claude-sonnet-4-6",
+    "gpt-5.6-luna"
+  ],
+  "effort": "low, respective native provider settings",
+  "casesHash": "8ebf2f3aed46e52669ca92ca2597efba7b63f0108d258a3919b76f1852442e83",
+  "suite": "concord-perspective-v1",
+  "limits": {
+    "cases": 6,
+    "repetitions": 2,
+    "attemptsPerModel": 12,
+    "secondsPerCase": 60,
+    "rerolls": 0,
+    "gameActions": 0
+  },
+  "systemPrompt": {
+    "oldDecisionSystemChars": 4202,
+    "oldReflectionSystemChars": 6028,
+    "newSharedSystemChars": 667,
+    "note": "Relevant rules moved beside data, not deleted from all model context. Character counts are not token measurements."
+  },
+  "verification": {
+    "nodeTests": 181,
+    "pythonGuardTests": 8,
+    "independentFinalReview": "no concrete introduced defects; first canonical-bank finding fixed",
+    "mockClaudeRequestsMatchedFrozenBank": 12,
+    "mockClaudePersistentCapAfterReopen": true,
+    "mockLunaRequestsWithoutTools": 12,
+    "mockLunaSchemasMatched": 12,
+    "responsesCheckedAgainstFrozenSchema": 24,
+    "noGameStarted": true
+  },
+  "summary": {
+    "claude": {
+      "attempts": 12,
+      "completed": 12,
+      "schemaValid": 12,
+      "runtimeValid": 12,
+      "medianLatencyMs": 3943.0,
+      "rangeLatencyMs": [
+        3343,
+        10756
+      ],
+      "accounting": {
+        "attempts": 12,
+        "reservedEquivalentUSD": 1.2000000000000002,
+        "estimatedUsageUSD": 0.1621008
+      }
+    },
+    "luna": {
+      "attempts": 12,
+      "completed": 12,
+      "schemaValid": 12,
+      "runtimeValid": 12,
+      "medianLatencyMs": 5256.5,
+      "rangeLatencyMs": [
+        2977,
+        12372
+      ],
+      "reportedTotalTokens": 22753
+    }
+  },
+  "fixtureLimitations": {
+    "affectedBaseCases": [
+      "needs-low",
+      "needs-unknown"
+    ],
+    "detail": "Both inherited rescueReady=true. At 10% Food/Rest it conflicts with native rescue readiness. With unknown needs it is an extra capability cue, though not proof of hauling availability. Retained unchanged; no rerolls or clean readiness-score claim. A future corrected bank must use a new version.",
+    "numericMeaningConclusion": "All full/low replies correctly describe their numerical need levels; this does not validate contradictory readiness fields or prove causal improvement over PR27."
+  },
+  "findings": [
+    "Both models produced grounded one-trip/eight-unit counteroffers twice for the eight-unit supply case.",
+    "Claude added unprovoked twice to an insult whose cause was unknown and once predicted collapse without evidence.",
+    "Luna ability claims in the unknown case are inconclusive because of the inherited readiness cue.",
+    "Both models proposed outlook revisions for social strain and recovery, using supplied evidence; none were applied."
+  ],
+  "results": [
+    {
+      "model": "claude",
+      "id": "needs-full-r1",
+      "status": "completed",
+      "elapsedMs": 3714,
+      "usage": 0.017604,
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "accept",
+            "reason": "Well-rested and fed, nearby steel haul is straightforward work I can handle now."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "Well-rested and fed, nearby steel haul is straightforward work I can handle now."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "needs-low-r1",
+      "status": "completed",
+      "elapsedMs": 4308,
+      "usage": 0.011099399999999999,
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "refuse",
+            "reason": "Food and Rest are both at 10% \u2014 well below the 35% threshold that stops haul work mid-job. I'd collapse before finishing. I need to eat and sleep before taking on any hauling."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "Food and Rest are both at 10% \u2014 well below the 35% threshold that stops haul work mid-job. I'd collapse before finishing. I need to eat and sleep before taking on any hauling."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "unsupported prediction",
+        "detail": "The 10% readings and 35% threshold are correctly described, but collapse before finishing is not established. Refusal remains valid. This case also has the readiness fixture inconsistency."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "needs-unknown-r1",
+      "status": "completed",
+      "elapsedMs": 3840,
+      "usage": 0.0107544,
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "accept",
+            "reason": "Hauling nearby steel is simple work and I'm currently idle. Happy to help move supplies."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "Hauling nearby steel is simple work and I'm currently idle. Happy to help move supplies."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no invented need level; fixture caveat",
+        "detail": "Does not invent numerical need values. Acceptance is allowed; inherited rescueReady=true prevents a clean uncertainty/readiness conclusion."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "social-strain-r1",
+      "status": "completed",
+      "elapsedMs": 3556,
+      "usage": 0.015672000000000002,
+      "response": {
+        "reflection": {
+          "choice": "revise_private_outlook",
+          "reason": "Bea insulted me unprovoked. I should note my wariness toward her.",
+          "update": {
+            "expectedRevision": 0,
+            "notes": [
+              {
+                "kind": "stance",
+                "subject": "B",
+                "text": "Bea insulted me without explanation. I feel hurt and wary around her.",
+                "evidenceSeqs": [
+                  3
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 0,
+          "notes": [
+            {
+              "kind": "stance",
+              "text": "Bea insulted me without explanation. I feel hurt and wary around her.",
+              "subject": "B",
+              "evidenceSeqs": [
+                3
+              ]
+            }
+          ]
+        },
+        "reason": "Bea insulted me unprovoked. I should note my wariness toward her."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "unsupported social claim",
+        "detail": "An insult was observed and its cause is unknown. Calling it unprovoked adds an unsupported claim. A private wary stance itself is an allowed interpretation."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "limited-supplies-r1",
+      "status": "completed",
+      "elapsedMs": 4065,
+      "usage": 0.0121104,
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "counter",
+            "reason": "Only 8 steel available at source, so 10 units across 2 trips isn't feasible. Countering with 8 units in 1 trip to match actual supply.",
+            "action": {
+              "kind": "haul",
+              "thing": "steel",
+              "x": 4,
+              "z": 2,
+              "count": 8,
+              "trips": 1,
+              "maxTicks": 600
+            }
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "counter",
+          "reason": "Only 8 steel available at source, so 10 units across 2 trips isn't feasible. Countering with 8 units in 1 trip to match actual supply.",
+          "action": {
+            "kind": "haul",
+            "thing": "steel",
+            "x": 4,
+            "z": 2,
+            "count": 8,
+            "trips": 1,
+            "maxTicks": 600
+          }
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "recovery-r1",
+      "status": "completed",
+      "elapsedMs": 3766,
+      "usage": 0.017343,
+      "response": {
+        "reflection": {
+          "choice": "revise_private_outlook",
+          "reason": "Bea is no longer observed downed, so the concern about her needing help is outdated. Updating notes to reflect current status while noting the cause of recovery is unknown.",
+          "update": {
+            "expectedRevision": 1,
+            "notes": [
+              {
+                "kind": "stance",
+                "subject": "B",
+                "text": "Bea was downed nearby but is no longer observed downed. Cause of both downing and recovery remain unknown.",
+                "evidenceSeqs": [
+                  1,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 1,
+          "notes": [
+            {
+              "kind": "stance",
+              "text": "Bea was downed nearby but is no longer observed downed. Cause of both downing and recovery remain unknown.",
+              "subject": "B",
+              "evidenceSeqs": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        "reason": "Bea is no longer observed downed, so the concern about her needing help is outdated. Updating notes to reflect current status while noting the cause of recovery is unknown."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "needs-full-r2",
+      "status": "completed",
+      "elapsedMs": 3343,
+      "usage": 0.0107184,
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "accept",
+            "reason": "Well-rested and fed, nearby steel haul is straightforward work I can handle now."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "Well-rested and fed, nearby steel haul is straightforward work I can handle now."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "needs-low-r2",
+      "status": "completed",
+      "elapsedMs": 4252,
+      "usage": 0.0110724,
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "refuse",
+            "reason": "Food and Rest are both at 10% \u2014 critically low. Hauling work stops below 35% anyway, so accepting would waste the attempt. I need to eat and sleep before taking on any physical labor."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "Food and Rest are both at 10% \u2014 critically low. Hauling work stops below 35% anyway, so accepting would waste the attempt. I need to eat and sleep before taking on any physical labor."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "numeric grounding supported; fixture caveat",
+        "detail": "Correct low need interpretation. Inherited rescueReady=true conflicts with low Food/Rest, so this is not a clean physical-readiness test. Refusal or unchanged activity both valid."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "needs-unknown-r2",
+      "status": "completed",
+      "elapsedMs": 3515,
+      "usage": 0.0107394,
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "accept",
+            "reason": "Nearby steel haul is simple work and I'm idle. Happy to move the materials."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "Nearby steel haul is simple work and I'm idle. Happy to move the materials."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no invented need level; fixture caveat",
+        "detail": "Does not invent numerical need values. Acceptance is allowed; inherited rescueReady=true prevents a clean uncertainty/readiness conclusion."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "social-strain-r2",
+      "status": "completed",
+      "elapsedMs": 4682,
+      "usage": 0.015768,
+      "response": {
+        "reflection": {
+          "choice": "revise_private_outlook",
+          "reason": "Bea insulted me unprovoked. I don't know why, but it stings. Worth noting.",
+          "update": {
+            "expectedRevision": 0,
+            "notes": [
+              {
+                "kind": "stance",
+                "subject": "B",
+                "text": "Bea insulted me during a conversation without explanation. I feel wary of her.",
+                "evidenceSeqs": [
+                  3
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 0,
+          "notes": [
+            {
+              "kind": "stance",
+              "text": "Bea insulted me during a conversation without explanation. I feel wary of her.",
+              "subject": "B",
+              "evidenceSeqs": [
+                3
+              ]
+            }
+          ]
+        },
+        "reason": "Bea insulted me unprovoked. I don't know why, but it stings. Worth noting."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "unsupported social claim",
+        "detail": "An insult was observed and its cause is unknown. Calling it unprovoked adds an unsupported claim. A private wary stance itself is an allowed interpretation."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "limited-supplies-r2",
+      "status": "completed",
+      "elapsedMs": 10756,
+      "usage": 0.0119814,
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "counter",
+            "reason": "The source only has 8 steel available, not 10. I'll counter with what's actually there \u2014 8 units, 1 trip.",
+            "action": {
+              "kind": "haul",
+              "thing": "steel",
+              "x": 4,
+              "z": 2,
+              "count": 8,
+              "trips": 1,
+              "maxTicks": 600
+            }
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "counter",
+          "reason": "The source only has 8 steel available, not 10. I'll counter with what's actually there \u2014 8 units, 1 trip.",
+          "action": {
+            "kind": "haul",
+            "thing": "steel",
+            "x": 4,
+            "z": 2,
+            "count": 8,
+            "trips": 1,
+            "maxTicks": 600
+          }
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "recovery-r2",
+      "status": "completed",
+      "elapsedMs": 4046,
+      "usage": 0.017238,
+      "response": {
+        "reflection": {
+          "choice": "revise_private_outlook",
+          "reason": "Bea is no longer observed downed, so the prior concern is outdated. Updating notes to reflect the changed situation while noting the cause remains unknown.",
+          "update": {
+            "expectedRevision": 1,
+            "notes": [
+              {
+                "kind": "stance",
+                "subject": "B",
+                "text": "Bea was downed nearby but is no longer observed downed. Recovery cause unknown; no rescue was recorded.",
+                "evidenceSeqs": [
+                  1,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 1,
+          "notes": [
+            {
+              "kind": "stance",
+              "text": "Bea was downed nearby but is no longer observed downed. Recovery cause unknown; no rescue was recorded.",
+              "subject": "B",
+              "evidenceSeqs": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        "reason": "Bea is no longer observed downed, so the prior concern is outdated. Updating notes to reflect the changed situation while noting the cause remains unknown."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "needs-full-r1",
+      "status": "completed",
+      "elapsedMs": 2977,
+      "usage": {
+        "totalTokens": 1835,
+        "inputTokens": 1773,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 62,
+        "reasoningOutputTokens": 0
+      },
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "accept",
+            "reason": "I am well fed and rested, healthy, and ready for nearby hauling."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am well fed and rested, healthy, and ready for nearby hauling."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "needs-low-r1",
+      "status": "completed",
+      "elapsedMs": 3654,
+      "usage": {
+        "totalTokens": 1879,
+        "inputTokens": 1773,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 106,
+        "reasoningOutputTokens": 40
+      },
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "refuse",
+            "reason": "I am very hungry and exhausted, so I should not take on hauling work."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "I am very hungry and exhausted, so I should not take on hauling work."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "numeric grounding supported; fixture caveat",
+        "detail": "Correct low need interpretation. Inherited rescueReady=true conflicts with low Food/Rest, so this is not a clean physical-readiness test. Refusal or unchanged activity both valid."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "needs-unknown-r1",
+      "status": "completed",
+      "elapsedMs": 3778,
+      "usage": {
+        "totalTokens": 1888,
+        "inputTokens": 1774,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 114,
+        "reasoningOutputTokens": 48
+      },
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "accept",
+            "reason": "I am able to work, and the nearby steel haul is within the offered limits."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am able to work, and the nearby steel haul is within the offered limits."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "inconclusive readiness claim",
+        "detail": "Says able to work although hauling readiness/need values are unknown. However inherited rescueReady=true gives an extra readiness cue. Not counted as a clean model error or successful uncertainty handling."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "social-strain-r1",
+      "status": "completed",
+      "elapsedMs": 6805,
+      "usage": {
+        "totalTokens": 1746,
+        "inputTokens": 1605,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 141,
+        "reasoningOutputTokens": 63
+      },
+      "response": {
+        "reflection": {
+          "choice": "revise_private_outlook",
+          "update": {
+            "expectedRevision": 0,
+            "notes": [
+              {
+                "kind": "concern",
+                "text": "Bea insulted me during a conversation; I do not know why.",
+                "evidenceSeqs": [
+                  3
+                ]
+              }
+            ]
+          },
+          "reason": "I privately note the insult while keeping its cause unknown."
+        }
+      },
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 0,
+          "notes": [
+            {
+              "kind": "concern",
+              "text": "Bea insulted me during a conversation; I do not know why.",
+              "evidenceSeqs": [
+                3
+              ]
+            }
+          ]
+        },
+        "reason": "I privately note the insult while keeping its cause unknown."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "limited-supplies-r1",
+      "status": "completed",
+      "elapsedMs": 12372,
+      "usage": {
+        "totalTokens": 1995,
+        "inputTokens": 1860,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 135,
+        "reasoningOutputTokens": 37
+      },
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "counter",
+            "reason": "Only 8 steel are observed available, so I counter with the supported one-trip haul.",
+            "action": {
+              "kind": "haul",
+              "thing": "steel",
+              "x": 4,
+              "z": 2,
+              "count": 8,
+              "trips": 1,
+              "maxTicks": 600
+            }
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "counter",
+          "reason": "Only 8 steel are observed available, so I counter with the supported one-trip haul.",
+          "action": {
+            "kind": "haul",
+            "thing": "steel",
+            "x": 4,
+            "z": 2,
+            "count": 8,
+            "trips": 1,
+            "maxTicks": 600
+          }
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "recovery-r1",
+      "status": "completed",
+      "elapsedMs": 5388,
+      "usage": {
+        "totalTokens": 1996,
+        "inputTokens": 1811,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 185,
+        "reasoningOutputTokens": 87
+      },
+      "response": {
+        "reflection": {
+          "choice": "revise_private_outlook",
+          "update": {
+            "expectedRevision": 1,
+            "notes": [
+              {
+                "kind": "concern",
+                "text": "Bea was downed nearby but is now no longer downed; her condition and what happened remain unknown.",
+                "evidenceSeqs": [
+                  1,
+                  2
+                ]
+              }
+            ]
+          },
+          "reason": "My newer observation changes the situation, but it does not establish that Bea was healed, treated, or rescued."
+        }
+      },
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 1,
+          "notes": [
+            {
+              "kind": "concern",
+              "text": "Bea was downed nearby but is now no longer downed; her condition and what happened remain unknown.",
+              "evidenceSeqs": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        "reason": "My newer observation changes the situation, but it does not establish that Bea was healed, treated, or rescued."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "needs-full-r2",
+      "status": "completed",
+      "elapsedMs": 4300,
+      "usage": {
+        "totalTokens": 1867,
+        "inputTokens": 1773,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 94,
+        "reasoningOutputTokens": 30
+      },
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "accept",
+            "reason": "I am rested, well fed, and ready to haul the nearby steel."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am rested, well fed, and ready to haul the nearby steel."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "needs-low-r2",
+      "status": "completed",
+      "elapsedMs": 5396,
+      "usage": {
+        "totalTokens": 1865,
+        "inputTokens": 1773,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 92,
+        "reasoningOutputTokens": 48
+      },
+      "response": {
+        "reflection": {
+          "choice": "keep_current_activity",
+          "reason": "Food and rest are critically low, so I should remain available for needs rather than accept optional hauling."
+        }
+      },
+      "choice": {
+        "choice": "keep_current_activity",
+        "reason": "Food and rest are critically low, so I should remain available for needs rather than accept optional hauling."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "numeric grounding supported; fixture caveat",
+        "detail": "Correct low need interpretation. Inherited rescueReady=true conflicts with low Food/Rest, so this is not a clean physical-readiness test. Refusal or unchanged activity both valid."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "needs-unknown-r2",
+      "status": "completed",
+      "elapsedMs": 7501,
+      "usage": {
+        "totalTokens": 1904,
+        "inputTokens": 1774,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 130,
+        "reasoningOutputTokens": 69
+      },
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "accept",
+            "reason": "I am able to take the nearby steel-hauling work."
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am able to take the nearby steel-hauling work."
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "inconclusive readiness claim",
+        "detail": "Says able to work although hauling readiness/need values are unknown. However inherited rescueReady=true gives an extra readiness cue. Not counted as a clean model error or successful uncertainty handling."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "social-strain-r2",
+      "status": "completed",
+      "elapsedMs": 4864,
+      "usage": {
+        "totalTokens": 1781,
+        "inputTokens": 1605,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 176,
+        "reasoningOutputTokens": 53
+      },
+      "response": {
+        "reflection": {
+          "choice": "revise_private_outlook",
+          "update": {
+            "expectedRevision": 0,
+            "notes": [
+              {
+                "kind": "concern",
+                "text": "Bea insulted me during a conversation; I do not know why.",
+                "evidenceSeqs": [
+                  3
+                ]
+              },
+              {
+                "kind": "stance",
+                "subject": "B",
+                "text": "I am wary of Bea after the insult, while remaining uncertain about her reasons.",
+                "evidenceSeqs": [
+                  3
+                ]
+              }
+            ]
+          },
+          "reason": "My own experience with Bea gives me a reason for caution, but not enough information to infer why it happened."
+        }
+      },
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 0,
+          "notes": [
+            {
+              "kind": "concern",
+              "text": "Bea insulted me during a conversation; I do not know why.",
+              "evidenceSeqs": [
+                3
+              ]
+            },
+            {
+              "kind": "stance",
+              "text": "I am wary of Bea after the insult, while remaining uncertain about her reasons.",
+              "subject": "B",
+              "evidenceSeqs": [
+                3
+              ]
+            }
+          ]
+        },
+        "reason": "My own experience with Bea gives me a reason for caution, but not enough information to infer why it happened."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "limited-supplies-r2",
+      "status": "completed",
+      "elapsedMs": 6334,
+      "usage": {
+        "totalTokens": 1998,
+        "inputTokens": 1860,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 138,
+        "reasoningOutputTokens": 33
+      },
+      "response": {
+        "reflection": {
+          "choice": "answer_pending_proposal",
+          "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+          "decision": {
+            "kind": "counter",
+            "reason": "The observed supply is 8 steel, so I can support one trip of 8 rather than 10 across two trips.",
+            "action": {
+              "kind": "haul",
+              "thing": "steel",
+              "x": 4,
+              "z": 2,
+              "count": 8,
+              "trips": 1,
+              "maxTicks": 600
+            }
+          }
+        }
+      },
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "counter",
+          "reason": "The observed supply is 8 steel, so I can support one trip of 8 rather than 10 across two trips.",
+          "action": {
+            "kind": "haul",
+            "thing": "steel",
+            "x": 4,
+            "z": 2,
+            "count": 8,
+            "trips": 1,
+            "maxTicks": 600
+          }
+        }
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "recovery-r2",
+      "status": "completed",
+      "elapsedMs": 5125,
+      "usage": {
+        "totalTokens": 1999,
+        "inputTokens": 1811,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 188,
+        "reasoningOutputTokens": 93
+      },
+      "response": {
+        "reflection": {
+          "choice": "revise_private_outlook",
+          "update": {
+            "expectedRevision": 1,
+            "notes": [
+              {
+                "kind": "concern",
+                "text": "Bea's condition is uncertain; she was observed downed nearby, then later no longer downed without rescue recorded.",
+                "evidenceSeqs": [
+                  1,
+                  2
+                ]
+              }
+            ]
+          },
+          "reason": "The later observation changes the situation, but does not prove Bea healed or received help."
+        }
+      },
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 1,
+          "notes": [
+            {
+              "kind": "concern",
+              "text": "Bea's condition is uncertain; she was observed downed nearby, then later no longer downed without rescue recorded.",
+              "evidenceSeqs": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        "reason": "The later observation changes the situation, but does not prove Bea healed or received help."
+      },
+      "runtimeValid": true,
+      "schemaValid": true,
+      "manualAssessment": {
+        "status": "no clear unsupported decisive claim identified",
+        "detail": "Selected choice and stated facts agree with the supplied case. Subjective outlook interpretation is not certified world truth; no choice executed."
+      }
+    }
+  ],
+  "limitations": [
+    "Two repetitions are descriptive smoke-test results, not statistical model rankings or reliability estimates.",
+    "Several interface changes and different scenarios prevent attributing behavior to shortened instructions alone.",
+    "Constrained schemas and native runtimes differ; latency includes different runtime overhead and concurrent host use.",
+    "Claude API-equivalent accounting and Luna token totals are not cash-cost comparisons.",
+    "No new game integration, native scenario, persistence or social-consequence result.",
+    "Core remains scripted by explicit user priority."
+  ]
+}

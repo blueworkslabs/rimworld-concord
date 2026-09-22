@@ -1,3 +1,4 @@
+import {modelPerspective} from './model-perspective.js';
 import { z } from 'zod';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
@@ -74,7 +75,7 @@ export class JevAppraiser {
  async assess(view:AppraisalView,signal:AbortSignal,timeoutMs=5000) {
   if(view.event.pawn!==view.pawn.id||view.character.id!==view.pawn.id||view.events?.some(e=>e.pawn!==view.pawn.id)) throw Error('Perspective ownership mismatch');
   if(!Number.isFinite(timeoutMs)||timeoutMs<1||timeoutMs>30000) throw Error('Invalid appraisal timeout');
-  const state=JSON.stringify(view);
+  const state=JSON.stringify(modelPerspective(view));
   if(Buffer.byteLength(state)>16000) throw Error('Appraisal context too large');
   signal.throwIfAborted();this.budget.assertHealthy();
   // 32k context * listed $0.042/M input < $0.002. Revalidate pricing before any live trial.
