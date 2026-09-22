@@ -240,3 +240,14 @@ contract evaluation, beginning with the user-suggested Luna through native Codex
 (`gpt-5.6-luna` in the current catalog). Verify tool isolation first; keep schema
 adherence, judgment, latency and game outcomes separate. No Luna call or alternate
 pawn backend is included in this slice. See [cross-model plan](PLAYABLE_DIRECTION.md).
+
+
+## Needs versus optional work — 2026-09-22
+
+A second native situation used wood hauling and different own-need levels, with
+no casualty. Both live pawns accepted and four trips delivered forty wood; Alvin
+later ate through native routines, without further inference. This is not causal
+evidence about hunger alone or model meal planning. Scripted refusal/counter
+coverage, paired/cold restore and 187 checks passed; the original flawed offline
+bank is preserved beside a corrected v2 export. See [trial](NEEDS_WORK_TRIAL.md)
+and [recorded evidence](evidence/needs-work.json).

@@ -174,3 +174,15 @@ test('adapter sends the contextual schema and prompt from the same frozen snapsh
   assert.deepEqual(sent.prompt.executableChoices.map((x:any)=>x.choice),['keep_current_activity']);
  }finally{b?.close();await rm(dir,{recursive:true,force:true});}
 });
+
+test('needs follow-up has its own persistent four-attempt cap; exhaustion never resets on reopen',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'concord-needs-cap-')),binary=join(dir,'fake-claude');
+ const view={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Wait',health:1},character:{id:'A',name:'Ada',memories:[]},proposal:{id:'d8caec56-f2fa-4b50-a58e-f3a7588a3d20',pawn:'A',action:{kind:'move' as const,x:2,z:1},reason:'test',status:'pending' as const}};
+ const options={ledgerPath:join(dir,'needs.db'),scratchRoot:join(dir,'scratch'),binary,trial:'needs-v1' as const};let b:ClaudeDecisionBackend|undefined;
+ try{
+  await writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\nconsole.log('+JSON.stringify(JSON.stringify(init))+');\nconsole.log('+JSON.stringify(JSON.stringify(result))+');\n',{mode:0o700});
+  b=new ClaudeDecisionBackend(options);for(let i=0;i<4;i++)await b.decide(view,new AbortController().signal);
+  assert.equal(b.summary().attempts,4);await assert.rejects(b.decide(view,new AbortController().signal));b.close();b=new ClaudeDecisionBackend(options);
+  await assert.rejects(b.decide(view,new AbortController().signal));assert.equal(b.summary().attempts,4);
+ }finally{b?.close();await rm(dir,{recursive:true,force:true});}
+});

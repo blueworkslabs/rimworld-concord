@@ -685,3 +685,15 @@ fixed 12-attempt batch per model passed structural/runtime validation. The
 [semantic evidence](evidence/semantic-perspectives.json) separately records
 unsupported prose and the low/unknown fixture readiness confound. No new game,
 persistence or social-consequence result is claimed. See [contract and limits](MODEL_PERSPECTIVE.md).
+
+
+## Native needs-versus-work trial
+
+The [separate needs trial](NEEDS_WORK_TRIAL.md) records two paused optional-work
+decisions followed by two minutes of native observation: forty wood delivered,
+then native eating, with 94 unpaused samples and no further inference. Scripted
+refusal, smaller-counter/fresh-consent execution and paired/cold restore passed.
+187 automated checks and independent Codex review cover final behavior
+`b6e6a3e29e417b8ab8a8589bde655e5d0de060b1`. Public [evidence](evidence/needs-work.json)
+retains unsupported certainty and scenario limitations. No live core, automatic
+prose scorer, outlook-effect experiment or reader study is claimed.
