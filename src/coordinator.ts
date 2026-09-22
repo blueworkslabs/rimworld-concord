@@ -442,6 +442,15 @@ export class Coordinator {
     if(result.kind==='accept'&&p.action.kind!=='move'&&!this.game.cancel)throw Error('Work requires scoped cancellation');
   }
   private async applyDecision(p:Proposal,result:Decision,fresh:GameState,signal?:AbortSignal) {
+    if(p.replacesAgreementId){
+      const old=this.domain.proposals[p.replacesAgreementId]!;
+      const receipt=fresh.actions.find(a=>a.id===old.actionId&&a.actor===p.pawn);
+      if(receipt&&receipt.status!=='started'){
+        this.domain.outcomes[receipt.id]=receipt;
+        if(this.domain.characters[p.pawn]!.commitment===receipt.id)delete this.domain.characters[p.pawn]!.commitment;
+        this.finishStanding(old,receipt.status);this.commit('action-outcome',p.pawn,receipt);
+      }
+    }
     this.validateDecision(p,result,fresh);
     if(p.replacesAgreementId&&result.kind==='accept') {
       // Consent is durable before any cancellation. An interrupted handover never
@@ -449,7 +458,8 @@ export class Coordinator {
       p.decision=result;p.status='accepted';p.standing={status:'stopped',deadline:this.observedTick+(p.action.kind==='move'?0:p.action.maxTicks),steps:[],reason:'Replacement handover not dispatched'};
       if(p.requestId)this.domain.requests![p.requestId]!.status='closed';
       this.commit('replacement-consented',p.pawn,p);
-      await this.withdraw(p.pawn,'Accepted replacement: '+result.reason);
+      await this.withdraw(p.pawn,('Accepted replacement: '+result.reason).slice(0,1000));
+      if(this.domain.proposals[p.replacesAgreementId]!.standing?.status==='completed')throw Error('Previous agreement completed during handover');
       if(this.domain.characters[p.pawn]!.commitment)throw Error('Previous job cancellation unconfirmed');
       const after=await this.current();this.ingest(after);signal?.throwIfAborted();
       const invalid=rescueQuestionInvalid(after,{...p,status:'pending'});if(invalid)throw Error(invalid);
@@ -535,6 +545,9 @@ export class Coordinator {
       const receipt=await this.game.cancel!({epoch:this.domain.epoch,actor:pawn,id:p.actionId,kind:p.action.kind==='rescue'?'rescue':'haul'});
       if(receipt.id!==p.actionId||receipt.actor!==pawn)throw Error('Cancellation receipt does not match prior job');
       this.domain.outcomes[receipt.id]=receipt;
+      if(receipt.status==='completed'&&p.action.kind==='haul'&&p.standing.steps.length>=p.action.trips){
+        p.standing.status='completed';p.standing.reason='Agreed work completed before cancellation';
+      }
       if(receipt.status!=='started')delete character.commitment;
       this.commit('action-outcome',pawn,receipt);
     }
