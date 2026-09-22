@@ -68,7 +68,7 @@ try{
  if(cold){
   const saved=JSON.parse(await readFile(root+'/.runtime/'+prefix+'-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.policy??'reconsider-v1',policy);assert.equal(saved.mode,scripted?'scripted':'live');
   store=new Store(saved.db);c=new Coordinator(store,b);await c.restore(saved.checkpoint);
-  assert.deepEqual(c.inspect().characters,saved.domain.characters);assert.deepEqual(c.inspect().proposals,saved.domain.proposals);assert.deepEqual(c.inspect().outcomes,saved.domain.outcomes);assert.deepEqual(c.inspect().requests,saved.domain.requests);assert.deepEqual(c.inspect().crew,saved.domain.crew);assert.notEqual(c.inspect().epoch,saved.domain.epoch);
+  assert.deepEqual(c.inspect().characters,saved.domain.characters);assert.deepEqual(c.inspect().proposals,saved.domain.proposals);assert.deepEqual(c.inspect().outcomes,saved.domain.outcomes);assert.deepEqual(c.inspect().requests,saved.domain.requests);assert.deepEqual(c.inspect().crew?.entries,saved.domain.crew?.entries);assert.notEqual(c.inspect().epoch,saved.domain.epoch);
   const restored=await b.state();assert.equal(restored.pawns.find(p=>p.id===saved.target)?.currentBed,saved.patientBed);
   assert.deepEqual(restored.events?.filter(e=>e.pawn===saved.pawn&&e.kind==='casualty'&&e.subject===saved.target)??[],saved.sightings);
   receipt.persistedSightings=saved.sightings.length;receipt.coldRestore=true;receipt.summary=workSummary(c.inspect());receipt.requests=c.core().requests();
@@ -125,6 +125,7 @@ try{
    }
    if(shutdown.stopped)break;
    await c.advanceIntentions();
+   if(shutdown.stopped)break;
    if(negotiationDone&&decisions<WORK_TRIAL.decisions&&reflections<WORK_TRIAL.reflections&&appraisals<WORK_TRIAL.appraisals)await pump.poll();
    const state=await b.state(),thinking=pendingThoughts.size>0;samples++;if(state.paused)pausedSamples++;if(thinking)thoughtSamples++;
    if(thinking&&wasThinking)ticksDuringThought+=Math.max(0,state.ticks-priorTick);priorTick=state.ticks;wasThinking=thinking;
@@ -146,7 +147,7 @@ try{
   const sightings=finish.events?.filter(e=>e.pawn===pawn&&e.kind==='casualty'&&e.subject===target)??[];
   assert(sightings.length<=1,'No repeated alert for the same continuously downed patient');
   const checkpoint='lab-concord-reconsider-'+Date.now();await c.checkpoint(checkpoint);const domain=c.inspect();await c.restore(checkpoint);
-  assert.deepEqual(c.inspect().characters,domain.characters);assert.deepEqual(c.inspect().proposals,domain.proposals);assert.deepEqual(c.inspect().outcomes,domain.outcomes);assert.deepEqual(c.inspect().requests,domain.requests);assert.deepEqual(c.inspect().crew,domain.crew);
+  assert.deepEqual(c.inspect().characters,domain.characters);assert.deepEqual(c.inspect().proposals,domain.proposals);assert.deepEqual(c.inspect().outcomes,domain.outcomes);assert.deepEqual(c.inspect().requests,domain.requests);assert.deepEqual(c.inspect().crew?.entries,domain.crew?.entries);
   const restored=await b.state();assert.deepEqual(restored.events?.filter(e=>e.pawn===pawn&&e.kind==='casualty'&&e.subject===target)??[],sightings);
   const patientBed=finish.pawns.find(p=>p.id===target)?.currentBed;assert.equal(restored.pawns.find(p=>p.id===target)?.currentBed,patientBed);
   receipt.persistedSightings=sightings.length;
