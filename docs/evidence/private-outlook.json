@@ -1,0 +1,228 @@
+{
+  "date": "2026-09-22",
+  "kind": "private outlook implementation with scripted proof and unsuccessful live formation",
+  "finalBehaviorHead": "90031c5223474a691a969278b09a028906f6e0ff",
+  "automatedTests": 167,
+  "limits": {
+    "claudeAttempts": 6,
+    "jevCalls": 0,
+    "channelDeadlineMs": 120000
+  },
+  "mode": "paused reflection and proposal with native execution after consent, not continuous play",
+  "scripted": {
+    "passed": true,
+    "outlookRevision": 1,
+    "noteKinds": [
+      "stance"
+    ],
+    "citationCounts": [
+      1
+    ],
+    "privateTextOmitted": true,
+    "checks": [
+      "private reflection changes no jobs, native pawn facts, other outlooks or public entries",
+      "paired rewind removes future outlook; retained checkpoint restores it"
+    ],
+    "laterPerspectiveContainedRestoredOutlook": true,
+    "completedRescues": 1,
+    "pairedRestore": true,
+    "coldRestore": true,
+    "inferenceCalls": 0
+  },
+  "live": {
+    "runnerChecksPassed": true,
+    "outlookFormationSucceeded": false,
+    "outlookAbsentAfterColdRestore": true,
+    "reflection": {
+      "pawn": "Thing_Human405",
+      "status": "failed",
+      "throughSeq": 1
+    },
+    "rejectedChoice": {
+      "choice": "request_rescue_alternative",
+      "agreementId": "00000000-0000-0000-0000-000000000000",
+      "target": "Thing_Human408",
+      "reasonOmitted": true,
+      "status": "rejected before coordinator action"
+    },
+    "cause": "Requested an unavailable rescue alternative with an invented agreement ID while no agreement existed. No outlook update or request was applied.",
+    "laterOffer": "Separate scripted optional rescue offer, not a reply to an applied pawn request or result of an outlook update",
+    "finalProposal": {
+      "id": "1e5d585b-1626-4c9b-aa81-d94b241c891a",
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "rescue",
+        "target": "Thing_Human408",
+        "bed": "Thing_SleepingSpot990002",
+        "x": 74,
+        "z": 77,
+        "maxTicks": 1800
+      },
+      "reason": "Would you carry this observed downed crewmate to this particular medical bed? This is optional rescue, not treatment; your choice remains yours.",
+      "status": "accepted",
+      "rescueMap": 0,
+      "decision": {
+        "kind": "accept",
+        "reason": "Beatrice is downed nearby and I'm well-rested and fed. I'll carry her to the sleeping spot."
+      },
+      "actionId": "54294a65-2a0c-4428-aee2-fd657a29c3ec",
+      "standing": {
+        "status": "completed",
+        "deadline": 1826,
+        "steps": [
+          "54294a65-2a0c-4428-aee2-fd657a29c3ec"
+        ],
+        "reason": "Agreed work completed"
+      }
+    },
+    "outcomes": [
+      {
+        "id": "54294a65-2a0c-4428-aee2-fd657a29c3ec",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed casualty to agreed medical bed; treatment not implied",
+        "kind": "rescue",
+        "thing": "",
+        "target": "Thing_Human408",
+        "bed": "Thing_SleepingSpot990002",
+        "x": 74,
+        "z": 77,
+        "jobId": 9,
+        "count": 0,
+        "delivered": 1,
+        "untilTick": 1826
+      }
+    ],
+    "pairedRestore": true,
+    "coldRestore": true,
+    "publicEntries": [
+      {
+        "seq": 1,
+        "tick": 2,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "Thing_Human408",
+        "text": "Locally observed Beatrice downed and outside a bed. Cause and urgency unknown.",
+        "key": "native-observation:1"
+      },
+      {
+        "seq": 2,
+        "tick": 2,
+        "kind": "record",
+        "actor": "Pedro",
+        "recipient": "observer",
+        "subject": "Thing_Human408",
+        "text": "Locally observed Beatrice downed and outside a bed. Cause and urgency unknown.",
+        "key": "native-observation:2"
+      },
+      {
+        "seq": 3,
+        "tick": 26,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Alvin",
+        "subject": "1e5d585b-1626-4c9b-aa81-d94b241c891a",
+        "text": "Would you carry this observed downed crewmate to this particular medical bed? This is optional rescue, not treatment; your choice remains yours.",
+        "key": "offer:1e5d585b-1626-4c9b-aa81-d94b241c891a"
+      },
+      {
+        "seq": 4,
+        "tick": 26,
+        "kind": "message",
+        "actor": "Alvin",
+        "recipient": "Core",
+        "subject": "1e5d585b-1626-4c9b-aa81-d94b241c891a",
+        "text": "accept: Beatrice is downed nearby and I'm well-rested and fed. I'll carry her to the sleeping spot.",
+        "key": "reply:1e5d585b-1626-4c9b-aa81-d94b241c891a"
+      },
+      {
+        "seq": 5,
+        "tick": 26,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "1e5d585b-1626-4c9b-aa81-d94b241c891a",
+        "text": "rescue: started.",
+        "key": "outcome:54294a65-2a0c-4428-aee2-fd657a29c3ec:started"
+      },
+      {
+        "seq": 6,
+        "tick": 283,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "1e5d585b-1626-4c9b-aa81-d94b241c891a",
+        "text": "rescue: completed. Casualty placed in the agreed bed; treatment not implied.",
+        "key": "outcome:54294a65-2a0c-4428-aee2-fd657a29c3ec:completed"
+      }
+    ],
+    "publicProgress": [
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "progress": {
+          "id": "1e5d585b-1626-4c9b-aa81-d94b241c891a",
+          "kind": "rescue",
+          "status": "completed",
+          "tick": 305,
+          "agreed": 1,
+          "completed": 1,
+          "active": 0,
+          "unconfirmed": 0,
+          "unsuccessful": 0,
+          "notStarted": 0,
+          "unfulfilled": 0,
+          "delivered": 0,
+          "quantityUnknown": 0
+        }
+      }
+    ],
+    "before": {
+      "claude": {
+        "attempts": 0,
+        "reservedEquivalentUSD": 0,
+        "estimatedUsageUSD": 0
+      },
+      "jev": {
+        "calls": 0,
+        "reservedUSD": 0,
+        "reportedUSD": 0
+      }
+    },
+    "after": {
+      "claude": {
+        "attempts": 2,
+        "reservedEquivalentUSD": 0.2,
+        "estimatedUsageUSD": 0.054558
+      },
+      "jev": {
+        "calls": 0,
+        "reservedUSD": 0,
+        "reportedUSD": 0
+      }
+    },
+    "noColdInference": true,
+    "cleanup": {
+      "operatorStops": [],
+      "errors": []
+    }
+  },
+  "historicalFiles": {
+    "count": 58,
+    "unchanged": true
+  },
+  "review": {
+    "completed": true,
+    "findingsRemaining": 0,
+    "head": "90031c5223474a691a969278b09a028906f6e0ff"
+  },
+  "limitations": [
+    "Citations establish provenance, not truth or personality quality.",
+    "No native trait or relationship-score changes; private outlook does not authorize actions.",
+    "Live formation and influence on a later choice were not demonstrated.",
+    "Scripted restore/decision plumbing is not a causal behavioral comparison.",
+    "No retry, no Jev calls, no continuous-play timing claim.",
+    "Next output-grounding improvement: align provider schema with current allowed choices; enforce existing validation regardless."
+  ]
+}

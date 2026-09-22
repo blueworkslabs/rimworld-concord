@@ -1,0 +1,48 @@
+{
+  "slug": "a-private-outlook",
+  "title": "A Private Outlook",
+  "date": "2026-09-22",
+  "summary": "Private outlooks passed scripted persistence checks, but the live reflection chose an unavailable action and formed no outlook.",
+  "sections": [
+    {
+      "heading": "What We Built",
+      "paragraphs": [
+        "Pawns can now hold an optional private outlook: up to four short values, concerns or interpersonal stances. Each note cites one to three of that pawn’s captured experiences or retained outlook citations. A stance needs a subject explicitly present in its evidence. These links establish provenance, not whether an interpretation is fair or true. No outlook is seeded by an authored personality override; native traits and relationship scores stay untouched.",
+        "A dedicated reflection choice can replace, revise or remove the notes, provided its expected revision still matches. It authorizes no speech, job, withdrawal or consent. Only the owner’s later proposal, reflection and appraisal perspectives receive the outlook. Other pawns and the public crew log do not. Current notes retain at most twelve cited event snapshots; rewind removes discarded revisions."
+      ]
+    },
+    {
+      "heading": "The Scripted Proof",
+      "paragraphs": [
+        "All 167 automated checks passed, and independent Codex review found no actionable introduced defects. In the native scripted rehearsal, Alvin formed one stance after locally seeing Beatrice downed. It stayed private, survived restore and appeared in his later proposal perspective. Fresh scripted acceptance then completed exact-bed rescue. Rewinding removed the stance; restoring the retained checkpoint and cold restarting preserved it. This verifies the path, not that a note caused the choice."
+      ]
+    },
+    {
+      "heading": "The Live Gap",
+      "paragraphs": [
+        "The live trial used paused reflection and a later paused offer. Alvin selected an unavailable rescue-alternative request and supplied an invented agreement ID, despite having no agreement to replace. Validation rejected it. No request was applied and no private outlook formed; the attempt was retained without retry.",
+        "After paired restore, the trial’s separate, preplanned rescue offer was accepted and Beatrice reached the agreed bed. That rescue was not a consequence of an outlook or an applied request. Two Claude attempts and zero Jev calls were used. Cold restore preserved the failed reflection, absent outlook and separate rescue outcome without further inference."
+      ]
+    },
+    {
+      "heading": "What Comes Next",
+      "paragraphs": [
+        "Next is matching the provider’s output schema to currently allowed choices and identifiers, while keeping runtime validation. Then a separately bounded trial can test live outlook formation again. General character continuity, consequential social exchange and human contact remain open."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Private outlook contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PRIVATE_OUTLOOK.md"
+    },
+    {
+      "label": "Scripted and live evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/private-outlook.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

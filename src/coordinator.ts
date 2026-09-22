@@ -1,3 +1,4 @@
+import {reviseOutlook} from './outlook.js';
 import {recordCrew,crewReport,agreementProgress} from './crew-log.js';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
@@ -207,6 +208,16 @@ export class Coordinator {
         }
         const reason=result.kind==='proposal'?result.decision.reason:result.reason;
         const reflection={tick:this.observedTick,throughSeq,backend:backend.name,reason};
+        if(result.kind==='revise_outlook') {
+          // Validate against the frozen supplied perspective, then recheck the live revision.
+          const next=reviseOutlook(prepared.view.character,result.update,this.observedTick);
+          if((character.outlook?.revision??0)!==result.update.expectedRevision)throw Error('Private outlook superseded');
+          character.outlook=next;
+          character.attention!.last={status:'continued',throughSeq,reason};
+          character.reflections=[...(character.reflections??[]),reflection].slice(-16);
+          this.commit('outlook-revised',pawn,{...reflection,outlook:next});
+          return {pawn,status:'continued',throughSeq};
+        }
         if(result.kind==='request_rescue') {
           this.requestRescue(prepared.view,result,fresh);
           character.attention!.last={status:'continued',throughSeq,reason};

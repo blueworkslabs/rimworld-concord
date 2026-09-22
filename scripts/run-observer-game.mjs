@@ -14,14 +14,15 @@ const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.arg
 
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','jevLedger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
-const policy=process.argv.includes('--paced')?'paced-v1':'observer-v1',intent=true,alternative=true;
+const outlook=process.argv.includes('--outlook');
+const policy=outlook?'outlook-v1':process.argv.includes('--paced')?'paced-v1':'observer-v1',intent=true,alternative=true;
 for(const k of ['scriptedReflectionDelayMs','scriptedRescueDelayMs'])if(config[k]!==undefined&&(!Number.isInteger(config[k])||config[k]<0||config[k]>20000))throw Error('Invalid scripted delay');
-const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0,estimatedUsageUSD:0}),close(){},async decide(view,signal){if(view.proposal.action.kind==='rescue')await delay(config.scriptedRescueDelayMs??0,undefined,{signal});if(view.proposal.replacesAgreementId&&config.scriptedAlternativeDecision==='refuse')return {kind:'refuse',reason:'Scripted retention of original agreement'};if(view.proposal.replacesAgreementId&&config.scriptedAlternativeDecision==='counter'&&!view.proposal.parentId)return {kind:'counter',reason:'Scripted shorter rescue scope',action:{...view.proposal.action,maxTicks:1200}};return {kind:'accept',reason:'Scripted dry-run consent'};},async reflect(view,signal){await delay(config.scriptedReflectionDelayMs??0,undefined,{signal});const reason=view.pawn.casualties?.observations.length?'Scripted consideration of observed casualty':'Scripted continuation of native activity';if(!intent&&!alternative)return {kind:config.scriptedReflection??'withdraw',reason};const choice=ReflectionChoice.parse(config.scriptedReflection==='request_rescue'&&view.intention?.action.kind==='haul'&&view.intention.standing?.status==='running'&&view.pawn.casualties?.observations.length?{choice:'request_rescue_alternative',agreementId:view.intention?.id,target:view.pawn.casualties?.observations[0]?.target,reason}:config.scriptedReflection!=='withdraw'?{choice:'keep_current_activity',reason}:{choice:'withdraw_current_agreement',agreementId:view.intention?.id,reason});validateReflectionChoice(choice,view);this.receipts.push({mode:'reflection',status:'scripted',providerChoice:choice});return reflectionFromChoice(choice);}}:new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:policy});
-const budget=new TrialBudget(config.jevLedger,.024,12,policy==='paced-v1'?'jev-paced-v1':'jev-observer-v1');
+const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0,estimatedUsageUSD:0}),close(){},async decide(view,signal){if(view.proposal.action.kind==='rescue')await delay(config.scriptedRescueDelayMs??0,undefined,{signal});if(view.proposal.replacesAgreementId&&config.scriptedAlternativeDecision==='refuse')return {kind:'refuse',reason:'Scripted retention of original agreement'};if(view.proposal.replacesAgreementId&&config.scriptedAlternativeDecision==='counter'&&!view.proposal.parentId)return {kind:'counter',reason:'Scripted shorter rescue scope',action:{...view.proposal.action,maxTicks:1200}};return {kind:'accept',reason:'Scripted dry-run consent'};},async reflect(view,signal){if(outlook){const e=view.events.find(e=>e.kind==='casualty'&&e.subject);if(!e)return {kind:'continue',reason:'No new grounded concern'};return {kind:'revise_outlook',reason:'Scripted private concern',update:{expectedRevision:view.character.outlook?.revision??0,notes:[{kind:'stance',subject:e.subject,text:'I want to be attentive to this crewmate after seeing them downed',evidenceSeqs:[e.seq]}]}};}await delay(config.scriptedReflectionDelayMs??0,undefined,{signal});const reason=view.pawn.casualties?.observations.length?'Scripted consideration of observed casualty':'Scripted continuation of native activity';if(!intent&&!alternative)return {kind:config.scriptedReflection??'withdraw',reason};const choice=ReflectionChoice.parse(config.scriptedReflection==='request_rescue'&&view.intention?.action.kind==='haul'&&view.intention.standing?.status==='running'&&view.pawn.casualties?.observations.length?{choice:'request_rescue_alternative',agreementId:view.intention?.id,target:view.pawn.casualties?.observations[0]?.target,reason}:config.scriptedReflection!=='withdraw'?{choice:'keep_current_activity',reason}:{choice:'withdraw_current_agreement',agreementId:view.intention?.id,reason});validateReflectionChoice(choice,view);this.receipts.push({mode:'reflection',status:'scripted',providerChoice:choice});return reflectionFromChoice(choice);}}:new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:policy});
+const budget=new TrialBudget(config.jevLedger,outlook?.008:.024,outlook?4:12,outlook?'jev-outlook-v1':policy==='paced-v1'?'jev-paced-v1':'jev-observer-v1');
 const before={claude:backend.summary(),jev:budget.summary()};
 if(!cold&&(before.claude.attempts||before.jev.calls))throw Error('Fresh trial required; no replay or automatic continuation');
 const maxDecisions=12-Number(before.claude.attempts);
-const appraiser=cold?undefined:scripted?{async assess(){return {reflectionScore:.2,costUSD:0};}}:new JevAppraiser(protectedJevTransport(),budget);
+const appraiser=cold||outlook?undefined:scripted?{async assess(){return {reflectionScore:.2,costUSD:0};}}:new JevAppraiser(protectedJevTransport(),budget);
 const quote=s=>"'"+s.replaceAll("'","'\\''")+"'";
 const env=Object.fromEntries(['PATH','HOME','LANG'].filter(k=>process.env[k]).map(k=>[k,process.env[k]]));
 const digestCode="const fs=require('fs'),p=require('path'),h=require('crypto').createHash('sha256'),d=process.argv[1];for(const n of fs.readdirSync(d).filter(n=>n.endsWith('.js')).sort()){h.update(n);h.update(fs.readFileSync(p.join(d,n)));}console.log(h.digest('hex'));";
@@ -32,7 +33,8 @@ const marker=config.receipt+'.started';
 const runId=cold?JSON.parse(await readFile(marker,'utf8')).runId:randomUUID();
 if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,policy,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
 if(cold&&(JSON.parse(await readFile(marker,'utf8')).policy??'reconsider-v1')!==policy)throw Error('Cold policy mismatch');
-const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-observer-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}`;
+const launcher=outlook?'run-rescue-lab.sh':'run-observer-lab.sh',entry=outlook?(cold?'outlook-cold':'outlook'):(cold?'cold':'game');
+const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/'+launcher)} ${entry}${scripted?' --scripted':''}`;
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
 const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],appraisals=[],responses=[];
@@ -48,7 +50,7 @@ async function handle(line){
  if(draining||cold||seen.has(m.id))throw Error('Unexpected request');
  const isDecision=m.type==='decision-request';
  if(isDecision){if(!['decision','reflection'].includes(m.mode)||++decisionCount>maxDecisions)throw Error('Decision limit');}
- else if(m.type!=='appraisal'||++appraisalCount>12-Number(before.jev.calls))throw Error('Appraisal limit');
+ else if(outlook||m.type!=='appraisal'||++appraisalCount>12-Number(before.jev.calls))throw Error('Appraisal limit');
  seen.add(m.id);const controller=new AbortController();active.set(m.id,controller);const start=Date.now();
  try{
   await lane.run(controller.signal,async()=>{
@@ -70,7 +72,7 @@ input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill(
 const timer=setTimeout(()=>{failed=true;child.kill();},1200000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
-const result={at:new Date().toISOString(),policy,kind:cold?'observer-live-cold':scripted?'observer-scripted':'observer-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
+const result={at:new Date().toISOString(),policy,kind:outlook?(cold?'outlook-cold':scripted?'outlook-scripted':'outlook-live'):cold?'observer-live-cold':scripted?'observer-scripted':'observer-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
  before,after:{claude:backend.summary(),jev:budget.summary()},decisions:backend.receipts,responses,appraisals,game:receipt,
  accounting:'Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls.'};
 backend.close();budget.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;

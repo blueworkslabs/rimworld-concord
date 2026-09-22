@@ -207,3 +207,18 @@ durable-character continuity slice and one consequential social exchange from
 [the playable direction](PLAYABLE_DIRECTION.md), judged by observable choices
 and continuity rather than additional reflection volume. The live core and human
 contact remain separate future milestones, not enabled by this change.
+
+## Private outlook checkpoint
+
+A bounded private outlook is implemented: up to four evidence-linked values,
+concerns or stances, revised only by the owning pawn's reflection. Native trait
+and relationship values stay unchanged. Scripted native formation, owner-only
+later perspectives, rewind and cold restore passed. The live trial formed no
+outlook: it attempted an unavailable rescue request with an invented agreement,
+which validation rejected. A separate preplanned rescue offer later succeeded.
+
+Before extending social behavior, align provider output schemas with current
+allowed choices/identifiers and then test live outlook formation under a fresh
+bound. Do not count unrelated rescue success as character continuity. General
+personality development and social/human-contact milestones remain open.
+See [private outlook contract](PRIVATE_OUTLOOK.md).
