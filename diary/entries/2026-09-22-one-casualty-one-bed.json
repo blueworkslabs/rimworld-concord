@@ -1,0 +1,44 @@
+{
+  "slug": "one-casualty-one-bed",
+  "title": "One Casualty, One Bed",
+  "date": "2026-09-22",
+  "summary": "Scripted rescue now reaches an agreed medical bed. Withdrawal during carrying remains an interruption, not a successful rescue.",
+  "sections": [
+    {
+      "heading": "What Changed",
+      "paragraphs": [
+        "The core can now propose carrying one observed downed colonist to one specific nearby medical bed. The rescuer can accept, refuse, or counter with another observed bed. Once agreed, native carrying executes that one attempt. No automatic retries, no bed substitution along the way, no capture or treatment bundled in. Planning holds keep our coordinator from offering the same patient or bed twice, but they are not native reservations; other colony activity can still change availability."
+      ]
+    },
+    {
+      "heading": "What We Tested",
+      "paragraphs": [
+        "Scripted tests in the real game confirmed the exchange: a refusal produced no job; a counter selected a different bed and required fresh consent; replaying the action identity did not create a second rescue. Completion required the living casualty to occupy that exact bed, no longer being carried. The rescuer arriving nearby was not enough.",
+        "A separate test withdrew consent during observed carrying. The casualty returned to the ground at the carrier’s position. The attempt was recorded as interrupted, not completed, and no retry followed. Withdrawal can leave someone still needing help; it does not promise a safe resolution.",
+        "Native checks rejected the wrong map, wrong bed identity or coordinates, and a patient who was not downed. An accepted rescue also stopped at its deadline without coordinator polling. Paired restore and a full game/coordinator cold restart retained both the completed outcome and the patient in the agreed bed, without new inference."
+      ]
+    },
+    {
+      "heading": "Current Limits",
+      "paragraphs": [
+        "These were disposable, operator-authored fixtures: anesthesia, medical sleeping spots and disabled native work priorities. The first fixture omitted the anesthesia duration and correctly failed the downed-patient check. Another put beds too close to observe carrying separately; moving them farther away made withdrawal testable. Neither failed setup was evidence of a successful interruption."
+      ]
+    },
+    {
+      "heading": "Next Step",
+      "paragraphs": [
+        "The 102 automated checks passed, along with the existing native hauling regressions. No new pawn-model calls were used. Live rescue choices, naturally occurring emergencies, treatment, combat danger and active-job checkpointing remain untested or unsupported. The next behavioral question is how pawns weigh meaningful competing priorities—not whether scripted consent can stand in for that judgment."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Rescue contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/840f801e44421729852ad907dbacf6f34b42a1f0/docs/RESCUE.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
