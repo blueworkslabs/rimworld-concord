@@ -12,18 +12,22 @@ Use the installed native Codex app-server with ChatGPT sign-in, selected model
 `gpt-5.6-luna`, low effort, standard service tier and fresh ephemeral threads.
 Native Codex owns authentication; credentials are never copied into the probe.
 The account type must be ChatGPT and the returned model/provider must match.
-There is no API-key or alternate-model fallback.
+There is no API-key or alternate-model fallback. This client rejects overrides
+of built-in provider IDs. A per-process `concord_native` provider entry therefore
+pins the SAME native ChatGPT endpoint (https://chatgpt.com/backend-api/codex),
+requires native OpenAI authentication, and sets request/stream retries to zero.
+It is not an API-billing endpoint, copied credential or global provider change.
 
 Both thread and turn explicitly specify no execution environments; dynamic tools
 are empty. Shell, apps, plugins, MCP, skills, hooks, web search and delegation are
-disabled. The model metadata's tool presentation overrides client feature flags,
+disabled, including the separate legacy `notify` command. The model metadata's tool presentation overrides client feature flags,
 so a LOCAL catalog snapshot changes only `tool_mode` to `direct`,
 `multi_agent_version` to `disabled`, and `supports_search_tool` to false. The model
 ID and all other model metadata stay unchanged; installed/global configuration
 and account settings are untouched. A local HTTP mock captures real outgoing
 requests for all five cases and rejects any top-level or additional tools before
 native inference. The same executable, catalog and tool configuration are used
-for the subscription run; only the mock provider is replaced by native OpenAI.
+for the subscription run; only the mock provider is replaced by the pinned native ChatGPT provider.
 Unexpected tool items, approval requests or instruction sources fail closed.
 
 Codex's structured-output dialect uses anyOf instead of disjoint tagged oneOf
