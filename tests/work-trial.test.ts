@@ -48,3 +48,12 @@ test('exceptional game cleanup attempts all withdrawals despite a failed stop',a
  const result=await stopTrialWork(fake as any);assert.deepEqual(result.operatorStops,['A','B']);assert.equal(result.errors.length,1);
  assert.deepEqual(calls,['reconcile','withdraw A','withdraw B','retire q','reconcile']);
 });
+
+test('trial preserves but never adopts movement counters that cannot be stopped',async()=>{
+ const {trialCounterSupported,stopTrialWork}=await import('../src/work-trial.js');
+ const p={...proposal,status:'countered' as const,decision:{kind:'counter' as const,reason:'Elsewhere',action:{kind:'move' as const,x:2,z:1}}};
+ assert.equal(trialCounterSupported(p),false);assert.equal(trialCounterSupported({...p,decision:{kind:'counter',reason:'Less',action:{kind:'haul',thing:'steel',x:1,z:1,count:10,trips:1,maxTicks:600}}}),true);
+ const d=domain();d.characters.A!.commitment='move';
+ const result=await stopTrialWork({inspect:()=>d,async reconcile(){}} as any);
+ assert.deepEqual(result.errors,['Executable commitment still unresolved: A']);
+});

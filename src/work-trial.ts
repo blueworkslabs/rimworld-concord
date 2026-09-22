@@ -1,6 +1,7 @@
 import type {Domain,Proposal} from './protocol.js';
 /** Fixed experiment policy, not a general autonomy scheduler. */
 export const WORK_TRIAL={decisions:12,appraisals:12,reflections:3,observationMs:300000,secondRoundMs:120000,maxTurns:48} as const;
+export function trialCounterSupported(p:Proposal):boolean {return p.status==='countered'&&p.decision?.kind==='counter'&&p.decision.action.kind==='haul';}
 export function laterOfferEligible(domain:Domain,pawn:string):boolean {
  const c=domain.characters[pawn];
  if(!c||c.commitment||c.intention)return false;
@@ -52,5 +53,6 @@ export async function stopTrialWork(c:import('./coordinator.js').Coordinator){
  for(const p of Object.values(c.inspect().proposals))if(p.status==='pending')
   await attempt(()=>c.core().withdrawOffer(p.id,'Operator trial ended; offer retired without acceptance'));
  await attempt(()=>c.reconcile());
+ for(const ch of Object.values(c.inspect().characters))if(ch.commitment)errors.push('Executable commitment still unresolved: '+ch.id);
  return {operatorStops,errors};
 }

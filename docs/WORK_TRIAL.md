@@ -9,7 +9,9 @@ failed compliance test.
 ## Fixed policy
 
 - Initial optional two-trip, ten-unit offers are assessed while paused.
-- At most one exact counter revision per offer, subject to fresh grounding.
+- At most one exact hauling counter revision per offer, subject to fresh grounding.
+  A movement counter remains a recorded answer but is not adopted: this trial
+  cannot cancel a movement job safely and does not expand native cancellation.
   A repeated counter or refusal is not pursued.
 - Observe five minutes continuously. At two minutes, offer another bounded job
   only to pawns whose prior accepted work completed. No reoffers after refusal,

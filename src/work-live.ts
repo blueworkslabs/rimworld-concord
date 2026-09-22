@@ -9,7 +9,7 @@ import {LabBridge} from './lab-bridge.js';
 import {DecisionChannel} from './decision-channel.js';
 import {AppraisalChannel} from './appraisal-channel.js';
 import {AttentionPump} from './attention.js';
-import {WORK_TRIAL,laterOfferEligible,workSummary,retireUndecided,WorkShutdown,stopTrialWork} from './work-trial.js';
+import {WORK_TRIAL,laterOfferEligible,workSummary,retireUndecided,WorkShutdown,stopTrialWork,trialCounterSupported} from './work-trial.js';
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
 const runId=process.env.CONCORD_TRIAL_ID;if(!runId||!/^[0-9a-f-]{36}$/.test(runId))throw Error('Run identity required');
 const send=(m:unknown)=>process.stdout.write(JSON.stringify(m)+'\n');
@@ -56,7 +56,8 @@ async function offerRound(pawns:string[],later=false){
   catch{offers.push({pawn,status:'offer-preflight-unavailable'});continue;}
   await negotiate(id,pawn);
   const p=c!.inspect().proposals[id]!;
-  if(!shutdown.stopped&&p.status==='countered'&&decisions<WORK_TRIAL.decisions){
+  if(p.status==='countered'&&!trialCounterSupported(p)){offers.push({pawn,id,status:'counter-outside-hauling-trial-retained'});continue;}
+  if(!shutdown.stopped&&trialCounterSupported(p)&&decisions<WORK_TRIAL.decisions){
    let revised;try{revised=await c!.core().revise(id,'The core offers your exact alternative back. Fresh consent is yours; refusal remains valid.');}
    catch{offers.push({pawn,id,status:'counter-no-longer-grounded'});continue;}
    await negotiate(revised.id,pawn);
