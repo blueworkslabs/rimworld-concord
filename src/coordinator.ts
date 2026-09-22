@@ -4,6 +4,7 @@ import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, t
 import type { AppraisalView } from './appraisal.js';
 import { nativeAttention } from './routing.js';
 import { Store } from './store.js';
+import {groundedPawn,haulingView,planHaul} from './haul-planning.js';
 import { AttentionOptions, Reflection, bounded, coalesce, type AttentionBackend, type AppraisalBackend, type AttentionResult } from './attention.js';
 
 /** Character handles bind identity in code; backend output cannot choose an actor. */
@@ -133,7 +134,7 @@ export class Coordinator {
       this.pending.set(pawn,controller);this.attending.set(pawn,{controller,throughSeq});
       const activity={epoch:game.epoch,actor:pawn,activityId:randomUUID(),ttlMs:config.timeoutMs+2000};
       this.commit('attention-started',pawn,{throughSeq,count:events.length,backend:backend.name,appraiser:significant?null:appraiser?.name});
-      const view=structuredClone({pawn:own,character,...(character.intention?{intention:this.domain.proposals[character.intention]}:{}),events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
+      const view=structuredClone({pawn:groundedPawn(this.domain,game,own),character,...(character.intention?{intention:this.domain.proposals[character.intention]}:{}),events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
         proposals:Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending').slice(0,8),
         histories:Object.fromEntries(Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending'&&p.parentId).slice(0,8).map(p=>[p.id,this.history(p)]))});
       return {status:'running' as const,generation:this.generation,controller,activity,view,throughSeq,significant};
@@ -218,7 +219,7 @@ export class Coordinator {
       const experience=character?.experiences?.find(e=>e.event.seq===seq);
       const own=game.pawns.find(p=>p.id===pawn);
       if(!own||!character||!experience||experience.route!=='appraisal') throw Error('No eligible appraisal');
-      return {generation:this.generation,view:structuredClone({pawn:own,character,event:experience.event})};
+      return {generation:this.generation,view:structuredClone({pawn:groundedPawn(this.domain,game,own),character,event:experience.event})};
     });
     signal.throwIfAborted();
     const result=z.object({reflectionScore:z.number().finite().min(0).max(1)}).passthrough().parse(await backend.assess(prepared.view,signal));
@@ -240,9 +241,10 @@ export class Coordinator {
     return {
       haulingOptions:(pawn:string)=>this.serial(async()=>{
         if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
-        const own=(await this.current()).pawns.find(p=>p.id===pawn);
+        const game=await this.current();
+        const own=game.pawns.find(p=>p.id===pawn);
         if(!own) throw Error('Pawn unavailable');
-        return structuredClone(own.hauling??null);
+        return haulingView(this.domain,game,own);
       }),
       movementOptions:(pawn:string)=>this.serial(async()=>{
         if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
@@ -254,20 +256,30 @@ export class Coordinator {
       }),
       inbox:()=>structuredClone(Object.values(this.domain.proposals).filter(p=>p.status==='countered'&&!p.replyId)),
       propose:(pawn:string,action:Action,reason:string,id=randomUUID())=>this.serial(async()=>{
-        await this.current();return this.propose(pawn,action,reason,id);
+        return this.propose(await this.current(),pawn,action,reason,id);
+      }),
+      withdrawOffer:(id:string,reason:string)=>this.serial(async()=>{
+        await this.current();
+        if(!reason.trim()||reason.length>1000)throw Error('Invalid withdrawal reason');
+        const p=this.domain.proposals[id];
+        if(!p||p.status!=='pending')throw Error('Only pending offers may be withdrawn by the core');
+        p.status='withdrawn';p.withdrawalReason=reason;
+        // Do not cancel an unrelated thought by this pawn. Status invalidates late acceptance.
+        this.commit('offer-withdrawn','core',{id,reason});
+        return structuredClone(p);
       }),
       revise:(counterId:string,reason:string,id=randomUUID())=>this.serial(async()=>{
-        await this.current();
+        const game=await this.current();
         const parent=this.domain.proposals[counterId];
         if(!parent||parent.status!=='countered'||parent.decision?.kind!=='counter') throw Error('Expected a communicated counterproposal');
         if((parent.round??0)>=2) throw Error('Negotiation round limit reached');
         if(parent.replyId&&parent.replyId!==id) throw Error('Counterproposal already answered');
         // Adopting an alternative only creates a new offer. The pawn must accept it anew.
-        return this.propose(parent.pawn,parent.decision.action,reason,id,parent);
+        return this.propose(game,parent.pawn,parent.decision.action,reason,id,parent);
       })
     };
   }
-  private propose(pawn:string,action:Action,reason:string,id:string,parent?:Proposal) {
+  private propose(game:GameState,pawn:string,action:Action,reason:string,id:string,parent?:Proposal) {
     action=Action.parse(action);z.string().uuid().parse(id);
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
     if(!reason.trim()||reason.length>1000) throw Error('Invalid proposal reason');
@@ -276,7 +288,8 @@ export class Coordinator {
       if(prior.pawn!==pawn||JSON.stringify(prior.action)!==JSON.stringify(action)||prior.reason!==reason||prior.parentId!==parent?.id) throw Error('Proposal ID collision');
       return structuredClone(prior);
     }
-    const p:Proposal={id,pawn,action,reason,status:'pending',...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;
+    const p:Proposal={id,pawn,action,reason,status:'pending',...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
     if(parent)parent.replyId=id;
     this.domain.proposals[id]=p;this.commit(parent?'proposal-revised':'proposed','core',p);
     return structuredClone(p);
@@ -312,7 +325,7 @@ export class Coordinator {
       try {await this.game.setActivity?.(activity);} catch {this.commit('indicator-unavailable',pawn,{});}
       this.pending.set(pawn,controller);
       this.commit('deliberation-started',pawn,{proposal:id,backend:backend.name});
-      return {generation:this.generation,controller,activity,view:structuredClone({pawn:own,character:this.domain.characters[pawn]!,proposal:p,...(p.parentId?{history:this.history(p)}:{})})};
+      return {generation:this.generation,controller,activity,view:structuredClone({pawn:groundedPawn(this.domain,game,own),character:this.domain.characters[pawn]!,proposal:p,...(p.parentId?{history:this.history(p)}:{})})};
     });
     let timer:ReturnType<typeof setTimeout>|undefined;
     try {
@@ -361,7 +374,7 @@ export class Coordinator {
   }
   private async dispatch(p:Proposal) {
     if(p.status!=='accepted' || !p.actionId) throw Error('Action requires pawn acceptance');
-    const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline});
+    const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline,mapId:p.haulMap});
     this.domain.outcomes[receipt.id]=receipt;
     if(receipt.status!=='started') {
       delete this.domain.characters[p.pawn]!.commitment;

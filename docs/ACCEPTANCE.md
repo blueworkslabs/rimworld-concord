@@ -233,3 +233,34 @@ new inference. The raw review remains private. Review-driven corrections include
 serialized provider cleanup after cancellation and actor lookup across loaded
 maps when reconciling or cancelling a haul. The real-game fixture is single-map;
 this does not claim a multi-map playtest.
+
+## Supply-aware hauling coordination — 2026-09-22
+
+- 84 automated checks pass. New cases cover serialized conflicting offers,
+  quantity/capacity and observation freshness, hold release, pending-offer
+  withdrawal and late answers, uncertain cancellation, map identity, owner-only
+  views and checkpoint/reopen continuity. An injected other-pawn private field
+  caused the privacy regression to fail; restoring the implementation passed.
+- The mod compiles against the owned installed game assemblies. In the
+  [scripted three-pawn game trial](evidence/haul-planning-scripted.json), the core
+  offered three distinct steel stacks and storage cells without creating jobs.
+  All three accepted first trips delivered exactly ten units. Refusal and
+  pending-offer withdrawal released holds without native action. Native dispatch
+  rejected a deliberately mismatched map ID.
+- Paired restore preserved accepted holds between trips. A full game/coordinator
+  [cold restart](evidence/haul-planning-cold.json) retained those agreements and
+  completed the remaining six trips without inference: nine scripted trips total.
+- [Existing hauling regressions](evidence/haul-planning-regressions.json) still
+  pass: exact delivery, request replay, withdrawal during/between trips, refusal,
+  expiry without coordinator polling and cancellation-before-dispatch.
+- Independent read-only Codex review completed on behavioral commit
+  `0ad88c7dfdd5864a6b6be134086196e40c2328f8`, with no actionable findings.
+  Later evidence/editorial-only changes do not alter behavior. Raw reports stay
+  private. Review did not independently run the game; native receipts above are
+  the author's verification.
+- All choices in this increment are scripted, with operator-authored stockpiles,
+  relocated supplies and disabled native work priorities. No new live pawn
+  inference or budget changes. No improved model judgment, general coordination,
+  map-switch playthrough or active-job checkpoint support is claimed. Planning
+  holds are advisory, conservative and limited to this coordinator; native
+  workers can still invalidate an offer. Both lab services are stopped.

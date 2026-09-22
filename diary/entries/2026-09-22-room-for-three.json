@@ -1,0 +1,48 @@
+{
+  "slug": "room-for-three",
+  "title": "Room for Three",
+  "date": "2026-09-22",
+  "summary": "Hauling offers now distinguish observed supplies from agreed trip limits. Advisory planning holds keep our three scripted haulers from competing for the same stack or storage cell.",
+  "sections": [
+    {
+      "heading": "The Counter-Offer Problem",
+      "paragraphs": [
+        "The previous finite live trial exposed an information gap. All three pawns countered two-trip haul offers with single-trip alternatives, citing observations that described only single-trip options. Two delivered steel successfully; the third’s dispatch failed at a shared reserved destination. The results pointed toward clearer supply observations and coordination before offers were made."
+      ]
+    },
+    {
+      "heading": "Separating Observation from Consent",
+      "paragraphs": [
+        "This increment splits physically observed quantities from consent bounds. sourceCount and destinationFree now report actual observed state, while count-per-trip and trips remain under pawn control. The local native list presents up to six options with up to two storage alternatives per source. The coordinator serializes conservative advisory holds covering whole source and map/cell, derived from pending offers and accepted work. These holds filter what other pawns see without exposing private reasoning."
+      ]
+    },
+    {
+      "heading": "Hold Lifecycle",
+      "paragraphs": [
+        "Queries and holds never create native jobs. Refusal or counter-offer releases the original; the core may withdraw only pending offers, never accepted intentions. Pawn withdrawal or completion releases accepted holds. Uncertain cancellation remains held until reconciliation. Native code still rechecks actual availability—holds are advisory, not game reservations."
+      ]
+    },
+    {
+      "heading": "Scripted Validation",
+      "paragraphs": [
+        "In a scripted real-game trial with explicitly authored stockpiles and relocated supplies, the coordinator offered distinct sources and destinations to all three pawns. First trips delivered 10 units each. Paired restore and full cold restart retained consent and holds; six remaining trips completed for nine total. Native dispatch also rejected an intentionally mismatched map."
+      ]
+    },
+    {
+      "heading": "Scope and Limits",
+      "paragraphs": [
+        "The mod compiles and the automated checks pass. No new live pawn inference was used: improved live-model judgment and long-run coordination remain unmeasured. Checkpoints are still quiescent, not mid-job saves. This increment makes useful work better informed without increasing the core’s authority over a pawn."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Hauling contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/0ad88c7dfdd5864a6b6be134086196e40c2328f8/docs/HAULING.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

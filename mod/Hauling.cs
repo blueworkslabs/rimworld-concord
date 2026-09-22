@@ -11,6 +11,10 @@ namespace Concord {
         public string kind="haul",thing;
         public int x,z,count,trips=1,maxTicks=1800;
     }
+    [Serializable] public class HaulSupply {
+        public string thing,label;
+        public int x,z,sourceCount,destinationFree;
+    }
     public static class Hauling {
         public static bool Ready(Pawn p) {
             return Movement.Available(p) && !p.WorkTagIsDisabled(WorkTags.Hauling) &&
@@ -32,6 +36,7 @@ namespace Concord {
         }
         public static string Options(Pawn p,string epoch) {
             var options=new List<HaulOption>();
+            var supplies=new List<HaulSupply>();
             if(Ready(p)) {
                 // Local visible square only, bounded scans; never expose the full item registry.
                 var cells=new List<IntVec3>();
@@ -39,6 +44,7 @@ namespace Concord {
                     var c=p.Position+new IntVec3(dx,0,dz);
                     if(c.InBounds(p.Map)&&!c.Fogged(p.Map)&&GenSight.LineOfSight(p.Position,c,p.Map))cells.Add(c);
                 }
+                cells=cells.OrderBy(c=>(c-p.Position).LengthHorizontalSquared).ThenBy(c=>c.x).ThenBy(c=>c.z).ToList();
                 int candidates=0;
                 foreach(var cell in cells)foreach(var t in cell.GetThingList(p.Map).ToArray()) {
                     if(options.Count>=6||candidates>=24)break;
@@ -47,13 +53,20 @@ namespace Concord {
                     if(t.Position.IsValidStorageFor(p.Map,t))continue;
                     candidates++;
                     int count=Math.Min(10,t.stackCount);
+                    int destinations=0;
                     foreach(var dest in cells)if(Valid(p,t,dest,count)) {
-                        options.Add(new HaulOption {thing=t.GetUniqueLoadID(),x=dest.x,z=dest.z,count=count});break;
+                        var stack=dest.GetThingList(p.Map).FirstOrDefault(x=>x.def.category==ThingCategory.Item);
+                        int free=stack==null?t.def.stackLimit:stack.def.stackLimit-stack.stackCount;
+                        int trips=Math.Min(3,Math.Min(t.stackCount,free)/count);
+                        options.Add(new HaulOption {thing=t.GetUniqueLoadID(),x=dest.x,z=dest.z,count=count,trips=trips});
+                        supplies.Add(new HaulSupply {thing=t.GetUniqueLoadID(),label=t.LabelNoCount,x=dest.x,z=dest.z,sourceCount=t.stackCount,destinationFree=free});
+                        if(++destinations>=2||options.Count>=6)break;
                     }
                 }
             }
-            return "{\"epoch\":\""+epoch+"\",\"tick\":"+Find.TickManager.TicksGame+",\"status\":\""+(Ready(p)?"available":"unavailable")+"\",\"options\":["+
-                String.Join(",",options.Select(o=>JsonUtility.ToJson(o)).ToArray())+"]}";
+            return "{\"epoch\":\""+epoch+"\",\"tick\":"+Find.TickManager.TicksGame+",\"mapId\":"+p.Map.uniqueID+",\"status\":\""+(Ready(p)?"available":"unavailable")+"\",\"options\":["+
+                String.Join(",",options.Select(o=>JsonUtility.ToJson(o)).ToArray())+"],\"supplies\":["+
+                String.Join(",",supplies.Select(s=>JsonUtility.ToJson(s)).ToArray())+"]}";
         }
     }
     // Native reservations, movement and carrying. No opportunistic extra stacks or

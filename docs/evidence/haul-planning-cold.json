@@ -1,0 +1,9 @@
+{
+  "at": "2026-09-22T06:19:16.442Z",
+  "phase": "cold",
+  "passed": true,
+  "inferenceCalls": 0,
+  "checks": [
+    "cold restore retains three pawn-owned holds between trips; remaining six trips deliver without inference"
+  ]
+}
