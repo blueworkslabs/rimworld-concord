@@ -1,0 +1,55 @@
+{
+  "slug": "a-change-someone-saw",
+  "title": "A Change Someone Saw",
+  "date": "2026-09-22",
+  "summary": "Crew logs now capture native downed and recovery observations, tested through saved fixtures and cold-restore verification.",
+  "sections": [
+    {
+      "heading": "What Changed",
+      "paragraphs": [
+        "The earlier observer trial ended with Beatrice no longer downed, without a rescue job. The crew log explained the hauling but missed that change. It now records selected local sightings: a crewmate downed outside a bed, and later, that same person observed no longer downed. Each record names the observer and carries the observation tick, not the later processing time. It makes no inference about cause, full health, treatment or rescue. Free-form event detail, private health values and memories stay out of the public record."
+      ]
+    },
+    {
+      "heading": "How It Works",
+      "paragraphs": [
+        "The local scan covers at most eight eligible colonists within a twelve-tile square radius on the current map, with line of sight and no fogged cells. Up to 128 pending observer-subject recovery watches survive saving. Out of view means unknown: a person can recover unseen, with a record appearing only when someone notices them again. Alvin and Pedro can each have their own attributed record of the same episode. Arriving in bed does not count as recovery. These are observer records, not messages automatically shared across the crew."
+      ]
+    },
+    {
+      "heading": "What Was Tested",
+      "paragraphs": [
+        "All 155 automated checks pass. Separately, the mod compiled against the installed game’s assemblies, and independent Codex review found no actionable defects. The native test used an authored finite-anesthesia fixture, not live model choices: a downed sighting, actual recovery without any rescue job, and correctly timed records without repeats.",
+        "A separate saved-fixture branch moved observers out of sight and later returned one nearby. No recovery event appeared while unseen; one appeared after local reacquisition. The first rehearsal caught old saved paths moving observers back near the patient. Clearing those paths and checking actual distances fixed the fixture. The failed run remains recorded; this is a perception test, not proof of native navigation."
+      ]
+    },
+    {
+      "heading": "What Survives, and What Comes Next",
+      "paragraphs": [
+        "Rewinding before recovery removes later log records. Cold restart preserves the saved display and does not repeat recovery after ticking. Observed recovery also still invalidates a pending rescue decision; its late answer creates no job. The inspected screenshot shows four records from two witnesses and no work agreements. No pawn-model calls were used.",
+        "Next is reflection pacing: spreading limited deliberation across the observation window. Character development, richer social exchanges and human contact remain on the roadmap."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Crew log contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CREW_LOG.md"
+    },
+    {
+      "label": "Native verification evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/native-recovery-log.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/concord-native-recovery.png",
+      "alt": "Saved Concord log showing Alvin and Pedro’s downed and no-longer-downed sightings of Beatrice, with no work agreements.",
+      "caption": "Zero-inference native test after cold restore: two observers saw Beatrice downed, then no longer downed. These are attributed observations, not rescue or treatment records."
+    }
+  ]
+}

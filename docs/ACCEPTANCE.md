@@ -599,3 +599,15 @@ then accepted a separate offer after completion: thirty steel and exact-bed resc
 Live paired/cold restore passed; three Claude attempts, zero Jev, no retries.
 Independent Codex review covered final behavior. [Contract and limits](REQUESTED_GOAL_TRIAL.md)
 · [Sanitized evidence](evidence/requested-goal-live.json).
+
+## Locally observed recovery in the crew log (2026-09-22)
+
+155 automated checks and installed-assembly mod compilation passed. A no-inference
+native fixture verified downed/no-longer-downed observer records without rescue,
+no out-of-view recovery event, reacquisition using persisted sighting state,
+per-observer duplicate suppression and native observation timestamps. Paired rewind
+removed later public recovery records; game-only cached display and cold restart
+passed without repeated recovery. Existing pending-rescue invalidation regression
+passed with no dispatch. Independent Codex review covered final behavior/tests.
+First fixture-path failure was retained and corrected with actual distance checks.
+[Verification contract](NATIVE_LOG_TRIAL.md) · [Evidence](evidence/native-recovery-log.json).

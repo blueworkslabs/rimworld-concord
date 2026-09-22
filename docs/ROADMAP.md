@@ -184,3 +184,10 @@ sequence completed thirty steel then rescue, with paired/cold restore. The core
 remained scripted and deliberately delayed its reply. Selected native-event
 visibility and reflection pacing remain the next bounded follow-ups; broader
 character, social and human-contact work stays in the playable-direction plan.
+
+Selected native visibility is implemented: attributed local downed and later
+no-longer-downed observations now appear as observer records, not speech or private
+thought. No-inference native perception/rewind/cold-restore checks passed. The log
+still is not a complete colony history or a medical diagnosis. Reflection pacing
+is the next focused follow-up; character/social/human-contact milestones remain
+separate. See [native-log verification](NATIVE_LOG_TRIAL.md).

@@ -20,6 +20,9 @@ export function afterAppraisal(a:Appraisal,threshold:number,consequential:boolea
  * Other memories remain conservative; this is not general semantic appraisal.
  */
 export function nativeAttention(event:{kind:string;detail:string}):{next:Route;interrupt:boolean} {
+ // Observation updates memory without waking a model or cancelling unrelated thought.
+ // Pending rescue questions still use their own fresh-subject invalidation checks.
+ if(event.kind==='casualty-recovered')return {next:'native',interrupt:false};
  const significant=event.kind==='memory'||event.kind==='health'||event.kind==='casualty';
  return {next:route({urgent:event.kind==='health',significant,conflictsWithCommitment:false,routine:event.kind==='job'}).next,
    interrupt:significant&&!(event.kind==='memory'&&['Chitchat','DeepTalk'].includes(event.detail))};

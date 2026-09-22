@@ -24,6 +24,21 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
   c.entries.push({seq:++c.nextSeq,tick,kind:type,actor:name(from),recipient:name(to),subject:safe(subject,120),text:safe(text),key});
   c.entries=c.entries.slice(-128);
  };
+ if(kind==='native-event'){
+  const e=data.event;
+  // Only typed physical observations. Never project free-form native detail,
+  // health/need values, private memories, or general audit payloads.
+  if(e?.pawn===actor&&typeof e.subject==='string'&&e.subject&&Number.isInteger(e.seq)&&Number.isInteger(e.tick)){
+   const subject=name(e.subject);
+   if(e.kind==='casualty'||e.kind==='casualty-recovered'){
+    const text=e.kind==='casualty'?`Locally observed ${subject} downed and outside a bed. Cause and urgency unknown.`:
+      `Locally observed ${subject} no longer downed after an earlier downed sighting. Cause unknown; this is not a rescue or treatment record.`;
+    // Keep the native observation tick, not the later coordinator ingestion tick.
+    add('record',actor,'observer',e.subject,text,`native-observation:${e.seq}`);
+    const entry=c.entries.find(x=>x.key===`native-observation:${e.seq}`);if(entry)entry.tick=e.tick;
+   }
+  }
+ }
  if(kind==='proposed'||kind==='proposal-revised')add('message','core',data.pawn,data.id,data.reason,`offer:${data.id}`);
  if(kind==='decided'||kind==='replacement-consented'){
   const p=data as Proposal;
