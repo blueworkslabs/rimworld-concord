@@ -1,0 +1,92 @@
+{
+  "date": "2026-09-22",
+  "passed": true,
+  "kind": "scripted-native-observation",
+  "tests": 155,
+  "reviewedBehavior": "b3bdfc9a68fda269ad8bceebd31a8381128ccf5d",
+  "inferenceCalls": 0,
+  "nativeChecks": [
+    "out-of-view recovery emits nothing; persisted prior sighting produces recovery only on local reacquisition",
+    "observed native recovery without a rescue job, correct observation ticks and per-observer deduplication",
+    "rewinding before recovery removes later public recovery records"
+  ],
+  "coldChecks": [
+    "game-only saved log, paired cold restore and no repeated recovery after restart"
+  ],
+  "pairedRestore": true,
+  "noActions": true,
+  "finalSavedReport": {
+    "world": "ff9dff5d993b4e1984c111ebabd8311c",
+    "epoch": "721e8bfa504048c6a942cd1f0b20cd2b",
+    "branch": "33f94e83-1bb8-41f6-9178-fe78fa848c5a",
+    "revision": 24,
+    "tick": 783,
+    "entries": [
+      {
+        "seq": 1,
+        "tick": 2,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "Thing_Human408",
+        "text": "Locally observed Beatrice downed and outside a bed. Cause and urgency unknown.",
+        "key": "native-observation:1"
+      },
+      {
+        "seq": 2,
+        "tick": 2,
+        "kind": "record",
+        "actor": "Pedro",
+        "recipient": "observer",
+        "subject": "Thing_Human408",
+        "text": "Locally observed Beatrice downed and outside a bed. Cause and urgency unknown.",
+        "key": "native-observation:2"
+      },
+      {
+        "seq": 3,
+        "tick": 605,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "Thing_Human408",
+        "text": "Locally observed Beatrice no longer downed after an earlier downed sighting. Cause unknown; this is not a rescue or treatment record.",
+        "key": "native-observation:7"
+      },
+      {
+        "seq": 4,
+        "tick": 605,
+        "kind": "record",
+        "actor": "Pedro",
+        "recipient": "observer",
+        "subject": "Thing_Human408",
+        "text": "Locally observed Beatrice no longer downed after an earlier downed sighting. Cause unknown; this is not a rescue or treatment record.",
+        "key": "native-observation:9"
+      }
+    ],
+    "agreements": []
+  },
+  "pendingRescueRegression": {
+    "passed": true,
+    "recoveredPatient": true,
+    "noDispatch": true,
+    "pairedRestore": true
+  },
+  "rehearsals": [
+    {
+      "passed": false,
+      "reason": "Saved relocation retained an old in-flight path; observers stepped back near patient. Visibility assertion correctly failed."
+    },
+    {
+      "passed": true,
+      "correction": "Clear relocated fixture paths/jobs and assert actual distance before and after out-of-view recovery."
+    }
+  ],
+  "limitations": [
+    "Authored anesthesia fixture and saved-fixture relocations; not a natural colony or native navigation trial.",
+    "Only local downed/no-longer-downed observations; not full health, medical diagnosis, cause, treatment or rescue attribution.",
+    "One record per observer per watched episode; multiple witnesses may produce separate attributed records.",
+    "Current-map radius12 sight scan, at most8 colonists;128 saved watches and bounded event/log histories can leave gaps.",
+    "No new pawn inference or general reflection pacing change.",
+    "Main receipt first-pass event samples precede its final rewind/replay; the published saved report is from the final cold-restored branch."
+  ]
+}

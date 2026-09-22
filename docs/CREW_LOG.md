@@ -87,3 +87,7 @@ or interrupting an unrelated thought. Existing subject-specific rescue guards
 still invalidate pending consent when an observed patient no longer needs it.
 The event archive and log rewind with paired saves; the existing bounded saved
 log remains readable without a connected coordinator.
+
+Visibility uses the existing current-map local scan: radius twelve (square distance),
+line of sight, no fogged cells, and at most eight eligible colonists per observer.
+It is not an omniscient colony monitor. Missing observations remain unknown.

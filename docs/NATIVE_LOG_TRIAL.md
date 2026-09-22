@@ -26,3 +26,24 @@ receipts remain private; sanitized verification evidence is published separately
 No model allowance is established or consumed by this test. Native recovery means
 no longer downed, not full health, treatment or rescue. General reflection pacing
 and richer character/social behavior remain separate work.
+
+## Verified result — 2026-09-22
+
+155 automated checks passed; the mod compiled against the installed assemblies.
+Native recovery, out-of-view/reacquisition, per-observer deduplication, observation
+timestamps, rewind of later public records and paired/cold restore passed.
+The game-only cached display was checked before coordinator restore. The existing
+pending-rescue recovery regression also passed: stale consent cancelled, no job.
+No pawn-model calls, rescue actions or new model budgets were used.
+
+The first rehearsal was retained as failed: saved relocation left in-flight path
+state, so observers stepped back near the patient. The corrected fixture clears
+relocated jobs/path state and asserts actual distance before and after recovery.
+Independent Codex review covered final behavioral/test commit
+`b3bdfc9a68fda269ad8bceebd31a8381128ccf5d` with no actionable defects.
+
+The private main receipt's first-pass event samples precede its final rewind and
+replay. The [published saved report](evidence/native-recovery-log.json) is from the
+final cold-restored branch; event sequence numbers must not be compared across
+those discarded timelines. The inspected screenshot shows four attributed records
+(two witnesses), no work agreements and a saved/non-live report label.
