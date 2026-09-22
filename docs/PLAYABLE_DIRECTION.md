@@ -89,3 +89,16 @@ are not new native gameplay features. See the [current roadmap](ROADMAP.md) and
 [semantic interface/evaluation contract](MODEL_PERSPECTIVE.md). Maintenance should
 support this work: preserve old evidence, centralize trial policies, keep future
 plans separate from historical checkpoints, and avoid an unrelated mass refactor.
+
+## Foundation before presentation polish (2026-09-22)
+
+The current transaction-like log is adequate instrumentation for this early
+phase. A first human screenshot read recovered the proposal, acceptance and
+recorded rescue; trip-versus-agreement labeling was discussed, not prioritized
+for a redesign. This is limited feedback, not general usability validation.
+Defer cosmetic label work and narrative presentation until the functional
+foundation is stronger. Later, make the four protagonists' story engaging through
+personality, charm and humor in deliberate speech and readable presentation,
+without inventing outcomes, publishing private thoughts or forcing drama. The
+ledger supplies an evidence trail; it is not the intended final storytelling
+experience.

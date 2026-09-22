@@ -1,9 +1,8 @@
+import {readFileSync} from 'node:fs';
+const archived=JSON.parse(readFileSync(new URL('../../trials/fixtures/speech-check-v1.json',import.meta.url),'utf8'));
 /** Authored held-constant message contrasts. No game imports or applied choices. */
 import assert from 'node:assert/strict';
 import {perspectiveCasesV2} from './perspective-v2.js';
-import {claudeArgs} from '../src/claude-decision.js';
-import {codexSchema} from '../src/contract-cases.js';
-import {pawnInstructions,modelPrompt} from '../src/model-perspective.js';
 import {promptAccounting} from '../src/prompt-accounting.js';
 import {ReflectionChoice,validateReflectionChoice} from '../src/reflection-choice.js';
 export const bankVersion='concord-speech-check-v1';
@@ -29,11 +28,8 @@ export function speechCases(){
  });
  return [1,2].flatMap(repetition=>six.map(c=>({...structuredClone(c),id:c.caseId+'-r'+repetition,repetition})));
 }
-export function preparedSpeechCases(){return speechCases().map(c=>{
- const args=claudeArgs('reflection',c.view),schema=codexSchema(JSON.parse(args[args.indexOf('--json-schema')+1]!));
- const prompt=JSON.stringify(modelPrompt('reflection',c.view));
- return {...c,instructions:pawnInstructions,schema,prompt,authoredSize:promptAccounting(pawnInstructions,prompt,schema)};
-});}
+/** Historical bank: preserve the exact PR33 requests after production schema evolution. */
+export function preparedSpeechCases(){return structuredClone(archived.cases) as Array<ReturnType<typeof speechCases>[number]&{instructions:string;schema:Record<string,unknown>;prompt:string;authoredSize:ReturnType<typeof promptAccounting>}>;}
 export function checkSpeechResult(id:string,raw:unknown){
  const c=speechCases().find(c=>c.id===id);if(!c)throw Error('Unknown fixed case');
  if(!raw||typeof raw!=='object'||Object.keys(raw).length!==1||!('reflection' in raw))throw Error('Expected only reflection envelope');

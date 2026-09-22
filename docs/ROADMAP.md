@@ -22,15 +22,19 @@ future milestone, not the next dependency.
 - Build on the bounded addressed exchange with tests of how recipients interpret
   uncertain or disputed speech. Keep attributed statements distinct from native
   facts, private outlook revisions and permission to act; see [social contract](SOCIAL_EXCHANGE.md).
-  The first [offline interpretation check](SPEECH_CHECKS.md) is complete; next
-  distinguish durable recipient interpretation from merely receiving a message.
+  The first [offline interpretation check](SPEECH_CHECKS.md) and optional
+  [received-message outlook retention](PRIVATE_OUTLOOK.md#received-message-evidence)
+  are complete; next verify the new citation path in the native game.
 - Test durable outlook reuse without treating a later acceptance as proof of
-  persuasion. A controlled comparison and social-outlook citation design remain
-  separate work; native chatter stays distinct from coordinator-mediated speech.
+  persuasion. The small offline message/no-message contrast is complete; next
+  test correction/reconsideration and fresh work consent in a bounded native
+  scenario. No live allowance for that next scenario is enabled by this roadmap.
+  Native chatter stays distinct from coordinator-mediated speech.
 - Reassess legibility before adding entry kinds. One fresh-context model reader
   of a retained exported log is complete, but its packet omitted UI/report-header
-  framing. A human reader or actual-UI/full-header test remains uncompleted; do
-  not infer a UI defect from ambiguity specific to the exported packet.
+  framing. One human screenshot read recovered the main sequence; this is limited
+  feedback, not general usability validation. Defer UI polish while building the
+  foundation; do not infer a UI defect from packet-specific ambiguity.
 - Improve grounding coverage only against a separately versioned, held-out set.
   The first numeric/phrase checker deliberately leaves prose unscored and misses
   paraphrases; source IDs alone do not establish support. Keep predictions separate
