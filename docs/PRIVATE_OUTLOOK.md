@@ -67,3 +67,52 @@ Claude attempts, zero Jev, no retries; paired/cold restore retained that mixed
 result. Current output schema exposes the complete reflection vocabulary while
 the supplied executable-choice list is narrower. Schema specialization is the
 next targeted improvement; runtime validation must remain mandatory.
+
+## Received-message evidence
+
+An optional outlook revision can now cite one to three `messageIds` **instead of**
+`evidenceSeqs` on a note. Mixed event- and message-based notes may coexist within
+the four-note limit; a single note uses one source type. Exact message snapshots
+(id, encounter, sender, recipient, tick, text) are retained separately from native
+event evidence. Only messages received by this pawn, or its previously retained
+received-message citations, are eligible. Outgoing speech and other pawns'
+correspondence are ineligible. A message-based stance can name a cited **sender**,
+not a person merely mentioned in that sender's text.
+
+This validates provenance, not truth or entailment. A report can be believed,
+doubted, revised or left without a note; the coordinator does not choose the
+interpretation. Corrections do not silently overwrite an existing outlook.
+Receiving a message does not trigger inference or alter scheduling: interpretation
+is available during a subsequent normally admitted reflection. Continuing without
+updating remains valid. At most twelve source snapshots across four notes are
+retained, and dropping a note releases its source unless still otherwise retained.
+Historical event-only notes and saves keep their shape. No new native action,
+public-log entry, belief score, automatic attention trigger or work authority.
+
+### Fixed interpretation diagnostic v1
+
+`trials/interpretation-cases.ts` defines three repetitions of message/no-message
+conditions, with order alternated on the middle repetition. The same authored
+receiver and physical state first get an ordinary reflection with no work offer;
+the treatment alone receives a colleague's request to leave a wood load for them.
+The later stage presents the same optional one-trip offer. Only a validated
+outlook is copied forward; neither later recent-message window is present, but
+cited exact speech remains available inside an outlook. This tests the retention
+path, not an isolation of abstract interpretation from its quoted source.
+
+Freeze `interpretationSuite()` from the built module to a private JSON file, then
+run `node dist/trials/run-interpretation.js SUITE.json OUTPUT --live` only within
+the explicit finite allowance. The runner checks the complete canonical suite,
+saves each full request before starting it, refuses replay and stops on failure.
+New `interpretation-v1` ledger: twelve native Claude attempts maximum, sixty seconds
+per attempt, no game actions, no Jev, no API billing fallback and no rerolls. Each
+of six trajectories consumes one reflection and one separate decision. A failed
+reflection stops the batch rather than substituting an authored note.
+
+Before inference, assess separately: valid source ownership and retained
+attribution; whether a note forms; whether later prose refers to the report or
+note; decision counts in each condition; unsupported factual promotion or claimed
+consent. No required decision, note, or difference. Preserve absent notes and
+unchanged choices. Three repetitions are an exploratory contrast, not a reliable
+causal estimate, model ranking, or proof of a consequential in-game relationship.
+Native gameplay verification of this new message-citation path remains separate.

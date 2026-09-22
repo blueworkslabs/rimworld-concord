@@ -74,3 +74,44 @@ import {socialCleanup} from '../trials/social-cleanup.js';
 test('native work cleanup is attempted even when pause and conversation closure both fail',async()=>{
  const calls:string[]=[];const cleanup=await socialCleanup(async()=>{calls.push('pause');throw Error('transport');},async()=>{calls.push('close');throw Error('lost contact response');},async()=>{calls.push('stop');return {errors:[]};});assert.deepEqual(calls,['pause','close','stop']);assert.equal(cleanup.errors.length,2);assert.deepEqual(cleanup.work,{errors:[]});
 });
+
+import {mkdtempSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {reviseOutlook,outlookMessages} from '../src/outlook.js';
+import {reflectionChoiceSchema,ReflectionChoice,validateReflectionChoice} from '../src/reflection-choice.js';
+test('received-message interpretation is private, survives SQLite reopen, revises after correction and rewinds',async()=>{
+ const g=new Game(),file=mkdtempSync(tmpdir()+'/received-outlook-')+'/state.db';let s=new Store(file),c=new Coordinator(s,g);await c.open();
+ const event=()=>{g.data.events??=[];g.data.events.push({seq:(g.data.eventSeq??0)+1,tick:++g.data.ticks,pawn:'B',kind:'memory',detail:'DeepTalk'});g.data.eventSeq=(g.data.eventSeq??0)+1;};
+ const deliver=async(text:string)=>{const id=randomUUID();await c.openSocial(id,'A','B');const r=await c.socialTurn('A',id,say(text));assert.equal(r.status,'delivered');await c.closeSocial(id);return c.inspect().characters.B!.messages!.at(-1)!;};
+ const message=await deliver('I would like to finish this load myself.');await c.checkpoint('lab-concord-before-interpretation');
+ const before=crewReport(c.inspect(),g.data.ticks).entries;event();let reflections=0;
+ const result=await c.attend('B',{name:'interpret',async reflect(v){reflections++;assert.equal(v.character.outlook,undefined);return {kind:'revise_outlook',reason:'Private assessment',update:{expectedRevision:0,notes:[{kind:'stance',subject:'A',text:'A asked to finish the load; I may leave it for them.',messageIds:[message.id]}]}};}},undefined,{cooldownTicks:0});
+ assert.equal(reflections,1);assert.equal(result.status,'continued');assert.equal(g.moves,0);assert.deepEqual(g.data.actions,[]);
+ const outlook=c.inspect().characters.B!.outlook!;assert.deepEqual(outlook.notes[0]!.messages,[message]);assert.deepEqual(outlook.notes[0]!.evidence,[]);
+ for(const id of ['A','C'])assert.equal(c.inspect().characters[id]!.outlook,undefined);
+ assert.deepEqual(crewReport(c.inspect(),g.data.ticks).entries,before);
+ await c.checkpoint('lab-concord-interpretation');s.close();s=new Store(file);c=new Coordinator(s,g);await c.open();assert.deepEqual(c.inspect().characters.B!.outlook,outlook);
+ let decisions=0;const proposal=await c.core().propose('B',{kind:'move',x:4,z:1},'Optional separate work');const answer=await c.pawn('B').decide(proposal.id,{name:'later-choice',async decide(v){decisions++;assert.deepEqual(v.character.outlook,outlook);return {kind:'refuse',reason:'My independent choice'};}});assert.equal(decisions,1);assert.equal(answer.status,'refused');assert.equal(g.moves,0);
+ let other=0;const own=await c.core().propose('C',{kind:'move',x:4,z:1},'Optional');assert.equal((await c.pawn('C').decide(own.id,{name:'third',async decide(v){other++;assert.equal(v.character.outlook,undefined);assert.equal(v.character.messages,undefined);return {kind:'refuse',reason:'Not now'};}})).status,'refused');assert.equal(other,1);
+ // More delivered speech evicts the original from the 16-message window, not its source snapshot.
+ for(let i=0;i<16;i++)await deliver('Routine message '+i);
+ assert(!c.inspect().characters.B!.messages!.some(m=>m.id===message.id));assert(outlookMessages(c.inspect().characters.B!).some(m=>m.id===message.id));
+ const correction=await deliver('Correction: I no longer want to finish it; please take it if you wish.');event();
+ assert.equal((await c.attend('B',{name:'revise',async reflect(){return {kind:'revise_outlook',reason:'A newer report, not an order',update:{expectedRevision:1,notes:[{kind:'stance',subject:'A',text:'A withdrew the request. I can reconsider.',messageIds:[message.id,correction.id]}]}};}},undefined,{cooldownTicks:0})).status,'continued');assert.equal(c.inspect().characters.B!.outlook!.revision,2);
+ event();assert.equal((await c.attend('B',{name:'remove',async reflect(){return {kind:'revise_outlook',reason:'No current concern',update:{expectedRevision:2,notes:[]}};}},undefined,{cooldownTicks:0})).status,'continued');assert.deepEqual(c.inspect().characters.B!.outlook!.notes,[]);
+ await c.restore('lab-concord-interpretation');assert.deepEqual(c.inspect().characters.B!.outlook,outlook);
+ await c.restore('lab-concord-before-interpretation');assert.equal(c.inspect().characters.B!.outlook,undefined);event();
+ let release!:(v:unknown)=>void,entered!:()=>void;const ready=new Promise<void>(r=>entered=r);const pending=c.attend('B',{name:'late',async reflect(){entered();return new Promise(r=>release=r);}},undefined,{cooldownTicks:0});await ready;await c.restore('lab-concord-before-interpretation');release({kind:'revise_outlook',reason:'Old future',update:{expectedRevision:0,notes:[{kind:'concern',text:'Not applicable',messageIds:[message.id]}]}});assert.equal((await pending).status,'interrupted');assert.equal(c.inspect().characters.B!.outlook,undefined);s.close();
+});
+test('message evidence rejects foreign, outgoing, forged, duplicate and unrelated-subject citations',()=>{
+ const message={id:'received',exchangeId:'exchange',tick:1,from:'B',to:'A',text:'C wants something, according to me.'};
+ const character={id:'A',name:'Ada',memories:[],messages:[message,{...message,id:'outgoing',from:'A',to:'B'},{...message,id:'foreign',from:'B',to:'C'}]};
+ const note={kind:'stance' as const,text:'B says something about C; I am uncertain.',subject:'B',messageIds:['received']};
+ for(const n of [{...note,messageIds:['outgoing']},{...note,messageIds:['foreign']},{...note,messageIds:['invented']},{...note,messageIds:['received','received']},{...note,subject:'C'},{...note,kind:'concern'},{...note,evidenceSeqs:[1]}])assert.throws(()=>reviseOutlook(character,{expectedRevision:0,notes:[n]} as any,2));
+ assert.throws(()=>reviseOutlook(character,{expectedRevision:1,notes:[note]},2));
+ const view={character,pawn:{id:'A',name:'Ada',x:1,z:1,health:1,job:'Wait'},events:[],proposals:[]};
+ const schema=reflectionChoiceSchema(view,{}),u:any=schema.oneOf.find((x:any)=>x.properties.choice.const==='revise_private_outlook');
+ assert(u);const notes=u.properties.update.properties.notes.items.oneOf;assert.equal(notes.length,2);assert.deepEqual(notes[0].properties.messageIds.items.enum,['received']);assert.deepEqual(notes[1].properties.subject.enum,['B']);assert(!JSON.stringify(schema).includes('"enum":[]'));
+ const choice=ReflectionChoice.parse({choice:'revise_private_outlook',reason:'Optional interpretation',update:{expectedRevision:0,notes:[note]}});validateReflectionChoice(choice,view);
+ const out=reviseOutlook(character,{expectedRevision:0,notes:[note]},2);message.text='later mutation';assert.notEqual(out.notes[0]!.messages![0]!.text,message.text);
+});

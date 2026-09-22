@@ -99,3 +99,13 @@ The separate reader consumed one additional Luna turn (thirteen Luna turns total
 not twelve); Claude used twelve attempts. No game started, no choices were applied,
 and seventy historical databases were unchanged. Full outcomes and explicitly
 reviewer-authored annotations are in [the evidence](evidence/speech-interpretation.json).
+
+### Historical contract preservation
+
+PR33's exact prepared v1 requests are archived in
+`trials/fixtures/speech-check-v1.json`. The exporter remains byte-identical after
+received-message outlook support changes the production schema. The old Claude
+runner refuses contract drift before backend creation: it requires its original
+build, rather than spending its historical policy on new prompts under the old
+bank name. No prior inputs, replies or allowances were replaced. The new
+interpretation diagnostic has a distinct bank and ledger.

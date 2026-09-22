@@ -1,4 +1,4 @@
-import {OutlookUpdate,outlookEvidence,reviseOutlook} from './outlook.js';
+import {OutlookUpdate,outlookEvidence,outlookMessages,reviseOutlook} from './outlook.js';
 import {z} from 'zod';
 import {Decision} from './protocol.js';
 import type {AttentionView,Reflection} from './attention.js';
@@ -15,7 +15,8 @@ export type ReflectionChoice=z.infer<typeof ReflectionChoice>;
 
 export function reflectionChoices(view:AttentionView){
  const choices:Array<Record<string,unknown>>=[{choice:'keep_current_activity',effect:'Leave current agreement/native activity unchanged. No new consent or job.'}];
- if(outlookEvidence(view.character).length||view.character.outlook)choices.push({choice:'revise_private_outlook',expectedRevision:view.character.outlook?.revision??0,evidence:outlookEvidence(view.character).map(e=>({seq:e.seq,...(e.subject?{subject:e.subject}:{})})),effect:'Replace only your private outlook; no speech, trait edit, withdrawal, consent or job. Cite own supplied experiences or retained evidence. The whole notes array replaces the previous outlook: retain still-relevant notes or revise/remove them. At most four notes. A stance must name a subject in its cited evidence. expectedRevision must match the supplied revision. Updates and their reasons stay private and are optional; do not manufacture a change.'});
+ const received=outlookMessages(view.character);
+ if(outlookEvidence(view.character).length||received.length||view.character.outlook)choices.push({choice:'revise_private_outlook',expectedRevision:view.character.outlook?.revision??0,...(received.length?{receivedMessages:received.map(m=>({id:m.id,from:m.from,to:m.to,tick:m.tick})),messageEvidenceRule:'Alternatively cite messageIds from receivedMessages on a note, instead of evidenceSeqs. These preserve exactly what the sender said, not proof it is true. A message-based stance names a cited sender, not someone mentioned in their text. Retain attribution and uncertainty; a note may be revised or removed. No automatic belief change or authority.'}:{}),evidence:outlookEvidence(view.character).map(e=>({seq:e.seq,...(e.subject?{subject:e.subject}:{})})),effect:'Replace only your private outlook; no speech, trait edit, withdrawal, consent or job. Cite own supplied experiences or retained evidence. The whole notes array replaces the previous outlook: retain still-relevant notes or revise/remove them. At most four notes. A stance must name a subject in its cited evidence. expectedRevision must match the supplied revision. Updates and their reasons stay private and are optional; do not manufacture a change.'});
  if(view.intention&&view.intention.id===view.character.intention&&view.intention.pawn===view.pawn.id&&view.intention.standing?.status==='running')
   choices.push({choice:'withdraw_current_agreement',agreementId:view.intention.id,effect:'Stop this agreement only. No replacement work is authorized.'});
  if(view.intention&&view.intention.id===view.character.intention&&view.intention.pawn===view.pawn.id&&view.intention.action.kind==='haul'&&view.intention.standing?.status==='running'&&!(view.requests??[]).some(r=>r.agreementId===view.intention!.id)){
@@ -58,9 +59,16 @@ export function reflectionChoiceSchema(view:AttentionView,decisionSchema:Record<
     const subjects=[...new Set(evidence.flatMap(e=>e.subject?[e.subject]:[]))];
     const fields={text:{type:'string',minLength:1,maxLength:240},evidenceSeqs:{type:'array',minItems:1,maxItems:3,uniqueItems:true,items:{type:'integer',enum:seqs}}};
     const notes:Array<Record<string,unknown>>=[{type:'object',additionalProperties:false,required:['kind','text','evidenceSeqs'],properties:{kind:{enum:['value','concern']},...fields}}];
+    if(!seqs.length)notes.length=0;
     if(subjects.length)notes.push({type:'object',additionalProperties:false,required:['kind','text','subject','evidenceSeqs'],properties:{kind:{const:'stance'},subject:{type:'string',enum:subjects},...fields}});
+    const messages=outlookMessages(view.character);
+    if(messages.length){
+     const fields={text:{type:'string',minLength:1,maxLength:240},messageIds:{type:'array',minItems:1,maxItems:3,uniqueItems:true,items:{type:'string',enum:messages.map(m=>m.id)}}};
+     notes.push({type:'object',additionalProperties:false,required:['kind','text','messageIds'],properties:{kind:{enum:['value','concern']},...fields}},
+      {type:'object',additionalProperties:false,required:['kind','text','subject','messageIds'],properties:{kind:{const:'stance'},subject:{type:'string',enum:[...new Set(messages.map(m=>m.from))]},...fields}});
+    }
     // Empty outlooks can still be cleared/revised without fabricating evidence.
-    properties.update={type:'object',additionalProperties:false,required:['expectedRevision','notes'],properties:{expectedRevision:{const:c.expectedRevision},notes:seqs.length?{type:'array',maxItems:4,items:{oneOf:notes}}:{type:'array',maxItems:0,items:{type:'object',additionalProperties:false,properties:{}}}}};
+    properties.update={type:'object',additionalProperties:false,required:['expectedRevision','notes'],properties:{expectedRevision:{const:c.expectedRevision},notes:seqs.length||messages.length?{type:'array',maxItems:4,items:{oneOf:notes}}:{type:'array',maxItems:0,items:{type:'object',additionalProperties:false,properties:{}}}}};
     required.push('update');break;
    }
    case 'request_rescue_alternative':

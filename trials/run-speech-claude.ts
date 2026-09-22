@@ -4,11 +4,18 @@ import {resolve,join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
 import {ClaudeDecisionBackend,CLAUDE_MODEL} from '../src/claude-decision.js';
+import {modelPrompt,pawnInstructions} from '../src/model-perspective.js';
+import {claudeArgs} from '../src/claude-decision.js';
+import {codexSchema} from '../src/contract-cases.js';
 import {bankVersion,preparedSpeechCases} from './speech-cases.js';
 export async function runSpeechClaude(file:string,output:string,create=(dir:string)=>new ClaudeDecisionBackend({ledgerPath:join(dir,'allowance.db'),scratchRoot:join(dir,'scratch'),trial:'speech-check-v1'})){
  const data=readFileSync(file);const suite=JSON.parse(data.toString());
  const cases=preparedSpeechCases();
  if(suite.version!==bankVersion||suite.authored!==true||JSON.stringify(suite.cases)!==JSON.stringify(cases))throw Error('Frozen case bank differs from this build');
+ for(const c of cases){
+  const args=claudeArgs('reflection',c.view),schema=codexSchema(JSON.parse(args[args.indexOf('--json-schema')+1]!));
+  if(c.prompt!==JSON.stringify(modelPrompt('reflection',c.view))||c.instructions!==pawnInstructions||JSON.stringify(c.schema)!==JSON.stringify(schema))throw Error('Archived bank requires its original build; current provider contract differs');
+ }
  const root=resolve(output);mkdirSync(root,{recursive:true,mode:0o700});
  const hash=createHash('sha256').update(data).digest('hex');
  writeFileSync(join(root,'started.json'),JSON.stringify({casesHash:hash,maxAttempts:12,caseTimeoutMs:60000}),{flag:'wx',mode:0o600});
