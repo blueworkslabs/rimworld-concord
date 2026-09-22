@@ -8,15 +8,18 @@ import {Store} from './store.js';
 import {LabBridge} from './lab-bridge.js';
 import {DecisionChannel} from './decision-channel.js';
 import {AppraisalChannel} from './appraisal-channel.js';
-import {AttentionPump} from './attention.js';
+import {AttentionPump,type AttentionAdmission} from './attention.js';
+import {ReflectionPacer} from './reflection-pacing.js';
 import {retireUndecided,WorkShutdown,stopTrialWork} from './work-trial.js';
-import {OBSERVER_TRIAL as WORK_TRIAL,pendingObserverRequest} from './observer-trial.js';
+import {OBSERVER_TRIAL,PACED_TRIAL,pendingObserverRequest} from './observer-trial.js';
 import {reconsiderSummary as workSummary} from './reconsider-trial.js';
 import {laterOfferEligible} from './work-trial.js';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 if(process.env.CONCORD_OBSERVER_LOCKED!=='1')throw Error('Use scripts/run-observer-lab.sh game|cold');
-const policy='observer-v1',prefix='observer-live';
+const policy=process.env.CONCORD_TRIAL_POLICY??'observer-v1';
+if(!['observer-v1','paced-v1'].includes(policy))throw Error('Unknown observer policy');
+const paced=policy==='paced-v1',prefix=paced?'paced-live':'observer-live',WORK_TRIAL=paced?PACED_TRIAL:OBSERVER_TRIAL;
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
 const runId=process.env.CONCORD_TRIAL_ID;if(!runId||!/^[0-9a-f-]{36}$/.test(runId))throw Error('Run identity required');
 const send=(m:unknown)=>process.stdout.write(JSON.stringify(m)+'\n');
@@ -52,7 +55,7 @@ async function negotiate(id:string,pawn:string){
  await record();
 }
 async function offer(pawn:string,action:any,reason:string,requestId?:string){
- const p=requestId?await c!.core().offerAlternative(requestId,action,reason):await c!.core().propose(pawn,action,reason);await negotiate(p.id,pawn);
+ const p=requestId?await (paced?c!.core().offerRequestedRescue(requestId,action,reason):c!.core().offerAlternative(requestId,action,reason)):await c!.core().propose(pawn,action,reason);await negotiate(p.id,pawn);
  const answered=c!.inspect().proposals[p.id]!;
  if(answered.status==='countered'&&answered.decision?.kind==='counter'){
   if(answered.decision.action.kind!==action.kind||(action.kind==='rescue'&&answered.decision.action.kind==='rescue'&&answered.decision.action.target!==action.target)){offers.push({id:p.id,status:'counter-outside-this-offer-scope-retained'});return p.id;}
@@ -71,7 +74,7 @@ try{
   assert.deepEqual(c.inspect().characters,saved.domain.characters);assert.deepEqual(c.inspect().proposals,saved.domain.proposals);assert.deepEqual(c.inspect().outcomes,saved.domain.outcomes);assert.deepEqual(c.inspect().requests,saved.domain.requests);assert.deepEqual(c.inspect().crew?.entries,saved.domain.crew?.entries);assert.notEqual(c.inspect().epoch,saved.domain.epoch);
   const restored=await b.state();assert.equal(restored.pawns.find(p=>p.id===saved.target)?.currentBed,saved.patientBed);
   assert.deepEqual(restored.events?.filter(e=>e.pawn===saved.pawn&&e.kind==='casualty'&&e.subject===saved.target)??[],saved.sightings);
-  receipt.persistedSightings=saved.sightings.length;receipt.coldRestore=true;receipt.summary=workSummary(c.inspect());receipt.requests=c.core().requests();
+  receipt.persistedSightings=saved.sightings.length;receipt.pacing=saved.pacing;receipt.coldRestore=true;receipt.summary=workSummary(c.inspect());receipt.requests=c.core().requests();
  }else{
   const fixture=JSON.parse(await readFile(root+'/.runtime/observer-fixture.json','utf8'));await b.load(fixture.name);await b.admin('pause');
   const db=root+'/.runtime/'+prefix+'-'+runId+'.db';store=new Store(db);c=new Coordinator(store,b);await c.open();
@@ -88,8 +91,11 @@ try{
   let samples=0,pausedSamples=0,thoughtSamples=0,ticksDuringThought=0,priorTick=start.ticks,wasThinking=false;
   let negotiationDone=true,laterDone=false,nextCapture=0;
   const seenRequests=new Set<string>(),frames:any[]=[],screenshots:string[]=[];
+  const pacer=paced?new ReflectionPacer({windowMs:duration,routineSlots:PACED_TRIAL.routineReflectionSlots,urgentSlots:PACED_TRIAL.urgentReflectionSlots}):undefined;
+  const permitted=(claim:Parameters<AttentionAdmission['canClaim']>[0])=>!shutdown.stopped&&decisions<WORK_TRIAL.decisions&&reflections<WORK_TRIAL.reflections&&(!claim.needsAppraisal||appraisals<WORK_TRIAL.appraisals);
+  const admission:AttentionAdmission|undefined=pacer?{canClaim:claim=>permitted(claim)&&pacer.canClaim(claim),claim:claim=>permitted(claim)?pacer.claim(claim):undefined}:undefined;
   pump=new AttentionPump(c,{name:decision.name,reflect:(view,signal)=>decision.reflect(view,signal)},appraisal,
-   {cooldownTicks:1200,timeoutMs:90000},{maxConcurrent:1,maxNativeTurns:WORK_TRIAL.maxNativeTurns,maxModelTurns:WORK_TRIAL.maxModelTurns});
+   {cooldownTicks:1200,timeoutMs:90000},{maxConcurrent:1,maxNativeTurns:WORK_TRIAL.maxNativeTurns,maxModelTurns:WORK_TRIAL.maxModelTurns},admission);
   deadlineTimer=setTimeout(()=>{void shutdown.stop().catch(e=>{receipt.shutdownError=String(e);});},duration);
   const capture=async()=>{
    const state=await b.state();assert(state.crewLog,'Public log unavailable');
@@ -110,9 +116,10 @@ try{
      shutdown.later=(async()=>{
       if(request){
        const rescue=(await c!.core().rescueOptions(request.pawn))?.options.find(a=>a.target===request.target);
+       if(shutdown.stopped)return;
        if(!rescue){await c!.core().declineRequest(request.id,'No currently observed usable rescue option; existing work unchanged.');return;}
-       try{await offer(request.pawn,rescue,'In response to your request: replace the remaining hauling with this specific rescue? Acceptance ends the old agreement after confirmed cancellation; refusal keeps it. Rescue is not treatment.',request.id);}
-       catch(e){offers.push({requestId:request.id,status:'replacement-unavailable-no-retry',error:String(e)});if(c!.inspect().requests?.[request.id]?.status==='pending')await c!.core().declineRequest(request.id,'The replacement is no longer available; no automatic retry.');}
+       try{await offer(request.pawn,rescue,paced?'In response to your earlier request, would you carry this observed downed colonist to this specific medical bed? This is optional rescue, not treatment. If your haul is still running, acceptance replaces it after it is stopped; if it completed, this is separate new work.':'In response to your request: replace the remaining hauling with this specific rescue? Acceptance ends the old agreement after confirmed cancellation; refusal keeps it. Rescue is not treatment.',request.id);}
+       catch(e){offers.push({requestId:request.id,status:paced?'requested-offer-unavailable-no-retry':'replacement-unavailable-no-retry',error:String(e)});if(c!.inspect().requests?.[request.id]?.status==='pending')await c!.core().declineRequest(request.id,paced?'No currently valid requested rescue offer; no automatic retry.':'The replacement is no longer available; no automatic retry.');}
       }else for(const id of workers){
        if(shutdown.stopped||decisions>=WORK_TRIAL.decisions)break;
        if(!laterOfferEligible(c!.inspect(),id)){offers.push({pawn:id,status:'later-round-ineligible'});continue;}
@@ -127,7 +134,7 @@ try{
    if(shutdown.stopped)break;
    await c.advanceIntentions();
    if(shutdown.stopped)break;
-   if(negotiationDone&&decisions<WORK_TRIAL.decisions&&reflections<WORK_TRIAL.reflections&&appraisals<WORK_TRIAL.appraisals)await pump.poll();
+   if(negotiationDone&&(paced||decisions<WORK_TRIAL.decisions&&reflections<WORK_TRIAL.reflections&&appraisals<WORK_TRIAL.appraisals))await pump.poll();
    const state=await b.state(),thinking=pendingThoughts.size>0;samples++;if(state.paused)pausedSamples++;if(thinking)thoughtSamples++;
    if(thinking&&wasThinking)ticksDuringThought+=Math.max(0,state.ticks-priorTick);priorTick=state.ticks;wasThinking=thinking;
    if(Date.now()-began>=nextCapture){await capture();nextCapture+=15000;await record();}
@@ -144,6 +151,7 @@ try{
   await capture();receipt.publicFrames=frames;receipt.screenshots=screenshots;
   receipt.observation={wallMs:Date.now()-began,ticks:finish.ticks-start.ticks,samples,pausedSamples,thoughtSamples,ticksDuringThought,attention:pump.results,decisions,reflections,appraisals,operatorStops,laterDone,connected,pump:pump.status()};
   receipt.summary=workSummary(c.inspect());receipt.requests=c.core().requests();
+  if(pacer)receipt.pacing=pacer.status();
   receipt.finalPatient=finish.pawns.find(p=>p.id===target);
   const sightings=finish.events?.filter(e=>e.pawn===pawn&&e.kind==='casualty'&&e.subject===target)??[];
   assert(sightings.length<=1,'No repeated alert for the same continuously downed patient');
@@ -152,9 +160,9 @@ try{
   const restored=await b.state();assert.deepEqual(restored.events?.filter(e=>e.pawn===pawn&&e.kind==='casualty'&&e.subject===target)??[],sightings);
   const patientBed=finish.pawns.find(p=>p.id===target)?.currentBed;assert.equal(restored.pawns.find(p=>p.id===target)?.currentBed,patientBed);
   receipt.persistedSightings=sightings.length;
-  await writeFile(root+'/.runtime/'+prefix+'-latest.json',JSON.stringify({runId,policy,mode:scripted?'scripted':'live',db,checkpoint,domain,pawn,target,patientBed,sightings}));
+  await writeFile(root+'/.runtime/'+prefix+'-latest.json',JSON.stringify({runId,policy,mode:scripted?'scripted':'live',db,checkpoint,domain,pawn,target,patientBed,sightings,pacing:receipt.pacing}));
   receipt.interruptionAudit=store.events().filter(e=>['decision-invalidated','decision-interrupted','experience-deferred','decision-error'].includes(e.event.kind)).map(e=>e.event);
-  receipt.pairedRestore=true;receipt.limits=WORK_TRIAL;receipt.limitations='Authored three-pawn colony: two separate hauling opportunities, one initially downed patient outside the first worker local view; native work priorities disabled, needs/idle/social routines remain native. Core scripted, no personality overrides. Initial consent paused; general bounded attention, requests and one later hauling round continuous. Five-minute observation including quiet stretches; split attention and immutable provider limits. No rerolls. Observer reconstruction uses only public crew log frames and screenshots; technical audit is separate. This is not natural sustained planning or human-user evaluation.';
+  receipt.pairedRestore=true;receipt.limits=WORK_TRIAL;receipt.limitations=(paced?'Four routine reflection slots across the window, two immediate health/casualty reserve slots; unused intervals do not bank. Native/appraisal-only outcomes release the reservation. No model call starts after the pacing window. Request replies use the fresh-goal API. Scheduling state is process-local; cold mode performs no inference and old live ledgers cannot be reopened for another run. Not a controlled comparison against the old trial. ':'')+'Authored three-pawn colony: two separate hauling opportunities, one initially downed patient outside the first worker local view; native work priorities disabled, needs/idle/social routines remain native. Core scripted, no personality overrides. Initial consent paused; general bounded attention, requests and one later hauling round continuous. Five-minute observation including quiet stretches; split attention and immutable provider limits. No rerolls. Observer reconstruction uses only public crew log frames and screenshots; technical audit is separate. This is not natural sustained planning or human-user evaluation.';
   if(!connected)throw Error('Host disconnected; partial result retained');
   if(receipt.laterError)throw Error('Later offer round failed; evidence retained');
  }

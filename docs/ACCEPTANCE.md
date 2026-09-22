@@ -611,3 +611,23 @@ passed without repeated recovery. Existing pending-rescue invalidation regressio
 passed with no dispatch. Independent Codex review covered final behavior/tests.
 First fixture-path failure was retained and corrected with actual distance checks.
 [Verification contract](NATIVE_LOG_TRIAL.md) · [Evidence](evidence/native-recovery-log.json).
+
+## Bounded reflection pacing (2026-09-22)
+
+160 automated checks and independent read-only Codex review passed. The optional
+paced policy reserves two health/casualty slots and admits one routine reflection
+per quarter of the window. Tests cover expiry, no banking, appraisal-only release,
+consumed failures and admission before event-cursor mutation. A 45-second scripted
+rehearsal used two reserves and the last two routine intervals; sixty steel was
+delivered and stale rescue consent remained rejected. Paired/cold restore passed.
+
+One five-minute live authored trial completed six reflections: reserves at 1.44
+and 17.84 seconds, routine starts at 23.34/75.84/151.03/225.95 seconds. Nine Claude
+attempts, zero Jev calls; 273 unpaused samples. Five hauls delivered fifty steel
+and a freshly accepted replacement completed rescue. Other reflections continued
+native behavior. No later eligible work was forced. Paired/cold restore retained
+log, agreements, outcomes and pacing trace, with no inference or outstanding work
+at cleanup. Later attributed no-longer-downed sightings remained distinct from
+rescue. This proves bounded later attention, not causal behavioral improvement,
+a natural-colony benchmark, or durable production scheduling.
+[Contract](REFLECTION_PACING.md) · [Evidence](evidence/reflection-pacing-live.json).

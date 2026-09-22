@@ -8,7 +8,7 @@ import { nativeAttention,attentionInterrupt } from './routing.js';
 import { Store } from './store.js';
 import {rescueView,planRescue} from './rescue-planning.js';
 import {groundedPawn,haulingView,planHaul} from './haul-planning.js';
-import { AttentionOptions, Reflection, bounded, coalesce, type AttentionBackend, type AppraisalBackend, type AttentionResult } from './attention.js';
+import { AttentionOptions, Reflection, bounded, coalesce, type AttentionBackend, type AppraisalBackend, type AttentionResult,type AttentionAdmission } from './attention.js';
 
 /** Character handles bind identity in code; backend output cannot choose an actor. */
 export class Coordinator {
@@ -107,7 +107,7 @@ export class Coordinator {
   /** Polling is operator-owned. Routes are durable attention records, not automatic orders. */
   async observe() {return this.serial(async()=>{this.ingest(await this.current());});}
   /** Operator scheduling hints only. Every condition is checked again at claim time. */
-  attentionCandidates(options:AttentionOptions={},hasAppraiser=false,mode?:'native'|'model'):string[] {
+  attentionCandidates(options:AttentionOptions={},hasAppraiser=false,mode?:'native'|'model',admission?:AttentionAdmission):string[] {
     const config=AttentionOptions.parse(options);
     if(!this.domain) throw Error('Coordinator not opened');
     return Object.values(this.domain.characters).filter(c=>{
@@ -119,6 +119,7 @@ export class Coordinator {
       const needsModel=events.some(e=>e.route!=='native');
       if(mode==='native'&&needsModel||mode==='model'&&!needsModel)return false;
       if(!significant&&needsModel&&!hasAppraiser) return false;
+      if(needsModel&&admission&&!admission.canClaim({pawn:c.id,events:events.map(e=>({seq:e.event.seq,kind:e.event.kind})),needsAppraisal:!significant}))return false;
       return !needsModel||interrupting||c.attention?.lastAttemptTick===undefined||
         this.observedTick-c.attention.lastAttemptTick>=config.cooldownTicks;
     }).sort((a,b)=>{
@@ -132,7 +133,7 @@ export class Coordinator {
    * never silently replayed after restart. A later event may prompt fresh reflection.
    */
   async attend(pawn:string,backend:AttentionBackend,appraiser?:AppraisalBackend,
-    options:AttentionOptions={},signal=new AbortController().signal,mode?:'native'|'model'):Promise<AttentionResult> {
+    options:AttentionOptions={},signal=new AbortController().signal,mode?:'native'|'model',admission?:AttentionAdmission):Promise<AttentionResult> {
     const config=AttentionOptions.parse(options);
     const prepared=await this.serial(async()=>{
       signal.throwIfAborted();
@@ -151,6 +152,8 @@ export class Coordinator {
       if(needsModel&&!significant&&!appraiser) return {status:'unavailable' as const};
       if(needsModel&&!interrupting&&character.attention?.lastAttemptTick!==undefined&&
         game.ticks-character.attention.lastAttemptTick<config.cooldownTicks) return {status:'cooldown' as const};
+      const lease=needsModel?admission?.claim({pawn,events:events.map(e=>({seq:e.event.seq,kind:e.event.kind})),needsAppraisal:!significant}):undefined;
+      if(needsModel&&admission&&!lease)return {status:'paced' as const};
       const throughSeq=events.at(-1)!.event.seq;
       const progress=character.attention??={cursor:0};
       progress.cursor=throughSeq;
@@ -169,7 +172,7 @@ export class Coordinator {
         proposals:Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending').slice(0,8),
         requests:Object.values(this.domain.requests??{}).filter(r=>r.pawn===pawn).slice(-8),
         histories:Object.fromEntries(Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending'&&p.parentId).slice(0,8).map(p=>[p.id,this.history(p)]))});
-      return {status:'running' as const,generation:this.generation,controller,activity,view,throughSeq,significant};
+      return {status:'running' as const,generation:this.generation,controller,activity,view,throughSeq,significant,lease};
     });
     if(prepared.status!=='running') return {pawn,status:prepared.status,throughSeq:'throughSeq' in prepared?prepared.throughSeq:undefined};
     const combined=AbortSignal.any([signal,prepared.controller.signal]);
@@ -187,6 +190,7 @@ export class Coordinator {
         // Only deliberation gets the thinking badge. Appraisal is a bounded fast gate.
         try {await this.game.setActivity?.(prepared.activity);} catch { /* cognition can proceed without UI */ }
         combined.throwIfAborted();
+        if(prepared.lease&&!prepared.lease.consume())throw Error('Reflection admission expired');
         return Reflection.parse(await backend.reflect(prepared.view,combined));
       });
       return await this.serial(async()=>{
@@ -246,6 +250,7 @@ export class Coordinator {
       });
     } finally {
       clearTimeout(timer);
+      prepared.lease?.release();
       try {await this.decisionPause(prepared.activity,true);} catch { /* game lease expires even if transport is lost */ }
       if(this.pending.get(pawn)===prepared.controller) this.pending.delete(pawn);
       if(this.questions.get(pawn)?.controller===prepared.controller)this.questions.delete(pawn);

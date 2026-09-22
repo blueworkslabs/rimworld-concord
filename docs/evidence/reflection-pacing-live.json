@@ -1,0 +1,703 @@
+{
+  "date": "2026-09-22",
+  "kind": "single bounded paced mixed-work trial",
+  "finalBehaviorHead": "2aae3191a06f1e695ba3af970e14ad3bd81b1070",
+  "automatedTests": 160,
+  "limits": {
+    "decisions": 12,
+    "appraisals": 12,
+    "reflections": 6,
+    "observationMs": 300000,
+    "routineSlots": 4,
+    "urgentSlots": 2,
+    "maxNativeTurns": 100,
+    "maxModelTurns": 18
+  },
+  "before": {
+    "claude": {
+      "attempts": 0,
+      "reservedEquivalentUSD": 0,
+      "estimatedUsageUSD": 0
+    },
+    "jev": {
+      "calls": 0,
+      "reservedUSD": 0,
+      "reportedUSD": 0
+    }
+  },
+  "after": {
+    "claude": {
+      "attempts": 9,
+      "reservedEquivalentUSD": 0.9,
+      "estimatedUsageUSD": 0.15341190000000002
+    },
+    "jev": {
+      "calls": 0,
+      "reservedUSD": 0,
+      "reportedUSD": 0
+    }
+  },
+  "accounting": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls.",
+  "observation": {
+    "wallMs": 301262,
+    "ticks": 17972,
+    "samples": 273,
+    "pausedSamples": 0,
+    "thoughtSamples": 29,
+    "ticksDuringThought": 1326,
+    "attention": [
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 4
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "continued",
+        "throughSeq": 15
+      },
+      {
+        "pawn": "Thing_Human408",
+        "status": "continued",
+        "throughSeq": 21
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 46
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 51
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 53
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 54
+      },
+      {
+        "pawn": "Thing_Human408",
+        "status": "continued",
+        "throughSeq": 83
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "continued",
+        "throughSeq": 137
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 142
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 145
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 148
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 152
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 156
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 160
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 162
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 164
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 167
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 168
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 171
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 177
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 181
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 183
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 187
+      }
+    ],
+    "decisions": 9,
+    "reflections": 6,
+    "appraisals": 0,
+    "operatorStops": [],
+    "laterDone": true,
+    "connected": true,
+    "pump": {
+      "started": 24,
+      "nativeStarted": 18,
+      "modelStarted": 6,
+      "pending": 0,
+      "stopped": true
+    }
+  },
+  "pacing": {
+    "windowMs": 300000,
+    "routineSlots": 4,
+    "urgentSlots": 2,
+    "elapsedMs": 301261.93842,
+    "used": 6,
+    "held": 0,
+    "claims": [
+      {
+        "pawn": "Thing_Human405",
+        "throughSeq": 4,
+        "slot": "urgent:0",
+        "atMs": 989.2062759999972,
+        "reflectionAtMs": 1443.026963999997
+      },
+      {
+        "pawn": "Thing_Human411",
+        "throughSeq": 15,
+        "slot": "urgent:1",
+        "atMs": 17509.6458,
+        "reflectionAtMs": 17835.613694
+      },
+      {
+        "pawn": "Thing_Human408",
+        "throughSeq": 21,
+        "slot": "routine:0",
+        "atMs": 23033.955535,
+        "reflectionAtMs": 23343.633758999997
+      },
+      {
+        "pawn": "Thing_Human405",
+        "throughSeq": 46,
+        "slot": "routine:1",
+        "atMs": 75417.54001,
+        "reflectionAtMs": 75842.496795
+      },
+      {
+        "pawn": "Thing_Human408",
+        "throughSeq": 83,
+        "slot": "routine:2",
+        "atMs": 150628.67710700002,
+        "reflectionAtMs": 151030.024211
+      },
+      {
+        "pawn": "Thing_Human411",
+        "throughSeq": 137,
+        "slot": "routine:3",
+        "atMs": 225519.15912899998,
+        "reflectionAtMs": 225947.314925
+      }
+    ]
+  },
+  "work": {
+    "completedHaulTrips": 5,
+    "deliveredSteel": 50,
+    "completedRescues": 1
+  },
+  "publicEntries": [
+    {
+      "seq": 1,
+      "tick": 2,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "Alvin",
+      "subject": "45c26047-290f-45a8-b588-e124bf234656",
+      "text": "Would you carry up to three ten-unit trips of these supplies to this storage cell? You may refuse, counter or later reconsider.",
+      "key": "offer:45c26047-290f-45a8-b588-e124bf234656"
+    },
+    {
+      "seq": 2,
+      "tick": 2,
+      "kind": "message",
+      "actor": "Alvin",
+      "recipient": "Core",
+      "subject": "45c26047-290f-45a8-b588-e124bf234656",
+      "text": "accept: I'm well-rested and fed, and hauling steel is straightforward work I can manage. I'll move those supplies over.",
+      "key": "reply:45c26047-290f-45a8-b588-e124bf234656"
+    },
+    {
+      "seq": 3,
+      "tick": 2,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "45c26047-290f-45a8-b588-e124bf234656",
+      "text": "haul: started.",
+      "key": "outcome:9eefedf3-42ac-4964-a589-5fb3e51fa332:started"
+    },
+    {
+      "seq": 4,
+      "tick": 2,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "Pedro",
+      "subject": "927a7749-4324-4b4f-aa97-08366287a809",
+      "text": "Would you move up to three ten-unit loads from this separate observed supply stack? Refusal or a counter is valid.",
+      "key": "offer:927a7749-4324-4b4f-aa97-08366287a809"
+    },
+    {
+      "seq": 5,
+      "tick": 2,
+      "kind": "message",
+      "actor": "Pedro",
+      "recipient": "Core",
+      "subject": "927a7749-4324-4b4f-aa97-08366287a809",
+      "text": "accept: Nothing pressing on my end. I'll haul steel \u2014 three trips, ten units each. Straightforward enough.",
+      "key": "reply:927a7749-4324-4b4f-aa97-08366287a809"
+    },
+    {
+      "seq": 6,
+      "tick": 2,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "927a7749-4324-4b4f-aa97-08366287a809",
+      "text": "haul: started.",
+      "key": "outcome:d26e015a-4e75-4832-9bb8-2381b8cd07f1:started"
+    },
+    {
+      "seq": 7,
+      "tick": 30,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "Thing_Human408",
+      "text": "Locally observed Beatrice downed and outside a bed. Cause and urgency unknown.",
+      "key": "native-observation:3"
+    },
+    {
+      "seq": 8,
+      "tick": 51,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "Thing_Human408",
+      "text": "Locally observed Beatrice downed and outside a bed. Cause and urgency unknown.",
+      "key": "native-observation:4"
+    },
+    {
+      "seq": 9,
+      "tick": 134,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "45c26047-290f-45a8-b588-e124bf234656",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:9eefedf3-42ac-4964-a589-5fb3e51fa332:completed"
+    },
+    {
+      "seq": 10,
+      "tick": 232,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "927a7749-4324-4b4f-aa97-08366287a809",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:d26e015a-4e75-4832-9bb8-2381b8cd07f1:completed"
+    },
+    {
+      "seq": 11,
+      "tick": 244,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "927a7749-4324-4b4f-aa97-08366287a809",
+      "text": "haul: started.",
+      "key": "outcome:2e29009b-4687-47d2-b81e-1e04dcd46d27:started"
+    },
+    {
+      "seq": 12,
+      "tick": 325,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "927a7749-4324-4b4f-aa97-08366287a809",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:2e29009b-4687-47d2-b81e-1e04dcd46d27:completed"
+    },
+    {
+      "seq": 13,
+      "tick": 325,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "927a7749-4324-4b4f-aa97-08366287a809",
+      "text": "haul: started.",
+      "key": "outcome:bbffb7c0-88c9-4367-9151-7da71e1374a8:started"
+    },
+    {
+      "seq": 14,
+      "tick": 377,
+      "kind": "message",
+      "actor": "Alvin",
+      "recipient": "Core",
+      "subject": "aaf64630-4ffd-4521-ad2c-0161b42e4d0c",
+      "text": "Beatrice is down nearby and there's a free medical sleeping spot close by. I'd like to know if I can help carry her to safety without abandoning the steel hauling I already committed to \u2014 but I won't drop my current work until I hear back and give fresh consent.",
+      "key": "request:aaf64630-4ffd-4521-ad2c-0161b42e4d0c"
+    },
+    {
+      "seq": 15,
+      "tick": 442,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "Alvin",
+      "subject": "9d26c8af-446d-4528-b5f2-435085b00bda",
+      "text": "In response to your earlier request, would you carry this observed downed colonist to this specific medical bed? This is optional rescue, not treatment. If your haul is still running, acceptance replaces it after it is stopped; if it completed, this is separate new work.",
+      "key": "offer:9d26c8af-446d-4528-b5f2-435085b00bda"
+    },
+    {
+      "seq": 16,
+      "tick": 442,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "45c26047-290f-45a8-b588-e124bf234656",
+      "text": "haul: started.",
+      "key": "outcome:e006669f-e2dd-45eb-ab5e-c6749dce361e:started"
+    },
+    {
+      "seq": 17,
+      "tick": 504,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "927a7749-4324-4b4f-aa97-08366287a809",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:bbffb7c0-88c9-4367-9151-7da71e1374a8:completed"
+    },
+    {
+      "seq": 18,
+      "tick": 618,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "45c26047-290f-45a8-b588-e124bf234656",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:e006669f-e2dd-45eb-ab5e-c6749dce361e:completed"
+    },
+    {
+      "seq": 19,
+      "tick": 976,
+      "kind": "message",
+      "actor": "Alvin",
+      "recipient": "Core",
+      "subject": "9d26c8af-446d-4528-b5f2-435085b00bda",
+      "text": "accept: Beatrice is still down and unattended. I have the energy for this, the bed is free, and I already raised my hand to help. Stopping the haul mid-run is a cost, but leaving a colonist on the ground when I can carry her isn't something I'm willing to do. I'll bring her to the sleeping spot.",
+      "key": "reply:9d26c8af-446d-4528-b5f2-435085b00bda"
+    },
+    {
+      "seq": 20,
+      "tick": 976,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "45c26047-290f-45a8-b588-e124bf234656",
+      "text": "Agreement stopped. Any completed work remains recorded; unfinished work is not completion.",
+      "key": "stopped:45c26047-290f-45a8-b588-e124bf234656"
+    },
+    {
+      "seq": 21,
+      "tick": 982,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "9d26c8af-446d-4528-b5f2-435085b00bda",
+      "text": "rescue: started.",
+      "key": "outcome:f286b305-79c2-4742-900e-1d18f31fd0bd:started"
+    },
+    {
+      "seq": 22,
+      "tick": 1154,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "9d26c8af-446d-4528-b5f2-435085b00bda",
+      "text": "rescue: completed. Casualty placed in the agreed bed; treatment not implied.",
+      "key": "outcome:f286b305-79c2-4742-900e-1d18f31fd0bd:completed"
+    },
+    {
+      "seq": 23,
+      "tick": 15045,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "Thing_Human408",
+      "text": "Locally observed Beatrice no longer downed after an earlier downed sighting. Cause unknown; this is not a rescue or treatment record.",
+      "key": "native-observation:159"
+    },
+    {
+      "seq": 24,
+      "tick": 15045,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "Thing_Human408",
+      "text": "Locally observed Beatrice no longer downed after an earlier downed sighting. Cause unknown; this is not a rescue or treatment record.",
+      "key": "native-observation:160"
+    }
+  ],
+  "publicProgress": [
+    {
+      "pawn": "Thing_Human405",
+      "name": "Alvin",
+      "progress": {
+        "id": "9d26c8af-446d-4528-b5f2-435085b00bda",
+        "kind": "rescue",
+        "status": "completed",
+        "tick": 17975,
+        "agreed": 1,
+        "completed": 1,
+        "active": 0,
+        "unconfirmed": 0,
+        "unsuccessful": 0,
+        "notStarted": 0,
+        "unfulfilled": 0,
+        "delivered": 0,
+        "quantityUnknown": 0
+      }
+    },
+    {
+      "pawn": "Thing_Human411",
+      "name": "Pedro",
+      "progress": {
+        "id": "927a7749-4324-4b4f-aa97-08366287a809",
+        "kind": "haul",
+        "status": "completed",
+        "tick": 17975,
+        "agreed": 3,
+        "completed": 3,
+        "active": 0,
+        "unconfirmed": 0,
+        "unsuccessful": 0,
+        "notStarted": 0,
+        "unfulfilled": 0,
+        "delivered": 30,
+        "quantityUnknown": 0
+      }
+    },
+    {
+      "pawn": "Thing_Human405",
+      "name": "Alvin",
+      "progress": {
+        "id": "45c26047-290f-45a8-b588-e124bf234656",
+        "kind": "haul",
+        "status": "stopped",
+        "tick": 17975,
+        "agreed": 3,
+        "completed": 2,
+        "active": 0,
+        "unconfirmed": 0,
+        "unsuccessful": 0,
+        "notStarted": 1,
+        "unfulfilled": 1,
+        "delivered": 20,
+        "quantityUnknown": 0
+      }
+    }
+  ],
+  "offers": [
+    {
+      "id": "45c26047-290f-45a8-b588-e124bf234656",
+      "pawn": "Thing_Human405",
+      "decision": {
+        "kind": "accept",
+        "reason": "I'm well-rested and fed, and hauling steel is straightforward work I can manage. I'll move those supplies over."
+      },
+      "elapsedMs": 6837
+    },
+    {
+      "id": "927a7749-4324-4b4f-aa97-08366287a809",
+      "pawn": "Thing_Human411",
+      "decision": {
+        "kind": "accept",
+        "reason": "Nothing pressing on my end. I'll haul steel \u2014 three trips, ten units each. Straightforward enough."
+      },
+      "elapsedMs": 5193
+    },
+    {
+      "id": "9d26c8af-446d-4528-b5f2-435085b00bda",
+      "pawn": "Thing_Human405",
+      "decision": {
+        "kind": "accept",
+        "reason": "Beatrice is still down and unattended. I have the energy for this, the bed is free, and I already raised my hand to help. Stopping the haul mid-run is a cost, but leaving a colonist on the ground when I can carry her isn't something I'm willing to do. I'll bring her to the sleeping spot."
+      },
+      "elapsedMs": 9353
+    },
+    {
+      "pawn": "Thing_Human405",
+      "status": "later-round-ineligible"
+    },
+    {
+      "pawn": "Thing_Human411",
+      "status": "no-later-observed-option"
+    }
+  ],
+  "returnedChoices": [
+    {
+      "mode": "decision",
+      "pawn": "Alvin",
+      "elapsedMs": 6047,
+      "choice": "accept"
+    },
+    {
+      "mode": "decision",
+      "pawn": "Pedro",
+      "elapsedMs": 4477,
+      "choice": "accept"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Alvin",
+      "elapsedMs": 4684,
+      "choice": "request_rescue"
+    },
+    {
+      "mode": "decision",
+      "pawn": "Alvin",
+      "elapsedMs": 7889,
+      "choice": "accept"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Pedro",
+      "elapsedMs": 3997,
+      "choice": "continue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Beatrice",
+      "elapsedMs": 3791,
+      "choice": "continue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Alvin",
+      "elapsedMs": 4007,
+      "choice": "continue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Beatrice",
+      "elapsedMs": 4289,
+      "choice": "continue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Pedro",
+      "elapsedMs": 3559,
+      "choice": "continue"
+    }
+  ],
+  "appraisals": [],
+  "pairedRestore": true,
+  "coldRestore": true,
+  "coldNoInference": true,
+  "coldPacingTracePreserved": true,
+  "cleanup": {
+    "operatorStops": [],
+    "errors": []
+  },
+  "historicalFiles": {
+    "count": 55,
+    "unchanged": true
+  },
+  "scriptedRehearsal": {
+    "passed": true,
+    "coldRestore": true,
+    "inferenceCalls": 0,
+    "work": {
+      "completedHaulTrips": 6,
+      "deliveredSteel": 60,
+      "completedRescues": 0
+    },
+    "pacing": {
+      "windowMs": 45000,
+      "routineSlots": 4,
+      "urgentSlots": 2,
+      "elapsedMs": 46232.846548,
+      "used": 4,
+      "held": 0,
+      "claims": [
+        {
+          "pawn": "Thing_Human405",
+          "throughSeq": 4,
+          "slot": "urgent:0",
+          "atMs": 1072.123106,
+          "reflectionAtMs": 1498.4463889999997
+        },
+        {
+          "pawn": "Thing_Human411",
+          "throughSeq": 3,
+          "slot": "urgent:1",
+          "atMs": 2765.6198219999997,
+          "reflectionAtMs": 3087.6751269999995
+        },
+        {
+          "pawn": "Thing_Human405",
+          "throughSeq": 25,
+          "slot": "routine:2",
+          "atMs": 24650.272609,
+          "reflectionAtMs": 24947.829035
+        },
+        {
+          "pawn": "Thing_Human411",
+          "throughSeq": 32,
+          "slot": "routine:3",
+          "atMs": 35041.421253,
+          "reflectionAtMs": 35369.684736999996
+        }
+      ]
+    },
+    "staleRescueAnswerRetained": true
+  },
+  "review": {
+    "completed": true,
+    "findingsRemaining": 0,
+    "finalBehaviorHead": "2aae3191a06f1e695ba3af970e14ad3bd81b1070"
+  },
+  "limitations": "Four routine reflection slots across the window, two immediate health/casualty reserve slots; unused intervals do not bank. Native/appraisal-only outcomes release the reservation. No model call starts after the pacing window. Request replies use the fresh-goal API. Scheduling state is process-local; cold mode performs no inference and old live ledgers cannot be reopened for another run. Not a controlled comparison against the old trial. Authored three-pawn colony: two separate hauling opportunities, one initially downed patient outside the first worker local view; native work priorities disabled, needs/idle/social routines remain native. Core scripted, no personality overrides. Initial consent paused; general bounded attention, requests and one later hauling round continuous. Five-minute observation including quiet stretches; split attention and immutable provider limits. No rerolls. Observer reconstruction uses only public crew log frames and screenshots; technical audit is separate. This is not natural sustained planning or human-user evaluation."
+}
