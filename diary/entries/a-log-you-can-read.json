@@ -1,0 +1,54 @@
+{
+  "slug": "a-log-you-can-read",
+  "title": "A log you can read",
+  "date": "2026-09-22",
+  "summary": "Read-only crew log now displays proposals, decisions and progress without exposing private thoughts or granting control.",
+  "sections": [
+    {
+      "heading": "What the Log Shows Now",
+      "paragraphs": [
+        "The Concord crew log is now a read-only window into the crew's agreements. It displays deliberately addressed core proposals, pawn decision replies, rescue requests and declines, kept separate from native action records. The progress board distinguishes completed, active, unconfirmed, unsuccessful, not-started and unfulfilled trips, with confirmed deliveries drawn from game receipts. Pawns also receive explicit progress about their own agreement during reflection and replacement decisions.",
+        "Private memories, background reflections and withdrawal reasoning stay excluded. The observer log does not automatically become shared knowledge among the crew. Opening it grants no authority and does not pause the colony. This makes choices easier to follow without pretending that a character's explanation is a reliable account of what happened."
+      ]
+    },
+    {
+      "heading": "Testing What Holds Up",
+      "paragraphs": [
+        "One hundred forty-five automated checks pass. The build survived real installed-game compilation, a native scripted scenario, paired restore and full cold restart. The saved report was tested after game-only load before coordinator republication, with historical display marked as not live. An independent final Codex review came back clean after fixes.",
+        "The authored scripted scenario begins with a three-trip hauling agreement. Alvin completes one trip, delivering ten steel, then requests rescue while keeping his agreement active. Refusing the replacement leaves hauling intact; restoring removes that discarded future reply. A fresh alternative is accepted with an intentionally inaccurate scripted message: “My haul is wrapped up; I will rescue Beatrice.” The board still records two unfulfilled trips, while the native rescue places Beatrice in the agreed bed. These are scripted choices, not new live-model decisions.",
+        "Native tests caught serialization and standalone cache loading failures. Reviews caught rich-text style handling and report-size capacity errors. Both categories were fixed and rechecked. The log bounds itself to newest 128 entries and 12 agreements, not a full campaign archive."
+      ]
+    },
+    {
+      "heading": "What's Still Ahead",
+      "paragraphs": [
+        "The next question is whether viewers can follow consequential choices during a longer mixed-work trial. Durable character development, selective social exchanges and a bounded live core remain future work. Suggestions to the core, personal correspondence and comms-station conversations are recorded options, not implemented chat. Clearer progress supplies better information; whether live pawns use it more accurately remains untested."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Crew log contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CREW_LOG.md"
+    },
+    {
+      "label": "Scripted test evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/crew-log-game.json"
+    },
+    {
+      "label": "Playable direction",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PLAYABLE_DIRECTION.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/concord-crew-log.png",
+      "alt": "RimWorld Concord tab showing a completed rescue, one of three hauls completed, and separately coloured messages and records.",
+      "caption": "Scripted real-game test: an intentionally inaccurate completion message sits below receipt-based progress. One haul delivered ten steel, two trips remained unfulfilled, and the rescue completed. No live pawn inference."
+    }
+  ]
+}

@@ -154,3 +154,14 @@ Do not describe placeholder interfaces or design documents as live integrations.
   negotiations. Do not infer a general reasoning fix from one successful sequence.
 - Core remains scripted; broader character consistency and strategic planning
   remain unproved. See [contract](ALTERNATIVE_REQUESTS.md) and [evidence](ACCEPTANCE.md).
+
+## Legible crew planning checkpoint
+
+The next playable direction is recorded in [PLAYABLE_DIRECTION.md](PLAYABLE_DIRECTION.md):
+readable communication and receipt-based progress first, then bounded mixed-work
+observation, character development, selective social exchange and strategic core
+planning. Future core messages, pawn correspondence and comms-station encounters
+are recorded options, not part of the current implementation or inference budget.
+See [crew log contract](CREW_LOG.md) for the first read-only presentation slice.
+
+The first presentation slice is implemented: read-only crew log, explicit own-agreement progress and bounded saved display cache. Native scripted tests and cold restore passed; no new live inference was used. Next is a bounded mixed-work observer trial, not automatic expansion into human chat or durable-self systems.

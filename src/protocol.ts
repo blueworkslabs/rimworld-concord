@@ -1,3 +1,4 @@
+import type {AgreementProgress,CrewArchive,CrewReport} from './crew-log.js';
 import { z } from 'zod';
 
 export const Move = z.object({kind:z.literal('move'), x:z.number().int().nonnegative(), z:z.number().int().nonnegative()}).strict();
@@ -30,7 +31,7 @@ export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:nu
 export type Receipt = {id:string;actor:string;status:Outcome;reason:string;x:number;z:number;kind?:string;thing?:string;count?:number;delivered?:number;target?:string;bed?:string};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
-  pawns:Pawn[];actions:Receipt[];events?:NativeEvent[];eventSeq?:number;
+  pawns:Pawn[];actions:Receipt[];crewLog?:CrewReport;events?:NativeEvent[];eventSeq?:number;
 };
 export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail:string;subject?:string};
 export type Attention = {event:NativeEvent;route:'native'|'appraisal'|'deliberation';interrupt?:boolean};
@@ -40,6 +41,7 @@ export type ActionRequest = {id:string;epoch:string;actor:string;action:Action;u
 /** Admin capability: held by the coordinator/runner only, never provided to a character backend. */
 export interface GameBridge {
   state():Promise<GameState>;
+  setCrewLog?(report:CrewReport):Promise<void>;
   setActivity?(activity:Activity):Promise<void>;
   setDecisionPause?(pause:DecisionPause):Promise<void>;
   cancel?(request:{epoch:string;actor:string;id:string;kind?:'haul'|'rescue'}):Promise<Receipt>;
@@ -58,13 +60,13 @@ export type Character = {id:string;name:string;memories:string[];commitment?:str
 };
 export type AlternativeRequest = {id:string;pawn:string;agreementId:string;target:string;mapId:number;reason:string;status:'pending'|'offered'|'declined'|'closed';replyReason?:string;proposalId?:string};
 export type Proposal = {replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;rescueMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
-export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;history?:Proposal[]};
+export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;agreementProgress?:AgreementProgress;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;
   decide(view:Perspective, signal:AbortSignal):Promise<unknown>;
 }
 export type Domain = {
-  eventCursor?:number;
+  eventCursor?:number;crew?:CrewArchive;
   schema:1;world:string;epoch:string;branch:string;
   characters:Record<string,Character>;proposals:Record<string,Proposal>;
   outcomes:Record<string,Receipt>;requests?:Record<string,AlternativeRequest>;

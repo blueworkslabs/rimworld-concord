@@ -9,4 +9,5 @@ mcs -target:library -out:"$concord_root/mod/Assemblies/Concord.dll" \
   -r:"$concord_managed/UnityEngine.CoreModule.dll" \
   -r:"$concord_managed/UnityEngine.JSONSerializeModule.dll" \
   -r:"$concord_managed/UnityEngine.IMGUIModule.dll" \
+  -r:"$concord_managed/UnityEngine.TextRenderingModule.dll" \
   "$concord_root"/mod/*.cs
