@@ -55,18 +55,19 @@ class GuardTests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as folder:
    root=pathlib.Path(folder);catalog=root/'catalog.json';cases=root/'cases.json';out=root/'run'
    catalog.write_text(json.dumps({'models':[{'slug':p.MODEL,'tool_mode':'direct','multi_agent_version':'disabled','supports_search_tool':False}]}))
-   cases.write_text(json.dumps({'version':'concord-contract-v1','authored':True,'cases':[{'id':id,'prompt':'{}'} for id in p.CASE_IDS]}))
+   cases.write_text(json.dumps({'version':'concord-contract-v1','authored':True,'cases':[{'id':id,'instructions':'Test é','prompt':'{}','schema':{}} for id in p.CASE_IDS]}))
    class Fake:
     def __init__(self,*a):pass
     def initialize(self):pass
     def account(self):pass
     def run(self,case):
      saved=json.loads((out/'receipt.json').read_text());assert saved['attempts']==1 and saved['results'][0]['status']=='started'
+     assert saved['results'][0]['authoredSize']==p.authored_size(case)
      raise TimeoutError('retained failure')
     def close(self):pass
    argv=['probe',str(cases),str(catalog),str(out),'--live']
    with patch.object(sys,'argv',argv),patch.object(p,'Client',Fake),patch.object(p,'preflight',return_value={'toolsExposed':0}),patch.object(p.subprocess,'check_output',return_value='test-version'):
     with self.assertRaises(TimeoutError):p.main()
-    saved=json.loads((out/'receipt.json').read_text());self.assertEqual(saved['attempts'],1);self.assertEqual(saved['results'][0]['status'],'failed')
+    saved=json.loads((out/'receipt.json').read_text());self.assertEqual(saved['attempts'],1);self.assertEqual(saved['results'][0]['status'],'failed');self.assertEqual(saved['results'][0]['authoredSize'],p.authored_size(json.loads(cases.read_text())['cases'][0]))
     with self.assertRaises(FileExistsError):p.main()
 if __name__=='__main__':unittest.main()

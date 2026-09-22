@@ -17,6 +17,10 @@ def validate_suite(suite):
   canonical=json.loads(subprocess.check_output(['node',str(pathlib.Path(__file__).with_name(exporter))],text=True))
   assert suite==canonical,'Frozen case contents differ from this build'
  return suite['cases']
+EXTRA_INSTRUCTIONS='Return only the requested structured response. No tools or external context.'
+def authored_size(case):
+ size={k:len(v.encode('utf-8')) for k,v in {'instructionsBytes':case['instructions'],'promptBytes':case['prompt'],'schemaBytes':json.dumps(case['schema'],separators=(',',':'),ensure_ascii=False),'extraInstructionsBytes':EXTRA_INSTRUCTIONS}.items()};size['totalAuthoredBytes']=sum(size.values())
+ return size
 def digest(data):return hashlib.sha256(data).hexdigest()
 def toml(value):
  if isinstance(value,dict):return '{'+','.join(k+'='+toml(v) for k,v in value.items())+'}'
@@ -79,7 +83,7 @@ class Client:
   assert a.get('account',{}).get('type')=='chatgpt','Native ChatGPT login required; no API fallback'
  def run(self,case):
   self.events=[];began=time.monotonic();deadline=began+60
-  t=self.rpc('thread/start',{'model':MODEL,'modelProvider':self.provider,'environments':[],'dynamicTools':[],'ephemeral':True,'approvalPolicy':'never','sandbox':'read-only','baseInstructions':case['instructions'],'developerInstructions':'Return only the requested structured response. No tools or external context.','cwd':str(self.cwd),'allowProviderModelFallback':False},deadline)
+  t=self.rpc('thread/start',{'model':MODEL,'modelProvider':self.provider,'environments':[],'dynamicTools':[],'ephemeral':True,'approvalPolicy':'never','sandbox':'read-only','baseInstructions':case['instructions'],'developerInstructions':EXTRA_INSTRUCTIONS,'cwd':str(self.cwd),'allowProviderModelFallback':False},deadline)
   assert t['model']==MODEL and t['modelProvider']==self.provider and t['approvalPolicy']=='never' and not t.get('instructionSources'),'Unexpected model, provider or instructions'
   tid=t['thread']['id'];assert t['thread']['ephemeral'] is True
   turn=self.rpc('turn/start',{'threadId':tid,'environments':[],'input':[{'type':'text','text':case['prompt']}],'effort':'low','serviceTierForTurn':'default','outputSchema':case['schema']},deadline)
@@ -94,8 +98,8 @@ class Client:
    if x.get('method')=='thread/tokenUsage/updated':usage=p['tokenUsage']['total']
    if x.get('method')=='turn/completed' and p['turn']['id']==turnid:
     status=p['turn']['status'];error=p['turn'].get('error');break
-  size={k:len(v.encode('utf-8')) for k,v in {'instructionsBytes':case['instructions'],'promptBytes':case['prompt'],'schemaBytes':json.dumps(case['schema'],separators=(',',':'),ensure_ascii=False),'extraInstructionsBytes':'Return only the requested structured response. No tools or external context.'}.items()};size['totalAuthoredBytes']=sum(size.values())
-  return {'authoredSize':size,'id':case['id'],'model':t['model'],'status':status,'error':error,'elapsedMs':round((time.monotonic()-began)*1000),'usage':usage,'rawText':text}
+
+  return {'authoredSize':authored_size(case),'id':case['id'],'model':t['model'],'status':status,'error':error,'elapsedMs':round((time.monotonic()-began)*1000),'usage':usage,'rawText':text}
  def close(self):
   try:os.killpg(self.p.pid,signal.SIGTERM)
   except ProcessLookupError:pass
@@ -143,10 +147,10 @@ def main():
    for case in cases:
     # Persist consumption BEFORE a model turn, including failure/timeout; never retry.
     assert validate_catalog(catalog)==catalogHash
-    receipt['attempts']+=1;receipt['results'].append({'id':case['id'],'status':'started'});save()
+    receipt['attempts']+=1;receipt['results'].append({'id':case['id'],'status':'started','authoredSize':authored_size(case)});save()
     try:receipt['results'][-1]=client.run(case)
     except Exception as e:
-     receipt['results'][-1]={'id':case['id'],'status':'failed','error':(type(e).__name__+': '+str(e))[:500]};save();raise
+     receipt['results'][-1].update({'status':'failed','error':(type(e).__name__+': '+str(e))[:500]});save();raise
     save()
   receipt['finished']=True;save()
  finally:
