@@ -1,6 +1,6 @@
 /** Optional work versus own needs. Deliberately paused choices, then native activity. */
 import assert from 'node:assert/strict';
-import {NeedsRunGuard,smallerHaul} from './needs-policy.js';
+import {NeedsRunGuard,smallerHaul,needsOutput} from './needs-policy.js';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -15,9 +15,9 @@ const runId=process.env.CONCORD_TRIAL_ID;
 if(!runId||!/^[0-9a-f-]{36}$/.test(runId)||process.env.CONCORD_TRIAL_POLICY!=='needs-v1')throw Error('Trial identity required');
 const receipt:any={passed:false,runId,policy:'needs-v1',mode:scripted?'scripted':'live',views:[],samples:[]};
 let c:Coordinator|undefined,s:Store|undefined,attempts=0,connected=true;
-const send=(m:unknown)=>process.stdout.write(JSON.stringify(m)+'\n');
-const channel=new DecisionChannel(raw=>{const m=raw as any;if(m.type==='decision-request'&&(cold||++attempts>4))throw Error('Needs trial limit');send(m);});
 const guard=new NeedsRunGuard();
+const send=needsOutput(process.stdout,()=>{connected=false;guard.stop();channel.close();});
+const channel=new DecisionChannel(raw=>{const m=raw as any;if(m.type==='decision-request'&&(cold||++attempts>4))throw Error('Needs trial limit');send(m);});
 let drained:(()=>void)|undefined;const input=createInterface({input:process.stdin,crlfDelay:Infinity});
 input.on('line',line=>{try{if(line.length>32000)throw Error('Response too large');const m=JSON.parse(line);if(m.type==='drained'&&m.id===runId){drained?.();return;}channel.receive(m);}catch{connected=false;guard.stop();channel.close();}});
 input.on('close',()=>{connected=false;guard.stop();channel.close();});
@@ -30,7 +30,7 @@ async function decide(id:string,pawn:string){
 try{
  if(cold){
   const saved=JSON.parse(await readFile(root+'/.runtime/needs-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,receipt.mode);
-  s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);
+  guard.check();s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);guard.check();
   for(const key of ['characters','proposals','outcomes'] as const)assert.deepEqual(c.inspect()[key],saved.domain[key]);
   assert.deepEqual(c.inspect().crew?.entries,saved.domain.crew?.entries);receipt.coldRestore=true;receipt.report=(await b.state()).crewLog;
  }else{
@@ -61,13 +61,13 @@ try{
   while(Date.now()<end){guard.check();await c.reconcile();guard.check();await c.advanceIntentions();guard.check();await c.observe();const state=await b.state();guard.sample(state.paused,state.ticks,receipt.preRun.ticks);receipt.samples.push({elapsedMs:Date.now()-start,ticks:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,downed:p.downed,needs:p.facts?.filter(f=>f.key==='need')}))});await delay(400);}
   guard.check();await b.admin('pause');await c.reconcile();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();
   if(scripted){const full=f.actors.find((a:any)=>a.condition==='full');assert(Object.values(c.inspect().proposals).some(p=>p.pawn===full.id&&p.standing?.status==='completed'));const hungry=f.actors.find((a:any)=>a.condition==='hungry');assert(!receipt.final.actions.some((a:any)=>a.actor===hungry.id));}
-  receipt.cleanup=await stopTrialWork(c);assert.equal(receipt.cleanup.errors.length,0);receipt.summary=workSummary(c.inspect());receipt.report=(await b.state()).crewLog;
-  const checkpoint='lab-concord-needs-final-'+Date.now();await c.checkpoint(checkpoint);const domain=c.inspect();await c.restore(checkpoint);
+  guard.check();receipt.cleanup=await stopTrialWork(c);guard.check();assert.equal(receipt.cleanup.errors.length,0);receipt.summary=workSummary(c.inspect());receipt.report=(await b.state()).crewLog;
+  const checkpoint='lab-concord-needs-final-'+Date.now();await c.checkpoint(checkpoint);guard.check();const domain=c.inspect();await c.restore(checkpoint);guard.check();
   for(const key of ['characters','proposals','outcomes'] as const)assert.deepEqual(c.inspect()[key],domain[key]);
   assert.deepEqual(c.inspect().crew?.entries,domain.crew?.entries);receipt.pairedRestore=true;
   await writeFile(root+'/.runtime/needs-latest.json',JSON.stringify({runId,mode:receipt.mode,db,checkpoint,domain}));
  }
- receipt.passed=true;
+ guard.check();receipt.passed=true;
 }catch(e){receipt.error=String(e);process.exitCode=1;}
 finally{
  clearTimeout(timer);try{await finish();}catch(e){receipt.passed=false;receipt.drainError=String(e);process.exitCode=1;}

@@ -41,3 +41,13 @@ test('only strictly smaller same-target hauling counters receive another offer',
  assert(!smallerHaul({...offer,trips:1,count:11},offer));
  assert(!smallerHaul({...offer,thing:'other',trips:1},offer));
 });
+
+import {Writable} from 'node:stream';
+import {needsOutput} from '../trials/needs-policy.js';
+test('broken output stops once and does not crash or keep sending during cleanup',async()=>{
+ let failures=0,writes=0;
+ const output=new Writable({write(_chunk,_encoding,callback){writes++;callback(Error('EPIPE'));}});
+ const send=needsOutput(output,()=>{failures++;send({type:'cancel'});});
+ send({type:'request'});await new Promise(resolve=>setImmediate(resolve));
+ send({type:'receipt'});assert.equal(failures,1);assert.equal(writes,1);
+});
