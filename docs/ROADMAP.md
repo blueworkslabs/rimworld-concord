@@ -90,7 +90,7 @@
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
 - Evaluate end-to-end scheduling and sustained character consistency beyond the finite integration trials.
 - Extend social-event capture and perceived knowledge; add operator inspection UI.
-- Expand relevance-aware interruption beyond the narrow Chitchat exception; retain urgent supersession.
+- Expand relevance-aware interruption beyond the narrow Chitchat/DeepTalk exceptions; retain urgent supersession.
 - Tune optional consequential-decision pauses from playtests; avoid global stop-start behavior.
 - Extend beyond authored-preference checks toward sustained character behavior and multi-party negotiation.
 
@@ -113,3 +113,17 @@ Do not describe placeholder interfaces or design documents as live integrations.
   rescue deliberation was cancelled by DeepTalk. No live rescue completed.
 - Next evidence-led priority: contextual interruption handling for social memories
   beyond Chitchat, without weakening genuine invalidation or rerolling this trial.
+
+## Relevance-aware interruption follow-up
+
+- Chitchat/DeepTalk wait behind thought without losing their experiences; legacy
+  stored flags use current scheduling. Other significant memories remain conservative.
+- Pending rescue questions use fresh locally observed patient/bed contradictions,
+  availability and proposal validity. Bounded shortlist absence is unknown.
+- Native scripted recovery cancels late rescue consent; delayed scripted rescue
+  completes exact-bed delivery. Both cold restores pass.
+- Live follow-up: structured `continue` contradicted prose promising withdrawal.
+  Three hauls/thirty steel completed; no rescue was offered. Two attempts, no retries.
+- No social event arrived during thought in this live run: deferral's live-event
+  demonstration remains open. Next priority is executable intent/reason consistency,
+  without parsing prose into unconsented actions. See [evidence](ACCEPTANCE.md).

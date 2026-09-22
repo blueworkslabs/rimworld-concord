@@ -1,0 +1,138 @@
+{
+  "date": "2026-09-22",
+  "kind": "single bounded live interruption-policy follow-up with scripted core",
+  "reviewedBehaviorHead": "0b202c21a23bb1a52af6a95b6954d60a123940c5",
+  "policy": "interruption-v1",
+  "runnerCleanupAndPersistencePassed": true,
+  "actor": "Alvin",
+  "patient": "Beatrice",
+  "discovery": {
+    "nativeTick": 48,
+    "observerNativeJob": "Concord_Haul"
+  },
+  "reflection": {
+    "nativeTickAtView": 61,
+    "nativeJobAtView": "Concord_Haul",
+    "structuredOutput": {
+      "kind": "continue",
+      "reason": "Beatrice is down nearby and there's a free medical sleeping spot. I'm well-fed and rested. I'll withdraw the haul and go rescue her \u2014 the steel can wait."
+    },
+    "elapsedMs": 3624,
+    "mismatch": "Reason promises withdrawal/rescue, executable kind is continue. Coordinator did not reinterpret prose as an action."
+  },
+  "responses": [
+    {
+      "mode": "decision",
+      "elapsedMs": 4363,
+      "output": {
+        "kind": "accept",
+        "reason": "Needs are high, I'm well-rested and fed. Hauling steel is straightforward work and I've got nothing more pressing right now. I'll move those loads over."
+      }
+    },
+    {
+      "mode": "reflection",
+      "elapsedMs": 3619,
+      "output": {
+        "kind": "continue",
+        "reason": "Beatrice is down nearby and there's a free medical sleeping spot. I'm well-fed and rested. I'll withdraw the haul and go rescue her \u2014 the steel can wait."
+      }
+    }
+  ],
+  "outcomes": {
+    "completedHaulTrips": 3,
+    "deliveredSteel": 30,
+    "completedRescues": 0
+  },
+  "rescue": {
+    "offered": false,
+    "completed": false,
+    "patientStillDownOnGround": true
+  },
+  "interruptionAudit": [],
+  "observation": {
+    "wallMs": 15991,
+    "ticks": 924,
+    "samples": 22,
+    "pausedSamples": 0,
+    "thoughtSamples": 6,
+    "ticksDuringThought": 206,
+    "attention": [
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 2
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 6
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 7
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 8
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 11
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 13
+      }
+    ],
+    "decisions": 2,
+    "reflections": 1,
+    "appraisals": 0,
+    "operatorStops": [],
+    "rescueOfferStarted": false,
+    "connected": true,
+    "pump": {
+      "started": 6,
+      "nativeStarted": 5,
+      "modelStarted": 1,
+      "pending": 0,
+      "stopped": true
+    }
+  },
+  "accounting": {
+    "limits": {
+      "decisions": 6,
+      "appraisals": 4,
+      "reflections": 1,
+      "observationMs": 120000,
+      "maxNativeTurns": 96,
+      "maxModelTurns": 1
+    },
+    "used": {
+      "claudeAttempts": 2,
+      "returnedAnswers": 2,
+      "jevAppraisals": 0
+    },
+    "reservedEquivalentUSD": 0.2,
+    "estimatedEquivalentUSD": 0.0267726,
+    "noRerolls": true,
+    "historicalDatabaseFilesUnchanged": 24,
+    "unusedAllowanceNotSpent": true
+  },
+  "persistence": {
+    "paired": true,
+    "hostDrained": true,
+    "finalCleanup": {
+      "operatorStops": [],
+      "errors": []
+    },
+    "cold": true,
+    "noColdInference": true,
+    "sameSubjectSightingsAfterCold": 1
+  },
+  "limitations": "Authored anesthesia/supplies/bed geometry; no personality or relationship overrides. Patient already downed outside initial local view; discovery, not a new injury. Scripted core. Initial consent paused, discovery/reflection/rescue negotiation continuous. One discovery-triggered model attention turn; preexisting events queue until sighting. Routine and model attention bounded separately. Rescue only follows settled pawn-chosen withdrawal and fresh consent. At most one same-kind counter revision per offer. End when branch settles after 15s or two minutes; no rerolls, no inference continuation after cap. Not a causal character-comparison experiment. No relevant social event occurred during live deliberation, so the new DeepTalk defer policy has no live-event demonstration in this run. This is a prose/action mismatch, not evidence of a deliberate preference to keep hauling.",
+  "nextQuestion": "Make executable choice and stated intent agree without silently turning narrative text into authority or rerolling a preferred outcome."
+}
