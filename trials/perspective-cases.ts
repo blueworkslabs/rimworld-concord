@@ -3,6 +3,8 @@ import {claudeArgs} from '../src/claude-decision.js';
 import {modelPrompt,pawnInstructions} from '../src/model-perspective.js';
 import {ReflectionChoice,validateReflectionChoice} from '../src/reflection-choice.js';
 import type {AttentionView} from '../src/attention.js';
+// Retained v1 evidence: offered() inherits rescueReady=true, a known confound in
+// low/unknown needs. Do not silently repair this bank; corrected cases need v2.
 export const bankVersion='concord-perspective-v1';
 export function perspectiveCases(){
  const quiet=()=>structuredClone(contractCases()[0]!.view);

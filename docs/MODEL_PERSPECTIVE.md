@@ -58,3 +58,29 @@ per case are a smoke test, not enough to rank models or estimate reliability.
 This is breadth in offline perspectives, not three new playable scenarios. A
 second native scenario and consequential social exchange remain future work;
 keeping the core scripted is an explicit development choice.
+
+## Retained first batch — 2026-09-22
+
+[Full sanitized evidence](evidence/semantic-perspectives.json): both models used
+all 12 attempts and returned schema/runtime-valid choices. Full/low numeric need
+interpretations were correct in these samples; both models twice countered the
+oversized supply offer with eight units in one trip. These are unexecuted choices.
+Claude twice described an unexplained insult as "unprovoked" and once predicted
+collapse without evidence. The shorter contract did not eliminate unsupported
+prose, and this is not a controlled before/after prompt comparison.
+
+**Fixture caveat:** v1 inherited `rescueReady:true` in its low- and unknown-needs
+variants. This contradicts 10% Food/Rest and gives the unknown case an extra
+capability cue. Luna's two "able to work" claims cannot be scored as clean
+uncertainty failures here. Neither can these cases prove correct readiness
+judgment. The original inputs and responses are retained unchanged, with no
+rerolls. Do not reuse those v1 cases as a clean readiness-quality gate; a corrected
+bank must get a new version, cross-field consistency checks and a fresh finite
+allowance. This is a test-data defect, not a new native game behavior.
+
+Median observed response times were 3.943 seconds for Claude and 5.2565 seconds
+for Luna, with different native overhead and concurrent host use. No speed,
+quality or cost ranking is claimed. The next useful step is to correct the
+fixture boundary before using it again, then exercise a second native scenario
+with needs versus voluntary work—not another rescue-only feature. The core stays
+scripted; consequential social exchange remains on the roadmap.

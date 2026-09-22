@@ -17,6 +17,9 @@ future milestone, not the next dependency.
 
 ## Next: broader embodied pawn behavior
 
+- Correct the retained v1 bank's low/unknown readiness-field inconsistency in a
+  new version before treating it as a clean uncertainty/readiness evaluation.
+
 - Use the snapshot results to choose a second native scenario beyond the familiar
   steel/rescue fixture—for example needs conflicting with an optional work offer.
 - Test durable outlook reuse and one bounded consequential social exchange.
