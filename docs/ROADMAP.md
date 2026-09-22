@@ -165,3 +165,14 @@ are recorded options, not part of the current implementation or inference budget
 See [crew log contract](CREW_LOG.md) for the first read-only presentation slice.
 
 The first presentation slice is implemented: read-only crew log, explicit own-agreement progress and bounded saved display cache. Native scripted tests and cold restore passed; no new live inference was used. Next is a bounded mixed-work observer trial, not automatic expansion into human chat or durable-self systems.
+
+## Observer trial findings
+
+A bounded five-minute mixed-work trial delivered eighty steel but no rescue.
+The public log makes the request and scripted decline visible; native recovery
+of the casualty is absent from that log. Six-reflection allowance ended attention
+early. The next planning targets are resolving a still-relevant requested goal
+after its replacement context expires (fresh standalone consent, never a stale
+answer replay), selected observable native state changes, and reflection pacing.
+Do not interpret this as a refusal to rescue or proof of developed personalities.
+See [trial contract](OBSERVER_TRIAL.md) and [evidence](evidence/observer-live.json).

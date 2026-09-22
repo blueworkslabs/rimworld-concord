@@ -548,3 +548,40 @@ Final independent Codex review of behavioral head
 No new pawn inference or trial allowance was used. This establishes mechanics
 and visibility, not stronger live reasoning, developed personalities or human
 chat. [Evidence](evidence/crew-log-game.json) · [Contract](CREW_LOG.md).
+
+## Mixed-work observer trial (2026-09-22)
+
+147 automated checks pass. Independent Codex review of final behavior
+`9905a427d4d43f810b6e2935688528eda9ec7399` found no remaining concrete defects
+after two deadline scheduling fixes. Scripted rehearsals preserved failures,
+including an initially over-strict restore revision comparison. Final scripted
+paired and cold restore passed. No new game-mod behavior in this milestone.
+
+One live run used a three-pawn authored setup: two independent hauling lanes and
+an initially anesthetized/downed Beatrice. Native work priorities were disabled;
+needs, idle behavior and social activity remained native. Initial negotiation
+was paused. Both workers accepted three ten-unit trips. Alvin requested rescue
+while retaining hauling; his agreement completed before the core handled it,
+so the replacement-only scripted policy declined the request. This was not a
+pawn refusing rescue. No rescue offer or rescue job followed.
+
+At the later round Alvin accepted two more trips, correctly described the old
+work as complete, and said he welcomed a rescue proposal. Pedro had no observed
+further hauling option. Eight trips delivered eighty steel. By the final state
+Beatrice was standing and wandering without rescue; the crew log does not record
+that native recovery. Its exact time and cause are not established here.
+
+The five-minute window recorded 17,992 ticks, 316 samples with none paused and
+301,459 ms including final reporting/cleanup. Nine Claude attempts and three Jev
+calls used fresh ledgers. Six reflections reached their sub-limit early, stopping
+further attention turns; this is not five minutes of unrestricted deliberation.
+25 native and seven model attention claims completed; no rerolls or cleanup stops.
+Historical 46 database files unchanged. Paired and full cold restore preserved
+choices, outcomes and log contents; a separate cold native check confirmed
+Beatrice was no longer downed and not in a bed. No additional inference.
+
+22 public log/progress snapshots contain eight addressed messages and sixteen
+work records. They support reconstructing the offers, request, decline, later
+acceptance and deliveries without private reflections. Native recovery is a
+visibility gap; this analyst inspection is not a blinded human usability test.
+[Evidence](evidence/observer-live.json) · [Public frames](evidence/observer-public-frames.json).
