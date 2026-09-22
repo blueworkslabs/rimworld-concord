@@ -53,3 +53,28 @@ wood opportunity skips that offer. Speech and decisions are paused; the game the
 runs for two minutes (30 seconds for scripted rehearsal). Both silence and
 refusal are valid. Total runner deadline six minutes; per-choice limit 45 seconds.
 No live result is implied by the implementation or mocked tests.
+
+## Recorded evidence, 2026-09-22
+
+The final scripted rehearsal delivered a request and reply, then separately
+refused Alvin's offer and accepted Beatrice's. One native trip delivered ten
+wood. Rewind removed later speech; paired and full cold restore preserved the
+retained exchange, decisions and outcomes.
+
+In the single live run, Alvin mentioned hunger and Beatrice replied, "Morning.
+Go find something to eat then." Both subsequently accepted independent,
+preplanned one-trip wood offers. Two native trips delivered twenty wood. Both
+later decision perspectives contained the two delivered messages; Pedro's
+perspective contained none. No outlook was created. Four Claude Sonnet 4.6
+attempts, zero Jev calls, no rerolls; all 94 samples during the two-minute native
+window were unpaused. Speech and offer decisions themselves were paused.
+Paired/cold restore passed without inference, including delivered text and the
+observer log. This verifies delivery and continuity, not persuasion, an eating
+plan, sustained conversation or a native relationship change.
+
+All 220 automated checks passed. Independent Codex review caught three lifecycle
+and cleanup issues; each received a fix and regression coverage, followed by clean
+focused reviews. An intentionally injected contact-field leak failed the privacy
+test. Historical databases stayed unchanged. Full perspectives and raw diagnostics
+remain private; [sanitized evidence](evidence/social-exchange.json) records the
+delivered speech, separate decisions, native outcomes and limitations.

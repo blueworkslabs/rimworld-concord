@@ -707,3 +707,16 @@ The numeric/phrase diagnostic is deliberately incomplete: it missed two collapse
 predictions found manually. Outlook-related response contrasts are authored
 snapshot evidence, not native gameplay or sustained character development.
 See [scope and results](GROUNDING_CHECKS.md), [per-case records](evidence/outlook-grounding.json).
+
+## Bounded local social exchange
+
+2026-09-22: 220 automated checks passed; independent full Codex review and focused
+reviews covered behavior `50fac3b981d6d004f84a141dcba99c6b6d365988`. The scripted
+native rehearsal proved two delivered messages, separate refusal/acceptance,
+ten wood delivered and paired/cold persistence. The live run delivered two
+optional messages, then two separately accepted trips delivered twenty wood.
+Four Claude attempts, zero Jev, no rerolls; 94 unpaused native-activity samples.
+Both participants' later choices received their correspondence; the third pawn
+did not. Rewind and paired/cold restore passed with no additional inference.
+No native social job, automatic belief/relationship update or causal persuasion
+result is claimed. See [contract](SOCIAL_EXCHANGE.md) and [evidence](evidence/social-exchange.json).

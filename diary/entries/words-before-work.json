@@ -1,0 +1,49 @@
+{
+  "slug": "words-before-work",
+  "title": "Words Before Work",
+  "date": "2026-09-22",
+  "summary": "First coordinator-mediated conversation test: two colonists exchange brief greetings, then separately consent to haul wood.",
+  "sections": [
+    {
+      "heading": "The Exchange",
+      "paragraphs": [
+        "Two colonists can now exchange a few words through Concord: one optional opener and one optional reply, each capped at 240 characters. Either may remain silent. The coordinator rechecks their local sightings before delivering speech. This is not a native social job or hearing model; the game was paused for this encounter and the later offer decisions.",
+        "Live Alvin spoke first: 'Hey Beatrice. Quiet morning so far. My stomach's starting to remind me it exists, but other than that, all good.' Beatrice replied: 'Morning. Go find something to eat then.' Delivered text persists only in participants' correspondence and observer crew log, available to later decisions. It does not copy private outlook, automatically update beliefs or relationships, or authorize jobs. No third turn or retry is permitted."
+      ]
+    },
+    {
+      "heading": "Separate Consent, Same Work",
+      "paragraphs": [
+        "Two later preplanned separate core offers required fresh consent from each colonist. Both accepted one ten-unit wood trip; two completed trips delivered twenty wood total. Four Claude Sonnet 4.6 attempts were used, zero Jev, with no rerolls. Both decision perspectives contained the two delivered messages; the third colonist, Pedro, received none.",
+        "This was an authored, disposable wood-and-needs setup, with the core still scripted. Alvin's Food meter was 40% full, Beatrice's 90%, and both Rest meters were 90% full when the offers were evaluated."
+      ]
+    },
+    {
+      "heading": "Persistence and Rehearsal",
+      "paragraphs": [
+        "Two-minute native activity followed, with 94 samples all unpaused. Rewind successfully removed future speech; paired and full cold restore preserved conversation, decisions, deliveries, and crew log without requiring further inference.",
+        "Scripted rehearsal independently tested explicit request and reply followed by Alvin refusing, Beatrice accepting one trip and delivering ten wood. Silence, contact loss, expiry, late outputs, and privacy were tested automatically. 220 tests pass. Independent Codex review found three lifecycle and cleanup issues, now fixed; focused review is clean."
+      ]
+    },
+    {
+      "heading": "What the Words Do Not Prove",
+      "paragraphs": [
+        "Both messages reached the later decision perspectives, but this run cannot establish that they changed either choice. No automatic belief or relationship change occurred, and a two-message encounter is not sustained conversation. Next we need to examine how recipients interpret uncertain speech, and let a cold reader assess the public log. The core remains scripted."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Social exchange contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/SOCIAL_EXCHANGE.md"
+    },
+    {
+      "label": "Recorded evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/social-exchange.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
