@@ -13,8 +13,8 @@ import {retireUndecided,WorkShutdown,stopTrialWork} from './work-trial.js';
 import {RECONSIDER_TRIAL as WORK_TRIAL,rescueAfterWithdrawal,reconsiderSummary as workSummary} from './reconsider-trial.js';
 if(process.env.CONCORD_RECONSIDER_LOCKED!=='1')throw Error('Use scripts/run-reconsider-lab.sh game|cold to acquire the staging lock');
 const policy=process.env.CONCORD_TRIAL_POLICY??'reconsider-v1';
-if(!['reconsider-v1','interruption-v1','intent-v1','alternative-v1'].includes(policy))throw Error('Unknown trial policy');
-const prefix=policy==='alternative-v1'?'alternative-live':policy==='intent-v1'?'intent-live':policy==='interruption-v1'?'interrupt-live':'reconsider-live';
+if(!['reconsider-v1','interruption-v1','intent-v1','alternative-v1','goal-v1'].includes(policy))throw Error('Unknown trial policy');
+const prefix=policy==='goal-v1'?'goal-live':policy==='alternative-v1'?'alternative-live':policy==='intent-v1'?'intent-live':policy==='interruption-v1'?'interrupt-live':'reconsider-live';
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
 const runId=process.env.CONCORD_TRIAL_ID;if(!runId||!/^[0-9a-f-]{36}$/.test(runId))throw Error('Run identity required');
 const send=(m:unknown)=>process.stdout.write(JSON.stringify(m)+'\n');
@@ -50,7 +50,7 @@ async function negotiate(id:string,pawn:string){
  await record();
 }
 async function offer(pawn:string,action:any,reason:string,requestId?:string){
- const p=requestId?await c!.core().offerAlternative(requestId,action,reason):await c!.core().propose(pawn,action,reason);await negotiate(p.id,pawn);
+ const p=requestId?await (policy==='goal-v1'?c!.core().offerRequestedRescue(requestId,action,reason):c!.core().offerAlternative(requestId,action,reason)):await c!.core().propose(pawn,action,reason);await negotiate(p.id,pawn);
  const answered=c!.inspect().proposals[p.id]!;
  if(answered.status==='countered'&&answered.decision?.kind==='counter'){
   if(answered.decision.action.kind!==action.kind||(action.kind==='rescue'&&answered.decision.action.kind==='rescue'&&answered.decision.action.target!==action.target)){offers.push({id:p.id,status:'counter-outside-this-offer-scope-retained'});return p.id;}
@@ -90,28 +90,41 @@ try{
   deadlineTimer=setTimeout(()=>{void shutdown.stop().catch(e=>{receipt.shutdownError=String(e);});},duration);
   while(!shutdown.stopped&&Date.now()-began<duration&&connected){
    await c.reconcile();
+   if(shutdown.stopped)break;
    const state=await b.state(),event=state.events?.find(e=>e.pawn===pawn&&e.kind==='casualty'&&e.subject===target);
    if(!discovery&&event){discovery={event,at:Date.now(),actor:state.pawns.find(p=>p.id===pawn),intention:c.inspect().proposals[haulId]};receipt.discovery=discovery;}
    // Keep existing attention queued until the actual local sighting. This is a focused
    // stimulus trial, not a general-purpose autonomous attention benchmark.
    if(discovery&&!shutdown.later&&(pump.status().modelStarted>0||c.inspect().proposals[haulId]?.standing?.status==='running'))await pump.poll();
-   if(!rescueChecked&&pump.status().modelStarted>0&&pump.status().pending===0){
+   // This trial deliberately delays the core reply until the old haul settles.
+   const waitingForGoal=policy==='goal-v1'&&c.core().requests().some(r=>r.status==='pending'&&r.agreementId===haulId)&&c.inspect().proposals[haulId]?.standing?.status==='running';
+   if(!shutdown.stopped&&!rescueChecked&&!waitingForGoal&&pump.status().modelStarted>0&&pump.status().pending===0){
     rescueChecked=true;
     const applied=pump.results.some(r=>r.status==='continued')&&store.events().some(e=>e.event.kind==='attention-withdrawn'&&e.event.actor===pawn);
     const eligible=rescueAfterWithdrawal(c.inspect(),pawn,haulId,reflection,applied);
     receipt.rescueEligibility={eligible,applied};
-    const request=policy==='alternative-v1'?c.core().requests().find(r=>r.pawn===pawn&&r.agreementId===haulId&&r.status==='pending'):undefined;
+    const request=['alternative-v1','goal-v1'].includes(policy)?c.core().requests().find(r=>r.pawn===pawn&&r.agreementId===haulId&&r.status==='pending'):undefined;
     if(request)receipt.alternativeRequest={id:request.id,agreementId:request.agreementId,target:request.target};
     if(eligible||request){
      shutdown.later=(async()=>{
       const rescue=(await c!.core().rescueOptions(pawn))?.options.find(a=>a.target===(request?.target??target));
+      if(shutdown.stopped)return;
       if(!rescue){if(request)await c!.core().declineRequest(request.id,'No currently observed usable rescue option; existing work unchanged');offers.push({pawn,status:'no-current-rescue-option',requestId:request?.id});return;}
+      if(policy==='goal-v1'&&request){
+       const old=c!.inspect().proposals[request.agreementId];
+       if(old?.standing?.status!=='completed'){await c!.core().declineRequest(request.id,'The original agreement stopped rather than completed; no automatic new offer.');return;}
+       receipt.goalReply={originStatus:old.standing.status,origin:old.id,requestId:request.id};
+       try{await offer(pawn,rescue,'Your hauling agreement completed. In response to your earlier request, would you carry this observed downed colonist to this specific medical bed? This is separate optional work, not a replacement or treatment. You may refuse or counter.',request.id);}
+       catch(e){offers.push({pawn,requestId:request.id,status:'fresh-offer-unavailable',error:String(e)});if(c!.core().requests().find(r=>r.id===request.id)?.status==='pending')await c!.core().declineRequest(request.id,'No valid fresh rescue offer; request closed without a job.');}
+       return;
+      }
       await offer(pawn,rescue,request?'In response to your request: would you replace your current hauling agreement with this specific rescue? Acceptance ends that agreement after confirmed cancellation; refusal or counter keeps it. This is not treatment.':'You ended your supply agreement. Would you carry this observed downed colonist to this specific medical bed? This is a new optional agreement, not treatment; you may refuse or counter.',request?.id);
      })().catch(e=>{receipt.laterError=String(e);void shutdown.stop().catch(e=>{receipt.shutdownError=String(e);});}).finally(()=>{rescueDone=true;});
     }
    }
    if(shutdown.stopped)break;
    await c.advanceIntentions();
+   if(shutdown.stopped)break;
    const thinking=pendingThoughts.size>0;samples++;if(state.paused)pausedSamples++;if(thinking)thoughtSamples++;
    if(thinking&&wasThinking)ticksDuringThought+=Math.max(0,state.ticks-priorTick);priorTick=state.ticks;wasThinking=thinking;
    if(samples%20===0)await record();
@@ -136,7 +149,7 @@ try{
   receipt.persistedSightings=sightings.length;
   await writeFile(root+'/.runtime/'+prefix+'-latest.json',JSON.stringify({runId,policy,mode:scripted?'scripted':'live',db,checkpoint,domain,pawn,target,patientBed,sightings}));
   receipt.interruptionAudit=store.events().filter(e=>['decision-invalidated','decision-interrupted','experience-deferred','decision-error'].includes(e.event.kind)).map(e=>e.event);
-  receipt.pairedRestore=true;receipt.limits=WORK_TRIAL;receipt.limitations='Authored anesthesia/supplies/bed geometry; no personality or relationship overrides. Patient already downed outside initial local view; discovery, not a new injury. Scripted core. Initial consent paused, discovery/reflection/rescue negotiation continuous. One discovery-triggered model attention turn; preexisting events queue until sighting. Routine and model attention bounded separately. Rescue follows settled pawn withdrawal or a pawn-requested replacement with fresh consent and confirmed old-job cancellation. Requesting alone changes no work. At most one same-kind counter revision per offer. End when branch settles after 15s or two minutes; no rerolls, no inference continuation after cap. Not a causal character-comparison experiment.';
+  receipt.pairedRestore=true;receipt.limits=WORK_TRIAL;receipt.limitations=(policy==='goal-v1'?'This follow-up deliberately defers the core reply until the original haul settles. Completed origins allow fresh standalone rescue consent; stopped origins do not. ':'')+'Authored anesthesia/supplies/bed geometry; no personality or relationship overrides. Patient already downed outside initial local view; discovery, not a new injury. Scripted core. Initial consent paused, discovery/reflection/rescue negotiation continuous. One discovery-triggered model attention turn; preexisting events queue until sighting. Routine and model attention bounded separately. Rescue follows settled pawn withdrawal or a pawn-requested replacement with fresh consent and confirmed old-job cancellation. Requesting alone changes no work. At most one same-kind counter revision per offer. End when branch settles after 15s or two minutes; no rerolls, no inference continuation after cap. Not a causal character-comparison experiment.';
   if(!connected)throw Error('Host disconnected; partial result retained');
   if(receipt.laterError)throw Error('Later offer round failed; evidence retained');
  }

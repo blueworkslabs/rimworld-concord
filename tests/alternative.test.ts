@@ -99,3 +99,54 @@ test('maximum-length acceptance reason remains intact through bounded stop messa
  const {c,ask,calls,store}=await setup();await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');const reason='x'.repeat(1000);
  const result=await c.pawn('A').decide(offer.id,scripted({kind:'accept',reason}));assert.equal(result.decision!.reason,reason);assert.deepEqual(calls,['move:haul','cancel','move:rescue']);store.close();
 });
+
+test('pending goal gets standalone rescue after fresh final receipt, with old completion retained and no cancellation',async()=>{
+ const {c,p,data,calls,ask,store}=await setup(1);assert.equal((await ask()).status,'continued');const r=c.core().requests()[0]!;
+ data.actions[0]!.status='completed'; // Deliberately do not reconcile before the core reply.
+ const offer=await c.core().offerRequestedRescue(r.id,rescue,'Your haul completed. Rescue is separate optional work.');
+ assert.equal(offer.requestId,r.id);assert.equal(offer.replacesAgreementId,undefined);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
+ assert.deepEqual(calls,['move:haul']);let supplied:any;
+ const result=await c.pawn('A').decide(offer.id,{name:'fresh',async decide(view){supplied=view;return {kind:'accept',reason:'I accept this new rescue'};}});
+ assert.equal(result.status,'accepted');assert(supplied);assert.equal(supplied.agreementProgress.status,'completed');
+ assert.deepEqual(calls,['move:haul','move:rescue']);assert.equal(c.core().requests()[0]!.status,'closed');store.close();
+});
+test('goal reply while original work runs remains a replacement; an issued replacement is never reinterpreted',async()=>{
+ const {c,p,data,ask,calls,store}=await setup(1);await ask();const r=c.core().requests()[0]!;
+ const offer=await c.core().offerRequestedRescue(r.id,rescue,'Optional replacement');assert.equal(offer.replacesAgreementId,p.id);
+ data.actions[0]!.status='completed';await assert.rejects(c.pawn('A').decide(offer.id,yes));
+ await assert.rejects(c.core().offerRequestedRescue(r.id,rescue,'Try fresh instead'));assert.deepEqual(calls,['move:haul']);store.close();
+});
+test('declined or closed goals and stopped origins cannot become new offers',async()=>{
+ for(const mode of ['declined','stopped','closed']){
+  const {c,data,ask,store,calls}=await setup(1);await ask();const r=c.core().requests()[0]!;
+  if(mode==='declined')await c.core().declineRequest(r.id,'Not now');
+  if(mode==='stopped')await c.pawn('A').withdraw('I stop this work');
+  if(mode==='closed'){const p=await c.core().offerAlternative(r.id,rescue,'Replace?');await c.pawn('A').decide(p.id,scripted({kind:'refuse',reason:'No'}));}
+  if(mode!=='stopped')data.actions[0]!.status='completed';
+  await assert.rejects(c.core().offerRequestedRescue(r.id,rescue,'Do not revive'));assert(!calls.includes('move:rescue'));store.close();
+ }
+});
+test('completed pending goal survives paired restore; standalone counter needs fresh same-patient consent',async()=>{
+ const {c,data,ask,store,calls}=await setup(1);await ask();data.actions[0]!.status='completed';await c.reconcile();
+ await c.checkpoint('lab-concord-completed-request');await c.restore('lab-concord-completed-request');
+ const r=c.core().requests()[0]!;assert.equal(r.status,'pending');const offer=await c.core().offerRequestedRescue(r.id,rescue,'Separate rescue?');
+ await assert.rejects(c.pawn('A').decide(offer.id,scripted({kind:'counter',reason:'Different patient',action:{...rescue,target:'C'}})));
+ assert.equal((await c.pawn('A').decide(offer.id,scripted({kind:'counter',reason:'Less time',action:{...rescue,maxTicks:120}}))).status,'countered');
+ const revised=await c.core().revise(offer.id,'Your exact proposal');assert.equal(revised.replacesAgreementId,undefined);assert.equal(revised.requestId,r.id);assert.deepEqual(calls,['move:haul']);
+ await c.pawn('A').decide(revised.id,yes);assert.deepEqual(calls,['move:haul','move:rescue']);store.close();
+});
+test('new work or observed recovery prevents a fresh requested offer, without changing the new agreement',async()=>{
+ for(const mode of ['busy','recovered']){
+  const {c,data,ask,store,calls}=await setup(1);await ask();data.actions[0]!.status='completed';await c.reconcile();
+  if(mode==='busy'){const next=await c.core().propose('A',haul,'New haul');await c.pawn('A').decide(next.id,yes);}
+  else data.pawns[0]!.casualties!.visibleSubjects![0]!.downed=false;
+  await assert.rejects(c.core().offerRequestedRescue(c.core().requests()[0]!.id,rescue,'Stale idea'));
+  assert(!calls.includes('cancel'));assert(!calls.includes('move:rescue'));assert.equal(c.core().requests()[0]!.status,'pending');store.close();
+ }
+});
+test('standalone refusal closes only the request and preserves completed work',async()=>{
+ const {c,p,data,ask,store,calls}=await setup(1);await ask();data.actions[0]!.status='completed';
+ const offer=await c.core().offerRequestedRescue(c.core().requests()[0]!.id,rescue,'Separate rescue?');
+ await c.pawn('A').decide(offer.id,scripted({kind:'refuse',reason:'No thanks'}));
+ assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');assert.equal(c.core().requests()[0]!.status,'closed');assert.deepEqual(calls,['move:haul']);store.close();
+});
