@@ -33,7 +33,7 @@ namespace Concord {
   }
   public static void Set(WorldState w,string epoch,string json){
    if(epoch!=w.epoch)throw new Exception("Stale crew log timeline");
-   if(json==null||json.Length>220000)throw new Exception("Crew report too large");
+   if(json==null||json.Length>2000000)throw new Exception("Crew report too large");
    var r=Parse(json);Guid branch;
    if(r==null)throw new Exception("Missing crew report");
    if(r.world!=w.world||r.epoch!=w.epoch)throw new Exception("Crew report world/epoch mismatch");

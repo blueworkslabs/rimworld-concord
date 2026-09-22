@@ -1,3 +1,4 @@
+import {encodeCrewReport} from '../src/lab-bridge.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {agreementProgress,recordCrew,crewReport,type CrewReport} from '../src/crew-log.js';
@@ -40,4 +41,11 @@ test('display failures do not fail decisions; restore removes future messages an
  fail=false;await c.observe();assert.equal(c.crewSyncError,undefined);assert.equal(snapshot!.entries.length,2);
  await c.checkpoint('lab-concord-log');const saved=snapshot!.entries;await c.core().propose('A',{kind:'move',x:1,z:1},'Discarded future');assert(snapshot!.entries.some(e=>e.text==='Discarded future'));
  await c.restore('lab-concord-log');assert.deepEqual(snapshot!.entries,saved);assert.equal(snapshot!.epoch,'new');store.close();
+});
+
+test('maximal escaped message retention stays within native transport cap and round-trips',()=>{
+ const {d,p}=fixture();d.characters.A!.name='\u0000'.repeat(80);
+ for(let i=0;i<128;i++)recordCrew(d,'proposed','core',{...p,id:String(i)+'\u0000'.repeat(110),reason:'\u0000'.repeat(1000)},i);
+ const report=crewReport(d,200),encoded=encodeCrewReport(report);assert(encoded.length>220000);assert(encoded.length<=2000000);const wire=JSON.parse(encoded);
+ assert.deepEqual(wire.entryLines.split('\n').map((x:string)=>JSON.parse(x)),report.entries);
 });
