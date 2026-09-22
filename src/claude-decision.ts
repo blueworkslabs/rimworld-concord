@@ -4,7 +4,8 @@ import { mkdtemp,mkdir } from 'node:fs/promises';
 import { join,isAbsolute } from 'node:path';
 import { z } from 'zod';
 import { Decision,type Perspective } from './protocol.js';
-import { Reflection,type AttentionView } from './attention.js';
+import { type AttentionView } from './attention.js';
+import {ReflectionChoice,reflectionChoices,reflectionChoiceInstructions,reflectionFromChoice,validateReflectionChoice} from './reflection-choice.js';
 import { TrialBudget } from './appraisal.js';
 
 export const CLAUDE_MODEL='claude-sonnet-4-6';
@@ -18,15 +19,15 @@ const system='You are one autonomous RimWorld pawn, not a coding assistant or th
 export function claudeArgs(mode:'decision'|'reflection') {
  const schema=mode==='decision'?{type:'object',additionalProperties:false,required:['decision'],properties:{decision}}:
  {type:'object',additionalProperties:false,required:['reflection'],properties:{reflection:{oneOf:[
-   {type:'object',additionalProperties:false,required:['kind','reason'],properties:{kind:{const:'withdraw'},reason:{type:'string',minLength:1,maxLength:1000}}},
-   {type:'object',additionalProperties:false,required:['kind','reason'],properties:{kind:{const:'continue'},reason:{type:'string',minLength:1,maxLength:1000}}},
-   {type:'object',additionalProperties:false,required:['kind','proposalId','decision'],properties:{kind:{const:'proposal'},proposalId:{type:'string'},decision}}
+   {type:'object',additionalProperties:false,description:'End only the named running agreement; do not start replacement work.',required:['choice','agreementId','reason'],properties:{choice:{const:'withdraw_current_agreement'},agreementId:{type:'string',format:'uuid'},reason:{type:'string',minLength:1,maxLength:1000}}},
+   {type:'object',additionalProperties:false,description:'Keep the current activity and agreement unchanged; do not withdraw or start another job.',required:['choice','reason'],properties:{choice:{const:'keep_current_activity'},reason:{type:'string',minLength:1,maxLength:1000}}},
+   {type:'object',additionalProperties:false,description:'Answer one listed pending proposal; a counter executes nothing.',required:['choice','proposalId','decision'],properties:{choice:{const:'answer_pending_proposal'},proposalId:{type:'string'},decision}}
  ]}}};
  return ['--print','--safe-mode','--tools','','--disallowedTools','mcp__*','--strict-mcp-config','--mcp-config','{"mcpServers":{}}',
  '--disable-slash-commands','--no-session-persistence','--no-chrome','--permission-mode','dontAsk','--permission-prompts','none',
  '--setting-sources','','--model',CLAUDE_MODEL,'--effort','low','--max-turns','2','--max-budget-usd','0.10',
  '--settings','{"alwaysThinkingEnabled":false}','--output-format','stream-json','--verbose',
- '--system-prompt',system+(mode==='reflection'?' You may withdraw your running hauling or rescue intention if character.intention is present, continue native behavior, or decide ONE existing proposal from your supplied list; never invent a proposal ID.':''),
+ '--system-prompt',system+(mode==='reflection'?' '+reflectionChoiceInstructions:''),
  '--json-schema',JSON.stringify(schema)];
 }
 
@@ -46,22 +47,22 @@ export function parseClaudeResult(event:unknown,mode:'decision'|'reflection') {
    modelUsage:z.record(z.unknown()),num_turns:z.number().int().min(1).max(2)}).parse(event);
  if(Object.keys(result.modelUsage).some(m=>m!==CLAUDE_MODEL)||!Object.keys(result.modelUsage).length)
    throw Error('Unexpected model route');
- const output=mode==='decision'?z.object({decision:Decision}).strict().parse(result.structured_output).decision:
-   z.object({reflection:Reflection}).strict().parse(result.structured_output).reflection;
- return {output,estimatedUsageUSD:result.total_cost_usd,turns:result.num_turns};
+ const providerChoice=mode==='reflection'?z.object({reflection:ReflectionChoice}).strict().parse(result.structured_output).reflection:undefined;
+ const output=providerChoice?reflectionFromChoice(providerChoice):z.object({decision:Decision}).strict().parse(result.structured_output).decision;
+ return {output,providerChoice,estimatedUsageUSD:result.total_cost_usd,turns:result.num_turns};
 }
 
 const exec=promisify(execFile);
 export class ClaudeDecisionBackend {
  readonly name=CLAUDE_MODEL;
- readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string}>=[];
+ readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string;providerChoice?:ReflectionChoice}>=[];
  private budget:TrialBudget;
  private pending=false;
  // Subscription usage only. This separate trial does not reset the Jev ledger.
- constructor(private options:{ledgerPath:string;scratchRoot:string;binary?:string;trial?:'reliability-v1'|'negotiation-v1'|'hauling-v1'|'work-v1'|'reconsider-v1'|'interruption-v1'}) {
+ constructor(private options:{ledgerPath:string;scratchRoot:string;binary?:string;trial?:'reliability-v1'|'negotiation-v1'|'hauling-v1'|'work-v1'|'reconsider-v1'|'interruption-v1'|'intent-v1'}) {
    if(!isAbsolute(options.ledgerPath)||!isAbsolute(options.scratchRoot))throw Error('Absolute operator paths required');
-   if(options.trial!==undefined&&!['reliability-v1','negotiation-v1','hauling-v1','work-v1','reconsider-v1','interruption-v1'].includes(options.trial))throw Error('Unknown trial');
-   this.budget=options.trial==='interruption-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-interruption-v1'):options.trial==='reconsider-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-reconsider-v1'):options.trial==='work-v1'?new TrialBudget(options.ledgerPath,1.20,12,'claude-work-v1'):options.trial==='hauling-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-hauling-v1'):options.trial==='negotiation-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-negotiation-v1'):options.trial==='reliability-v1'?new TrialBudget(options.ledgerPath,0.40,4,'claude-reliability-v1'):new TrialBudget(options.ledgerPath,0.30,3);
+   if(options.trial!==undefined&&!['reliability-v1','negotiation-v1','hauling-v1','work-v1','reconsider-v1','interruption-v1','intent-v1'].includes(options.trial))throw Error('Unknown trial');
+   this.budget=options.trial==='intent-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-intent-v1'):options.trial==='interruption-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-interruption-v1'):options.trial==='reconsider-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-reconsider-v1'):options.trial==='work-v1'?new TrialBudget(options.ledgerPath,1.20,12,'claude-work-v1'):options.trial==='hauling-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-hauling-v1'):options.trial==='negotiation-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-negotiation-v1'):options.trial==='reliability-v1'?new TrialBudget(options.ledgerPath,0.40,4,'claude-reliability-v1'):new TrialBudget(options.ledgerPath,0.30,3);
  }
  summary(){const s=this.budget.summary()!;return {attempts:s.calls,reservedEquivalentUSD:s.reservedUSD,estimatedUsageUSD:s.reportedUSD};}
  close(){if(this.pending)throw Error('Decision still pending');this.budget.close();}
@@ -76,7 +77,7 @@ export class ClaudeDecisionBackend {
  }
  private async run(mode:'decision'|'reflection',view:unknown,signal:AbortSignal) {
    signal.throwIfAborted();if(this.pending)throw Error('Decision backend busy');
-   const prompt=JSON.stringify({task:mode,perspective:view});if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
+   const prompt=JSON.stringify({task:mode,perspective:view,...(mode==='reflection'?{executableChoices:reflectionChoices(view as AttentionView)}:{})});if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
    this.pending=true;
    // Native client reads its existing login itself. No secret/env copying or extraction.
    const env=Object.fromEntries(['PATH','HOME','LANG'].filter(k=>process.env[k]).map(k=>[k,process.env[k]!])) as NodeJS.ProcessEnv;
@@ -92,8 +93,11 @@ export class ClaudeDecisionBackend {
      id=this.budget.reserve(0.10);const began=Date.now();
      const events=await this.invoke(binary,claudeArgs(mode),prompt,cwd,env,signal,
        cost=>this.budget.settle(id!,cost));
-     const parsed=parseClaudeResult(events.result,mode);signal.throwIfAborted();
-     this.receipts.push({mode,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'ok'});
+     const parsed=parseClaudeResult(events.result,mode);
+     const receipt={mode,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'rejected',...(parsed.providerChoice?{providerChoice:parsed.providerChoice}:{})};
+     this.receipts.push(receipt);
+     if(parsed.providerChoice)validateReflectionChoice(parsed.providerChoice,view as AttentionView);
+     signal.throwIfAborted();receipt.status='ok';
      return parsed.output;
    } catch {throw Error(id?'Live decision unavailable; attempt retained':'Claude decision preflight failed');}
    finally {this.pending=false;}

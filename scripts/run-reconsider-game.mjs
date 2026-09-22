@@ -5,6 +5,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {parseTrialMessage} from '../dist/src/trial-wire.js';
+import {ReflectionChoice,reflectionFromChoice,validateReflectionChoice} from '../dist/src/reflection-choice.js';
 import {InferenceLane} from '../dist/src/inference-lane.js';
 import {ClaudeDecisionBackend} from '../dist/src/claude-decision.js';
 import {JevAppraiser,TrialBudget} from '../dist/src/appraisal.js';
@@ -13,10 +14,12 @@ const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.arg
 
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','jevLedger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
-const relevance=process.argv.includes('--relevance'),policy=relevance?'interruption-v1':'reconsider-v1';
+const relevance=process.argv.includes('--relevance'),intent=process.argv.includes('--intent');
+if(relevance&&intent)throw Error('Select one trial policy');
+const policy=intent?'intent-v1':relevance?'interruption-v1':'reconsider-v1';
 for(const k of ['scriptedReflectionDelayMs','scriptedRescueDelayMs'])if(config[k]!==undefined&&(!Number.isInteger(config[k])||config[k]<0||config[k]>20000))throw Error('Invalid scripted delay');
-const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0,estimatedUsageUSD:0}),close(){},async decide(view,signal){if(view.proposal.action.kind==='rescue')await delay(config.scriptedRescueDelayMs??0,undefined,{signal});return {kind:'accept',reason:'Scripted dry-run consent'};},async reflect(view,signal){await delay(config.scriptedReflectionDelayMs??0,undefined,{signal});return {kind:config.scriptedReflection??'withdraw',reason:'Scripted reconsideration after actual local sighting'};}}:new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:policy});
-const budget=new TrialBudget(config.jevLedger,.008,4,relevance?'jev-interruption-v1':'jev-reconsider-v1');
+const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0,estimatedUsageUSD:0}),close(){},async decide(view,signal){if(view.proposal.action.kind==='rescue')await delay(config.scriptedRescueDelayMs??0,undefined,{signal});return {kind:'accept',reason:'Scripted dry-run consent'};},async reflect(view,signal){await delay(config.scriptedReflectionDelayMs??0,undefined,{signal});const reason='Scripted reconsideration after actual local sighting';if(!intent)return {kind:config.scriptedReflection??'withdraw',reason};const choice=ReflectionChoice.parse(config.scriptedReflection==='continue'?{choice:'keep_current_activity',reason}:{choice:'withdraw_current_agreement',agreementId:view.intention?.id,reason});validateReflectionChoice(choice,view);this.receipts.push({mode:'reflection',status:'scripted',providerChoice:choice});return reflectionFromChoice(choice);}}:new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:policy});
+const budget=new TrialBudget(config.jevLedger,.008,4,intent?'jev-intent-v1':relevance?'jev-interruption-v1':'jev-reconsider-v1');
 const before={claude:backend.summary(),jev:budget.summary()};
 if(!cold&&(before.claude.attempts||before.jev.calls))throw Error('Fresh trial required; no replay or automatic continuation');
 const maxDecisions=6-Number(before.claude.attempts);
@@ -51,12 +54,13 @@ async function handle(line){
  seen.add(m.id);const controller=new AbortController();active.set(m.id,controller);const start=Date.now();
  try{
   await lane.run(controller.signal,async()=>{
-  if(isDecision){const output=await (m.mode==='decision'?backend.decide(m.view,controller.signal):backend.reflect(m.view,controller.signal));
+  try {if(isDecision){const output=await (m.mode==='decision'?backend.decide(m.view,controller.signal):backend.reflect(m.view,controller.signal));
    responses.push({id:m.id,mode:m.mode,pawn:m.view.pawn.id,receivedAt:new Date().toISOString(),elapsedMs:Date.now()-start,output});
    // Preserve returned answers even if the coordinator subsequently rejects them as stale.
-   await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses},null,2),{mode:0o600});
+   await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,decisions:backend.receipts},null,2),{mode:0o600});
    send({type:'decision-result',id:m.id,output});}
   else {const r=await appraiser.assess(m.view,controller.signal,20000);appraisals.push({status:'ok',elapsedMs:Date.now()-start,score:r.reflectionScore,costUSD:r.costUSD});send({type:'appraisal-result',id:m.id,result:{reflectionScore:r.reflectionScore}});}
+  }finally{await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,decisions:backend.receipts},null,2),{mode:0o600});}
   });
  }catch{
   // Failures and cancellation retain their reservations; never reroll a response.

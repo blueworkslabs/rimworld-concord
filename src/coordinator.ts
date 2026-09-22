@@ -192,6 +192,7 @@ export class Coordinator {
         const reason=result.kind==='proposal'?result.decision.reason:result.reason;
         const reflection={tick:this.observedTick,throughSeq,backend:backend.name,reason};
         if(result.kind==='withdraw') {
+          if(!prepared.view.intention||character.intention!==prepared.view.intention.id)throw Error('Reflection agreement superseded');
           await this.withdraw(pawn,result.reason);
           character.attention!.last={status:'continued',throughSeq,reason};
           character.reflections=[...(character.reflections??[]),reflection].slice(-16);

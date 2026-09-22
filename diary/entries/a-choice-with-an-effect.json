@@ -1,0 +1,53 @@
+{
+  "slug": "a-choice-with-an-effect",
+  "title": "A choice with an effect",
+  "date": "2026-09-22",
+  "summary": "Clearer action labels produced one consistent live response—and exposed a missing way to ask for an alternative.",
+  "sections": [
+    {
+      "heading": "What Changed",
+      "paragraphs": [
+        "Pawns could already continue or withdraw from an agreement. The change is how those choices are presented to the live model: keep the current activity, withdraw from this specific agreement, or answer a pending offer. Each label now spells out what it does—and what it does not authorize.",
+        "Withdrawal must name the pawn's current agreement. It does not start a rescue or any replacement job. An explanation remains an explanation, not an order hidden in prose. Native activity continues while the pawn thinks; this change adds no automatic pause."
+      ]
+    },
+    {
+      "heading": "What Was Tested",
+      "paragraphs": [
+        "All 125 automated checks passed. Separate real-game scripted tests exercised both branches: withdrawal followed one completed haul and led, through fresh consent, to exact-bed rescue; continuation completed three hauls and thirty steel with no rescue. Both passed paired restore, and continuation passed cold restart.",
+        "During the scripted rescue thought, a real DeepTalk memory arrived. It queued without cancelling the answer and remained available for later reflection. This is native-event evidence with a scripted decision, not a live model's social judgment.",
+        "In the single live follow-up, Alvin noticed downed Beatrice and selected keep current activity. His explanation agreed: he would continue hauling unless a rescue proposal arrived. All three trips completed, thirty steel was delivered, and no rescue was offered or performed. Paired and cold restore preserved that outcome."
+      ]
+    },
+    {
+      "heading": "Current Limitations",
+      "paragraphs": [
+        "Two Claude attempts were used, with no Jev calls or retries. This one matching choice, explanation and outcome does not prove that clearer labels caused better reasoning. The authored scenario also establishes neither personality nor medical judgment; inconsistent explanations can still occur."
+      ]
+    },
+    {
+      "heading": "Next Unresolved Step",
+      "paragraphs": [
+        "Alvin waited for a rescue proposal, but our scripted trial only offers one after withdrawal. A bounded way to request or discuss an alternative while retaining current work is still missing. That is the next useful question: can pawns negotiate a change without first abandoning their existing commitment?"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Explicit choice contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/INTENT_CHOICES.md"
+    },
+    {
+      "label": "Live evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/intent-live.json"
+    },
+    {
+      "label": "Scripted evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/intent-scripted.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
