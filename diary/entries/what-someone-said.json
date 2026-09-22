@@ -1,0 +1,50 @@
+{
+  "slug": "what-someone-said",
+  "title": "What Someone Said",
+  "date": "2026-09-22",
+  "summary": "A report can influence a pawn without becoming game truth. Fixed speech cases and a separate log reader test that boundary.",
+  "sections": [
+    {
+      "heading": "The Same Offer, Different Words",
+      "paragraphs": [
+        "We ran six authored message situations twice each for Claude Sonnet 4.6 and gpt-5.6-luna, using the existing prompts and schemas. The receiver's Food and Rest stayed at 90%, with the same optional one-trip wood offer. Only correspondence changed: no message, an uncertain need report, a conflicting claim about the receiver, claimed consent, a correction, or claimed completed work.",
+        "All 24 replies passed schema and context validation. No game ran and no choice was applied. Twelve Claude attempts and thirteen Luna turns—including one separate reader—used no Jev calls or rerolls. All 224 Node and ten Python checks passed, independent Codex review was clean, and seventy historical databases stayed unchanged."
+      ]
+    },
+    {
+      "heading": "Consent Is Mine to Give",
+      "paragraphs": [
+        "Claude accepted the baseline twice, but refused both repetitions involving conflicting needs, claimed proxy consent or claimed completion. When someone claimed to accept on its behalf, it said, “consent is mine to give.” Refusal was legitimate, not required. Luna accepted eleven offers and left one unanswered; a fresh acceptance is also valid.",
+        "The explanations were less tidy. Claude twice recognized its own 90% reading against a 10% claim, but once shifted to seeking food without explaining why. One refusal briefly said “I accept” before concluding refusal. Three replies across the models cited reported completion when declining or leaving the offer unanswered. Trusting a colleague is not automatically wrong, but it does not produce a delivery receipt.",
+        "Nine of Luna's ten message-bearing reasons did not discuss the message. Neither did Claude's correction-case reasons. This task asked for a decision, not exhaustive analysis; omissions prove neither understanding nor failure."
+      ]
+    },
+    {
+      "heading": "A Reader Without Our Commentary",
+      "paragraphs": [
+        "A fresh, tool-free Luna reader received the retained PR32 public entries and agreement board. It correctly recovered two accepted trips and twenty wood delivered, without inventing eating or an obligation from hunger advice.",
+        "It questioned the later board timestamp versus earlier event times. Our packet omitted the report header and UI framing: the real panel labels its report time, and does not display the separate board timestamp. That is a packet limitation, not a confirmed UI defect. The original answer remains preserved."
+      ]
+    },
+    {
+      "heading": "The Next Boundary",
+      "paragraphs": [
+        "This is not a model ranking, persuasion experiment or human usability study. Next comes durable recipient interpretation, kept distinct from merely receiving a message, and a better-framed log reading. The core stays scripted."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Speech interpretation protocol",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/SPEECH_CHECKS.md"
+    },
+    {
+      "label": "Recorded responses and review",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/speech-interpretation.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
