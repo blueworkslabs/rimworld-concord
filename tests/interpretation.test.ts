@@ -13,11 +13,11 @@ test('matched interpretation stages differ only in received speech initially, la
 });
 test('interpretation suite is checked before backend creation; failure retains attempt and prohibits replay',async()=>{
  const root=mkdtempSync(tmpdir()+'/interpretation-fail-'),file=root+'/suite.json',out=root+'/run';
- const suite=interpretationSuite();let created=0,closed=false;
+ const suite=interpretationSuite();let created=0,closed=false,captured:any;
  writeFileSync(file,JSON.stringify({...suite,maxAttempts:13}));await assert.rejects(runInterpretation(file,out,()=>{created++;throw Error('not called');}),/Frozen/);assert.equal(created,0);assert(!existsSync(out));
  writeFileSync(file,JSON.stringify(suite));
- const backend:any={rawResponses:[],receipts:[],failures:[],close(){closed=true;},summary:()=>({attempts:1}),async reflect(){const receipt=JSON.parse(readFileSync(out+'/receipt.json','utf8'));assert.equal(receipt.attempts,1);assert.equal(receipt.results[0].status,'started');assert(receipt.results[0].request.prompt);throw Error('No retry');}};
- const r=await runInterpretation(file,out,()=>backend);assert.equal(r.attempts,1);assert.equal(r.results[0].status,'failed');assert(closed);await assert.rejects(runInterpretation(file,out,()=>backend),/EEXIST/);
+ const backend:any={rawResponses:[],receipts:[],failures:[],close(){closed=true;},summary:()=>({attempts:1}),async reflect(){captured=JSON.parse(readFileSync(out+'/receipt.json','utf8'));throw Error('No retry');}};
+ const r=await runInterpretation(file,out,()=>backend);assert.equal(r.attempts,1);assert.equal(r.results[0].status,'failed');assert(closed);assert(captured);assert.equal(captured.attempts,1);assert.equal(captured.results[0].status,'started');assert.deepEqual(captured.results[0].request,suite.cases[0]!.reflectionRequest);await assert.rejects(runInterpretation(file,out,()=>backend),/EEXIST/);
 });
 test('mock native two-stage run retains attribution, records exact prompts and enforces persistent 12-call cap',async()=>{
  const root=mkdtempSync(tmpdir()+'/interpretation-provider-'),file=root+'/suite.json',out=root+'/run',binary=root+'/fake-claude',capture=root+'/prompts.jsonl';
