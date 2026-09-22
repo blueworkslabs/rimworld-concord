@@ -163,3 +163,5 @@ observation, character development, selective social exchange and strategic core
 planning. Future core messages, pawn correspondence and comms-station encounters
 are recorded options, not part of the current implementation or inference budget.
 See [crew log contract](CREW_LOG.md) for the first read-only presentation slice.
+
+The first presentation slice is implemented: read-only crew log, explicit own-agreement progress and bounded saved display cache. Native scripted tests and cold restore passed; no new live inference was used. Next is a bounded mixed-work observer trial, not automatic expansion into human chat or durable-self systems.

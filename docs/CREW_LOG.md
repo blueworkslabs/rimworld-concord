@@ -29,7 +29,7 @@ not a complete campaign archive or a pawn-to-pawn communications system.
 Progress distinguishes completed, active, unconfirmed (issued without a known
 receipt), unsuccessful and not-started trips. Unfulfilled is agreed minus
 completed, even when the agreement has stopped; it grants no permission to resume.
-For hauling, delivered units come from successful receipt quantities. The pawn's
+For hauling, delivered units come from successful receipt quantities; missing quantities remain explicitly unknown. The pawn's
 own reflection and replacement-decision view include these explicit progress
 fields, using current matching game receipts where available. No other pawn's
 private state is added. This improves supplied information, not a guarantee of
@@ -45,7 +45,7 @@ work or fail a valid pawn decision; the coordinator exposes `crewSyncError` and
 retries at its next operation. Stale content is visibly labelled as the last
 report, not live state.
 
-The game save retains its last report for viewing without the coordinator. A load
+The game save retains its last report as UTF-8/base64 for viewing without the coordinator, preserving JSON escape sequences through native string loading. The transport is bounded at two million characters in addition to entry and field limits. A load
 changes the game epoch; saved contents are marked non-live until a valid new
 report arrives. Paired restore replaces coordinator log history with that saved
 branch and republishes it, excluding discarded future messages. Publication is

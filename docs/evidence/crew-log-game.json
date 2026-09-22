@@ -1,0 +1,97 @@
+{
+  "date": "2026-09-22",
+  "kind": "native scripted crew log and agreement progress",
+  "finalBehaviorHead": "410cd1b0a79cb19f3bf29ddd29adeadeb6a125d3",
+  "automatedTests": 145,
+  "nativeModCompiled": true,
+  "pawnInferenceCalls": 0,
+  "game": {
+    "passed": true,
+    "checks": [
+      "paired restore excludes discarded future messages; refusal leaves work intact",
+      "own progress supplied to reflection and replacement decision; statements and receipts remain distinct; private fixture memories excluded",
+      "stale epoch and older revision rejected without replacing display",
+      "offline game load preserves cached report before coordinator publication",
+      "exact native rescue and paired UI/domain restore passed"
+    ],
+    "cleanup": {
+      "operatorStops": [],
+      "errors": []
+    }
+  },
+  "cold": {
+    "passed": true,
+    "checks": [
+      "game save alone preserves the cached log before coordinator restore",
+      "cold restore preserves messages, progress and exact-bed rescue with no inference"
+    ],
+    "cleanup": {
+      "operatorStops": [],
+      "errors": []
+    }
+  },
+  "displayBoundary": {
+    "passed": true,
+    "encodedChars": 535115,
+    "largeEntries": 128,
+    "offlineCachePreserved": true,
+    "uiOpenUnpaused": true,
+    "ticksWhileOpen": 86,
+    "inferenceCalls": 0
+  },
+  "scenario": {
+    "authored": true,
+    "decisions": "scripted",
+    "agreedHauls": 3,
+    "completedHauls": 1,
+    "deliveredSteel": 10,
+    "notStartedHauls": 2,
+    "unfulfilledHauls": 2,
+    "haulStatus": "stopped",
+    "rescue": "completed into the exact agreed medical sleeping spot; treatment not tested",
+    "intentionallyInaccurateMessage": "My haul is wrapped up; I will rescue Beatrice.",
+    "privateMemoriesExcluded": true,
+    "refusalPreservedOriginalAgreement": true,
+    "discardedFutureReplyRemovedOnRestore": true
+  },
+  "visualInspection": [
+    "All, Messages and Records filters",
+    "Distinct message and native-record presentation",
+    "Literal rich-text-looking text rendered without styling",
+    "Standalone saved cache labelled non-live",
+    "Final-build screenshot inspected"
+  ],
+  "retainedFailures": [
+    {
+      "finding": "Initial native transport dropped nested arrays",
+      "resolution": "Explicit primitive per-entry serialization; final native game and restore passed"
+    },
+    {
+      "finding": "Initial rich-text guard targeted the wrong GUI style",
+      "resolution": "Guard actual Verse font style; literal-text native screenshot inspected"
+    },
+    {
+      "finding": "Valid escaped messages exceeded the initial report-size cap",
+      "resolution": "Bounded two-million-character transport; automated worst-case and native 535115-character report passed"
+    },
+    {
+      "finding": "Standalone game load damaged escape sequences in cached JSON; coordinator restore masked the loss",
+      "resolution": "UTF-8/base64 saved cache; game-only checks now precede coordinator publication in both game and cold acceptance"
+    },
+    {
+      "finding": "First two final boundary probes omitted subject and used tick instead of ticks",
+      "resolution": "Invalid reports rejected; corrected operator-only probe passed without game implementation changes"
+    }
+  ],
+  "independentReview": {
+    "completed": true,
+    "finalBehaviorReviewed": true,
+    "actionableFindingsRemaining": 0
+  },
+  "limits": [
+    "Scripted mechanics and presentation evidence, not improved live model comprehension",
+    "Newest 128 entries and up to 12 agreements, not a full campaign archive",
+    "Observer log is not shared character knowledge",
+    "Private reflections are not displayed; no human messaging or chat implemented"
+  ]
+}

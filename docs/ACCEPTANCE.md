@@ -521,3 +521,30 @@ in regression tests. Focused review of final behavior
 `f51de052ab771b177550af5669987c6d48514f65` found no further defects. Later changes
 publish factual evidence and reviewed diary prose only. This single authored
 scenario does not establish general reasoning reliability or developed personality.
+
+## Readable crew log and explicit progress (2026-09-22)
+
+**145/145 checks** and compilation against installed game assemblies passed.
+The read-only Concord tab separates addressed messages from native records,
+excludes private reflections and shows receipt-based agreement progress.
+Own reflection and replacement-decision views receive those progress distinctions.
+
+A scripted scenario completed one of three hauls (ten steel), requested rescue,
+proved refusal preserves hauling, restored away the refusal, then accepted a
+replacement and completed exact-bed rescue. An intentionally inaccurate scripted
+“haul is wrapped up” reply remains a message; the board correctly records two
+unfulfilled trips and a stopped agreement. This is not a new live-model trial.
+
+Paired and full cold restore passed. Game-only loads were checked before
+coordinator republication: the last report survives and is labelled non-live.
+That additional check caught a native saved-string escape issue that paired
+republishing had masked; encoded cache storage fixed it. Initial transport and
+review findings were also retained, fixed and rechecked. Native display probes
+verified literal text rendering, filters, a 535,115-character valid report and
+86 advancing game ticks while the panel was open, without pausing the colony.
+
+Final independent Codex review of behavioral head
+`410cd1b0a79cb19f3bf29ddd29adeadeb6a125d3` found no actionable regressions.
+No new pawn inference or trial allowance was used. This establishes mechanics
+and visibility, not stronger live reasoning, developed personalities or human
+chat. [Evidence](evidence/crew-log-game.json) · [Contract](CREW_LOG.md).

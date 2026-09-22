@@ -26,7 +26,9 @@ A subsequent [three-pawn negotiation trial](docs/NEGOTIATION.md) completed a liv
 
 [Bounded hauling](docs/HAULING.md) adds exact item/storage choices and pawn-owned consent for up to three trips, with withdrawal, needs and expiry stops. Scripted multi-trip/cold-restore checks and a live three-pawn negotiation retained both delivered supplies and a rejected trip. Active-job checkpoints and long-run character quality remain unproven.
 
-[Bounded rescue](docs/RESCUE.md) adds one exact downed colonist / medical-bed agreement, with pawn-owned withdrawal and native validation. This is not capture or treatment; live rescue judgment remains untested.
+[Bounded rescue](docs/RESCUE.md) adds one exact downed colonist / medical-bed agreement, with pawn-owned withdrawal and native validation. This is not capture or treatment. A bounded live [request and replacement trial](docs/ALTERNATIVE_REQUESTS.md) completed exact-bed rescue; broader judgment remains unproved.
+
+The read-only [Concord crew log](docs/CREW_LOG.md) separates addressed messages from recorded outcomes and shows receipt-based agreement progress. Scripted native UI and game-only / paired / cold restore checks passed; private reflections are excluded. Future character, social and human-contact directions are recorded in the [playable plan](docs/PLAYABLE_DIRECTION.md).
 
 Explicit [timing modes](docs/DECISION_TIMING.md) preserve human pauses and let Chitchat and DeepTalk queue without cancelling thought. Continuous play remains the default.
 
