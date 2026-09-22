@@ -55,10 +55,10 @@ async function handle(line){
   try {if(isDecision){const output=await (m.mode==='social'?backend.speak(m.view,controller.signal):backend.decide(m.view,controller.signal));
    responses.push({id:m.id,mode:m.mode,pawn:m.view.pawn.id,receivedAt:new Date().toISOString(),elapsedMs:Date.now()-start,output});
    // Preserve returned answers even if the coordinator subsequently rejects them as stale.
-   await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,decisions:backend.receipts},null,2),{mode:0o600});
+   await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,decisions:backend.receipts,rawResponses:backend.rawResponses,failures:backend.failures},null,2),{mode:0o600});
    send({type:'decision-result',id:m.id,output});}
 
-  }finally{await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,decisions:backend.receipts},null,2),{mode:0o600});}
+  }finally{await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,decisions:backend.receipts,rawResponses:backend.rawResponses,failures:backend.failures},null,2),{mode:0o600});}
   });
  }catch{
   // Failures and cancellation retain their reservations; never reroll a response.
@@ -70,6 +70,6 @@ const timer=setTimeout(()=>{failed=true;child.kill();},1200000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
 const result={at:new Date().toISOString(),policy,kind:cold?'social-cold':scripted?'social-scripted':'social-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
- before,after:{claude:backend.summary(),jevCalls:0},decisions:backend.receipts,failures:backend.failures,responses,game:receipt,
+ before,after:{claude:backend.summary(),jevCalls:0},decisions:backend.receipts,rawResponses:backend.rawResponses,failures:backend.failures,responses,game:receipt,
  accounting:'Claude native Max API-equivalent usage estimates; No Jev calls. Fresh immutable ledgers, no rerolls.'};
 backend.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;
