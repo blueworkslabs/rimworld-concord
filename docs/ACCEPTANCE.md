@@ -657,3 +657,22 @@ additional inference or outstanding cleanup work.
 Next: narrow the provider output schema to current executable choices, while
 retaining validation, before another separately bounded outlook test.
 [Contract](PRIVATE_OUTLOOK.md) · [Evidence](evidence/private-outlook.json).
+
+
+## Contextual reflection choices (2026-09-22)
+
+171 checks pass. Generated schema excludes unavailable branches and binds snapshot
+identifiers/revision/evidence; runtime validation remains. The recorded prior
+invented-agreement request fails this schema, while continuation and owned
+evidence updates validate. Independent Codex review covers behavior 17d8f0d.
+
+Scripted private outlook and fresh-consent rescue passed, including rewind and
+full restart. In one fresh live paused follow-up, Alvin formed one concern and
+one stance, each citing his own casualty event. No job, speech or native fact
+changed during the update. Restored notes reached the later decision perspective;
+a separate scripted rescue offer was accepted and exact-bed delivery completed.
+Paired/cold persistence passed without additional inference. Two Claude attempts,
+zero Jev, no retries;85 historical database/sidecar files unchanged. This is
+formation and reuse evidence, not proof that notes caused the rescue decision.
+Luna model compatibility remains a planned, separate fixed-snapshot evaluation.
+[Contract](CONTEXTUAL_CHOICES.md) · [Evidence](evidence/contextual-choices.json).

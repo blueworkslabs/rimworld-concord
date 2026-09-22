@@ -22,5 +22,3 @@ export function reviseOutlook(character:Character,update:OutlookUpdate,tick:numb
  });
  return {revision:u.expectedRevision+1,updatedTick:tick,notes};
 }
-/** Same bounded contract exposed to the native structured-output provider. */
-export const outlookUpdateJsonSchema={type:'object',additionalProperties:false,required:['expectedRevision','notes'],properties:{expectedRevision:{type:'integer',minimum:0},notes:{type:'array',maxItems:4,items:{type:'object',additionalProperties:false,required:['kind','text','evidenceSeqs'],properties:{kind:{enum:['value','concern','stance']},text:{type:'string',minLength:1,maxLength:240},subject:{type:'string',minLength:1,maxLength:120},evidenceSeqs:{type:'array',minItems:1,maxItems:3,items:{type:'integer',minimum:1}}}}}}};

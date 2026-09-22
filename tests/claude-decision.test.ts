@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CLAUDE_MODEL,claudeArgs,verifyClaudeInit,parseClaudeResult } from '../src/claude-decision.js';
 import { ClaudeDecisionBackend } from '../src/claude-decision.js';
-import { mkdtemp,writeFile,rm } from 'node:fs/promises';
+import { mkdtemp,writeFile,readFile,rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -152,5 +152,25 @@ test('private outlook follow-up has its own persistent six-attempt cap; exhausti
   b=new ClaudeDecisionBackend(options);for(let i=0;i<6;i++)await b.decide(view,new AbortController().signal);
   assert.equal(b.summary().attempts,6);await assert.rejects(b.decide(view,new AbortController().signal));b.close();b=new ClaudeDecisionBackend(options);
   await assert.rejects(b.decide(view,new AbortController().signal));assert.equal(b.summary().attempts,6);
+ }finally{b?.close();await rm(dir,{recursive:true,force:true});}
+});
+
+
+test('adapter sends the contextual schema and prompt from the same frozen snapshot',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'concord-contextual-')),binary=join(dir,'fake-claude'),capture=join(dir,'capture.json');
+ const view={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Wait',health:1},character:{id:'A',name:'Ada',memories:[]},events:[],proposals:[]};
+ let b:ClaudeDecisionBackend|undefined;
+ try{
+  const raw={...result,structured_output:{reflection:{choice:'keep_current_activity',reason:'No changes'}}};
+  await writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0); }\n'+
+   'let input="";process.stdin.on("data",c=>input+=c);process.stdin.on("end",()=>{require("node:fs").writeFileSync('+JSON.stringify(capture)+',JSON.stringify({schema:JSON.parse(process.argv[process.argv.indexOf("--json-schema")+1]),prompt:JSON.parse(input)}));console.log('+JSON.stringify(JSON.stringify(init))+');console.log('+JSON.stringify(JSON.stringify(raw))+');});\n',{mode:0o700});
+  b=new ClaudeDecisionBackend({ledgerPath:join(dir,'trial.db'),scratchRoot:dir,binary});
+  const pending=b.reflect(view,new AbortController().signal);
+  view.character.name='Changed after invocation';
+  assert.equal((await pending).kind,'continue');assert.equal(b.receipts[0]!.status,'ok');
+  const sent=JSON.parse(await readFile(capture,'utf8'));
+  assert.equal(sent.prompt.perspective.character.name,'Ada');
+  assert.deepEqual(sent.schema.properties.reflection.oneOf.map((x:any)=>x.properties.choice.const),['keep_current_activity']);
+  assert.deepEqual(sent.prompt.executableChoices.map((x:any)=>x.choice),['keep_current_activity']);
  }finally{b?.close();await rm(dir,{recursive:true,force:true});}
 });
