@@ -1,3 +1,4 @@
+import type {AgreementProgress} from './crew-log.js';
 import { z } from 'zod';
 import { attentionInterrupt } from './routing.js';
 import { Decision, type Attention, type Character, type NativeEvent, type Pawn, type Proposal,type AlternativeRequest } from './protocol.js';
@@ -14,7 +15,7 @@ export const Reflection=z.discriminatedUnion('kind',[
   z.object({kind:z.literal('proposal'),proposalId:z.string().uuid(),decision:Decision}).strict()
 ]);
 export type Reflection=z.infer<typeof Reflection>;
-export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];intention?:Proposal;histories?:Record<string,Proposal[]>;requests?:AlternativeRequest[]};
+export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];intention?:Proposal;agreementProgress?:AgreementProgress;histories?:Record<string,Proposal[]>;requests?:AlternativeRequest[]};
 export interface AttentionBackend {
   readonly name:string;
   reflect(view:AttentionView,signal:AbortSignal):Promise<unknown>;

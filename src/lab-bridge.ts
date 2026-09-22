@@ -1,3 +1,4 @@
+import type {CrewReport} from './crew-log.js';
 import { readFile, writeFile, rename, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
@@ -17,6 +18,7 @@ export class LabBridge implements GameBridge {
     const result=this.queue.then(()=>this.exchange(payload));
     this.queue=result.catch(()=>{}); return result;
   }
+  async setCrewLog(report:CrewReport){await this.request({op:'crew-log',epoch:report.epoch,crewJson:JSON.stringify(report)});}
   async setDecisionPause(pause:DecisionPause) { await this.request({op:'decision-pause',...pause}); }
   async setActivity(activity:Activity) { await this.request({op:'activity',...activity}); }
   private async exchange(payload:Record<string,unknown>):Promise<{state:GameState;receipt:Receipt}> {

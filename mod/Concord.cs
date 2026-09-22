@@ -30,12 +30,17 @@ namespace Concord
         public List<ActionRecord> actions = new List<ActionRecord>();
         public List<NativeEvent> events = new List<NativeEvent>();
         public int eventSeq;
+        public string crewJson;
+        public CrewReport crewReport;
+        public float crewReceived=-1000f;
         public List<CasualtyNotice> casualtyNotices=new List<CasualtyNotice>();
         private readonly Dictionary<string,Sample> samples=new Dictionary<string,Sample>();
         public readonly Dictionary<string,Thinking> thinking=new Dictionary<string,Thinking>();
         public WorldState(Game game) { }
         public override void ExposeData() {
             Scribe_Values.Look(ref world,"concordWorld");
+            Scribe_Values.Look(ref crewJson,"concordCrewLog");
+            if(Scribe.mode==LoadSaveMode.PostLoadInit){crewReport=null;crewReceived=-1000f;}
             Scribe_Collections.Look(ref actions,"concordActions",LookMode.Deep);
             if(actions==null) actions=new List<ActionRecord>();
             Scribe_Collections.Look(ref events,"concordEvents",LookMode.Deep);
@@ -103,7 +108,7 @@ namespace Concord
             }
         }
     }
-    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing,target,bed,cancelKind; public int x,z,ttlMs,count,maxTicks,untilTick; public int mapId=-1; }
+    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing,target,bed,cancelKind,crewJson; public int x,z,ttlMs,count,maxTicks,untilTick; public int mapId=-1; }
     [Serializable] public class Response { public string id,error; public bool ok; }
     [Serializable] public class PawnView { public string id,name,job,currentBed,carrying; public int x,z; public float health; public bool workReady,rescueReady,downed; }
     [Serializable] public class Snapshot { public string world,epoch; public int ticks,decisionPauses; public bool loaded,paused,manualPaused; }
@@ -141,7 +146,7 @@ namespace Concord
             }).TrimEnd('}')+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
-                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"]}";
+                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"crewLog\":"+(String.IsNullOrEmpty(w.crewJson)?"null":w.crewJson)+"}";
         }
         private static ActionRecord Move(Request r) {
             var w=World();
@@ -222,6 +227,7 @@ namespace Concord
                 var payload=File.ReadAllText(path); File.Delete(path);
                 var r=JsonUtility.FromJson<Request>(payload); response.id=r.id;
                 if(r.op=="move"||r.op=="haul"||r.op=="rescue") receipt=JsonUtility.ToJson(Move(r));
+                else if(r.op=="crew-log") {var w=World();CrewLog.Set(w,r.epoch,r.crewJson);}
                 else if(r.op=="cancel") receipt=JsonUtility.ToJson(Cancel(r));
                 else if(r.op=="decision-pause") {World();DecisionPauses.Set(r.epoch,r.actor,r.leaseId,r.ttlMs);}
                 else if(r.op=="activity") {

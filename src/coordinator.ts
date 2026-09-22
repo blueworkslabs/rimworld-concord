@@ -1,3 +1,4 @@
+import {recordCrew,crewReport,agreementProgress} from './crew-log.js';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal,type AlternativeRequest } from './protocol.js';
@@ -18,6 +19,8 @@ export class Coordinator {
   private questions=new Map<string,{controller:AbortController;proposal:string}>();
   private attending=new Map<string,{controller:AbortController;throughSeq:number}>();
   private observedTick=0;
+  private crewPublished='';
+  crewSyncError:string|undefined;
   constructor(private store:Store,private game:GameBridge,private timing:{mode:'continuous'|'pause-at-decision'}={mode:'continuous'}) {
     if(!['continuous','pause-at-decision'].includes(timing.mode))throw Error('Invalid timing mode');
     if(timing.mode==='pause-at-decision'&&!game.setDecisionPause)throw Error('Game-owned decision pause unsupported');
@@ -26,9 +29,17 @@ export class Coordinator {
     if(this.timing.mode==='pause-at-decision')await this.game.setDecisionPause!({epoch:activity.epoch,actor:activity.actor,leaseId:activity.activityId,ttlMs:release?0:activity.ttlMs});
   }
   private serial<T>(fn:()=>Promise<T>):Promise<T> {
-    const result=this.queue.then(fn); this.queue=result.catch(()=>{}); return result;
+    const result=this.queue.then(async()=>{try{return await fn();}finally{await this.publishCrew();}}); this.queue=result.catch(()=>{}); return result;
+  }
+  private async publishCrew(){
+    if(!this.domain||!this.game.setCrewLog)return;
+    const report=crewReport(this.domain,this.observedTick),key=JSON.stringify(report);
+    if(key===this.crewPublished)return;
+    try{await this.game.setCrewLog(report);this.crewPublished=key;this.crewSyncError=undefined;}
+    catch(e){this.crewSyncError=String(e); /* Presentation failure grants no gameplay authority. Retry on next operation. */}
   }
   private commit(kind:string,actor:string,data:unknown) {
+    recordCrew(this.domain,kind,actor,data,this.observedTick);
     this.store.commit(this.domain,{branch:this.domain.branch,kind,actor,data});
   }
   async open() {
@@ -154,7 +165,7 @@ export class Coordinator {
       this.pending.set(pawn,controller);this.attending.set(pawn,{controller,throughSeq});
       const activity={epoch:game.epoch,actor:pawn,activityId:randomUUID(),ttlMs:config.timeoutMs+2000};
       this.commit('attention-started',pawn,{throughSeq,count:events.length,backend:backend.name,appraiser:significant?null:appraiser?.name});
-      const view=structuredClone({pawn:groundedPawn(this.domain,game,own),character,...(character.intention?{intention:this.domain.proposals[character.intention]}:{}),events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
+      const view=structuredClone({pawn:groundedPawn(this.domain,game,own),character,...(character.intention?{intention:this.domain.proposals[character.intention],agreementProgress:agreementProgress(this.domain,this.domain.proposals[character.intention]!,game.ticks,game.actions)}:{}),events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
         proposals:Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending').slice(0,8),
         requests:Object.values(this.domain.requests??{}).filter(r=>r.pawn===pawn).slice(-8),
         histories:Object.fromEntries(Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending'&&p.parentId).slice(0,8).map(p=>[p.id,this.history(p)]))});
@@ -386,7 +397,7 @@ export class Coordinator {
       this.pending.set(pawn,controller);
       if(p.action.kind==='rescue')this.questions.set(pawn,{controller,proposal:id});
       this.commit('deliberation-started',pawn,{proposal:id,backend:backend.name});
-      return {generation:this.generation,controller,activity,view:structuredClone({pawn:groundedPawn(this.domain,game,own),character:this.domain.characters[pawn]!,proposal:p,...(p.parentId?{history:this.history(p)}:{})})};
+      return {generation:this.generation,controller,activity,view:structuredClone({pawn:groundedPawn(this.domain,game,own),character:this.domain.characters[pawn]!,proposal:p,...((p.replacesAgreementId??this.domain.characters[pawn]!.intention)?{agreementProgress:agreementProgress(this.domain,this.domain.proposals[(p.replacesAgreementId??this.domain.characters[pawn]!.intention)!]!,game.ticks,game.actions)}:{}),...(p.parentId?{history:this.history(p)}:{})})};
     });
     let timer:ReturnType<typeof setTimeout>|undefined;
     try {
@@ -594,6 +605,7 @@ export class Coordinator {
       try { this.store.saved(name); throw Error('Checkpoint already exists'); }
       catch(e) { if(String(e)!=='Error: Unknown paired checkpoint') throw e; }
       this.cancelDecisions();
+      await this.publishCrew();
       const saved=await this.game.save(name);
       await this.current();
       this.store.checkpoint(name,this.domain,saved.sha256);
