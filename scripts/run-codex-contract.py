@@ -11,6 +11,9 @@ PERSPECTIVE_IDS=[case+'-r'+str(rep) for rep in (1,2) for case in ['needs-full','
 def validate_suite(suite):
  expected={'concord-contract-v1':CASE_IDS,'concord-perspective-v1':PERSPECTIVE_IDS}.get(suite.get('version'))
  assert expected and suite.get('authored') is True and [c['id'] for c in suite['cases']]==expected,'Unrecognized fixed suite'
+ if suite['version']=='concord-perspective-v1':
+  canonical=json.loads(subprocess.check_output(['node',str(pathlib.Path(__file__).with_name('export-perspective-cases.mjs'))],text=True))
+  assert suite==canonical,'Frozen case contents differ from this build'
  return suite['cases']
 def digest(data):return hashlib.sha256(data).hexdigest()
 def toml(value):

@@ -8,9 +8,17 @@ class GuardTests(unittest.TestCase):
  def test_only_recognized_fixed_suites_and_exact_repetition_order_are_allowed(self):
   for version,ids in [('concord-contract-v1',p.CASE_IDS),('concord-perspective-v1',p.PERSPECTIVE_IDS)]:
    suite={'version':version,'authored':True,'cases':[{'id':i} for i in ids]}
+   if version=='concord-perspective-v1':
+    import json
+    suite=json.loads(p.subprocess.check_output(['node',str(pathlib.Path(__file__).with_name('export-perspective-cases.mjs'))],text=True))
    self.assertEqual(len(p.validate_suite(suite)),len(ids))
    suite['cases'].append(suite['cases'][0])
    with self.assertRaises(AssertionError):p.validate_suite(suite)
+ def test_altered_second_repetition_fails_before_any_trial_marker(self):
+  import json
+  suite=json.loads(p.subprocess.check_output(['node',str(pathlib.Path(__file__).with_name('export-perspective-cases.mjs'))],text=True))
+  suite['cases'][6]['prompt']='Different prompt with same id'
+  with self.assertRaisesRegex(AssertionError,'contents differ'):p.validate_suite(suite)
  def test_native_configuration_has_no_provider_or_auth_fallback(self):
   c=p.config(pathlib.Path('/tmp/frozen-catalog.json'));self.assertEqual(c['model_provider'],p.NATIVE_PROVIDER);self.assertNotIn('model_providers.openai',c)
   provider=c['model_providers.'+p.NATIVE_PROVIDER];self.assertEqual(provider['base_url'],p.NATIVE_URL);self.assertIs(provider['requires_openai_auth'],True);self.assertEqual(c['notify'],[])
