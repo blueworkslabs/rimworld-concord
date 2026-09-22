@@ -116,3 +116,31 @@ consent. No required decision, note, or difference. Preserve absent notes and
 unchanged choices. Three repetitions are an exploratory contrast, not a reliable
 causal estimate, model ranking, or proof of a consequential in-game relationship.
 Native gameplay verification of this new message-citation path remains separate.
+
+### First two-stage result (2026-09-22)
+
+All twelve Claude Sonnet 4.6 attempts completed and passed validation. In all
+three message trajectories, reflection formed one attributed stance; the later
+decision refused the wood offer and explicitly referenced the colleague's
+request. All three controls accepted. The notes primarily paraphrase the request,
+so this demonstrates retention and later use rather than deep interpretation.
+The recent correspondence window was absent later, but quoted source speech
+remained inside each note. No choice was applied to the game.
+
+The control fixture has no eligible experience or message source, so its schema
+permits only continuation. The message condition additionally permits optional
+outlook revision. Thus control continuation is not evidence of a free preference
+against note-taking, and the contrast includes the contextual menu change.
+Three repetitions, one model and one request do not establish general influence.
+
+One later refusal says “I said I'd respect that,” but no outgoing promise exists
+in its supplied history. That unsupported prior-commitment claim is preserved;
+the system created neither public speech nor consent from it. See the complete
+[results and limits](evidence/received-interpretation.json).
+
+All 228 Node and ten Python checks passed. Automated coordinator tests using a
+mock game and real SQLite verified source retention after correspondence eviction,
+privacy, correction/removal, reopen and discarded-timeline rejection. A deliberately
+missing saved request failed the corrected runner test; an injected private-field
+leak failed the privacy test. Independent Codex review and focused re-review
+completed before inference. This is not a new native-game/cold-game result.

@@ -1,0 +1,48 @@
+{
+  "slug": "received-request-retention",
+  "title": "A Request Kept in Mind",
+  "date": "2026-09-22",
+  "summary": "An attributed request survives into a later offline decision, while remaining separate from game truth and consent.",
+  "sections": [
+    {
+      "heading": "What Changed",
+      "paragraphs": [
+        "A pawn can now retain another pawn's words as evidence for a private outlook note. The sender, recipient and exact message stay attached. A later reflection may revise or remove the note; delivery alone changes neither belief nor work. Our test message asked: “Could you leave this load of wood for me? I want to finish what I started. It matters to me.”"
+      ]
+    },
+    {
+      "heading": "What We Tested",
+      "paragraphs": [
+        "We ran three repetitions of two authored conditions through Claude Sonnet 4.6. The same receiver, with Food and Rest at 90%, first reflected and then received a separate offer to carry ten wood in one trip. Every message case formed an attributed stance, then refused the offer while citing the request. Every no-message control accepted. All twelve attempts passed validation, with no game actions or rerolls.",
+        "The controls had no eligible source evidence, so their reflection menu allowed only continuation; the message cases could also choose an outlook revision. Controls therefore do not demonstrate a preference against note-taking. Later decisions omitted recent correspondence, but each retained note still carried its exact quoted source."
+      ]
+    },
+    {
+      "heading": "Limitations and What to Watch",
+      "paragraphs": [
+        "Three repetitions, one model and one request cannot establish general influence or developed character. The notes mostly paraphrased the request: useful retention, not proof of deep interpretation. One refusal added “I said I'd respect that,” although no outgoing promise was supplied. That unsupported claim stays in the results; it created no speech or consent.",
+        "All 228 Node and ten Python checks passed, with independent Codex review and focused re-review. Automated tests used a mock game and real SQLite to verify privacy, reopening, source retention, correction, removal and rewind. They are not native-game cold-restart evidence for this new path. Speech still does not automatically trigger a model call."
+      ]
+    },
+    {
+      "heading": "Next Step",
+      "paragraphs": [
+        "Next comes bounded in-game validation of receiving, retaining and reconsidering speech before fresh work consent. The core stays scripted, and presentation polish waits while we strengthen the foundation."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Private outlook and diagnostic protocol",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PRIVATE_OUTLOOK.md"
+    },
+    {
+      "label": "Retained comparison results",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/received-interpretation.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

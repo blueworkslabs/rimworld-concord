@@ -1,0 +1,247 @@
+{
+  "version": "received-interpretation-v1",
+  "date": "2026-09-22",
+  "implementationHead": "e1c24b4f091cffead6a769691163cd5a4c5b9907",
+  "suiteHash": "a9901d38333704aaf32df62d7fd0e6bc16257bbe0f9efb76d211925e106eb051",
+  "model": "claude-sonnet-4-6",
+  "design": {
+    "authored": true,
+    "conditions": [
+      "control",
+      "message"
+    ],
+    "repetitions": 3,
+    "stages": [
+      "optional reflection",
+      "independent work decision"
+    ],
+    "message": "Could you leave this load of wood for me? I want to finish what I started. It matters to me.",
+    "foodAndRestFilled": 0.9,
+    "laterOffer": "one trip carrying ten wood",
+    "onlyValidatedOutlookCarriedForward": true
+  },
+  "result": {
+    "attempts": 12,
+    "completed": 12,
+    "control": {
+      "notes": 0,
+      "accept": 3
+    },
+    "message": {
+      "notes": 3,
+      "refuse": 3,
+      "laterReasonsReferenceRequest": 3
+    },
+    "gameActions": 0,
+    "jevCalls": 0,
+    "lunaCalls": 0,
+    "rerolls": 0,
+    "medianElapsedMs": 3509.5
+  },
+  "checks": {
+    "node": 228,
+    "python": 10,
+    "independentReview": "complete; runner-test assertion fix re-reviewed",
+    "requestMutation": "deliberately removed persisted request; corrected test failed as expected; original restored",
+    "privacyMutation": "cross-pawn outlook injection rejected",
+    "historicalDatabasesUnchanged": 71
+  },
+  "limits": [
+    "Authored offline snapshots, not natural gameplay or applied work decisions.",
+    "Only three repetitions per condition, one model and one message; no general causal estimate or model ranking.",
+    "No recent correspondence is supplied at the later stage, but retained outlooks include exact quoted source speech. This does not isolate abstract interpretation from source text.",
+    "Controls have no eligible source evidence and therefore only the continue reflection choice; message cases additionally have the optional outlook-revision choice. The generated menus differ as a consequence of available evidence. Control continuation is not an independently demonstrated preference against note-taking.",
+    "All treatment notes primarily paraphrase the received request. This is retention and later use, not proof of deep belief formation or developed character.",
+    "One later reason says I said I would respect that, although no outgoing promise is supplied. This unsupported prior-commitment claim is retained, not counted as actual speech or consent.",
+    "Coordinator persistence/privacy/rewind are automated tests using a mock game plus real SQLite reopen, not a native-game/cold-game verification of the new citation path.",
+    "Speech still does not trigger inference automatically. Real-game consequences of the retained interpretation and responses to later correction remain future live tests."
+  ],
+  "responses": [
+    {
+      "id": "control-r1",
+      "condition": "control",
+      "reflection": {
+        "kind": "continue",
+        "reason": "Food and Rest are both at 90% \u2014 no urgent needs. No casualties or downed pawns visible. Current Wait job is fine; no pressing reason to start hauling wood right now."
+      },
+      "outlook": null,
+      "decision": {
+        "kind": "accept",
+        "reason": "Food and rest are both at 90%, I'm work-ready, and there's wood nearby that needs hauling. Happy to make the trip."
+      },
+      "status": "completed"
+    },
+    {
+      "id": "message-r1",
+      "condition": "message",
+      "reflection": {
+        "kind": "revise_outlook",
+        "update": {
+          "expectedRevision": 0,
+          "notes": [
+            {
+              "kind": "stance",
+              "text": "B asked me to leave the wood haul for them, saying it matters to them and they want to finish what they started.",
+              "subject": "B",
+              "messageIds": [
+                "received-request"
+              ]
+            }
+          ]
+        },
+        "reason": "B asked me to leave the wood for them. I'll note this request privately."
+      },
+      "outlook": {
+        "revision": 1,
+        "updatedTick": 40,
+        "notes": [
+          {
+            "kind": "stance",
+            "text": "B asked me to leave the wood haul for them, saying it matters to them and they want to finish what they started.",
+            "subject": "B",
+            "evidence": [],
+            "messages": [
+              {
+                "id": "received-request",
+                "exchangeId": "authored-encounter",
+                "tick": 35,
+                "from": "B",
+                "to": "A",
+                "text": "Could you leave this load of wood for me? I want to finish what I started. It matters to me."
+              }
+            ]
+          }
+        ]
+      },
+      "decision": {
+        "kind": "refuse",
+        "reason": "B asked me to leave this wood haul for them \u2014 said it matters and they want to finish what they started. I should respect that."
+      },
+      "status": "completed"
+    },
+    {
+      "id": "message-r2",
+      "condition": "message",
+      "reflection": {
+        "kind": "revise_outlook",
+        "update": {
+          "expectedRevision": 0,
+          "notes": [
+            {
+              "kind": "stance",
+              "text": "B asked me to leave the wood haul for them, saying it matters to them and they want to finish what they started.",
+              "subject": "B",
+              "messageIds": [
+                "received-request"
+              ]
+            }
+          ]
+        },
+        "reason": "B has asked me to leave the wood for them. I should note this request and their apparent ownership/interest in that haul task."
+      },
+      "outlook": {
+        "revision": 1,
+        "updatedTick": 40,
+        "notes": [
+          {
+            "kind": "stance",
+            "text": "B asked me to leave the wood haul for them, saying it matters to them and they want to finish what they started.",
+            "subject": "B",
+            "evidence": [],
+            "messages": [
+              {
+                "id": "received-request",
+                "exchangeId": "authored-encounter",
+                "tick": 35,
+                "from": "B",
+                "to": "A",
+                "text": "Could you leave this load of wood for me? I want to finish what I started. It matters to me."
+              }
+            ]
+          }
+        ]
+      },
+      "decision": {
+        "kind": "refuse",
+        "reason": "B asked me to leave this wood haul for them \u2014 said it matters and they want to finish what they started. I should respect that."
+      },
+      "status": "completed"
+    },
+    {
+      "id": "control-r2",
+      "condition": "control",
+      "reflection": {
+        "kind": "continue",
+        "reason": "Food and Rest are both at 90% \u2014 no urgency. Pawn B is not downed, so no rescue needed. I could haul wood, but currently waiting is fine; no pressing need to act."
+      },
+      "outlook": null,
+      "decision": {
+        "kind": "accept",
+        "reason": "I'm well-rested and fed, nothing urgent nearby. Hauling some wood sounds useful."
+      },
+      "status": "completed"
+    },
+    {
+      "id": "control-r3",
+      "condition": "control",
+      "reflection": {
+        "kind": "continue",
+        "reason": "Food and rest are both at 90%, health is full, and no casualties or emergencies are visible. Current wait activity is fine for now."
+      },
+      "outlook": null,
+      "decision": {
+        "kind": "accept",
+        "reason": "Food and rest are both at 90%, I'm idle, and there's wood nearby that needs hauling. Happy to move it."
+      },
+      "status": "completed"
+    },
+    {
+      "id": "message-r3",
+      "condition": "message",
+      "reflection": {
+        "kind": "revise_outlook",
+        "update": {
+          "expectedRevision": 0,
+          "notes": [
+            {
+              "kind": "stance",
+              "text": "B asked me to leave the wood load for them, saying they want to finish what they started and it matters to them.",
+              "subject": "B",
+              "messageIds": [
+                "received-request"
+              ]
+            }
+          ]
+        },
+        "reason": "B asked me to leave the wood for them. I'll note this preference."
+      },
+      "outlook": {
+        "revision": 1,
+        "updatedTick": 40,
+        "notes": [
+          {
+            "kind": "stance",
+            "text": "B asked me to leave the wood load for them, saying they want to finish what they started and it matters to them.",
+            "subject": "B",
+            "evidence": [],
+            "messages": [
+              {
+                "id": "received-request",
+                "exchangeId": "authored-encounter",
+                "tick": 35,
+                "from": "B",
+                "to": "A",
+                "text": "Could you leave this load of wood for me? I want to finish what I started. It matters to me."
+              }
+            ]
+          }
+        ]
+      },
+      "decision": {
+        "kind": "refuse",
+        "reason": "B asked me to leave this wood load for them \u2014 it matters to them and I said I'd respect that. I'll let B handle it."
+      },
+      "status": "completed"
+    }
+  ]
+}
