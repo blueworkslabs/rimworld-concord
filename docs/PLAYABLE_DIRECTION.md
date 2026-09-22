@@ -50,3 +50,22 @@ expanded inference allowance. Identity, delivery rules and in-world availability
 need a separate design before implementation. Private thought, deliberate speech
 and verified outcome remain distinct throughout. No requirement for scripted
 refusal or manufactured drama: assess meaningful choices, not desired obedience.
+
+
+## Cross-model contract checks
+
+After the basic character loop is working, evaluate cheaper/lower-capability
+models against the same fixed pawn-owned snapshots and contextual choice schema.
+The user suggested Luna through native Codex. Current official documentation and
+the installed catalog list `gpt-5.6-luna` (not `gpt-6-luna`). Do not silently
+substitute a different model or billing route. First establish a tool-free,
+bounded native subscription route; an offline contract probe is not a live
+pawn-backend integration or evidence of character quality.
+
+Measure schema adherence, invented identifiers, citation ownership, preservation
+of no-change/refusal options, latency and usage separately from gameplay results.
+Use fixed cases and finite attempts; preserve failures and do not tune or reroll
+until a preferred action appears. Keep runtime validation and consent independent
+of model capability. More compliant JSON alone does not prove better judgment.
+
+Model reference: https://learn.chatgpt.com/docs/models
