@@ -29,7 +29,11 @@ export const AttentionOptions=z.object({
   timeoutMs:z.number().int().min(1).max(115000).default(5000)
 }).strict();
 export type AttentionOptions=z.input<typeof AttentionOptions>;
-export type AttentionResult={pawn:string;status:'idle'|'busy'|'cooldown'|'unavailable'|'native'|'continued'|'decided'|'failed'|'interrupted';throughSeq?:number};
+/** Admission is operator-owned, synchronous and rechecked in the serialized claim. */
+export type AttentionClaim={pawn:string;events:{seq:number;kind:string}[];needsAppraisal:boolean};
+export interface AttentionLease {consume():boolean;release():void;}
+export interface AttentionAdmission {canClaim(claim:AttentionClaim):boolean;claim(claim:AttentionClaim):AttentionLease|undefined;}
+export type AttentionResult={pawn:string;status:'idle'|'busy'|'cooldown'|'paced'|'unavailable'|'native'|'continued'|'decided'|'failed'|'interrupted';throughSeq?:number};
 
 /** Collapse repeated routine/need signals to the latest of each kind, but preserve
  * each significant event. Original events remain in the experience/audit archive.
@@ -65,7 +69,7 @@ export class AttentionPump {
   readonly results:AttentionResult[]=[];
   constructor(private coordinator:Coordinator,private backend:AttentionBackend,
     private appraiser?:AppraisalBackend,private options:AttentionOptions={},
-    private limits:{maxConcurrent:number;maxTurns?:number;maxNativeTurns?:number;maxModelTurns?:number;pawns?:string[]}={maxConcurrent:2,maxTurns:12}) {
+    private limits:{maxConcurrent:number;maxTurns?:number;maxNativeTurns?:number;maxModelTurns?:number;pawns?:string[]}={maxConcurrent:2,maxTurns:12},private admission?:AttentionAdmission) {
     AttentionOptions.parse(options);
     if(!Number.isInteger(limits.maxConcurrent)||limits.maxConcurrent<1||limits.maxConcurrent>3||
       (limits.maxTurns!==undefined?(!Number.isInteger(limits.maxTurns)||limits.maxTurns<1||limits.maxTurns>100||limits.maxNativeTurns!==undefined||limits.maxModelTurns!==undefined):
@@ -80,15 +84,15 @@ export class AttentionPump {
       await this.coordinator.reconcile();
       if(this.controller.signal.aborted) return;
       const split=this.limits.maxTurns===undefined;
-      const model=new Set(this.coordinator.attentionCandidates(this.options,!!this.appraiser,'model'));
-      for(const pawn of this.coordinator.attentionCandidates(this.options,!!this.appraiser)) {
+      const model=new Set(this.coordinator.attentionCandidates(this.options,!!this.appraiser,'model',this.admission));
+      for(const pawn of this.coordinator.attentionCandidates(this.options,!!this.appraiser,undefined,this.admission)) {
         if(this.running.size>=this.limits.maxConcurrent||(!split&&this.starts>=this.limits.maxTurns!))break;
         if(this.running.has(pawn)||this.limits.pawns&&!this.limits.pawns.includes(pawn))continue;
         const mode=model.has(pawn)?'model':'native';
         if(split&&(mode==='model'?this.modelStarts>=this.limits.maxModelTurns!:this.nativeStarts>=this.limits.maxNativeTurns!))continue;
         this.starts++;if(mode==='model')this.modelStarts++;else this.nativeStarts++;
-        const task=this.coordinator.attend(pawn,this.backend,this.appraiser,this.options,this.controller.signal,split?mode:undefined)
-          .then(result=>{this.results.push(result);})
+        const task=this.coordinator.attend(pawn,this.backend,this.appraiser,this.options,this.controller.signal,split?mode:undefined,this.admission)
+          .then(result=>{if(result.status==='paced'){this.starts--;if(mode==='model')this.modelStarts--;else this.nativeStarts--;}else this.results.push(result);})
           .catch(()=>{this.results.push({pawn,status:this.controller.signal.aborted?'interrupted':'failed'});})
           .finally(()=>{this.running.delete(pawn);});
         this.running.set(pawn,task);

@@ -264,3 +264,27 @@ test('restored legacy DeepTalk retains the experience but uses current noninterr
  assert(!reopened.attentionCandidates().includes('A'));assert.equal((await reopened.attend('A',quiet)).status,'cooldown');
  assert.equal(reopened.inspect().characters.A!.experiences![0]!.event.detail,'DeepTalk');game.data.ticks+=300;assert.equal((await reopened.attend('A',quiet)).status,'continued');store.close();
 });
+
+test('paced denial preserves event cursor and does not consume pump turns; later admission still sees the event',async()=>{
+ const {game,c,store}=await setup();let allowed=false,calls=0;
+ const admission={canClaim:()=>true,claim:()=>allowed?{consume:()=>true,release(){}}:undefined};
+ game.event('memory');const pump=new AttentionPump(c,{name:'count',async reflect(){calls++;return {kind:'continue',reason:'Now considered'};}},low,{}, {maxConcurrent:1,maxNativeTurns:5,maxModelTurns:1},admission);
+ await pump.poll();await pump.drain();assert.equal(calls,0);assert.equal(c.inspect().characters.A!.attention,undefined);assert.equal(pump.status().modelStarted,0);assert.equal(pump.results.length,0);
+ allowed=true;await pump.poll();await pump.drain();assert.equal(calls,1);assert.equal(pump.results[0]!.status,'continued');assert.equal(c.inspect().characters.A!.attention!.cursor,1);await pump.stop();store.close();
+});
+test('pacing blocks models but not another pawn native work; appraisal-only releases reflection reservation',async()=>{
+ const {game,c,store}=await setup();let reflected=0,released=0,consumed=0,allow=false;
+ const admission={canClaim:()=>allow,claim:()=>allow?{consume:()=>{consumed++;return true;},release:()=>{released++;}}:undefined};
+ const backend={name:'count',async reflect(){reflected++;return {kind:'continue',reason:'Considered'};}};
+ game.event('memory','A');game.event('job','B');const pump=new AttentionPump(c,backend,low,{}, {maxConcurrent:1,maxNativeTurns:5,maxModelTurns:5},admission);
+ await pump.poll();await pump.drain();assert.equal(pump.results[0]!.pawn,'B');assert.equal(pump.results[0]!.status,'native');assert.equal(reflected,0);
+ allow=true;game.event('need','B');const result=await c.attend('B',backend,low,{},undefined,'model',admission);
+ assert.equal(result.status,'native');assert.equal(reflected,0);assert.equal(consumed,0);assert.equal(released,1);await pump.stop();store.close();
+});
+test('admission is consumed before an attempted reflection and released on failure; expired admission never calls backend',async()=>{
+ const {game,c,store}=await setup();let consumed=0,released=0,calls=0;let permit=true;
+ const admission={canClaim:()=>true,claim:()=>({consume:()=>{consumed++;return permit;},release:()=>{released++;}})};
+ const backend={name:'fail',async reflect(){calls++;throw Error('failed provider');}};
+ game.event();assert.equal((await c.attend('A',backend,low,{},undefined,'model',admission)).status,'failed');assert.deepEqual([consumed,released,calls],[1,1,1]);
+ permit=false;game.event();assert.equal((await c.attend('A',backend,low,{},undefined,'model',admission)).status,'failed');assert.deepEqual([consumed,released,calls],[2,2,1]);store.close();
+});
