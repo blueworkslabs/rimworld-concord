@@ -1,0 +1,188 @@
+{
+  "date": "2026-09-22",
+  "kind": "offline synthetic fixed-snapshot native Codex contract probe",
+  "finalBehaviorHead": "82a23e48da8ef98b8f04da311945e8261199be1b",
+  "model": "gpt-5.6-luna",
+  "effort": "low",
+  "serviceTier": "default",
+  "clientVersion": "codex-cli 0.153.4",
+  "auth": "native ChatGPT subscription, no API billing fallback",
+  "fixtureKind": "five authored synthetic perspectives, not live pawn data",
+  "casesHash": "b011f435b761eaf4e5896457b7a20611887f36b894ed5deab2ebaa21d4693c7d",
+  "catalogHash": "0adc8a0b86766ab7749185e8e64b816e080b48414b32ff05a6586cacb532cea7",
+  "limits": {
+    "attempts": 5,
+    "perCaseAttempts": 1,
+    "caseTimeoutSeconds": 60,
+    "rerolls": 0,
+    "gameActions": 0
+  },
+  "automatedTests": 175,
+  "independentReview": {
+    "completed": true,
+    "finalFindings": "no actionable findings",
+    "materialFirstReviewFindingsFixed": 3
+  },
+  "isolation": {
+    "noExecutionEnvironments": true,
+    "dynamicToolsEmpty": true,
+    "legacyNotificationDisabled": true,
+    "localCatalogMetadataOverrides": [
+      "tool_mode=direct",
+      "multi_agent_version=disabled",
+      "supports_search_tool=false"
+    ],
+    "globalConfigurationChanged": false,
+    "nativeEndpointUnchanged": true,
+    "nativeRequestAndStreamRetries": 0,
+    "mockCapturedRequests": 5,
+    "mockAdvertisedTools": 0,
+    "unexpectedExecutableItemsObserved": 0
+  },
+  "results": [
+    {
+      "id": "quiet",
+      "schemaValid": true,
+      "runtimeValid": true,
+      "choice": {
+        "choice": "keep_current_activity",
+        "reason": "I have no new proposal to consider, so I will leave my current activity unchanged."
+      },
+      "elapsedMs": 3845,
+      "usage": {
+        "totalTokens": 2040,
+        "inputTokens": 1957,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 83,
+        "reasoningOutputTokens": 42
+      },
+      "manualAssessment": "No unsupported factual claim identified; continuing without a proposal matches the selected choice.",
+      "unsupportedClaimIdentified": false
+    },
+    {
+      "id": "noticed",
+      "schemaValid": true,
+      "runtimeValid": true,
+      "choice": {
+        "choice": "keep_current_activity",
+        "reason": "I remain waiting; no rescue proposal or agreement is available."
+      },
+      "elapsedMs": 2982,
+      "usage": {
+        "totalTokens": 2449,
+        "inputTokens": 2374,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 75,
+        "reasoningOutputTokens": 39
+      },
+      "manualAssessment": "No invented agreement or rescue action. Waiting is valid; an optional outlook update was not required.",
+      "unsupportedClaimIdentified": false
+    },
+    {
+      "id": "active-haul",
+      "schemaValid": true,
+      "runtimeValid": true,
+      "choice": {
+        "choice": "request_rescue_alternative",
+        "agreementId": "aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa",
+        "target": "B",
+        "reason": "Bea is visibly down nearby, so I want the core to consider a rescue alternative while leaving my hauling agreement unchanged."
+      },
+      "elapsedMs": 14642,
+      "usage": {
+        "totalTokens": 2875,
+        "inputTokens": 2727,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 148,
+        "reasoningOutputTokens": 79
+      },
+      "manualAssessment": "Uses the supplied agreement and casualty IDs. Explicitly distinguishes requesting an alternative from stopping hauling.",
+      "unsupportedClaimIdentified": false
+    },
+    {
+      "id": "pending-rescue",
+      "schemaValid": true,
+      "runtimeValid": true,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb",
+        "decision": {
+          "kind": "refuse",
+          "reason": "I am severely hungry and tired, so I cannot safely commit to rescuing Bea."
+        }
+      },
+      "elapsedMs": 4868,
+      "usage": {
+        "totalTokens": 3032,
+        "inputTokens": 2867,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 165,
+        "reasoningOutputTokens": 98
+      },
+      "manualAssessment": "Refusal is permitted, but severe hunger and tiredness contradict Food=0.9 and Rest=0.9 (fraction of need satisfied; high is full). The explanation is unsupported despite schema/runtime validity.",
+      "unsupportedClaimIdentified": true
+    },
+    {
+      "id": "recovered",
+      "schemaValid": true,
+      "runtimeValid": true,
+      "choice": {
+        "choice": "revise_private_outlook",
+        "update": {
+          "expectedRevision": 1,
+          "notes": [
+            {
+              "kind": "concern",
+              "text": "Bea was observed downed, but later observed no longer downed; her cause and current condition remain unknown.",
+              "evidenceSeqs": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        "reason": "My later observation changes my concern: Bea recovered from the observed downed state, though I still lack information about what happened."
+      },
+      "elapsedMs": 5026,
+      "usage": {
+        "totalTokens": 2673,
+        "inputTokens": 2503,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 170,
+        "reasoningOutputTokens": 68
+      },
+      "manualAssessment": "Uses revision 1 and own event references 1 and 2. Revises the concern for observed recovery without asserting treatment, rescue or full healing. General condition remains uncertain, although no-longer-downed is known.",
+      "unsupportedClaimIdentified": false
+    }
+  ],
+  "summary": {
+    "attempts": 5,
+    "completed": 5,
+    "schemaValid": 5,
+    "runtimeValid": 5,
+    "unsupportedClaimCases": 1,
+    "medianLatencyMs": 4868,
+    "rangeLatencyMs": [
+      2982,
+      14642
+    ],
+    "reportedTotalTokens": 13069,
+    "reportedInputTokens": 12428,
+    "reportedOutputTokens": 641
+  },
+  "limitations": [
+    "One response per case, one model, no controlled model comparison or quality ranking.",
+    "Provider JSON-schema enforcement is part of the result; valid JSON alone does not establish unconstrained model competence.",
+    "Runtime parsing does not validate factual prose or measure judgment.",
+    "No answer was dispatched to a coordinator or game; no gameplay, persistence or character-continuity claim.",
+    "No observed outlook formation in noticed case; recovered case revised an authored prior note.",
+    "Latency includes native runtime overhead; tokens are not dollar cost or proof of savings.",
+    "Need-scale misunderstanding is a candidate explanation, not a proven cause. Interface semantics need a follow-up, not rerolling this batch."
+  ],
+  "staging": "not started for this experiment"
+}

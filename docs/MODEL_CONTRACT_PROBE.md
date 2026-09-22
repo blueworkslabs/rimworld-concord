@@ -70,3 +70,31 @@ Sources: [App server](https://learn.chatgpt.com/docs/app-server),
 [model catalog setting](https://learn.chatgpt.com/docs/config-file/config-reference),
 [models](https://learn.chatgpt.com/docs/models),
 [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+
+## First bounded result — 2026-09-22
+
+[Retained evidence](evidence/luna-contract.json): all five native Luna responses
+completed and passed the generated schema plus the existing contextual runtime
+validator. The quiet and noticed cases continued unchanged. Active hauling
+requested a rescue alternative using the supplied IDs without claiming to stop
+work. The pending-offer case refused. Recovery revised the authored prior concern
+using the two supplied experience references. No choice was executed.
+
+One explanation failed factual grounding: the refusal claimed severe hunger and
+tiredness despite Food and Rest both being 0.9. Native observations export these
+as `CurLevelPercentage`, where higher means more satisfied, not more urgent.
+Refusal is allowed; the unsupported reason is the defect in this response.
+The existing prompt mentions a 35-percent execution threshold but does not
+explicitly define the generic need level's range and direction. Misinterpreting
+that scale is a plausible explanation, not a demonstrated cause.
+
+Median response latency was 4.868 seconds (range 2.982–14.642), including native
+runtime overhead. Reported usage totaled 13,069 tokens. There were five attempts,
+no rerolls and no game calls. These are not price estimates, comparative model
+rankings or evidence of live gameplay. Constrained-output enforcement is part of
+this result, not a test of unconstrained JSON generation.
+
+Next: make need-state semantics explicit in the shared model-facing interface,
+then use a fresh, fixed high/low/unknown-state check. Preserve this batch unchanged;
+do not force acceptance or treat refusal itself as failure. Luna remains an
+offline compatibility probe, not an installed pawn backend.
