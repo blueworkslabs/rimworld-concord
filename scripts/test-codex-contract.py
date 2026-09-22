@@ -5,6 +5,12 @@ class GuardTests(unittest.TestCase):
   p.assert_no_tools({'model':p.MODEL,'tools':[],'input':[{'type':'additional_tools','tools':[]}]})
   for request in [{'model':p.MODEL,'tools':[{'name':'shell'}]},{'model':p.MODEL,'input':[{'type':'additional_tools','tools':[{'type':'namespace','name':'functions','tools':[]}]}]},{'model':'wrong'}]:
    with self.assertRaises(AssertionError):p.assert_no_tools(request)
+ def test_only_recognized_fixed_suites_and_exact_repetition_order_are_allowed(self):
+  for version,ids in [('concord-contract-v1',p.CASE_IDS),('concord-perspective-v1',p.PERSPECTIVE_IDS)]:
+   suite={'version':version,'authored':True,'cases':[{'id':i} for i in ids]}
+   self.assertEqual(len(p.validate_suite(suite)),len(ids))
+   suite['cases'].append(suite['cases'][0])
+   with self.assertRaises(AssertionError):p.validate_suite(suite)
  def test_native_configuration_has_no_provider_or_auth_fallback(self):
   c=p.config(pathlib.Path('/tmp/frozen-catalog.json'));self.assertEqual(c['model_provider'],p.NATIVE_PROVIDER);self.assertNotIn('model_providers.openai',c)
   provider=c['model_providers.'+p.NATIVE_PROVIDER];self.assertEqual(provider['base_url'],p.NATIVE_URL);self.assertIs(provider['requires_openai_auth'],True);self.assertEqual(c['notify'],[])

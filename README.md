@@ -6,33 +6,13 @@ An experimental foundation for an ancient AI core and three autonomous colonists
 
 ## Status
 
-A bounded experimental vertical slice, not a playable campaign or unattended AI colony:
+An experimental vertical slice, not a playable campaign or unattended AI colony:
 
-- A core proposes movement, bounded hauling or rescue; an identity-bound pawn accepts, refuses, or counterproposes.
-- Accepted movement, hauling or rescue becomes a real native RimWorld job; refusals and counters do not execute it.
-- Coordinator persists character memories, commitments and an ordered audit trail in SQLite.
-- Duplicate action IDs do not cause duplicate effects; game reload creates a new epoch, rejecting old decisions.
-- Quiescent checkpoints pair an immutable game save/hash with character state; restore forks a timeline.
-- Bounded asynchronous decisions expose `deliberating` activity while native simulation can continue.
-- Self-perspectives include native traits, skills, needs, surviving memories and direct relations.
-- Selected native events are archived, routed and projected only into their owning pawn's experience stream.
-- An expiring in-game thinking badge appears during proposal or event-triggered deliberation without pausing simulation.
-- A bounded attention pump consumes captured events, coalesces repeated signals and applies pawn-owned responses; verified with scripted backends.
-- A bounded Jev appraisal adapter is implemented against the documented API with mocked tests, one live synthetic fixture and two real-game live appraisals. Both game scores retained native behavior. See the [bounded live runner](docs/LIVE_APPRAISAL.md).
-
-- A tool-isolated Claude Code Max backend completed one live pawn decision and real movement. A subsequent reliability trial completed event-triggered refusal in both paused and continuous modes, with paired and cold restore verified. See [live deliberation](docs/LIVE_DELIBERATION.md).
-
-A subsequent [three-pawn negotiation trial](docs/NEGOTIATION.md) completed a live counter → revised offer → fresh acceptance → movement exchange. Three real self-views plus labelled authored preferences were checked over two sequential decisions each; the core replies were scripted. Paired and cold restore passed. This is not emergent-personality evidence.
-
-[Bounded hauling](docs/HAULING.md) adds exact item/storage choices and pawn-owned consent for up to three trips, with withdrawal, needs and expiry stops. Scripted multi-trip/cold-restore checks and a live three-pawn negotiation retained both delivered supplies and a rejected trip. Active-job checkpoints and long-run character quality remain unproven.
-
-[Bounded rescue](docs/RESCUE.md) adds one exact downed colonist / medical-bed agreement, with pawn-owned withdrawal and native validation. This is not capture or treatment. A bounded live [request and replacement trial](docs/ALTERNATIVE_REQUESTS.md) completed exact-bed rescue; broader judgment remains unproved.
-
-The read-only [Concord crew log](docs/CREW_LOG.md) separates addressed messages from recorded outcomes and shows receipt-based agreement progress. Scripted native UI and game-only / paired / cold restore checks passed; private reflections are excluded. Future character, social and human-contact directions are recorded in the [playable plan](docs/PLAYABLE_DIRECTION.md).
-
-Explicit [timing modes](docs/DECISION_TIMING.md) preserve human pauses and let Chitchat and DeepTalk queue without cancelling thought. Continuous play remains the default.
-
-See [acceptance](docs/ACCEPTANCE.md) for measured results and limitations, and [roadmap](docs/ROADMAP.md) for what is not built.
+- Pawns negotiate and carry out bounded movement, hauling and rescue; the core is still scripted.
+- Consent, native outcome checks and paired/cold restore are enforced below the model layer.
+- The in-game crew log separates addressed messages, observed events and work records; private outlooks remain private.
+- Claude has bounded real-game evidence; Luna has offline contract evidence, not a game backend. Sustained character quality remains unproved.
+- Current focus: self-describing perspectives and broader fixed cases. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
 
 ## Layout
 

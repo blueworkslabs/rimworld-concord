@@ -61,7 +61,7 @@ test('rejected CLI outputs and failed exits retain known charges and lock overru
    let b=new ClaudeDecisionBackend(options);
    try {
     await assert.rejects(b.decide(view,new AbortController().signal),/attempt retained/);
-    assert.equal(b.summary().estimatedUsageUSD,bad.total_cost_usd);b.close();b=new ClaudeDecisionBackend(options);
+    assert.equal(b.summary().estimatedUsageUSD,bad.total_cost_usd);if(i===2){assert.equal(b.failures[0]!.stage,'parsing');assert.deepEqual(b.rawResponses[0]!.structuredOutput,{});}b.close();b=new ClaudeDecisionBackend(options);
     if(bad.total_cost_usd>0.1){await assert.rejects(b.decide(view,new AbortController().signal));assert.equal(b.summary().attempts,1);}
    }finally{b.close();}
   }

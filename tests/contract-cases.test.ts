@@ -1,3 +1,4 @@
+import {modelPerspective} from '../src/model-perspective.js';
 import {execFileSync} from 'node:child_process';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -24,7 +25,7 @@ test('Codex dialect retains disjoint choice tags and supplied IDs, does not incl
  for(const c of preparedCases()){
   assert.equal(c.schema.type,'object');assert(!JSON.stringify(c.schema).includes('oneOf'));assert(!JSON.stringify(c.schema).includes('"const"'));
   assert.deepEqual(c.schema.properties.reflection.anyOf.map((x:any)=>x.properties.choice.enum[0]),reflectionChoices(c.view).map(x=>x.choice));
-  assert.deepEqual(JSON.parse(c.prompt).perspective,c.view);assert(!JSON.parse(c.prompt).description);
+  assert.deepEqual(JSON.parse(c.prompt).perspective,modelPerspective(c.view));assert(!JSON.parse(c.prompt).description);
  }
  assert.deepEqual(codexSchema({type:'integer',const:1}),{type:'integer',enum:[1]});
 });
