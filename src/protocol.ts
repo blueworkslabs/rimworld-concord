@@ -56,7 +56,8 @@ export type Character = {id:string;name:string;memories:string[];commitment?:str
   attention?:AttentionProgress;
   reflections?:{tick:number;throughSeq:number;backend:string;reason:string}[];
 };
-export type Proposal = {id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;rescueMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
+export type AlternativeRequest = {id:string;pawn:string;agreementId:string;target:string;mapId:number;reason:string;status:'pending'|'offered'|'declined'|'closed';replyReason?:string;proposalId?:string};
+export type Proposal = {replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;rescueMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;
@@ -66,6 +67,6 @@ export type Domain = {
   eventCursor?:number;
   schema:1;world:string;epoch:string;branch:string;
   characters:Record<string,Character>;proposals:Record<string,Proposal>;
-  outcomes:Record<string,Receipt>;
+  outcomes:Record<string,Receipt>;requests?:Record<string,AlternativeRequest>;
 };
 export type Event = {branch:string;kind:string;actor:string;data:unknown};

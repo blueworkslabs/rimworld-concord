@@ -484,3 +484,40 @@ Later changes publish factual evidence and reviewed diary prose only.
 Live paired and full cold restore preserved the agreed continuation, all three
 hauling outcomes and one casualty sighting, with no further inference. Host
 draining and cleanup reported no outstanding work.
+
+## Pawn-originated rescue alternatives (2026-09-22)
+
+- **139/139 automated checks.** Requesting while hauling grants no action consent
+  and does not stop work. Scope, duplicate requests, privacy projection, refusal,
+  counters, fresh consent, uncertain cancellation, timeout, late receipts, native
+  final-trip completion and reopen behavior are covered. No mod changes.
+- Native scripted acceptance completed one haul/ten steel, interrupted the next
+  trip and delivered the casualty to the exact bed. Refusal kept the agreement
+  and completed all three hauls/thirty steel. Both final-build paired restores
+  passed; an earlier successful handover also passed cold restore.
+- The initial delayed rehearsal is retained: the request preserved hauling, but
+  the old agreement finished before the core reply. Stale replacement was rejected
+  and the runner reported a later-round failure. No inference was used.
+  [Scripted evidence](evidence/alternative-scripted.json).
+
+Live, Alvin accepted three ten-unit hauling trips, locally noticed Beatrice,
+requested a rescue alternative while keeping his agreement, then accepted the
+scripted core's concrete replacement. Two trips completed: **twenty steel**. The
+third never started. Beatrice reached the exact agreed medical sleeping spot;
+this proves rescue placement, not treatment. The acceptance explanation called
+the haul “wrapped up” despite one agreed trip remaining. That inaccurate progress
+statement is preserved, not interpreted as full agreement completion.
+
+Three Claude attempts, zero Jev calls, no rerolls; unused allowance stays unused.
+Continuous observation ended after 18.437 seconds / 1069 ticks with no paused
+samples; initial negotiation was paused. One model and two native attention
+claims. Paired and full cold restore preserved request, consent, both hauling
+outcomes and completed rescue, with no additional inference. Cleanup found no
+outstanding work. All 28 historical database files remained unchanged.
+[Live evidence](evidence/alternative-live.json).
+
+Independent Codex review found two handover defects, both fixed and reproduced
+in regression tests. Focused review of final behavior
+`f51de052ab771b177550af5669987c6d48514f65` found no further defects. Later changes
+publish factual evidence and reviewed diary prose only. This single authored
+scenario does not establish general reasoning reliability or developed personality.

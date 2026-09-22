@@ -50,3 +50,14 @@ setting. Claims coexist, release independently and expire on wall time even when
 simulation is paused. The model never receives this capability. Known mundane
 Chitchat and DeepTalk are retained for background reflection without invalidating current thought;
 other memory/health events retain conservative cancellation. See [timing policy](DECISION_TIMING.md).
+
+## Pawn-requested alternatives
+
+A deliberating pawn may communicate one locally grounded rescue request while
+retaining its running hauling agreement. The scripted core sees that explicit
+message, not the pawn's private reflection, and may decline or offer a concrete
+same-patient replacement. Refusal and countering preserve the old agreement;
+acceptance authorizes a checked handover, not simultaneous jobs. Confirmed old-job
+cancellation precedes rescue dispatch; completed old work invalidates stale
+replacement consent. Interrupted handovers persist without automatic switch
+retries. See [bounded request semantics](ALTERNATIVE_REQUESTS.md).

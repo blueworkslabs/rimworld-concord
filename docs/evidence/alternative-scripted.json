@@ -1,0 +1,514 @@
+{
+  "date": "2026-09-22",
+  "kind": "native scripted request and replacement branches",
+  "finalBehaviorHead": "f51de052ab771b177550af5669987c6d48514f65",
+  "automatedTests": 139,
+  "nativeModChanged": false,
+  "inferenceCalls": 0,
+  "branches": [
+    {
+      "branch": "dry-accept",
+      "passed": false,
+      "responseDelaysMs": {
+        "scriptedReflectionDelayMs": 1500,
+        "scriptedRescueDelayMs": 2000
+      },
+      "responses": [
+        {
+          "mode": "decision",
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        },
+        {
+          "mode": "reflection",
+          "output": {
+            "kind": "request_rescue",
+            "agreementId": "8c164c0c-ddcd-4c9f-adc6-97b3f2a81b28",
+            "target": "Thing_Human408",
+            "reason": "Scripted reconsideration after actual local sighting"
+          }
+        }
+      ],
+      "offers": [
+        {
+          "id": "8c164c0c-ddcd-4c9f-adc6-97b3f2a81b28",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 494
+        }
+      ],
+      "requests": [
+        {
+          "id": "c6cb71a0-4856-4074-b98b-4f70ebf30e1e",
+          "pawn": "Thing_Human405",
+          "agreementId": "8c164c0c-ddcd-4c9f-adc6-97b3f2a81b28",
+          "target": "Thing_Human408",
+          "mapId": 0,
+          "reason": "Scripted reconsideration after actual local sighting",
+          "status": "pending"
+        }
+      ],
+      "outcomes": {
+        "completedHaulTrips": 3,
+        "deliveredSteel": 30,
+        "completedRescues": 0
+      },
+      "nativeOutcomes": [
+        {
+          "id": "6aa3b793-77ce-475a-b5c9-2075df3462c5",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 3,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 3602
+        },
+        {
+          "id": "44cba769-bfe9-4011-a74e-0e11cd85b6f2",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 20,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 3602
+        },
+        {
+          "id": "0e16e9c7-2a9a-4a62-b435-5de3fa0a98bf",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 27,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 3602
+        }
+      ],
+      "pairedRestore": true,
+      "coldRestore": false,
+      "error": "Error: Later offer round failed; evidence retained",
+      "laterError": "Error: Requested agreement is no longer active",
+      "cleanup": {
+        "operatorStops": [],
+        "errors": []
+      }
+    },
+    {
+      "branch": "dry-fast",
+      "passed": true,
+      "responseDelaysMs": {
+        "scriptedReflectionDelayMs": 0,
+        "scriptedRescueDelayMs": 0
+      },
+      "responses": [
+        {
+          "mode": "decision",
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        },
+        {
+          "mode": "reflection",
+          "output": {
+            "kind": "request_rescue",
+            "agreementId": "8292c8dc-eb58-435c-a4e0-61a6e8eb202e",
+            "target": "Thing_Human408",
+            "reason": "Scripted reconsideration after actual local sighting"
+          }
+        },
+        {
+          "mode": "decision",
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        }
+      ],
+      "offers": [
+        {
+          "id": "8292c8dc-eb58-435c-a4e0-61a6e8eb202e",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 487
+        },
+        {
+          "id": "fd73b6e1-fa59-4045-a818-34493a028958",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 1281
+        }
+      ],
+      "requests": [
+        {
+          "id": "63a4189c-600c-4a88-8d13-a375908f5944",
+          "pawn": "Thing_Human405",
+          "agreementId": "8292c8dc-eb58-435c-a4e0-61a6e8eb202e",
+          "target": "Thing_Human408",
+          "mapId": 0,
+          "reason": "Scripted reconsideration after actual local sighting",
+          "status": "closed",
+          "replyReason": "In response to your request: would you replace your current hauling agreement with this specific rescue? Acceptance ends that agreement after confirmed cancellation; refusal or counter keeps it. This is not treatment.",
+          "proposalId": "fd73b6e1-fa59-4045-a818-34493a028958"
+        }
+      ],
+      "outcomes": {
+        "completedHaulTrips": 1,
+        "deliveredSteel": 10,
+        "completedRescues": 1
+      },
+      "nativeOutcomes": [
+        {
+          "id": "77df650b-3d84-4d57-ad00-4774e709f766",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 3,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 3602
+        },
+        {
+          "id": "9ec35771-2693-49b8-a002-0a10f02e6e56",
+          "actor": "Thing_Human405",
+          "status": "interrupted",
+          "reason": "Pawn withdrew work commitment",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 14,
+          "count": 10,
+          "delivered": 0,
+          "untilTick": 3602
+        },
+        {
+          "id": "340e3a1b-7316-40b2-bf31-fa9e3ce0cd63",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed casualty to agreed medical bed; treatment not implied",
+          "kind": "rescue",
+          "thing": "",
+          "target": "Thing_Human408",
+          "bed": "Thing_SleepingSpot990001",
+          "x": 96,
+          "z": 82,
+          "jobId": 20,
+          "count": 0,
+          "delivered": 1,
+          "untilTick": 2003
+        }
+      ],
+      "pairedRestore": true,
+      "coldRestore": true,
+      "error": null,
+      "laterError": null,
+      "cleanup": {
+        "operatorStops": [],
+        "errors": []
+      }
+    },
+    {
+      "branch": "dry-refuse",
+      "passed": true,
+      "responseDelaysMs": {
+        "scriptedReflectionDelayMs": 0,
+        "scriptedRescueDelayMs": 0
+      },
+      "responses": [
+        {
+          "mode": "decision",
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        },
+        {
+          "mode": "reflection",
+          "output": {
+            "kind": "request_rescue",
+            "agreementId": "570e4f5e-fc59-4746-a2ae-dd3dc81fc245",
+            "target": "Thing_Human408",
+            "reason": "Scripted reconsideration after actual local sighting"
+          }
+        },
+        {
+          "mode": "decision",
+          "output": {
+            "kind": "refuse",
+            "reason": "Scripted retention of original agreement"
+          }
+        }
+      ],
+      "offers": [
+        {
+          "id": "570e4f5e-fc59-4746-a2ae-dd3dc81fc245",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 538
+        },
+        {
+          "id": "4a831ea4-1a66-4585-9379-4614bd7731df",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "refuse",
+            "reason": "Scripted retention of original agreement"
+          },
+          "elapsedMs": 872
+        }
+      ],
+      "requests": [
+        {
+          "id": "46cde5af-ea8f-4362-9d8d-788b775a4cb5",
+          "pawn": "Thing_Human405",
+          "agreementId": "570e4f5e-fc59-4746-a2ae-dd3dc81fc245",
+          "target": "Thing_Human408",
+          "mapId": 0,
+          "reason": "Scripted reconsideration after actual local sighting",
+          "status": "closed",
+          "replyReason": "In response to your request: would you replace your current hauling agreement with this specific rescue? Acceptance ends that agreement after confirmed cancellation; refusal or counter keeps it. This is not treatment.",
+          "proposalId": "4a831ea4-1a66-4585-9379-4614bd7731df"
+        }
+      ],
+      "outcomes": {
+        "completedHaulTrips": 3,
+        "deliveredSteel": 30,
+        "completedRescues": 0
+      },
+      "nativeOutcomes": [
+        {
+          "id": "76fcd68d-00cb-4589-86d9-659511513be0",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 3,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 3602
+        },
+        {
+          "id": "2ddd763b-613e-4674-8f86-72b7cf90c646",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 12,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 3602
+        },
+        {
+          "id": "c07e66d9-a5df-4d09-b9b4-7a9f572acecb",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 21,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 3602
+        }
+      ],
+      "pairedRestore": true,
+      "coldRestore": false,
+      "error": null,
+      "laterError": null,
+      "cleanup": {
+        "operatorStops": [],
+        "errors": []
+      }
+    },
+    {
+      "branch": "dry-final",
+      "passed": true,
+      "responseDelaysMs": {
+        "scriptedReflectionDelayMs": 0,
+        "scriptedRescueDelayMs": 0
+      },
+      "responses": [
+        {
+          "mode": "decision",
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        },
+        {
+          "mode": "reflection",
+          "output": {
+            "kind": "request_rescue",
+            "agreementId": "d4307cf0-f93a-4c3a-bc61-0445080a793b",
+            "target": "Thing_Human408",
+            "reason": "Scripted reconsideration after actual local sighting"
+          }
+        },
+        {
+          "mode": "decision",
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        }
+      ],
+      "offers": [
+        {
+          "id": "d4307cf0-f93a-4c3a-bc61-0445080a793b",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 547
+        },
+        {
+          "id": "90ddfe77-696f-4950-ae86-0047410a4dc1",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 1296
+        }
+      ],
+      "requests": [
+        {
+          "id": "d15f6c38-39bf-490e-90c9-5c585f04446e",
+          "pawn": "Thing_Human405",
+          "agreementId": "d4307cf0-f93a-4c3a-bc61-0445080a793b",
+          "target": "Thing_Human408",
+          "mapId": 0,
+          "reason": "Scripted reconsideration after actual local sighting",
+          "status": "closed",
+          "replyReason": "In response to your request: would you replace your current hauling agreement with this specific rescue? Acceptance ends that agreement after confirmed cancellation; refusal or counter keeps it. This is not treatment.",
+          "proposalId": "90ddfe77-696f-4950-ae86-0047410a4dc1"
+        }
+      ],
+      "outcomes": {
+        "completedHaulTrips": 1,
+        "deliveredSteel": 10,
+        "completedRescues": 1
+      },
+      "nativeOutcomes": [
+        {
+          "id": "4b9c9424-1166-4895-84b1-6ac58113ef8a",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 3,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 3602
+        },
+        {
+          "id": "8d2430d2-ca84-4e02-b788-55a601209990",
+          "actor": "Thing_Human405",
+          "status": "interrupted",
+          "reason": "Pawn withdrew work commitment",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "target": "",
+          "bed": "",
+          "x": 88,
+          "z": 80,
+          "jobId": 16,
+          "count": 10,
+          "delivered": 0,
+          "untilTick": 3602
+        },
+        {
+          "id": "08b91f42-0b90-4f89-9331-a3c39a431c3b",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed casualty to agreed medical bed; treatment not implied",
+          "kind": "rescue",
+          "thing": "",
+          "target": "Thing_Human408",
+          "bed": "Thing_SleepingSpot990001",
+          "x": 96,
+          "z": 82,
+          "jobId": 20,
+          "count": 0,
+          "delivered": 1,
+          "untilTick": 2004
+        }
+      ],
+      "pairedRestore": true,
+      "coldRestore": false,
+      "error": null,
+      "laterError": null,
+      "cleanup": {
+        "operatorStops": [],
+        "errors": []
+      }
+    }
+  ],
+  "notes": [
+    "Initial delayed rehearsal retained: request did not stop hauling, but all three trips finished before the reply; stale replacement rejected and runner reported later-round failure.",
+    "Fast scripted acceptance completed exact-bed rescue after one delivered haul and interrupted next trip; refusal completed all three hauls.",
+    "dry-fast ran on initial behavior ed4fadf and passed cold restore; dry-refuse and dry-final ran on final behavior f51de052.",
+    "Scripted timing is not evidence that a live model will request or accept rescue."
+  ]
+}

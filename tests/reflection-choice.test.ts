@@ -34,3 +34,11 @@ test('provider schema names concrete effects and parsing preserves the original 
  const parsed=parseClaudeResult({type:'result',subtype:'success',is_error:false,total_cost_usd:.001,num_turns:1,modelUsage:{[CLAUDE_MODEL]:{}},structured_output:{reflection:choice}},'reflection');
  assert.deepEqual(parsed.providerChoice,choice);assert.equal(parsed.output.kind,'withdraw');
 });
+test('requesting a rescue alternative preserves the current agreement and only names an observed subject',()=>{
+ const view=choiceView();view.pawn.casualties={epoch:'e',tick:1,mapId:1,radius:12,observations:[{target:'B',name:'Bee',x:4,z:5}]};
+ const request=ReflectionChoice.parse({choice:'request_rescue_alternative',agreementId:id,target:'B',reason:'Can we discuss helping?'});
+ validateReflectionChoice(request,view);assert.deepEqual(reflectionFromChoice(request),{kind:'request_rescue',agreementId:id,target:'B',reason:'Can we discuss helping?'});
+ assert.throws(()=>validateReflectionChoice({...request,target:'unseen'} as any,view));
+ view.requests=[{id:other,pawn:'A',agreementId:id,target:'B',mapId:1,reason:'Already asked',status:'declined'}];
+ assert.throws(()=>validateReflectionChoice(request,view));assert(!reflectionChoices(view).some(c=>c.choice==='request_rescue_alternative'));
+});
