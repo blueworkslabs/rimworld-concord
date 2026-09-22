@@ -1,0 +1,108 @@
+{
+  "date": "2026-09-22",
+  "kind": "bounded live commitment reconsideration, scripted core",
+  "reviewedBehaviorHead": "13ee494cf2e27e5dda17f9b7cacdcb9cf7ed2894",
+  "runnerCleanupAndPersistencePassed": true,
+  "liveRescueCompleted": false,
+  "actor": "Alvin",
+  "patient": "Beatrice",
+  "fixture": "Authored anesthesia, steel, storage and bed geometry. Patient already down outside initial local view. No authored personality or relationship overrides.",
+  "initialOffer": {
+    "kind": "haul",
+    "countPerTrip": 10,
+    "maxTrips": 3,
+    "decision": "accept"
+  },
+  "discovery": {
+    "nativeTick": 52,
+    "observerNativeJob": "Concord_Haul",
+    "intentionStatus": "running"
+  },
+  "reflection": {
+    "nativeTickAtView": 72,
+    "nativeJobAtView": "Concord_Haul",
+    "intentionStatus": "running",
+    "decision": {
+      "kind": "withdraw",
+      "reason": "Beatrice is downed close by and I can't in good conscience keep hauling steel while a colonist needs carrying to safety. Withdrawing the haul intention so I'm free to respond."
+    },
+    "elapsedMs": 5180,
+    "remainingTripsStarted": 0
+  },
+  "rescue": {
+    "freshOfferAfterSettledWithdrawal": true,
+    "decision": "cancelled before valid response",
+    "trigger": "Native DeepTalk memory at tick667",
+    "offerRetired": true,
+    "accepted": false,
+    "nativeJobCreated": false,
+    "patientRemainedOnGround": true
+  },
+  "outcomes": {
+    "completedHaulTrips": 1,
+    "deliveredSteel": 10,
+    "completedRescues": 0
+  },
+  "observation": {
+    "wallMs": 16295,
+    "ticks": 939,
+    "samples": 25,
+    "pausedSamples": 0,
+    "thoughtSamples": 13,
+    "ticksDuringThought": 409,
+    "attention": [
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 2
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 6
+      }
+    ],
+    "decisions": 3,
+    "reflections": 1,
+    "appraisals": 0,
+    "operatorStops": [],
+    "rescueOfferStarted": true,
+    "connected": true,
+    "pump": {
+      "started": 2,
+      "nativeStarted": 1,
+      "modelStarted": 1,
+      "pending": 0,
+      "stopped": true
+    }
+  },
+  "accounting": {
+    "ceilings": {
+      "claudeAttempts": 6,
+      "jevAppraisals": 4
+    },
+    "used": {
+      "claudeAttempts": 3,
+      "returnedAnswers": 2,
+      "cancelledAttempts": 1,
+      "jevAppraisals": 0
+    },
+    "noRerolls": true,
+    "historicalLedgerFilesUnchanged": 15,
+    "unusedAllowanceNotSpent": true,
+    "note": "Subscription API-equivalent reservations are not cash charges. Cancelled attempt retains its reservation; no complete cost is claimed for it."
+  },
+  "persistence": {
+    "paired": true,
+    "cold": true,
+    "noColdInference": true,
+    "sameSubjectSightingsAfterCold": 1,
+    "hostDrained": true,
+    "finalCleanup": {
+      "operatorStops": [],
+      "errors": []
+    }
+  },
+  "limitations": "Authored anesthesia/supplies/bed geometry; no personality or relationship overrides. Patient already downed outside initial local view; discovery, not a new injury. Scripted core. Initial consent paused, discovery/reflection/rescue negotiation continuous. One discovery-triggered model attention turn; preexisting events queue until sighting. Routine and model attention bounded separately. Rescue only follows settled pawn-chosen withdrawal and fresh consent. At most one same-kind counter revision per offer. End when branch settles after 15s or two minutes; no rerolls, no inference continuation after cap. Not a causal character-comparison experiment.",
+  "nextQuestion": "Relevance-aware social-memory interruption beyond the existing Chitchat exception; DeepTalk policy was not changed and trial was not rerun."
+}

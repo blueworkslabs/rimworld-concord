@@ -349,3 +349,49 @@ This is scripted mechanical evidence, not live rescue judgment, a naturally
 occurring emergency, treatment, combat safety or long-term character behavior.
 No historical live-trial allowance was reopened. Active-job checkpointing remains
 unsupported. See [rescue contract](RESCUE.md).
+
+## Local casualty discovery and commitment reconsideration (2026-09-22)
+
+- `npm test`: **111/111**. Split native/model attention bounds include fresh-state
+  escalation protection and exhaustion in either direction; six-attempt ledger
+  survives reopen. New staging entry points reject missing locks/direct misuse.
+  Relay tests retain a returned answer even when the game declines application,
+  and accept a 100 KB final report without enlarging inference-request limits.
+- Native mod compiled against the installed game. Scripted discovery occurred
+  during a running haul: withdrawal interrupted it, a fresh rescue agreement
+  delivered the patient to the exact bed. The alternative continuation branch
+  completed three trips/thirty steel without a rescue offer. Paired restore and
+  cold restart of the still-downed-patient branch preserved one sighting, not a
+  repeated trigger. [Scripted evidence](evidence/reconsider-scripted.json).
+- **Live, one actor:** Alvin accepted up to three ten-unit trips. Locally seeing
+  downed Beatrice started reflection during his native hauling job. His first
+  trip completed while he thought; his answer withdrew the remaining agreement.
+  The remaining two trips never started. Ten steel delivered, not thirty.
+- The scripted core offered a separate rescue only after withdrawal settled.
+  A new native **DeepTalk** memory interrupted that decision before a valid
+  answer returned. The unanswered offer was retired, no rescue job was created,
+  and the patient remained on the ground. No reroll or unused-allowance extension.
+- Three Claude subscription attempts (two returned responses, one cancelled),
+  zero Jev calls. The casualty took the direct deliberation route. Observation
+  ended at the prescribed settled-branch condition after about sixteen seconds,
+  not two full minutes; zero paused samples during that window. Attention used
+  one model and one native claim, not the 96-turn native ceiling.
+
+The result demonstrates **a live decision changing unfinished work**, not a live
+completed rescue, medical judgment, relationship causation or developed
+personality. The patient was anesthetized in an authored geometric fixture;
+there was no newly occurring injury. No personality/relationship overrides.
+Queued attention was enabled at discovery, not unrestricted general scheduling.
+The existing non-Chitchat memory interruption rule remains a concrete follow-up:
+DeepTalk must not automatically be assumed to invalidate an unrelated rescue
+question. See [fixed policy](RECONSIDERATION.md).
+
+Live paired and **full cold restore passed**, with no additional inference. Both
+preserved the delivered haul, stopped remaining agreement, retired unanswered
+rescue offer and patient still on the ground. One same-subject sighting survived;
+host draining and game cleanup reported no outstanding work. Fifteen historical
+trial database hashes stayed unchanged. [Live receipt](evidence/reconsider-live.json).
+Private independent Codex review covered behavior through
+`13ee494cf2e27e5dda17f9b7cacdcb9cf7ed2894`; confirmed evidence-retention issues were
+fixed and the focused final review found no actionable defects. Subsequent
+changes only publish factual evidence and reviewed diary prose.
