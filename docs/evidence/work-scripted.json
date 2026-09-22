@@ -1,0 +1,24 @@
+{
+  "at": "2026-09-22T06:57:28.849Z",
+  "passed": true,
+  "completedTrips": 12,
+  "offers": 6,
+  "hostDrained": true,
+  "cleanup": {
+    "operatorStops": [],
+    "errors": []
+  },
+  "usage": {
+    "claude": {
+      "attempts": 0,
+      "reservedEquivalentUSD": 0,
+      "estimatedUsageUSD": 0
+    },
+    "jev": {
+      "calls": 0,
+      "reservedUSD": 0,
+      "reportedUSD": 0
+    }
+  },
+  "limit": "Fifteen-second scripted runner rehearsal, not live-model evidence. Earlier incomplete-participation dry-run retained privately; fresh fixture was generated before any live inference."
+}

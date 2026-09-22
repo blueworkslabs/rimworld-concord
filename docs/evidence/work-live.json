@@ -1,0 +1,1049 @@
+{
+  "at": "2026-09-22T07:06:30.820Z",
+  "passed": true,
+  "kind": "work-live",
+  "game": {
+    "at": "2026-09-22T07:01:03.012Z",
+    "runId": "6c677ee9-d1b2-4c5b-aa4f-b32fe62271f7",
+    "mode": "live",
+    "passed": true,
+    "offers": [
+      {
+        "id": "9f1b0d32-d3f6-4543-8455-559e7920a2b1",
+        "pawn": "Thing_Human405",
+        "decision": {
+          "kind": "accept",
+          "reason": "Steel needs moving and I'm well-rested and fed. Two trips of ten units to the storage cell works for me. I'll get it done."
+        },
+        "elapsedMs": 4481
+      },
+      {
+        "id": "041a0a22-14cb-42d7-8bc9-db59ab2a3c50",
+        "pawn": "Thing_Human408",
+        "decision": {
+          "kind": "accept",
+          "reason": "Food and rest are both high, and I've nothing pressing right now. Two trips of ten steel is straightforward work \u2014 I'll get it done."
+        },
+        "elapsedMs": 5843
+      },
+      {
+        "id": "3c974803-ee55-46bb-ae24-9f700135ca03",
+        "pawn": "Thing_Human411",
+        "decision": {
+          "kind": "accept",
+          "reason": "Needs are solid, stack is close by. I'll haul two trips of ten steel. Makes sense to keep the colony supplied."
+        },
+        "elapsedMs": 5389
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "no-two-trip-observed-option"
+      },
+      {
+        "pawn": "Thing_Human408",
+        "status": "no-two-trip-observed-option"
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "no-two-trip-observed-option"
+      }
+    ],
+    "initial": [
+      {
+        "pawn": "Thing_Human405",
+        "hauling": {
+          "epoch": "40bcaaab7ecf459eaeaf32e387aefc9d",
+          "tick": 2,
+          "mapId": 0,
+          "status": "available",
+          "options": [
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1883",
+              "x": 80,
+              "z": 80,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            },
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1883",
+              "x": 81,
+              "z": 85,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            },
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1885",
+              "x": 80,
+              "z": 80,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            },
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1885",
+              "x": 81,
+              "z": 85,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            }
+          ],
+          "supplies": [
+            {
+              "thing": "Thing_Steel1883",
+              "label": "steel",
+              "x": 80,
+              "z": 80,
+              "sourceCount": 75,
+              "destinationFree": 75
+            },
+            {
+              "thing": "Thing_Steel1883",
+              "label": "steel",
+              "x": 81,
+              "z": 85,
+              "sourceCount": 75,
+              "destinationFree": 75
+            },
+            {
+              "thing": "Thing_Steel1885",
+              "label": "steel",
+              "x": 80,
+              "z": 80,
+              "sourceCount": 75,
+              "destinationFree": 75
+            },
+            {
+              "thing": "Thing_Steel1885",
+              "label": "steel",
+              "x": 81,
+              "z": 85,
+              "sourceCount": 75,
+              "destinationFree": 75
+            }
+          ]
+        },
+        "facts": [
+          {
+            "key": "need",
+            "value": "Mood",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Food",
+            "level": 0.800000011920929
+          },
+          {
+            "key": "need",
+            "value": "Rest",
+            "level": 0.9760115146636963
+          },
+          {
+            "key": "need",
+            "value": "Joy",
+            "level": 0.5093969106674194
+          },
+          {
+            "key": "need",
+            "value": "Beauty",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Comfort",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Indoors",
+            "level": 1
+          },
+          {
+            "key": "need",
+            "value": "DrugDesire",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "RoomSize",
+            "level": 0.5
+          }
+        ]
+      },
+      {
+        "pawn": "Thing_Human408",
+        "hauling": {
+          "epoch": "40bcaaab7ecf459eaeaf32e387aefc9d",
+          "tick": 2,
+          "mapId": 0,
+          "status": "available",
+          "options": [
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1884",
+              "x": 72,
+              "z": 79,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            },
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1884",
+              "x": 80,
+              "z": 80,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            }
+          ],
+          "supplies": [
+            {
+              "thing": "Thing_Steel1884",
+              "label": "steel",
+              "x": 72,
+              "z": 79,
+              "sourceCount": 75,
+              "destinationFree": 75
+            },
+            {
+              "thing": "Thing_Steel1884",
+              "label": "steel",
+              "x": 80,
+              "z": 80,
+              "sourceCount": 75,
+              "destinationFree": 75
+            }
+          ]
+        },
+        "facts": [
+          {
+            "key": "need",
+            "value": "Mood",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Food",
+            "level": 0.800000011920929
+          },
+          {
+            "key": "need",
+            "value": "Rest",
+            "level": 0.9582061767578125
+          },
+          {
+            "key": "need",
+            "value": "Joy",
+            "level": 0.5601838231086731
+          },
+          {
+            "key": "need",
+            "value": "Beauty",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Comfort",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Outdoors",
+            "level": 1
+          },
+          {
+            "key": "need",
+            "value": "DrugDesire",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "RoomSize",
+            "level": 0.5
+          }
+        ]
+      },
+      {
+        "pawn": "Thing_Human411",
+        "hauling": {
+          "epoch": "40bcaaab7ecf459eaeaf32e387aefc9d",
+          "tick": 2,
+          "mapId": 0,
+          "status": "available",
+          "options": [
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1885",
+              "x": 81,
+              "z": 85,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            },
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1885",
+              "x": 80,
+              "z": 80,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            },
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1883",
+              "x": 81,
+              "z": 85,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            },
+            {
+              "kind": "haul",
+              "thing": "Thing_Steel1883",
+              "x": 80,
+              "z": 80,
+              "count": 10,
+              "trips": 3,
+              "maxTicks": 1800
+            }
+          ],
+          "supplies": [
+            {
+              "thing": "Thing_Steel1885",
+              "label": "steel",
+              "x": 81,
+              "z": 85,
+              "sourceCount": 75,
+              "destinationFree": 75
+            },
+            {
+              "thing": "Thing_Steel1885",
+              "label": "steel",
+              "x": 80,
+              "z": 80,
+              "sourceCount": 75,
+              "destinationFree": 75
+            },
+            {
+              "thing": "Thing_Steel1883",
+              "label": "steel",
+              "x": 81,
+              "z": 85,
+              "sourceCount": 75,
+              "destinationFree": 75
+            },
+            {
+              "thing": "Thing_Steel1883",
+              "label": "steel",
+              "x": 80,
+              "z": 80,
+              "sourceCount": 75,
+              "destinationFree": 75
+            }
+          ]
+        },
+        "facts": [
+          {
+            "key": "need",
+            "value": "Mood",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Food",
+            "level": 0.800000011920929
+          },
+          {
+            "key": "need",
+            "value": "Rest",
+            "level": 0.9352295994758606
+          },
+          {
+            "key": "need",
+            "value": "Joy",
+            "level": 0.546859085559845
+          },
+          {
+            "key": "need",
+            "value": "Beauty",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Comfort",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "Outdoors",
+            "level": 1
+          },
+          {
+            "key": "need",
+            "value": "DrugDesire",
+            "level": 0.5
+          },
+          {
+            "key": "need",
+            "value": "RoomSize",
+            "level": 0.5
+          }
+        ]
+      }
+    ],
+    "hostDrained": true,
+    "observation": {
+      "wallMs": 301084,
+      "ticks": 17966,
+      "samples": 460,
+      "pausedSamples": 0,
+      "thoughtSamples": 11,
+      "ticksDuringThought": 345,
+      "attention": [
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 1
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 9
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 12
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 14
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 16
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 13
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 17
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 18
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 19
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 20
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 21
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 23
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 24
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 26
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 27
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 29
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 30
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 31
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 32
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "continued",
+          "throughSeq": 35
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 44
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 45
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "continued",
+          "throughSeq": 42
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 47
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 51
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 49
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 53
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 55
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 57
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 59
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 60
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 61
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 63
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 65
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 67
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 68
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 70
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 71
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 72
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 73
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 75
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 77
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 76
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 78
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 80
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 81
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "native",
+          "throughSeq": 83
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "native",
+          "throughSeq": 82
+        }
+      ],
+      "decisions": 5,
+      "reflections": 2,
+      "appraisals": 5,
+      "operatorStops": [],
+      "laterRoundStarted": true,
+      "connected": true
+    },
+    "summary": {
+      "decisions": [
+        {
+          "pawn": "Thing_Human405",
+          "id": "9f1b0d32-d3f6-4543-8455-559e7920a2b1",
+          "decision": {
+            "kind": "accept",
+            "reason": "Steel needs moving and I'm well-rested and fed. Two trips of ten units to the storage cell works for me. I'll get it done."
+          },
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1883",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 2,
+            "maxTicks": 1800
+          }
+        },
+        {
+          "pawn": "Thing_Human408",
+          "id": "041a0a22-14cb-42d7-8bc9-db59ab2a3c50",
+          "decision": {
+            "kind": "accept",
+            "reason": "Food and rest are both high, and I've nothing pressing right now. Two trips of ten steel is straightforward work \u2014 I'll get it done."
+          },
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1884",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 2,
+            "maxTicks": 1800
+          }
+        },
+        {
+          "pawn": "Thing_Human411",
+          "id": "3c974803-ee55-46bb-ae24-9f700135ca03",
+          "decision": {
+            "kind": "accept",
+            "reason": "Needs are solid, stack is close by. I'll haul two trips of ten steel. Makes sense to keep the colony supplied."
+          },
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1885",
+            "x": 81,
+            "z": 85,
+            "count": 10,
+            "trips": 2,
+            "maxTicks": 1800
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "id": "04b702e1-be83-4363-98d8-b33ae01b0ed1",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "x": 80,
+          "z": 80,
+          "jobId": 3,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1802
+        },
+        {
+          "id": "eb1d0c0c-b764-4604-85ec-856f8c534bd1",
+          "actor": "Thing_Human408",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1884",
+          "x": 72,
+          "z": 79,
+          "jobId": 4,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1802
+        },
+        {
+          "id": "32a9da31-4574-45e7-8ca0-72d6662d1766",
+          "actor": "Thing_Human411",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1885",
+          "x": 81,
+          "z": 85,
+          "jobId": 5,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1802
+        },
+        {
+          "id": "d0a89a73-5269-490e-ad6b-492071f67135",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1883",
+          "x": 80,
+          "z": 80,
+          "jobId": 18,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1802
+        },
+        {
+          "id": "a494d11d-e3e3-4092-b716-22bed2fff234",
+          "actor": "Thing_Human408",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1884",
+          "x": 72,
+          "z": 79,
+          "jobId": 19,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1802
+        },
+        {
+          "id": "e8c2ce2f-0177-42f9-acca-02fd56cf5fc0",
+          "actor": "Thing_Human411",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_Steel1885",
+          "x": 81,
+          "z": 85,
+          "jobId": 20,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1802
+        }
+      ],
+      "deliveredUnits": 60,
+      "completedTrips": 6,
+      "stopped": [],
+      "intentions": [
+        {
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1883",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 2,
+            "maxTicks": 1800
+          },
+          "standing": {
+            "status": "completed",
+            "deadline": 1802,
+            "steps": [
+              "04b702e1-be83-4363-98d8-b33ae01b0ed1",
+              "d0a89a73-5269-490e-ad6b-492071f67135"
+            ],
+            "reason": "Agreed trips completed"
+          }
+        },
+        {
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1884",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 2,
+            "maxTicks": 1800
+          },
+          "standing": {
+            "status": "completed",
+            "deadline": 1802,
+            "steps": [
+              "eb1d0c0c-b764-4604-85ec-856f8c534bd1",
+              "a494d11d-e3e3-4092-b716-22bed2fff234"
+            ],
+            "reason": "Agreed trips completed"
+          }
+        },
+        {
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_Steel1885",
+            "x": 81,
+            "z": 85,
+            "count": 10,
+            "trips": 2,
+            "maxTicks": 1800
+          },
+          "standing": {
+            "status": "completed",
+            "deadline": 1802,
+            "steps": [
+              "32a9da31-4574-45e7-8ca0-72d6662d1766",
+              "e8c2ce2f-0177-42f9-acca-02fd56cf5fc0"
+            ],
+            "reason": "Agreed trips completed"
+          }
+        }
+      ],
+      "reflections": [
+        {
+          "pawn": "Thing_Human405",
+          "reflections": [],
+          "attention": {
+            "cursor": 81,
+            "last": {
+              "status": "native",
+              "throughSeq": 81,
+              "reason": "Routine events: continue native behavior"
+            },
+            "lastAttemptTick": 2097
+          }
+        },
+        {
+          "pawn": "Thing_Human408",
+          "reflections": [
+            {
+              "tick": 2020,
+              "throughSeq": 35,
+              "backend": "claude-sonnet-4-6",
+              "reason": "Just finished a pleasant chat and I'm wandering easy. Needs are fine. No proposals waiting on me right now \u2014 I'll keep drifting and enjoy the outdoors."
+            }
+          ],
+          "attention": {
+            "cursor": 82,
+            "lastAttemptTick": 2443,
+            "last": {
+              "status": "native",
+              "throughSeq": 82,
+              "reason": "Routine events: continue native behavior"
+            }
+          }
+        },
+        {
+          "pawn": "Thing_Human411",
+          "reflections": [
+            {
+              "tick": 2418,
+              "throughSeq": 42,
+              "backend": "claude-sonnet-4-6",
+              "reason": "Needs are good, already hauled steel earlier. Wandering for now, no pending proposals to act on."
+            }
+          ],
+          "attention": {
+            "cursor": 83,
+            "lastAttemptTick": 2193,
+            "last": {
+              "status": "native",
+              "throughSeq": 83,
+              "reason": "Routine events: continue native behavior"
+            }
+          }
+        }
+      ]
+    },
+    "pairedRestore": true,
+    "limits": {
+      "decisions": 12,
+      "appraisals": 12,
+      "reflections": 3,
+      "observationMs": 300000,
+      "secondRoundMs": 120000,
+      "maxTurns": 48
+    },
+    "limitations": "Authored supply fixture; scripted core, native self-perspectives, no personality overrides. Initial offers paused; later round and reflection continuous. Refusals are not reoffered; at most one exact counter revision per round; all failures retained. Operator shutdown distinct from pawn withdrawal. Finite descriptive trial, not a controlled causal comparison or long-run character-quality evaluation.",
+    "finalCleanup": {
+      "operatorStops": [],
+      "errors": []
+    }
+  },
+  "providerReceipts": [
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3608,
+      "estimatedUsageUSD": 0.018765,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 4933,
+      "estimatedUsageUSD": 0.0111123,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "decision",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 4515,
+      "estimatedUsageUSD": 0.0109623,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "reflection",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3932,
+      "estimatedUsageUSD": 0.022374,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    },
+    {
+      "mode": "reflection",
+      "model": "claude-sonnet-4-6",
+      "elapsedMs": 3064,
+      "estimatedUsageUSD": 0.0185883,
+      "turns": 2,
+      "tools": [
+        "StructuredOutput"
+      ],
+      "status": "ok"
+    }
+  ],
+  "appraisals": [
+    {
+      "status": "ok",
+      "elapsedMs": 813,
+      "score": 0.2,
+      "costUSD": 8.232e-05
+    },
+    {
+      "status": "ok",
+      "elapsedMs": 338,
+      "score": 0.2,
+      "costUSD": 7.0182e-05
+    },
+    {
+      "status": "ok",
+      "elapsedMs": 519,
+      "score": 0.24,
+      "costUSD": 8.6436e-05
+    },
+    {
+      "status": "ok",
+      "elapsedMs": 466,
+      "score": 0.21,
+      "costUSD": 8.022e-05
+    },
+    {
+      "status": "ok",
+      "elapsedMs": 360,
+      "score": 0.2,
+      "costUSD": 0.000111678
+    }
+  ],
+  "usage": {
+    "claude": {
+      "attempts": 5,
+      "reservedEquivalentUSD": 0.5,
+      "estimatedUsageUSD": 0.0818019
+    },
+    "jev": {
+      "calls": 5,
+      "reservedUSD": 0.01,
+      "reportedUSD": 0.000430836
+    }
+  },
+  "accounting": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls.",
+  "interpretation": {
+    "attentionTurnCapReached": true,
+    "liveMultiTripCompleted": true,
+    "appraisalEscalationObserved": false,
+    "activeCommitmentReconsiderationObserved": false,
+    "laterOffersMade": 0,
+    "notControlledComparison": true
+  }
+}

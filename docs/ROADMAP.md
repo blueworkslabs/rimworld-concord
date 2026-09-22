@@ -71,6 +71,13 @@
 - Bounded local alternatives and map-bound native dispatch; execution still revalidates.
 - Scripted coordination and restore checks; live-model improvement remains unmeasured.
 
+## Live useful-work observation
+
+- Three live two-trip agreements completed six native hauls without per-trip inference.
+- Two post-work reflections completed during continuous play; five Jev appraisals stayed native.
+- Five-minute observation and cold restore verified; 48-turn attention cap reached, later local options absent.
+- Scripted core/authored fixture: no sustained planning or long-run personality claim. See [trial policy](WORK_TRIAL.md) and [evidence](ACCEPTANCE.md).
+
 ## Next bounded increment
 
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
