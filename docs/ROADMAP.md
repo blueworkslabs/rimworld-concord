@@ -17,19 +17,19 @@ future milestone, not the next dependency.
 
 ## Next: broader embodied pawn behavior
 
-- Corrected v2 need fixtures are separate from retained v1 evidence; validate a
-  future runner against the full frozen v2 bank before new comparative inference.
-
-- Use the snapshot results to choose a second native scenario beyond the familiar
-  steel/rescue fixture—for example needs conflicting with an optional work offer.
+- Keep corrected v2 needs and the matched-outlook bank separate from old evidence.
+  Future comparisons must validate full canonical inputs and use fresh finite caps.
+- Build on the completed needs-versus-work scenario with a bounded consequential
+  social exchange; do not return to rescue as the only integration situation.
 - Test durable outlook reuse and one bounded consequential social exchange.
   Native chatter remains texture; speech and private reflection stay distinct.
 - Reassess legibility with a cold reader of an unannotated real public log before
   adding entry kinds. No cold-read result yet.
-- Add narrowly scoped contradiction checks with an unscorable category; do not
-  confuse exact field matching with general prose entailment or use it to veto
-  valid choices. Test matched pawn outlooks without requiring different actions.
-  See [needs-work trial and evaluation follow-ups](NEEDS_WORK_TRIAL.md).
+- Improve grounding coverage only against a separately versioned, held-out set.
+  The first numeric/phrase checker deliberately leaves prose unscored and misses
+  paraphrases; source IDs alone do not establish support. Keep predictions separate
+  from contradictory state claims and never use the score to veto valid choices.
+  See [grounding and matched-outlook limits](GROUNDING_CHECKS.md).
 
 ## Later, when the pawns are ready
 

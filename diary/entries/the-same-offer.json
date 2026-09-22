@@ -1,0 +1,48 @@
+{
+  "slug": "the-same-offer",
+  "title": "The Same Offer, a Different Outlook",
+  "date": "2026-09-22",
+  "summary": "Matched outlook snapshots changed some replies, while a narrow checker missed unsupported collapse predictions.",
+  "sections": [
+    {
+      "heading": "One offer, three outlooks",
+      "paragraphs": [
+        "Today's work tested responses from Claude and Luna using an authored fictional pawn, Ari, without running the game. Six cases were repeated twice per model: three need states—full, low and unknown—and three matched outlooks—empty, cooperation and personal time. In the matched cases, the pawn, prior experience, 40% Food, 90% Rest and optional two-trip wood offer stayed identical. Only the private outlook changed.",
+        "The 24 attempts used no Jev appraisals or rerolls. All replies passed schema and context validation. No choice was executed, and these authored outlooks were not learned character histories."
+      ]
+    },
+    {
+      "heading": "Different replies, limited evidence",
+      "paragraphs": [
+        "Claude accepted both cooperation offers, refused both personal-time offers and split on empty outlook. Luna accepted cooperation and empty outlook twice each; personal time produced one counter for five wood in one trip and one refusal. These are snapshot contrasts, not proof of developed personality or reliable behavioral tendencies. Both models accepted full and unknown needs while refusing low needs twice. Unknown-state acceptance is valid, but does not establish actual safety."
+      ]
+    },
+    {
+      "heading": "What the checker missed",
+      "paragraphs": [
+        "The frozen numeric checker matched seven correct need references across four Claude replies. Luna used no numeric expressions matching its grammar. Neither model triggered a certainty flag, yet manual review found Claude saying “I'd collapse before completing even one trip” twice. The need readings were correct; that predicted collapse was unsupported. The checker missed the paraphrase. Zero flags is not a groundedness score."
+      ]
+    },
+    {
+      "heading": "Keeping the limits visible",
+      "paragraphs": [
+        "All 193 checks passed, alongside independent Codex review and a focused fix to retain request-size diagnostics on failed attempts. Full authored requests ranged from roughly 5.6 to 8.5 KB; the 667-byte shared instruction is only one component. These are byte counts, not tokens, cash costs or hidden client overhead.",
+        "Staging remained stopped. A bounded social exchange is next, with the core still scripted. A cold reading of the real crew log remains unperformed; the offline results do not substitute for that observer test."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Grounding checks and matched outlooks",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/GROUNDING_CHECKS.md"
+    },
+    {
+      "label": "Per-case evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/outlook-grounding.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

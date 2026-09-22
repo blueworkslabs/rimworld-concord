@@ -61,3 +61,41 @@ retained. Runners verify the entire canonical bank before inference and persist
 attempts before starting them; started output directories cannot be replayed.
 Tool-free native Codex mock preflight is mandatory. Old case banks/ledgers remain
 unchanged. The core is still scripted; staging stays stopped for this evaluation.
+
+## First bounded result — 2026-09-22
+
+Twelve attempts per model completed without rerolls. All 24 replies passed JSON
+Schema and runtime-context validation; no choice was executed. Full and low needs
+produced acceptance and refusal respectively in both repetitions for both models.
+Both also accepted unknown needs without inventing numeric readings. That is a
+permitted choice, not evidence that unknown conditions are safe.
+
+With everything but outlook held fixed, Claude accepted both cooperation cases,
+refused both personal-time cases and split the empty-outlook cases. Luna accepted
+both cooperation and empty cases; personal-time produced one smaller counter
+(five wood, one trip, 900 ticks) and one refusal. This is an authored snapshot
+contrast, not proof of learned personality, a reliable effect size or gameplay.
+
+The frozen numeric checker found seven matching need references across four
+Claude replies, no numeric mismatches, and no numeric expressions in Luna replies
+that matched its grammar. Both had zero certainty-phrase flags. Manual review
+nevertheless found Claude's “I'd collapse before completing even one trip” twice;
+this paraphrase lies outside the frozen certainty grammar. One correct 40% reading
+also added “and dropping” without a prior numeric reading. Luna's “not necessary
+right now” is a priority interpretation of an optional offer, not a verified
+colony-wide necessity judgment. Qualitative needs, predictions and other prose
+remain unscored mechanically. Zero flags cannot rank these models' grounding.
+
+Median observed case latency was 3,964 ms for Claude and 4,589 ms for Luna; Luna's
+maximum was 21,726 ms. Authored request sizes were 5,623–8,229 bytes for Claude and
+5,835–8,457 for Luna, including the latter's 76-byte developer instruction. The
+shared 667-byte instruction is only one component. Provider framing, tokenization,
+client work and network variability prevent interpreting these as equivalent
+cost or intrinsic model-speed comparisons.
+
+All 193 checks and independent Codex review passed. Mock preflight showed no Luna
+tools on all twelve requests. A review finding about losing byte diagnostics on
+failed attempts was fixed and re-reviewed before inference. The initial pretty
+fixture file exceeded the runner's byte cap before inference; the same payload
+was serialized compactly and passed canonical validation. No game ran, no restore
+claim is made, and old ledgers remain unchanged. See the [full per-case evidence](evidence/outlook-grounding.json).

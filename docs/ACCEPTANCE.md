@@ -697,3 +697,13 @@ refusal, smaller-counter/fresh-consent execution and paired/cold restore passed.
 `b6e6a3e29e417b8ab8a8589bde655e5d0de060b1`. Public [evidence](evidence/needs-work.json)
 retains unsupported certainty and scenario limitations. No live core, automatic
 prose scorer, outlook-effect experiment or reader study is claimed.
+
+## Offline matched-outlook / grounding smoke test
+
+2026-09-22: 193 checks passed. Twelve Claude attempts and twelve Luna turns on a
+frozen six-case bank; all outputs passed schema/context validation, no rerolls or
+game actions. Full independent Codex review plus final focused review completed.
+The numeric/phrase diagnostic is deliberately incomplete: it missed two collapse
+predictions found manually. Outlook-related response contrasts are authored
+snapshot evidence, not native gameplay or sustained character development.
+See [scope and results](GROUNDING_CHECKS.md), [per-case records](evidence/outlook-grounding.json).
