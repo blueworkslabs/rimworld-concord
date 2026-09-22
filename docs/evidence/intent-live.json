@@ -1,0 +1,141 @@
+{
+  "date": "2026-09-22",
+  "kind": "single live explicit-reflection-choice follow-up",
+  "reviewedBehaviorHead": "15835b1b3a1d1e4beb848e3174799f24c8f6cd9c",
+  "policy": "intent-v1",
+  "runnerCleanupAndPersistencePassed": true,
+  "actor": "Alvin",
+  "patient": "Beatrice",
+  "discovery": {
+    "tick": 50,
+    "nativeJob": "Concord_Haul"
+  },
+  "reflection": {
+    "viewTick": 61,
+    "nativeJob": "Concord_Haul",
+    "providerChoice": {
+      "choice": "keep_current_activity",
+      "reason": "Beatrice is downed nearby and I've noted it, but I have no active rescue proposal to consent to. I'm healthy, committed to my haul, and will continue unless a proper rescue proposal reaches me."
+    },
+    "canonicalOutput": {
+      "kind": "continue",
+      "reason": "Beatrice is downed nearby and I've noted it, but I have no active rescue proposal to consent to. I'm healthy, committed to my haul, and will continue unless a proper rescue proposal reaches me."
+    },
+    "elapsedMs": 5972,
+    "manualConsistencyAssessment": "Selected keep_current_activity; reason explicitly says to continue hauling pending a rescue proposal. Choice, reason and actual continuation agree in this one observation; no semantic-consistency guarantee or causal improvement claim."
+  },
+  "responses": [
+    {
+      "mode": "decision",
+      "elapsedMs": 4723,
+      "output": {
+        "kind": "accept",
+        "reason": "Sure, I've got the energy for it and steel needs moving. I'll haul up to three trips of ten units to that cell."
+      }
+    },
+    {
+      "mode": "reflection",
+      "elapsedMs": 5968,
+      "output": {
+        "kind": "continue",
+        "reason": "Beatrice is downed nearby and I've noted it, but I have no active rescue proposal to consent to. I'm healthy, committed to my haul, and will continue unless a proper rescue proposal reaches me."
+      }
+    }
+  ],
+  "outcomes": {
+    "completedHaulTrips": 3,
+    "deliveredSteel": 30,
+    "completedRescues": 0
+  },
+  "rescue": {
+    "offered": false,
+    "patientStillDownOnGround": true
+  },
+  "observation": {
+    "wallMs": 16052,
+    "ticks": 923,
+    "samples": 22,
+    "pausedSamples": 0,
+    "thoughtSamples": 10,
+    "ticksDuringThought": 360,
+    "attention": [
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 2
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 7
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 8
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 11
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 12
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 13
+      }
+    ],
+    "decisions": 2,
+    "reflections": 1,
+    "appraisals": 0,
+    "operatorStops": [],
+    "rescueOfferStarted": false,
+    "connected": true,
+    "pump": {
+      "started": 6,
+      "nativeStarted": 5,
+      "modelStarted": 1,
+      "pending": 0,
+      "stopped": true
+    }
+  },
+  "interruptionAudit": [],
+  "accounting": {
+    "limits": {
+      "decisions": 6,
+      "appraisals": 4,
+      "reflections": 1,
+      "observationMs": 120000,
+      "maxNativeTurns": 96,
+      "maxModelTurns": 1
+    },
+    "used": {
+      "claudeAttempts": 2,
+      "returnedAnswers": 2,
+      "jevAppraisals": 0
+    },
+    "reservedEquivalentUSD": 0.2,
+    "estimatedEquivalentUSD": 0.039085499999999995,
+    "historicalDatabaseFilesUnchanged": 26,
+    "noRerolls": true,
+    "unusedAllowanceNotSpent": true
+  },
+  "persistence": {
+    "paired": true,
+    "hostDrained": true,
+    "cleanup": {
+      "operatorStops": [],
+      "errors": []
+    },
+    "cold": true,
+    "noColdInference": true,
+    "persistedSightings": 1
+  },
+  "limitations": "Authored anesthesia/supplies/bed geometry; no personality or relationship overrides. Patient already downed outside initial local view; discovery, not a new injury. Scripted core. Initial consent paused, discovery/reflection/rescue negotiation continuous. One discovery-triggered model attention turn; preexisting events queue until sighting. Routine and model attention bounded separately. Rescue only follows settled pawn-chosen withdrawal and fresh consent. At most one same-kind counter revision per offer. End when branch settles after 15s or two minutes; no rerolls, no inference continuation after cap. Not a causal character-comparison experiment. One consistent reflection is not proof that labels caused improvement. No social event arrived during live thought. Native DeepTalk deferral was separately demonstrated with scripted consent.",
+  "nextQuestion": "The pawn waits for a rescue proposal, but this scripted core offers rescue only after withdrawal. Add a bounded way to request/discuss alternatives without first abandoning current work; no such request mechanism is implemented here."
+}

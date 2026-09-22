@@ -93,3 +93,7 @@ See [architecture](docs/ARCHITECTURE.md), [narrative](docs/NARRATIVE.md), and [m
 The [interruption policy](docs/INTERRUPTIONS.md) distinguishes locally observed
 rescue contradictions from missing shortlist information. Its bounded live
 follow-up preserved a prose/action mismatch, not a completed live rescue.
+
+[Explicit reflection choices](docs/INTENT_CHOICES.md) name their executable effects
+and validate agreement scope. A single live follow-up produced matching choice
+and explanation; broader consistency and pawn-originated alternatives remain open.

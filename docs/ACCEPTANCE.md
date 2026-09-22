@@ -440,3 +440,47 @@ Independent Codex review found premature reflection bookkeeping, fixed before
 live execution. The final focused review of behavior through
 `0b202c21a23bb1a52af6a95b6954d60a123940c5` found no further concrete defects.
 Subsequent changes publish evidence and fact-checked diary prose only.
+
+## Explicit reflection choice effects (2026-09-22)
+
+- **125/125 automated checks.** Claude's provider schema names keep-current-activity,
+  withdraw-current-agreement and answer-pending-proposal. Eligible options describe
+  their effects; withdrawal names the supplied running agreement. Invalid scope
+  is rejected without retry, with the structurally valid provider choice retained.
+  The coordinator rechecks the captured agreement before withdrawal. Canonical
+  saved reflections remain unchanged. Contradictory prose still grants no authority.
+- Both native scripted branches used the new choice validator/translation.
+  Withdrawal stopped after one completed haul/ten steel; fresh consent then
+  delivered Beatrice to the agreed bed. Continuation completed three hauls/thirty
+  steel without a rescue offer. Both paired restores passed, and the continuation
+  branch also passed full cold restore without inference. No mod changes.
+- A real native **DeepTalk** arrived during the scripted rescue decision, was
+  recorded as deferred, and did not cancel the answer. Its sequence was 10 while
+  the actor's final attention cursor was 7: it remained queued. This extends the
+  previous mock deferral evidence to a native event with scripted deliberation,
+  not live social judgment. [Scripted evidence](evidence/intent-scripted.json).
+
+The single live follow-up accepted three hauling trips. A local sighting at tick
+50 prompted reflection while hauling; the view was captured at tick 61. The
+provider chose `keep_current_activity`, translated to canonical `continue`, and
+said it would continue hauling unless a rescue proposal arrived. All three trips
+completed: thirty steel, no rescue offer or rescue, patient still down on the
+ground. Choice, explanation and effect agree in this observation. This is not a
+controlled comparison or proof of generally improved reasoning. No reroll.
+
+Two Claude attempts, no Jev calls. The settled branch ended after 16.052 seconds
+and 923 ticks, with zero paused samples, one model attention claim and five native
+claims. No social event arrived during live thought. Historical 26 database files
+were unchanged; unused allowance remained unused. [Live evidence](evidence/intent-live.json).
+
+The result identifies a planning limit: the pawn waits for an alternative, but
+this scripted core offers rescue only after withdrawal. A pawn-originated request
+for an alternative while keeping its current agreement is not implemented yet.
+This is not evidence of a preference against rescue or a developed personality.
+Independent Codex review of final behavior at
+`15835b1b3a1d1e4beb848e3174799f24c8f6cd9c` completed with no actionable findings.
+Later changes publish factual evidence and reviewed diary prose only.
+
+Live paired and full cold restore preserved the agreed continuation, all three
+hauling outcomes and one casualty sighting, with no further inference. Host
+draining and cleanup reported no outstanding work.

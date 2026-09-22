@@ -127,3 +127,16 @@ Do not describe placeholder interfaces or design documents as live integrations.
 - No social event arrived during thought in this live run: deferral's live-event
   demonstration remains open. Next priority is executable intent/reason consistency,
   without parsing prose into unconsented actions. See [evidence](ACCEPTANCE.md).
+
+## Explicit intent-choice follow-up
+
+- Provider reflection choices now spell out their effects and bind withdrawal
+  to the pawn's exact agreement; original choices and canonical responses are
+  both retained. No prose parsing or semantic-consistency guarantee.
+- Native scripted continuation/withdrawal branches pass; actual DeepTalk queued
+  during scripted rescue thought without cancellation.
+- One live reflection's choice/reason/effect agreed: continue hauling pending a
+  rescue offer. Thirty steel delivered, no rescue. This is a single observation.
+- Next: bounded pawn-originated requests for alternatives while retaining current
+  work, so discussing rescue need not require abandoning an agreement first.
+  Preserve fresh consent and separate discussion, agreement and execution.

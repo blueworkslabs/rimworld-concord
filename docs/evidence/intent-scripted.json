@@ -1,0 +1,206 @@
+{
+  "date": "2026-09-22",
+  "kind": "native scripted explicit-choice branches",
+  "reviewedBehaviorHead": "15835b1b3a1d1e4beb848e3174799f24c8f6cd9c",
+  "automatedTests": 125,
+  "inferenceCalls": 0,
+  "nativeModChanged": false,
+  "branches": [
+    {
+      "branch": "withdraw",
+      "passed": true,
+      "providerChoices": [
+        {
+          "mode": "reflection",
+          "status": "scripted",
+          "providerChoice": {
+            "choice": "withdraw_current_agreement",
+            "agreementId": "010b4063-c23a-47c7-b19b-bd5c72ec8303",
+            "reason": "Scripted reconsideration after actual local sighting"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "mode": "decision",
+          "elapsedMs": 0,
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        },
+        {
+          "mode": "reflection",
+          "elapsedMs": 3007,
+          "output": {
+            "kind": "withdraw",
+            "reason": "Scripted reconsideration after actual local sighting"
+          }
+        },
+        {
+          "mode": "decision",
+          "elapsedMs": 5005,
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        }
+      ],
+      "outcomes": {
+        "completedHaulTrips": 1,
+        "deliveredSteel": 10,
+        "completedRescues": 1
+      },
+      "observation": {
+        "wallMs": 18145,
+        "ticks": 1049,
+        "samples": 29,
+        "pausedSamples": 0,
+        "thoughtSamples": 14,
+        "ticksDuringThought": 419,
+        "attention": [
+          {
+            "pawn": "Thing_Human405",
+            "status": "continued",
+            "throughSeq": 2
+          },
+          {
+            "pawn": "Thing_Human405",
+            "status": "native",
+            "throughSeq": 7
+          }
+        ],
+        "decisions": 3,
+        "reflections": 1,
+        "appraisals": 0,
+        "operatorStops": [],
+        "rescueOfferStarted": true,
+        "connected": true,
+        "pump": {
+          "started": 2,
+          "nativeStarted": 1,
+          "modelStarted": 1,
+          "pending": 0,
+          "stopped": true
+        }
+      },
+      "interruptionAudit": [
+        {
+          "branch": "d1616933-8756-44ce-acad-febe3b44b82b",
+          "kind": "experience-deferred",
+          "actor": "Thing_Human405",
+          "data": {
+            "seq": 10,
+            "kind": "memory",
+            "detail": "DeepTalk",
+            "reason": "Conversation queued behind current thought"
+          }
+        }
+      ],
+      "pairedRestore": true,
+      "coldRestore": "Not repeated for this branch; paired restore passed"
+    },
+    {
+      "branch": "continue",
+      "passed": true,
+      "providerChoices": [
+        {
+          "mode": "reflection",
+          "status": "scripted",
+          "providerChoice": {
+            "choice": "keep_current_activity",
+            "reason": "Scripted reconsideration after actual local sighting"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "mode": "decision",
+          "elapsedMs": 2,
+          "output": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          }
+        },
+        {
+          "mode": "reflection",
+          "elapsedMs": 3008,
+          "output": {
+            "kind": "continue",
+            "reason": "Scripted reconsideration after actual local sighting"
+          }
+        }
+      ],
+      "outcomes": {
+        "completedHaulTrips": 3,
+        "deliveredSteel": 30,
+        "completedRescues": 0
+      },
+      "observation": {
+        "wallMs": 16090,
+        "ticks": 928,
+        "samples": 22,
+        "pausedSamples": 0,
+        "thoughtSamples": 5,
+        "ticksDuringThought": 171,
+        "attention": [
+          {
+            "pawn": "Thing_Human405",
+            "status": "continued",
+            "throughSeq": 2
+          },
+          {
+            "pawn": "Thing_Human405",
+            "status": "native",
+            "throughSeq": 5
+          },
+          {
+            "pawn": "Thing_Human405",
+            "status": "native",
+            "throughSeq": 6
+          },
+          {
+            "pawn": "Thing_Human405",
+            "status": "native",
+            "throughSeq": 7
+          },
+          {
+            "pawn": "Thing_Human405",
+            "status": "native",
+            "throughSeq": 8
+          },
+          {
+            "pawn": "Thing_Human405",
+            "status": "native",
+            "throughSeq": 10
+          }
+        ],
+        "decisions": 2,
+        "reflections": 1,
+        "appraisals": 0,
+        "operatorStops": [],
+        "rescueOfferStarted": false,
+        "connected": true,
+        "pump": {
+          "started": 6,
+          "nativeStarted": 5,
+          "modelStarted": 1,
+          "pending": 0,
+          "stopped": true
+        }
+      },
+      "interruptionAudit": [],
+      "pairedRestore": true,
+      "coldRestore": true,
+      "noColdInference": true
+    }
+  ],
+  "limitations": "Scripted choices via the explicit-choice validator and canonical translation, not live judgment. Actual native DeepTalk during withdrawal-branch rescue thought was deferred, and the scripted answer completed. No semantic classifier, prose-derived authority or retries.",
+  "nativeDeepTalk": {
+    "eventSeq": 10,
+    "deferredDuringPendingThought": true,
+    "attentionCursorAtEnd": 7,
+    "stillQueued": true,
+    "scriptedRescueAnswerCompleted": true
+  }
+}
