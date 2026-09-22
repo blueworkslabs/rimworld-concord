@@ -16,11 +16,18 @@ export function afterAppraisal(a:Appraisal,threshold:number,consequential:boolea
   return 'native'; // a selected intention still needs normal action validation
 }
 
-/** Conservative first policy: known mundane Chitchat waits; unfamiliar memories
- * and health changes still supersede thought. This is not semantic appraisal.
+/** Known low-stakes conversations wait without losing their attention record.
+ * Other memories remain conservative; this is not general semantic appraisal.
  */
 export function nativeAttention(event:{kind:string;detail:string}):{next:Route;interrupt:boolean} {
  const significant=event.kind==='memory'||event.kind==='health'||event.kind==='casualty';
  return {next:route({urgent:event.kind==='health',significant,conflictsWithCommitment:false,routine:event.kind==='job'}).next,
-   interrupt:significant&&!(event.kind==='memory'&&event.detail==='Chitchat')};
+   interrupt:significant&&!(event.kind==='memory'&&['Chitchat','DeepTalk'].includes(event.detail))};
+}
+
+/** Stored event routing is historical evidence; current quiet-memory policy also
+ * applies to attention restored from before that policy was introduced. */
+export function attentionInterrupt(e:{event:{kind:string;detail:string};interrupt?:boolean}):boolean {
+ if(e.event.kind==='memory'&&['Chitchat','DeepTalk'].includes(e.event.detail))return false;
+ return e.interrupt??nativeAttention(e.event).interrupt;
 }

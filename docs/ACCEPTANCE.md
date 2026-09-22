@@ -395,3 +395,48 @@ Private independent Codex review covered behavior through
 `13ee494cf2e27e5dda17f9b7cacdcb9cf7ed2894`; confirmed evidence-retention issues were
 fixed and the focused final review found no actionable defects. Subsequent
 changes only publish factual evidence and reviewed diary prose.
+
+## Interruption relevance and contradictory live intent (2026-09-22)
+
+- **119/119 automated checks**, compiled against the installed game. Deferred
+  DeepTalk remains queued after explicit decisions and reflections, including
+  legacy stored interrupt flags. Unfamiliar significant memories still supersede.
+- Pending rescue decisions invalidate on rescuer unavailability, proposal withdrawal,
+  map change or fresh locally observed patient/bed contradictions. Missing or stale
+  local facts alone do not invalidate. Reflection acceptance validates before
+  marking completion; durable acceptance survives dispatch-reply loss.
+- Native authored short anesthesia expired while a scripted rescue answer was
+  pending. The actual observed patient recovery cancelled it, and a late accept
+  dispatched no job. Paired and full cold restore passed.
+- The first delayed rehearsal exposed an overstrict guard: shortlist disappearance
+  cancelled a pending rescue. This retained result prompted the positive-evidence
+  correction before live inference. Final delayed scripted rehearsal (5-second
+  reflection, 8-second rescue answer) delivered ten steel, withdrew remaining
+  hauling and rescued Beatrice into the exact bed. Paired/cold restore passed.
+  No social event occurred during thought in that rehearsal.
+  [Scripted evidence](evidence/interruption-scripted.json).
+
+**Single live follow-up, fresh interruption-v1 allowance:** Alvin accepted three
+hauling trips and locally noticed Beatrice at tick 48. Reflection viewed him still
+hauling at tick 61. It returned structured `continue`, but its reason said it would
+withdraw and rescue her. The coordinator did not convert prose into authority:
+all three hauls completed, thirty steel delivered, and no rescue was offered.
+The patient remained downed on the ground. This is a preserved **prose/action
+mismatch**, not proof of a deliberate preference for hauling.
+
+Two Claude attempts returned valid structured responses; no cancellations, Jev
+calls or rerolls. Observation ended at the settled-branch condition after
+15.991 seconds/924 ticks, with zero paused samples, one model attention claim
+and five native claims. No relevant social event occurred during deliberation:
+DeepTalk deferral is mock-tested, not live-event demonstrated here. The authored
+anesthesia/supply/bed fixture and scripted core establish neither personality
+nor medical judgment. [Live evidence](evidence/interruption-live.json).
+
+Paired and full cold restore preserved completed hauling, the contradictory
+reflection and one casualty sighting, with no additional inference. Cleanup found
+no outstanding work; 24 historical database files stayed byte-identical. Fresh
+limits remained six Claude attempts/four Jev appraisals, unused allowances unused.
+Independent Codex review found premature reflection bookkeeping, fixed before
+live execution. The final focused review of behavior through
+`0b202c21a23bb1a52af6a95b6954d60a123940c5` found no further concrete defects.
+Subsequent changes publish evidence and fact-checked diary prose only.

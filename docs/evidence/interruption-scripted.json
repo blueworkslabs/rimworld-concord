@@ -1,0 +1,102 @@
+{
+  "date": "2026-09-22",
+  "reviewedBehaviorHead": "0b202c21a23bb1a52af6a95b6954d60a123940c5",
+  "automatedTests": 119,
+  "nativeBuild": true,
+  "inferenceCalls": 0,
+  "nativeRecovery": {
+    "authoredShortAnesthesia": true,
+    "observedRecoveryInvalidatedQuestion": true,
+    "lateAcceptanceNoDispatch": true,
+    "pairedRestore": true,
+    "coldRestore": true
+  },
+  "retainedEarlierRehearsal": {
+    "behaviorHead": "c926389fea328d4ee486f413f32e8605be9e5200",
+    "outcomes": {
+      "completedHaulTrips": 1,
+      "deliveredSteel": 10,
+      "completedRescues": 0
+    },
+    "interruptionAudit": [
+      {
+        "branch": "1306ace7-d249-489f-92e9-6f556b55de49",
+        "kind": "decision-invalidated",
+        "actor": "Thing_Human405",
+        "data": {
+          "proposal": "4640081a-a076-4bce-9f57-29a6be427e4e",
+          "reason": "Offered patient and bed are no longer supported by current local options"
+        }
+      },
+      {
+        "branch": "1306ace7-d249-489f-92e9-6f556b55de49",
+        "kind": "decision-error",
+        "actor": "Thing_Human405",
+        "data": {
+          "proposal": "4640081a-a076-4bce-9f57-29a6be427e4e",
+          "error": "Error: Attention cancelled",
+          "fallback": "continue-native"
+        }
+      }
+    ],
+    "finding": "Bounded shortlist disappearance cancelled valid pending rescue; changed to positive observed contradictions before live trial."
+  },
+  "finalRehearsal": {
+    "scriptedReflectionDelayMs": 5000,
+    "scriptedRescueDelayMs": 8000,
+    "outcomes": {
+      "completedHaulTrips": 1,
+      "deliveredSteel": 10,
+      "completedRescues": 1
+    },
+    "observation": {
+      "wallMs": 20370,
+      "ticks": 1181,
+      "samples": 32,
+      "pausedSamples": 0,
+      "thoughtSamples": 23,
+      "ticksDuringThought": 729,
+      "attention": [
+        {
+          "pawn": "Thing_Human405",
+          "status": "continued",
+          "throughSeq": 2
+        },
+        {
+          "pawn": "Thing_Human405",
+          "status": "native",
+          "throughSeq": 3
+        }
+      ],
+      "decisions": 3,
+      "reflections": 1,
+      "appraisals": 0,
+      "operatorStops": [],
+      "rescueOfferStarted": true,
+      "connected": true,
+      "pump": {
+        "started": 2,
+        "nativeStarted": 1,
+        "modelStarted": 1,
+        "pending": 0,
+        "stopped": true
+      }
+    },
+    "interruptionAudit": [],
+    "pairedRestore": true,
+    "coldRestore": true,
+    "socialEventDuringThought": false
+  },
+  "unitCoverage": [
+    "Deferred DeepTalk remains pending for later reflection",
+    "Legacy interrupt flags use current quiet-memory scheduling",
+    "Unfamiliar significant memories still supersede",
+    "Observed target/bed/map/readiness/offer changes invalidate",
+    "Shortlist absence and stale facts do not alone invalidate",
+    "Fresh final validation including reflection-selected acceptance",
+    "Rejected consent does not persist a successful reflection",
+    "Durable acceptance survives lost dispatch reply",
+    "Separate finite trial budget and staging launcher guards"
+  ],
+  "limitations": "Native recovery and rescue choices scripted. No native conversation occurred during the delayed thought; deferred social-event behavior is mock-tested, not yet live-event verified."
+}

@@ -244,3 +244,23 @@ test('fresh casualty cannot escalate a native-only claim across the split budget
  assert.equal(calls,0);assert.equal(c.inspect().characters.A!.attention,undefined);
  assert.equal((await c.attend('A',backend,low,{},undefined,'model')).status,'continued');assert.equal(calls,1);store.close();
 });
+
+test('DeepTalk remains queued behind reflection and important unfamiliar memory still supersedes',async()=>{
+ const {game,store,c}=await setup();game.event('casualty');let release!:(v:unknown)=>void;
+ const pending=c.attend('A',{name:'slow',reflect:()=>new Promise(r=>release=r)});await until(()=>!!release);
+ game.event('memory','A','DeepTalk');await c.observe();release({kind:'continue',reason:'Finish considering casualty'});
+ assert.equal((await pending).status,'continued');assert.equal(c.inspect().characters.A!.attention!.cursor,1);
+ assert.equal((await c.attend('A',quiet)).status,'cooldown');game.data.ticks+=300;
+ let seen=false;const next=await c.attend('A',{name:'later',async reflect(v){seen=v.events.some(e=>e.detail==='DeepTalk');return {kind:'continue',reason:'Remember conversation'};}});
+ assert(seen);assert.equal(next.status,'continued');
+ game.event('memory','A','DeepTalk');release=undefined as any;const another=c.attend('A',{name:'slow',reflect:()=>new Promise(r=>release=r)},undefined,{cooldownTicks:0});await until(()=>!!release);
+ game.event('memory','A','WitnessedDeath');await c.observe();assert.equal((await another).status,'interrupted');release({kind:'continue',reason:'Discard'});store.close();
+});
+
+test('restored legacy DeepTalk retains the experience but uses current noninterrupting cooldown',async()=>{
+ const {game,store,c}=await setup();game.event('memory','A','DeepTalk');await c.observe();
+ const old=c.inspect();old.characters.A!.experiences![0]!.interrupt=true;old.characters.A!.attention={cursor:0,lastAttemptTick:1000};
+ store.commit(old,{branch:old.branch,kind:'legacy-fixture',actor:'operator',data:{}});const reopened=new Coordinator(store,game);await reopened.open();
+ assert(!reopened.attentionCandidates().includes('A'));assert.equal((await reopened.attend('A',quiet)).status,'cooldown');
+ assert.equal(reopened.inspect().characters.A!.experiences![0]!.event.detail,'DeepTalk');game.data.ticks+=300;assert.equal((await reopened.attend('A',quiet)).status,'continued');store.close();
+});

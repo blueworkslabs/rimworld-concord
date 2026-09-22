@@ -28,7 +28,7 @@ A subsequent [three-pawn negotiation trial](docs/NEGOTIATION.md) completed a liv
 
 [Bounded rescue](docs/RESCUE.md) adds one exact downed colonist / medical-bed agreement, with pawn-owned withdrawal and native validation. This is not capture or treatment; live rescue judgment remains untested.
 
-Explicit [timing modes](docs/DECISION_TIMING.md) preserve human pauses and let known mundane Chitchat queue without cancelling thought. Continuous play remains the default.
+Explicit [timing modes](docs/DECISION_TIMING.md) preserve human pauses and let Chitchat and DeepTalk queue without cancelling thought. Continuous play remains the default.
 
 See [acceptance](docs/ACCEPTANCE.md) for measured results and limitations, and [roadmap](docs/ROADMAP.md) for what is not built.
 
@@ -89,3 +89,7 @@ This is an application boundary, **not** a sandbox for hostile plugin code or th
 Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. An opt-in bounded attention pump consumes event routes. Native-client live decisions and reflections now have bounded paused/continuous evidence. Long-running operation and broader goals remain to be proved. See [attention consumption](docs/ATTENTION.md).
 
 See [architecture](docs/ARCHITECTURE.md), [narrative](docs/NARRATIVE.md), and [model access](docs/MODELS.md).
+
+The [interruption policy](docs/INTERRUPTIONS.md) distinguishes locally observed
+rescue contradictions from missing shortlist information. Its bounded live
+follow-up preserved a prose/action mismatch, not a completed live rescue.

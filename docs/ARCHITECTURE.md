@@ -48,5 +48,5 @@ The coordinator defaults to continuous play. An explicit pause-at-decision mode
 uses owner/epoch-scoped game pause claims, not changes to the player's time-speed
 setting. Claims coexist, release independently and expire on wall time even when
 simulation is paused. The model never receives this capability. Known mundane
-Chitchat is retained for background reflection without invalidating current thought;
+Chitchat and DeepTalk are retained for background reflection without invalidating current thought;
 other memory/health events retain conservative cancellation. See [timing policy](DECISION_TIMING.md).

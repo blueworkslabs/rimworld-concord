@@ -1,0 +1,48 @@
+{
+  "slug": "a-conversation-can-wait",
+  "title": "A conversation can wait",
+  "date": "2026-09-22",
+  "summary": "Live trial reveals prose/action mismatch in rescue intent; next step aligns executable choice with stated reasoning.",
+  "sections": [
+    {
+      "heading": "What Changed",
+      "paragraphs": [
+        "Chitchat and DeepTalk now wait behind an existing thought instead of cancelling it. The experiences are still remembered and remain available for later reflection. Importance to a character is not automatically evidence that their current question has become invalid. Unfamiliar significant memories and health or casualty events still interrupt conservatively; this is a narrow policy, not general understanding of every conversation.",
+        "A pending rescue can still be cancelled when the rescuer becomes unavailable or locally observes a contradiction, such as the patient recovering or the agreed bed becoming occupied. Losing an entry from a bounded shortlist is only missing information. A slower rehearsal caught our first guard confusing those two things; we corrected it before the live trial."
+      ]
+    },
+    {
+      "heading": "Rehearsal and Live Trial",
+      "paragraphs": [
+        "All 119 automated checks and the native build passed. In the real game, an authored short anesthetic wore off while a scripted answer was pending: observed recovery cancelled the question, and late consent created no rescue job. Another delayed, scripted rehearsal delivered ten steel and then placed Beatrice in the agreed bed. Both survived cold restart.",
+        "The live follow-up took a different turn. Alvin noticed downed Beatrice while hauling. His explanation said he would withdraw and rescue her, but his structured choice was continue. The coordinator did not reinterpret narrative text as action. All three hauling trips finished, delivering thirty steel. No rescue was offered or performed."
+      ]
+    },
+    {
+      "heading": "What Was Tested",
+      "paragraphs": [
+        "Two Claude attempts were used, with no Jev calls or retries. Paired and cold restore preserved the live outcome and its contradictory explanation. No social event arrived during either delayed scripted or live deliberation, so DeepTalk deferral remains mock-tested rather than live-event verified. This authored scenario does not establish personality, medical judgment, or a deliberate preference for hauling."
+      ]
+    },
+    {
+      "heading": "Next Unresolved Step",
+      "paragraphs": [
+        "The next question is making executable choice and stated intent agree without silently turning prose into authority or rerolling until rescue happens. The interruption policy is narrower and tested; the latest result exposes a separate gap between what a pawn says and the action it selects."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Interruption policy",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/INTERRUPTIONS.md"
+    },
+    {
+      "label": "Live evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/interruption-live.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
