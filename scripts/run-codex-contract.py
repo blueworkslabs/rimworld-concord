@@ -9,11 +9,13 @@ NATIVE_URL='https://chatgpt.com/backend-api/codex'
 CASE_IDS=['quiet','noticed','active-haul','pending-rescue','recovered']
 PERSPECTIVE_IDS=[case+'-r'+str(rep) for rep in (1,2) for case in ['needs-full','needs-low','needs-unknown','social-strain','limited-supplies','recovery']]
 OUTLOOK_IDS=[case+'-r'+str(rep) for rep in (1,2) for case in ['needs-full','needs-low','needs-unknown','outlook-empty','outlook-cooperate','outlook-protect-time']]
+SPEECH_IDS=[case+'-r'+str(rep) for rep in (1,2) for case in ['no-message','uncertain-other-need','contradicted-own-need','claimed-consent','corrected-report','claimed-completion']]
 def validate_suite(suite):
- expected={'concord-contract-v1':CASE_IDS,'concord-perspective-v1':PERSPECTIVE_IDS,'concord-outlook-check-v1':OUTLOOK_IDS}.get(suite.get('version'))
+ expected={'concord-contract-v1':CASE_IDS,'concord-perspective-v1':PERSPECTIVE_IDS,'concord-outlook-check-v1':OUTLOOK_IDS,'concord-speech-check-v1':SPEECH_IDS,'concord-log-read-v1':['public-log']}.get(suite.get('version'))
  assert expected and suite.get('authored') is True and [c['id'] for c in suite['cases']]==expected,'Unrecognized fixed suite'
- if suite['version'] in ('concord-perspective-v1','concord-outlook-check-v1'):
-  exporter='export-outlook-cases.mjs' if suite['version']=='concord-outlook-check-v1' else 'export-perspective-cases.mjs'
+ exporters={'concord-perspective-v1':'export-perspective-cases.mjs','concord-outlook-check-v1':'export-outlook-cases.mjs','concord-speech-check-v1':'export-speech-cases.mjs','concord-log-read-v1':'export-log-reader.mjs'}
+ if suite['version'] in exporters:
+  exporter=exporters[suite['version']]
   canonical=json.loads(subprocess.check_output(['node',str(pathlib.Path(__file__).with_name(exporter))],text=True))
   assert suite==canonical,'Frozen case contents differ from this build'
  return suite['cases']

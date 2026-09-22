@@ -1,0 +1,153 @@
+{
+  "source": {
+    "milestone": "PR32 live social run",
+    "runId": "60e31b91-953c-4c40-9667-e8f1175d0167",
+    "receiptSha256": "077605050848e6a6b19644bc1228ca06fa4257d630513cb96b8f84ff973d1f3f",
+    "evidence": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/social-exchange.json",
+    "synthetic": false
+  },
+  "log": {
+    "entries": [
+      {
+        "seq": 1,
+        "tick": 2,
+        "kind": "message",
+        "actor": "Alvin",
+        "recipient": "Beatrice",
+        "subject": "1180f9bd-4873-4d26-9d3d-aa3744347b87",
+        "text": "Hey Beatrice. Quiet morning so far. My stomach's starting to remind me it exists, but other than that, all good.",
+        "key": "social:867b8f1d-ff73-4af5-b787-93516c1f140e"
+      },
+      {
+        "seq": 2,
+        "tick": 2,
+        "kind": "message",
+        "actor": "Beatrice",
+        "recipient": "Alvin",
+        "subject": "1180f9bd-4873-4d26-9d3d-aa3744347b87",
+        "text": "Morning. Go find something to eat then.",
+        "key": "social:eca44519-0659-4d6b-ae54-9a18977fcc85"
+      },
+      {
+        "seq": 3,
+        "tick": 3,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Alvin",
+        "subject": "b097328e-a6c9-46c0-a9c8-625a6d1e5a46",
+        "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This is an optional separate offer. Nothing said in conversation commits you to this work.",
+        "key": "offer:b097328e-a6c9-46c0-a9c8-625a6d1e5a46"
+      },
+      {
+        "seq": 4,
+        "tick": 3,
+        "kind": "message",
+        "actor": "Alvin",
+        "recipient": "Core",
+        "subject": "b097328e-a6c9-46c0-a9c8-625a6d1e5a46",
+        "text": "accept: Food is low but still above the stop-work threshold. Hauling a load of wood is straightforward and worth doing while I can.",
+        "key": "reply:b097328e-a6c9-46c0-a9c8-625a6d1e5a46"
+      },
+      {
+        "seq": 5,
+        "tick": 3,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "b097328e-a6c9-46c0-a9c8-625a6d1e5a46",
+        "text": "haul: started.",
+        "key": "outcome:b1cb0e7a-a18f-49eb-9ea7-81291859c236:started"
+      },
+      {
+        "seq": 6,
+        "tick": 3,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Beatrice",
+        "subject": "dd46bc15-c62a-48e2-a07a-4e2286bba539",
+        "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This is an optional separate offer. Nothing said in conversation commits you to this work.",
+        "key": "offer:dd46bc15-c62a-48e2-a07a-4e2286bba539"
+      },
+      {
+        "seq": 7,
+        "tick": 3,
+        "kind": "message",
+        "actor": "Beatrice",
+        "recipient": "Core",
+        "subject": "dd46bc15-c62a-48e2-a07a-4e2286bba539",
+        "text": "accept: Wood nearby, I'm well-rested and fed, and hauling is straightforward work. Happy to move a load.",
+        "key": "reply:dd46bc15-c62a-48e2-a07a-4e2286bba539"
+      },
+      {
+        "seq": 8,
+        "tick": 3,
+        "kind": "record",
+        "actor": "Beatrice",
+        "recipient": "observer",
+        "subject": "dd46bc15-c62a-48e2-a07a-4e2286bba539",
+        "text": "haul: started.",
+        "key": "outcome:f424cc51-e0cd-4332-a4bd-17ad5e626b16:started"
+      },
+      {
+        "seq": 9,
+        "tick": 105,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "b097328e-a6c9-46c0-a9c8-625a6d1e5a46",
+        "text": "haul: completed. Delivered 10 units.",
+        "key": "outcome:b1cb0e7a-a18f-49eb-9ea7-81291859c236:completed"
+      },
+      {
+        "seq": 10,
+        "tick": 105,
+        "kind": "record",
+        "actor": "Beatrice",
+        "recipient": "observer",
+        "subject": "dd46bc15-c62a-48e2-a07a-4e2286bba539",
+        "text": "haul: completed. Delivered 10 units.",
+        "key": "outcome:f424cc51-e0cd-4332-a4bd-17ad5e626b16:completed"
+      }
+    ],
+    "agreements": [
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "progress": {
+          "id": "dd46bc15-c62a-48e2-a07a-4e2286bba539",
+          "kind": "haul",
+          "status": "completed",
+          "tick": 7216,
+          "agreed": 1,
+          "completed": 1,
+          "active": 0,
+          "unconfirmed": 0,
+          "unsuccessful": 0,
+          "notStarted": 0,
+          "unfulfilled": 0,
+          "delivered": 10,
+          "quantityUnknown": 0
+        }
+      },
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "progress": {
+          "id": "b097328e-a6c9-46c0-a9c8-625a6d1e5a46",
+          "kind": "haul",
+          "status": "completed",
+          "tick": 7216,
+          "agreed": 1,
+          "completed": 1,
+          "active": 0,
+          "unconfirmed": 0,
+          "unsuccessful": 0,
+          "notStarted": 0,
+          "unfulfilled": 0,
+          "delivered": 10,
+          "quantityUnknown": 0
+        }
+      }
+    ]
+  }
+}
