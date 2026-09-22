@@ -63,6 +63,14 @@
 - Quiescent between-trip paired/cold restore; active-job checkpoints remain deferred.
 - See [contract and trial scope](HAULING.md). Finite live results are recorded in the acceptance evidence, not inferred from implementation.
 
+## Supply-aware coordination increment
+
+- Separate observed source quantities/storage capacity from per-trip consent limits.
+- Conservative, durable planning holds prevent competing offers inside one coordinator.
+- Pending-offer withdrawal cannot cancel pawn-owned accepted work.
+- Bounded local alternatives and map-bound native dispatch; execution still revalidates.
+- Scripted coordination and restore checks; live-model improvement remains unmeasured.
+
 ## Next bounded increment
 
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.

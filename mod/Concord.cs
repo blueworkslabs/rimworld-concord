@@ -89,7 +89,7 @@ namespace Concord
             }
         }
     }
-    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing; public int x,z,ttlMs,count,maxTicks,untilTick; }
+    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing; public int x,z,ttlMs,count,maxTicks,untilTick; public int mapId=-1; }
     [Serializable] public class Response { public string id,error; public bool ok; }
     [Serializable] public class PawnView { public string id,name,job; public int x,z; public float health; public bool workReady; }
     [Serializable] public class Snapshot { public string world,epoch; public int ticks,decisionPauses; public bool loaded,paused,manualPaused; }
@@ -147,6 +147,7 @@ namespace Concord
             var cell=new IntVec3(r.x,0,r.z);
             if(pawn==null) { aNew.reason="Pawn is no longer available on this map"; return aNew; }
             if(r.op=="haul") {
+                if(r.mapId!=pawn.Map.uniqueID) {aNew.reason="Haul observation belongs to a different or unknown map";return aNew;}
                 var thing=Find.CurrentMap.listerThings.AllThings.FirstOrDefault(t=>t.GetUniqueLoadID()==r.thing);
                 if(r.maxTicks<60||r.maxTicks>3600||!Hauling.Valid(pawn,thing,cell,r.count)) {aNew.reason="Haul source, storage, needs or reservation unavailable";return aNew;}
                 aNew.untilTick=Math.Min(Find.TickManager.TicksGame+r.maxTicks,r.untilTick);

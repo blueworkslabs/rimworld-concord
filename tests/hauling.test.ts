@@ -7,7 +7,7 @@ import {Action,type ActionRequest,type GameState,type Receipt} from '../src/prot
 const haul={kind:'haul' as const,thing:'steel',x:4,z:5,count:10,trips:3,maxTicks:600};
 const accept=scripted({kind:'accept',reason:'Three trips, then done'});
 async function setup(){
- const data:GameState={world:'w',epoch:'e',ticks:10,loaded:true,paused:false,actions:[],pawns:[{id:'A',name:'Ada',x:1,z:1,job:'',health:1,workReady:true,hauling:{epoch:'e',tick:10,status:'available',options:[haul]}}]};
+ const data:GameState={world:'w',epoch:'e',ticks:10,loaded:true,paused:false,actions:[],pawns:[{id:'A',name:'Ada',x:1,z:1,job:'',health:1,workReady:true,hauling:{epoch:'e',tick:10,mapId:1,status:'available',options:[haul],supplies:[{thing:'steel',label:'Steel',x:4,z:5,sourceCount:75,destinationFree:75}]}}]};
  let lost=false,cancelLost=false;const saves=new Map<string,GameState>();
  const game={async state(){return structuredClone(data);},async move(r:ActionRequest){
   const old=data.actions.find(x=>x.id===r.id);if(old)return structuredClone(old);
@@ -55,7 +55,7 @@ test('event reflection can withdraw active hauling; no future trip follows',asyn
  assert.equal(r.status,'continued');await c.advanceIntentions();assert.equal(data.actions.length,1);assert.equal(data.actions[0]!.status,'interrupted');
 });
 test('hauling query is physical-only, cloned; counters still require fresh acceptance',async()=>{
- const {c,p,data}=await setup();const view=await c.core().haulingOptions('A');assert(view);assert.deepEqual(Object.keys(view).sort(),['epoch','options','status','tick']);view.options[0]!.count=1;assert.equal(data.pawns[0]!.hauling!.options[0]!.count,10);
+ const {c,p,data}=await setup();const view=await c.core().haulingOptions('A');assert(view);assert.deepEqual(Object.keys(view).sort(),['epoch','mapId','options','status','supplies','tick']);view.options[0]!.count=1;assert.equal(data.pawns[0]!.hauling!.options[0]!.count,10);
  await c.pawn('A').decide(p.id,scripted({kind:'counter',reason:'Only one trip',action:{...haul,trips:1}}));assert.equal(data.actions.length,0);
  const reply=await c.core().revise(p.id,'One trip then');assert.equal(data.actions.length,0);await c.pawn('A').decide(reply.id,accept);assert.equal(data.actions.length,1);
 });

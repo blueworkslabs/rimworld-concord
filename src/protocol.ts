@@ -8,7 +8,9 @@ export const Haul = z.object({kind:z.literal('haul'),thing:z.string().min(1).max
 export type Haul = z.infer<typeof Haul>;
 export const Action = z.discriminatedUnion('kind',[Move,Haul]);
 export type Action = z.infer<typeof Action>;
-export type HaulingView = {epoch:string;tick:number;status:'available'|'unavailable';options:Haul[]};
+/** Physical quantities are observations, independent of the proposed consent bounds. */
+export type HaulSupply = {thing:string;label:string;x:number;z:number;sourceCount:number;destinationFree:number};
+export type HaulingView = {epoch:string;tick:number;mapId?:number;status:'available'|'unavailable';options:Haul[];supplies?:HaulSupply[]};
 export const Decision = z.discriminatedUnion('kind', [
   z.object({kind:z.literal('accept'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('refuse'),reason:z.string().min(1).max(1000)}).strict(),
@@ -29,7 +31,7 @@ export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail
 export type Attention = {event:NativeEvent;route:'native'|'appraisal'|'deliberation';interrupt?:boolean};
 export type DecisionPause = {epoch:string;actor:string;leaseId:string;ttlMs:number};
 export type Activity = {epoch:string;actor:string;activityId:string;ttlMs:number};
-export type ActionRequest = {id:string;epoch:string;actor:string;action:Action;untilTick?:number};
+export type ActionRequest = {id:string;epoch:string;actor:string;action:Action;untilTick?:number;mapId?:number};
 /** Admin capability: held by the coordinator/runner only, never provided to a character backend. */
 export interface GameBridge {
   state():Promise<GameState>;
@@ -49,7 +51,7 @@ export type Character = {id:string;name:string;memories:string[];commitment?:str
   attention?:AttentionProgress;
   reflections?:{tick:number;throughSeq:number;backend:string;reason:string}[];
 };
-export type Proposal = {id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'countered';decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
+export type Proposal = {id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;
