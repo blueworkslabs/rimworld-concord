@@ -1,0 +1,55 @@
+{
+  "slug": "a-goal-beyond-the-haul",
+  "title": "A Goal Beyond the Haul",
+  "date": "2026-09-22",
+  "summary": "A pending rescue request can receive a fresh offer after the hauling that prompted it has finished.",
+  "sections": [
+    {
+      "heading": "The Gap Between Chores and Care",
+      "paragraphs": [
+        "The previous trial left a conversation unfinished. Alvin requested rescue while hauling, but his hauling was complete by the time the core answered. Its replacement-only script declined the request. Not because Alvin refused to help: the core had no path from that request to a separate rescue offer. Finishing the chore had closed the door to discussing what came next."
+      ]
+    },
+    {
+      "heading": "What Changed",
+      "paragraphs": [
+        "Now an unanswered request can outlast that original agreement. If hauling still runs, the core can offer a replacement. If hauling has completed and the pawn has no new commitment, it can instead offer rescue as separate work. The requested patient and map stay fixed, a usable bed must be currently observed, and the same pawn must consent afresh. Declined or already-answered requests are not revived. Stopped hauling does not qualify as completed work, and stale replacement acceptance cannot authorize the new job."
+      ]
+    },
+    {
+      "heading": "What We Tested",
+      "paragraphs": [
+        "All 153 automated tests pass, and independent Codex review found no actionable defects. Scripted game checks covered both answers: acceptance delivered thirty steel across three trips, then completed exact-bed rescue; refusal delivered the steel without rescue. Paired restore passed both branches, with cold restart also checked for scripted acceptance.",
+        "In the single live follow-up, Alvin requested rescue while keeping his hauling agreement. The scripted core deliberately waited until all three trips finished, then offered standalone rescue. Alvin accepted, and Beatrice reached the agreed medical sleeping spot. His reply, “Hauling wrapped up cleanly — all three trips delivered,” matched the receipts this time. No treatment was claimed. Requests, decisions, outcomes and bed placement survived paired and full restart without further inference; 51 historical database files stayed unchanged."
+      ]
+    },
+    {
+      "heading": "Current Limits and Next Steps",
+      "paragraphs": [
+        "The trial used three Claude attempts and no Jev calls, retries or cancellations. Initial negotiation was paused; the continuous observation settled after about 25.8 seconds, with all 25 sampled states unpaused. Only one casualty-discovery reflection was enabled. This demonstrates one successful conversation path, not sustained autonomous planning or generally reliable explanations.",
+        "Next are selected native world changes, such as recovery, in the log, and reflection pacing. Durable character development, richer social exchanges and human contact remain on the roadmap."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Requested goal contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/ALTERNATIVE_REQUESTS.md"
+    },
+    {
+      "label": "Trial evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/requested-goal-live.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/concord-goal-live.png",
+      "alt": "Saved Concord crew log showing all three hauling trips and one rescue completed, with a fresh core offer and Alvin’s acceptance.",
+      "caption": "Saved log after the live trial’s paired restore: thirty steel delivered, then rescue completed under separate fresh consent. This is a saved report, not a live display."
+    }
+  ]
+}

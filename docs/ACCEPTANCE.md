@@ -585,3 +585,17 @@ work records. They support reconstructing the offers, request, decline, later
 acceptance and deliveries without private reflections. Native recovery is a
 visibility gap; this analyst inspection is not a blinded human usability test.
 [Evidence](evidence/observer-live.json) · [Public frames](evidence/observer-public-frames.json).
+
+## Pending goal / fresh rescue offer follow-up (2026-09-22)
+
+153 automated checks pass. A still-pending rescue request can receive a fresh
+standalone offer after ordinary haul completion; declined/closed requests, stopped
+origins, new commitments, observed recovery and stale replacement consent cannot
+silently authorize it. Same-patient counters retain offer mode and fresh consent.
+Native scripted acceptance completed three hauls/thirty steel then exact-bed rescue;
+scripted refusal completed hauling without rescue. Both paired restores and the
+acceptance cold restart passed. One live sequence requested rescue during hauling,
+then accepted a separate offer after completion: thirty steel and exact-bed rescue.
+Live paired/cold restore passed; three Claude attempts, zero Jev, no retries.
+Independent Codex review covered final behavior. [Contract and limits](REQUESTED_GOAL_TRIAL.md)
+· [Sanitized evidence](evidence/requested-goal-live.json).

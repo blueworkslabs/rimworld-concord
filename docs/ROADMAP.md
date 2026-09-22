@@ -176,3 +176,11 @@ after its replacement context expires (fresh standalone consent, never a stale
 answer replay), selected observable native state changes, and reflection pacing.
 Do not interpret this as a refusal to rescue or proof of developed personalities.
 See [trial contract](OBSERVER_TRIAL.md) and [evidence](evidence/observer-live.json).
+
+The pending-goal reply path is now implemented and verified: an unanswered request
+can receive standalone rescue consent after ordinary hauling completion, without
+reviving declined requests or reusing stale replacement acceptance. One live
+sequence completed thirty steel then rescue, with paired/cold restore. The core
+remained scripted and deliberately delayed its reply. Selected native-event
+visibility and reflection pacing remain the next bounded follow-ups; broader
+character, social and human-contact work stays in the playable-direction plan.

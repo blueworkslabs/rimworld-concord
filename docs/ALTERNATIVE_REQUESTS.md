@@ -59,3 +59,29 @@ remains an independent choice using the earlier follow-up policy. Refusal,
 continuation, counters, incomplete handovers and failures all remain evidence.
 No output is rerolled to obtain a request or rescue. Scripted checks separately
 exercise request/decline, refusal, counter, handover failure and persistence.
+
+## A pending request outlasting its original work
+
+`core.offerRequestedRescue(requestId, action, reason)` answers an **unanswered**
+request against current evidence. If its original hauling agreement still runs,
+it creates a replacement with the existing cancellation-before-dispatch rules.
+If that agreement completed and the pawn has no new commitment, it creates a
+standalone rescue offer linked by `requestId`, **without** `replacesAgreementId`.
+The pawn receives receipt-based progress for the completed origin and must give
+fresh consent. No completed work is cancelled or resumed.
+
+The core consumes a freshly observed terminal receipt before selecting the offer
+mode. The patient and map remain those requested; the exact bed must be currently
+grounded. Observed recovery rejects an offer even if a shortlist still contains
+an older option. An unavailable option is not an instruction to invent a bed.
+
+This does not reopen declined, closed or already-answered requests, nor turn a
+stopped/withdrawn origin into a completed one. A new commitment blocks the fresh
+standalone offer. Counters retain the original offer mode and requested patient,
+and require a revised offer and fresh consent. An already-issued replacement
+that becomes stale remains stale: its answer is never replayed as standalone
+consent. `offerAlternative` retains its replacement-only contract.
+
+The request is a deliberate goal communication, not an autonomous persistent
+planner. The operator/core must choose when to answer or decline it. There is no
+automatic retry, request revival or inference loop.

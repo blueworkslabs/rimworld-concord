@@ -313,6 +313,15 @@ export class Coordinator {
         if(!r||r.status!=='pending')throw Error('Expected unanswered pawn request');
         return this.propose(game,r.pawn,action,reason,id,undefined,r);
       }),
+      /** Answer an unanswered goal using a fresh offer; never reinterpret an issued replacement. */
+      offerRequestedRescue:(requestId:string,action:Action,reason:string,id=randomUUID())=>this.serial(async()=>{
+        const game=await this.current(),r=this.domain.requests?.[requestId];
+        if(!r||r.status!=='pending')throw Error('Expected unanswered pawn request');
+        const old=this.domain.proposals[r.agreementId];
+        if(old)this.refreshReceipt(old,game);
+        this.ingest(game);
+        return this.propose(game,r.pawn,action,reason,id,undefined,r,old?.standing?.status==='completed');
+      }),
       inbox:()=>structuredClone(Object.values(this.domain.proposals).filter(p=>p.status==='countered'&&!p.replyId)),
       propose:(pawn:string,action:Action,reason:string,id=randomUUID())=>this.serial(async()=>{
         return this.propose(await this.current(),pawn,action,reason,id);
@@ -339,7 +348,7 @@ export class Coordinator {
       })
     };
   }
-  private propose(game:GameState,pawn:string,action:Action,reason:string,id:string,parent?:Proposal,request?:AlternativeRequest) {
+  private propose(game:GameState,pawn:string,action:Action,reason:string,id:string,parent?:Proposal,request?:AlternativeRequest,standalone=false) {
     action=Action.parse(action);z.string().uuid().parse(id);
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
     if(!reason.trim()||reason.length>1000) throw Error('Invalid proposal reason');
@@ -349,15 +358,18 @@ export class Coordinator {
       return structuredClone(prior);
     }
     const alternative=request??(parent?.requestId?this.domain.requests?.[parent.requestId]:undefined);
+    const replaces=alternative?(parent?parent.replacesAgreementId:standalone?undefined:alternative.agreementId):undefined;
     if(alternative){
       if(action.kind!=='rescue'||action.target!==alternative.target)throw Error('Alternative must address the requested patient');
       if(parent&&(alternative.status!=='offered'||alternative.proposalId!==parent.id))throw Error('Alternative reply superseded');
-      const candidate={pawn,action,requestId:alternative.id,replacesAgreementId:alternative.agreementId} as Proposal;
-      if(!this.replacementActive(candidate))throw Error('Requested agreement is no longer active');
+      const candidate={pawn,action,requestId:alternative.id,replacesAgreementId:replaces} as Proposal;
+      if(!replaces&&!this.completedRequestAvailable(candidate))throw Error('Completed request origin or free pawn required');
+      if(replaces&&!this.replacementActive(candidate))throw Error('Requested agreement is no longer active');
     }
     const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;
-    const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action,alternative?.agreementId):undefined;
-    const p:Proposal={id,pawn,action,reason,status:'pending',...(alternative?{requestId:alternative.id,replacesAgreementId:alternative.agreementId}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action,replaces):undefined;
+    const p:Proposal={id,pawn,action,reason,status:'pending',...(alternative?{requestId:alternative.id,...(replaces?{replacesAgreementId:replaces}:{})}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    if(action.kind==='rescue'){const invalid=rescueQuestionInvalid(game,p);if(invalid)throw Error(invalid);}
     if(alternative){if(rescueMap!==alternative.mapId)throw Error('Request map changed');alternative.status='offered';alternative.proposalId=id;alternative.replyReason=reason;}
     if(parent)parent.replyId=id;
     this.domain.proposals[id]=p;this.commit(parent?'proposal-revised':'proposed','core',p);
@@ -397,7 +409,8 @@ export class Coordinator {
       this.pending.set(pawn,controller);
       if(p.action.kind==='rescue')this.questions.set(pawn,{controller,proposal:id});
       this.commit('deliberation-started',pawn,{proposal:id,backend:backend.name});
-      return {generation:this.generation,controller,activity,view:structuredClone({pawn:groundedPawn(this.domain,game,own),character:this.domain.characters[pawn]!,proposal:p,...((p.replacesAgreementId??this.domain.characters[pawn]!.intention)?{agreementProgress:agreementProgress(this.domain,this.domain.proposals[(p.replacesAgreementId??this.domain.characters[pawn]!.intention)!]!,game.ticks,game.actions)}:{}),...(p.parentId?{history:this.history(p)}:{})})};
+      const progressId=p.replacesAgreementId??(p.requestId?this.domain.requests?.[p.requestId]?.agreementId:undefined)??this.domain.characters[pawn]!.intention;
+      return {generation:this.generation,controller,activity,view:structuredClone({pawn:groundedPawn(this.domain,game,own),character:this.domain.characters[pawn]!,proposal:p,...(progressId?{agreementProgress:agreementProgress(this.domain,this.domain.proposals[progressId]!,game.ticks,game.actions)}:{}),...(p.parentId?{history:this.history(p)}:{})})};
     });
     let timer:ReturnType<typeof setTimeout>|undefined;
     try {
@@ -434,6 +447,18 @@ export class Coordinator {
     const old=this.domain.proposals[p.replacesAgreementId??''],r=this.domain.requests?.[p.requestId??''],ch=this.domain.characters[p.pawn];
     return !!(old&&r&&r.pawn===p.pawn&&r.agreementId===old.id&&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&old.pawn===p.pawn&&old.action.kind==='haul'&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
   }
+  private completedRequestAvailable(p:Proposal):boolean {
+    const r=this.domain.requests?.[p.requestId??''],old=this.domain.proposals[r?.agreementId??''],ch=this.domain.characters[p.pawn];
+    return !!(r&&old&&ch&&r.pawn===p.pawn&&old.pawn===p.pawn&&old.action.kind==='haul'&&old.status==='accepted'&&old.standing?.status==='completed'
+      &&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&!ch.commitment&&!ch.intention);
+  }
+  private refreshReceipt(p:Proposal,game:GameState) {
+    const receipt=game.actions.find(a=>a.id===p.actionId&&a.actor===p.pawn);
+    if(!receipt||receipt.status==='started')return;
+    this.domain.outcomes[receipt.id]=receipt;
+    if(this.domain.characters[p.pawn]!.commitment===receipt.id)delete this.domain.characters[p.pawn]!.commitment;
+    this.finishStanding(p,receipt.status);this.commit('action-outcome',p.pawn,receipt);
+  }
   private requestRescue(view:import('./attention.js').AttentionView,result:Extract<Reflection,{kind:'request_rescue'}>,fresh:GameState) {
     const old=this.domain.proposals[result.agreementId],ch=this.domain.characters[view.pawn.id]!,seen=view.pawn.casualties;
     if(!old||old.pawn!==view.pawn.id||old.action.kind!=='haul'||old.standing?.status!=='running'||ch.intention!==old.id||view.intention?.id!==old.id)throw Error('Request agreement superseded');
@@ -448,20 +473,13 @@ export class Coordinator {
   }
   private validateDecision(p:Proposal,result:Decision,fresh:GameState) {
     if(p.replacesAgreementId&&!this.replacementActive(p))throw Error('Replacement agreement no longer active');
-    if(p.replacesAgreementId&&result.kind==='counter'&&(result.action.kind!=='rescue'||p.action.kind!=='rescue'||result.action.target!==p.action.target))throw Error('Replacement counter outside requested patient');
+    if(p.requestId&&!p.replacesAgreementId&&!this.completedRequestAvailable(p))throw Error('Requested standalone offer no longer valid');
+    if(p.requestId&&result.kind==='counter'&&(result.action.kind!=='rescue'||p.action.kind!=='rescue'||result.action.target!==p.action.target))throw Error('Replacement counter outside requested patient');
     if(result.kind==='accept'&&p.action.kind==='rescue'){const invalid=rescueQuestionInvalid(fresh,p);if(invalid)throw Error(invalid);}
     if(result.kind==='accept'&&p.action.kind!=='move'&&!this.game.cancel)throw Error('Work requires scoped cancellation');
   }
   private async applyDecision(p:Proposal,result:Decision,fresh:GameState,signal?:AbortSignal) {
-    if(p.replacesAgreementId){
-      const old=this.domain.proposals[p.replacesAgreementId]!;
-      const receipt=fresh.actions.find(a=>a.id===old.actionId&&a.actor===p.pawn);
-      if(receipt&&receipt.status!=='started'){
-        this.domain.outcomes[receipt.id]=receipt;
-        if(this.domain.characters[p.pawn]!.commitment===receipt.id)delete this.domain.characters[p.pawn]!.commitment;
-        this.finishStanding(old,receipt.status);this.commit('action-outcome',p.pawn,receipt);
-      }
-    }
+    if(p.replacesAgreementId)this.refreshReceipt(this.domain.proposals[p.replacesAgreementId]!,fresh);
     this.validateDecision(p,result,fresh);
     if(p.replacesAgreementId&&result.kind==='accept') {
       // Consent is durable before any cancellation. An interrupted handover never

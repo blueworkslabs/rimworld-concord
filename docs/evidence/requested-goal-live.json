@@ -1,0 +1,333 @@
+{
+  "at": "2026-09-22T14:39:28.270Z",
+  "runId": "a82f9fa9-d7d0-4092-bb87-4995cac765ba",
+  "policy": "goal-v1",
+  "passed": true,
+  "reviewedBehavior": "ec9446ad563e39f59f5cef00046659d44a1c947e",
+  "tests": 153,
+  "summary": {
+    "completedHaulTrips": 3,
+    "deliveredSteel": 30,
+    "completedRescues": 1
+  },
+  "requests": [
+    {
+      "id": "1f90de6b-f31c-4cd9-a92e-4d1ae81e4a2a",
+      "pawn": "Thing_Human405",
+      "agreementId": "2ed504b9-897c-4424-bba9-cffd5b53033d",
+      "target": "Thing_Human408",
+      "mapId": 0,
+      "reason": "Beatrice is down nearby and I can see an open sleeping spot close by. I'm mid-haul and don't want to abandon it outright, but I'd like to know if rescue can be arranged \u2014 either alongside or after I finish. Asking the core to look into it while I keep hauling.",
+      "status": "closed",
+      "replyReason": "Your hauling agreement completed. In response to your earlier request, would you carry this observed downed colonist to this specific medical bed? This is separate optional work, not a replacement or treatment. You may refuse or counter.",
+      "proposalId": "02fe077b-dc0f-451d-8f4c-0dfffe87781e"
+    }
+  ],
+  "goalReply": {
+    "originStatus": "completed",
+    "origin": "2ed504b9-897c-4424-bba9-cffd5b53033d",
+    "requestId": "1f90de6b-f31c-4cd9-a92e-4d1ae81e4a2a"
+  },
+  "proposals": [
+    {
+      "id": "2ed504b9-897c-4424-bba9-cffd5b53033d",
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_Steel1883",
+        "x": 88,
+        "z": 80,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 3600
+      },
+      "reason": "Would you carry up to three ten-unit trips of these supplies to this storage cell? You may refuse, counter or later reconsider.",
+      "status": "accepted",
+      "decision": {
+        "kind": "accept",
+        "reason": "Plenty of food and rest, nothing urgent on my plate. Happy to haul the steel over \u2014 three trips of ten should be straightforward."
+      },
+      "standing": {
+        "status": "completed",
+        "deadline": 3602,
+        "steps": [
+          "8786df5b-12ac-4197-b6da-977378103358",
+          "4d27c338-ab83-4f66-a2f5-08e38ae13430",
+          "aed0f2ac-fcaf-4f85-bd2b-203477866f52"
+        ],
+        "reason": "Agreed work completed"
+      },
+      "actionId": "aed0f2ac-fcaf-4f85-bd2b-203477866f52"
+    },
+    {
+      "id": "02fe077b-dc0f-451d-8f4c-0dfffe87781e",
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "rescue",
+        "target": "Thing_Human408",
+        "bed": "Thing_SleepingSpot990001",
+        "x": 96,
+        "z": 82,
+        "maxTicks": 1800
+      },
+      "reason": "Your hauling agreement completed. In response to your earlier request, would you carry this observed downed colonist to this specific medical bed? This is separate optional work, not a replacement or treatment. You may refuse or counter.",
+      "status": "accepted",
+      "requestId": "1f90de6b-f31c-4cd9-a92e-4d1ae81e4a2a",
+      "decision": {
+        "kind": "accept",
+        "reason": "Hauling wrapped up cleanly \u2014 all three trips delivered. Beatrice is still down nearby and the sleeping spot is open. I'm in good shape and this is the rescue I was hoping to arrange. I'll carry her over now."
+      },
+      "standing": {
+        "status": "completed",
+        "deadline": 3110,
+        "steps": [
+          "4ef22a16-f4c2-4815-8656-985fa07652bb"
+        ],
+        "reason": "Agreed work completed"
+      },
+      "actionId": "4ef22a16-f4c2-4815-8656-985fa07652bb"
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "8786df5b-12ac-4197-b6da-977378103358",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 3,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "4d27c338-ab83-4f66-a2f5-08e38ae13430",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 34,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "aed0f2ac-fcaf-4f85-bd2b-203477866f52",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 43,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "4ef22a16-f4c2-4815-8656-985fa07652bb",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed casualty to agreed medical bed; treatment not implied",
+      "kind": "rescue",
+      "thing": "",
+      "target": "Thing_Human408",
+      "bed": "Thing_SleepingSpot990001",
+      "x": 96,
+      "z": 82,
+      "jobId": 84,
+      "count": 0,
+      "delivered": 1,
+      "untilTick": 3110
+    }
+  ],
+  "publicResponses": [
+    {
+      "mode": "decision",
+      "elapsedMs": 5138,
+      "output": {
+        "kind": "accept",
+        "reason": "Plenty of food and rest, nothing urgent on my plate. Happy to haul the steel over \u2014 three trips of ten should be straightforward."
+      }
+    },
+    {
+      "mode": "reflection",
+      "elapsedMs": 4918,
+      "output": {
+        "kind": "request_rescue",
+        "agreementId": "2ed504b9-897c-4424-bba9-cffd5b53033d",
+        "target": "Thing_Human408",
+        "reason": "Beatrice is down nearby and I can see an open sleeping spot close by. I'm mid-haul and don't want to abandon it outright, but I'd like to know if rescue can be arranged \u2014 either alongside or after I finish. Asking the core to look into it while I keep hauling."
+      }
+    },
+    {
+      "mode": "decision",
+      "elapsedMs": 5388,
+      "output": {
+        "kind": "accept",
+        "reason": "Hauling wrapped up cleanly \u2014 all three trips delivered. Beatrice is still down nearby and the sleeping spot is open. I'm in good shape and this is the rescue I was hoping to arrange. I'll carry her over now."
+      }
+    }
+  ],
+  "finalPatient": {
+    "id": "Thing_Human408",
+    "name": "Beatrice",
+    "downed": true,
+    "currentBed": "Thing_SleepingSpot990001",
+    "job": "LayDown",
+    "x": 96,
+    "z": 82
+  },
+  "observation": {
+    "wallMs": 25765,
+    "ticks": 1502,
+    "samples": 25,
+    "pausedSamples": 0,
+    "thoughtSamples": 12,
+    "ticksDuringThought": 515,
+    "decisions": 3,
+    "reflections": 1,
+    "appraisals": 0,
+    "operatorStops": [],
+    "rescueOfferStarted": true,
+    "laterReplyStarted": true,
+    "pump": {
+      "started": 6,
+      "nativeStarted": 5,
+      "modelStarted": 1,
+      "pending": 0,
+      "stopped": true
+    }
+  },
+  "limits": {
+    "decisions": 6,
+    "appraisals": 4,
+    "reflections": 1,
+    "observationMs": 120000,
+    "maxNativeTurns": 96,
+    "maxModelTurns": 1
+  },
+  "accounting": {
+    "before": {
+      "claude": {
+        "attempts": 0,
+        "reservedEquivalentUSD": 0,
+        "estimatedUsageUSD": 0
+      },
+      "jev": {
+        "calls": 0,
+        "reservedUSD": 0,
+        "reportedUSD": 0
+      }
+    },
+    "after": {
+      "claude": {
+        "attempts": 3,
+        "reservedEquivalentUSD": 0.30000000000000004,
+        "estimatedUsageUSD": 0.063123
+      },
+      "jev": {
+        "calls": 0,
+        "reservedUSD": 0,
+        "reportedUSD": 0
+      }
+    },
+    "note": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls."
+  },
+  "pairedRestore": true,
+  "coldRestore": true,
+  "finalCleanup": {
+    "operatorStops": [],
+    "errors": []
+  },
+  "hostDrained": true,
+  "historicalDatabaseFilesUnchanged": 51,
+  "scripted": {
+    "accept": {
+      "passed": true,
+      "runId": "9bcaa80c-3547-4931-999d-c36aaec00130",
+      "pairedRestore": true,
+      "completedHaulTrips": 3,
+      "deliveredSteel": 30,
+      "completedRescues": 1,
+      "goalReply": {
+        "originStatus": "completed",
+        "origin": "b925a070-47b4-419d-b689-d58453527cb1",
+        "requestId": "831cf56c-2f07-4640-bfd7-eed9be04fda4"
+      },
+      "offers": [
+        {
+          "id": "b925a070-47b4-419d-b689-d58453527cb1",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 748
+        },
+        {
+          "id": "a1bae23e-7f20-499e-9105-98b0ca8d5a9a",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 1292
+        }
+      ]
+    },
+    "refuse": {
+      "passed": true,
+      "runId": "b6e7a9ca-65ca-49b0-8448-a06458960a12",
+      "pairedRestore": true,
+      "completedHaulTrips": 3,
+      "deliveredSteel": 30,
+      "completedRescues": 0,
+      "goalReply": {
+        "originStatus": "completed",
+        "origin": "b1354599-0add-434c-bc0d-7626ed6efe91",
+        "requestId": "c935db9c-448f-418c-a99b-416b770fb857"
+      },
+      "offers": [
+        {
+          "id": "b1354599-0add-434c-bc0d-7626ed6efe91",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "accept",
+            "reason": "Scripted dry-run consent"
+          },
+          "elapsedMs": 811
+        },
+        {
+          "id": "4652b046-a9c6-4056-9826-5a9497ec2112",
+          "pawn": "Thing_Human405",
+          "decision": {
+            "kind": "refuse",
+            "reason": "Scripted retention of original agreement"
+          },
+          "elapsedMs": 1195
+        }
+      ]
+    },
+    "acceptCold": true
+  },
+  "limitations": [
+    "Authored fixture, scripted core deliberately waits for the original haul to settle; not general strategic planning.",
+    "One casualty-discovery reflection; initial negotiation paused; no rerolls.",
+    "Native recovery visibility and general reflection pacing remain separate follow-ups.",
+    "General character reliability and causality cannot be inferred from one live sequence."
+  ]
+}
