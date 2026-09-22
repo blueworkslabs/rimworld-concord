@@ -63,3 +63,14 @@ test('provider and relay expose only say/silence, with no work authority',async(
  const event={type:'result',subtype:'success',is_error:false,total_cost_usd:0,modelUsage:{[CLAUDE_MODEL]:{}},num_turns:1,structured_output:{social:{choice:'say',text:'Could you help?'}}};assert.equal(parseClaudeResult(event,'social').output.choice,'say');assert.throws(()=>SocialChoice.parse({choice:'accept',reason:'yes'}));
  const {c,s}=await setup(),id=randomUUID();await c.openSocial(id,'A','B');const requests:any[]=[];const channel=new DecisionChannel(m=>requests.push(m));const turn=c.socialTurn('A',id,channel);while(!requests.length)await new Promise(r=>setImmediate(r));const request=requests[0];assert.equal(request.mode,'social');assert.equal(socialPrompt(request.view).task,'social');channel.receive({type:'decision-result',id:request.id,output:{choice:'stay_silent'}});assert.equal((await turn).status,'silent');s.close();
 });
+
+test('lost contact before claim closes the encounter rather than allowing a later retry',async()=>{
+ const {c,s,g}=await setup(),id=randomUUID();await c.openSocial(id,'A','B');g.visible=false;await assert.rejects(c.socialTurn('A',id,say('not delivered')));assert.equal(c.inspect().exchanges![id]!.status,'closed');g.visible=true;await assert.rejects(c.socialTurn('A',id,say('retry')));assert.equal(c.inspect().characters.B!.messages,undefined);s.close();
+});
+test('expired unanswered encounters no longer block participants, while IDs remain retired',async()=>{
+ for(const reply of [false,true]){const {c,s,g}=await setup(),id=randomUUID();await c.openSocial(id,'A','B');if(reply)await c.socialTurn('A',id,say('Hello'));g.data.ticks+=3601;await c.observe();assert.equal(c.inspect().exchanges![id]!.status,'closed');assert.equal((await c.openSocial(id,'A','B')).status,'closed');await c.openSocial(randomUUID(),'B','C');s.close();}
+});
+import {socialCleanup} from '../trials/social-cleanup.js';
+test('native work cleanup is attempted even when pause and conversation closure both fail',async()=>{
+ const calls:string[]=[];const cleanup=await socialCleanup(async()=>{calls.push('pause');throw Error('transport');},async()=>{calls.push('close');throw Error('lost contact response');},async()=>{calls.push('stop');return {errors:[]};});assert.deepEqual(calls,['pause','close','stop']);assert.equal(cleanup.errors.length,2);assert.deepEqual(cleanup.work,{errors:[]});
+});

@@ -70,6 +70,10 @@ export class Coordinator {
   }
   private ingest(game:GameState) {
     this.observedTick=game.ticks;
+    for(const e of Object.values(this.domain.exchanges??{}))if(e.status!=='closed'&&game.ticks>e.expiresTick){
+      if(e.status==='running')this.pending.get(e.turn==='opening'?e.initiator:e.recipient)?.abort();
+      e.status='closed';this.commit('social-expired','operator',{id:e.id});
+    }
     for(const [pawn,q] of this.questions) {
       const p=this.domain.proposals[q.proposal];
       const reason=p?(p.replacesAgreementId&&!this.replacementActive(p)?'Replacement agreement is no longer active':rescueQuestionInvalid(game,p)):'Offer is missing';
@@ -143,7 +147,11 @@ export class Coordinator {
       if(pawn!==from)throw Error('Social turn belongs to another pawn');
       if(game.ticks>e.expiresTick){e.status='closed';this.commit('social-expired',pawn,{id});throw Error('Social encounter expired');}
       if(this.pending.has(from)||this.pending.has(to))throw Error('Social participant busy');
-      const {own,other}=socialContact(game,from,to),character=this.domain.characters[from]!;
+      let contact:ReturnType<typeof socialContact>;
+      try{contact=socialContact(game,from,to);}catch(error){
+        e.status='closed';this.commit('social-contact-lost',pawn,{id});throw error;
+      }
+      const {own,other}=contact,character=this.domain.characters[from]!;
       const controller=new AbortController();this.pending.set(from,controller);
       // Reserve both participants against concurrently taking a stale private perspective.
       this.pending.set(to,controller);

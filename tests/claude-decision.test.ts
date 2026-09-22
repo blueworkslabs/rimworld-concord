@@ -187,3 +187,18 @@ test('needs follow-up has its own persistent four-attempt cap; exhaustion never 
   await assert.rejects(b.decide(view,new AbortController().signal));assert.equal(b.summary().attempts,4);
  }finally{b?.close();await rm(dir,{recursive:true,force:true});}
 });
+
+test('social adapter freezes own context, exposes no work schema, and retains the four-call cap across reopen',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'concord-social-adapter-')),binary=join(dir,'fake-claude'),capture=join(dir,'capture.json');
+ const view={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Wait',health:1},character:{id:'A',name:'Ada',memories:[]},contact:{id:'B',name:'Bea'},exchange:{id:'d4e59686-dcef-42a7-8e16-13b65bf2548b',turn:'opening' as const,messages:[]}};
+ const raw={...result,structured_output:{social:{choice:'say',text:'Would you consider helping?'}}};let b:ClaudeDecisionBackend|undefined;
+ try{
+  await writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0); }\n'+
+   'let input="";process.stdin.on("data",c=>input+=c);process.stdin.on("end",()=>{require("node:fs").writeFileSync('+JSON.stringify(capture)+',JSON.stringify({schema:JSON.parse(process.argv[process.argv.indexOf("--json-schema")+1]),prompt:JSON.parse(input)}));console.log('+JSON.stringify(JSON.stringify(init))+');console.log('+JSON.stringify(JSON.stringify(raw))+');});\n',{mode:0o700});
+  const options={ledgerPath:join(dir,'trial.db'),scratchRoot:dir,binary,trial:'social-v1' as const};b=new ClaudeDecisionBackend(options);
+  const pending=b.speak(view,new AbortController().signal);view.character.name='Changed';assert.equal((await pending).choice,'say');
+  const sent=JSON.parse(await readFile(capture,'utf8'));assert.equal(sent.prompt.perspective.character.name,'Ada');assert.deepEqual(sent.schema.required,['social']);assert.equal(sent.prompt.contract.includes('fresh consent'),true);
+  for(let i=0;i<3;i++)assert.equal((await b.speak(view,new AbortController().signal)).choice,'say');assert.equal(b.summary().attempts,4);b.close();b=new ClaudeDecisionBackend(options);
+  await assert.rejects(b.speak(view,new AbortController().signal));assert.equal(b.summary().attempts,4);
+ }finally{b?.close();await rm(dir,{recursive:true,force:true});}
+});

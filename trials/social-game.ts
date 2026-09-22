@@ -10,6 +10,7 @@ import {Store} from '../src/store.js';
 import {LabBridge} from '../src/lab-bridge.js';
 import {DecisionChannel} from '../src/decision-channel.js';
 import {socialContact} from '../src/social.js';
+import {socialCleanup} from './social-cleanup.js';
 import {stopTrialWork,retireUndecided,workSummary} from '../src/work-trial.js';
 if(process.env.CONCORD_SOCIAL_LOCKED!=='1')throw Error('Use scripts/run-social-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
@@ -75,6 +76,7 @@ try{
 }catch(e){receipt.error=String(e);process.exitCode=1;}
 finally{
  clearTimeout(timer);try{await finish();}catch(e){receipt.passed=false;receipt.drainError=String(e);process.exitCode=1;}
- try{await b.admin('pause');if(c&&!cold){if(exchangeId)await c.closeSocial(exchangeId);receipt.finalCleanup=await stopTrialWork(c);assert.equal(receipt.finalCleanup.errors.length,0);}}catch(e){receipt.passed=false;receipt.cleanupError=String(e);process.exitCode=1;}
+ receipt.finalCleanup=await socialCleanup(()=>b.admin('pause'),async()=>{if(c&&!cold&&exchangeId)await c.closeSocial(exchangeId);},async()=>c&&!cold?stopTrialWork(c):{errors:[]});
+ if(receipt.finalCleanup.errors.length){receipt.passed=false;receipt.cleanupError=receipt.finalCleanup.errors;process.exitCode=1;}
  receipt.attempts=attempts;input.close();s?.close();await writeFile(root+'/.runtime/social-'+(cold?'cold':'game')+'.json',JSON.stringify(receipt,null,2));send({type:'receipt',receipt});
 }
