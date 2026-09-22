@@ -1,0 +1,21 @@
+/** Disposable authored scenario; no fixture capability is exposed to a pawn. */
+import assert from 'node:assert/strict';
+import {LabBridge} from './lab-bridge.js';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {mkdir,writeFile} from 'node:fs/promises';
+if(process.env.CONCORD_RECONSIDER_LOCKED!=='1')throw Error('Use scripts/run-reconsider-lab.sh fixture to acquire the staging lock');
+const b=new LabBridge(),root=new URL('../..',import.meta.url).pathname;
+await b.load('lab-initial');await b.admin('pause');const initial=await b.state();
+const actor=initial.pawns.find(p=>p.workReady&&p.rescueReady)!;assert(actor,'Ready actor');
+const target=initial.pawns.find(p=>p.id!==actor.id)!;
+const origin={x:actor.x,z:actor.z},offset=(dx:number,dz=0)=>({x:origin.x+dx,z:origin.z+dz});
+const config={actor:actor.id,target:target.id,origin,source:offset(5),destination:offset(6),patientCell:offset(14),beds:[offset(14,2)]};
+const name='lab-concord-reconsider-fixture-'+Date.now();
+await promisify(execFile)('python3',[root+'/scripts/reconsider-fixture.py',b.root+'/profile/Saves/lab-initial.rws',b.root+'/profile/Saves/'+name+'.rws',JSON.stringify(config)]);
+await b.load(name);await b.admin('pause');const actual=await b.state(),pawn=actual.pawns.find(p=>p.id===actor.id)!;
+assert(!pawn.casualties?.observations.some(o=>o.target===target.id),'Patient starts outside actor knowledge');
+assert(actual.pawns.find(p=>p.id===target.id)!.downed,'Patient remains downed');
+const action=pawn.hauling?.options.find(o=>o.x===config.destination.x&&o.z===config.destination.z&&o.trips>=3);assert(action,'Three-trip option must be native-grounded');
+await mkdir(root+'/.runtime',{recursive:true});await writeFile(root+'/.runtime/reconsider-fixture.json',JSON.stringify({name,...config,action}));
+console.log(JSON.stringify({name,...config,action,initialCasualties:pawn.casualties,initialRescue:pawn.rescue}));

@@ -26,13 +26,13 @@ export type Outcome = 'started'|'completed'|'failed'|'interrupted';
 /** Bounded local opportunities, not a route, reservation or future success guarantee. */
 export type MovementView = {epoch:string;tick:number;originX:number;originZ:number;radius:number;
   status:'available'|'unavailable';options:Move[]};
-export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;downed?:boolean;currentBed?:string;carrying?:string;rescue?:RescueView;rescueReady?:boolean;workReady?:boolean};
+export type Pawn = {id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[]};downed?:boolean;currentBed?:string;carrying?:string;rescue?:RescueView;rescueReady?:boolean;workReady?:boolean};
 export type Receipt = {id:string;actor:string;status:Outcome;reason:string;x:number;z:number;kind?:string;thing?:string;count?:number;delivered?:number;target?:string;bed?:string};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
   pawns:Pawn[];actions:Receipt[];events?:NativeEvent[];eventSeq?:number;
 };
-export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail:string};
+export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail:string;subject?:string};
 export type Attention = {event:NativeEvent;route:'native'|'appraisal'|'deliberation';interrupt?:boolean};
 export type DecisionPause = {epoch:string;actor:string;leaseId:string;ttlMs:number};
 export type Activity = {epoch:string;actor:string;activityId:string;ttlMs:number};

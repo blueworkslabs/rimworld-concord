@@ -80,7 +80,7 @@ export class Coordinator {
   /** Polling is operator-owned. Routes are durable attention records, not automatic orders. */
   async observe() {return this.serial(async()=>{this.ingest(await this.current());});}
   /** Operator scheduling hints only. Every condition is checked again at claim time. */
-  attentionCandidates(options:AttentionOptions={},hasAppraiser=false):string[] {
+  attentionCandidates(options:AttentionOptions={},hasAppraiser=false,mode?:'native'|'model'):string[] {
     const config=AttentionOptions.parse(options);
     if(!this.domain) throw Error('Coordinator not opened');
     return Object.values(this.domain.characters).filter(c=>{
@@ -90,6 +90,7 @@ export class Coordinator {
       const significant=events.some(e=>e.route==='deliberation');
       const interrupting=events.some(e=>e.interrupt??nativeAttention(e.event).interrupt);
       const needsModel=events.some(e=>e.route!=='native');
+      if(mode==='native'&&needsModel||mode==='model'&&!needsModel)return false;
       if(!significant&&needsModel&&!hasAppraiser) return false;
       return !needsModel||interrupting||c.attention?.lastAttemptTick===undefined||
         this.observedTick-c.attention.lastAttemptTick>=config.cooldownTicks;
@@ -104,7 +105,7 @@ export class Coordinator {
    * never silently replayed after restart. A later event may prompt fresh reflection.
    */
   async attend(pawn:string,backend:AttentionBackend,appraiser?:AppraisalBackend,
-    options:AttentionOptions={},signal=new AbortController().signal):Promise<AttentionResult> {
+    options:AttentionOptions={},signal=new AbortController().signal,mode?:'native'|'model'):Promise<AttentionResult> {
     const config=AttentionOptions.parse(options);
     const prepared=await this.serial(async()=>{
       signal.throwIfAborted();
@@ -118,6 +119,8 @@ export class Coordinator {
       const significant=events.some(e=>e.route==='deliberation');
       const interrupting=events.some(e=>e.interrupt??nativeAttention(e.event).interrupt);
       const needsModel=events.some(e=>e.route!=='native');
+      // A native-only scheduling claim must never escalate after fresh ingestion.
+      if(mode==='native'&&needsModel||mode==='model'&&!needsModel)return {status:'unavailable' as const};
       if(needsModel&&!significant&&!appraiser) return {status:'unavailable' as const};
       if(needsModel&&!interrupting&&character.attention?.lastAttemptTick!==undefined&&
         game.ticks-character.attention.lastAttemptTick<config.cooldownTicks) return {status:'cooldown' as const};

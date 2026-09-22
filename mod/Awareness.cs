@@ -7,10 +7,10 @@ using Verse;
 
 namespace Concord {
     [Serializable] public class NativeEvent : IExposable {
-        public int seq,tick; public string pawn,kind,detail;
+        public int seq,tick; public string pawn,kind,detail,subject;
         public void ExposeData() {
             Scribe_Values.Look(ref seq,"seq"); Scribe_Values.Look(ref tick,"tick");
-            Scribe_Values.Look(ref pawn,"pawn"); Scribe_Values.Look(ref kind,"kind"); Scribe_Values.Look(ref detail,"detail");
+            Scribe_Values.Look(ref subject,"subject");Scribe_Values.Look(ref pawn,"pawn"); Scribe_Values.Look(ref kind,"kind"); Scribe_Values.Look(ref detail,"detail");
         }
     }
     [Serializable] public class Fact { public string key,value; public float level; }

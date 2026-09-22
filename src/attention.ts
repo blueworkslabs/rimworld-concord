@@ -58,13 +58,17 @@ export class AttentionPump {
   private controller=new AbortController();
   private polling=false;
   private starts=0;
+  private nativeStarts=0;
+  private modelStarts=0;
   readonly results:AttentionResult[]=[];
   constructor(private coordinator:Coordinator,private backend:AttentionBackend,
     private appraiser?:AppraisalBackend,private options:AttentionOptions={},
-    private limits={maxConcurrent:2,maxTurns:12}) {
+    private limits:{maxConcurrent:number;maxTurns?:number;maxNativeTurns?:number;maxModelTurns?:number;pawns?:string[]}={maxConcurrent:2,maxTurns:12}) {
     AttentionOptions.parse(options);
     if(!Number.isInteger(limits.maxConcurrent)||limits.maxConcurrent<1||limits.maxConcurrent>3||
-      !Number.isInteger(limits.maxTurns)||limits.maxTurns<1||limits.maxTurns>100) throw Error('Invalid pump limits');
+      (limits.maxTurns!==undefined?(!Number.isInteger(limits.maxTurns)||limits.maxTurns<1||limits.maxTurns>100||limits.maxNativeTurns!==undefined||limits.maxModelTurns!==undefined):
+       (![limits.maxNativeTurns,limits.maxModelTurns].every(n=>Number.isInteger(n)&&n!>=0&&n!<=100)||!limits.maxNativeTurns&&!limits.maxModelTurns))||
+      (limits.pawns!==undefined&&(!limits.pawns.length||limits.pawns.length>3||limits.pawns.some(p=>typeof p!=='string'||!p))))throw Error('Invalid pump limits');
   }
   async poll() {
     if(this.controller.signal.aborted) throw Error('Attention pump stopped');
@@ -73,11 +77,15 @@ export class AttentionPump {
     try {
       await this.coordinator.reconcile();
       if(this.controller.signal.aborted) return;
+      const split=this.limits.maxTurns===undefined;
+      const model=new Set(this.coordinator.attentionCandidates(this.options,!!this.appraiser,'model'));
       for(const pawn of this.coordinator.attentionCandidates(this.options,!!this.appraiser)) {
-        if(this.running.size>=this.limits.maxConcurrent||this.starts>=this.limits.maxTurns) break;
-        if(this.running.has(pawn)) continue;
-        this.starts++;
-        const task=this.coordinator.attend(pawn,this.backend,this.appraiser,this.options,this.controller.signal)
+        if(this.running.size>=this.limits.maxConcurrent||(!split&&this.starts>=this.limits.maxTurns!))break;
+        if(this.running.has(pawn)||this.limits.pawns&&!this.limits.pawns.includes(pawn))continue;
+        const mode=model.has(pawn)?'model':'native';
+        if(split&&(mode==='model'?this.modelStarts>=this.limits.maxModelTurns!:this.nativeStarts>=this.limits.maxNativeTurns!))continue;
+        this.starts++;if(mode==='model')this.modelStarts++;else this.nativeStarts++;
+        const task=this.coordinator.attend(pawn,this.backend,this.appraiser,this.options,this.controller.signal,split?mode:undefined)
           .then(result=>{this.results.push(result);})
           .catch(()=>{this.results.push({pawn,status:this.controller.signal.aborted?'interrupted':'failed'});})
           .finally(()=>{this.running.delete(pawn);});
@@ -85,7 +93,7 @@ export class AttentionPump {
       }
     } finally {this.polling=false;}
   }
-  status(){return {started:this.starts,pending:this.running.size,stopped:this.controller.signal.aborted};}
+  status(){return {started:this.starts,nativeStarted:this.nativeStarts,modelStarted:this.modelStarts,pending:this.running.size,stopped:this.controller.signal.aborted};}
   async drain(){await Promise.all([...this.running.values()]);}
   async stop(){this.controller.abort();await this.drain();}
 }
