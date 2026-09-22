@@ -22,31 +22,33 @@ conversation content from which to infer that it invalidated this question.
 
 ## A question about a specific patient and bed
 
-An explicit rescue decision tracks its offered proposal. Each observation checks
-only that question: the rescuer must remain available and the exact offered
-patient/bed/coordinate pair must remain in fresh, map-matching local rescue
-options. Changes to unrelated options do not cancel it. Withdrawal of the offer
-also invalidates its pending question. Loss of support aborts provider work and
-records `decision-invalidated`; delayed answers cannot authorize a job.
+An explicit rescue decision tracks its offered proposal. Withdrawal, rescuer
+unavailability or an observed map change invalidate it. Fresh pawn-local visible
+facts also invalidate it when the specific patient has recovered or is in bed,
+or the specific bed is occupied, nonmedical, forbidden, converted or moved.
+These bounded physical observations contain no other pawn's private mental state.
 
-**Losing a bounded shortlist entry is not proof the rescue is impossible.** This
-is a conservative loss-of-grounding rule, including range, readiness, reservation
-or shortlist changes. The implementation does not infer an unseen death or claim
-to know why an option vanished. A later offer needs fresh grounding and consent;
-this experiment does not automatically reoffer it.
+**Missing information is not contradictory evidence.** Range, occlusion,
+reservation and shortlist truncation can remove a pair from the available options
+without showing that the question is invalid. Missing or stale observations do
+not alone cancel a known offer. A slower scripted rehearsal exposed an earlier
+shortlist-absence guard cancelling a rescue thought; that rehearsal is retained,
+and the guard was replaced before live inference.
 
-Final acceptance uses the same newly ingested snapshot to recheck rescue support,
-including when a reflection selects an existing rescue proposal. Open-ended
-reflection is not cancelled merely because one unrelated pending option changes;
-its selected rescue is checked before acceptance. Native dispatch remains the
-last authority and may still fail after consent. No override, automatic reroute
-or retroactive success is introduced.
+Observed contradictions abort provider work and record `decision-invalidated`;
+delayed answers cannot authorize a job. Final acceptance uses the same newly
+ingested snapshot, including when reflection selects an existing rescue proposal.
+Validation precedes completion bookkeeping, while a durably accepted decision
+survives loss of the dispatch reply. Open-ended reflection is not cancelled merely
+because an unrelated option changes. Native dispatch remains the final authority:
+a target no longer visible can still make execution fail after consent. There is
+no override, automatic reroute or retroactive success.
 
 ## Verification and follow-up experiment
 
 Unit tests cover deferred conversation, later reflection, old saved interrupt
-flags, proposal withdrawal, exact target/bed/map/readiness changes, unrelated
-options, fresh checks without polling, and reflection-selected stale consent.
+flags, proposal withdrawal, observed target/bed/map/readiness changes, unknown or stale
+observations, fresh checks without polling, and reflection-selected stale consent.
 The native recovery fixture shortens anesthesia in a disposable save copy: a
 patient actually stands while a scripted decision is pending. The late acceptance
 must create no rescue job. This is an authored recovery, not a spontaneous event.

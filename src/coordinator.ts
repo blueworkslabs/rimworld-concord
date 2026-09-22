@@ -202,6 +202,7 @@ export class Coordinator {
           if(!prepared.view.proposals.some(p=>p.id===result.proposalId)) throw Error('Proposal outside attention perspective');
           const proposal=this.domain.proposals[result.proposalId];
           if(!proposal||proposal.pawn!==pawn||proposal.status!=='pending'||character.commitment||character.intention) throw Error('Attention proposal superseded');
+          this.validateDecision(proposal,result.decision,fresh);
           character.attention!.last={status:'decided',throughSeq,reason};
           character.reflections=[...(character.reflections??[]),reflection].slice(-16);
           await this.applyDecision(proposal,result.decision,fresh);
@@ -388,9 +389,12 @@ export class Coordinator {
       try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* expired or old timeline */ }
     }
   }
-  private async applyDecision(p:Proposal,result:Decision,fresh:GameState) {
+  private validateDecision(p:Proposal,result:Decision,fresh:GameState) {
     if(result.kind==='accept'&&p.action.kind==='rescue'){const invalid=rescueQuestionInvalid(fresh,p);if(invalid)throw Error(invalid);}
     if(result.kind==='accept'&&p.action.kind!=='move'&&!this.game.cancel)throw Error('Work requires scoped cancellation');
+  }
+  private async applyDecision(p:Proposal,result:Decision,fresh:GameState) {
+    this.validateDecision(p,result,fresh);
     p.decision=result;
     p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':'countered';
     this.domain.characters[p.pawn]!.memories.push(`${result.kind}: ${p.reason}; ${result.reason}`);
