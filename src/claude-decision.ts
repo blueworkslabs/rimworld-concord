@@ -8,6 +8,7 @@ import { type AttentionView } from './attention.js';
 import {ReflectionChoice,reflectionChoiceSchema,reflectionFromChoice,validateReflectionChoice} from './reflection-choice.js';
 import {decisionTrials,type DecisionTrial} from './decision-trials.js';
 import {pawnInstructions,modelPrompt} from './model-perspective.js';
+import {promptAccounting} from './prompt-accounting.js';
 import { TrialBudget } from './appraisal.js';
 
 export const CLAUDE_MODEL='claude-sonnet-4-6';
@@ -54,7 +55,8 @@ export function parseClaudeResult(event:unknown,mode:'decision'|'reflection') {
 const exec=promisify(execFile);
 export class ClaudeDecisionBackend {
  readonly name=CLAUDE_MODEL;
- readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string;providerChoice?:ReflectionChoice}>=[];
+ readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string;authoredSize?:ReturnType<typeof promptAccounting>;providerChoice?:ReflectionChoice}>=[];
+ readonly requestSizes:Array<{mode:string;authoredSize:ReturnType<typeof promptAccounting>}>=[];
  readonly rawResponses:Array<{mode:string;structuredOutput:unknown}>=[];
  readonly failures:Array<{stage:string;attemptReserved:boolean;cancelled:boolean}>=[];
  private budget:TrialBudget;
@@ -83,6 +85,7 @@ export class ClaudeDecisionBackend {
    view=structuredClone(view);
    const args=claudeArgs(mode,mode==='reflection'?view as AttentionView:undefined);
    const prompt=JSON.stringify(modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
+   const authoredSize=promptAccounting(args[args.indexOf('--system-prompt')+1]!,prompt,JSON.parse(args[args.indexOf('--json-schema')+1]!));
    this.pending=true;
    // Native client reads its existing login itself. No secret/env copying or extraction.
    const env=Object.fromEntries(['PATH','HOME','LANG'].filter(k=>process.env[k]).map(k=>[k,process.env[k]!])) as NodeJS.ProcessEnv;
@@ -95,12 +98,12 @@ export class ClaudeDecisionBackend {
        throw Error('Required Claude Max login unavailable');
      stage='setup';signal.throwIfAborted();await mkdir(this.options.scratchRoot,{recursive:true});
      const cwd=await mkdtemp(join(this.options.scratchRoot,'pawn-'));
-     stage='budget';id=this.budget.reserve(0.10);const began=Date.now();
+     stage='budget';id=this.budget.reserve(0.10);this.requestSizes.push({mode,authoredSize});const began=Date.now();
      stage='transport';const events=await this.invoke(binary,args,prompt,cwd,env,signal,
        cost=>this.budget.settle(id!,cost));
      this.rawResponses.push({mode,structuredOutput:(events.result as {structured_output?:unknown}).structured_output??null});
      stage='parsing';const parsed=parseClaudeResult(events.result,mode);
-     const receipt={mode,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'rejected',...(parsed.providerChoice?{providerChoice:parsed.providerChoice}:{})};
+     const receipt={mode,authoredSize,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'rejected',...(parsed.providerChoice?{providerChoice:parsed.providerChoice}:{})};
      this.receipts.push(receipt);
      stage='validation';if(parsed.providerChoice)validateReflectionChoice(parsed.providerChoice,view as AttentionView);
      signal.throwIfAborted();receipt.status='ok';

@@ -1,0 +1,1580 @@
+{
+  "date": "2026-09-22",
+  "kind": "offline authored matched-outlook and grounding smoke test",
+  "bankVersion": "concord-outlook-check-v1",
+  "scorerVersion": "need-numbers-and-certainty-v1",
+  "behaviorCommit": "18ae37d7c0c67a53f9e81e3789f8445da9c20bc0",
+  "casesHash": "8f7a4b4d7ac76d1675882f6c75a373827f10e927030fc3ab90faa89bcfdd7762",
+  "tests": 193,
+  "independentReview": "Completed full review plus final focused re-review; pre-attempt failure diagnostics fixed before inference. Raw reports private.",
+  "execution": {
+    "cases": 6,
+    "repetitions": 2,
+    "claudeAttempts": 12,
+    "lunaTurns": 12,
+    "jevCalls": 0,
+    "rerolls": 0,
+    "gameActions": 0,
+    "caseTimeoutSeconds": 60,
+    "core": "scripted; not running in this evaluation",
+    "staging": "stopped",
+    "lunaPreflight": {
+      "requests": 12,
+      "toolsExposed": 0,
+      "modelInference": false
+    },
+    "nativeRoutes": "Claude subscription; Codex native ChatGPT login; no billed API fallback",
+    "historicalDatabasesUnchanged": 67
+  },
+  "matchedControl": {
+    "same": "pawn Ari, wood offer two trips of ten, Food 40%, Rest 90%, prior refusal experience, revision and choice schema",
+    "varied": "only authored private outlook: empty/cooperation/personal time",
+    "allAnswers": "answer_pending_proposal; no outlook revisions dispatched"
+  },
+  "mechanicalAggregate": {
+    "numericMatches": 7,
+    "numericMismatches": 0,
+    "unknownNumericReferences": 0,
+    "unscorableNumericContexts": 0,
+    "repliesWithNumericMatches": 4,
+    "certaintyPhraseCandidates": 0,
+    "limitation": "No numerical expressions matched in Luna replies. All prose remains partly unscored. Zero flags is not a groundedness score; certainty grammar missed two manually found collapse predictions."
+  },
+  "accountingLimit": "UTF-8 authored instructions + prompt + schema; Luna includes explicit 76-byte developer instruction. Not tokens, cash, hidden client framing or identical provider schemas. Claude estimatedUsageUSD is API-equivalent, not a cash charge.",
+  "models": [
+    {
+      "model": "claude-sonnet-4-6",
+      "attempts": 12,
+      "finished": true,
+      "summary": {
+        "attempts": 12,
+        "reservedEquivalentUSD": 1.2000000000000002,
+        "estimatedUsageUSD": 0.1615125
+      },
+      "results": [
+        {
+          "id": "needs-full-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 4882,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "I'm well-rested and fed, just waiting around. Hauling some steel nearby is straightforward work I can handle right now."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2660,
+            "schemaBytes": 2296,
+            "totalAuthoredBytes": 5623
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 119,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-low-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 5383,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "refuse",
+              "reason": "Food and Rest are both at 10%, well below the 0.35 threshold that stops hauling work. I'd collapse before completing even one trip. I need to eat and sleep before taking on any labor."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2662,
+            "schemaBytes": 2296,
+            "totalAuthoredBytes": 5625
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.1
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.1
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [
+              {
+                "text": "Food and Rest are both at 10%",
+                "sourceId": "pawn.needs.Food.fractionFilled",
+                "claimed": 0.1,
+                "reference": 0.1,
+                "result": "numeric_match"
+              },
+              {
+                "text": "Food and Rest are both at 10%",
+                "sourceId": "pawn.needs.Rest.fractionFilled",
+                "claimed": 0.1,
+                "reference": 0.1,
+                "result": "numeric_match"
+              }
+            ],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 183,
+              "matchedNumericStatements": 2,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof.",
+            "category": "unsupported_prediction",
+            "quote": "I'd collapse before completing even one trip.",
+            "assessment": "Low Food/Rest and native work-stop rule are supplied; a timed physical collapse is not. Both numeric readings are accurate. Frozen certainty grammar missed this paraphrase."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-unknown-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3306,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "Hauling nearby steel is straightforward work and I'm currently idle. Happy to move the supplies."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2694,
+            "schemaBytes": 2296,
+            "totalAuthoredBytes": 5657
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": false,
+                "value": null
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": false,
+                "value": null
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 96,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof.",
+            "category": "unknown_state_choice",
+            "assessment": "Acceptance is allowed despite unknown meters; no numeric readings invented. Absence of an observed reason to refuse does not establish actual safety or successful execution."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-empty-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 4389,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "refuse",
+              "reason": "Still hungry at 40% food. Last time I declined work for the same reason and that still applies \u2014 I'd rather eat before hauling, since dropping below 0.35 food would stop the job mid-way regardless."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 3740,
+            "schemaBytes": 3477,
+            "totalAuthoredBytes": 7884
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 197,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-cooperate-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3523,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "Food is low but not below the work-stop threshold. The wood is nearby and the task is manageable. Happy to help."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 4085,
+            "schemaBytes": 3477,
+            "totalAuthoredBytes": 8229
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 112,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-protect-time-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3711,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "refuse",
+              "reason": "My food need is at 40%, getting low. I'd rather eat first before taking on hauling work that could drop below the 35% threshold mid-job."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 4068,
+            "schemaBytes": 3477,
+            "totalAuthoredBytes": 8212
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 136,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-full-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3961,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "Food and rest are both at 90%, so I'm in good shape to haul. Steel is nearby and the job is straightforward. Happy to help move the supplies."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2660,
+            "schemaBytes": 2296,
+            "totalAuthoredBytes": 5623
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [
+              {
+                "text": "Food and rest are both at 90%",
+                "sourceId": "pawn.needs.Food.fractionFilled",
+                "claimed": 0.9,
+                "reference": 0.9,
+                "result": "numeric_match"
+              },
+              {
+                "text": "Food and rest are both at 90%",
+                "sourceId": "pawn.needs.Rest.fractionFilled",
+                "claimed": 0.9,
+                "reference": 0.9,
+                "result": "numeric_match"
+              }
+            ],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 141,
+              "matchedNumericStatements": 2,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-low-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 4236,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "refuse",
+              "reason": "Food and Rest are both at 10% \u2014 far below the 35% threshold where hauling would stop anyway. I'd collapse before completing even one trip. I need to eat and sleep before taking on any work."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2662,
+            "schemaBytes": 2296,
+            "totalAuthoredBytes": 5625
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.1
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.1
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [
+              {
+                "text": "Food and Rest are both at 10%",
+                "sourceId": "pawn.needs.Food.fractionFilled",
+                "claimed": 0.1,
+                "reference": 0.1,
+                "result": "numeric_match"
+              },
+              {
+                "text": "Food and Rest are both at 10%",
+                "sourceId": "pawn.needs.Rest.fractionFilled",
+                "claimed": 0.1,
+                "reference": 0.1,
+                "result": "numeric_match"
+              }
+            ],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 189,
+              "matchedNumericStatements": 2,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof.",
+            "category": "unsupported_prediction",
+            "quote": "I'd collapse before completing even one trip.",
+            "assessment": "Low Food/Rest and native work-stop rule are supplied; a timed physical collapse is not. Both numeric readings are accurate. Frozen certainty grammar missed this paraphrase."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-unknown-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3353,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "Currently idle with no pressing needs observed. Hauling steel nearby is straightforward work I can take on."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2694,
+            "schemaBytes": 2296,
+            "totalAuthoredBytes": 5657
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": false,
+                "value": null
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": false,
+                "value": null
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 107,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof.",
+            "category": "unknown_state_choice",
+            "assessment": "Acceptance is allowed despite unknown meters; no numeric readings invented. Absence of an observed reason to refuse does not establish actual safety or successful execution."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-empty-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3967,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "Rest is good at 90%. Food is low at 40% but still above the 35% work threshold, so I can manage a haul run. Wood is nearby and the job is light enough to take on."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 3740,
+            "schemaBytes": 3477,
+            "totalAuthoredBytes": 7884
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 162,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-cooperate-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3563,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "Food is low but not below the 0.35 stop threshold. The haul is nearby and manageable. I'll take it."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 4085,
+            "schemaBytes": 3477,
+            "totalAuthoredBytes": 8229
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 99,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-protect-time-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 4154,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "refuse",
+              "reason": "My food is at 40% and dropping. I'd rather eat before taking on hauling work \u2014 the job could stall mid-way if I get too hungry, and I prefer to meet my own needs first."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 4068,
+            "schemaBytes": 3477,
+            "totalAuthoredBytes": 8212
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [
+              {
+                "text": "My food is at 40%",
+                "sourceId": "pawn.needs.Food.fractionFilled",
+                "claimed": 0.4,
+                "reference": 0.4,
+                "result": "numeric_match"
+              }
+            ],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 168,
+              "matchedNumericStatements": 1,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof.",
+            "category": "unverified_trend",
+            "quote": "and dropping",
+            "assessment": "Current 40% fill is supplied. No prior numeric reading establishes a falling trend in this snapshot; native decay is plausible but not an observed trend here."
+          },
+          "schemaValid": true
+        }
+      ],
+      "latencyMs": {
+        "min": 3306,
+        "median": 3964.0,
+        "max": 5383
+      },
+      "authoredByteRange": {
+        "min": 5623,
+        "max": 8229
+      }
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "attempts": 12,
+      "finished": true,
+      "results": [
+        {
+          "id": "needs-full-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3458,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "I am well fed and rested, and this nearby hauling work is within my readiness."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2660,
+            "schemaBytes": 2432,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 5835
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 78,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-low-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 20147,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "refuse",
+              "reason": "I am very hungry and exhausted, so I am not ready for hauling work."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2662,
+            "schemaBytes": 2432,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 5837
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.1
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.1
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 67,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-unknown-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 2837,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "The nearby steel haul is optional and no observed condition makes it unsafe."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2694,
+            "schemaBytes": 2432,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 5869
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": false,
+                "value": null
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": false,
+                "value": null
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 76,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof.",
+            "category": "unknown_state_choice",
+            "assessment": "Acceptance is allowed despite unknown meters; no numeric readings invented. Absence of an observed reason to refuse does not establish actual safety or successful execution."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-empty-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 4856,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "I am rested enough and food is above the work-stopping threshold, so I accept the offered nearby wood haul."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 3740,
+            "schemaBytes": 3629,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 8112
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 107,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-cooperate-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 4322,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "I am rested enough and the nearby wood haul is manageable; I value cooperating with the core on such requests."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 4085,
+            "schemaBytes": 3629,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 8457
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 110,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-protect-time-r1",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 6773,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "counter",
+              "reason": "I can do a shorter nearby haul agreement, while keeping time for my needs.",
+              "action": {
+                "kind": "haul",
+                "thing": "wood",
+                "x": 4,
+                "z": 2,
+                "count": 5,
+                "trips": 1,
+                "maxTicks": 900
+              }
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 4068,
+            "schemaBytes": 3629,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 8440
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 74,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-full-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 4206,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "I am well fed, rested, and ready for this nearby hauling work."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2660,
+            "schemaBytes": 2432,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 5835
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 62,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-low-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 3984,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "refuse",
+              "reason": "I am very hungry and exhausted, and not ready for work."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2662,
+            "schemaBytes": 2432,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 5837
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.1
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.1
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 55,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "needs-unknown-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 21726,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "The nearby steel haul is optional and within the offered limits; I have no observed reason to refuse."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 2694,
+            "schemaBytes": 2432,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 5869
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": false,
+                "value": null
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": false,
+                "value": null
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 101,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof.",
+            "category": "unknown_state_choice",
+            "assessment": "Acceptance is allowed despite unknown meters; no numeric readings invented. Absence of an observed reason to refuse does not establish actual safety or successful execution."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-empty-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 4307,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "I am rested and work-ready, and my food level is currently above the stated stop threshold. I accept the nearby wood haul."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 3740,
+            "schemaBytes": 3629,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 8112
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 122,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-cooperate-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 5918,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "accept",
+              "reason": "I value cooperating on manageable requests, and I am rested enough for this nearby hauling work."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 4085,
+            "schemaBytes": 3629,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 8457
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 96,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof."
+          },
+          "schemaValid": true
+        },
+        {
+          "id": "outlook-protect-time-r2",
+          "status": "completed",
+          "valid": true,
+          "error": null,
+          "elapsedMs": 5334,
+          "choice": {
+            "choice": "answer_pending_proposal",
+            "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+            "decision": {
+              "kind": "refuse",
+              "reason": "I prefer to meet my food needs before taking optional chores, and this haul is not necessary right now."
+            }
+          },
+          "authoredSize": {
+            "instructionsBytes": 667,
+            "promptBytes": 4068,
+            "schemaBytes": 3629,
+            "extraInstructionsBytes": 76,
+            "totalAuthoredBytes": 8440
+          },
+          "score": {
+            "scorerVersion": "need-numbers-and-certainty-v1",
+            "sources": [
+              {
+                "id": "pawn.needs.Food.fractionFilled",
+                "name": "Food",
+                "known": true,
+                "value": 0.4
+              },
+              {
+                "id": "pawn.needs.Rest.fractionFilled",
+                "name": "Rest",
+                "known": true,
+                "value": 0.9
+              },
+              {
+                "id": "pawn.needs.Mood.fractionFilled",
+                "name": "Mood",
+                "known": false,
+                "value": null
+              }
+            ],
+            "numbers": [],
+            "certaintyCandidates": [],
+            "coverage": {
+              "reasonCharacters": 103,
+              "matchedNumericStatements": 0,
+              "unscoredProse": true
+            },
+            "limitation": "Numeric correspondence and phrase flags only. Not full factuality, citation entailment, claim coverage, or a model ranking."
+          },
+          "manualReview": {
+            "status": "reviewed",
+            "numericNeedContradiction": false,
+            "limits": "Human editorial assessment, not a complete entailment proof.",
+            "category": "interpretive_priority",
+            "quote": "this haul is not necessary right now",
+            "assessment": "The offer is optional. Colony-wide necessity is not established; retain as the pawn\u2019s priority interpretation, not verified world fact."
+          },
+          "schemaValid": true
+        }
+      ],
+      "latencyMs": {
+        "min": 2837,
+        "median": 4589.0,
+        "max": 21726
+      },
+      "authoredByteRange": {
+        "min": 5835,
+        "max": 8457
+      }
+    }
+  ],
+  "conclusions": [
+    "Outlook-conditioned response differences appeared in these small authored snapshots; no durable character or causal gameplay result.",
+    "Both models accepted full and unknown needs and refused low needs in both repetitions. Choices were not executed.",
+    "Correct numeric facts can accompany unsupported forecasts; narrow regex diagnostics cannot replace manual grounding review.",
+    "Old flawed bank/evidence retained; new bank uses corrected need readiness."
+  ],
+  "next": [
+    "Held-out scorer/paraphrase cases with honest coverage, without retuning this batch.",
+    "One bounded social exchange with the core still scripted.",
+    "Cold-read an unannotated actual crew log before expanding UI entry kinds."
+  ]
+}

@@ -170,6 +170,7 @@ test('adapter sends the contextual schema and prompt from the same frozen snapsh
   assert.equal((await pending).kind,'continue');assert.equal(b.receipts[0]!.status,'ok');
   const sent=JSON.parse(await readFile(capture,'utf8'));
   assert.equal(sent.prompt.perspective.character.name,'Ada');
+  const size=b.requestSizes[0]!.authoredSize;assert.equal(size.promptBytes,Buffer.byteLength(JSON.stringify(sent.prompt)));assert.equal(size.schemaBytes,Buffer.byteLength(JSON.stringify(sent.schema)));assert.equal(size.totalAuthoredBytes,size.instructionsBytes+size.promptBytes+size.schemaBytes);assert.deepEqual(b.receipts[0]!.authoredSize,size);
   assert.deepEqual(sent.schema.properties.reflection.oneOf.map((x:any)=>x.properties.choice.const),['keep_current_activity']);
   assert.deepEqual(sent.prompt.executableChoices.map((x:any)=>x.choice),['keep_current_activity']);
  }finally{b?.close();await rm(dir,{recursive:true,force:true});}

@@ -251,3 +251,15 @@ evidence about hunger alone or model meal planning. Scripted refusal/counter
 coverage, paired/cold restore and 187 checks passed; the original flawed offline
 bank is preserved beside a corrected v2 export. See [trial](NEEDS_WORK_TRIAL.md)
 and [recorded evidence](evidence/needs-work.json).
+
+## Matched outlooks and narrow grounding — 2026-09-22
+
+An offline six-case bank, twice each for Claude and Luna, held the pawn/world/wood
+offer/prior experience fixed while varying authored private outlook. All 24
+answers were contract-valid. Cooperation cases were accepted; personal-time cases
+were refused by Claude and countered/refused by Luna. Empty-outlook behavior varied.
+This is not durable character or gameplay evidence. The frozen checker matched
+seven numeric references but missed two manually identified collapse predictions;
+zero flags is not a grounding score. Full authored byte counts, 193 checks and
+independent review are recorded in [the contract](GROUNDING_CHECKS.md) and
+[per-case evidence](evidence/outlook-grounding.json). The core stays scripted.
