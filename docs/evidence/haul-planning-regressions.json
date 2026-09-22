@@ -1,0 +1,29 @@
+{
+  "at": "2026-09-22T06:20:02.312Z",
+  "phase": "game",
+  "passed": true,
+  "checks": [
+    "native exact quantity delivered; duplicate request starts no extra haul",
+    "withdrawal between trips prevents third trip",
+    "active withdrawal interrupts only the owned native job",
+    "refusal creates no hauling job",
+    "native game stops expired hauling without coordinator polling",
+    "cancel-before-dispatch tombstone prevents delayed job creation"
+  ],
+  "inferenceCalls": 0,
+  "options": [
+    {
+      "pawn": "Thing_Human405",
+      "options": 4
+    },
+    {
+      "pawn": "Thing_Human408",
+      "options": 2
+    },
+    {
+      "pawn": "Thing_Human411",
+      "options": 4
+    }
+  ],
+  "limitation": "Operator-authored stockpiles, relocated steel and disabled native work priorities. Scripted consent; quiescent between-trip checkpoints only."
+}

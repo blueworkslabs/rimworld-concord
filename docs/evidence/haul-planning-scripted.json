@@ -1,0 +1,55 @@
+{
+  "at": "2026-09-22T06:17:56.250Z",
+  "phase": "game",
+  "passed": true,
+  "inferenceCalls": 0,
+  "checks": [
+    "three supply-informed offers choose distinct sources and storage cells before consent; no query or hold creates a native job",
+    "refusal and pending-offer withdrawal release planning holds without native action",
+    "all three first trips deliver exact ten-unit quantities without a competing dispatch failure",
+    "paired restore preserves accepted between-trip holds",
+    "native dispatch rejects a mismatched observation map before hauling"
+  ],
+  "offers": [
+    {
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_Steel1883",
+        "x": 80,
+        "z": 80,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 1800
+      },
+      "mapId": 0
+    },
+    {
+      "pawn": "Thing_Human408",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_Steel1884",
+        "x": 72,
+        "z": 79,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 1800
+      },
+      "mapId": 0
+    },
+    {
+      "pawn": "Thing_Human411",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_Steel1885",
+        "x": 81,
+        "z": 85,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 1800
+      },
+      "mapId": 0
+    }
+  ],
+  "limitation": "Operator-authored stockpiles and relocated supplies; scripted decisions, not evidence of improved live-model judgment. Quiescent checkpoints only."
+}
