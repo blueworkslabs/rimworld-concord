@@ -24,7 +24,7 @@ test('only successful strict decisions on the chosen model are accepted',()=>{
    {structured_output:{decision:{kind:'accept',reason:'ok',actor:'another-pawn'}}}])assert.throws(()=>parseClaudeResult({...result,...bad},'decision'));
 });
 test('reflection schema accepts only continuation or an identified proposal decision',()=>{
- const r={...result,structured_output:{reflection:{kind:'continue',reason:'Keep routine'}}};
+ const r={...result,structured_output:{reflection:{choice:'keep_current_activity',reason:'Keep routine'}}};
  assert.equal(parseClaudeResult(r,'reflection').output.kind,'continue');
  assert.throws(()=>parseClaudeResult({...r,structured_output:{reflection:{kind:'move',x:1,z:1}}},'reflection'));
 });
@@ -102,4 +102,31 @@ test('interruption follow-up has its own persistent six-attempt cap; exhaustion 
   assert.equal(b.summary().attempts,6);await assert.rejects(b.decide(view,new AbortController().signal));b.close();b=new ClaudeDecisionBackend(options);
   await assert.rejects(b.decide(view,new AbortController().signal));assert.equal(b.summary().attempts,6);
  }finally{b?.close();await rm(dir,{recursive:true,force:true});}
+});
+
+test('explicit intent follow-up has its own persistent six-attempt cap; exhaustion never resets on reopen',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'concord-intent-cap-')),binary=join(dir,'fake-claude');
+ const view={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Wait',health:1},character:{id:'A',name:'Ada',memories:[]},proposal:{id:'d8caec56-f2fa-4b50-a58e-f3a7588a3d20',pawn:'A',action:{kind:'move' as const,x:2,z:1},reason:'test',status:'pending' as const}};
+ const options={ledgerPath:join(dir,'intent.db'),scratchRoot:join(dir,'scratch'),binary,trial:'intent-v1' as const};let b:ClaudeDecisionBackend|undefined;
+ try{
+  await writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\nconsole.log('+JSON.stringify(JSON.stringify(init))+');\nconsole.log('+JSON.stringify(JSON.stringify(result))+');\n',{mode:0o700});
+  b=new ClaudeDecisionBackend(options);for(let i=0;i<6;i++)await b.decide(view,new AbortController().signal);
+  assert.equal(b.summary().attempts,6);await assert.rejects(b.decide(view,new AbortController().signal));b.close();b=new ClaudeDecisionBackend(options);
+  await assert.rejects(b.decide(view,new AbortController().signal));assert.equal(b.summary().attempts,6);
+ }finally{b?.close();await rm(dir,{recursive:true,force:true});}
+});
+
+test('native adapter retains explicit provider choice when its agreement ID is rejected',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'concord-choice-')),binary=join(dir,'fake-claude');
+ const agreementId='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
+ const view={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Wait',health:1},character:{id:'A',name:'Ada',memories:[]},events:[],proposals:[]};
+ const raw={...result,structured_output:{reflection:{choice:'withdraw_current_agreement',agreementId,reason:'This nonexistent agreement'}}};
+ let backend:ClaudeDecisionBackend|undefined;
+ try{
+  await writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0); }\nconsole.log('+JSON.stringify(JSON.stringify(init))+');\nconsole.log('+JSON.stringify(JSON.stringify(raw))+');\n',{mode:0o700});
+  backend=new ClaudeDecisionBackend({ledgerPath:join(dir,'trial.db'),scratchRoot:dir,binary,trial:'intent-v1'});
+  await assert.rejects(backend.reflect(view,new AbortController().signal),/attempt retained/);
+  assert.equal(backend.summary().attempts,1);assert.equal(backend.summary().estimatedUsageUSD,.001);
+  assert.equal(backend.receipts[0]!.status,'rejected');assert.deepEqual(backend.receipts[0]!.providerChoice,raw.structured_output.reflection);
+ }finally{backend?.close();await rm(dir,{recursive:true,force:true});}
 });

@@ -59,3 +59,14 @@ test('hauling query is physical-only, cloned; counters still require fresh accep
  await c.pawn('A').decide(p.id,scripted({kind:'counter',reason:'Only one trip',action:{...haul,trips:1}}));assert.equal(data.actions.length,0);
  const reply=await c.core().revise(p.id,'One trip then');assert.equal(data.actions.length,0);await c.pawn('A').decide(reply.id,accept);assert.equal(data.actions.length,1);
 });
+test('late reflection cannot withdraw an agreement already ended by its pawn',async()=>{
+ const {c,p,data,store}=await setup();await c.pawn('A').decide(p.id,accept);
+ data.events=[{seq:1,pawn:'A',tick:11,kind:'memory',detail:'DeepTalk'}];data.eventSeq=1;
+ let entered!:()=>void,release!:(v:unknown)=>void;const ready=new Promise<void>(r=>entered=r);
+ const thought=c.attend('A',{name:'held',reflect:()=>{entered();return new Promise(r=>release=r);}});await ready;
+ await c.pawn('A').withdraw('Separate settled pawn withdrawal');
+ release({kind:'withdraw',reason:'Late withdrawal of previous agreement'});assert.equal((await thought).status,'failed');
+ assert.equal(c.inspect().proposals[p.id]!.standing!.reason,'Separate settled pawn withdrawal');
+ assert.equal(store.events().filter(e=>e.event.kind==='intention-stopped').length,1);assert.equal(data.actions.length,1);
+ store.close();
+});
