@@ -39,7 +39,7 @@ test('forged actor, oversized or action-bearing output cannot deliver or execute
 });
 test('contact and expiry checked at both claim and delivery; no remote delivery',async()=>{
  for(const change of ['visibility','downed','expiry'] as const){const {c,s,g}=await setup(),id=randomUUID();await c.openSocial(id,'A','B');
- assert.equal((await c.socialTurn('A',id,{name:'changes',async speak(){if(change==='visibility')g.visible=false;if(change==='downed')g.data.pawns[1]!.downed=true;if(change==='expiry')g.data.ticks+=3601;return {choice:'say',text:'Hello'};}})).status,'failed');assert.equal(c.inspect().characters.B!.messages,undefined);s.close();}
+ assert.equal((await c.socialTurn('A',id,{name:'changes',async speak(){if(change==='visibility')g.visible=false;if(change==='downed')g.data.pawns[1]!.downed=true;if(change==='expiry')g.data.ticks+=3601;return {choice:'say',text:'Hello'};}})).status,change==='expiry'?'interrupted':'failed');assert.equal(c.inspect().characters.B!.messages,undefined);s.close();}
  const {c,s,g}=await setup();g.visible=false;await assert.rejects(c.openSocial(randomUUID(),'A','B'));s.close();
 });
 test('attempt is durable, participant-reserved and timeout cannot retry or deliver late',async()=>{
