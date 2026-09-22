@@ -3,6 +3,7 @@ import {randomUUID} from 'node:crypto';
 import {spawn,execFileSync} from 'node:child_process';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
+import {parseTrialMessage} from '../dist/src/trial-wire.js';
 import {InferenceLane} from '../dist/src/inference-lane.js';
 import {ClaudeDecisionBackend} from '../dist/src/claude-decision.js';
 import {JevAppraiser,TrialBudget} from '../dist/src/appraisal.js';
@@ -29,12 +30,12 @@ if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,at:new Date().toI
 const command=`env CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-reconsider-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}`;
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
-const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],appraisals=[];
+const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],appraisals=[],responses=[];
 let receipt,draining=false,failed=false,decisionCount=0,appraisalCount=0;
 const send=m=>{if(!child.stdin.destroyed)child.stdin.write(JSON.stringify(m)+'\n');};
 child.stderr.on('data',()=>{});child.stdin.on('error',()=>{failed=true;});
 async function handle(line){
- if(line.length>32000)throw Error('Oversized input');const m=JSON.parse(line);
+ const m=parseTrialMessage(line);
  if(m.type==='receipt'){if(receipt)throw Error('Duplicate receipt');receipt=m.receipt;return;}
  if(!/^[0-9a-f-]{36}$/.test(m.id))throw Error('Invalid correlation');
  if(m.type==='decision-cancel'||m.type==='appraisal-cancel'){active.get(m.id)?.abort();return;}
@@ -46,7 +47,11 @@ async function handle(line){
  seen.add(m.id);const controller=new AbortController();active.set(m.id,controller);const start=Date.now();
  try{
   await lane.run(controller.signal,async()=>{
-  if(isDecision){const output=await (m.mode==='decision'?backend.decide(m.view,controller.signal):backend.reflect(m.view,controller.signal));send({type:'decision-result',id:m.id,output});}
+  if(isDecision){const output=await (m.mode==='decision'?backend.decide(m.view,controller.signal):backend.reflect(m.view,controller.signal));
+   responses.push({id:m.id,mode:m.mode,pawn:m.view.pawn.id,receivedAt:new Date().toISOString(),elapsedMs:Date.now()-start,output});
+   // Preserve returned answers even if the coordinator subsequently rejects them as stale.
+   await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses},null,2),{mode:0o600});
+   send({type:'decision-result',id:m.id,output});}
   else {const r=await appraiser.assess(m.view,controller.signal,20000);appraisals.push({status:'ok',elapsedMs:Date.now()-start,score:r.reflectionScore,costUSD:r.costUSD});send({type:'appraisal-result',id:m.id,result:{reflectionScore:r.reflectionScore}});}
   });
  }catch{
@@ -60,6 +65,6 @@ const timer=setTimeout(()=>{failed=true;child.kill();},1200000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
 const result={at:new Date().toISOString(),kind:cold?'reconsider-live-cold':scripted?'reconsider-scripted':'reconsider-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
- before,after:{claude:backend.summary(),jev:budget.summary()},decisions:backend.receipts,appraisals,game:receipt,
+ before,after:{claude:backend.summary(),jev:budget.summary()},decisions:backend.receipts,responses,appraisals,game:receipt,
  accounting:'Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls.'};
 backend.close();budget.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;
