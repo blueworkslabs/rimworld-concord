@@ -25,3 +25,23 @@ provider receipts remain private; sanitized results are published separately.
 
 The crew log continues to distinguish addressed messages and verified work.
 Native recovery visibility and general reflection pacing are separate follow-ups.
+
+## Verified result — 2026-09-22
+
+The single live run completed three hauling trips (thirty steel), then one rescue.
+Alvin requested rescue while hauling; the delayed core reply issued a standalone
+offer after all three trips completed. Fresh acceptance led to exact-bed delivery.
+His completion claim matched the receipts in this response. No treatment implied.
+
+Three Claude attempts and zero Jev calls were used, with no rerolls. The continuous
+portion settled after 25.765 seconds / 1,502 ticks; all 25 sampled states were
+unpaused. Only one discovery reflection was enabled, with five native attention
+turns. Paired and full cold restore preserved the result without further inference.
+Cleanup found no outstanding work; 51 historical database files were unchanged.
+
+Scripted acceptance completed the same three hauls then rescue, with paired/cold
+restore. Scripted refusal completed the hauls without rescue, with paired restore.
+153 automated checks passed. Independent read-only Codex review of behavioral
+commit `ec9446ad563e39f59f5cef00046659d44a1c947e` found no actionable defects.
+No mod changes or new live strategic core were involved. See
+[evidence](evidence/requested-goal-live.json).
