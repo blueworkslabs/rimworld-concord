@@ -28,3 +28,16 @@ test('needs entries require launcher and a held lock blocks all game access',()=
  }
  assert.equal(decisionTrials['needs-v1'].calls,4);assert.equal(decisionTrials['needs-v1'].reservedEquivalentUSD,.4);
 });
+
+import {smallerHaul,NeedsRunGuard} from '../trials/needs-policy.js';
+test('trial stop and observation guards reject disconnect, pause and no tick progress',()=>{
+ const guard=new NeedsRunGuard();guard.sample(false,2,1);
+ assert.throws(()=>guard.sample(true,2,1));assert.throws(()=>guard.sample(false,1,1));
+ guard.stop();assert.throws(()=>guard.check());assert.throws(()=>guard.sample(false,2,1));
+});
+test('only strictly smaller same-target hauling counters receive another offer',()=>{
+ const offer={kind:'haul' as const,thing:'wood',x:3,z:2,count:10,trips:2,maxTicks:3600};
+ assert(!smallerHaul(offer,offer));assert(smallerHaul({...offer,trips:1},offer));
+ assert(!smallerHaul({...offer,trips:1,count:11},offer));
+ assert(!smallerHaul({...offer,thing:'other',trips:1},offer));
+});

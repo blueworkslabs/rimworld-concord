@@ -21,7 +21,7 @@ for i,(stack,pos) in enumerate(zip(stacks,positions)):
     for key,value in [('ID',str(900+i)),('label',f'Concord fixture {i}'),('baseLabel','Stockpile'),('color','(0.5, 0.5, 0.5, 1)')]:E.SubElement(zone,key).text=value
     cells=E.SubElement(zone,'cells');E.SubElement(cells,'li').text=f"({pos['x']}, 0, {pos['z']})"
     settings=E.SubElement(zone,'settings');E.SubElement(settings,'priority').text='Normal'
-    filt=E.SubElement(settings,'filter');E.SubElement(filt,'disallowedSpecialFilters');defs=E.SubElement(filt,'allowedDefs');E.SubElement(defs,'li').text='WoodLog'
+    filt=E.SubElement(settings,'filter');E.SubElement(filt,'allowedHitPointsPercents').text='0~1';E.SubElement(filt,'allowedQualityLevels').text='Awful~Legendary';E.SubElement(filt,'disallowedSpecialFilters');defs=E.SubElement(filt,'allowedDefs');E.SubElement(defs,'li').text='WoodLog'
 # Keep autonomous native haulers from moving trial supplies before a tested offer.
 for pawn in m.findall('things/thing'):
     if pawn.findtext('def')=='Human':
@@ -46,7 +46,10 @@ for pawn in m.findall('things/thing'):
 meals=[t for t in m.findall('things/thing') if t.findtext('def')=='MealSurvivalPack']
 assert len(meals)>=len(positions)
 for meal,pos in zip(meals,positions):
-    meal.find('pos').text=f"({pos['sourceX']}, 0, {pos['sourceZ']})"
+    occupied={t.findtext('pos') for t in m.findall('things/thing')}
+    storage={cell.text for cell in zones.findall('li/cells/li')}
+    cell=next(c for c in pos['candidates'] if f"({c['x']}, 0, {c['z']})" not in occupied|storage)
+    meal.find('pos').text=f"({cell['x']}, 0, {cell['z']})"
     flag=meal.find('forbidden')
     if flag is not None:flag.text='False'
 with open(dst,'xb') as out:r.write(out,encoding='utf-8',xml_declaration=True)

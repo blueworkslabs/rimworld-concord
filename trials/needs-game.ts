@@ -1,5 +1,6 @@
 /** Optional work versus own needs. Deliberately paused choices, then native activity. */
 import assert from 'node:assert/strict';
+import {NeedsRunGuard,smallerHaul} from './needs-policy.js';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -16,10 +17,11 @@ const receipt:any={passed:false,runId,policy:'needs-v1',mode:scripted?'scripted'
 let c:Coordinator|undefined,s:Store|undefined,attempts=0,connected=true;
 const send=(m:unknown)=>process.stdout.write(JSON.stringify(m)+'\n');
 const channel=new DecisionChannel(raw=>{const m=raw as any;if(m.type==='decision-request'&&(cold||++attempts>4))throw Error('Needs trial limit');send(m);});
+const guard=new NeedsRunGuard();
 let drained:(()=>void)|undefined;const input=createInterface({input:process.stdin,crlfDelay:Infinity});
-input.on('line',line=>{try{if(line.length>32000)throw Error('Response too large');const m=JSON.parse(line);if(m.type==='drained'&&m.id===runId){drained?.();return;}channel.receive(m);}catch{connected=false;channel.close();}});
-input.on('close',()=>{connected=false;channel.close();});
-const timer=setTimeout(()=>channel.close(),240000);
+input.on('line',line=>{try{if(line.length>32000)throw Error('Response too large');const m=JSON.parse(line);if(m.type==='drained'&&m.id===runId){drained?.();return;}channel.receive(m);}catch{connected=false;guard.stop();channel.close();}});
+input.on('close',()=>{connected=false;guard.stop();channel.close();});
+const timer=setTimeout(()=>{guard.stop();channel.close();},360000);
 async function finish(){channel.close();if(!connected)throw Error('Host disconnected');await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Drain timeout')),15000);drained=()=>{clearTimeout(t);resolve();};send({type:'drain',id:runId});});receipt.hostDrained=true;}
 async function decide(id:string,pawn:string){
  try{return await c!.pawn(pawn).decide(id,{name:channel.name,async decide(v,signal){receipt.views.push(v);return channel.decide(v,signal);}},45000);}
@@ -36,6 +38,7 @@ try{
   await b.load(f.name);await b.admin('pause');const db=root+'/.runtime/needs-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();
   receipt.initial=await b.state();assert(receipt.initial.pawns.every((p:any)=>!p.downed));
   for(const actor of f.actors){
+   guard.check();
    const pawn=(await b.state()).pawns.find(p=>p.id===actor.id)!;
    const food=pawn.facts?.find(f=>f.key==='need'&&f.value==='Food')?.level;
    assert(Math.abs(food!-(actor.condition==='hungry'?.4:.9))<.01);assert(pawn.workReady);
@@ -47,15 +50,16 @@ try{
    // One fresh response to an in-scope smaller counter; never pressure a refusal.
    if(answer.status==='countered'&&answer.decision?.kind==='counter'){
     const a=answer.decision.action;
-    if(a.kind==='haul'&&a.thing===action.thing&&a.x===action.x&&a.z===action.z&&a.count<=action.count&&a.trips<=2&&a.maxTicks<=3600){
+    if(smallerHaul(a,action)){
+     guard.check();
      try{const reply=await c.core().revise(answer.id,'Your smaller scope is acceptable; fresh consent remains yours.');answer=await decide(reply.id,actor.id);}catch(e){receipt.counterError=String(e);}
     }
    }
    if(scripted){assert.equal(answer.status,actor.condition==='hungry'?'refused':'accepted');}
   }
-  receipt.preRun=await b.state();await b.admin('run');const start=Date.now(),end=start+(scripted?30000:120000);
-  while(Date.now()<end){await c.reconcile();await c.advanceIntentions();await c.observe();const state=await b.state();receipt.samples.push({elapsedMs:Date.now()-start,ticks:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,downed:p.downed,needs:p.facts?.filter(f=>f.key==='need')}))});await delay(400);}
-  await b.admin('pause');await c.reconcile();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();
+  guard.check();receipt.preRun=await b.state();guard.check();await b.admin('run');await delay(200);const start=Date.now(),end=start+(scripted?30000:120000);
+  while(Date.now()<end){guard.check();await c.reconcile();guard.check();await c.advanceIntentions();guard.check();await c.observe();const state=await b.state();guard.sample(state.paused,state.ticks,receipt.preRun.ticks);receipt.samples.push({elapsedMs:Date.now()-start,ticks:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,downed:p.downed,needs:p.facts?.filter(f=>f.key==='need')}))});await delay(400);}
+  guard.check();await b.admin('pause');await c.reconcile();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();
   if(scripted){const full=f.actors.find((a:any)=>a.condition==='full');assert(Object.values(c.inspect().proposals).some(p=>p.pawn===full.id&&p.standing?.status==='completed'));const hungry=f.actors.find((a:any)=>a.condition==='hungry');assert(!receipt.final.actions.some((a:any)=>a.actor===hungry.id));}
   receipt.cleanup=await stopTrialWork(c);assert.equal(receipt.cleanup.errors.length,0);receipt.summary=workSummary(c.inspect());receipt.report=(await b.state()).crewLog;
   const checkpoint='lab-concord-needs-final-'+Date.now();await c.checkpoint(checkpoint);const domain=c.inspect();await c.restore(checkpoint);
