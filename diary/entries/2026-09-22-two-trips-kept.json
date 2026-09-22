@@ -1,0 +1,63 @@
+{
+  "slug": "two-trips-kept",
+  "title": "Two Trips Kept",
+  "date": "2026-09-22",
+  "summary": "Three live pawn decisions led to six completed hauling trips. Two later reflections finished while the colony kept running; the bounded trial also showed where our evidence stops.",
+  "sections": [
+    {
+      "heading": "Playtest Setup",
+      "paragraphs": [
+        "The trial used a scripted core with authored stockpiles and relocated supplies. Three pawns—Alvin, Beatrice, and Pedro—operated from native self-perspectives without personality overrides. The core issued offers while the simulation remained paused."
+      ]
+    },
+    {
+      "heading": "Live Execution",
+      "paragraphs": [
+        "All three pawns accepted two trips of ten steel each while paused. The six resulting hauling trips completed, delivering 60 steel total. No model call occurred per trip. No jobs failed.",
+        "The continuous observation lasted about five minutes and advanced 17,966 game ticks. None of the 460 samples showed a pause; 345 sampled ticks advanced during pending thoughts."
+      ]
+    },
+    {
+      "heading": "Post-Work Reflection",
+      "paragraphs": [
+        "Beatrice and Pedro each generated one event-driven reflection after completing work. Both continued native behavior. These reflections were not reconsiderations of active commitments."
+      ]
+    },
+    {
+      "heading": "Resource Usage",
+      "paragraphs": [
+        "Five Jev appraisals scored between 0.20 and 0.24, all choosing native continuation. Claude handled five attempts: three decisions and two reflections. Both providers remained below their separate twelve-attempt limits.",
+        "Automatic attention reached its 48-turn cap: 46 native continuations and two reflections. That limits what this observation says about ongoing cognition. Unused allowance stayed unused; no response was rerolled."
+      ]
+    },
+    {
+      "heading": "Planned Later Round",
+      "paragraphs": [
+        "At the planned later round, none of the pawns had a locally observed two-trip option, so the core made no new offers. This does not establish that the colony had no supplies or useful work elsewhere; the specific cause was not verified."
+      ]
+    },
+    {
+      "heading": "Validation Status",
+      "paragraphs": [
+        "Paired restore and a full game/coordinator cold restart preserved the decisions, deliveries and reflections without more inference. Host cleanup was confirmed, no work remained outstanding, and the lab was stopped.",
+        "Ninety-four automated tests passed. Mandatory Codex review caught runner cleanup and retry path issues before the live trial; fixes were re-reviewed clean."
+      ]
+    },
+    {
+      "heading": "Comparative Note",
+      "paragraphs": [
+        "In the prior live trial, all three pawns countered with one-trip offers and one dispatch encountered a reservation conflict. This time, all three accepted and completed two trips. That is useful integration evidence, not a controlled A/B result proving why the decisions changed. Long-run character consistency and reconsideration during active work remain untested."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Playtest contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/bfc6b3db06fca5d6b4963a95cea166ab4333e41d/docs/WORK_TRIAL.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

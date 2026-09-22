@@ -57,10 +57,10 @@ export class ClaudeDecisionBackend {
  private budget:TrialBudget;
  private pending=false;
  // Subscription usage only. This separate trial does not reset the Jev ledger.
- constructor(private options:{ledgerPath:string;scratchRoot:string;binary?:string;trial?:'reliability-v1'|'negotiation-v1'|'hauling-v1'}) {
+ constructor(private options:{ledgerPath:string;scratchRoot:string;binary?:string;trial?:'reliability-v1'|'negotiation-v1'|'hauling-v1'|'work-v1'}) {
    if(!isAbsolute(options.ledgerPath)||!isAbsolute(options.scratchRoot))throw Error('Absolute operator paths required');
-   if(options.trial!==undefined&&!['reliability-v1','negotiation-v1','hauling-v1'].includes(options.trial))throw Error('Unknown trial');
-   this.budget=options.trial==='hauling-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-hauling-v1'):options.trial==='negotiation-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-negotiation-v1'):options.trial==='reliability-v1'?new TrialBudget(options.ledgerPath,0.40,4,'claude-reliability-v1'):new TrialBudget(options.ledgerPath,0.30,3);
+   if(options.trial!==undefined&&!['reliability-v1','negotiation-v1','hauling-v1','work-v1'].includes(options.trial))throw Error('Unknown trial');
+   this.budget=options.trial==='work-v1'?new TrialBudget(options.ledgerPath,1.20,12,'claude-work-v1'):options.trial==='hauling-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-hauling-v1'):options.trial==='negotiation-v1'?new TrialBudget(options.ledgerPath,0.60,6,'claude-negotiation-v1'):options.trial==='reliability-v1'?new TrialBudget(options.ledgerPath,0.40,4,'claude-reliability-v1'):new TrialBudget(options.ledgerPath,0.30,3);
  }
  summary(){const s=this.budget.summary()!;return {attempts:s.calls,reservedEquivalentUSD:s.reservedUSD,estimatedUsageUSD:s.reportedUSD};}
  close(){if(this.pending)throw Error('Decision still pending');this.budget.close();}

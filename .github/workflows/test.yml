@@ -15,6 +15,7 @@ jobs:
       - run: npm test
       - run: node --check scripts/run-jev-game.mjs
       - run: node --check scripts/run-claude-game.mjs
+      - run: node --check scripts/run-work-game.mjs
       - run: node diary/build.mjs --check
       - run: node diary/build.mjs
       - run: bash -n scripts/build-mod.sh scripts/run-lab.sh scripts/run-attention-lab.sh

@@ -29,5 +29,8 @@ export class DecisionChannel {
    const value=r.error?undefined:(p.mode==='decision'?Decision:Reflection).parse(r.output);
    p.cleanup();this.pending=undefined;if(r.error)p.reject(Error(r.error));else p.resolve(value);
  }
- close(){this.closed=true;this.pending?.cleanup();this.pending?.reject(Error('Decision channel closed'));this.pending=undefined;}
+ close(){
+   this.closed=true;const p=this.pending;this.pending=undefined;
+   if(p){p.cleanup();try{this.send({type:'decision-cancel',id:p.id});}catch{}p.reject(Error('Decision channel closed'));}
+ }
 }

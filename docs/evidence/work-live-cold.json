@@ -1,0 +1,32 @@
+{
+  "at": "2026-09-22T07:07:22.285Z",
+  "passed": true,
+  "coldRestore": true,
+  "hostDrained": true,
+  "usageBefore": {
+    "claude": {
+      "attempts": 5,
+      "reservedEquivalentUSD": 0.5,
+      "estimatedUsageUSD": 0.0818019
+    },
+    "jev": {
+      "calls": 5,
+      "reservedUSD": 0.01,
+      "reportedUSD": 0.000430836
+    }
+  },
+  "usageAfter": {
+    "claude": {
+      "attempts": 5,
+      "reservedEquivalentUSD": 0.5,
+      "estimatedUsageUSD": 0.0818019
+    },
+    "jev": {
+      "calls": 5,
+      "reservedUSD": 0.01,
+      "reportedUSD": 0.000430836
+    }
+  },
+  "unchangedUsage": true,
+  "preserved": "All three character records, proposals, outcomes and reflection records compared exactly after full game/coordinator restart, with fresh epoch."
+}

@@ -264,3 +264,48 @@ this does not claim a multi-map playtest.
   map-switch playthrough or active-job checkpoint support is claimed. Planning
   holds are advisory, conservative and limited to this coordinator; native
   workers can still invalidate an offer. Both lab services are stopped.
+
+## Supply-informed live useful-work trial — 2026-09-22
+
+The fixed [trial policy](WORK_TRIAL.md) retained a scripted core and native pawn
+self-perspectives, without authored personality preferences. The fixture uses
+explicitly relocated supplies, authored stockpiles and disabled native work
+priorities. This is not an ordinary managed colony or a controlled A/B test.
+
+- All three initial live offers were accepted: two ten-unit steel trips each.
+  The [native receipts](evidence/work-live.json) record six completed trips and
+  sixty units delivered, with no failed job and no model call per trip.
+- Five-minute continuous observation: 301,084ms including shutdown boundary work,
+  17,966 advancing ticks, 460 samples, no paused samples. Eleven samples observed
+  pending thoughts; 345 ticks advanced between consecutive thinking samples.
+- Beatrice and Pedro each completed a later event-driven reflection, continuing
+  native behavior. These occurred **after** work, not while reconsidering an
+  active agreement. Five Jev scores (0.20, 0.20, 0.24, 0.21, 0.20) selected native
+  continuation; no appraisal-triggered escalation is established.
+- The bounded attention pump reached its **48-turn cap** (46 native results,
+  two continued reflections). This is not unrestricted cognition throughout the
+  observation window. Routine batches count toward this trial cap.
+- At the later scripted offer round, no pawn had an observed two-trip option;
+  no new offers or guessed destinations were issued. The specific cause was not
+  diagnosed; this does not establish absence of supply or work elsewhere.
+- Five Claude Max attempts used $0.50 reserved / $0.0818019 reported API-equivalent
+  usage, not cash charges. Five Jev appraisals used $0.010 reserved / $0.000430836
+  reported API charges. Limits were twelve each; unused allowances remain unused.
+  No rerolls, historical ledger changes or additional inference during restore.
+- Paired restore and [full game/coordinator cold restore](evidence/work-live-cold.json)
+  exactly preserve character records, decisions, outcomes and reflections under
+  a fresh epoch. Host inference drain confirmed; final work cleanup has no
+  outstanding work or errors. Both shared lab services stopped.
+- 94 automated tests pass. The [zero-inference rehearsal](evidence/work-scripted.json)
+  completed twelve trips across two offer rounds. Initial rehearsal had only two
+  eligible pawns; it was preserved and a fresh disposable fixture generated and
+  preflighted before any live inference. Runner review uncovered and fixed
+  no-retry, inference cancellation/drain, exceptional cleanup and action-scope
+  issues; focused independent Codex review of final behavioral commit
+  `bfc6b3db06fca5d6b4963a95cea166ab4333e41d` completed with no remaining actionable
+  findings. Raw reviews and partial-run diagnostics remain private.
+
+This establishes live bounded multi-trip execution, not why the choices differ
+from the prior trial's counters. No naturally developed personality, sustained
+strategic planning, difficult value conflict, active-job checkpoint or live
+withdrawal during work is claimed. The native mod is unchanged from PR #13.
