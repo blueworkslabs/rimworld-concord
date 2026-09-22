@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
-import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal } from './protocol.js';
+import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal,type AlternativeRequest } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
 import {rescueQuestionInvalid} from './decision-validity.js';
 import { nativeAttention,attentionInterrupt } from './routing.js';
@@ -59,7 +59,7 @@ export class Coordinator {
     this.observedTick=game.ticks;
     for(const [pawn,q] of this.questions) {
       const p=this.domain.proposals[q.proposal];
-      const reason=p?rescueQuestionInvalid(game,p):'Offer is missing';
+      const reason=p?(p.replacesAgreementId&&!this.replacementActive(p)?'Replacement agreement is no longer active':rescueQuestionInvalid(game,p)):'Offer is missing';
       if(reason&&!q.controller.signal.aborted){
         this.commit('decision-invalidated',pawn,{proposal:q.proposal,reason});
         q.controller.abort(Error(reason));
@@ -156,6 +156,7 @@ export class Coordinator {
       this.commit('attention-started',pawn,{throughSeq,count:events.length,backend:backend.name,appraiser:significant?null:appraiser?.name});
       const view=structuredClone({pawn:groundedPawn(this.domain,game,own),character,...(character.intention?{intention:this.domain.proposals[character.intention]}:{}),events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
         proposals:Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending').slice(0,8),
+        requests:Object.values(this.domain.requests??{}).filter(r=>r.pawn===pawn).slice(-8),
         histories:Object.fromEntries(Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending'&&p.parentId).slice(0,8).map(p=>[p.id,this.history(p)]))});
       return {status:'running' as const,generation:this.generation,controller,activity,view,throughSeq,significant};
     });
@@ -191,6 +192,13 @@ export class Coordinator {
         }
         const reason=result.kind==='proposal'?result.decision.reason:result.reason;
         const reflection={tick:this.observedTick,throughSeq,backend:backend.name,reason};
+        if(result.kind==='request_rescue') {
+          this.requestRescue(prepared.view,result,fresh);
+          character.attention!.last={status:'continued',throughSeq,reason};
+          character.reflections=[...(character.reflections??[]),reflection].slice(-16);
+          this.commit('attention-requested',pawn,reflection);
+          return {pawn,status:'continued',throughSeq};
+        }
         if(result.kind==='withdraw') {
           if(!prepared.view.intention||character.intention!==prepared.view.intention.id)throw Error('Reflection agreement superseded');
           await this.withdraw(pawn,result.reason);
@@ -206,7 +214,7 @@ export class Coordinator {
           this.validateDecision(proposal,result.decision,fresh);
           character.attention!.last={status:'decided',throughSeq,reason};
           character.reflections=[...(character.reflections??[]),reflection].slice(-16);
-          await this.applyDecision(proposal,result.decision,fresh);
+          await this.applyDecision(proposal,result.decision,fresh,combined);
           return {pawn,status:'decided',throughSeq};
         }
         character.attention!.last={status:'continued',throughSeq,reason};
@@ -283,6 +291,17 @@ export class Coordinator {
         // Older bridges return null, never a fabricated safe destination.
         return structuredClone(own.movement??null);
       }),
+      requests:()=>Object.values(this.domain.requests??{}).map(r=>({id:r.id,pawn:r.pawn,agreementId:r.agreementId,target:r.target,mapId:r.mapId,reason:r.reason,status:r.status,replyReason:r.replyReason,proposalId:r.proposalId})),
+      declineRequest:(id:string,reason:string)=>this.serial(async()=>{
+        await this.current();const r=this.domain.requests?.[id];
+        if(!r||r.status!=='pending'||!reason.trim()||reason.length>1000)throw Error('Invalid pending request reply');
+        r.status='declined';r.replyReason=reason;this.commit('alternative-declined','core',r);return structuredClone(r);
+      }),
+      offerAlternative:(requestId:string,action:Action,reason:string,id=randomUUID())=>this.serial(async()=>{
+        const game=await this.current(),r=this.domain.requests?.[requestId];
+        if(!r||r.status!=='pending')throw Error('Expected unanswered pawn request');
+        return this.propose(game,r.pawn,action,reason,id,undefined,r);
+      }),
       inbox:()=>structuredClone(Object.values(this.domain.proposals).filter(p=>p.status==='countered'&&!p.replyId)),
       propose:(pawn:string,action:Action,reason:string,id=randomUUID())=>this.serial(async()=>{
         return this.propose(await this.current(),pawn,action,reason,id);
@@ -293,6 +312,7 @@ export class Coordinator {
         const p=this.domain.proposals[id];
         if(!p||p.status!=='pending')throw Error('Only pending offers may be withdrawn by the core');
         p.status='withdrawn';p.withdrawalReason=reason;
+        if(p.requestId&&this.domain.requests?.[p.requestId]?.proposalId===p.id)this.domain.requests[p.requestId]!.status='closed';
         // Do not cancel an unrelated thought by this pawn. Status invalidates late acceptance.
         this.commit('offer-withdrawn','core',{id,reason});
         return structuredClone(p);
@@ -308,7 +328,7 @@ export class Coordinator {
       })
     };
   }
-  private propose(game:GameState,pawn:string,action:Action,reason:string,id:string,parent?:Proposal) {
+  private propose(game:GameState,pawn:string,action:Action,reason:string,id:string,parent?:Proposal,request?:AlternativeRequest) {
     action=Action.parse(action);z.string().uuid().parse(id);
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
     if(!reason.trim()||reason.length>1000) throw Error('Invalid proposal reason');
@@ -317,9 +337,17 @@ export class Coordinator {
       if(prior.pawn!==pawn||JSON.stringify(prior.action)!==JSON.stringify(action)||prior.reason!==reason||prior.parentId!==parent?.id) throw Error('Proposal ID collision');
       return structuredClone(prior);
     }
+    const alternative=request??(parent?.requestId?this.domain.requests?.[parent.requestId]:undefined);
+    if(alternative){
+      if(action.kind!=='rescue'||action.target!==alternative.target)throw Error('Alternative must address the requested patient');
+      if(parent&&(alternative.status!=='offered'||alternative.proposalId!==parent.id))throw Error('Alternative reply superseded');
+      const candidate={pawn,action,requestId:alternative.id,replacesAgreementId:alternative.agreementId} as Proposal;
+      if(!this.replacementActive(candidate))throw Error('Requested agreement is no longer active');
+    }
     const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;
-    const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action):undefined;
-    const p:Proposal={id,pawn,action,reason,status:'pending',...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action,alternative?.agreementId):undefined;
+    const p:Proposal={id,pawn,action,reason,status:'pending',...(alternative?{requestId:alternative.id,replacesAgreementId:alternative.agreementId}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    if(alternative){if(rescueMap!==alternative.mapId)throw Error('Request map changed');alternative.status='offered';alternative.proposalId=id;alternative.replyReason=reason;}
     if(parent)parent.replyId=id;
     this.domain.proposals[id]=p;this.commit(parent?'proposal-revised':'proposed','core',p);
     return structuredClone(p);
@@ -345,7 +373,8 @@ export class Coordinator {
       if(!p || p.pawn!==pawn) throw Error('Proposal does not belong to pawn');
       if(p.status!=='pending') throw Error('Proposal already decided');
       if(this.pending.has(pawn)) throw Error('Pawn already deliberating');
-      if(this.domain.characters[pawn]!.commitment||this.domain.characters[pawn]!.intention) throw Error('Pawn already committed; reconcile outcome first');
+      if((this.domain.characters[pawn]!.commitment||this.domain.characters[pawn]!.intention)&&!this.replacementActive(p)) throw Error('Pawn already committed; reconcile outcome first');
+      if(p.replacesAgreementId&&!this.replacementActive(p))throw Error('Replacement agreement no longer active');
       const own=game.pawns.find(x=>x.id===pawn);
       if(!own) throw Error('Pawn unavailable');
       if(p.action.kind==='rescue'){const invalid=rescueQuestionInvalid(game,p);if(invalid)throw Error(invalid);}
@@ -374,7 +403,7 @@ export class Coordinator {
         const p=this.domain.proposals[id]!;
         if(p.status!=='pending') throw Error('Proposal already decided');
         if(this.questions.get(pawn)?.controller===prepared.controller)this.questions.delete(pawn);
-        await this.applyDecision(p,result,fresh);
+        await this.applyDecision(p,result,fresh,prepared.controller.signal);
         return structuredClone(p);
       });
     } catch(error) {
@@ -390,14 +419,44 @@ export class Coordinator {
       try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* expired or old timeline */ }
     }
   }
+  private replacementActive(p:Proposal):boolean {
+    const old=this.domain.proposals[p.replacesAgreementId??''],r=this.domain.requests?.[p.requestId??''],ch=this.domain.characters[p.pawn];
+    return !!(old&&r&&r.pawn===p.pawn&&r.agreementId===old.id&&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&old.pawn===p.pawn&&old.action.kind==='haul'&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
+  }
+  private requestRescue(view:import('./attention.js').AttentionView,result:Extract<Reflection,{kind:'request_rescue'}>,fresh:GameState) {
+    const old=this.domain.proposals[result.agreementId],ch=this.domain.characters[view.pawn.id]!,seen=view.pawn.casualties;
+    if(!old||old.pawn!==view.pawn.id||old.action.kind!=='haul'||old.standing?.status!=='running'||ch.intention!==old.id||view.intention?.id!==old.id)throw Error('Request agreement superseded');
+    if(!seen||!seen.observations.some(t=>t.target===result.target)||Object.values(this.domain.requests??{}).some(r=>r.agreementId===old.id))throw Error('Unobserved casualty or duplicate agreement request');
+    const current=fresh.pawns.find(p=>p.id===view.pawn.id)?.casualties;
+    if(current?.epoch===fresh.epoch&&current.tick===fresh.ticks){
+      const t=current.visibleSubjects?.find(t=>t.target===result.target);
+      if(current.mapId!==seen.mapId||t&&(!t.downed||t.inBed))throw Error('Observed request target changed');
+    }
+    const r:AlternativeRequest={id:randomUUID(),pawn:view.pawn.id,agreementId:old.id,target:result.target,mapId:seen.mapId,reason:result.reason,status:'pending'};
+    (this.domain.requests??={})[r.id]=r;this.commit('alternative-requested',r.pawn,r);
+  }
   private validateDecision(p:Proposal,result:Decision,fresh:GameState) {
+    if(p.replacesAgreementId&&!this.replacementActive(p))throw Error('Replacement agreement no longer active');
+    if(p.replacesAgreementId&&result.kind==='counter'&&(result.action.kind!=='rescue'||p.action.kind!=='rescue'||result.action.target!==p.action.target))throw Error('Replacement counter outside requested patient');
     if(result.kind==='accept'&&p.action.kind==='rescue'){const invalid=rescueQuestionInvalid(fresh,p);if(invalid)throw Error(invalid);}
     if(result.kind==='accept'&&p.action.kind!=='move'&&!this.game.cancel)throw Error('Work requires scoped cancellation');
   }
-  private async applyDecision(p:Proposal,result:Decision,fresh:GameState) {
+  private async applyDecision(p:Proposal,result:Decision,fresh:GameState,signal?:AbortSignal) {
     this.validateDecision(p,result,fresh);
+    if(p.replacesAgreementId&&result.kind==='accept') {
+      // Consent is durable before any cancellation. An interrupted handover never
+      // auto-dispatches the replacement: no action ID exists until stop is confirmed.
+      p.decision=result;p.status='accepted';p.standing={status:'stopped',deadline:this.observedTick+(p.action.kind==='move'?0:p.action.maxTicks),steps:[],reason:'Replacement handover not dispatched'};
+      if(p.requestId)this.domain.requests![p.requestId]!.status='closed';
+      this.commit('replacement-consented',p.pawn,p);
+      await this.withdraw(p.pawn,'Accepted replacement: '+result.reason);
+      if(this.domain.characters[p.pawn]!.commitment)throw Error('Previous job cancellation unconfirmed');
+      const after=await this.current();this.ingest(after);signal?.throwIfAborted();
+      const invalid=rescueQuestionInvalid(after,{...p,status:'pending'});if(invalid)throw Error(invalid);
+    }
     p.decision=result;
     p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':'countered';
+    if(p.requestId&&result.kind!=='counter')this.domain.requests![p.requestId]!.status='closed';
     this.domain.characters[p.pawn]!.memories.push(`${result.kind}: ${p.reason}; ${result.reason}`);
     if(result.kind==='accept') {
       p.actionId=randomUUID();this.domain.characters[p.pawn]!.commitment=p.actionId;
@@ -415,7 +474,7 @@ export class Coordinator {
     const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline,mapId:p.action.kind==='rescue'?p.rescueMap:p.haulMap});
     this.domain.outcomes[receipt.id]=receipt;
     if(receipt.status!=='started') {
-      delete this.domain.characters[p.pawn]!.commitment;
+      if(this.domain.characters[p.pawn]!.commitment===receipt.id)delete this.domain.characters[p.pawn]!.commitment;
       this.domain.characters[p.pawn]!.memories.push(`Action ${receipt.status}: ${receipt.reason}`);
     }
     this.finishStanding(p,receipt.status);
@@ -438,7 +497,7 @@ export class Coordinator {
           if(JSON.stringify(previous)!==JSON.stringify(receipt)) {
             this.domain.outcomes[receipt.id]=receipt;
             if(receipt.status!=='started') {
-              delete this.domain.characters[p.pawn]!.commitment;
+              if(this.domain.characters[p.pawn]!.commitment===receipt.id)delete this.domain.characters[p.pawn]!.commitment;
               this.domain.characters[p.pawn]!.memories.push(`Action ${receipt.status}: ${receipt.reason}`);
             }
             this.finishStanding(p,receipt.status);
@@ -458,7 +517,7 @@ export class Coordinator {
     if(status!=='completed'||p.action.kind==='rescue'||(p.action.kind==='haul'&&p.standing.steps.length>=p.action.trips)) {
       p.standing.status=status==='completed'?'completed':'stopped';
       p.standing.reason=status==='completed'?'Agreed work completed':'Work did not complete; no automatic retry';
-      delete this.domain.characters[p.pawn]!.intention;
+      if(this.domain.characters[p.pawn]!.intention===p.id)delete this.domain.characters[p.pawn]!.intention;
     }
   }
   private async withdraw(pawn:string,reason:string) {
@@ -474,6 +533,7 @@ export class Coordinator {
     this.commit('intention-stopped',pawn,{proposal:p.id,reason});
     if(character.commitment&&p.actionId) {
       const receipt=await this.game.cancel!({epoch:this.domain.epoch,actor:pawn,id:p.actionId,kind:p.action.kind==='rescue'?'rescue':'haul'});
+      if(receipt.id!==p.actionId||receipt.actor!==pawn)throw Error('Cancellation receipt does not match prior job');
       this.domain.outcomes[receipt.id]=receipt;
       if(receipt.status!=='started')delete character.commitment;
       this.commit('action-outcome',pawn,receipt);

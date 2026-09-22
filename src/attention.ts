@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { attentionInterrupt } from './routing.js';
-import { Decision, type Attention, type Character, type NativeEvent, type Pawn, type Proposal } from './protocol.js';
+import { Decision, type Attention, type Character, type NativeEvent, type Pawn, type Proposal,type AlternativeRequest } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
 import type { Coordinator } from './coordinator.js';
 
@@ -8,12 +8,13 @@ import type { Coordinator } from './coordinator.js';
  * No raw move, actor override, admin tool, or invented proposal is accepted here.
  */
 export const Reflection=z.discriminatedUnion('kind',[
+  z.object({kind:z.literal('request_rescue'),agreementId:z.string().uuid(),target:z.string().min(1).max(120),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('withdraw'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('continue'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('proposal'),proposalId:z.string().uuid(),decision:Decision}).strict()
 ]);
 export type Reflection=z.infer<typeof Reflection>;
-export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];intention?:Proposal;histories?:Record<string,Proposal[]>};
+export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];intention?:Proposal;histories?:Record<string,Proposal[]>;requests?:AlternativeRequest[]};
 export interface AttentionBackend {
   readonly name:string;
   reflect(view:AttentionView,signal:AbortSignal):Promise<unknown>;

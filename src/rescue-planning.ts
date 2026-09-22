@@ -16,12 +16,15 @@ export function rescueView(domain:Domain,game:GameState,own:Pawn):RescueView|nul
     observations:v.observations.filter(o=>options.some(a=>a.target===o.target&&a.bed===o.bed))
       .map(o=>({target:o.target,targetName:o.targetName,bed:o.bed,bedLabel:o.bedLabel}))};
 }
-export function planRescue(domain:Domain,game:GameState,pawn:string,action:Rescue):number {
+export function planRescue(domain:Domain,game:GameState,pawn:string,action:Rescue,replaces?:string):number {
   const own=game.pawns.find(p=>p.id===pawn),v=own?.rescue;
   if(!v||v.status!=='available'||v.epoch!==game.epoch||v.tick!==game.ticks||!Number.isInteger(v.mapId)||v.mapId<0)
     throw Error('Fresh mapped rescue observation required');
-  if(Object.values(domain.proposals).some(p=>held(domain,p)&&
-    (conflict(p,action)||(p.pawn===pawn&&p.action.kind!=='move')))||domain.characters[pawn]?.commitment||domain.characters[pawn]?.intention)
+  const old=replaces?domain.proposals[replaces]:undefined,ch=domain.characters[pawn];
+  const replacing=!!(old&&old.pawn===pawn&&old.action.kind==='haul'&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
+  if(replaces&&!replacing)throw Error('Replacement agreement no longer active');
+  if(Object.values(domain.proposals).some(p=>p.id!==replaces&&held(domain,p)&&
+    (conflict(p,action)||(p.pawn===pawn&&p.action.kind!=='move')))||(!replacing&&(ch?.commitment||ch?.intention)))
     throw Error('Rescue patient, bed or pawn already held');
   if(!v.options.some(a=>a.target===action.target&&a.bed===action.bed&&a.x===action.x&&a.z===action.z))
     throw Error('Rescue scope is not an observed patient and bed');
