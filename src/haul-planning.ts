@@ -1,3 +1,4 @@
+import {rescueView} from './rescue-planning.js';
 import type {Domain,GameState,Haul,HaulingView,Pawn,Proposal} from './protocol.js';
 
 /** Conservative whole-stack/cell planning holds, not native reservations.
@@ -26,12 +27,15 @@ export function haulingView(domain:Domain,game:GameState,own:Pawn):HaulingView|n
 export function groundedPawn(domain:Domain,game:GameState,own:Pawn):Pawn {
   const copy=structuredClone(own),view=haulingView(domain,game,own);
   if(view)copy.hauling=view;
+  const rescue=rescueView(domain,game,own);if(rescue)copy.rescue=rescue;
   return copy;
 }
 export function planHaul(domain:Domain,game:GameState,pawn:string,action:Haul):number {
   const own=game.pawns.find(p=>p.id===pawn),view=own?.hauling;
   if(!own||!view||view.status!=='available'||view.epoch!==game.epoch||view.tick!==game.ticks||
     !Number.isInteger(view.mapId)||view.mapId!<0)throw Error('Fresh mapped hauling observation required');
+  if(Object.values(domain.proposals).some(p=>p.pawn===pawn&&p.action.kind==='rescue'&&
+    (p.status==='pending'||p.standing?.status==='running'||domain.characters[pawn]?.commitment===p.actionId&&!!p.actionId)))throw Error('Pawn already held by rescue work');
   if(holds(domain).some(p=>p.pawn===pawn||conflicts(p,action,view.mapId!)))
     throw Error('Hauling source, destination or pawn already held by an offer or commitment');
   const option=view.options.find(a=>a.thing===action.thing&&a.x===action.x&&a.z===action.z);

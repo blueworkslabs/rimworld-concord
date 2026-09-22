@@ -78,6 +78,13 @@
 - Five-minute observation and cold restore verified; 48-turn attention cap reached, later local options absent.
 - Scripted core/authored fixture: no sustained planning or long-run personality claim. See [trial policy](WORK_TRIAL.md) and [evidence](ACCEPTANCE.md).
 
+## Bounded rescue increment
+
+- Local, map-bound downed-colonist and single-medical-bed opportunities.
+- Fresh pawn consent; patient/bed planning holds, native carry and exact-bed outcome.
+- One attempt with withdrawal, needs/expiry stops and quiescent persistence.
+- Scripted verification only; no live rescue judgment or treatment claim. See [contract](RESCUE.md).
+
 ## Next bounded increment
 
 - Evaluate Jev on recorded self-perspectives and compare outcomes against scripted/rules baselines.
@@ -90,7 +97,7 @@
 ## Later
 
 - Compare rules+LLM against rules+Jev+LLM; OpenClaw tool plugin.
-- Pawn-originated goals and richer actions: rescue, construction, conversation.
+- Pawn-originated goals and richer actions: construction, conversation, broader rescue/treatment.
 - Core strategic planning, building/defense proposals, explicit planning pauses.
 - Broader standing intentions, active-job checkpoints, retention and portable installation.
 - Gravship scenario, binding mechanics, progression quests and evidence-backed chronicler.

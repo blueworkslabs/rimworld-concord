@@ -4,6 +4,7 @@ import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, t
 import type { AppraisalView } from './appraisal.js';
 import { nativeAttention } from './routing.js';
 import { Store } from './store.js';
+import {rescueView,planRescue} from './rescue-planning.js';
 import {groundedPawn,haulingView,planHaul} from './haul-planning.js';
 import { AttentionOptions, Reflection, bounded, coalesce, type AttentionBackend, type AppraisalBackend, type AttentionResult } from './attention.js';
 
@@ -239,6 +240,12 @@ export class Coordinator {
   /** Physical movement opportunities and communicated replies only; no private character state. */
   core() {
     return {
+      rescueOptions:(pawn:string)=>this.serial(async()=>{
+        if(!this.domain.characters[pawn])throw Error('Unknown pawn');
+        const game=await this.current(),own=game.pawns.find(p=>p.id===pawn);
+        if(!own)throw Error('Pawn unavailable');
+        return rescueView(this.domain,game,own);
+      }),
       haulingOptions:(pawn:string)=>this.serial(async()=>{
         if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
         const game=await this.current();
@@ -289,7 +296,8 @@ export class Coordinator {
       return structuredClone(prior);
     }
     const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;
-    const p:Proposal={id,pawn,action,reason,status:'pending',...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action):undefined;
+    const p:Proposal={id,pawn,action,reason,status:'pending',...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
     if(parent)parent.replyId=id;
     this.domain.proposals[id]=p;this.commit(parent?'proposal-revised':'proposed','core',p);
     return structuredClone(p);
@@ -357,13 +365,13 @@ export class Coordinator {
     }
   }
   private async applyDecision(p:Proposal,result:Decision) {
-    if(result.kind==='accept'&&p.action.kind==='haul'&&!this.game.cancel)throw Error('Hauling requires scoped cancellation');
+    if(result.kind==='accept'&&p.action.kind!=='move'&&!this.game.cancel)throw Error('Work requires scoped cancellation');
     p.decision=result;
     p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':'countered';
     this.domain.characters[p.pawn]!.memories.push(`${result.kind}: ${p.reason}; ${result.reason}`);
     if(result.kind==='accept') {
       p.actionId=randomUUID();this.domain.characters[p.pawn]!.commitment=p.actionId;
-      if(p.action.kind==='haul') {
+      if(p.action.kind!=='move') {
         p.standing={status:'running',deadline:this.observedTick+p.action.maxTicks,steps:[p.actionId]};
         this.domain.characters[p.pawn]!.intention=p.id;
       }
@@ -374,7 +382,7 @@ export class Coordinator {
   }
   private async dispatch(p:Proposal) {
     if(p.status!=='accepted' || !p.actionId) throw Error('Action requires pawn acceptance');
-    const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline,mapId:p.haulMap});
+    const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline,mapId:p.action.kind==='rescue'?p.rescueMap:p.haulMap});
     this.domain.outcomes[receipt.id]=receipt;
     if(receipt.status!=='started') {
       delete this.domain.characters[p.pawn]!.commitment;
@@ -391,7 +399,7 @@ export class Coordinator {
       for(const p of Object.values(this.domain.proposals)) {
         if(!p.actionId) continue;
         if(p.standing?.status==='stopped'&&this.domain.characters[p.pawn]!.commitment===p.actionId) {
-          const cancelled=await this.game.cancel!({epoch:this.domain.epoch,actor:p.pawn,id:p.actionId});
+          const cancelled=await this.game.cancel!({epoch:this.domain.epoch,actor:p.pawn,id:p.actionId,kind:p.action.kind==='rescue'?'rescue':'haul'});
           game.actions=game.actions.filter(a=>a.id!==cancelled.id).concat(cancelled);
         }
         const receipt=game.actions.find(a=>a.id===p.actionId);
@@ -410,16 +418,16 @@ export class Coordinator {
       }
       for(const p of Object.values(this.domain.proposals)) if(p.standing?.status==='running') {
         const own=game.pawns.find(x=>x.id===p.pawn);
-        if(game.ticks>=p.standing.deadline||!own?.workReady)
+        if(game.ticks>=p.standing.deadline||!(p.action.kind==='rescue'?own?.rescueReady:own?.workReady))
           await this.withdraw(p.pawn,game.ticks>=p.standing.deadline?'Agreed time expired':'Needs or availability require a break');
       }
     });
   }
   private finishStanding(p:Proposal,status:string) {
     if(!p.standing||p.standing.status!=='running'||status==='started')return;
-    if(status!=='completed'||(p.action.kind==='haul'&&p.standing.steps.length>=p.action.trips)) {
+    if(status!=='completed'||p.action.kind==='rescue'||(p.action.kind==='haul'&&p.standing.steps.length>=p.action.trips)) {
       p.standing.status=status==='completed'?'completed':'stopped';
-      p.standing.reason=status==='completed'?'Agreed trips completed':'Trip did not complete; no automatic retry';
+      p.standing.reason=status==='completed'?'Agreed work completed':'Work did not complete; no automatic retry';
       delete this.domain.characters[p.pawn]!.intention;
     }
   }
@@ -432,10 +440,10 @@ export class Coordinator {
     // never schedules another trip from a stopped intention.
     p.standing.status='stopped';p.standing.reason=reason;
     delete character.intention;
-    character.memories.push(`Stopped hauling: ${reason}`);
+    character.memories.push(`Stopped ${p.action.kind}: ${reason}`);
     this.commit('intention-stopped',pawn,{proposal:p.id,reason});
     if(character.commitment&&p.actionId) {
-      const receipt=await this.game.cancel!({epoch:this.domain.epoch,actor:pawn,id:p.actionId});
+      const receipt=await this.game.cancel!({epoch:this.domain.epoch,actor:pawn,id:p.actionId,kind:p.action.kind==='rescue'?'rescue':'haul'});
       this.domain.outcomes[receipt.id]=receipt;
       if(receipt.status!=='started')delete character.commitment;
       this.commit('action-outcome',pawn,receipt);

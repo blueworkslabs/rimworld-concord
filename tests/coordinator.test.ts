@@ -30,7 +30,7 @@ const accept=scripted({kind:'accept',reason:'I choose to help'});
 
 test('core has no execution handle; pawn acceptance executes once; counterpart cannot decide',async()=>{
   const {c,game}=await setup();
-  assert.deepEqual(Object.keys(c.core()),['haulingOptions','movementOptions','inbox','propose','withdrawOffer','revise']);
+  assert.deepEqual(Object.keys(c.core()),['rescueOptions','haulingOptions','movementOptions','inbox','propose','withdrawOffer','revise']);
   const id=randomUUID();const p=await c.core().propose('A',move,'Help',id);
   await assert.rejects(c.pawn('B').decide(p.id,accept),/belong/);
   await c.pawn('A').decide(p.id,accept);
