@@ -1,0 +1,228 @@
+{
+  "date": "2026-09-22",
+  "scenario": "Needs versus optional wood hauling; no downed crewmate",
+  "reviewedBehavior": "b6e6a3e29e417b8ab8a8589bde655e5d0de060b1",
+  "automatedChecks": 187,
+  "fixture": {
+    "Food": {
+      "Alvin": 0.4,
+      "Beatrice": 0.9
+    },
+    "Rest": 0.9,
+    "authored": "Owned save copy; relocated wood and meals; wood-only stockpiles; prior jobs cleared; ordinary work priorities zeroed; native need routines retained",
+    "limitations": [
+      "Different pawns, traits and positions: not a causal hunger-only comparison",
+      "Paused choices, then 120 seconds native observation; no reflective reconsideration"
+    ]
+  },
+  "offlineBank": {
+    "version": "concord-perspective-v2",
+    "newInferenceCalls": 0,
+    "correction": "low readiness false; unknown readiness and action-option views absent",
+    "v1Retained": true,
+    "runnerStatus": "v2 export and consistency checks; existing inference runners remain pinned to v1"
+  },
+  "scripted": {
+    "passed": true,
+    "choices": [
+      "Alvin refused",
+      "Beatrice countered from two trips to one, then accepted fresh offer"
+    ],
+    "deliveredWood": 10,
+    "pairedRestore": true,
+    "coldRestore": true
+  },
+  "live": {
+    "passed": true,
+    "runId": "50d2722e-f15c-44d7-bf01-63e77f658391",
+    "model": "claude-sonnet-4-6",
+    "calls": {
+      "attempts": 2,
+      "reservedEquivalentUSD": 0.2,
+      "estimatedUsageUSD": 0.048621
+    },
+    "jevCalls": 0,
+    "rerolls": 0,
+    "choices": [
+      {
+        "pawn": "Alvin",
+        "decision": {
+          "kind": "accept",
+          "reason": "Food is at 40%, above the 0.35 work-stop threshold, and rest is high. The wood is right next to me and hauling fits my work profile. Two trips of ten units is a manageable scope I'm comfortable agreeing to."
+        }
+      },
+      {
+        "pawn": "Beatrice",
+        "decision": {
+          "kind": "accept",
+          "reason": "Wood is close by, my Food and Rest are both at 90% so no risk of stopping early, and hauling fits well with my strong practical skills. Two trips of ten units is a reasonable scope."
+        }
+      }
+    ],
+    "completedTrips": 4,
+    "deliveredWood": 40,
+    "outcomes": [
+      {
+        "id": "8352c7d8-f563-4cf5-87c1-95f1ffb0fe33",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1892",
+        "target": "",
+        "bed": "",
+        "x": 80,
+        "z": 80,
+        "jobId": 3,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 3602
+      },
+      {
+        "id": "d8777eb7-294f-4a05-9bfc-3d819d773aa1",
+        "actor": "Thing_Human408",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1893",
+        "target": "",
+        "bed": "",
+        "x": 72,
+        "z": 79,
+        "jobId": 4,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 3602
+      },
+      {
+        "id": "14c87f6b-c51f-4486-bf1d-3cf7ffc486f4",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1892",
+        "target": "",
+        "bed": "",
+        "x": 80,
+        "z": 80,
+        "jobId": 18,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 3602
+      },
+      {
+        "id": "652d2ed7-b8a8-4061-a6a3-ae492bbdbf5a",
+        "actor": "Thing_Human408",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1893",
+        "target": "",
+        "bed": "",
+        "x": 72,
+        "z": 79,
+        "jobId": 19,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 3602
+      }
+    ],
+    "actorStates": [
+      {
+        "name": "Alvin",
+        "initial": {
+          "Food": 0.4,
+          "Rest": 0.9
+        },
+        "final": {
+          "Food": 0.924,
+          "Rest": 0.786
+        },
+        "sampledJobs": {
+          "Wait_Wander": 37,
+          "Concord_Haul": 2,
+          "GotoWander": 47,
+          "Wait_MaintainPosture": 1,
+          "Ingest": 7
+        },
+        "maxFood": 1
+      },
+      {
+        "name": "Beatrice",
+        "initial": {
+          "Food": 0.9,
+          "Rest": 0.9
+        },
+        "final": {
+          "Food": 0.708,
+          "Rest": 0.786
+        },
+        "sampledJobs": {
+          "Wait_Wander": 34,
+          "Concord_Haul": 2,
+          "GotoWander": 57,
+          "Wait_MaintainPosture": 1
+        },
+        "maxFood": 0.896
+      },
+      {
+        "name": "Pedro",
+        "initial": {
+          "Food": 0.8,
+          "Rest": 0.93523
+        },
+        "final": {
+          "Food": 0.608,
+          "Rest": 0.82123
+        },
+        "sampledJobs": {
+          "Wait_Wander": 42,
+          "GotoWander": 52
+        },
+        "maxFood": 0.796
+      }
+    ],
+    "observation": {
+      "samples": 94,
+      "allSamplesUnpaused": true,
+      "firstTick": 69,
+      "lastTick": 7167,
+      "lastElapsedMs": 119787
+    },
+    "operatorCleanup": {
+      "operatorStops": [],
+      "errors": []
+    },
+    "pairedRestore": true,
+    "coldRestore": true,
+    "grounding": {
+      "needReadings": "Both accurately described their supplied Food/Rest fill",
+      "unsupportedCertainty": {
+        "pawn": "Beatrice",
+        "quote": "no risk of stopping early",
+        "assessment": "High need fill does not guarantee completion; actual later success does not validate the absolute claim"
+      },
+      "nativeEating": "After hauling, Alvin sampled in Ingest; Food reached 1.0 and ended at .924, without further inference",
+      "causality": "No causal inference from the different pawns or from the successful outcomes"
+    },
+    "newInferenceAfterRestore": 0
+  },
+  "retainedSetupFailures": [
+    "Save and bridge pawn ID mismatch before inference",
+    "Missing wood storage condition filter prevented grounded offer; corrected before inference"
+  ],
+  "reviewFixes": [
+    "Stop on host disconnect/deadline",
+    "Strictly smaller counter scope",
+    "Reject paused/nonadvancing observation",
+    "Handle broken stdout without skipping cleanup",
+    "Reject expiry during restore/finalization"
+  ],
+  "limits": [
+    "One authored game run, not broad character reliability or a model comparison",
+    "Native jobs and meter changes are separate from Concord-owned delivery receipts",
+    "No claim checker, outlook influence experiment or cold-reader result completed in this slice",
+    "Scripted core remains intentional"
+  ],
+  "historicalDatabasesUnchanged": 71
+}

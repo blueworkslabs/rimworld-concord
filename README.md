@@ -12,7 +12,7 @@ An experimental vertical slice, not a playable campaign or unattended AI colony:
 - Consent, native outcome checks and paired/cold restore are enforced below the model layer.
 - The in-game crew log separates addressed messages, observed events and work records; private outlooks remain private.
 - Claude has bounded real-game evidence; Luna has offline contract evidence, not a game backend. Sustained character quality remains unproved.
-- Current focus: self-describing perspectives and broader fixed cases. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
+- Current focus: broader native scenarios and grounded explanations. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
 
 ## Layout
 

@@ -52,3 +52,19 @@ bank. No new offline inference is required or implied by this correction.
 - Prepare an unannotated real public-log packet for a cold reader before extending
   entry types. A reader's narrative should be compared with the actual record.
   No cold-read result is claimed yet.
+
+## Recorded live result
+
+On 2026-09-22 both workers accepted once. Four Concord hauling receipts confirmed
+forty wood delivered. Alvin correctly described Food 40% and high Rest; Beatrice
+correctly described both at 90%, but her “no risk of stopping early” assertion was
+unsupported certainty. Later success does not retroactively justify that claim.
+After delivery Alvin entered the native `Ingest` job and Food reached 1.0 (ending
+at 0.924), with no further inference or feeding proposal. This is native needs
+behavior coexisting with a bounded agreement—not model planning of a meal.
+
+The live run used two Claude attempts and no Jev calls. All 94 sampled observation
+states were unpaused. The setup/offer phase was explicitly paused; do not count
+that as continuous deliberation. Scripted rehearsal separately covered refusal,
+a strictly smaller counter, fresh acceptance and ten-unit delivery. No live
+refusal or counter occurred in this run.

@@ -1,0 +1,56 @@
+{
+  "slug": "work-before-a-meal",
+  "title": "Work Before a Meal",
+  "date": "2026-09-22",
+  "summary": "Forty wood delivered, then native eating: a second game scenario tests optional work against a pawn’s own needs.",
+  "sections": [
+    {
+      "heading": "The Scenario",
+      "paragraphs": [
+        "This time no crewmate needed rescuing. In a disposable colony setup, Alvin started with Food at 40% and Beatrice at 90%, both with Rest at 90%. Nearby wood and meals were repositioned, wood-only storage added, and ordinary work priorities zeroed. The scripted core offered optional hauling. Acceptance, refusal and smaller counters were all valid outcomes."
+      ]
+    },
+    {
+      "heading": "What Happened",
+      "paragraphs": [
+        "In the live run, both pawns accepted two trips of ten wood each. Alvin cited his 40% food as above the work-stop threshold and noted the wood was right next to him. Beatrice described her 90% food and rest as leaving no risk of stopping early. They completed four haul jobs total, delivering forty wood to the assigned cells.",
+        "A separate scripted rehearsal covered paths the live run did not take: Alvin refused, and Beatrice countered from two trips to one before accepting a fresh proposal and delivering ten wood. No Concord job was created for the refusing pawn."
+      ]
+    },
+    {
+      "heading": "What We Verified",
+      "paragraphs": [
+        "Both live replies read their supplied need fills correctly. After the deliveries, Alvin entered a native eating job; his Food meter reached 100% and ended at 92.4%. No further model call or core feeding instruction caused that meal. This is native self-care continuing alongside bounded work, not evidence that the model planned when to eat.",
+        "Two Claude attempts and no Jev calls were used, with no rerolls. Offer decisions were explicitly paused, followed by two minutes of native activity; all 94 sampled states were unpaused. Paired and cold restore preserved the result without inference. All 187 checks passed, independent Codex review was completed after fixes, and staging is stopped."
+      ]
+    },
+    {
+      "heading": "Limits and Next Steps",
+      "paragraphs": [
+        "This was one authored run with different pawns and traits, so we cannot draw causal conclusions about hunger thresholds specifically. Beatrice's phrasing about no risk of stopping early was unsupported certainty—her success does not validate the absolute claim.",
+        "The corrected offline bank is a new version; flawed inputs and prior answers remain unchanged. Its export and consistency checks are ready, but no new offline inference ran. Narrow claim checks, matched outlook cases and a cold reading of the crew log remain planned—not completed. The core stays scripted."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Needs versus optional work",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/NEEDS_WORK_TRIAL.md"
+    },
+    {
+      "label": "Recorded evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/needs-work.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/concord-needs-live.png",
+      "alt": "Concord crew log showing completed two-trip hauling agreements for Alvin and Beatrice, twenty units each.",
+      "caption": "Live trial, during the observation window: each agreement records two completed trips and twenty delivered wood. This image shows the work record, not Alvin’s later eating."
+    }
+  ]
+}

@@ -17,14 +17,19 @@ future milestone, not the next dependency.
 
 ## Next: broader embodied pawn behavior
 
-- Correct the retained v1 bank's low/unknown readiness-field inconsistency in a
-  new version before treating it as a clean uncertainty/readiness evaluation.
+- Corrected v2 need fixtures are separate from retained v1 evidence; validate a
+  future runner against the full frozen v2 bank before new comparative inference.
 
 - Use the snapshot results to choose a second native scenario beyond the familiar
   steel/rescue fixture—for example needs conflicting with an optional work offer.
 - Test durable outlook reuse and one bounded consequential social exchange.
   Native chatter remains texture; speech and private reflection stay distinct.
-- Reassess legibility from the in-game log, including quiet time and failures.
+- Reassess legibility with a cold reader of an unannotated real public log before
+  adding entry kinds. No cold-read result yet.
+- Add narrowly scoped contradiction checks with an unscorable category; do not
+  confuse exact field matching with general prose entailment or use it to veto
+  valid choices. Test matched pawn outlooks without requiring different actions.
+  See [needs-work trial and evaluation follow-ups](NEEDS_WORK_TRIAL.md).
 
 ## Later, when the pawns are ready
 
