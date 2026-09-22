@@ -26,8 +26,14 @@ for p in r.findall('.//maps/li/things/thing'):
  if ident==c['target'] and 'duration' in c:
   h=next(h for h in p.findall('healthTracker/hediffSet/hediffs/li') if h.findtext('def')=='Anesthetic')
   for k in ['ticksToDisappear','disappearsAfterTicks']:h.find(k).text=str(c['duration'])
- if c.get('hide') and ident!=c['target']:p.find('pos').text='(3, 0, 3)'
- if ident==c.get('observer') and 'near' in c:p.find('pos').text='(%s, 0, %s)'%(c['near']['x'],c['near']['z'])
+ relocated=False
+ if c.get('hide') and ident!=c['target']:p.find('pos').text='(3, 0, 3)';relocated=True
+ if ident==c.get('observer') and 'near' in c:p.find('pos').text='(%s, 0, %s)'%(c['near']['x'],c['near']['z']);relocated=True
+ if relocated:
+  # A saved in-flight path otherwise steps back to its old nextCell on load.
+  for key in ['jobs','pather']:
+   node=p.find(key)
+   if node is not None:node.clear()
 with open(dst,'xb') as f:r.write(f,encoding='utf-8',xml_declaration=True)
 `,b.root+'/profile/Saves/'+source+'.rws',b.root+'/profile/Saves/'+target+'.rws',JSON.stringify(config)]);
 }
@@ -50,7 +56,11 @@ try{
   const baseline=name('baseline');await c.checkpoint(baseline);const baselineReport=(await b.state()).crewLog!,baselineSeq=seen.eventSeq!;
   // Explicit saved-fixture relocations, not a claim of native navigation or global awareness.
   const hidden=name('hidden');await copyFixture(baseline,hidden,{target:f.target,duration:60,hide:true});await b.load(hidden);await b.admin('pause');
-  const hiddenStart=await b.state();const hiddenEnd=await runUntil(g=>g.ticks>=hiddenStart.ticks+120,false);
+  const hiddenStart=await b.state();
+  const distant=(g:GameState)=>{const t=g.pawns.find(p=>p.id===f.target)!;return g.pawns.filter(p=>p.id!==f.target).every(p=>Math.max(Math.abs(p.x-t.x),Math.abs(p.z-t.z))>12);};
+  assert(distant(hiddenStart),'Relocated observers must really be out of range');
+  const hiddenEnd=await runUntil(g=>g.ticks>=hiddenStart.ticks+120,false);
+  assert(distant(hiddenEnd),'Observers must remain out of range through recovery');
   assert.equal(hiddenEnd.pawns.find(p=>p.id===f.target)?.downed,false);
   assert(!hiddenEnd.events!.some(e=>e.seq>baselineSeq&&e.kind==='casualty-recovered'&&e.subject===f.target));
   const hiddenSave=name('hidden-saved');await b.save(hiddenSave);const near=name('near');await copyFixture(hiddenSave,near,{target:f.target,observer:f.rescuer,near:{x:own.x,z:own.z}});
@@ -65,6 +75,10 @@ try{
   for(const e of events){const row=entries.find(r=>r.key===`native-observation:${e.seq}`);assert(row);assert.equal(row.tick,e.tick);assert.equal(row.kind,'record');assert.equal(row.recipient,'observer');}
   const after=await runUntil(g=>g.ticks>=recovered.ticks+120);assert.equal(after.events!.filter(e=>e.kind==='casualty-recovered'&&e.subject===f.target).length,events.length);
   receipt.checks.push('observed native recovery without a rescue job, correct observation ticks and per-observer deduplication');
+  await c.restore(baseline);assert.deepEqual((await b.state()).crewLog!.entries,baselineReport.entries);
+  assert(!(await b.state()).crewLog!.entries.some(e=>e.text.includes('no longer downed')));
+  await runUntil(g=>!!g.events?.some(e=>e.kind==='casualty-recovered'&&e.pawn===f.rescuer&&e.subject===f.target));
+  receipt.checks.push('rewinding before recovery removes later public recovery records');
   const checkpoint=name('final');await c.checkpoint(checkpoint);const report=(await b.state()).crewLog!;await c.restore(checkpoint);assert.deepEqual((await b.state()).crewLog!.entries,report.entries);
   await writeFile(root+'/.runtime/native-log-latest.json',JSON.stringify({db,checkpoint,report,target:f.target}));receipt.report=report;receipt.events=events;receipt.pairedRestore=true;receipt.noActions=after.actions.length===0;
  }
