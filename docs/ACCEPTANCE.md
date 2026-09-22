@@ -631,3 +631,29 @@ at cleanup. Later attributed no-longer-downed sightings remained distinct from
 rescue. This proves bounded later attention, not causal behavioral improvement,
 a natural-colony benchmark, or durable production scheduling.
 [Contract](REFLECTION_PACING.md) · [Evidence](evidence/reflection-pacing-live.json).
+
+## Private outlook: implemented, live formation unproved (2026-09-22)
+
+167 automated checks and independent read-only Codex review passed. Optional
+private revisions validate own cited experiences, explicit stance subjects and
+expected revision; update no native traits, relationships, jobs or consent.
+Tests cover privacy, bounded retention after experience eviction, note removal,
+rewind/late-response rejection and owner-only later proposal/appraisal views.
+
+The scripted native rehearsal formed one stance after locally observing Beatrice
+downed, restored it into the later decision perspective, then completed rescue
+with separate consent. Rewind removed the later outlook; retained paired and
+cold checkpoints preserved it. Scripted only, not a causal preference experiment.
+
+The single live trial did NOT form an outlook. The provider chose an unavailable
+rescue-alternative request with an invented all-zero agreement ID despite no
+current agreement. Validation rejected it before application; no request/job or
+outlook resulted. A preplanned, separate scripted rescue offer was then accepted
+and exact-bed delivery completed. Two Claude attempts, zero Jev; no retries.
+Paused reflection/offer tests, not continuous-play evidence. Paired/cold restore
+preserved the failed attempt, absent outlook and separate consent/outcome; no
+additional inference or outstanding cleanup work.
+
+Next: narrow the provider output schema to current executable choices, while
+retaining validation, before another separately bounded outlook test.
+[Contract](PRIVATE_OUTLOOK.md) · [Evidence](evidence/private-outlook.json).

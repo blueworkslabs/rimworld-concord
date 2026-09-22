@@ -51,3 +51,19 @@ fresh acceptance and actual placement evidence. Refusal, counter, failed or
 unchanged outlook results are preserved, not retried. The paired restore before
 the later offer checks exposure of retained state, not that a note caused the
 choice. Native and live results are recorded separately in acceptance evidence.
+
+## Verified result and remaining gap
+
+167 automated checks and independent review passed. The scripted native case
+formed a stance, kept it out of public records, restored it into the owner's
+later proposal perspective and completed a separately accepted rescue. Paired
+rewind and full cold restart passed.
+
+In the single live case, no outlook was formed: the model selected an unavailable
+rescue request and invented its agreement ID. Adapter validation rejected it.
+The later preplanned rescue offer was separately accepted and delivered; it was
+not a reply to an applied request and not evidence of outlook influence. Two
+Claude attempts, zero Jev, no retries; paired/cold restore retained that mixed
+result. Current output schema exposes the complete reflection vocabulary while
+the supplied executable-choice list is narrower. Schema specialization is the
+next targeted improvement; runtime validation must remain mandatory.
