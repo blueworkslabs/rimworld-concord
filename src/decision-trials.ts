@@ -13,6 +13,7 @@ export const decisionTrials={
  'goal-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-goal-v1'},
  'paced-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-paced-v1'},
  'outlook-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-outlook-v1'},
+ 'needs-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-needs-v1'},
  'perspective-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-perspective-v1'}
 } as const;
 export type DecisionTrial=Exclude<keyof typeof decisionTrials,'legacy'>;
