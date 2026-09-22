@@ -1,4 +1,5 @@
 import {reviseOutlook} from './outlook.js';
+import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
 import {recordCrew,crewReport,agreementProgress} from './crew-log.js';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
@@ -107,6 +108,84 @@ export class Coordinator {
   }
   /** Polling is operator-owned. Routes are durable attention records, not automatic orders. */
   async observe() {return this.serial(async()=>{this.ingest(await this.current());});}
+  /** Operator selects a bounded encounter, not its speech or either pawn's actions.
+   * An idempotent ID prevents re-opening the same encounter after a lost reply. */
+  async openSocial(id:string,initiator:string,recipient:string) {
+    z.string().uuid().parse(id);
+    return this.serial(async()=>{
+      const game=await this.current();this.ingest(game);
+      const old=this.domain.exchanges?.[id];
+      if(old){if(old.initiator!==initiator||old.recipient!==recipient)throw Error('Social ID collision');return structuredClone(old);}
+      socialContact(game,initiator,recipient);
+      if(!this.domain.characters[initiator]||!this.domain.characters[recipient])throw Error('Unknown social participant');
+      if(this.pending.has(initiator)||this.pending.has(recipient))throw Error('Social participant busy');
+      const exchanges=this.domain.exchanges??={};
+      // Fixed per-timeline bound; no autonomous encounter pump or endless history.
+      if(Object.keys(exchanges).length>=32)throw Error('Social encounter limit');
+      if(Object.values(exchanges).some(e=>e.status!=='closed'&&[e.initiator,e.recipient].some(p=>p===initiator||p===recipient)))throw Error('Social encounter already open');
+      const exchange:SocialExchange={id,initiator,recipient,openedTick:game.ticks,expiresTick:game.ticks+3600,status:'opening',turn:'opening',messages:[]};
+      exchanges[id]=exchange;this.commit('social-opened','operator',{id,initiator,recipient});return structuredClone(exchange);
+    });
+  }
+  async closeSocial(id:string) {return this.serial(async()=>{
+    await this.current();const e=this.domain.exchanges?.[id];if(!e)throw Error('Unknown social encounter');
+    if(e.status==='running')this.pending.get(e.turn==='opening'?e.initiator:e.recipient)?.abort();
+    e.status='closed';this.commit('social-closed','operator',{id});
+  });}
+  /** Consumes one speech opportunity before inference; failure/silence never rerolls. */
+  async socialTurn(pawn:string,id:string,backend:SocialBackend,timeoutMs=5000,signal=new AbortController().signal) {
+    if(!Number.isFinite(timeoutMs)||timeoutMs<1||timeoutMs>115000)throw Error('Social timeout must be 1..115000 ms');
+    const prepared=await this.serial(async()=>{
+      signal.throwIfAborted();const game=await this.current();this.ingest(game);
+      const e=this.domain.exchanges?.[id];
+      if(!e||(e.status!=='opening'&&e.status!=='reply'))throw Error('Social turn unavailable');
+      const from=e.turn==='opening'?e.initiator:e.recipient,to=e.turn==='opening'?e.recipient:e.initiator;
+      if(pawn!==from)throw Error('Social turn belongs to another pawn');
+      if(game.ticks>e.expiresTick){e.status='closed';this.commit('social-expired',pawn,{id});throw Error('Social encounter expired');}
+      if(this.pending.has(from)||this.pending.has(to))throw Error('Social participant busy');
+      const {own,other}=socialContact(game,from,to),character=this.domain.characters[from]!;
+      const controller=new AbortController();this.pending.set(from,controller);
+      // Reserve both participants against concurrently taking a stale private perspective.
+      this.pending.set(to,controller);
+      e.status='running';this.commit('social-started',pawn,{id,turn:e.turn,backend:backend.name});
+      const view:SocialView=structuredClone({pawn:groundedPawn(this.domain,game,own),character,contact:{id:other.id,name:other.name},exchange:{id,turn:e.turn,messages:e.messages},
+        ...(character.intention?{intention:this.domain.proposals[character.intention],agreementProgress:agreementProgress(this.domain,this.domain.proposals[character.intention]!,game.ticks,game.actions)}:{})});
+      return {view,from,to,generation:this.generation,controller,activity:{epoch:game.epoch,actor:pawn,activityId:randomUUID(),ttlMs:timeoutMs+2000}};
+    });
+    const combined=AbortSignal.any([signal,prepared.controller.signal]);
+    const timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
+    try{
+      const choice=SocialChoice.parse(await bounded(combined,async()=>{
+        await this.decisionPause(prepared.activity);combined.throwIfAborted();
+        try{await this.game.setActivity?.(prepared.activity);}catch{}
+        combined.throwIfAborted();return backend.speak(prepared.view,combined);
+      }));
+      return await this.serial(async()=>{
+        combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale social turn');
+        const game=await this.current();this.ingest(game);combined.throwIfAborted();
+        const e=this.domain.exchanges?.[id];
+        if(!e||e.status!=='running'||e.turn!==prepared.view.exchange.turn||game.ticks>e.expiresTick)throw Error('Social encounter superseded');
+        socialContact(game,prepared.from,prepared.to);
+        if(choice.choice==='stay_silent'){e.status='closed';this.commit('social-silent',pawn,{id});return {status:'silent' as const};}
+        const message:SocialMessage={id:randomUUID(),exchangeId:id,tick:game.ticks,from:prepared.from,to:prepared.to,text:choice.text};
+        e.messages.push(message);e.status=e.turn==='opening'?'reply':'closed';e.turn='reply';
+        for(const actor of [prepared.from,prepared.to]){
+          const c=this.domain.characters[actor]!;c.messages=[...(c.messages??[]),structuredClone(message)].slice(-16);
+        }
+        this.commit('social-delivered',pawn,message);return {status:'delivered' as const,message:structuredClone(message)};
+      });
+    }catch(error){
+      await this.serial(async()=>{
+        if(this.generation===prepared.generation){const e=this.domain.exchanges?.[id];if(e)e.status='closed';this.commit('social-failed',pawn,{id,error:String(error)});}
+      });
+      return {status:combined.aborted?'interrupted' as const:'failed' as const};
+    }finally{
+      clearTimeout(timer);
+      try{await this.decisionPause(prepared.activity,true);}catch{}
+      for(const actor of [prepared.from,prepared.to])if(this.pending.get(actor)===prepared.controller)this.pending.delete(actor);
+      try{await this.game.setActivity?.({...prepared.activity,ttlMs:0});}catch{}
+    }
+  }
   /** Operator scheduling hints only. Every condition is checked again at claim time. */
   attentionCandidates(options:AttentionOptions={},hasAppraiser=false,mode?:'native'|'model',admission?:AttentionAdmission):string[] {
     const config=AttentionOptions.parse(options);
@@ -625,6 +704,9 @@ export class Coordinator {
   }
   private recoverAttention(reason:string) {
     if(!this.domain) return;
+    for(const e of Object.values(this.domain.exchanges??{}))if(e.status==='running'){
+      e.status='closed';this.commit('social-interrupted','operator',{id:e.id,reason});
+    }
     for(const c of Object.values(this.domain.characters)) if(c.attention?.last?.status==='running') {
       c.attention.last.status='interrupted';c.attention.last.reason=reason;
       this.commit('attention-interrupted',c.id,c.attention.last);

@@ -51,3 +51,16 @@ test('broken output stops once and does not crash or keep sending during cleanup
  send({type:'request'});await new Promise(resolve=>setImmediate(resolve));
  send({type:'receipt'});assert.equal(failures,1);assert.equal(writes,1);
 });
+
+
+test('social entry is locked and has its own four-attempt allowance',()=>{
+ const root=mkdtempSync(tmpdir()+'/social-guards-');mkdirSync(root+'/concord');
+ const env:NodeJS.ProcessEnv={...process.env,RIMWORLD_LAB_ROOT:root};delete env.CONCORD_SOCIAL_LOCKED;
+ const direct=spawnSync(process.execPath,['dist/trials/social-game.js'],{env,encoding:'utf8'});
+ assert.notEqual(direct.status,0);assert.match(direct.stderr,/Use scripts\/run-social-lab/);
+ for(const mode of ['fixture','game','cold']){
+  const r=spawnSync('flock',['-n',root+'/concord/coordinator.lock','bash','scripts/run-social-lab.sh',mode],{env,encoding:'utf8'});
+  assert.notEqual(r.status,0);assert.equal(existsSync(root+'/concord/request.json'),false);
+ }
+ assert.equal(decisionTrials['social-v1'].calls,4);assert.equal(decisionTrials['social-v1'].reservedEquivalentUSD,.4);
+});
