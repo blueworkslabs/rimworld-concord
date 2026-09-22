@@ -1,0 +1,55 @@
+{
+  "slug": "room-for-a-later-thought",
+  "title": "Room for a Later Thought",
+  "date": "2026-09-22",
+  "summary": "Finite reflection slots now pace pawn deliberation, tested across mocks, rehearsal and live five-minute trial.",
+  "sections": [
+    {
+      "heading": "Room Across the Window",
+      "paragraphs": [
+        "The earlier observer trial spent its six-reflection allowance early. The optional paced trial now offers four routine admission intervals across five minutes, plus two reserve slots for health or casualty events. These are fixed classifications, not an intelligent urgency judge. Unused routine intervals expire; denied event batches remain pending. Appraisal-only outcomes release their slot, but attempted reflections cannot reclaim it after failure or cancellation. Native reactions remain independent. This is process-local trial scheduling, not a cross-session production scheduler."
+      ]
+    },
+    {
+      "heading": "The Live Sequence",
+      "paragraphs": [
+        "In one authored five-minute trial, Alvin requested rescue while hauling, then accepted a specific replacement. He delivered twenty steel over two trips before switching; the third never started. Pedro completed three trips. Fifty steel was delivered in total, and Beatrice reached the agreed bed. The later hauling round found Alvin ineligible and Pedro without an observed option; no work was forced.",
+        "Six reflections completed: two reserve starts near 1 and 18 seconds, followed by routine starts near 23, 76, 151 and 226 seconds. The first requested rescue; the other five continued native behavior. Nine Claude attempts and zero Jev calls were used under twelve-attempt/twelve-appraisal ceilings. All 273 sampled states were unpaused. The remaining observation time continued after reflection capacity was exhausted."
+      ]
+    },
+    {
+      "heading": "What Was Verified",
+      "paragraphs": [
+        "All 160 automated checks passed, and independent Codex review found no actionable defects. A separate 45-second scripted rehearsal left earlier routine slots unused, delivered sixty steel and retained a stale rescue answer. Rehearsal and live paired/cold restore passed without further inference. Appraisal release was tested in mocks, not this zero-Jev live run.",
+        "The inspected midpoint screenshot separates Alvin’s stopped agreement, Pedro’s completed hauling and rescue completion. Later public records show both witnesses observing Beatrice no longer downed, without attributing treatment or healing to rescue. Private continuation reasons remain private."
+      ]
+    },
+    {
+      "heading": "A Narrow Conclusion",
+      "paragraphs": [
+        "Finite reflections reached later portions of the window—not proof of better judgment or developed characters. The core remained scripted; this was not a controlled comparison because request handling and native visibility also changed. Next is a planning checkpoint for durable character continuity and a consequential social exchange. Human contact remains future work."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Pacing contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/REFLECTION_PACING.md"
+    },
+    {
+      "label": "Verified trial evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/reflection-pacing-live.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/concord-paced-live.png",
+      "alt": "Live Concord log showing completed rescue, Pedro’s three completed hauls and Alvin’s stopped two-of-three-trip agreement, with a thinking badge visible.",
+      "caption": "Midpoint of the live paced trial: work records remain distinct from Alvin’s acceptance message. The screenshot predates the later no-longer-downed observations."
+    }
+  ]
+}

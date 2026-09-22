@@ -17,3 +17,15 @@ Build with `npm test`, synchronize the reviewed build, create the existing obser
 The paced trial also uses the current pending-goal reply path: an existing rescue request may receive a fresh standalone offer after ordinary haul completion. The historical observer trial remains unchanged. Therefore this follow-up is not a controlled comparison against the earlier observer trial.
 
 Unit checks cover slot expiry, reserve separation, appraisal release, consumed failures, and admission-before-cursor consumption. Native/live results will be recorded separately; unit checks alone do not prove long-run character quality or better decisions.
+
+## Verified result
+
+The single live run used all six slots: reserve starts at 1.44/17.84 seconds and
+routine starts at 23.34/75.84/151.03/225.95 seconds. All six reflections completed,
+with nine total Claude attempts and no Jev calls. Five hauls delivered fifty steel;
+a requested replacement completed rescue. All 273 sampled states were unpaused.
+After the final slot was consumed, native observation continued to the boundary.
+The 45-second scripted rehearsal left its first two routine intervals unused.
+Both runs passed paired/cold restore, including the recorded pacing trace.
+The earlier unit-evidence boundary still applies: no live appraisal release was
+exercised in this zero-Jev run. See [sanitized evidence](evidence/reflection-pacing-live.json).

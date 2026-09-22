@@ -191,3 +191,19 @@ thought. No-inference native perception/rewind/cold-restore checks passed. The l
 still is not a complete colony history or a medical diagnosis. Reflection pacing
 is the next focused follow-up; character/social/human-contact milestones remain
 separate. See [native-log verification](NATIVE_LOG_TRIAL.md).
+
+## Pacing checkpoint
+
+Optional trial pacing is now verified: four routine intervals plus two
+health/casualty reserve slots spread six live reflections to approximately
+226 seconds of a five-minute window. Provider ceilings stayed fixed; this run
+used nine Claude attempts and no Jev calls. Work/log/pacing evidence survived
+paired and cold restore. The remaining window was not unrestricted deliberation.
+See [pacing contract](REFLECTION_PACING.md).
+
+The mixed-work, pending-goal, native-visibility and pacing follow-ups provide a
+checkpoint before more scheduler expansion. Next planning focus: a bounded
+durable-character continuity slice and one consequential social exchange from
+[the playable direction](PLAYABLE_DIRECTION.md), judged by observable choices
+and continuity rather than additional reflection volume. The live core and human
+contact remain separate future milestones, not enabled by this change.
