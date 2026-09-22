@@ -41,7 +41,7 @@ export class AppraisalChannel {
   }
   close() {
     this.closed=true;
-    for(const p of this.pending.values()){p.cleanup();p.reject(Error('Appraisal connection closed'));}
+    for(const [id,p] of this.pending){p.cleanup();try{this.send({type:'appraisal-cancel',id});}catch{}p.reject(Error('Appraisal connection closed'));}
     this.pending.clear();
   }
 }

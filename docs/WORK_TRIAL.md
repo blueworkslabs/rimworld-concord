@@ -23,7 +23,9 @@ failed compliance test.
   and three automatic reflection requests. Separate immutable `work-v1` ledgers;
   all historical trial ledgers remain untouched. Calls are maxima, not targets.
 - At the observation deadline, stop the attention pump and close pending decision
-  channels. Any outstanding agreement is stopped explicitly as **operator trial
+  channels, send provider cancellation and wait for host cleanup confirmation.
+  The same cancellation/join path runs after errors. Failed undecided offers are
+  retired before automatic reflection can see them again. Any outstanding agreement is stopped explicitly as **operator trial
   shutdown**, not reported as a pawn's voluntary withdrawal. Retire pending offers.
 - Retain failures, cancellations and partial results. A durable start marker blocks
   rerunning even if a failed run consumed no model attempts. No rerolls or automatic

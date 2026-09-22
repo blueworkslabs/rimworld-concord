@@ -12,3 +12,9 @@ test('decision relay rejects forged reflection/action and ignores cancelled repl
  relay.receive({type:'decision-result',id,output:{kind:'continue',reason:'native'}});
  assert.deepEqual(await second,{kind:'continue',reason:'native'});relay.close();
 });
+
+test('closing a decision channel sends host cancellation exactly once before rejecting',async()=>{
+ const sent:any[]=[];const relay=new DecisionChannel(v=>sent.push(v));const promise=relay.reflect(view,new AbortController().signal);const rejected=assert.rejects(promise,/closed/);
+ relay.close();relay.close();await rejected;
+ assert.deepEqual(sent.map(m=>m.type),['decision-request','decision-cancel']);assert.equal(sent[0].id,sent[1].id);
+});

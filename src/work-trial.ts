@@ -19,3 +19,22 @@ export function workSummary(domain:Domain){
   intentions:proposals.filter(p=>p.standing).map(p=>({pawn:p.pawn,action:p.action,standing:p.standing})),
   reflections:Object.values(domain.characters).map(c=>({pawn:c.id,reflections:c.reflections??[],attention:c.attention}))};
 }
+
+/** Failed inference must not leave an offer available for a later automatic retry.
+ * Preserve accepted/countered/refused decisions if transport failed afterward. */
+export async function retireUndecided(c:import('./coordinator.js').Coordinator,id:string,reason:string){
+ if(c.inspect().proposals[id]?.status==='pending')await c.core().withdrawOffer(id,reason);
+}
+/** One shutdown path for deadline, normal completion and exceptions. */
+export class WorkShutdown {
+ stopped=false;
+ later?:Promise<void>;
+ private completion?:Promise<void>;
+ constructor(private close:()=>void,private stopAttention:()=>Promise<void>,private drainHost:()=>Promise<void>){}
+ stop():Promise<void>{
+  if(this.completion)return this.completion;
+  this.stopped=true;this.close();
+  this.completion=(async()=>{await this.stopAttention();await this.later;await this.drainHost();})();
+  return this.completion;
+ }
+}

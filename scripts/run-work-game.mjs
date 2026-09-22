@@ -30,7 +30,7 @@ const command=`env CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(co
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
 const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],appraisals=[];
-let receipt,failed=false,decisionCount=0,appraisalCount=0;
+let receipt,draining=false,failed=false,decisionCount=0,appraisalCount=0;
 const send=m=>{if(!child.stdin.destroyed)child.stdin.write(JSON.stringify(m)+'\n');};
 child.stderr.on('data',()=>{});child.stdin.on('error',()=>{failed=true;});
 async function handle(line){
@@ -38,7 +38,8 @@ async function handle(line){
  if(m.type==='receipt'){if(receipt)throw Error('Duplicate receipt');receipt=m.receipt;return;}
  if(!/^[0-9a-f-]{36}$/.test(m.id))throw Error('Invalid correlation');
  if(m.type==='decision-cancel'||m.type==='appraisal-cancel'){active.get(m.id)?.abort();return;}
- if(cold||seen.has(m.id))throw Error('Unexpected request');
+ if(m.type==='drain'){draining=true;for(const c of active.values())c.abort();await lane.drain();send({type:'drained',id:m.id});return;}
+ if(draining||cold||seen.has(m.id))throw Error('Unexpected request');
  const isDecision=m.type==='decision-request';
  if(isDecision){if(!['decision','reflection'].includes(m.mode)||++decisionCount>maxDecisions)throw Error('Decision limit');}
  else if(m.type!=='appraisal'||++appraisalCount>12-Number(before.jev.calls))throw Error('Appraisal limit');

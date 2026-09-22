@@ -10,3 +10,10 @@ test('new inference waits for cancelled provider cleanup and cancelled queued wo
  const next=lane.run(last.signal,async()=>{events.push('next');return 7;});await Promise.resolve();assert.deepEqual(events,['start']);
  finish();await rejected;await skippedResult;assert.equal(await next,7);assert.deepEqual(events,['start','cleanup','next']);
 });
+
+test('drain waits for provider cleanup after cancellation',async()=>{
+ const lane=new InferenceLane(),abort=new AbortController();let release!:()=>void,finished=false;
+ const pending=lane.run(abort.signal,async()=>{await new Promise<void>(r=>release=r);finished=true;});
+ await Promise.resolve();abort.abort();let drained=false;const drain=lane.drain().then(()=>{drained=true;});
+ await Promise.resolve();assert.equal(drained,false);release();await pending;await drain;assert(finished&&drained);
+});
