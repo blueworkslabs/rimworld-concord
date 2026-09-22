@@ -720,3 +720,16 @@ Both participants' later choices received their correspondence; the third pawn
 did not. Rewind and paired/cold restore passed with no additional inference.
 No native social job, automatic belief/relationship update or causal persuasion
 result is claimed. See [contract](SOCIAL_EXCHANGE.md) and [evidence](evidence/social-exchange.json).
+
+## Offline speech interpretation and exported-log reader
+
+2026-09-22: 224 Node and ten Python checks pass; independent read-only Codex review
+covers `29bfd735fea9b50a6df5b4769e057c926826afcc`. Six held-constant situations,
+twice each per Claude/Luna, produced 24 context-valid replies. Their explanations
+are manually annotated separately, including non-discussion and mixed wording;
+no preferred decision or overall truth grade is imposed. A separate fresh-context
+Luna reader recovered the two agreements and twenty delivered wood in the PR32
+public log. Its tick ambiguity was specific to a header-omitting exported packet,
+not a demonstrated UI defect. Twelve Claude attempts, thirteen Luna turns total,
+zero Jev, no rerolls or game actions. All seventy historical databases unchanged.
+See [protocol, results and limits](SPEECH_CHECKS.md) and [evidence](evidence/speech-interpretation.json).

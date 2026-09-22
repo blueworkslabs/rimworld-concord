@@ -22,11 +22,15 @@ future milestone, not the next dependency.
 - Build on the bounded addressed exchange with tests of how recipients interpret
   uncertain or disputed speech. Keep attributed statements distinct from native
   facts, private outlook revisions and permission to act; see [social contract](SOCIAL_EXCHANGE.md).
+  The first [offline interpretation check](SPEECH_CHECKS.md) is complete; next
+  distinguish durable recipient interpretation from merely receiving a message.
 - Test durable outlook reuse without treating a later acceptance as proof of
   persuasion. A controlled comparison and social-outlook citation design remain
   separate work; native chatter stays distinct from coordinator-mediated speech.
-- Reassess legibility with a cold reader of an unannotated real public log before
-  adding entry kinds. No cold-read result yet.
+- Reassess legibility before adding entry kinds. One fresh-context model reader
+  of a retained exported log is complete, but its packet omitted UI/report-header
+  framing. A human reader or actual-UI/full-header test remains uncompleted; do
+  not infer a UI defect from ambiguity specific to the exported packet.
 - Improve grounding coverage only against a separately versioned, held-out set.
   The first numeric/phrase checker deliberately leaves prose unscored and misses
   paraphrases; source IDs alone do not establish support. Keep predictions separate

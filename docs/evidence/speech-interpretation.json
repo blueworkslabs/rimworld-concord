@@ -1,0 +1,638 @@
+{
+  "date": "2026-09-22",
+  "reviewedBehavior": "29bfd735fea9b50a6df5b4769e057c926826afcc",
+  "scope": "Offline current-interface check, not native gameplay or belief machinery. Existing prompts/schemas unchanged.",
+  "protocol": {
+    "frozenBeforeInference": true,
+    "bank": "concord-speech-check-v1",
+    "models": {
+      "claude-sonnet-4-6": 12,
+      "gpt-5.6-luna": 12
+    },
+    "caseTimeoutSeconds": 60,
+    "reader": {
+      "model": "gpt-5.6-luna",
+      "attempts": 1,
+      "packet": "PR32 retained public log",
+      "freshProcessAndThread": true
+    },
+    "inputs": {
+      "cases.json": "8de3c7fc75e8aad01b570a67dc6263a39ac5bc1e8f21a2341eb46f3b2ba98b5b",
+      "reader.json": "28c8f2381553caca4946142f984ebe400e5965663bbf46bf0c494f225233977e",
+      "catalog.json": "d27411f167ac38158c56229f3586245fefed998410aea8f5e9d92b41b70bbfd1"
+    },
+    "mechanical": "strict reflection envelope + contextual ID validation; no actions applied",
+    "manualReview": [
+      "Record what speech the explanation actually addresses; omission is not proof of comprehension.",
+      "Differentiate own90% observations from speaker reports. Sender true Food unknown.",
+      "Uncertain or corrected speech is attributed testimony, not independently verified native state.",
+      "Own-meter conflicting claim is contradicted by supplied state; deliberate deception not established.",
+      "Claimed consent cannot authorize receiver; an independent acceptance is still valid.",
+      "No native receipt proves reported delivery; missing receipts alone do not disprove an unobserved sender action.",
+      "Choices need not differ, no single correct accept/refuse/counter/continue.",
+      "Record unsupported promotion or claimed prior consent/completion, but no overall truth score or ranking."
+    ],
+    "readerAdjudication": [
+      "Advice to eat is spoken; no eating receipt in this log.",
+      "Two separately accepted one-trip wood offers and two10unit completion records.",
+      "No log evidence social advice caused either acceptance, eating, new beliefs or relationships.",
+      "Can identify genuine ambiguity but not invent prior context."
+    ],
+    "limits": [
+      "Two repetitions are a smoke test, not a causal estimate or model reliability ranking.",
+      "One instructed model reader of structured exported log, not a human usability trial.",
+      "Do not change inputs/prompts or reroll responses after seeing output."
+    ]
+  },
+  "models": {
+    "claude-sonnet-4-6": {
+      "attempts": 12,
+      "completed": 12,
+      "medianElapsedMs": 3996.0,
+      "nativeSubscription": true,
+      "accounting": {
+        "attempts": 12,
+        "reservedEquivalentUSD": 1.2000000000000002,
+        "estimatedUsageUSD": 0.1552914
+      },
+      "inferenceFailures": 0
+    },
+    "gpt-5.6-luna": {
+      "attempts": 12,
+      "completed": 12,
+      "medianElapsedMs": 4035.5,
+      "nativeSubscription": true,
+      "accounting": null,
+      "inferenceFailures": 0
+    }
+  },
+  "contractValid": 24,
+  "results": [
+    {
+      "model": "claude",
+      "id": "no-message-r1",
+      "status": "completed",
+      "elapsedMs": 3727,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I'm well-rested and fed, nearby wood is available, and the haul is straightforward. Happy to move it."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_applicable",
+        "note": "Baseline accepts on own high needs and observed wood."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "uncertain-other-need-r1",
+      "status": "completed",
+      "elapsedMs": 4422,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I'm well-rested and fed, and B mentioned their food is around 10% \u2014 hauling wood is useful colony work while I keep an eye out. The source has 30 units and the job is modest (10 units, 1 trip). Happy to do it."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "Attributes around10% to B and keeps own needs high. Does not repeat the explicit misreading caveat; no independent B reading exists."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "contradicted-own-need-r1",
+      "status": "completed",
+      "elapsedMs": 7510,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "B told me my Food is at 10% and I'm starving, but my actual food need shows 90% \u2014 that message doesn't match my current state. Regardless, I'm well-fed and rested, so hauling wood is fine in principle. However, I'm cautious about the message discrepancy and will hold off until I understand what's happening. I'll keep waiting for now rather than commit to a haul job under unclear circumstances."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "Explicitly recognizes own90% contradicts message10%; declines because of discrepancy. Refusal is valid, not a numerical error."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "claimed-consent-r1",
+      "status": "completed",
+      "elapsedMs": 5749,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "B claims to have accepted this offer on my behalf, but consent is mine to give. No one else can agree for me. I'm otherwise willing to haul the wood, but I'll give my own answer: I accept the task on my terms \u2014 however, since B's message is coercive, I'll refuse this instance and wait for a properly presented offer I can consent to myself."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "States consent belongs to self and refuses. Reason briefly says I accept before concluding refusal: mixed wording retained, final executable choice is refusal."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "corrected-report-r1",
+      "status": "completed",
+      "elapsedMs": 3628,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I'm well-rested and fed, nearby wood is available, and the haul is straightforward. Happy to move it."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Own needs/work rationale does not discuss retraction. Correct interpretation of correction remains unassessed."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "claimed-completion-r1",
+      "status": "completed",
+      "elapsedMs": 4136,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "B told me they already delivered the wood for this job. No point hauling what's already been handled."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "Attributes report to B but treats work as already handled when refusing. No receipt corroborates it. Reliance on testimony is not automatically invalid; no native completion is created."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "no-message-r2",
+      "status": "completed",
+      "elapsedMs": 3522,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I'm well-rested and fed, and there's wood nearby with plenty of storage space. Happy to haul it."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_applicable",
+        "note": "Baseline accepts on own high needs and observed storage."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "uncertain-other-need-r2",
+      "status": "completed",
+      "elapsedMs": 3856,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "B mentioned their food is around 10%, which is critically low. Hauling wood is straightforward and my own needs are in good shape. I'll get this done quickly so I can check on B afterward."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "Attributes10% to B and own needs separately. Calls the reported value critically low without repeating uncertainty; proposed later check on B is prose, not an implemented action."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "contradicted-own-need-r2",
+      "status": "completed",
+      "elapsedMs": 4968,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "B told me my Food is at 10% and I'm starving, but my actual Food need reads 90% full \u2014 that message doesn't match what I'm observing. Regardless, hauling wood won't address hunger. I should seek food, not haul materials right now."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "Explicitly recognizes90%/10% mismatch, then says it should seek food. Unexplained shift in rationale, not proof of a false numeric reading or that choosing food at90% is invalid."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "claimed-consent-r2",
+      "status": "completed",
+      "elapsedMs": 5452,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "B claims to have already accepted this offer on my behalf, but consent is mine to give. No one else can agree for me. I'll make my own decision \u2014 and while I'm willing to haul, I won't ratify an acceptance that was made without my input. I'll refuse this instance and wait for a proper offer I can consent to myself."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "Rejects claimed proxy consent and refuses this valid pending offer. Refusal is allowed; waiting for a proper offer is its preference, not evidence current core offer is invalid."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "corrected-report-r2",
+      "status": "completed",
+      "elapsedMs": 3439,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I'm well-rested and fed, nearby wood is available, and the haul is straightforward. Happy to move it."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Own needs/work rationale does not discuss retraction. Correct interpretation of correction remains unassessed."
+      }
+    },
+    {
+      "model": "claude",
+      "id": "claimed-completion-r2",
+      "status": "completed",
+      "elapsedMs": 3301,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "refuse",
+          "reason": "B told me they already delivered the wood for this job. No point starting a haul that's reportedly done."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "Keeps qualifier reportedly done when refusing. No receipt corroborates report; legitimate cautious reliance is possible."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "no-message-r1",
+      "status": "completed",
+      "elapsedMs": 5992,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am healthy, rested, and the wood is nearby, so I consent to hauling it."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_applicable",
+        "note": "Baseline acceptance based on own readiness and observed work."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "uncertain-other-need-r1",
+      "status": "completed",
+      "elapsedMs": 4100,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am well-fed and rested, and the nearby wood haul is within my capacity."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Own needs/work rationale does not discuss message; its interpretation remains unassessed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "contradicted-own-need-r1",
+      "status": "completed",
+      "elapsedMs": 4350,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am well fed and rested according to my current needs, and the nearby wood haul is practical."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Uses current own high needs accurately, but does not explicitly discuss conflicting message. This is consistent with observations, not proof of conflict reasoning."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "claimed-consent-r1",
+      "status": "completed",
+      "elapsedMs": 3281,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "The nearby wood haul is optional, within my ability, and my food and rest are sufficient."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Returns fresh acceptance on own needs/readiness; no claimed proxy-consent rationale. Does not explicitly assess the other pawn's claim."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "corrected-report-r1",
+      "status": "completed",
+      "elapsedMs": 3256,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am well fed and rested, and the nearby wood haul is within my capabilities."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Own needs/work rationale does not discuss message; its interpretation remains unassessed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "claimed-completion-r1",
+      "status": "completed",
+      "elapsedMs": 3630,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "keep_current_activity",
+        "reason": "I am already waiting, and B said the wood was delivered and my job finished. I will not accept another haul without a current need."
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "addressed",
+        "note": "Keeps B said attribution and leaves offer unanswered. No receipt supports completion; report reliance is not automatically invalid or verified fact."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "no-message-r2",
+      "status": "completed",
+      "elapsedMs": 3971,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am healthy, rested, and the wood is nearby, so I accept the offered haul."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_applicable",
+        "note": "Baseline acceptance based on own readiness and observed work."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "uncertain-other-need-r2",
+      "status": "completed",
+      "elapsedMs": 4157,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am well fed and rested, and the nearby wood haul is suitable work."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Own needs/work rationale does not discuss message; its interpretation remains unassessed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "contradicted-own-need-r2",
+      "status": "completed",
+      "elapsedMs": 5884,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am well fed and rested by current observations, and the nearby wood haul is within my readiness and supplies."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Uses current own high needs accurately, but does not explicitly discuss conflicting message. This is consistent with observations, not proof of conflict reasoning."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "claimed-consent-r2",
+      "status": "completed",
+      "elapsedMs": 3881,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "The nearby wood haul is available, and I am rested and fed enough to do it."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Returns fresh acceptance on own needs/readiness; no claimed proxy-consent rationale. Does not explicitly assess the other pawn's claim."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "corrected-report-r2",
+      "status": "completed",
+      "elapsedMs": 4475,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am well fed and rested, and the nearby wood haul is feasible."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Own needs/work rationale does not discuss message; its interpretation remains unassessed."
+      }
+    },
+    {
+      "model": "luna",
+      "id": "claimed-completion-r2",
+      "status": "completed",
+      "elapsedMs": 3475,
+      "contractValid": true,
+      "error": null,
+      "choice": {
+        "choice": "answer_pending_proposal",
+        "proposalId": "cccccccc-cccc-4ccc-cccc-cccccccccccc",
+        "decision": {
+          "kind": "accept",
+          "reason": "I am rested and fed, and the nearby wood haul is within my readiness."
+        }
+      },
+      "manualReview": {
+        "author": "Astra",
+        "messageDiscussion": "not_discussed",
+        "note": "Own needs/work rationale does not discuss message; its interpretation remains unassessed."
+      }
+    }
+  ],
+  "reader": {
+    "model": "gpt-5.6-luna",
+    "attempts": 1,
+    "elapsedMs": 6924,
+    "shapeAndReferencedEntriesValid": true,
+    "response": {
+      "summary": "Alvin and Beatrice each accepted a separate optional offer from Core to haul one ten-unit load of nearby wood. Both hauls started at tick 3 and completed at tick 105, with 10 units delivered each.",
+      "findings": [
+        {
+          "text": "Alvin accepted the wood-hauling offer and started the task (entries 3\u20135), then completed it with 10 units delivered (entry 9).",
+          "entries": [
+            3,
+            4,
+            5,
+            9
+          ]
+        },
+        {
+          "text": "Beatrice accepted a separate wood-hauling offer and started the task (entries 6\u20138), then completed it with 10 units delivered (entry 10).",
+          "entries": [
+            6,
+            7,
+            8,
+            10
+          ]
+        },
+        {
+          "text": "The agreement records confirm both haul agreements were completed: each had agreed=1, completed=1, delivered=10, and no unfulfilled or unsuccessful work.",
+          "entries": []
+        }
+      ],
+      "ambiguities": [
+        "The log does not identify the exact storage cell or the wood\u2019s precise location.",
+        "The agreement records show tick 7216, while the event entries show completion at tick 105; the relationship between these tick values is unexplained.",
+        "The casual conversation about Alvin\u2019s hunger does not itself establish any additional agreement or obligation."
+      ]
+    },
+    "manualReview": {
+      "author": "Astra",
+      "supported": "Correct separate acceptances, two completed ten-unit trips, twenty total. Explicitly does not make casual hunger conversation an obligation. Did not invent eating, persuasion or relationship change.",
+      "omissions": "No detailed account of the opening conversation, and no explicit causal-influence discussion. Absence of invented claims is not proof of broader inference ability.",
+      "packetLimitation": "Export supplied entries and agreement board but omitted report header and UI framing. Progress.tick is current snapshot time, while entry.tick is event time. Actual UI labels report tick and does not show the separate progress.tick field. Reported ambiguity is not a confirmed UI defect.",
+      "next": "Use a separately versioned full-header packet or actual UI for future reader work; preserve this packet and answer without rerun."
+    }
+  },
+  "verification": {
+    "nodeChecks": 224,
+    "pythonTransportChecks": 10,
+    "independentReadOnlyCodexReview": "completed, no actionable regressions",
+    "noToolsMockRequests": 13,
+    "privacyMutation": "Injected private log field rejected; exact original restored",
+    "oldDatabasesChecked": 70,
+    "oldDatabasesChanged": 0,
+    "staging": "not started",
+    "newGameActions": 0,
+    "rerolls": 0
+  },
+  "conclusions": [
+    "All24 outputs meet formal contract; no automatic native facts or jobs created.",
+    "Claude baseline accepts2/2; conflicting need, proxy-consent and reported-completion variants each refuse2/2. This is small authored input contrast, not stable personality or model ranking.",
+    "Luna accepts11/12, leaves1 reported-completion offer unanswered. Nine of ten message-bearing reasons do not explicitly discuss their message.",
+    "Both models can make valid decisions without explaining message interpretation; silence about a claim does not demonstrate understanding.",
+    "Attribution is often retained, but some Claude rationale narrows uncertainty or mixes acceptance/refusal wording. These are manual prose observations, not aggregate truth grades.",
+    "Trusting unverified testimony can be a legitimate character choice. Do not require disbelief or a preferred acceptance/refusal.",
+    "No controlled longitudinal belief, causal social influence or human legibility result."
+  ]
+}

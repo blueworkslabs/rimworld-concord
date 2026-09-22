@@ -31,6 +31,13 @@ class GuardTests(unittest.TestCase):
   for name in ['shell_tool','apps','plugins','hooks','multi_agent','memories']:self.assertIs(c['features.'+name],False)
   self.assertIs(c['orchestrator.skills.enabled'],False);self.assertIs(c['orchestrator.mcp.enabled'],False)
   self.assertEqual(provider['request_max_retries'],0);self.assertEqual(provider['stream_max_retries'],0)
+ def test_speech_and_reader_require_exact_canonical_payloads(self):
+  import json
+  for exporter,count in [('export-speech-cases.mjs',12),('export-log-reader.mjs',1)]:
+   suite=json.loads(p.subprocess.check_output(['node',str(pathlib.Path(__file__).with_name(exporter))],text=True))
+   self.assertEqual(len(p.validate_suite(suite)),count)
+   suite['cases'][0]['prompt']='Changed with original case id'
+   with self.assertRaisesRegex(AssertionError,'contents differ'):p.validate_suite(suite)
  def test_tool_items_and_server_requests_fail_before_consumption(self):
   import queue,time
   c=object.__new__(p.Client);c.q=queue.Queue()
