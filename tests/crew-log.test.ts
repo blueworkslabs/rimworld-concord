@@ -49,3 +49,13 @@ test('maximal escaped message retention stays within native transport cap and ro
  const report=crewReport(d,200),encoded=encodeCrewReport(report);assert(encoded.length>220000);assert(encoded.length<=2000000);const wire=JSON.parse(encoded);
  assert.deepEqual(wire.entryLines.split('\n').map((x:string)=>JSON.parse(x)),report.entries);
 });
+
+test('native log allowlist preserves observer and observation time without copying private detail',()=>{
+ const {d}=fixture();d.characters.B={id:'B',name:'Bee',memories:['PRIVATE']};
+ for(const [seq,kind] of ['casualty','memory','health','food','casualty-recovered'].entries())
+  recordCrew(d,'native-event','A',{event:{seq,pawn:'A',kind,subject:'B',tick:20+seq,detail:'PRIVATE'}},90);
+ const entries=crewReport(d,90).entries;assert.equal(entries.length,2);assert(entries.every(e=>e.kind==='record'&&e.actor==='Ada'&&e.recipient==='observer'&&e.subject==='B'));
+ assert.deepEqual(entries.map(e=>e.tick),[20,24]);assert(entries[0]!.text.includes('Bee downed'));assert(entries[1]!.text.includes('Bee no longer downed'));assert(entries.every(e=>!e.text.includes('PRIVATE')));
+ recordCrew(d,'native-event','A',{event:{seq:4,pawn:'A',kind:'casualty-recovered',subject:'B',tick:24,detail:'PRIVATE'}},100);assert.equal(d.crew!.entries.length,2);
+ recordCrew(d,'native-event','A',{event:{seq:5,pawn:'B',kind:'casualty-recovered',subject:'B',tick:25}},100);assert.equal(d.crew!.entries.length,2);
+});

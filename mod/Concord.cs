@@ -34,6 +34,7 @@ namespace Concord
         public CrewReport crewReport;
         public float crewReceived=-1000f;
         public List<CasualtyNotice> casualtyNotices=new List<CasualtyNotice>();
+        public List<CasualtyNotice> recoveryWatches=new List<CasualtyNotice>();
         private readonly Dictionary<string,Sample> samples=new Dictionary<string,Sample>();
         public readonly Dictionary<string,Thinking> thinking=new Dictionary<string,Thinking>();
         public WorldState(Game game) { }
@@ -54,6 +55,8 @@ namespace Concord
             Scribe_Values.Look(ref eventSeq,"concordEventSeq");
             Scribe_Collections.Look(ref casualtyNotices,"concordCasualtyNotices",LookMode.Deep);
             if(casualtyNotices==null)casualtyNotices=new List<CasualtyNotice>();
+            Scribe_Collections.Look(ref recoveryWatches,"concordRecoveryWatches",LookMode.Deep);
+            if(recoveryWatches==null)recoveryWatches=new List<CasualtyNotice>();
             if(events==null) events=new List<NativeEvent>();
         }
         // Action ownership is independent of the operator's selected/viewed map.
@@ -82,6 +85,19 @@ namespace Concord
                 var id=p.GetUniqueLoadID(); var now=Awareness.Read(p); Sample old;
                 foreach(var target in Casualties.Visible(p)) {
                     var tid=target.GetUniqueLoadID();
+                    // A remembered local downed observation is not a diagnosis.
+                    // Leaving view or reaching a bed is NOT observed recovery.
+                    var watch=recoveryWatches.FirstOrDefault(n=>n.observer==id&&n.target==tid);
+                    if(target.Dead){if(watch!=null)recoveryWatches.Remove(watch);}
+                    else if(target.Downed&&!target.ageTracker.CurLifeStage.alwaysDowned){
+                        if(watch==null){
+                            recoveryWatches.Add(new CasualtyNotice {observer=id,target=tid});
+                            if(recoveryWatches.Count>128)recoveryWatches.RemoveAt(0);
+                        }
+                    }else if(!target.Downed&&watch!=null){
+                        Emit(id,"casualty-recovered","Locally observed previously downed colonist no longer downed; cause unknown",tid);
+                        recoveryWatches.Remove(watch);
+                    }
                     var known=casualtyNotices.FirstOrDefault(n=>n.observer==id&&n.target==tid);
                     if(Casualties.NeedsHelp(target)) {
                         if(known==null) {

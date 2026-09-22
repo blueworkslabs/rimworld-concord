@@ -61,3 +61,29 @@ negotiation, refusal, rescue, privacy exclusion, old-report rejection and paired
 cold restore. It deliberately supplies an inaccurate public completion statement
 so the UI can show a claim alongside distinct verified progress. It is not a live
 model judgment trial. Native UI screenshots require separate visual inspection.
+
+## Selected native observations
+
+Two event kinds become observer records: a local `casualty` sighting (downed,
+outside a bed) and `casualty-recovered` (the observer previously saw that person
+downed and now sees them no longer downed). The record names the observer and
+subject and uses the native observation tick, not a later ingestion time. It
+copies no free-form event detail, private memory, health value or diagnosis.
+These are records for the human observer, not deliberate speech or shared crew
+knowledge. A pawn receives only its own captured experience as before.
+
+The bridge retains at most 128 pending observer/subject recovery watches, saved
+with the game. A downed colonist already in bed can also establish a watch;
+entering a bed, disappearing, or leaving local visibility is not recovery.
+Standing again must be locally observed, so observation can lag the physical
+change. The log does not infer why it happened or claim full health, treatment,
+or rescue. Each observer emits once per watched downed/recovered episode; two
+witnesses may have separate attributed records. Evicted watches or events can
+leave gaps; this is not a complete medical history. Old saves without recovery
+watches establish them from subsequent sightings, not invented prior knowledge.
+
+Recovery is remembered as native attention without forcing another model call
+or interrupting an unrelated thought. Existing subject-specific rescue guards
+still invalidate pending consent when an observed patient no longer needs it.
+The event archive and log rewind with paired saves; the existing bounded saved
+log remains readable without a connected coordinator.
