@@ -1,0 +1,867 @@
+{
+  "date": "2026-09-22",
+  "kind": "bounded mixed-work live observer trial",
+  "finalBehaviorHead": "9905a427d4d43f810b6e2935688528eda9ec7399",
+  "automatedTests": 147,
+  "limits": {
+    "decisions": 12,
+    "appraisals": 12,
+    "reflections": 6,
+    "observationMs": 300000,
+    "secondRoundMs": 120000,
+    "maxNativeTurns": 100,
+    "maxModelTurns": 12
+  },
+  "accounting": "Claude native Max API-equivalent usage estimates; Jev paid API. Fresh immutable ledgers, no rerolls.",
+  "before": {
+    "claude": {
+      "attempts": 0,
+      "reservedEquivalentUSD": 0,
+      "estimatedUsageUSD": 0
+    },
+    "jev": {
+      "calls": 0,
+      "reservedUSD": 0,
+      "reportedUSD": 0
+    }
+  },
+  "after": {
+    "claude": {
+      "attempts": 9,
+      "reservedEquivalentUSD": 0.9,
+      "estimatedUsageUSD": 0.1997238
+    },
+    "jev": {
+      "calls": 3,
+      "reservedUSD": 0.006,
+      "reportedUSD": 0.000324954
+    }
+  },
+  "observation": {
+    "wallMs": 301459,
+    "ticks": 17992,
+    "samples": 316,
+    "pausedSamples": 0,
+    "thoughtSamples": 41,
+    "ticksDuringThought": 2052,
+    "attention": [
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 4
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "continued",
+        "throughSeq": 10
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 18
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 20
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 21
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 22
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 24
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 23
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 26
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 27
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 29
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 30
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "continued",
+        "throughSeq": 31
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 39
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 43
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "continued",
+        "throughSeq": 45
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 50
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 52
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 53
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 54
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 56
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 60
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 58
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 62
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 61
+      },
+      {
+        "pawn": "Thing_Human408",
+        "status": "native",
+        "throughSeq": 64
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 65
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 67
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "native",
+        "throughSeq": 68
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 69
+      },
+      {
+        "pawn": "Thing_Human408",
+        "status": "native",
+        "throughSeq": 70
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 74
+      }
+    ],
+    "decisions": 9,
+    "reflections": 6,
+    "appraisals": 3,
+    "operatorStops": [],
+    "laterDone": true,
+    "connected": true,
+    "pump": {
+      "started": 32,
+      "nativeStarted": 25,
+      "modelStarted": 7,
+      "pending": 0,
+      "stopped": true
+    }
+  },
+  "work": {
+    "completedHaulTrips": 8,
+    "deliveredSteel": 80,
+    "completedRescues": 0
+  },
+  "outcomes": [
+    {
+      "id": "86c2fe34-86bd-4e65-b9c3-4b1d25b1f3cd",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 3,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "dad9d4a1-6413-4568-a98b-e324985d517b",
+      "actor": "Thing_Human411",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel990005",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 94,
+      "jobId": 4,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "f88e625e-ede0-4cba-a92c-5b5e0417300e",
+      "actor": "Thing_Human411",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel990005",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 94,
+      "jobId": 21,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "f5730674-d7b1-4195-8b6f-406c4e159748",
+      "actor": "Thing_Human411",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel990005",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 94,
+      "jobId": 30,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "7d9527ec-687c-4fa4-bded-4d25c9977206",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 37,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "c0782e58-2481-4209-8140-06d773813337",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 42,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "884cd08b-6364-403c-b032-e34848b52c1d",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 395,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 9505
+    },
+    {
+      "id": "49f3c159-2943-49e3-a1b6-9b4cc96811d5",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 412,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 9505
+    }
+  ],
+  "offers": [
+    {
+      "id": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "pawn": "Thing_Human405",
+      "decision": {
+        "kind": "accept",
+        "reason": "I'm well-rested and well-fed, nothing urgent on my plate. Hauling steel is straightforward enough work \u2014 I'll move those loads over."
+      },
+      "elapsedMs": 5256
+    },
+    {
+      "id": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "pawn": "Thing_Human411",
+      "decision": {
+        "kind": "accept",
+        "reason": "I'm well-rested and fed, nothing urgent on my plate. Hauling steel is straightforward work \u2014 I'll move those loads."
+      },
+      "elapsedMs": 4359
+    },
+    {
+      "requestId": "5c0ab80c-360b-444d-9905-277d895a9ac1",
+      "status": "replacement-unavailable-no-retry",
+      "error": "Error: Requested agreement is no longer active"
+    },
+    {
+      "id": "272f997b-82c7-4d06-9241-c585a68728f7",
+      "pawn": "Thing_Human405",
+      "decision": {
+        "kind": "accept",
+        "reason": "Previous haul is done and I'm idle with good food and rest. Two ten-unit trips of steel is straightforward work. Accepting \u2014 though I note Beatrice is still down nearby and I'd welcome a rescue proposal if one comes."
+      },
+      "elapsedMs": 8036
+    },
+    {
+      "pawn": "Thing_Human411",
+      "status": "no-later-observed-option"
+    }
+  ],
+  "requests": [
+    {
+      "id": "5c0ab80c-360b-444d-9905-277d895a9ac1",
+      "pawn": "Thing_Human405",
+      "agreementId": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "target": "Thing_Human408",
+      "mapId": 0,
+      "reason": "Beatrice is down nearby and there's a free medical sleeping spot close by. I'd like to carry her over \u2014 can we arrange a rescue alongside or instead of the remaining steel trips? Keeping the hauling agreement for now until I hear back.",
+      "status": "declined",
+      "replyReason": "The replacement is no longer available; no automatic retry."
+    }
+  ],
+  "publicLog": [
+    {
+      "seq": 1,
+      "tick": 2,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "Alvin",
+      "subject": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "text": "Would you carry up to three ten-unit trips of these supplies to this storage cell? You may refuse, counter or later reconsider.",
+      "key": "offer:c6e8ed46-6d7b-411c-89c3-35e67cda2026"
+    },
+    {
+      "seq": 2,
+      "tick": 2,
+      "kind": "message",
+      "actor": "Alvin",
+      "recipient": "Core",
+      "subject": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "text": "accept: I'm well-rested and well-fed, nothing urgent on my plate. Hauling steel is straightforward enough work \u2014 I'll move those loads over.",
+      "key": "reply:c6e8ed46-6d7b-411c-89c3-35e67cda2026"
+    },
+    {
+      "seq": 3,
+      "tick": 2,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "text": "haul: started.",
+      "key": "outcome:86c2fe34-86bd-4e65-b9c3-4b1d25b1f3cd:started"
+    },
+    {
+      "seq": 4,
+      "tick": 2,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "Pedro",
+      "subject": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "text": "Would you move up to three ten-unit loads from this separate observed supply stack? Refusal or a counter is valid.",
+      "key": "offer:008c82cc-7c5f-4b7c-8e9f-71e2019607d5"
+    },
+    {
+      "seq": 5,
+      "tick": 2,
+      "kind": "message",
+      "actor": "Pedro",
+      "recipient": "Core",
+      "subject": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "text": "accept: I'm well-rested and fed, nothing urgent on my plate. Hauling steel is straightforward work \u2014 I'll move those loads.",
+      "key": "reply:008c82cc-7c5f-4b7c-8e9f-71e2019607d5"
+    },
+    {
+      "seq": 6,
+      "tick": 2,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "text": "haul: started.",
+      "key": "outcome:dad9d4a1-6413-4568-a98b-e324985d517b:started"
+    },
+    {
+      "seq": 7,
+      "tick": 140,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:86c2fe34-86bd-4e65-b9c3-4b1d25b1f3cd:completed"
+    },
+    {
+      "seq": 8,
+      "tick": 236,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:dad9d4a1-6413-4568-a98b-e324985d517b:completed"
+    },
+    {
+      "seq": 9,
+      "tick": 249,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "text": "haul: started.",
+      "key": "outcome:f88e625e-ede0-4cba-a92c-5b5e0417300e:started"
+    },
+    {
+      "seq": 10,
+      "tick": 344,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:f88e625e-ede0-4cba-a92c-5b5e0417300e:completed"
+    },
+    {
+      "seq": 11,
+      "tick": 410,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "text": "haul: started.",
+      "key": "outcome:f5730674-d7b1-4195-8b6f-406c4e159748:started"
+    },
+    {
+      "seq": 12,
+      "tick": 443,
+      "kind": "message",
+      "actor": "Alvin",
+      "recipient": "Core",
+      "subject": "5c0ab80c-360b-444d-9905-277d895a9ac1",
+      "text": "Beatrice is down nearby and there's a free medical sleeping spot close by. I'd like to carry her over \u2014 can we arrange a rescue alongside or instead of the remaining steel trips? Keeping the hauling agreement for now until I hear back.",
+      "key": "request:5c0ab80c-360b-444d-9905-277d895a9ac1"
+    },
+    {
+      "seq": 13,
+      "tick": 512,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "text": "haul: started.",
+      "key": "outcome:7d9527ec-687c-4fa4-bded-4d25c9977206:started"
+    },
+    {
+      "seq": 14,
+      "tick": 543,
+      "kind": "record",
+      "actor": "Pedro",
+      "recipient": "observer",
+      "subject": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:f5730674-d7b1-4195-8b6f-406c4e159748:completed"
+    },
+    {
+      "seq": 15,
+      "tick": 659,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:7d9527ec-687c-4fa4-bded-4d25c9977206:completed"
+    },
+    {
+      "seq": 16,
+      "tick": 659,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "text": "haul: started.",
+      "key": "outcome:c0782e58-2481-4209-8140-06d773813337:started"
+    },
+    {
+      "seq": 17,
+      "tick": 757,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:c0782e58-2481-4209-8140-06d773813337:completed"
+    },
+    {
+      "seq": 18,
+      "tick": 828,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "Alvin",
+      "subject": "5c0ab80c-360b-444d-9905-277d895a9ac1",
+      "text": "The replacement is no longer available; no automatic retry.",
+      "key": "decline:5c0ab80c-360b-444d-9905-277d895a9ac1"
+    },
+    {
+      "seq": 19,
+      "tick": 7232,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "Alvin",
+      "subject": "272f997b-82c7-4d06-9241-c585a68728f7",
+      "text": "Your earlier agreement is complete. Would you accept up to two new ten-unit trips from this observed stack? This is optional new work, not an extension.",
+      "key": "offer:272f997b-82c7-4d06-9241-c585a68728f7"
+    },
+    {
+      "seq": 20,
+      "tick": 7705,
+      "kind": "message",
+      "actor": "Alvin",
+      "recipient": "Core",
+      "subject": "272f997b-82c7-4d06-9241-c585a68728f7",
+      "text": "accept: Previous haul is done and I'm idle with good food and rest. Two ten-unit trips of steel is straightforward work. Accepting \u2014 though I note Beatrice is still down nearby and I'd welcome a rescue proposal if one comes.",
+      "key": "reply:272f997b-82c7-4d06-9241-c585a68728f7"
+    },
+    {
+      "seq": 21,
+      "tick": 7705,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "272f997b-82c7-4d06-9241-c585a68728f7",
+      "text": "haul: started.",
+      "key": "outcome:884cd08b-6364-403c-b032-e34848b52c1d:started"
+    },
+    {
+      "seq": 22,
+      "tick": 8035,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "272f997b-82c7-4d06-9241-c585a68728f7",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:884cd08b-6364-403c-b032-e34848b52c1d:completed"
+    },
+    {
+      "seq": 23,
+      "tick": 8048,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "272f997b-82c7-4d06-9241-c585a68728f7",
+      "text": "haul: started.",
+      "key": "outcome:49f3c159-2943-49e3-a1b6-9b4cc96811d5:started"
+    },
+    {
+      "seq": 24,
+      "tick": 8156,
+      "kind": "record",
+      "actor": "Alvin",
+      "recipient": "observer",
+      "subject": "272f997b-82c7-4d06-9241-c585a68728f7",
+      "text": "haul: completed. Delivered 10 units.",
+      "key": "outcome:49f3c159-2943-49e3-a1b6-9b4cc96811d5:completed"
+    }
+  ],
+  "publicProgress": [
+    {
+      "pawn": "Thing_Human405",
+      "name": "Alvin",
+      "progress": {
+        "id": "272f997b-82c7-4d06-9241-c585a68728f7",
+        "kind": "haul",
+        "status": "completed",
+        "tick": 17999,
+        "agreed": 2,
+        "completed": 2,
+        "active": 0,
+        "unconfirmed": 0,
+        "unsuccessful": 0,
+        "notStarted": 0,
+        "unfulfilled": 0,
+        "delivered": 20,
+        "quantityUnknown": 0
+      }
+    },
+    {
+      "pawn": "Thing_Human411",
+      "name": "Pedro",
+      "progress": {
+        "id": "008c82cc-7c5f-4b7c-8e9f-71e2019607d5",
+        "kind": "haul",
+        "status": "completed",
+        "tick": 17999,
+        "agreed": 3,
+        "completed": 3,
+        "active": 0,
+        "unconfirmed": 0,
+        "unsuccessful": 0,
+        "notStarted": 0,
+        "unfulfilled": 0,
+        "delivered": 30,
+        "quantityUnknown": 0
+      }
+    },
+    {
+      "pawn": "Thing_Human405",
+      "name": "Alvin",
+      "progress": {
+        "id": "c6e8ed46-6d7b-411c-89c3-35e67cda2026",
+        "kind": "haul",
+        "status": "completed",
+        "tick": 17999,
+        "agreed": 3,
+        "completed": 3,
+        "active": 0,
+        "unconfirmed": 0,
+        "unsuccessful": 0,
+        "notStarted": 0,
+        "unfulfilled": 0,
+        "delivered": 30,
+        "quantityUnknown": 0
+      }
+    }
+  ],
+  "publicSnapshotCount": 22,
+  "finalPatient": {
+    "name": "Beatrice",
+    "downed": false,
+    "currentBed": "",
+    "job": "GotoWander",
+    "health": 1
+  },
+  "legibilityLimits": [
+    "Crew log covers agreements and addressed messages, not every native world event",
+    "Beatrice was standing and wandering by final state without rescue; this recovery is absent from the crew log",
+    "Six-reflection sub-limit stopped new attention turns before the observation window ended",
+    "Analyst reconstruction, not a blinded human usability study"
+  ],
+  "returnedResponses": [
+    {
+      "mode": "decision",
+      "pawn": "Thing_Human405",
+      "elapsedMs": 4529,
+      "choice": "accept"
+    },
+    {
+      "mode": "decision",
+      "pawn": "Thing_Human411",
+      "elapsedMs": 3631,
+      "choice": "accept"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Thing_Human405",
+      "elapsedMs": 5492,
+      "choice": "request_rescue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Thing_Human411",
+      "elapsedMs": 4831,
+      "choice": "continue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Thing_Human411",
+      "elapsedMs": 6944,
+      "choice": "continue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Thing_Human405",
+      "elapsedMs": 7722,
+      "choice": "continue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Thing_Human411",
+      "elapsedMs": 5482,
+      "choice": "continue"
+    },
+    {
+      "mode": "reflection",
+      "pawn": "Thing_Human405",
+      "elapsedMs": 4868,
+      "choice": "continue"
+    },
+    {
+      "mode": "decision",
+      "pawn": "Thing_Human405",
+      "elapsedMs": 6797,
+      "choice": "accept"
+    }
+  ],
+  "appraisals": [
+    {
+      "status": "ok",
+      "elapsedMs": 748,
+      "score": 0.63,
+      "costUSD": 0.000116382
+    },
+    {
+      "status": "ok",
+      "elapsedMs": 414,
+      "score": 0.43,
+      "costUSD": 5.8884e-05
+    },
+    {
+      "status": "ok",
+      "elapsedMs": 399,
+      "score": 0.73,
+      "costUSD": 0.000149688
+    }
+  ],
+  "pairedRestore": true,
+  "coldRestore": true,
+  "finalCleanup": {
+    "operatorStops": [],
+    "errors": []
+  },
+  "limitations": "Authored three-pawn colony: two separate hauling opportunities, one initially downed patient outside the first worker local view; native work priorities disabled, needs/idle/social routines remain native. Core scripted, no personality overrides. Initial consent paused; general bounded attention, requests and one later hauling round continuous. Five-minute observation including quiet stretches; split attention and immutable provider limits. No rerolls. Observer reconstruction uses only public crew log frames and screenshots; technical audit is separate. This is not natural sustained planning or human-user evaluation.",
+  "review": {
+    "completed": true,
+    "findingsRemaining": 0,
+    "fixed": [
+      "deadline after reconcile could schedule unawaited negotiation",
+      "deadline after advancing work could poll stopped pump"
+    ]
+  },
+  "retainedRehearsals": [
+    {
+      "name": "dry",
+      "passed": false,
+      "inferenceCalls": 0,
+      "wallMs": 46072,
+      "work": {
+        "completedHaulTrips": 8,
+        "deliveredSteel": 80,
+        "completedRescues": 0
+      },
+      "failure": "Log contents preserved but initial assertion compared a revision that advances during restore",
+      "coldRestore": null
+    },
+    {
+      "name": "dry-final",
+      "passed": true,
+      "inferenceCalls": 0,
+      "wallMs": 46558,
+      "work": {
+        "completedHaulTrips": 8,
+        "deliveredSteel": 80,
+        "completedRescues": 0
+      },
+      "failure": null,
+      "coldRestore": true
+    },
+    {
+      "name": "dry-reviewed",
+      "passed": true,
+      "inferenceCalls": 0,
+      "wallMs": 46136,
+      "work": {
+        "completedHaulTrips": 6,
+        "deliveredSteel": 60,
+        "completedRescues": 0
+      },
+      "failure": null,
+      "coldRestore": true
+    }
+  ],
+  "fixtureSetup": "Initial second lane had no native hauling option; failed before inference, replaced with validated separate lane. Work priorities disabled; needs, idle and social routines native.",
+  "coldNativeCheck": {
+    "passed": true,
+    "downed": false,
+    "currentBed": "",
+    "logEntriesPreserved": true,
+    "inferenceCalls": 0
+  },
+  "historicalDatabases": {
+    "files": 46,
+    "unchanged": true
+  }
+}

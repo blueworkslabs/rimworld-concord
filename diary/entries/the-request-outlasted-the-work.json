@@ -1,0 +1,60 @@
+{
+  "slug": "the-request-outlasted-the-work",
+  "title": "The request outlasted the work",
+  "date": "2026-09-22",
+  "summary": "Eighty steel delivered, a rescue request declined, and a clearer view of what our scripted core still misses.",
+  "sections": [
+    {
+      "heading": "The Fixture and What We Watched",
+      "paragraphs": [
+        "We ran a bounded live observer trial with Alvin, Pedro and Beatrice: two separate hauling opportunities, with Beatrice initially anesthetized and downed. Native work priorities were disabled to prevent unrelated jobs and rescues; needs, idle behavior and social routines stayed native. No personality overrides were applied. The core remained scripted. Initial offers were paused, followed by five minutes of continuous observation."
+      ]
+    },
+    {
+      "heading": "What the Pawns Actually Did",
+      "paragraphs": [
+        "Alvin and Pedro each accepted three ten-unit hauls. Alvin noticed Beatrice and requested rescue while retaining his hauling agreement. By the time the core handled that request, his hauling had finished. The replacement-only policy declined the request because its original context had expired—not because Alvin refused rescue. No rescue offer or rescue job followed.",
+        "At the later round, Alvin accepted two additional trips. His public reply correctly said his earlier work was complete, noted Beatrice was still down then, and welcomed a rescue proposal. Pedro had no currently observed further hauling option at that round. Eight trips delivered eighty steel. By the final game state Beatrice was standing and wandering without rescue; her recovery's exact time and cause are not established here."
+      ]
+    },
+    {
+      "heading": "What the Logs and Tests Show",
+      "paragraphs": [
+        "Twenty-two public snapshots preserve eight addressed messages and sixteen work records. They support reconstructing the offers, request, decline and deliveries without private reflections. But the log omits Beatrice's native recovery. This was analyst inspection, not a blinded human usability study.",
+        "The window recorded 17,992 ticks and 316 samples, none paused. Nine Claude attempts and three Jev calls were used, below the twelve-attempt/twelve-appraisal ceilings. The six-reflection sub-limit stopped further attention turns early, so this was not five minutes of unrestricted deliberation. No rerolls.",
+        "All 147 automated checks passed. Two deadline races found in independent Codex review were fixed and re-reviewed clean; an over-strict rehearsal restore assertion was also corrected. Scripted and live paired/cold restore passed without further inference. Historical ledgers stayed unchanged, and staging is stopped."
+      ]
+    },
+    {
+      "heading": "What Comes Next",
+      "paragraphs": [
+        "Next, separate a requested goal from the agreement that prompted it: once old work finishes, a still-relevant request might deserve a fresh standalone offer and fresh consent. Selected native state changes and more selective reflection pacing also need attention. These are findings for the next step, not features implemented by this trial."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Observer trial contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/OBSERVER_TRIAL.md"
+    },
+    {
+      "label": "Live and rehearsal evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/observer-live.json"
+    },
+    {
+      "label": "Public observer snapshots",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/observer-public-frames.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/concord-observer-live.png",
+      "alt": "Mid-run Concord log showing completed hauling and Alvin's reply welcoming a rescue proposal while Beatrice remains downed nearby.",
+      "caption": "Live mid-window screenshot: eighty steel delivered and no rescue. Alvin's public reply welcomes a rescue proposal. Beatrice was later standing and wandering; that native change is absent from the crew log."
+    }
+  ]
+}
