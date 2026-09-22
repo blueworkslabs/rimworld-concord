@@ -39,7 +39,14 @@ namespace Concord
         public WorldState(Game game) { }
         public override void ExposeData() {
             Scribe_Values.Look(ref world,"concordWorld");
-            Scribe_Values.Look(ref crewJson,"concordCrewLog");
+            // Scribe's string loading interprets escapes; encode opaque JSON so it
+            // survives independently of a coordinator republishing after load.
+            string encoded=Scribe.mode==LoadSaveMode.Saving&&crewJson!=null?Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(crewJson)):null;
+            Scribe_Values.Look(ref encoded,"concordCrewLogEncoded");
+            if(Scribe.mode==LoadSaveMode.LoadingVars){
+                try{crewJson=String.IsNullOrEmpty(encoded)?null:System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(encoded));}
+                catch{crewJson=null;Log.Warning("[Concord] Saved crew report unavailable");}
+            }
             if(Scribe.mode==LoadSaveMode.PostLoadInit){crewReport=null;crewReceived=-1000f;}
             Scribe_Collections.Look(ref actions,"concordActions",LookMode.Deep);
             if(actions==null) actions=new List<ActionRecord>();

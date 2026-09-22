@@ -28,7 +28,7 @@ namespace Concord {
 
   private static bool Short(string s,int n){return s!=null&&s.Length<=n;}
   public static CrewReport Read(WorldState w){
-   if(w.crewReport==null&&!String.IsNullOrEmpty(w.crewJson))try{w.crewReport=Parse(w.crewJson);}catch{}
+   if(w.crewReport==null&&!String.IsNullOrEmpty(w.crewJson))try{w.crewReport=Parse(w.crewJson);}catch(Exception e){Log.Warning("[Concord] Saved crew report parse failed: "+e.Message);w.crewJson=null;}
    return w.crewReport;
   }
   public static void Set(WorldState w,string epoch,string json){

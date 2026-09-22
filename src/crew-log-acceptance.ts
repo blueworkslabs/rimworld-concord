@@ -15,7 +15,8 @@ async function report(){assert.equal(c!.crewSyncError,undefined);const g=await b
 async function finish(id:string){await b.admin('run');const end=Date.now()+30000;while(Date.now()<end){await c!.reconcile();if(c!.inspect().outcomes[id]?.status!=='started')break;await delay(100);}await b.admin('pause');await c!.reconcile();assert.equal(c!.inspect().outcomes[id]?.status,'completed');}
 try {
  if(cold){
-  const saved=JSON.parse(await readFile(root+'/.runtime/crew-log-latest.json','utf8'));s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);
+  const saved=JSON.parse(await readFile(root+'/.runtime/crew-log-latest.json','utf8'));await b.load(saved.checkpoint);await b.admin('pause');const offline=await b.state();assert(offline.crewLog);assert.notEqual(offline.crewLog.epoch,offline.epoch);assert.deepEqual(offline.crewLog.entries,saved.report.entries);checks.push('game save alone preserves the cached log before coordinator restore');
+  s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);
   const r=await report();assert.deepEqual(r.entries,saved.report.entries);assert.deepEqual(r.agreements.map(a=>a.progress.completed),saved.report.agreements.map((a:any)=>a.progress.completed));assert.equal((await b.state()).pawns.find(p=>p.id===saved.target)?.currentBed,saved.bed);receipt.report=r;checks.push('cold restore preserves messages, progress and exact-bed rescue with no inference');
  }else{
   const f=JSON.parse(await readFile(root+'/.runtime/reconsider-fixture.json','utf8'));await b.load(f.name);await b.admin('pause');const db=root+'/.runtime/crew-log-'+Date.now()+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();
@@ -32,7 +33,7 @@ try {
   const final=await report();assert(final.entries.some(e=>e.kind==='message'&&e.text.includes('My haul is wrapped up')));assert.equal(final.agreements.find(a=>a.progress.id===p.id)!.progress.completed,1);assert.equal(final.agreements.find(a=>a.progress.id===p.id)!.progress.status,'stopped');assert.equal(final.agreements.find(a=>a.progress.id===yes.id)!.progress.completed,1);
   checks.push('own progress supplied to reflection and replacement decision; statements and receipts remain distinct; private fixture memories excluded');
   await assert.rejects(b.setCrewLog({...final,epoch:'discarded'}),/Stale/);await assert.rejects(b.setCrewLog({...final,revision:0}),/Older/);assert.deepEqual((await report()).entries,final.entries);checks.push('stale epoch and older revision rejected without replacing display');
-  const checkpoint='lab-concord-crew-'+Date.now();await c.checkpoint(checkpoint);const domain=c.inspect();await c.restore(checkpoint);const restored=await report();assert.deepEqual(restored.entries,final.entries);assert.deepEqual(c.inspect().proposals,domain.proposals);
+  const checkpoint='lab-concord-crew-'+Date.now();await c.checkpoint(checkpoint);const domain=c.inspect();await b.load(checkpoint);await b.admin('pause');const offline=await b.state();assert(offline.crewLog);assert.notEqual(offline.crewLog.epoch,offline.epoch);assert.deepEqual(offline.crewLog.entries,final.entries);checks.push('offline game load preserves cached report before coordinator publication');await c.restore(checkpoint);const restored=await report();assert.deepEqual(restored.entries,final.entries);assert.deepEqual(c.inspect().proposals,domain.proposals);
   await writeFile(root+'/.runtime/crew-log-latest.json',JSON.stringify({db,checkpoint,report:restored,target:f.target,bed:rescue.bed}));receipt.report=restored;receipt.patientBed=(await b.state()).pawns.find(p=>p.id===f.target)?.currentBed;assert.equal(receipt.patientBed,rescue.bed);checks.push('exact native rescue and paired UI/domain restore passed');
  }
  receipt.passed=true;
