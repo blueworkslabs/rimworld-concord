@@ -1,0 +1,48 @@
+{
+  "slug": "a-request-before-a-switch",
+  "title": "A request before a switch",
+  "date": "2026-09-22",
+  "summary": "Pawn-originated rescue requests now allow discussing alternatives without abandoning hauling agreements.",
+  "sections": [
+    {
+      "heading": "What changed",
+      "paragraphs": [
+        "Pawns hauling under a running agreement can now request rescue of a locally observed casualty without first abandoning their work. The request itself does not authorize anything—it opens negotiation. The scripted core can decline or offer a concrete alternative: same-patient medical-bed rescue. If the pawn accepts, this fresh consent replaces the hauling agreement. Refusal or a counter-offer preserves the old agreement unchanged.",
+        "This shifts agency toward the pawn: they notice, they ask, but structured consent—not prose—determines whether the switch happens. The system distinguishes rescue (moving to bed) from treatment (medical care), and tracks agreement progress through completion states rather than pawn-reported summaries."
+      ]
+    },
+    {
+      "heading": "What was tested",
+      "paragraphs": [
+        "All 139 automated tests pass, including checks for scope, privacy, counters, failed cancellation, reopening, final-trip completion and maximum-length reasons. Independent Codex review found two handover defects; these were fixed and re-reviewed clean.",
+        "Scripted scenarios verified: acceptance path shows one completed haul, ten steel, interrupted second haul, then exact-bed rescue. Refusal path shows all three hauls and thirty steel delivered, no rescue. A delayed-rehearsal case confirmed stale replies get rejected after agreement completion.",
+        "One live follow-up observed Alvin accepting three ten-steel hauling trips, noticing downed Beatrice locally, requesting rescue while preserving his agreement, then accepting a scripted core concrete replacement. Two hauling trips completed (twenty steel delivered); the third never started. Beatrice reached the exact agreed medical sleeping spot. Continuous observation ran 18.437 seconds, 1069 ticks, zero paused samples after initial negotiation."
+      ]
+    },
+    {
+      "heading": "Limitations and next steps",
+      "paragraphs": [
+        "The live observation shows requesting and consented replacement can affect real gameplay, but one bounded case does not establish general character reliability. Alvin's acceptance explanation called his haul “wrapped up” when one of three agreed trips remained. That wording is retained as a discrepancy, not treated as evidence that the full agreement finished.",
+        "Paired and full cold restore preserved the request, consent, deliveries and patient in the agreed bed, without further inference. Three Claude attempts and no Jev calls were used; there were no rerolls. The remaining opportunity is clearer completed-versus-remaining agreement progress during negotiations. The casualty, bed and supplies setup was authored, with no personality or relationship overrides. Core behavior remains scripted."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Request and replacement contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/ALTERNATIVE_REQUESTS.md"
+    },
+    {
+      "label": "Live evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/alternative-live.json"
+    },
+    {
+      "label": "Scripted evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/alternative-scripted.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

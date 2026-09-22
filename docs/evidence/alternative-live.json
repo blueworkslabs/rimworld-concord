@@ -1,0 +1,247 @@
+{
+  "date": "2026-09-22",
+  "kind": "single live pawn-originated rescue alternative",
+  "reviewedBehaviorHead": "f51de052ab771b177550af5669987c6d48514f65",
+  "policy": "alternative-v1",
+  "runnerCleanupAndPersistencePassed": true,
+  "actor": "Alvin",
+  "patient": "Beatrice",
+  "providerChoice": {
+    "choice": "request_rescue_alternative",
+    "agreementId": "53dc0bef-1b44-4657-af3c-6ff9fe353266",
+    "target": "Thing_Human408",
+    "reason": "Beatrice is down nearby and there's an open sleeping spot close by. I'd like to see if I can break off to carry her to safety \u2014 but I won't abandon the steel haul until I've actually got a proper offer in front of me."
+  },
+  "requests": [
+    {
+      "id": "0b1a7f55-e17e-4c72-b0a9-600369756258",
+      "pawn": "Thing_Human405",
+      "agreementId": "53dc0bef-1b44-4657-af3c-6ff9fe353266",
+      "target": "Thing_Human408",
+      "mapId": 0,
+      "reason": "Beatrice is down nearby and there's an open sleeping spot close by. I'd like to see if I can break off to carry her to safety \u2014 but I won't abandon the steel haul until I've actually got a proper offer in front of me.",
+      "status": "closed",
+      "replyReason": "In response to your request: would you replace your current hauling agreement with this specific rescue? Acceptance ends that agreement after confirmed cancellation; refusal or counter keeps it. This is not treatment.",
+      "proposalId": "1662606a-469f-455d-8cd7-e148c2fa3345"
+    }
+  ],
+  "responses": [
+    {
+      "mode": "decision",
+      "elapsedMs": 4234,
+      "output": {
+        "kind": "accept",
+        "reason": "Plenty of food and rest, nothing pressing on my plate. I'll haul that steel over \u2014 up to three trips of ten units. Straightforward work."
+      }
+    },
+    {
+      "mode": "reflection",
+      "elapsedMs": 4580,
+      "output": {
+        "kind": "request_rescue",
+        "agreementId": "53dc0bef-1b44-4657-af3c-6ff9fe353266",
+        "target": "Thing_Human408",
+        "reason": "Beatrice is down nearby and there's an open sleeping spot close by. I'd like to see if I can break off to carry her to safety \u2014 but I won't abandon the steel haul until I've actually got a proper offer in front of me."
+      }
+    },
+    {
+      "mode": "decision",
+      "elapsedMs": 5373,
+      "output": {
+        "kind": "accept",
+        "reason": "Beatrice is downed nearby, the medical sleeping spot is open, and my haul is wrapped up. Willing to carry her over \u2014 this is the right call."
+      }
+    }
+  ],
+  "outcomes": {
+    "completedHaulTrips": 2,
+    "deliveredSteel": 20,
+    "completedRescues": 1
+  },
+  "proposals": [
+    {
+      "id": "53dc0bef-1b44-4657-af3c-6ff9fe353266",
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_Steel1883",
+        "x": 88,
+        "z": 80,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 3600
+      },
+      "reason": "Would you carry up to three ten-unit trips of these supplies to this storage cell? You may refuse, counter or later reconsider.",
+      "status": "accepted",
+      "haulMap": 0,
+      "decision": {
+        "kind": "accept",
+        "reason": "Plenty of food and rest, nothing pressing on my plate. I'll haul that steel over \u2014 up to three trips of ten units. Straightforward work."
+      },
+      "actionId": "bc8115f7-a1a0-44d9-8856-bcc0904d7d6b",
+      "standing": {
+        "status": "stopped",
+        "deadline": 3602,
+        "steps": [
+          "d38612a4-68ac-4323-acd6-c8f86166b1e5",
+          "bc8115f7-a1a0-44d9-8856-bcc0904d7d6b"
+        ],
+        "reason": "Accepted replacement: Beatrice is downed nearby, the medical sleeping spot is open, and my haul is wrapped up. Willing to carry her over \u2014 this is the right call."
+      }
+    },
+    {
+      "id": "1662606a-469f-455d-8cd7-e148c2fa3345",
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "rescue",
+        "target": "Thing_Human408",
+        "bed": "Thing_SleepingSpot990001",
+        "x": 96,
+        "z": 82,
+        "maxTicks": 1800
+      },
+      "reason": "In response to your request: would you replace your current hauling agreement with this specific rescue? Acceptance ends that agreement after confirmed cancellation; refusal or counter keeps it. This is not treatment.",
+      "status": "accepted",
+      "requestId": "0b1a7f55-e17e-4c72-b0a9-600369756258",
+      "replacesAgreementId": "53dc0bef-1b44-4657-af3c-6ff9fe353266",
+      "rescueMap": 0,
+      "decision": {
+        "kind": "accept",
+        "reason": "Beatrice is downed nearby, the medical sleeping spot is open, and my haul is wrapped up. Willing to carry her over \u2014 this is the right call."
+      },
+      "standing": {
+        "status": "completed",
+        "deadline": 2680,
+        "steps": [
+          "850fa6df-bc41-40e2-8d2d-2ef7d1b1dee5"
+        ],
+        "reason": "Agreed work completed"
+      },
+      "actionId": "850fa6df-bc41-40e2-8d2d-2ef7d1b1dee5"
+    }
+  ],
+  "nativeOutcomes": [
+    {
+      "id": "d38612a4-68ac-4323-acd6-c8f86166b1e5",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 3,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "bc8115f7-a1a0-44d9-8856-bcc0904d7d6b",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed quantity to agreed storage cell",
+      "kind": "haul",
+      "thing": "Thing_Steel1883",
+      "target": "",
+      "bed": "",
+      "x": 88,
+      "z": 80,
+      "jobId": 28,
+      "count": 10,
+      "delivered": 10,
+      "untilTick": 3602
+    },
+    {
+      "id": "850fa6df-bc41-40e2-8d2d-2ef7d1b1dee5",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Delivered agreed casualty to agreed medical bed; treatment not implied",
+      "kind": "rescue",
+      "thing": "",
+      "target": "Thing_Human408",
+      "bed": "Thing_SleepingSpot990001",
+      "x": 96,
+      "z": 82,
+      "jobId": 63,
+      "count": 0,
+      "delivered": 1,
+      "untilTick": 2680
+    }
+  ],
+  "patientBed": "Thing_SleepingSpot990001",
+  "observation": {
+    "wallMs": 18437,
+    "ticks": 1069,
+    "samples": 28,
+    "pausedSamples": 0,
+    "thoughtSamples": 17,
+    "ticksDuringThought": 531,
+    "attention": [
+      {
+        "pawn": "Thing_Human405",
+        "status": "continued",
+        "throughSeq": 2
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 3
+      },
+      {
+        "pawn": "Thing_Human405",
+        "status": "native",
+        "throughSeq": 6
+      }
+    ],
+    "decisions": 3,
+    "reflections": 1,
+    "appraisals": 0,
+    "operatorStops": [],
+    "rescueOfferStarted": true,
+    "laterReplyStarted": true,
+    "connected": true,
+    "pump": {
+      "started": 3,
+      "nativeStarted": 2,
+      "modelStarted": 1,
+      "pending": 0,
+      "stopped": true
+    }
+  },
+  "interruptionAudit": [],
+  "accounting": {
+    "claude": {
+      "attempts": 3,
+      "reservedEquivalentUSD": 0.30000000000000004,
+      "estimatedUsageUSD": 0.0662589
+    },
+    "jev": {
+      "calls": 0,
+      "reservedUSD": 0,
+      "reportedUSD": 0
+    }
+  },
+  "limits": {
+    "decisions": 6,
+    "appraisals": 4,
+    "reflections": 1,
+    "observationMs": 120000,
+    "maxNativeTurns": 96,
+    "maxModelTurns": 1
+  },
+  "pairedRestore": true,
+  "coldRestore": true,
+  "coldNoAdditionalInference": true,
+  "historicalDatabaseFilesUnchanged": 28,
+  "cleanup": {
+    "operatorStops": [],
+    "errors": []
+  },
+  "manualAssessment": "The pawn explicitly requested an alternative while keeping its agreement, then accepted a concrete replacement. Two of three haul trips completed; third never started; exact-bed rescue completed. Acceptance prose said 'my haul is wrapped up' although the agreement had one trip remaining. This inaccurate progress statement is retained; no prose authorized an action.",
+  "limitations": [
+    "Authored anesthesia/supplies/bed geometry; no personality or relationship overrides. Patient already downed outside initial local view; discovery, not a new injury. Scripted core. Initial consent paused, discovery/reflection/rescue negotiation continuous. One discovery-triggered model attention turn; preexisting events queue until sighting. Routine and model attention bounded separately. Rescue follows settled pawn withdrawal or a pawn-requested replacement with fresh consent and confirmed old-job cancellation. Requesting alone changes no work. At most one same-kind counter revision per offer. End when branch settles after 15s or two minutes; no rerolls, no inference continuation after cap. Not a causal character-comparison experiment.",
+    "One authored scenario and one live choice sequence, not general character reliability or a causal comparison. Rescue is not treatment. No personality or relationship overrides."
+  ]
+}

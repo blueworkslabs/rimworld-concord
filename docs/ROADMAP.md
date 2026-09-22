@@ -140,3 +140,17 @@ Do not describe placeholder interfaces or design documents as live integrations.
 - Next: bounded pawn-originated requests for alternatives while retaining current
   work, so discussing rescue need not require abandoning an agreement first.
   Preserve fresh consent and separate discussion, agreement and execution.
+
+## Request before replacement
+
+- Pawns can request one locally observed rescue alternative while retaining a
+  running hauling agreement. The core can decline or offer a concrete replacement;
+  fresh acceptance authorizes a confirmed old-job stop before rescue dispatch.
+- Native scripted acceptance and refusal passed. One live request and fresh
+  acceptance completed exact-bed rescue after two hauls/twenty steel; the third
+  haul never started. Request and outcomes survived paired/cold restore.
+- The live explanation overstated completion (“haul wrapped up” with one trip
+  remaining). Next opportunity: make agreement progress explicit during replacement
+  negotiations. Do not infer a general reasoning fix from one successful sequence.
+- Core remains scripted; broader character consistency and strategic planning
+  remain unproved. See [contract](ALTERNATIVE_REQUESTS.md) and [evidence](ACCEPTANCE.md).
