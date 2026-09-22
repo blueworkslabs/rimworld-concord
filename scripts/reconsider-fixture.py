@@ -35,6 +35,13 @@ for k,v in [('ID','990'),('label','Reconsideration fixture'),('baseLabel','Stock
 cells=E.SubElement(zone,'cells');setval(cells,'li',f"({dest['x']}, 0, {dest['z']})")
 settings=E.SubElement(zone,'settings');setval(settings,'priority','Normal')
 filt=E.SubElement(settings,'filter');E.SubElement(filt,'disallowedSpecialFilters');setval(E.SubElement(filt,'allowedDefs'),'li','Steel')
+# Optional independent worker lane for the bounded observer experiment.
+if config.get('secondary'):
+    import copy
+    c=config['secondary'];other=next(p for p in pawns if 'Thing_'+p.findtext('id')==c['pawn'])
+    setval(other,'pos',f"({c['origin']['x']}, 0, {c['origin']['z']})")
+    extra=copy.deepcopy(stack);setval(extra,'id','Steel990005');setval(extra,'pos',f"({c['source']['x']}, 0, {c['source']['z']})");things.append(extra)
+    zone2=copy.deepcopy(zone);setval(zone2,'ID','991');setval(zone2,'label','Independent observer supplies');setval(zone2.find('cells'),'li',f"({c['destination']['x']}, 0, {c['destination']['z']})");zones.append(zone2)
 uid=r.find('.//uniqueIDsManager')
 if uid is not None:
     for key in ['nextThingID','nextHediffID']:
