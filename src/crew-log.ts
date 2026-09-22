@@ -1,5 +1,5 @@
 import type {Domain,Proposal,Receipt} from './protocol.js';
-export type AgreementProgress={id:string;kind:string;status:string;tick:number;agreed:number;completed:number;active:number;unconfirmed:number;unsuccessful:number;notStarted:number;unfulfilled:number;delivered:number};
+export type AgreementProgress={id:string;kind:string;status:string;tick:number;agreed:number;completed:number;active:number;unconfirmed:number;unsuccessful:number;notStarted:number;unfulfilled:number;delivered:number;quantityUnknown:number};
 export type CrewEntry={seq:number;tick:number;kind:'message'|'record';actor:string;recipient:string;subject:string;text:string;key:string};
 export type CrewArchive={revision:number;nextSeq:number;entries:CrewEntry[]};
 export type CrewReport={world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
@@ -11,6 +11,7 @@ export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt
  return {id:p.id,kind:p.action.kind,status:p.standing?.status??p.status,tick,agreed,completed,active,
   unconfirmed:receipts.filter(r=>!r).length,unsuccessful:receipts.filter(r=>r?.status==='failed'||r?.status==='interrupted').length,
   notStarted:Math.max(0,agreed-ids.length),unfulfilled:Math.max(0,agreed-completed),
+  quantityUnknown:p.action.kind==='haul'?receipts.filter(r=>r?.status==='completed'&&r.delivered===undefined).length:0,
   delivered:p.action.kind==='haul'?receipts.reduce((n,r)=>n+(r?.status==='completed'?r.delivered??0:0),0):0};
 }
 const safe=(s:unknown,max=1000)=>String(s??'').slice(0,max);
@@ -35,7 +36,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  if(kind==='action-outcome'){
   const r=data as Receipt,p=Object.values(d.proposals).find(p=>p.pawn===r.actor&&(p.actionId===r.id||p.standing?.steps.includes(r.id)));
   if(!p)return;
-  const delivered=r.status==='completed'&&p.action.kind==='haul'?` Delivered ${r.delivered??0} units.`:'';
+  const delivered=r.status==='completed'&&p.action.kind==='haul'?(r.delivered===undefined?' Delivered quantity not reported.':` Delivered ${r.delivered} units.`):'';
   const rescue=r.status==='completed'&&p.action.kind==='rescue'?' Casualty placed in the agreed bed; treatment not implied.':'';
   add('record',r.actor,'observer',p.id,`${p.action.kind}: ${r.status}.${delivered}${rescue}`,`outcome:${r.id}:${r.status}`);
  }

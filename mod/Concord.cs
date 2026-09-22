@@ -146,7 +146,7 @@ namespace Concord
             }).TrimEnd('}')+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
-                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"crewLog\":"+(String.IsNullOrEmpty(w.crewJson)?"null":w.crewJson)+"}";
+                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"crewLog\":"+CrewLog.Json(w)+"}";
         }
         private static ActionRecord Move(Request r) {
             var w=World();

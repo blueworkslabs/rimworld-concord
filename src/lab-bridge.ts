@@ -18,7 +18,7 @@ export class LabBridge implements GameBridge {
     const result=this.queue.then(()=>this.exchange(payload));
     this.queue=result.catch(()=>{}); return result;
   }
-  async setCrewLog(report:CrewReport){await this.request({op:'crew-log',epoch:report.epoch,crewJson:JSON.stringify(report)});}
+  async setCrewLog(report:CrewReport){await this.request({op:'crew-log',epoch:report.epoch,crewJson:JSON.stringify({...report,entries:undefined,agreements:undefined,entryLines:report.entries.map(e=>JSON.stringify(e)).join('\n'),agreementLines:report.agreements.map(a=>JSON.stringify({...a.progress,pawn:a.pawn,name:a.name})).join('\n')})});}
   async setDecisionPause(pause:DecisionPause) { await this.request({op:'decision-pause',...pause}); }
   async setActivity(activity:Activity) { await this.request({op:'activity',...activity}); }
   private async exchange(payload:Record<string,unknown>):Promise<{state:GameState;receipt:Receipt}> {

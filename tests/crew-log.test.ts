@@ -15,6 +15,7 @@ test('progress separates completed, active, unknown, unsuccessful and never-star
  delete d.outcomes.two;r=agreementProgress(d,p,10);assert.equal(r.unconfirmed,1);assert.equal(r.active,0);
  d.outcomes.two={id:'two',actor:'A',status:'interrupted',reason:'stopped',x:4,z:5};r=agreementProgress(d,p,10);assert.equal(r.unsuccessful,1);assert.equal(r.completed,1);
  const fresh=[{...d.outcomes.two,status:'completed' as const,delivered:10}];r=agreementProgress(d,p,20,fresh);assert.equal(r.completed,2);assert.equal(r.delivered,20);assert.equal(r.unfulfilled,1);
+ delete d.outcomes.one!.delivered;r=agreementProgress(d,p,20);assert.equal(r.quantityUnknown,1);recordCrew(d,'action-outcome','A',d.outcomes.one,20);assert.match(d.crew!.entries[0]!.text,/quantity not reported/);
 });
 test('crew log records deliberate replies but never promotes private reflections or stop reasons',()=>{
  const {d,p}=fixture();recordCrew(d,'proposed','core',p,1);recordCrew(d,'attention-reflected','A',{reason:'PRIVATE'},2);
