@@ -309,3 +309,43 @@ This establishes live bounded multi-trip execution, not why the choices differ
 from the prior trial's counters. No naturally developed personality, sustained
 strategic planning, difficult value conflict, active-job checkpoint or live
 withdrawal during work is claimed. The native mod is unchanged from PR #13.
+# Bounded rescue — 2026-09-22
+
+Scripted, zero-pawn-inference checks against the installed RimWorld 1.6 game:
+
+- A disposable save copy supplied an anesthetized colonist, two medical sleeping
+  spots and disabled native work priorities. Native observations confirmed the
+  patient was downed and both exact bed choices were usable.
+- Queries and competing pending offers produced no native jobs. Refusal also
+  produced no job. A counter selected the alternate observed bed; its revised
+  offer required fresh scripted acceptance.
+- The accepted rescue carried the casualty into the exact agreed bed. The native
+  receipt recorded one delivery, independently corroborated by the patient's
+  current bed. Duplicate action replay and subsequent intention polling created
+  no second rescue.
+- A separate run observed actual carrying before voluntary withdrawal. The
+  casualty returned to the world at the carrier's position, not a substitute bed.
+  The recorded outcome was interrupted; no retry followed.
+- Native dispatch rejected a wrong map, wrong bed identity, wrong bed coordinates
+  and a non-downed patient. Native expiry stopped an accepted rescue without
+  coordinator polling. A rescue cancellation tombstone rejected delayed dispatch.
+- Paired restore and a full game/coordinator cold restart preserved the character
+  records, proposal, completed outcome and patient in the exact bed. No new
+  decision or repeated rescue occurred.
+- The 102 automated checks passed. A deliberately injected private option field
+  made the rescue projection test fail; the unmodified implementation passed.
+  The locked launcher also rejected fixture/game/cold runs while another process
+  held staging; bare entry points rejected invocation before transport. Native mod
+  compilation used the owned installed assemblies. Existing real-game
+  hauling delivery, duplicate, refusal, withdrawal, expiry and tombstone checks
+  also passed with this build.
+
+Fixture failures were retained: omitted anesthesia duration initially produced a
+standing patient, and adjacent beds made carrying too brief for the interruption
+test to observe. The corrected fixture used a duration and farther observed bed
+sites. These were setup failures, not rescue-delivery or withdrawal successes.
+
+This is scripted mechanical evidence, not live rescue judgment, a naturally
+occurring emergency, treatment, combat safety or long-term character behavior.
+No historical live-trial allowance was reopened. Active-job checkpointing remains
+unsupported. See [rescue contract](RESCUE.md).

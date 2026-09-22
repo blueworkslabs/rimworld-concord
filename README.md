@@ -8,8 +8,8 @@ An experimental foundation for an ancient AI core and three autonomous colonists
 
 A bounded experimental vertical slice, not a playable campaign or unattended AI colony:
 
-- A core proposes movement or bounded hauling; an identity-bound pawn accepts, refuses, or counterproposes.
-- Accepted movement or hauling becomes a real native RimWorld job; refusals and counters do not execute it.
+- A core proposes movement, bounded hauling or rescue; an identity-bound pawn accepts, refuses, or counterproposes.
+- Accepted movement, hauling or rescue becomes a real native RimWorld job; refusals and counters do not execute it.
 - Coordinator persists character memories, commitments and an ordered audit trail in SQLite.
 - Duplicate action IDs do not cause duplicate effects; game reload creates a new epoch, rejecting old decisions.
 - Quiescent checkpoints pair an immutable game save/hash with character state; restore forks a timeline.
@@ -25,6 +25,8 @@ A bounded experimental vertical slice, not a playable campaign or unattended AI 
 A subsequent [three-pawn negotiation trial](docs/NEGOTIATION.md) completed a live counter → revised offer → fresh acceptance → movement exchange. Three real self-views plus labelled authored preferences were checked over two sequential decisions each; the core replies were scripted. Paired and cold restore passed. This is not emergent-personality evidence.
 
 [Bounded hauling](docs/HAULING.md) adds exact item/storage choices and pawn-owned consent for up to three trips, with withdrawal, needs and expiry stops. Scripted multi-trip/cold-restore checks and a live three-pawn negotiation retained both delivered supplies and a rejected trip. Active-job checkpoints and long-run character quality remain unproven.
+
+[Bounded rescue](docs/RESCUE.md) adds one exact downed colonist / medical-bed agreement, with pawn-owned withdrawal and native validation. This is not capture or treatment; live rescue judgment remains untested.
 
 Explicit [timing modes](docs/DECISION_TIMING.md) preserve human pauses and let known mundane Chitchat queue without cancelling thought. Continuous play remains the default.
 
@@ -64,7 +66,7 @@ Reference assemblies come from an owned RimWorld 1.6 installation. Game/DLC bina
 
 The current mod activates only with `-rimworld-lab` and an explicitly configured `RIMWORLD_LAB_ROOT`; the save profile must match its `profile` directory. This is a development harness, not a portable end-user installer. See [lab setup](scripts/lab/README.md).
 
-Deploy `mod/About` and the compiled `mod/Assemblies` to the private lab's `game/Mods/Concord`, enable `blueworkslabs.concord`, and restart the game after mod changes. Preserve the original ModsConfig backup. Run the built coordinator on the same staging host:
+Deploy `mod/About`, `mod/Defs` and the compiled `mod/Assemblies` to the private lab's `game/Mods/Concord`, enable `blueworkslabs.concord`, and restart the game after mod changes. Preserve the original ModsConfig backup. Run the built coordinator on the same staging host:
 
 ```bash
 export RIMWORLD_LAB_ROOT="$HOME/rimworld-lab"
@@ -78,7 +80,7 @@ A copied lab-only shutdown save does **not** automatically become a paired Conco
 
 ## Authority and trust
 
-Model backends receive only their own pawn's supplied perspective and proposal. Their typed response cannot choose another actor or access admin operations. Core handles can propose but cannot execute. The coordinator binds pawn identity; the game rejects invalid actors, epochs, duplicate payload mismatches and infeasible movement or hauling.
+Model backends receive only their own pawn's supplied perspective and proposal. Their typed response cannot choose another actor or access admin operations. Core handles can propose but cannot execute. The coordinator binds pawn identity; the game rejects invalid actors, epochs, duplicate payload mismatches and infeasible movement, hauling or rescue.
 
 This is an application boundary, **not** a sandbox for hostile plugin code or the local operator. The file bridge and SQLite database are trusted local components. Future live runtimes must not inherit shell/file/admin access that bypasses the domain tools. `inspect()` and `LabBridge.admin()` are operator-only. Current perspective filtering is intentionally narrow, not a full sight/hearing/rumour model.
 
