@@ -222,3 +222,18 @@ allowed choices/identifiers and then test live outlook formation under a fresh
 bound. Do not count unrelated rescue success as character continuity. General
 personality development and social/human-contact milestones remain open.
 See [private outlook contract](PRIVATE_OUTLOOK.md).
+
+
+## Contextual choices checkpoint
+
+Reflection schemas now match available choices/IDs and owned outlook evidence.
+The fresh live follow-up formed one concern and one stance and preserved them
+into a later decision after restore. Rescue completed with separate fresh consent,
+not authority from private reflection. Formation and reuse are now demonstrated
+once; causal influence and sustained character quality remain open.
+
+Before widening character/social behavior, prepare a small fixed-snapshot model
+contract evaluation, beginning with the user-suggested Luna through native Codex
+(`gpt-5.6-luna` in the current catalog). Verify tool isolation first; keep schema
+adherence, judgment, latency and game outcomes separate. No Luna call or alternate
+pawn backend is included in this slice. See [cross-model plan](PLAYABLE_DIRECTION.md).

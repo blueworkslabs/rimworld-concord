@@ -1,0 +1,52 @@
+{
+  "slug": "choices-that-are-available",
+  "title": "Choices That Are Available",
+  "date": "2026-09-22",
+  "summary": "Reflection interface now shows only valid contextual choices, with live verification of private outlook formation and rescue execution.",
+  "sections": [
+    {
+      "heading": "What Changed",
+      "paragraphs": [
+        "The reflection output schema now filters to choices available in the pawn's supplied perspective. If no running agreement exists, withdrawal and rescue-alternative requests do not appear. Agreement, target and proposal IDs are constrained to supplied options, and the prompt and schema share a frozen snapshot. The earlier schema exposed the full menu, leaving the provider to infer what was possible. The separate proposal-counterproposal schema remains unchanged."
+      ]
+    },
+    {
+      "heading": "Why It Matters",
+      "paragraphs": [
+        "This removes a source of interface noise without removing the option to continue unchanged. Private outlook updates remain optional. Runtime validation still governs evidence ownership, cited subjects, current revision, consent and stale timelines. The constraints improve clarity, not guaranteed correctness: an unsupported interpretation can still fit the formal bounds. Private notes are not displayed as crew dialogue."
+      ]
+    },
+    {
+      "heading": "What Was Tested",
+      "paragraphs": [
+        "All 171 automated checks passed, and independent Codex review found no introduced defects. Scripted game checks covered private outlook formation, privacy, a later decision perspective, rescue with fresh consent, rewind and full restart.",
+        "One fresh live follow-up allowed at most six Claude attempts, zero Jev calls and two minutes for inference. Reflection and the later offer were paused; native execution ran after consent. Alvin formed one concern and one interpersonal stance, each citing his own casualty observation. The update triggered no jobs, speech or native-fact changes. Rewind removed the notes; restoring the later checkpoint returned them, and his subsequent decision perspective contained them. Cold restart preserved both.",
+        "A separate scripted optional rescue offer was then accepted live, and Beatrice reached the agreed medical bed. The private notes authorized neither offer nor rescue. Live formation and later availability are demonstrated; whether those notes changed his choice is not."
+      ]
+    },
+    {
+      "heading": "Limits and Next Steps",
+      "paragraphs": [
+        "Two Claude attempts were used, with no Jev calls, retries or additional inference during cold restore. Staging is stopped. The next model-compatibility check is recorded: evaluate the same fixed snapshots with cheaper or less-capable models. Luna is listed as gpt-5.6-luna in current documentation and the installed catalog. Its native Codex tool-free route and benchmark remain unverified; no new pawn backend is installed. Consequential social exchange remains on the roadmap."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Contextual choices contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CONTEXTUAL_CHOICES.md"
+    },
+    {
+      "label": "Scripted and live evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/contextual-choices.json"
+    },
+    {
+      "label": "Playable direction and model evaluation",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PLAYABLE_DIRECTION.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "date": "2026-09-22",
+  "kind": "snapshot-grounded reflection schema and bounded outlook follow-up",
+  "finalBehaviorHead": "17d8f0d7ff4e4b6809960d767fc0e5b0cea4835e",
+  "automatedTests": 171,
+  "limits": {
+    "claudeAttempts": 6,
+    "jevCalls": 0,
+    "channelDeadlineMs": 120000,
+    "newIdentityAndLedgers": true
+  },
+  "mode": "paused reflection and proposal with native execution after consent, not continuous play",
+  "recordedFailureReplay": {
+    "schemaValid": true,
+    "priorInventedAgreementChoiceRejected": true,
+    "continueAccepted": true,
+    "ownConcernAccepted": true,
+    "unknownEvidenceRejected": true
+  },
+  "scripted": {
+    "passed": true,
+    "outlook": {
+      "revision": 1,
+      "noteKinds": [
+        "stance"
+      ],
+      "citationCounts": [
+        1
+      ],
+      "privateTextOmitted": true
+    },
+    "checks": [
+      "private reflection changes no jobs, native pawn facts, other outlooks or public entries",
+      "paired rewind removes future outlook; retained checkpoint restores it"
+    ],
+    "laterPerspectiveContainedRestoredOutlook": true,
+    "completedRescues": 1,
+    "pairedRestore": true,
+    "coldRestore": true,
+    "inferenceCalls": 0
+  },
+  "live": {
+    "runnerChecksPassed": true,
+    "outlookFormationSucceeded": true,
+    "outlook": {
+      "revision": 1,
+      "noteKinds": [
+        "concern",
+        "stance"
+      ],
+      "citationCounts": [
+        1,
+        1
+      ],
+      "privateTextOmitted": true
+    },
+    "reflection": {
+      "pawn": "Thing_Human405",
+      "status": "continued",
+      "throughSeq": 1
+    },
+    "choices": [
+      {
+        "mode": "reflection",
+        "model": "claude-sonnet-4-6",
+        "elapsedMs": 5292,
+        "status": "ok",
+        "estimatedUsageUSD": 0.02685,
+        "turns": 2,
+        "tools": [
+          "StructuredOutput"
+        ],
+        "choice": "revise_private_outlook"
+      },
+      {
+        "mode": "decision",
+        "model": "claude-sonnet-4-6",
+        "elapsedMs": 5582,
+        "status": "ok",
+        "estimatedUsageUSD": 0.0166404,
+        "turns": 2,
+        "tools": [
+          "StructuredOutput"
+        ]
+      }
+    ],
+    "laterPerspectiveContainedRestoredOutlook": true,
+    "laterOffer": "Separate scripted optional rescue offer, not caused or authorized by private outlook revision",
+    "finalProposals": [
+      {
+        "id": "136dd059-01fd-4927-ab3c-01822aac74a7",
+        "pawn": "Thing_Human405",
+        "action": {
+          "kind": "rescue",
+          "target": "Thing_Human408",
+          "bed": "Thing_SleepingSpot990002",
+          "x": 74,
+          "z": 77,
+          "maxTicks": 1800
+        },
+        "reason": "Would you carry this observed downed crewmate to this particular medical bed? This is optional rescue, not treatment; your choice remains yours.",
+        "status": "accepted",
+        "rescueMap": 0,
+        "decision": {
+          "kind": "accept",
+          "reason": "Beatrice is down right beside me and I'm in good shape to help. We came here together \u2014 I'm not going to stand idle. I'll carry her to the sleeping spot at 74,77."
+        },
+        "actionId": "b9946532-4a75-40b3-84e4-64a9481883db",
+        "standing": {
+          "status": "completed",
+          "deadline": 1826,
+          "steps": [
+            "b9946532-4a75-40b3-84e4-64a9481883db"
+          ],
+          "reason": "Agreed work completed"
+        }
+      }
+    ],
+    "outcomes": [
+      {
+        "id": "b9946532-4a75-40b3-84e4-64a9481883db",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed casualty to agreed medical bed; treatment not implied",
+        "kind": "rescue",
+        "thing": "",
+        "target": "Thing_Human408",
+        "bed": "Thing_SleepingSpot990002",
+        "x": 74,
+        "z": 77,
+        "jobId": 9,
+        "count": 0,
+        "delivered": 1,
+        "untilTick": 1826
+      }
+    ],
+    "checks": [
+      "private reflection changes no jobs, native pawn facts, other outlooks or public entries",
+      "paired rewind removes future outlook; retained checkpoint restores it"
+    ],
+    "pairedRestore": true,
+    "coldRestore": true,
+    "before": {
+      "claude": {
+        "attempts": 0,
+        "reservedEquivalentUSD": 0,
+        "estimatedUsageUSD": 0
+      },
+      "jev": {
+        "calls": 0,
+        "reservedUSD": 0,
+        "reportedUSD": 0
+      }
+    },
+    "after": {
+      "claude": {
+        "attempts": 2,
+        "reservedEquivalentUSD": 0.2,
+        "estimatedUsageUSD": 0.0434904
+      },
+      "jev": {
+        "calls": 0,
+        "reservedUSD": 0,
+        "reportedUSD": 0
+      }
+    },
+    "noColdInference": true,
+    "cleanup": {
+      "operatorStops": [],
+      "errors": []
+    }
+  },
+  "historicalFiles": {
+    "count": 85,
+    "unchanged": true
+  },
+  "review": {
+    "completed": true,
+    "findingsRemaining": 0,
+    "head": "17d8f0d7ff4e4b6809960d767fc0e5b0cea4835e"
+  },
+  "modelCompatibility": {
+    "requestedName": "gpt-6 Luna",
+    "documentedModel": "gpt-5.6-luna",
+    "installedCatalogListsModel": true,
+    "source": "https://learn.chatgpt.com/docs/models",
+    "inferenceAttempts": 0,
+    "status": "Future fixed-snapshot benchmark recorded. No native Codex pawn adapter installed or tool-free route verified; no model substitution or API fallback."
+  },
+  "limitations": [
+    "One authored fixture, no retries, not a controlled comparison or general reliability claim.",
+    "Citations establish provenance, not semantic truth or personality quality.",
+    "Outlook does not authorize speech, work, native traits or relationship edits.",
+    "Later receipt of a restored outlook does not establish it caused a choice.",
+    "No Jev calls and no continuous-play timing claim.",
+    "Luna compatibility benchmark recorded, not yet run; no Codex pawn backend installed.",
+    "Separate proposal/counterproposal output schema remains unchanged."
+  ]
+}
