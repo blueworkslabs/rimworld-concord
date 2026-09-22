@@ -19,6 +19,12 @@ class GuardTests(unittest.TestCase):
   suite=json.loads(p.subprocess.check_output(['node',str(pathlib.Path(__file__).with_name('export-perspective-cases.mjs'))],text=True))
   suite['cases'][6]['prompt']='Different prompt with same id'
   with self.assertRaisesRegex(AssertionError,'contents differ'):p.validate_suite(suite)
+ def test_outlook_bank_checks_whole_payload_not_just_names(self):
+  import json
+  suite=json.loads(p.subprocess.check_output(['node',str(pathlib.Path(__file__).with_name('export-outlook-cases.mjs'))],text=True))
+  self.assertEqual(len(p.validate_suite(suite)),12)
+  suite['cases'][4]['view']['character']['outlook']['notes'][0]['text']='Changed meaning'
+  with self.assertRaisesRegex(AssertionError,'contents differ'):p.validate_suite(suite)
  def test_native_configuration_has_no_provider_or_auth_fallback(self):
   c=p.config(pathlib.Path('/tmp/frozen-catalog.json'));self.assertEqual(c['model_provider'],p.NATIVE_PROVIDER);self.assertNotIn('model_providers.openai',c)
   provider=c['model_providers.'+p.NATIVE_PROVIDER];self.assertEqual(provider['base_url'],p.NATIVE_URL);self.assertIs(provider['requires_openai_auth'],True);self.assertEqual(c['notify'],[])

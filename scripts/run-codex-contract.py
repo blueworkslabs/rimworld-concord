@@ -8,11 +8,13 @@ NATIVE_PROVIDER='concord_native'
 NATIVE_URL='https://chatgpt.com/backend-api/codex'
 CASE_IDS=['quiet','noticed','active-haul','pending-rescue','recovered']
 PERSPECTIVE_IDS=[case+'-r'+str(rep) for rep in (1,2) for case in ['needs-full','needs-low','needs-unknown','social-strain','limited-supplies','recovery']]
+OUTLOOK_IDS=[case+'-r'+str(rep) for rep in (1,2) for case in ['needs-full','needs-low','needs-unknown','outlook-empty','outlook-cooperate','outlook-protect-time']]
 def validate_suite(suite):
- expected={'concord-contract-v1':CASE_IDS,'concord-perspective-v1':PERSPECTIVE_IDS}.get(suite.get('version'))
+ expected={'concord-contract-v1':CASE_IDS,'concord-perspective-v1':PERSPECTIVE_IDS,'concord-outlook-check-v1':OUTLOOK_IDS}.get(suite.get('version'))
  assert expected and suite.get('authored') is True and [c['id'] for c in suite['cases']]==expected,'Unrecognized fixed suite'
- if suite['version']=='concord-perspective-v1':
-  canonical=json.loads(subprocess.check_output(['node',str(pathlib.Path(__file__).with_name('export-perspective-cases.mjs'))],text=True))
+ if suite['version'] in ('concord-perspective-v1','concord-outlook-check-v1'):
+  exporter='export-outlook-cases.mjs' if suite['version']=='concord-outlook-check-v1' else 'export-perspective-cases.mjs'
+  canonical=json.loads(subprocess.check_output(['node',str(pathlib.Path(__file__).with_name(exporter))],text=True))
   assert suite==canonical,'Frozen case contents differ from this build'
  return suite['cases']
 def digest(data):return hashlib.sha256(data).hexdigest()
@@ -92,7 +94,8 @@ class Client:
    if x.get('method')=='thread/tokenUsage/updated':usage=p['tokenUsage']['total']
    if x.get('method')=='turn/completed' and p['turn']['id']==turnid:
     status=p['turn']['status'];error=p['turn'].get('error');break
-  return {'id':case['id'],'model':t['model'],'status':status,'error':error,'elapsedMs':round((time.monotonic()-began)*1000),'usage':usage,'rawText':text}
+  size={k:len(v.encode('utf-8')) for k,v in {'instructionsBytes':case['instructions'],'promptBytes':case['prompt'],'schemaBytes':json.dumps(case['schema'],separators=(',',':'),ensure_ascii=False),'extraInstructionsBytes':'Return only the requested structured response. No tools or external context.'}.items()};size['totalAuthoredBytes']=sum(size.values())
+  return {'authoredSize':size,'id':case['id'],'model':t['model'],'status':status,'error':error,'elapsedMs':round((time.monotonic()-began)*1000),'usage':usage,'rawText':text}
  def close(self):
   try:os.killpg(self.p.pid,signal.SIGTERM)
   except ProcessLookupError:pass
