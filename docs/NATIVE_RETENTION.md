@@ -99,3 +99,7 @@ it does not mean every provider call or intended behavioral measurement succeede
 The subsequent [diagnostics/name follow-up](PROVIDER_DIAGNOSTICS.md) uses the new
 `retention-names-v1` policy and fresh private paths. The original live policy is
 frozen against new calls through the host runner; no historical result is replaced.
+
+The [indirect-message follow-up](INDIRECT_MESSAGE.md) now uses
+`retention-indirect-v1`. Both older live policies are frozen against new host
+calls; historical records and policy ceilings remain unchanged.

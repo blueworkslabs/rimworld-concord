@@ -1,0 +1,44 @@
+{
+  "slug": "an-interest-not-an-order",
+  "title": "An Interest, Not an Order",
+  "date": "2026-09-23",
+  "summary": "Beatrice states an interest without asking for help; Alvin later declines the haul in one native comparison.",
+  "sections": [
+    {
+      "heading": "No Explicit Ask",
+      "paragraphs": [
+        "This slice adds a separately bounded experiment, not a new way to command the crew. Its wording and four-attempt allowance were fixed before inference; the production response schema, action rules and scripted core stayed unchanged. UI polish remains deferred.",
+        "The message arm received an authored Beatrice statement through the existing delivery path: “I started sorting that wood earlier. Seeing that little job through matters to me.” This was test speech, not spontaneous model dialogue. It contains no explicit request, and the claimed prior work remains testimony—not verified game history."
+      ]
+    },
+    {
+      "heading": "What We Tested",
+      "paragraphs": [
+        "We ran one ordered control-then-message pair with the same Alvin and saved world, a common native Food-band event, equal optional reflection choices, and the same separate wood offer. The control formed a Food concern, accepted the offer, and delivered ten wood. The message arm retained an attributed stance about Beatrice’s apparent interest, refused the fresh offer, and started no hauling job.",
+        "Alvin’s live refusal was: “Beatrice told me she started sorting that wood and that finishing it matters to her. I'd rather not cut across her work.” These message-arm replies invented neither an explicit request nor a prior promise. The control note’s “eating/food” gloss was less precise: the supplied event establishes a Food-band change, not that Alvin ate.",
+        "All four Claude attempts validated, with zero Jev calls and no retries. All 96 native-activity samples were unpaused; reflection and offer decisions were deliberately paused. The scripted and live pairs passed paired and full-restart checks without additional inference, retaining the notes, name labels and outcomes."
+      ]
+    },
+    {
+      "heading": "Verification and Limits",
+      "paragraphs": [
+        "All 241 Node tests and ten Python checks passed, and independent Codex review found no actionable introduced defects. Staging is stopped; all 74 historical databases remain unchanged.",
+        "One pair does not establish general social influence or developed character. Both recent speech and retained outlook reached the later decision, so the note’s influence is not isolated. PR36’s direct-request result is historical context, not a concurrent third arm, and PR35’s parsing failure remains unexplained. Next is a separately bounded test of correction or removal after later speech."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Frozen indirect-message protocol",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/INDIRECT_MESSAGE.md"
+    },
+    {
+      "label": "Native indirect-message results",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/indirect-message.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}

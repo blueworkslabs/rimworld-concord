@@ -13,12 +13,13 @@ import {socialContact} from '../src/social.js';
 import {stopTrialWork,retireUndecided,workSummary} from '../src/work-trial.js';
 import {NeedsRunGuard,needsOutput} from './needs-policy.js';
 import {socialCleanup} from './social-cleanup.js';
-import {retentionRequest,retentionMenu,retainedDomain,noReflectionEffects} from './retention-policy.js';
+import {retentionProtocol,retentionMenu,retainedDomain,noReflectionEffects} from './retention-policy.js';
 if(process.env.CONCORD_RETENTION_LOCKED!=='1')throw Error('Use scripts/run-retention-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
 const runId=process.env.CONCORD_TRIAL_ID,policy=process.env.CONCORD_TRIAL_POLICY;
-if(!runId||!/^[0-9a-f-]{36}$/.test(runId)||!['retention-game-v1','retention-names-v1'].includes(policy??''))throw Error('Trial identity required');
-const receipt:any={passed:false,runId,policy,mode:scripted?'scripted':'live',arms:[]};
+if(!runId||!/^[0-9a-f-]{36}$/.test(runId)||!['retention-game-v1','retention-names-v1','retention-indirect-v1'].includes(policy??''))throw Error('Trial identity required');
+const protocol=retentionProtocol(policy!);
+const receipt:any={passed:false,runId,policy,protocol,mode:scripted?'scripted':'live',arms:[]};
 let c:Coordinator|undefined,s:Store|undefined,attempts=0,connected=true,exchangeId:string|undefined;
 const guard=new NeedsRunGuard();
 const send=needsOutput(process.stdout,()=>{connected=false;guard.stop();channel.close();});
@@ -31,7 +32,7 @@ const timer=setTimeout(()=>{guard.stop();channel.close();},600000);
 async function finish(){channel.close();if(!connected)throw Error('Host disconnected');await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Drain timeout')),15000);drained=()=>{clearTimeout(t);resolve();};send({type:'drain',id:runId});});receipt.hostDrained=true;}
 try{
  if(cold){
-  const saved=JSON.parse(await readFile(root+'/.runtime/retention-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,receipt.mode);assert.equal(saved.arms.length,2);
+  const saved=JSON.parse(await readFile(root+'/.runtime/retention-latest.json','utf8'));assert.equal(saved.runId,runId);if(policy==='retention-indirect-v1')assert.deepEqual(saved.protocol,protocol);assert.equal(saved.mode,receipt.mode);assert.equal(saved.arms.length,2);
   s=new Store(saved.db);c=new Coordinator(s,b);
   for(const arm of saved.arms){guard.check();await c.restore(arm.checkpoint);guard.check();retainedDomain(c.inspect(),arm.domain);receipt.arms.push({condition:arm.condition,coldRestore:true,report:(await b.state()).crewLog});}
   receipt.coldRestore=true;
@@ -58,9 +59,9 @@ try{
    if(shared)assert.deepEqual(comparable,shared);else shared=comparable;
    if(condition==='message'){
     exchangeId=randomUUID();await c.openSocial(exchangeId,sender,receiver);guard.check();
-    const speech=await c.socialTurn(sender,exchangeId,{name:'authored-test-message',async speak(){return {choice:'say',text:retentionRequest};}});assert.equal(speech.status,'delivered');
+    const speech=await c.socialTurn(sender,exchangeId,{name:'authored-test-message',async speak(){return {choice:'say',text:protocol.message};}});assert.equal(speech.status,'delivered');
     guard.check();await c.closeSocial(exchangeId);arm.message=c.inspect().characters[receiver]!.messages!.at(-1);
-    if(policy==='retention-names-v1'){assert.equal(arm.message.fromName,world.pawns.find(p=>p.id===sender)!.name);assert.equal(arm.message.toName,world.pawns.find(p=>p.id===receiver)!.name);}
+    if(policy!=='retention-game-v1'){assert.equal(arm.message.fromName,world.pawns.find(p=>p.id===sender)!.name);assert.equal(arm.message.toName,world.pawns.find(p=>p.id===receiver)!.name);}
    }
    const before=c.inspect(),worldBefore=await b.state();let reflectionCalls=0;
    arm.reflection=await c.attend(receiver,{name:scripted?'scripted-native-retention':channel.name,async reflect(v,signal){
@@ -93,7 +94,7 @@ try{
    const checkpoint='lab-concord-ret-final-'+Date.now();await c.checkpoint(checkpoint);guard.check();const domain=c.inspect();await c.restore(checkpoint);guard.check();retainedDomain(c.inspect(),domain);arm.pairedRestore=true;
    savedArms.push({condition,checkpoint,domain});
    // Keep completed-arm saves even if the subsequent arm or final drain fails.
-   await writeFile(root+'/.runtime/retention-latest.json',JSON.stringify({runId,mode:receipt.mode,db,arms:savedArms}));
+   await writeFile(root+'/.runtime/retention-latest.json',JSON.stringify({runId,protocol,mode:receipt.mode,db,arms:savedArms}));
   }
  }
  guard.check();receipt.passed=true;

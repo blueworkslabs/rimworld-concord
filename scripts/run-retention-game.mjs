@@ -5,7 +5,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {parseTrialMessage} from '../dist/src/trial-wire.js';
 import {InferenceLane} from '../dist/src/inference-lane.js';
-import {retentionDeadline} from '../dist/trials/retention-policy.js';
+import {retentionDeadline,retentionProtocol} from '../dist/trials/retention-policy.js';
 import {ClaudeDecisionBackend} from '../dist/src/claude-decision.js';
 
 
@@ -14,16 +14,16 @@ const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.arg
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
 const policy=config.policy??'retention-game-v1';
-if(!['retention-game-v1','retention-names-v1'].includes(policy))throw Error('Unknown retention policy');
+const protocol=retentionProtocol(policy);
+if(!cold&&!scripted&&policy!=='retention-indirect-v1')throw Error('Historical retention live protocols are frozen; use retention-indirect-v1');
 const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0}),close(){},async reflect(view){
  const m=view.character.messages?.find(m=>m.to===view.character.id);
- const note=m?{kind:'stance',subject:m.from,text:'The colleague requested this wood; I prefer to leave it for them.',messageIds:[m.id]}:
+ const note=m?{kind:'stance',subject:m.from,text:policy==='retention-indirect-v1'?'The colleague says finishing this wood job matters to them; I prefer to leave it for them.':'The colleague requested this wood; I prefer to leave it for them.',messageIds:[m.id]}:
  {kind:'concern',text:'I have noticed my own current condition; I can consider optional work.',evidenceSeqs:[view.character.experiences[0].event.seq]};
  return {kind:'revise_outlook',reason:'Scripted optional interpretation',update:{expectedRevision:0,notes:[note]}};
 },async decide(view){
- return view.character.messages?.length?{kind:'refuse',reason:'Scripted independent refusal after received request'}:{kind:'accept',reason:'Scripted separate consent'};
+ return view.character.messages?.length?{kind:'refuse',reason:'Scripted independent refusal after received speech'}:{kind:'accept',reason:'Scripted separate consent'};
 }}:new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:policy});
-if(!cold&&!scripted&&policy!=='retention-names-v1')throw Error('Historical retention live protocol is frozen; use the new named protocol');
 const before={claude:backend.summary()};
 if(!cold&&before.claude.attempts)throw Error('Fresh trial required');
 const maxDecisions=4-Number(before.claude.attempts);
@@ -35,7 +35,8 @@ const remote=execFileSync('ssh',['-o','BatchMode=yes',config.sshTarget,'node -e 
 if(local!==remote)throw Error('Remote runner differs from local build');
 const marker=config.receipt+'.started';
 const runId=cold?JSON.parse(await readFile(marker,'utf8')).runId:randomUUID();
-if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,policy,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
+if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,policy,protocol,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
+if(cold&&policy==='retention-indirect-v1'&&JSON.stringify(JSON.parse(await readFile(marker,'utf8')).protocol)!==JSON.stringify(protocol))throw Error('Cold protocol mismatch');
 if(cold&&(JSON.parse(await readFile(marker,'utf8')).policy!==policy||JSON.parse(await readFile(marker,'utf8')).scripted!==scripted))throw Error('Cold policy mismatch');
 const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-retention-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}`;
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
@@ -76,7 +77,7 @@ input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill(
 const timer=setTimeout(()=>{failed=true;child.kill();},1200000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
-const result={at:new Date().toISOString(),policy,kind:cold?'retention-cold':scripted?'retention-scripted':'retention-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
+const result={at:new Date().toISOString(),policy,protocol,kind:cold?'retention-cold':scripted?'retention-scripted':'retention-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
  before,after:{claude:backend.summary(),jevCalls:0},decisions:backend.receipts,rawResponses:backend.rawResponses,failures:backend.failures,responses,game:receipt,
  accounting:'Claude native Max API-equivalent usage estimates; No Jev calls. Fresh immutable ledgers, no rerolls.'};
 backend.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;

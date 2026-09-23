@@ -29,8 +29,9 @@ future milestone, not the next dependency.
 - Test durable outlook reuse without treating a later acceptance as proof of
   persuasion. The small offline message/no-message contrast is complete; next
   build on the [bounded provider diagnostics and name labels](PROVIDER_DIAGNOSTICS.md).
-  Next social checks should use a separately frozen indirect message, then correction
-  or removal after a later message. Do not count a raw rejected answer as an applied choice. Retention plus recent correspondence does not isolate
+  The [frozen indirect-message pair](INDIRECT_MESSAGE.md) is complete: a statement
+  of interest without an explicit request reached a later applied refusal. Next is
+  correction or removal after a later message, under a separate finite protocol. Do not count a raw rejected answer as an applied choice. Retention plus recent correspondence does not isolate
   the note's influence. No further allowance is enabled by this roadmap.
   Native chatter stays distinct from coordinator-mediated speech.
 - Reassess legibility before adding entry kinds. One fresh-context model reader

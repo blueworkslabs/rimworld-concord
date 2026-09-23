@@ -30,3 +30,13 @@ test('host cancels a stuck request without any remote message and releases compl
  const lostTransport=retentionDeadline(10),completed=retentionDeadline(10);completed.dispose();
  await wait(25);assert(lostTransport.controller.signal.aborted);assert(!completed.controller.signal.aborted);lostTransport.dispose();
 });
+
+import {retentionProtocol,retentionRequest,indirectStatement} from '../trials/retention-policy.js';
+test('retention protocol freezes old requests and binds indirect wording to a distinct policy',()=>{
+ assert.equal(retentionProtocol('retention-game-v1').message,retentionRequest);
+ assert.equal(retentionProtocol('retention-names-v1').message,retentionRequest);
+ assert.equal(retentionRequest,'Could you leave this load of wood for me? I want to finish what I started. It matters to me.');
+ assert.equal(retentionProtocol('retention-indirect-v1').message,indirectStatement);
+ assert.equal(indirectStatement,'I started sorting that wood earlier. Seeing that little job through matters to me.');
+ assert.throws(()=>retentionProtocol('unknown'));
+});
