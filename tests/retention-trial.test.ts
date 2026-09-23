@@ -24,3 +24,9 @@ test('historical interpretation bank remains unchanged by equal-menu native veri
  assert(host.indexOf("'.request-'")<host.indexOf("const output=await"));
  assert(host.includes("['decision','reflection']"));
 });
+import {retentionDeadline} from '../trials/retention-policy.js';
+import {setTimeout as wait} from 'node:timers/promises';
+test('host cancels a stuck request without any remote message and releases completed deadlines',async()=>{
+ const lostTransport=retentionDeadline(10),completed=retentionDeadline(10);completed.dispose();
+ await wait(25);assert(lostTransport.controller.signal.aborted);assert(!completed.controller.signal.aborted);lostTransport.dispose();
+});

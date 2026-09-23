@@ -7,7 +7,7 @@ trigger, and does not change historical banks or allowances.
 ## Frozen design
 
 Use the existing disposable needs/wood fixture. Capture a real native event for
-the recipient before saving the common baseline. Run **control then message**
+the hungry-but-work-eligible recipient before saving the common baseline. Run **control then message**
 from that same paired checkpoint, with the same receiver, native experience,
 physical state and one-trip wood offer. The treatment delivers an explicitly
 **authored**, attributed request through the normal social-delivery path; it is

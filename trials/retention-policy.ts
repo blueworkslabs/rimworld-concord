@@ -22,3 +22,9 @@ export function noReflectionEffects(before:Domain,after:Domain,worldBefore:GameS
  assert.deepEqual(worldAfter.actions,worldBefore.actions);assert.deepEqual(worldAfter.pawns,worldBefore.pawns);
  for(const id of Object.keys(before.characters))if(id!==owner)assert.deepEqual(after.characters[id],before.characters[id]);
 }
+/** Local to the inference host: does not depend on SSH delivering cancellation. */
+export function retentionDeadline(ms=45000){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),ms);
+ return {controller,dispose:()=>clearTimeout(timer)};
+}

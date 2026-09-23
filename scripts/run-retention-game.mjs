@@ -5,6 +5,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {parseTrialMessage} from '../dist/src/trial-wire.js';
 import {InferenceLane} from '../dist/src/inference-lane.js';
+import {retentionDeadline} from '../dist/trials/retention-policy.js';
 import {ClaudeDecisionBackend} from '../dist/src/claude-decision.js';
 
 
@@ -51,7 +52,7 @@ async function handle(line){
  const isDecision=m.type==='decision-request';
  if(isDecision){if(!['decision','reflection'].includes(m.mode)||++decisionCount>maxDecisions)throw Error('Decision limit');}
  else throw Error('No appraisal requests allowed');
- seen.add(m.id);const controller=new AbortController();active.set(m.id,controller);const start=Date.now();
+ seen.add(m.id);const deadline=retentionDeadline(),controller=deadline.controller;active.set(m.id,controller);const start=Date.now();
  try{
   await lane.run(controller.signal,async()=>{
   try {if(isDecision){
@@ -67,7 +68,7 @@ async function handle(line){
  }catch{
   // Failures and cancellation retain their reservations; never reroll a response.
   send({type:'decision-result',id:m.id,error:'Decision unavailable'});
- }finally{active.delete(m.id);}
+ }finally{deadline.dispose();active.delete(m.id);}
 }
 input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill();})));
 const timer=setTimeout(()=>{failed=true;child.kill();},1200000);

@@ -37,11 +37,11 @@ try{
   receipt.coldRestore=true;
  }else{
   const f=JSON.parse(await readFile(root+'/.runtime/needs-fixture.json','utf8'));
-  guard.check();await b.load(f.name);await b.admin('pause');
-  const db=root+'/.runtime/retention-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();
-  const sender=f.actors[0].id,receiver=f.actors[1].id;
+  guard.check();await b.load(f.name);guard.check();await b.admin('pause');guard.check();
+  const db=root+'/.runtime/retention-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();guard.check();
+  const sender=f.actors[1].id,receiver=f.actors[0].id;
   // Capture a genuine native experience, shared by BOTH arms. Do not inject events or notes.
-  await b.admin('run');const limit=Date.now()+10000;
+  guard.check();await b.admin('run');guard.check();const limit=Date.now()+10000;
   while(Date.now()<limit){guard.check();await c.observe();if(c.inspect().characters[receiver]?.experiences?.some(e=>e.route!=='native'))break;await delay(100);}
   await b.admin('pause');await c.observe();guard.check();
   assert(c.inspect().characters[receiver]?.experiences?.some(e=>e.route!=='native'),'Shared native attention evidence required');
@@ -62,7 +62,7 @@ try{
     guard.check();await c.closeSocial(exchangeId);arm.message=c.inspect().characters[receiver]!.messages!.at(-1);
    }
    const before=c.inspect(),worldBefore=await b.state();let reflectionCalls=0;
-   arm.reflection=await c.attend(receiver,{name:channel.name,async reflect(v,signal){
+   arm.reflection=await c.attend(receiver,{name:scripted?'scripted-native-retention':channel.name,async reflect(v,signal){
     reflectionCalls++;arm.reflectionView=v;arm.menu=retentionMenu(v);if(menu)assert.deepEqual(arm.menu,menu);else menu=arm.menu;
     return channel.reflect(v,signal);
    }},{name:'scripted-admit-once',async assess(){return {reflectionScore:1};}},{cooldownTicks:0,timeoutMs:45000});
@@ -79,7 +79,7 @@ try{
    const proposal=await c.core().propose(receiver,action,'Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional.');
    let decisionCalls=0;
    try{
-    await c.pawn(receiver).decide(proposal.id,{name:channel.name,async decide(v,signal){decisionCalls++;arm.decisionView=v;return channel.decide(v,signal);}},45000);
+    await c.pawn(receiver).decide(proposal.id,{name:scripted?'scripted-native-retention':channel.name,async decide(v,signal){decisionCalls++;arm.decisionView=v;return channel.decide(v,signal);}},45000);
    }catch(e){arm.decisionError=String(e);await retireUndecided(c,proposal.id,'Decision unavailable; no retry');}
    guard.check();assert.equal(decisionCalls,1);assert.deepEqual(arm.decisionView.character.outlook,arm.outlook);assert.deepEqual(arm.decisionView.character.messages,after.characters[receiver]!.messages);
    arm.decision=c.inspect().proposals[proposal.id];
