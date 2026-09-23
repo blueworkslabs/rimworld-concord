@@ -6,7 +6,7 @@ export const CoreAnswerChoice=z.union([SocialChoice,z.object({choice:z.literal('
 export function eatingOptions(d:Domain,g:GameState,p:Pawn):EatOption[]{
  const ch=d.characters[p.id],v=p.eating;
  if(!ch||ch.commitment||ch.intention||p.downed||!v||v.epoch!==g.epoch||v.tick!==g.ticks||!Number.isInteger(v.mapId)||v.mapId<0||
- Object.values(d.proposals).some(q=>q.pawn===p.id&&(q.status==='pending'||q.status==='countered')))return [];
+ Object.values(d.proposals).some(q=>q.pawn===p.id&&(q.status==='pending'||(q.status==='countered'&&!q.replyId))))return [];
  return v.options.filter(a=>typeof a.thing==='string'&&a.thing.length>0&&a.thing.length<=120&&Number.isInteger(a.count)&&a.count>=1&&a.count<=25&&a.maxTicks===1800&&Number.isInteger(a.x)&&a.x>=0&&Number.isInteger(a.z)&&a.z>=0).slice(0,6);
 }
 export function coreAnswerSchema(v?:CoreQuestionView){

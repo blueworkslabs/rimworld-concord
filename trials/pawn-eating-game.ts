@@ -1,3 +1,4 @@
+import {DecisionChannel} from '../src/decision-channel.js';
 /** Scripted choices, native ingestion; no character inference. */
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
@@ -31,7 +32,12 @@ try{
    const db=prefix+'-'+variant+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();await c.initializeCore('One optional question. Pawns own their choices.');
    const pre='lab-concord-eat-pre-'+variant+'-'+run.slice(0,8);await c.checkpoint(pre);
    const q=await c.planCore({name:'scripted',async plan(){return {topic:null,action:{kind:'ask',pawn:actor,text:'Would you like something to eat?',reason:'Optional self-care question'}};}});assert.equal(q.status,'applied');if(q.status!=='applied')throw Error();
-   let calls=0;const answer=await c.answerCoreQuestion(q.questionId!,{name:'scripted',async answerCore(v){calls++;assert(v.pawn.eating!.options.length>0);return variant==='speech'?{choice:'say',text:'I will eat some berries.'}:{choice:'eat',thing:v.pawn.eating!.options[0]!.thing,text:'I choose this portion of berries now.'};}});assert.equal(answer.status,'delivered');assert.equal(calls,1);
+   const requests:any[]=[];const relay=new DecisionChannel(r=>requests.push(r));
+   const pending=c.answerCoreQuestion(q.questionId!,relay);
+   while(!requests.length){if(Date.now()>=deadline)throw Error('No relayed question');await delay(10);}
+   const request=requests[0];assert.equal(request.mode,'core-answer');const v=request.view;assert(v.pawn.eating.options.length>0);
+   relay.receive({type:'decision-result',id:request.id,output:variant==='speech'?{choice:'say',text:'I will eat some berries.'}:{choice:'eat',thing:v.pawn.eating.options[0].thing,text:'I choose this portion of berries now.'}});
+   const answer=await pending;assert.equal(answer.status,'delivered');assert.equal(requests.length,1);relay.close();
    const selected=Object.values(c.inspect().selfCare??{})[0];
    if(selected){assert.equal(c.inspect().outcomes[selected.id]!.status,'started');const repeated=await b.eat({id:selected.id,epoch:c.inspect().epoch,actor,action:selected.action,mapId:selected.mapId,untilTick:selected.untilTick});assert.equal(repeated.status,'started');await assert.rejects(b.eat({id:selected.id,epoch:c.inspect().epoch,actor,action:{...selected.action,thing:'wrong'},mapId:selected.mapId,untilTick:selected.untilTick}));}
    if(variant==='stop')await c.pawn(actor).stopEating();

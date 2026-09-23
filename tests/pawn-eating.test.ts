@@ -1,3 +1,5 @@
+import {DecisionChannel} from '../src/decision-channel.js';
+import {eatingOptions} from '../src/pawn-eating.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -40,4 +42,15 @@ test('lost option, invented target, extra authority and existing commitment reje
 });
 test('late eating answer cannot act after paired rewind',async()=>{
  const {g,s,c}=await setup();await c.checkpoint('lab-concord-before-answer');const q=await ask(c);let enter!:()=>void,release!:(v:unknown)=>void;const entered=new Promise<void>(r=>enter=r);const pending=c.answerCoreQuestion(q,{name:'delayed',async answerCore(){enter();return new Promise(r=>release=r);}});await entered;await c.restore('lab-concord-before-answer');release(eat);assert.equal((await pending).status,'interrupted');assert.equal(g.calls,0);s.close();
+});
+
+test('decision relay carries typed core eating but remains speech-only for social turns',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c),requests:any[]=[];const channel=new DecisionChannel(r=>requests.push(r));
+ const pending=c.answerCoreQuestion(q,channel);while(!requests.length)await new Promise(r=>setImmediate(r));
+ assert.equal(requests[0].mode,'core-answer');channel.receive({type:'decision-result',id:requests[0].id,output:eat});assert.equal((await pending).status,'delivered');assert.equal(g.calls,1);
+ const abort=new AbortController();const social=channel.speak({} as any,abort.signal);assert.throws(()=>channel.receive({type:'decision-result',id:requests[1].id,output:eat}));abort.abort();await assert.rejects(social);s.close();
+});
+test('answered counter does not permanently suppress self-care; unresolved counter still holds',async()=>{
+ const {g,s,c}=await setup();const d=c.inspect(),p={id:'counter',pawn:'A',status:'countered' as const,reason:'less work',action:{kind:'move' as const,x:1,z:1}};d.proposals.counter=p;
+ const state=await g.state();assert.equal(eatingOptions(d,state,state.pawns[0]!).length,0);d.proposals.counter!.replyId='revision';d.proposals.revision={...p,id:'revision',status:'refused'};assert.equal(eatingOptions(d,state,state.pawns[0]!).length,1);s.close();
 });
