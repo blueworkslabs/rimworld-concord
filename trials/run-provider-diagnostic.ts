@@ -25,7 +25,7 @@ export async function runProviderDiagnostic(file:string,output:string,create=(di
    catch{row.status='failed';row.failure=backend.failures[fi]??{stage:'runner-validation-or-unavailable'};}
    row.elapsedMs=Date.now()-began;row.receipt=backend.receipts[ri]??null;row.raw=backend.rawResponses[rawi]??null;row.stream=backend.streamDiagnostics?.[si]??null;
    receipt.summary=backend.summary();save();
-   if(row.status==='failed'&&['authentication','setup','budget'].includes(row.failure.stage))break;
+   if(row.status==='failed'&&['authentication','setup','budget','isolation'].includes(row.failure.stage))break;
   }
   receipt.finished=true;receipt.passed=receipt.results.length===4&&receipt.results.every((r:any)=>r.status==='completed');
  }finally{backend?.close();save();}

@@ -41,3 +41,13 @@ test('provider diagnostic stops on a preflight failure without trying another ca
  const backend:any={receipts:[],rawResponses:[],failures:[],summary:()=>({attempts:0}),close(){closed=true;},async plan(){calls++;this.failures.push({stage:'authentication',attemptReserved:false,cancelled:false});throw Error('No native login');}};
  const r=await runProviderDiagnostic(file,root+'/run',()=>backend);assert.equal(calls,1);assert.equal(r.results.length,1);assert.equal(r.results[0].status,'failed');assert.equal(r.summary.attempts,0);assert(closed);
 });
+
+test('rejected native initialization stops the frozen probe after its first retained attempt',async()=>{
+ const root=mkdtempSync(tmpdir()+'/provider-isolation-'),file=root+'/suite.json',binary=root+'/fake',capture=root+'/calls',out=root+'/run';writeFileSync(file,JSON.stringify(providerDiagnosticSuite()));
+ const badInit={type:'system',subtype:'init',model:CLAUDE_MODEL,tools:['Bash'],mcp_servers:[],plugins:[],skills:[],slash_commands:[]};
+ writeFileSync(binary,`#!/usr/bin/env node
+if(process.argv.includes('auth')){console.log(JSON.stringify({loggedIn:true,authMethod:'claude.ai',apiProvider:'firstParty',subscriptionType:'max'}));process.exit(0);}
+require('node:fs').appendFileSync(${JSON.stringify(capture)},'attempt\\n');console.log(${JSON.stringify(JSON.stringify(badInit))});`,{mode:0o700});
+ const r=await runProviderDiagnostic(file,out,()=>new ClaudeDecisionBackend({ledgerPath:out+'/allowance.db',scratchRoot:out+'/scratch',trial:'provider-diagnostic-v1',binary}));
+ assert.equal(r.passed,false);assert.equal(r.results.length,1);assert.equal(r.results[0].failure.stage,'isolation');assert.equal(r.results[0].failure.attemptReserved,true);assert.equal(r.summary.attempts,1);assert.equal(readFileSync(capture,'utf8'),'attempt\n');
+});

@@ -14,6 +14,7 @@ import {promptAccounting} from './prompt-accounting.js';
 import { TrialBudget } from './appraisal.js';
 import {SocialChoice,socialChoiceSchema,socialPrompt,type SocialView} from './social.js';
 
+class ClaudeIsolationFailure extends Error {}
 export const CLAUDE_MODEL='claude-sonnet-4-6';
 const moveAction={type:'object',additionalProperties:false,required:['kind','x','z'],properties:{kind:{const:'move'},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0}}};
 const rescueAction={type:'object',additionalProperties:false,required:['kind','target','bed','x','z','maxTicks'],properties:{kind:{const:'rescue'},target:{type:'string',minLength:1,maxLength:120},bed:{type:'string',minLength:1,maxLength:120},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},maxTicks:{type:'integer',minimum:60,maximum:3600}}};
@@ -132,13 +133,13 @@ export class ClaudeDecisionBackend {
      stage='validation';if(mode==='core')validateCoreChoice(parsed.output,view as CoreView);if(parsed.providerChoice)validateReflectionChoice(parsed.providerChoice,view as AttentionView);
      signal.throwIfAborted();receipt.status='ok';
      return parsed.output;
-   } catch(error) {this.failures.push({stage,attemptReserved:!!id,cancelled:signal.aborted,...(stage==='parsing'||stage==='validation'?{issues:validationIssues(error)}:{})});throw Error((id?'Live decision unavailable; attempt retained':'Claude decision preflight failed')+' ['+stage+']');}
+   } catch(error) {if(error instanceof ClaudeIsolationFailure)stage='isolation';this.failures.push({stage,attemptReserved:!!id,cancelled:signal.aborted,...(stage==='parsing'||stage==='validation'?{issues:validationIssues(error)}:{})});throw Error((id?'Live decision unavailable; attempt retained':'Claude decision preflight failed')+' ['+stage+']');}
    finally {this.pending=false;}
  }
  private invoke(binary:string,args:string[],prompt:string,cwd:string,env:NodeJS.ProcessEnv,signal:AbortSignal,stream:ProviderStreamCounts,onCost:(cost:number)=>void,onResult:(result:unknown)=>void):Promise<{result:unknown;tools:string[]}> {
    return new Promise((resolve,reject)=>{
      const child=spawn(binary,args,{cwd,env,stdio:['pipe','pipe','pipe'],detached:true});
-     let buffer='',bytes=0,result:unknown,init=false,tools:string[]=[],failure=false;
+     let buffer='',bytes=0,result:unknown,init=false,tools:string[]=[],failure=false,isolationFailure=false;
      let force:ReturnType<typeof setTimeout>|undefined;
      const stop=()=>{failure=true;try{process.kill(-child.pid!,'SIGTERM');}catch{}
        force??=setTimeout(()=>{try{process.kill(-child.pid!,'SIGKILL');}catch{}},1000);};
@@ -149,9 +150,9 @@ export class ClaudeDecisionBackend {
        for(;;){const end=buffer.indexOf('\n');if(end<0)break;const line=buffer.slice(0,end);buffer=buffer.slice(end+1);if(!line.trim())continue;
          try {
            const event=JSON.parse(line);stream.observe(event);
-           if(event.type==='system'&&event.subtype==='init'){if(init)throw Error();verifyClaudeInit(event);init=true;tools=event.tools;}
-           if(event.type==='system'&&String(event.subtype).startsWith('hook_'))throw Error();
-           if(event.type==='assistant'&&event.message?.content?.some((c:any)=>c.type==='tool_use'&&c.name!=='StructuredOutput'))throw Error();
+           if(event.type==='system'&&event.subtype==='init'){try{if(init)throw Error();verifyClaudeInit(event);}catch{isolationFailure=true;throw Error();}init=true;tools=event.tools;}
+           if(event.type==='system'&&String(event.subtype).startsWith('hook_')){isolationFailure=true;throw Error();}
+           if(event.type==='assistant'&&event.message?.content?.some((c:any)=>c.type==='tool_use'&&c.name!=='StructuredOutput')){isolationFailure=true;throw Error();}
            if(event.type==='result'){
              // Preserve reported usage even for invalid output, error results, or failed exits.
              if(!result)onResult(event);
@@ -164,7 +165,7 @@ export class ClaudeDecisionBackend {
      });
      const cleanup=()=>{clearTimeout(timer);clearTimeout(force);signal.removeEventListener('abort',stop);};
      child.on('error',()=>{cleanup();reject(Error('CLI unavailable'));});
-     child.on('close',code=>{cleanup();if(code!==0||failure||!init||!result||signal.aborted)reject(Error('CLI decision failed'));else resolve({result,tools});});
+     child.on('close',code=>{cleanup();if(isolationFailure){reject(new ClaudeIsolationFailure('CLI isolation failed'));return;}if(code!==0||failure||!init||!result||signal.aborted)reject(Error('CLI decision failed'));else resolve({result,tools});});
      child.stdin.end(prompt);if(signal.aborted)stop();
    });
  }
