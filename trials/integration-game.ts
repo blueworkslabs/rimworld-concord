@@ -102,7 +102,7 @@ try{
   windowTimer=setTimeout(()=>channel.close(),window.durationMs);
   await delay(200);let laterDone=false,nextCapture=0,mid=false;
   while(!window.ended()){
-   guard.check();await c.reconcile();guard.check();if(window.ended())break;await c.advanceIntentions();guard.check();if(window.ended())break;await c.observe();guard.check();
+   guard.check();await c.reconcile();guard.check();if(window.ended())break;await c.advanceIntentions(()=>!guard.stopped&&!window!.ended());guard.check();if(window.ended())break;await c.observe();guard.check();
    const state=await b.state();guard.sample(state.paused,state.ticks,initialTick);
    receipt.samples.push({elapsedMs:window.elapsed(),ticks:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,facts:p.facts}))});
    if(!laterDone&&window.laterDue()){

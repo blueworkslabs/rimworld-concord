@@ -35,7 +35,9 @@ attempts, each with the existing 0.10 API-equivalent reservation and local 45-se
 deadline (1.20 maximum reservation, not a cash bill). Zero Jev calls. All attempts
 including failure consume the cap; unused capacity is not filled. Two speech,
 at most two reflection, four offers and up to four counter-consent attempts.
-A hard observation deadline closes pending inference; no new inference starts
+Intention advancement accepts an optional operator admission predicate (existing
+callers retain their behavior), checked after asynchronous preparation before a
+new trip is dispatched. A hard observation deadline closes pending inference; no new inference starts
 at/after it. Stop/retire owned work, preserve partial outcomes, paired checkpoint,
 then full game restart verification with zero inference. Stop staging afterward.
 

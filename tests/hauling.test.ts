@@ -70,3 +70,14 @@ test('late reflection cannot withdraw an agreement already ended by its pawn',as
  assert.equal(store.events().filter(e=>e.event.kind==='intention-stopped').length,1);assert.equal(data.actions.length,1);
  store.close();
 });
+
+test('operator admission closes during either advancement read without dispatching the next trip',async()=>{
+ for(const closeOnRead of [1,2]){
+  const {c,p,data,game,complete,store}=await setup();await c.pawn('A').decide(p.id,accept);complete();
+  let permitted=true,reads=0;const original=game.state;
+  game.state=async()=>{const state=await original();if(++reads===closeOnRead)permitted=false;return state;};
+  await c.advanceIntentions(()=>permitted);
+  assert.equal(data.actions.length,1);assert.equal(c.inspect().proposals[p.id]!.standing!.steps.length,1);
+  assert.equal(c.inspect().characters.A!.commitment,undefined);store.close();
+ }
+});
