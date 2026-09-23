@@ -1,5 +1,7 @@
 /** Finite event-triggered core: explicit paused inference, no periodic planner rounds. */
 import assert from 'node:assert/strict';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {startNative} from './native-run.js';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
@@ -34,6 +36,13 @@ let drained:(()=>void)|undefined;
 const input=createInterface({input:process.stdin,crlfDelay:Infinity});
 input.on('line',line=>{try{if(line.length>32000)throw Error('Response too large');const m=JSON.parse(line);if(m.type==='drained'&&m.id===runId){drained?.();return;}channel.receive(m);}catch{stop();}});
 input.on('close',stop);const timer=setTimeout(stop,1500000);
+async function capture(label:string,openPanel=false){
+ try{
+  const exec=promisify(execFile),options={timeout:Math.max(1,Math.min(10000,operationDeadline-Date.now()))};
+  if(openPanel)await exec('python3',[b.root+'/bin/lab.py','click','1150','783'],options);
+  const name='campfire-live-'+run+'-'+label+'.png';await exec('python3',[b.root+'/bin/lab.py','screenshot',name],options);(receipt.captures??=[]).push(name);
+ }catch(e){(receipt.captureErrors??=[]).push(String(e));}
+}
 async function finish(){channel.close();if(!connected)throw Error('Host disconnected');await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Drain timeout')),15000);drained=()=>{clearTimeout(t);resolve();};send({type:'drain',id:runId});});receipt.hostDrained=true;}
 async function save(failed=false){const checkpoint='lab-concord-campfire-'+Date.now();await c!.checkpoint(checkpoint);const domain=c!.inspect();await writeFile(root+'/.runtime/campfire-live-'+run+'-latest.json',JSON.stringify({runId,mode:receipt.mode,db,checkpoint,domain,failed}));return {checkpoint,domain};}
 try{
@@ -45,8 +54,9 @@ try{
   db=root+'/.runtime/campfire-live-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();
   await c.initializeCore('Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan.');
   receipt.initial=await b.state();assert(receipt.initial.pawns.every((p:any)=>!p.downed));receipt.initialPerspective=await c.corePerspective();
+  if(run===1)await capture('initial',true);
   await c.configureCoreSchedule({maxAttempts:8,cooldownTicks:60,windowTicks:36000});
-  const nativeLimit=600000;let nativeElapsed=0;
+  const nativeLimit=600000;let nativeElapsed=0,midpointCaptured=false;
   const startTick=(await b.state()).ticks;
   guard.check();(receipt.resumes??=[]).push(await startNative(b));guard.check();let nativeStarted:number|undefined=Date.now();
   const nativeRemaining=()=>nativeLimit-nativeElapsed-(nativeStarted===undefined?0:Date.now()-nativeStarted);
@@ -55,6 +65,7 @@ try{
    await c.advanceIntentions(()=>!guard.stopped&&nativeRemaining()>0);guard.check();
    const state=await b.state();guard.sample(state.paused,state.ticks,startTick);
    receipt.samples.push({tick:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,food:p.facts?.find(f=>f.key==='need'&&f.value==='Food')?.level}))});
+   if(run===1&&!midpointCaptured&&nativeRemaining()<=nativeLimit/2){midpointCaptured=true;await capture('midpoint');}
    const view=await c.corePerspective();guard.check();
    if(nativeRemaining()<=0)break;
    if(coreAdmission(c.inspect().coreState!.schedule!,view).ready){
@@ -72,6 +83,7 @@ try{
   }
   await b.admin('pause');guard.check();await c.reconcile();guard.check();
   receipt.nativeElapsedMs=nativeElapsed+(nativeStarted===undefined?0:Math.max(0,Date.now()-nativeStarted));
+  if(run===1)await capture('final');
   await finish();guard.check();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();receipt.cleanup=await stopTrialWork(c);assert.equal(receipt.cleanup.errors.length,0);guard.check();receipt.summary=workSummary(c.inspect());receipt.production={campfires:Object.values(c.inspect().outcomes).filter(r=>r.kind==='build'&&r.status==='completed').length,meals:Object.values(c.inspect().outcomes).filter(r=>r.kind==='cook'&&r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0)};
   receipt.inferencePassed=campfireInferencePassed(receipt.rounds);
   const saved=await save(!receipt.inferencePassed);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);receipt.pairedRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;

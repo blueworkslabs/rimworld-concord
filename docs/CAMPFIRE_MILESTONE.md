@@ -47,6 +47,15 @@ and work, not a fabricated next plot beat.
 
 ## Verification and live protocol
 
+Scripted positive mechanics use a separately labelled copy with all three Food
+meters at 0.90, reducing self-care competition during exact resource checks.
+The corrected v2 fixture gives inserted berries their native 60 hit points; v1
+omitted health and is retained as invalid evidence. Earlier disappearing berries
+were not established to be self-care. Cooking must consume ten berries per meal,
+verified independently from product counts.
+The live fixture retains the hunger values above. Native ingredient conflicts
+remain recorded negative cases, not rerolled live results.
+
 First verify scripted refusal/counter/fresh acceptance, native resource use and
 product creation, withdrawal, independent consent for cooking, paired restore
 between meals, and cold restore. Then independent review of the final behavior.

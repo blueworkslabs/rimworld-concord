@@ -114,12 +114,28 @@ namespace Concord {
   protected override IEnumerable<Toil> MakeNewToils(){
    this.FailOn(()=>!Production.Active(pawn,job));
    var toils=base.MakeNewToils().ToList();
+   // Native placement records recipe ingredients only for its exact DoBill
+   // JobDef, not subclasses. Keep our isolated JobDef and record the actual
+   // dropped stack through the same native callback (including stack merges).
+   foreach(var toil in toils.Where(t=>t.debugName=="PlaceHauledThingInCell"))toil.initAction=()=>{
+    var a=Production.Record(pawn,job);var carried=pawn.carryTracker.CarriedThing;Thing placed;
+    if(a==null||carried==null||carried.stackCount!=a.count||Production.Ingredients(carried)!=a.count||
+       !pawn.carryTracker.TryDropCarriedThing(job.targetC.Cell,ThingPlaceMode.Direct,out placed,(t,n)=>HaulAIUtility.UpdateJobWithPlacedThings(job,t,n)))EndJobWith(JobCondition.Incompletable);
+   };
    // Last native toil creates, consumes and drops products synchronously.
    var finish=toils.Last();var init=finish.initAction;
    finish.initAction=()=>{
     var a=Production.Record(pawn,job);var map=pawn.Map;var meal=ThingDefOf.MealSimple;
+    // Fail before product creation if the exact delivered quantity vanished.
+    if(a==null||a.status!="started"||job.placedThings==null||job.placedThings.Count!=1||
+       job.placedThings[0].Count!=a.count||job.placedThings[0].thing==null||
+       !job.placedThings[0].thing.Spawned||job.placedThings[0].thing.Map!=map||
+       job.placedThings[0].thing.stackCount<a.count||Production.Ingredients(job.placedThings[0].thing)!=a.count){EndJobWith(JobCondition.Incompletable);return;}
+    var ingredient=job.placedThings[0].thing.def;
+    int foodBefore=map.listerThings.ThingsOfDef(ingredient).Sum(t=>t.stackCount);
     int before=map.listerThings.ThingsOfDef(meal).Sum(t=>t.stackCount);init();int made=map.listerThings.ThingsOfDef(meal).Sum(t=>t.stackCount)-before;
-    if(a!=null&&a.status=="started"){a.delivered=Math.Max(0,made);a.status=made==1?"completed":"failed";a.reason=made==1?"Native recipe produced one simple meal; eating not implied":"Recipe output was not confirmed; no retry";}
+    int consumed=foodBefore-map.listerThings.ThingsOfDef(ingredient).Sum(t=>t.stackCount);
+    if(a.status=="started"){a.delivered=Math.Max(0,made);a.status=made==1&&consumed==a.count?"completed":"failed";a.reason=a.status=="completed"?"Native recipe consumed "+consumed+" ingredients and produced one simple meal; eating not implied":"Recipe ingredient consumption or output was not confirmed; no retry";}
    };
    AddFinishAction(condition=>{var b=job.bill;if(b!=null&&!b.DeletedOrDereferenced)b.billStack.Delete(b);});
    foreach(var t in toils)yield return t;

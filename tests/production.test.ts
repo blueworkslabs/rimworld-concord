@@ -62,3 +62,8 @@ test('native resume handles the single load-pause race, but never loops over a p
  const b={async admin(){calls++;},async state(){return {ticks:1,paused:calls<2} as GameState;}};
  assert.equal((await startNative(b)).length,2);assert.equal(calls,2);calls=0;b.state=async()=>({ticks:1,paused:true} as GameState);await assert.rejects(startNative(b));assert.equal(calls,2);
 });
+test('less food appearing later is not permission to repeat a refused cooking offer with fewer meals',async()=>{
+ const {g,s,c}=await setup();g.kind='cook';const p=await c.core().propose('A',cook,'Optional');await c.pawn('A').decide(p.id,{name:'no',async decide(){return {kind:'refuse',reason:'No cooking'};}});
+ const state=await g.state();state.pawns[0]!.production!.options=[{...cook,meals:2}];state.pawns[0]!.production!.supplies[1]!.count=20;
+ assert(!coreView(c.inspect(),state).opportunities.some(o=>o.pawn==='A'&&o.action.kind==='cook'));s.close();
+});
