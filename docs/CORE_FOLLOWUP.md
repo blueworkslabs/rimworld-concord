@@ -60,4 +60,56 @@ and uses the same `--cold` configuration after a full stop/start. Never reuse or
 reset historical allowances. Rehearsal and live run have separate run IDs,
 receipts and checkpoints. Stop staging at handoff.
 
-Results pending.
+## Recorded result
+
+The one live trial used **four core attempts and three pawn replies**. It is a
+mixed result (`inferencePassed=false`), not an all-green planning run:
+
+1. Core asked Alvin about food. His delivered reply requested help. His claim
+   “I've been focused on building” is unsupported by supplied history; his
+   current job was wandering. A construction skill/option is not work history.
+2. That reply triggered the next core turn, which asked Beatrice about food and
+   help. She volunteered that she could try cooking and suggested checking
+   stockpiles. This was speech, not cooking consent.
+3. Her reply triggered another core attempt. It returned an ask-Pedro choice
+   with a null topic link, but the provider reported **three internal turns**
+   against the adapter's two-turn bound. Parsing rejected it before delivery.
+   No guard was weakened; the CLI turn-count discrepancy remains unexplained.
+4. A later change in Pedro's shared Food band admitted the fourth turn—not an
+   immediate replay of the failed attempt. Its question reached Pedro. He
+   replied that he could haul if needed. No work agreement resulted.
+
+**Zero work offers, jobs, campfires or meals.** All87 native samples were
+unpaused outside deliberate inference pauses; native observation lasted120528ms.
+No Ingest job was sampled; sampling is not a complete eating-event history.
+The fourth turn exhausted the core allowance; two pawn slots stayed unused.
+API-equivalent reported usage: core0.2581194 + pawns0.067866 USD, not cash billing.
+
+Paired and full cold restore passed, preserving the failed attempt and consumed
+allowances without extra calls. Final scripted rehearsal and paired/cold checks
+also passed: authored ask, preference reply, then wait. All294 Node checks and
+independent full/focused review passed. Review caught shared artifact filenames
+and an omitted launcher in the deployment digest; both are fixed. A launcher-only
+mutation changes the digest. All219 historical database-related files are
+unchanged. Staging is stopped.
+
+[Full retained outputs, failure metadata and public records](evidence/core-followup.json).
+No new blind-reader study was performed. The existing panel still does not
+explain why coordination stopped at a failure or exhausted allowance.
+
+## What this does and does not establish
+
+A voluntary reply now reaches the core's next in-game decision, and all three
+pawns spoke. This is not evidence of a productive plan, independent personalities
+or live construction/cooking. The core attributed Alvin's building claim as
+speech; it did not create a completed-work record from it.
+
+The available menu listed campfire build/wood-haul options but no cooking option.
+Inspection confirms a concrete information gap: native production supplies are
+collected for executable work options, so food ingredients are not separately
+exposed before a usable campfire exists. Missing food options are not evidence
+that food is absent. This gap does not prove why the model chose only questions.
+
+Next: inspect the provider turn-count discrepancy without weakening validation,
+and add genuinely grounded food observations/prerequisite information separate
+from immediately available jobs. No such fix or additional trial is included here.

@@ -1,0 +1,58 @@
+{
+  "slug": "three-replies-no-plan",
+  "title": "Three Replies, No Plan",
+  "date": "2026-09-23",
+  "summary": "The core heard all three pawns and followed a reply, but one rejected turn and no work proposal keep the result mixed.",
+  "sections": [
+    {
+      "heading": "What Ran",
+      "paragraphs": [
+        "After the six-call offline contract check, this separate in-game trial allowed four core attempts and five pawn attempts over two minutes of native activity. Inference was deliberately paused; all 87 samples between decisions were unpaused. The same campfire fixture and open coordination brief remained, with no required speaker or work choice. Four core attempts and three pawn replies were used, with zero Jev calls and no rerolls."
+      ]
+    },
+    {
+      "heading": "What the Voices Said",
+      "paragraphs": [
+        "Core asked Alvin about food. Alvin replied requesting help, with an unsupported claim that he had been focused on building. That reply triggered core to ask Beatrice, who voluntarily responded she could try cooking but did not see food and suggested checking stockpiles. A third core attempt returned a question for Pedro, but the provider reported 3 internal turns against an adapter limit of 2 so the adapter rejected it before delivery. A fourth core turn, triggered by Pedro's telemetry showing a Food band change, asked Pedro about food; he replied he could haul if needed. All three voices spoke. No message constituted consent."
+      ]
+    },
+    {
+      "heading": "What Did Not Happen",
+      "paragraphs": [
+        "No offers, agreements, jobs, campfires or meals resulted. No eating job appeared in the 87 samples, though those samples are not a complete event history. The rejected provider result remains a failed attempt, not an all-green run. Paired save/restore and full cold restart preserved the result without extra calls. The final scripted question\u2013reply\u2013wait rehearsal also passed both restore checks; 294 automated checks and independent review passed."
+      ]
+    },
+    {
+      "heading": "What We Learned",
+      "paragraphs": [
+        "Alvin's building claim remains unsupported\u2014his current job was wandering with no prior work provided. Core attributed this as speech rather than verified work. Menus listed build and wood haul but no cook options. Native observation only exposes food through currently executable cook options; without a campfire, no general raw food observations appear. The missing food option does not mean food was absent. This suggests an observation gap but does not prove why the model avoided building.",
+        "Next, inspect the provider-reported turn count without weakening the guard, and separate grounded food observations and prerequisites from jobs available right now. Another long trial is not the immediate next step. These are follow-ups, not implemented fixes."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Follow-up protocol and results",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CORE_FOLLOWUP.md"
+    },
+    {
+      "label": "Retained trial evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/core-followup.json"
+    },
+    {
+      "label": "Corrected contract check",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/43"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/2026-09-23-core-followup.png",
+      "alt": "Actual final crew panel showing Pedro and Beatrice replying about food, low shared Food bands, and no agreements.",
+      "caption": "Unaltered final player capture from the live follow-up. Three replies were delivered; no work was proposed. The rejected third core result never reached the crew."
+    }
+  ]
+}
