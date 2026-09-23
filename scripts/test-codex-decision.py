@@ -12,6 +12,9 @@ class Transport(unittest.TestCase):
   for r in [{'model':m.MODEL,'tools':[{'type':'shell'}]},{'model':m.MODEL,'input':[{'type':'additional_tools','tools':[{}]}]},{'model':'other'}]:
    with self.assertRaises(AssertionError):m.assert_no_tools(r)
   m.assert_no_tools({'model':m.MODEL,'tools':[]})
+ def test_error_diagnostics_do_not_retain_provider_text(self):
+  d=m.error_diagnostics({'message':'SECRET canary: invalid schema, oneOf is not supported, HTTP 400'})
+  self.assertEqual(d,{'present':True,'categories':['schema','unsupported'],'httpStatuses':[400]});self.assertNotIn('SECRET',json.dumps(d))
  def test_provider_is_native_no_api_fallback_or_retry(self):
   c=m.config(pathlib.Path('/frozen/catalog.json'));p=c['model_providers.'+m.NATIVE_PROVIDER]
   self.assertTrue(p['requires_openai_auth']);self.assertEqual(p['base_url'],m.NATIVE_URL);self.assertEqual(p['request_max_retries'],0);self.assertEqual(p['stream_max_retries'],0)

@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {OngoingUsage} from '../src/ongoing-usage.js';
-import {CodexDecisionBackend,LUNA_MODEL,parseCodexChoice} from '../src/codex-decision.js';
+import {CodexDecisionBackend,LUNA_MODEL,parseCodexChoice,codexRequest} from '../src/codex-decision.js';
 const view:any={pawn:{id:'A'},character:{id:'A'},question:{id:'q',from:'core',text:'Food?'}};
 function fixture(code:string){const root=mkdtempSync(join(tmpdir(),'luna-test-'));writeFileSync(join(root,'catalog.json'),'{}');writeFileSync(join(root,'helper.py'),code);const b=new CodexDecisionBackend({ledgerPath:join(root,'usage.db'),scratchRoot:join(root,'scratch'),catalogPath:join(root,'catalog.json'),helperPath:join(root,'helper.py')});return {root,b,close(){b.close();rmSync(root,{recursive:true,force:true});}};}
 const helper=(raw:any)=>`import sys,pathlib,json\np=pathlib.Path(sys.argv[3]);p.mkdir()\n(p/'result.json').write_text(json.dumps(${JSON.stringify(JSON.stringify(raw))} and json.loads(${JSON.stringify(JSON.stringify(raw))})))\n`;
@@ -16,3 +16,8 @@ test('cancellation kills helper descendants, prevents late output, and settles t
 test('ongoing ledger has no turn ceiling but crash uncertainty and repeated failures stop admission',()=>{const root=mkdtempSync(join(tmpdir(),'usage-test-')),file=join(root,'u.db');let u=new OngoingUsage(file);try{for(let i=0;i<25;i++)u.settle(u.reserve('core',LUNA_MODEL),'ok',1,null);const pending=u.reserve('core',LUNA_MODEL);u.close();u=new OngoingUsage(file);assert.throws(()=>u.reserve('core',LUNA_MODEL),/Unresolved/);u.settle(pending,'cancelled',1,null);for(let i=0;i<2;i++)u.settle(u.reserve('core',LUNA_MODEL),'failed',1,null);assert.throws(()=>u.reserve('core',LUNA_MODEL),/Repeated/);assert.equal(u.summary().length,28);}finally{u.close();rmSync(root,{recursive:true,force:true});}});
 test('ongoing policy refuses a historical ledger instead of changing it',()=>{const root=mkdtempSync(join(tmpdir(),'old-usage-')),file=join(root,'old.db'),db=new DatabaseSync(file);db.exec('CREATE TABLE reservations(id TEXT)');db.close();assert.throws(()=>new OngoingUsage(file),/Not an ongoing/);rmSync(root,{recursive:true,force:true});});
 test('Luna JSON wrapper is strict, not prose-extracted action authority',()=>{assert.throws(()=>parseCodexChoice('core-answer','I will eat',view));assert.throws(()=>parseCodexChoice('core-answer',JSON.stringify({social:{choice:'say',text:'Hi'},order:'eat'}),view));});
+
+test('native structured-output dialect applies to live modes, not just offline suites',()=>{
+ const req=codexRequest('core-answer',view);const text=JSON.stringify(req.schema);
+ assert(!text.includes('"const"'));assert(!text.includes('"oneOf"'));assert(!text.includes('"uniqueItems"'));assert(text.includes('"enum"'));
+});

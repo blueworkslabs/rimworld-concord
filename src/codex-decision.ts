@@ -2,6 +2,7 @@ import {spawn} from 'node:child_process';
 import {mkdtemp,mkdir,readFile,writeFile,stat} from 'node:fs/promises';
 import {isAbsolute,join,resolve} from 'node:path';
 import {z} from 'zod';
+import {codexSchema} from './contract-cases.js';
 import {claudeArgs} from './claude-decision.js';
 import {Decision,type Perspective} from './protocol.js';
 import {Reflection,type AttentionView} from './attention.js';
@@ -26,7 +27,7 @@ export function codexRequest(mode:Mode,view:any){
   schema.$defs={coreTopicUpdate:branches[0].properties.topics.items};
   for(const branch of branches)branch.properties.topics.items={$ref:'#/$defs/coreTopicUpdate'};
  }
- const request={id:mode,instructions,prompt,schema};
+ const request={id:mode,instructions,prompt,schema:codexSchema(schema)};
  if(Buffer.byteLength(JSON.stringify(request))>64000)throw Error('Complete request too large');
  return request;
 }
@@ -67,7 +68,7 @@ export class CodexDecisionBackend {
    const outcome=await this.invoke(root,signal);
    try{const file=join(root,'attempt/result.json');if((await stat(file)).size<=1048576)raw=JSON.parse(await readFile(file,'utf8'));}catch{}
    const parsedUsage=Usage.safeParse(raw?.usage);if(parsedUsage.success)usage=parsedUsage.data;
-   this.receipts.push({id,mode,model:LUNA_MODEL,elapsedMs:Date.now()-start,stage:raw?.stage??'transport',status:raw?.status??'unknown',usage,rawText:typeof raw?.rawText==='string'?raw.rawText:null,preflight:raw?.preflight??null,authoredSize:promptAccounting(request.instructions,request.prompt,request.schema)});
+   this.receipts.push({id,mode,model:LUNA_MODEL,elapsedMs:Date.now()-start,stage:raw?.stage??'transport',status:raw?.status??'unknown',diagnostic:raw?.diagnostic??null,usage,rawText:typeof raw?.rawText==='string'?raw.rawText:null,preflight:raw?.preflight??null,authoredSize:promptAccounting(request.instructions,request.prompt,request.schema)});
    if(!outcome||signal.aborted||raw?.status!=='completed'||raw.model!==LUNA_MODEL||raw.preflight?.toolsExposed!==0||raw.preflight?.requests!==1||typeof raw.rawText!=='string')throw Error('Native decision unavailable');
    const choice=parseCodexChoice(mode,raw.rawText,view);signal.throwIfAborted();this.ledger.settle(id,'ok',Date.now()-start,usage);id=undefined;return choice;
   }catch{

@@ -2,7 +2,7 @@
 No game handles, API credentials, native-login extraction or retry. The parent owns
 its process group; cancellation terminates this helper and app-server together.
 """
-import argparse,hashlib,http.server,json,os,pathlib,queue,signal,subprocess,threading,time
+import argparse,hashlib,http.server,json,os,pathlib,queue,signal,subprocess,threading,time,re
 if not __debug__:raise RuntimeError('Runtime validation requires normal Python mode')
 MODEL='gpt-5.6-luna'
 NATIVE_PROVIDER='concord_native'
@@ -31,6 +31,16 @@ def validate_catalog(catalog):
  d=json.loads(catalog.read_text());assert len(d['models'])==1
  m=d['models'][0];assert m['slug']==MODEL and m['tool_mode']=='direct' and m['multi_agent_version']=='disabled' and m['supports_search_tool'] is False
  return digest(catalog.read_bytes())
+def error_diagnostics(error):
+ # Never retain provider prose, headers, endpoints, account IDs or reasoning.
+ text=json.dumps(error).lower() if error else ''
+ criteria={'schema':['schema','oneof','anyof','additionalproperties','response_format'],
+ 'model':['model'],'authentication':['unauthorized','authentication','401'],
+ 'quota':['quota','usage limit','rate limit','429'],'transport':['connection','timeout','tls'],
+ 'unsupported':['unsupported','not supported','not available'],
+ 'reasoning':['reasoning','effort'],'tier':['service_tier','service tier']}
+ return {'present':bool(error),'categories':[k for k,words in criteria.items() if any(w in text for w in words)],
+  'httpStatuses':sorted(set(int(n) for n in re.findall(r'\b(400|401|403|404|408|413|422|429|500|502|503|504)\b',text)))}
 class Client:
  def __init__(self,root,catalog,provider=NATIVE_PROVIDER,url=None):
   self.q=queue.Queue();self.events=[];self.n=0;self.provider=provider;self.total=0
@@ -95,9 +105,9 @@ class Client:
    if x.get('method')=='item/completed' and p.get('turnId')==turnid and p['item']['type']=='agentMessage':text=p['item']['text']
    if x.get('method')=='thread/tokenUsage/updated':usage=p['tokenUsage']['total']
    if x.get('method')=='turn/completed' and p['turn']['id']==turnid:
-    status=p['turn']['status'];error=bool(p['turn'].get('error'));break
+    status=p['turn']['status'];diagnostic=error_diagnostics(p['turn'].get('error'));error=diagnostic['present'];break
 
-  return {'authoredSize':authored_size(case),'id':case['id'],'model':t['model'],'status':status,'error':error,'elapsedMs':round((time.monotonic()-began)*1000),'usage':usage,'rawText':text}
+  return {'authoredSize':authored_size(case),'id':case['id'],'model':t['model'],'status':status,'error':error,'diagnostic':diagnostic,'elapsedMs':round((time.monotonic()-began)*1000),'usage':usage,'rawText':text}
  def close(self):
   try:self.p.terminate()
   except ProcessLookupError:pass

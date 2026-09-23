@@ -116,7 +116,8 @@ disabled, and a mock preflight that rejects any advertised tool before each real
 The ongoing backend uses an ephemeral thread, replacement instructions, no dynamic
 tools, a fresh empty working directory, and only PATH/HOME/LANG. The existing native
 ChatGPT login must be present; no API/model fallback is allowed. Server tool requests
-and executable items fail closed. The final JSON is parsed and contextually validated,
+and executable items fail closed. The schema uses the existing Codex dialect conversion (singleton enums, tagged
+`anyOf`, runtime duplicate-citation rejection). The final JSON is parsed and contextually validated,
 then the coordinator rechecks current game state before dispatch. No game handle is
 passed to the app-server.
 
