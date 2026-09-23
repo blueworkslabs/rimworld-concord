@@ -15,16 +15,17 @@ import {NeedsRunGuard,needsOutput} from './needs-policy.js';
 import {socialCleanup} from './social-cleanup.js';
 import {coreAdmission} from '../src/core-scheduler.js';
 import {campfireDecisionMs} from './campfire-policy.js';
-import {CORE_FOLLOWUP_POLICY as P,followupInferencePassed} from './core-followup-policy.js';
+import {coreFollowupPolicy,followupInferencePassed} from './core-followup-policy.js';
 import {retainedDomain} from './retention-policy.js';
 if(process.env.CONCORD_CORE_FOLLOWUP_LOCKED!=='1')throw Error('Use scripts/run-core-followup-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,cold=process.argv.includes('--cold');
 const scripted=process.argv.includes('--scripted');
+const policy=process.env.CONCORD_TRIAL_POLICY??'',P=coreFollowupPolicy(policy);
 const pausedInference=true;let operationDeadline=Date.now()+P.wallMs;const b=new LabBridge(undefined,()=>operationDeadline);
 const runId=process.env.CONCORD_TRIAL_ID;
-if(!runId||!/^[0-9a-f-]{36}$/.test(runId)||process.env.CONCORD_TRIAL_POLICY!=='core-followup-v1')throw Error('Trial identity required');
+if(!runId||!/^[0-9a-f-]{36}$/.test(runId))throw Error('Trial identity required');
 const run=runId;
-const receipt:any={passed:false,runId,policy:'core-followup-v1',mode:scripted?'scripted':'live-paused',run,views:[],rounds:[],samples:[]};
+const receipt:any={passed:false,runId,policy,mode:scripted?'scripted':'live-paused',run,views:[],rounds:[],samples:[]};
 const guard=new NeedsRunGuard(),controller=new AbortController(),end=operationDeadline;
 let c:Coordinator|undefined,s:Store|undefined,db:string|undefined,connected=true,coreAttempts=0,pawnAttempts=0,inferenceDeadline=end;
 const stop=()=>{connected=false;guard.stop();controller.abort();channel.close();};
@@ -87,7 +88,7 @@ try{
   receipt.nativeElapsedMs=nativeElapsed+(nativeStarted===undefined?0:Math.max(0,Date.now()-nativeStarted));
   await capture('final');
   await finish();guard.check();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();receipt.cleanup=await stopTrialWork(c);assert.equal(receipt.cleanup.errors.length,0);guard.check();receipt.summary=workSummary(c.inspect());receipt.production={campfires:Object.values(c.inspect().outcomes).filter(r=>r.kind==='build'&&r.status==='completed').length,meals:Object.values(c.inspect().outcomes).filter(r=>r.kind==='cook'&&r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0)};
-  receipt.inferencePassed=followupInferencePassed(receipt.rounds);
+  receipt.inferencePassed=followupInferencePassed(receipt.rounds,P.coreCalls);
   if(scripted){assert.equal(receipt.rounds[0]?.answer?.status,'delivered');assert.equal(receipt.rounds[1]?.result?.status,'applied');assert.equal(c.inspect().coreState?.turns[1]?.choice?.action.kind,'wait');assert.equal(Object.keys(c.inspect().proposals).length,0);}
   const saved=await save(!receipt.inferencePassed);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);receipt.pairedRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
  }

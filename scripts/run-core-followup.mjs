@@ -7,6 +7,7 @@ import {parseTrialMessage} from '../dist/src/trial-wire.js';
 import {InferenceLane} from '../dist/src/inference-lane.js';
 import {integrationHostAllowance} from '../dist/trials/integration-policy.js';
 import {retentionDeadline} from '../dist/trials/retention-policy.js';
+import {coreFollowupPolicy} from '../dist/trials/core-followup-policy.js';
 import {ClaudeDecisionBackend} from '../dist/src/claude-decision.js';
 
 
@@ -15,14 +16,14 @@ const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.arg
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
 
-const policy='core-followup-v1';
-const protocol={policy,coreCalls:4,pawnCalls:5,cooldownTicks:60,windowTicks:18000,nativeMs:scripted?15000:120000,pausedInference:true,wallMs:900000,jevCalls:0};
+const policy=config.policy??'core-followup-v1',P=coreFollowupPolicy(policy);
+const protocol={policy,coreCalls:P.coreCalls,pawnCalls:P.pawnCalls,cooldownTicks:P.cooldownTicks,windowTicks:P.windowTicks,nativeMs:scripted?P.scriptedNativeMs:P.nativeMs,pausedInference:true,wallMs:P.wallMs,jevCalls:0};
 let scriptedTurn=0;
 const mock={receipts:[],rawResponses:[],failures:[],summary:()=>({attempts:0,reservedEquivalentUSD:0}),close(){},async plan(v){return {topics:[{sourceId:'brief',text:'Check voluntary communication without ordering work.',status:'open'}],actionTopicId:null,action:scriptedTurn++===0?{kind:'ask',pawn:v.crew[0].id,text:'Would you like to discuss food before any optional work?',reason:'Ask a voluntary question.'}:{kind:'wait',reason:'Reply received. No work authorized or requested in this scripted rehearsal.'}};},async answerCore(){return {choice:'say',text:'I prefer to eat first. Please leave work for now.'};},async decide(){throw Error('Unexpected scripted work offer');}};
-const coreBackend=scripted?mock:new ClaudeDecisionBackend({ledgerPath:config.ledger+'.core',scratchRoot:config.scratchRoot+'/core',trial:'core-followup-core-v1'});
-const pawnBackend=scripted?mock:new ClaudeDecisionBackend({ledgerPath:config.ledger+'.pawns',scratchRoot:config.scratchRoot+'/pawns',trial:'core-followup-pawns-v1'});
+const coreBackend=scripted?mock:new ClaudeDecisionBackend({ledgerPath:config.ledger+'.core',scratchRoot:config.scratchRoot+'/core',trial:P.coreTrial});
+const pawnBackend=scripted?mock:new ClaudeDecisionBackend({ledgerPath:config.ledger+'.pawns',scratchRoot:config.scratchRoot+'/pawns',trial:P.pawnTrial});
 const summary=()=>({core:coreBackend.summary(),pawns:pawnBackend.summary()});
-const diagnostics=()=>({core:{decisions:coreBackend.receipts,rawResponses:coreBackend.rawResponses,failures:coreBackend.failures},pawns:{decisions:pawnBackend.receipts,rawResponses:pawnBackend.rawResponses,failures:pawnBackend.failures}});
+const diagnostics=()=>({core:{decisions:coreBackend.receipts,rawResponses:coreBackend.rawResponses,failures:coreBackend.failures,streamDiagnostics:coreBackend.streamDiagnostics??[]},pawns:{decisions:pawnBackend.receipts,rawResponses:pawnBackend.rawResponses,failures:pawnBackend.failures,streamDiagnostics:pawnBackend.streamDiagnostics??[]}});
 const before=summary();
 if(!cold&&(before.core.attempts||before.pawns.attempts))throw Error('Fresh trial required');
 const quote=s=>"'"+s.replaceAll("'","'\\''")+"'";
@@ -51,7 +52,7 @@ async function handle(line){
  if(m.type==='drain'){draining=true;for(const c of active.values())c.abort();await lane.drain();send({type:'drained',id:m.id});return;}
  if(draining||cold||seen.has(m.id))throw Error('Unexpected request');
  const isDecision=m.type==='decision-request';
- if(isDecision){if(!['decision','core','core-answer'].includes(m.mode)||(m.mode==='core'?++coreCount>4-Number(before.core.attempts):++pawnCount>5-Number(before.pawns.attempts)))throw Error('Decision limit');}
+ if(isDecision){if(!['decision','core','core-answer'].includes(m.mode)||(m.mode==='core'?++coreCount>P.coreCalls-Number(before.core.attempts):++pawnCount>P.pawnCalls-Number(before.pawns.attempts)))throw Error('Decision limit');}
  else throw Error('No appraisal requests allowed');
  seen.add(m.id);const deadline=retentionDeadline(),controller=deadline.controller;active.set(m.id,controller);const start=Date.now();
  try{
