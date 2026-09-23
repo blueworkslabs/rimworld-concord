@@ -34,8 +34,9 @@ small desert fixture with three colonists (Alvin, Beatrice, Pedro), not the camp
   colonists choose and do, not in explanations over unchanged native behaviour.
 - **The game is the ground truth.** Speech is testimony, private thought stays
   private, and outcomes come from the game's receipts.
-- **Deliberate communication, not mind-reading.** The core sees what an attentive
-  crewmate could see and learns the rest by asking.
+- **Deliberate communication, not mind-reading.** The core receives local observations, explicit
+  shared-link telemetry and addressed communication—not private minds—and asks
+  about what it doesn't know.
 - **No manufactured drama.** No scripted refusals, no required conflict. Judge
   meaningful choices, not obedience or its opposite.
 - **Smooth play is the target.** Native routines continue while colonists think;
@@ -48,8 +49,8 @@ small desert fixture with three colonists (Alvin, Beatrice, Pedro), not the camp
 A target, not today's build. Over about ten minutes:
 
 1. A need surfaces in the open: someone says it, or a shared status band turns amber.
-2. The core proposes a plan in pieces. Someone bargains or refuses, and it costs
-   something.
+2. A plan emerges in pieces. If someone bargains or refuses, it has a real
+   consequence; cooperation and alternatives remain valid too.
 3. Mostly quiet execution. The log says what everyone is waiting on, so silence reads
    as patience rather than a stall.
 4. An interruption forces a rethink: hunger, a downed crewmate, something on the horizon.

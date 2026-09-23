@@ -42,4 +42,7 @@ and sources) · [PROJECT_BASELINE](PROJECT_BASELINE.md) (the founding discussion
 Documents from before the 2026-09-23 cleanup (per-feature write-ups, `ACCEPTANCE.md`)
 are preserved at commit
 [`ac5baf8`](https://github.com/blueworkslabs/rimworld-concord/tree/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs);
-the trial ledger links each one.
+the trial ledger links the trial-specific write-ups. The earlier
+[narrative note](https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/NARRATIVE.md)
+and [visibility note](https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/CORE_VISIBILITY.md)
+remain available there too.

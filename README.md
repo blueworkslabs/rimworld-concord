@@ -40,7 +40,7 @@ What happened when: [HISTORY](docs/HISTORY.md) · every trial: [trial ledger](do
 2. A TypeScript coordinator owns characters, offers, consent, scheduling and
    checkpoints in SQLite (`src/`).
 3. Each model call gets a narrow, self-describing perspective and a menu of real
-   options, and returns one structured choice. No tools, no game handle, no database.
+   options, and returns one structured choice. No action tools, game handle or database.
 4. Consent, identity, deduplication and timeline safety are enforced below the models.
 
 Details: [ARCHITECTURE](docs/ARCHITECTURE.md). All documentation: [docs/README.md](docs/README.md).

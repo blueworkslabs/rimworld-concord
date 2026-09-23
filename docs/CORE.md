@@ -1,7 +1,7 @@
 # The core
 
-The core is a bounded planner, not a controller. It sees what an attentive crewmate
-could see, proposes listed work, asks questions, remembers open topics, and wakes
+The core is a bounded planner, not a controller. It sees attributed local observations, explicitly shared telemetry and
+addressed communication, proposes listed work, asks questions, remembers open topics, and wakes
 only when something public changes. It is opt-in per trial; the scripted core remains
 the regression baseline.
 
@@ -100,7 +100,8 @@ With a schedule, the core runs only when admitted:
   set once before the first turn; the window starts at that tick.
 - **Admission order**: inside the window, budget left, cooldown passed since the last
   attempt, and at least one new wake cause. The attempt and the causes it consumed are
-  persisted before inference, so a failed turn is never retried.
+  persisted before inference, so the same consumed causes do not automatically retry a failed turn. A later new
+  cause may admit another attempt within the remaining allowance.
 
 Wake causes are public changes only:
 

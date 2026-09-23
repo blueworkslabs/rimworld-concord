@@ -1,6 +1,6 @@
 # Actions and agreements
 
-Everything a colonist does for the colony goes through the same path: an **offer**, the
+Concord-directed colony work goes through the same path: an **offer**, the
 pawn's own **answer**, and, if accepted, an **agreement** that native RimWorld jobs
 carry out and the game's receipts account for. Eating is the one pawn-initiated
 exception and has its own section.
@@ -93,7 +93,7 @@ dispatch):
 | Haul | as move, plus hauling work enabled, Manipulation, Food ≥ 35 % and Rest ≥ 35 % |
 | Rescue | as move, plus Caring work enabled, Manipulation, Food ≥ 35 %, Rest ≥ 35 %, carrying nothing* |
 | Build, cook | haul readiness, plus Construction or Cooking enabled |
-| Eat | available, has a Food need, Manipulation; Food < 90 %*, not already eating*, carrying nothing* |
+| Eat | available, has a Food need, Manipulation; Food < 90 % at dispatch and ingestion, not already eating*, carrying nothing* |
 
 ## Capabilities
 
@@ -182,7 +182,8 @@ most the portion were eaten and nutrition went up. Only the operator-held
 closes a self-care follow-up topic ([CORE](CORE.md#topics)).
 
 Native RimWorld picks food on its own, and its ordinary food search skips raw berries
-until a pawn is urgently hungry (in our diagnosis: no eating at 20 % Food, eating at 10 %). The `eat` choice lets
+until these fixture pawns are urgently hungry; native genes can alter that rule
+(in our diagnosis: no eating at 20 % Food, eating at 10 %). The `eat` choice lets
 a pawn decide earlier; it still respects `WillEat`, forbidden items and reservations.
 
 ## Receipts

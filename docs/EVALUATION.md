@@ -26,9 +26,9 @@ an authored fixture is not a personality, and a single timing is not a benchmark
 - Freeze the protocol: fixture, question, call allowance, time limits and assessment.
   Offline suites are versioned and must match their canonical export exactly; a
   corrected bank gets a new version, and old runners only accept their own.
-- Order: `npm test` (and Python checks) → mod compiled against the owned game
-  assemblies → a scripted, zero-inference rehearsal in the real game → at most then
-  the live run.
+- For game trials: relevant automated checks → mod compilation when native code
+  changed → a scripted, zero-inference rehearsal → at most then the live run.
+  Offline-only probes need their own contract/runner checks, not a game launch.
 - Each live trial gets its own ledger and allowance ([MODELS](MODELS.md#ledgers)).
 
 **During and after**
@@ -40,14 +40,17 @@ an authored fixture is not a personality, and a single timing is not a benchmark
   are. Later fixes never rewrite earlier results.
 - **Receipts decide.** Outcomes come from game receipts; a model's claim is recorded
   but not believed.
-- **Persistence**: every milestone passes a paired checkpoint restore and a full cold
-  restart with zero extra model calls. Earlier trial databases must stay byte-identical
+- **Persistence**: game-state milestones verify paired checkpoint restore and full cold
+  restart with zero extra model calls. Offline-only work tests its own persistence
+  where relevant and must not claim native restore verification. Earlier trial databases must stay byte-identical
   (checked by hash).
 - **Review**: an independent read-only Codex review of the final behavioural commit;
   material findings are fixed and re-reviewed. Review reports stay private.
 - **Privacy**: privacy boundaries are proven by fault injection (an injected private
-  field must make the check fail). Saves, databases, screenshots, raw reviews and raw
-  diagnostics stay out of Git; evidence JSON is sanitized.
+  field must make the check fail). Saves, databases, raw reviews and raw
+  diagnostics stay out of Git; evidence JSON is sanitized. Selected inspected
+  player screenshots may be published as diary/site assets; diagnostic captures
+  stay private.
 - **Say what isn't claimed.** Every result lists its limits.
 
 ## Offline checks

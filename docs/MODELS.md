@@ -1,8 +1,8 @@
 # Models
 
 What each model sees, what it may return, and how it is run and accounted for. The
-rule underneath all of it: a model chooses among options it was given; it never gets a
-tool, a game handle or the database, and its prose never becomes an action.
+rule underneath all of it: a model chooses among options it was given; it never gets an
+action tool, a game handle or the database, and its prose never becomes an action.
 
 Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decision.ts`,
 `src/provider-diagnostics.ts`, `src/appraisal.ts`, `src/protected-jev.ts`,
@@ -19,8 +19,10 @@ Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decisi
 | Diary drafts | `moonshotai/kimi-k2` | OpenRouter via OpenClaw `llm-task` | editorial only |
 
 No bare API mode, no Agent SDK, no extracted OAuth tokens. Subscription logins are
-used through their native clients. Usage figures are API-equivalent estimates, not
-cash charges. Billing routes are never switched silently.
+used through their native clients. For native subscription routes, usage figures are API-equivalent estimates, not
+per-call cash charges. Jev uses the paid OpenRouter API: its reported usage cost
+is monetary accounting, not a subscription estimate. Billing routes are never
+switched silently.
 
 ## What a pawn sees
 
@@ -46,9 +48,12 @@ contract. All pawn calls share a short fixed system prompt (`pawnInstructions`, 
 
 ## What a model may return
 
-The JSON schema for each call is generated from the current view, so IDs can only be
-ones that exist right now. The coordinator then validates the answer again against a
-fresh view before anything happens.
+Contextual schemas constrain supplied choice IDs, such as core opportunity IDs,
+reflection agreement/proposal IDs and eating-stack IDs. This is not a guarantee for
+every identifier: offer counter-actions use a static action schema with bounded
+strings for item, patient and bed IDs. A structurally valid counter can be recorded
+without grounded IDs; adoption must pass fresh proposal validation before creating
+an executable offer. Contextual choices are revalidated before application.
 
 ### Offer decisions
 
@@ -96,9 +101,11 @@ Each Claude call is a fresh CLI process:
   the process group (SIGKILL after 1 s); one pending call per backend;
 - the result must be a success, from the expected model only, with at most 2 turns.
 
-**Core formatting recovery.** A core answer may use a third turn only when the stream
+**Core formatting recovery.** A core-planner result may report `num_turns: 3` only when the stream
 proves one narrow pattern: two identified assistant messages, a first StructuredOutput
-call rejected for a schema mismatch, a second valid call, and a final result. Messages
+call rejected for a schema mismatch, a second valid call, and a final result.
+This recognizes provider result-counter semantics, not a third assistant message;
+pawn answers to core questions retain the ordinary guard. Messages
 may span several stream events, but identities must be complete and consistent, no
 message may reopen, and anything else (a third message, malformed blocks, unmatched
 tool results, events after the result) rejects the answer. `--max-turns` stays 2.
@@ -115,10 +122,13 @@ asks one `reflect` question, and the serialized perspective is at most 16,000 by
 
 ## Ledgers
 
-Every live trial has its own policy in `src/decision-trials.ts` (calls and an
-API-equivalent reservation) and a separate SQLite ledger (`TrialBudget`):
+Finite Claude trials have policies in `src/decision-trials.ts`; Jev uses its own
+configured allowance. Both use separate SQLite ledgers (`TrialBudget`):
 
-- each Claude attempt reserves USD 0.10 and each Jev attempt USD 0.002 before the call;
+- each Claude attempt reserves USD 0.10 API-equivalent; each Jev attempt reserves
+  USD 0.002 against its paid API allowance before the call. Jev reservations are
+  conservative local accounting, not a provider-enforced maximum charge; verify
+  pricing before a paid run;
 - failed, invalid and cancelled attempts keep their reservation; reported usage is
   settled even for invalid output;
 - a ledger is bound to one policy and never rolls back with a game save; unused

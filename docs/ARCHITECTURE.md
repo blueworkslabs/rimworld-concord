@@ -70,8 +70,9 @@ save.
   fresh consent; a thread allows at most two revisions.
 - Replacing running work requires consent to the replacement and a confirmed stop of
   the old job before the new one is dispatched.
-- Speech, topics and requests never create jobs. Eating happens only when the pawn
-  itself picks the `eat` option while answering a core question.
+- Speech, topics and requests never create jobs. Concord-directed eating happens only when the pawn
+  itself picks the `eat` option while answering a core question; native self-care
+  can still eat independently.
 - A model failure or timeout leaves the offer pending. It never turns into forced
   obedience or a fallback decision.
 
@@ -118,10 +119,13 @@ The full matrix is in [SOCIAL](SOCIAL.md#who-knows-what).
 
 ### Model isolation
 
-Every call is a fresh CLI process with no tools, no MCP servers, no settings, no
-session persistence, a reduced environment and a fixed model. The output schema is
-built from the IDs that exist right now, and the coordinator validates the answer
-again against a fresh view before applying it. See [MODELS](MODELS.md#isolation).
+Every Claude character call is a fresh CLI process with no action tools, no MCP
+servers, no settings, no session persistence, a reduced environment and a fixed
+model. `StructuredOutput` is a return-format mechanism, not an action tool. Jev
+uses a protected HTTP transport; Luna's offline route uses Codex app-server. Contextual schemas enumerate supplied choice IDs, and the coordinator revalidates
+those choices before application. Counter-action payloads are a documented exception:
+they use bounded strings, and fresh grounding is enforced when adoption creates an
+offer, not when the counter is first recorded. See [MODELS](MODELS.md#isolation).
 
 ### Timing
 

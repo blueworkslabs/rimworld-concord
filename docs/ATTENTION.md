@@ -102,7 +102,9 @@ window.
 - **Continuous** (default): no pauses. Native routines run while the pawn thinks.
 - **Pause at decision** (explicit test mode): the coordinator places a pause claim
   while a pawn decides on an offer, reflects after appraisal, or speaks in a social
-  turn. Core turns and core-question answers never pause.
+  turn. Core turns and core-question answers do not acquire these coordinator pause
+  claims. Trial launchers can separately pause inference, as the recent core trials
+  explicitly do.
 
 A pause claim belongs to one pawn and one epoch, lasts at most 120 s of wall-clock
 time, and at most three coexist. The mod shows a small movable notice using RimWorld's
