@@ -62,13 +62,15 @@ export type Character = {messages?:SocialMessage[];outlook?:PrivateOutlook;id:st
   reflections?:{tick:number;throughSeq:number;backend:string;reason:string}[];
 };
 export type AlternativeRequest = {id:string;pawn:string;agreementId:string;target:string;mapId:number;reason:string;status:'pending'|'offered'|'declined'|'closed';replyReason?:string;proposalId?:string};
-export type Proposal = {replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'deferred'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;rescueMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
+export type ReofferRequest = {id:string;pawn:string;deferredId:string;action:Action;mapId?:number;tick:number;reason:string;status:'pending'|'offered';proposalId?:string};
+export type Proposal = {reofferRequestId?:string;reoffersProposalId?:string;reofferReplyId?:string;replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'deferred'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;rescueMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;agreementProgress?:AgreementProgress;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;
   decide(view:Perspective, signal:AbortSignal):Promise<unknown>;
 }
 export type Domain = {
+  reoffers?:Record<string,ReofferRequest>;
   coreState?:import('./core-planner.js').CoreState;
   exchanges?:Record<string,SocialExchange>;
   eventCursor?:number;crew?:CrewArchive;

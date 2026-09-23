@@ -23,6 +23,7 @@ export function coreWakeSnapshot(v:CoreView):CoreWake[]{
  }
  for(const r of v.requests)wakes.push({sourceId:r.id,kind:'request',value:r.status});
  for(const m of v.messages)if(m.to==='core'&&m.from!=='core')wakes.push({sourceId:m.id,kind:'message',value:m.text});
+ for(const r of v.reoffers)wakes.push({sourceId:r.id,kind:'request',value:'reoffer-requested'});
  for(const q of v.questions)if(['answered','silent','failed'].includes(q.status))wakes.push({sourceId:q.id,kind:'answer',value:q.status});
  return wakes;
 }

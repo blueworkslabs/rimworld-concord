@@ -5,6 +5,7 @@ import type {AttentionView,Reflection} from './attention.js';
 
 /** Provider vocabulary; canonical coordinator actions and persisted history stay unchanged. */
 export const ReflectionChoice=z.discriminatedUnion('choice',[
+ z.object({choice:z.literal('request_fresh_offer'),proposalId:z.string().uuid(),reason:z.string().min(1).max(1000)}).strict(),
  z.object({choice:z.literal('revise_private_outlook'),update:OutlookUpdate,reason:z.string().min(1).max(1000)}).strict(),
  z.object({choice:z.literal('request_rescue_alternative'),agreementId:z.string().uuid(),target:z.string().min(1).max(120),reason:z.string().min(1).max(1000)}).strict(),
  z.object({choice:z.literal('keep_current_activity'),reason:z.string().min(1).max(1000)}).strict(),
@@ -15,6 +16,8 @@ export type ReflectionChoice=z.infer<typeof ReflectionChoice>;
 
 export function reflectionChoices(view:AttentionView){
  const choices:Array<Record<string,unknown>>=[{choice:'keep_current_activity',effect:'Leave current agreement/native activity unchanged. No new consent or job.'}];
+ const deferredIds=(view.deferredOffers??[]).filter(p=>p.pawn===view.pawn.id&&p.status==='deferred').map(p=>p.id);
+ if(deferredIds.length&&!view.character.intention&&!view.character.commitment)choices.push({choice:'request_fresh_offer',proposalIds:deferredIds,effect:'Deliberately tell the core it may offer this deferred work once again, if still grounded. Not consent or a job. You may still refuse, defer or counter the fresh offer. Your reason is communicated, not private reflection.'});
  const received=outlookMessages(view.character);
  if(outlookEvidence(view.character).length||received.length||view.character.outlook)choices.push({choice:'revise_private_outlook',expectedRevision:view.character.outlook?.revision??0,...(received.length?{receivedMessages:received.map(m=>({id:m.id,from:m.from,to:m.to,tick:m.tick})),messageEvidenceRule:'Alternatively cite messageIds from receivedMessages on a note, instead of evidenceSeqs. These preserve exactly what the sender said, not proof it is true. A message-based stance names a cited sender, not someone mentioned in their text. Retain attribution and uncertainty; a note may be revised or removed. No automatic belief change or authority.'}:{}),evidence:outlookEvidence(view.character).map(e=>({seq:e.seq,...(e.subject?{subject:e.subject}:{})})),effect:'Replace only your private outlook; no speech, trait edit, withdrawal, consent or job. Cite own supplied experiences or retained evidence. The whole notes array replaces the previous outlook: retain still-relevant notes or revise/remove them. At most four notes. A stance must name a subject in its cited evidence. expectedRevision must match the supplied revision. Updates and their reasons stay private and are optional; do not manufacture a change.'});
  if(view.intention&&view.intention.id===view.character.intention&&view.intention.pawn===view.pawn.id&&view.intention.standing?.status==='running')
@@ -34,10 +37,11 @@ export function validateReflectionChoice(choice:ReflectionChoice,view:AttentionV
  const allowed=reflectionChoices(view).find(x=>x.choice===choice.choice);
  if(!allowed||choice.choice==='withdraw_current_agreement'&&allowed.agreementId!==choice.agreementId||
   choice.choice==='request_rescue_alternative'&&(allowed.agreementId!==choice.agreementId||!(allowed.targetIds as string[]).includes(choice.target))||
-  choice.choice==='answer_pending_proposal'&&!(allowed.proposalIds as string[]).includes(choice.proposalId))throw Error('Reflection choice outside supplied scope');
+  (choice.choice==='answer_pending_proposal'||choice.choice==='request_fresh_offer')&&!(allowed.proposalIds as string[]).includes(choice.proposalId))throw Error('Reflection choice outside supplied scope');
 }
 export function reflectionFromChoice(choice:ReflectionChoice):Reflection {
  switch(choice.choice){
+  case 'request_fresh_offer':return {kind:'request_reoffer',proposalId:choice.proposalId,reason:choice.reason};
   case 'revise_private_outlook':return {kind:'revise_outlook',update:choice.update,reason:choice.reason};
   case 'request_rescue_alternative':return {kind:'request_rescue',agreementId:choice.agreementId,target:choice.target,reason:choice.reason};
   case 'keep_current_activity':return {kind:'continue',reason:choice.reason};
@@ -76,6 +80,8 @@ export function reflectionChoiceSchema(view:AttentionView,decisionSchema:Record<
     properties.agreementId={type:'string',const:c.agreementId};required.push('agreementId');break;
    case 'withdraw_current_agreement':
     properties.agreementId={type:'string',const:c.agreementId};required.push('agreementId');break;
+   case 'request_fresh_offer':
+    properties.proposalId={type:'string',enum:c.proposalIds};required.push('proposalId');break;
    case 'answer_pending_proposal':
     properties.proposalId={type:'string',enum:c.proposalIds};properties.decision=decisionSchema;
     required.push('proposalId','decision');break;

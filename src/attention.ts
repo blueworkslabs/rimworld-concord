@@ -10,6 +10,7 @@ import type { Coordinator } from './coordinator.js';
  * No raw move, actor override, admin tool, or invented proposal is accepted here.
  */
 export const Reflection=z.discriminatedUnion('kind',[
+  z.object({kind:z.literal('request_reoffer'),proposalId:z.string().uuid(),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('revise_outlook'),update:OutlookUpdate,reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('request_rescue'),agreementId:z.string().uuid(),target:z.string().min(1).max(120),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('withdraw'),reason:z.string().min(1).max(1000)}).strict(),
@@ -17,7 +18,7 @@ export const Reflection=z.discriminatedUnion('kind',[
   z.object({kind:z.literal('proposal'),proposalId:z.string().uuid(),decision:Decision}).strict()
 ]);
 export type Reflection=z.infer<typeof Reflection>;
-export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];intention?:Proposal;agreementProgress?:AgreementProgress;histories?:Record<string,Proposal[]>;requests?:AlternativeRequest[]};
+export type AttentionView={pawn:Pawn;character:Character;events:NativeEvent[];proposals:Proposal[];deferredOffers?:Proposal[];intention?:Proposal;agreementProgress?:AgreementProgress;histories?:Record<string,Proposal[]>;requests?:AlternativeRequest[]};
 export interface AttentionBackend {
   readonly name:string;
   reflect(view:AttentionView,signal:AbortSignal):Promise<unknown>;
