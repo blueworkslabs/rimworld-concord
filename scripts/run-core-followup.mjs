@@ -27,7 +27,7 @@ const before=summary();
 if(!cold&&(before.core.attempts||before.pawns.attempts))throw Error('Fresh trial required');
 const quote=s=>"'"+s.replaceAll("'","'\\''")+"'";
 const env=Object.fromEntries(['PATH','HOME','LANG'].filter(k=>process.env[k]).map(k=>[k,process.env[k]]));
-const digestCode="const fs=require('fs'),p=require('path'),h=require('crypto').createHash('sha256'),d=process.argv[1];for(const sub of ['src','trials'])for(const n of fs.readdirSync(p.join(d,sub)).filter(n=>n.endsWith('.js')).sort()){h.update(sub+'/'+n);h.update(fs.readFileSync(p.join(d,sub,n)));}console.log(h.digest('hex'));";
+const digestCode="const fs=require('fs'),p=require('path'),h=require('crypto').createHash('sha256'),d=process.argv[1];for(const sub of ['src','trials'])for(const n of fs.readdirSync(p.join(d,sub)).filter(n=>n.endsWith('.js')).sort()){h.update(sub+'/'+n);h.update(fs.readFileSync(p.join(d,sub,n)));}h.update('scripts/run-core-followup-lab.sh');h.update(fs.readFileSync(p.resolve(d,'../scripts/run-core-followup-lab.sh')));console.log(h.digest('hex'));";
 const local=execFileSync(process.execPath,['-e',digestCode,new URL('../dist/',import.meta.url).pathname],{env,encoding:'utf8'}).trim();
 const remote=execFileSync('ssh',['-o','BatchMode=yes',config.sshTarget,'node -e '+quote(digestCode)+' '+quote(config.remoteRepo+'/dist')],{env,timeout:15000,encoding:'utf8'}).trim();
 if(local!==remote)throw Error('Remote runner differs from local build');

@@ -19,10 +19,11 @@ import {CORE_FOLLOWUP_POLICY as P,followupInferencePassed} from './core-followup
 import {retainedDomain} from './retention-policy.js';
 if(process.env.CONCORD_CORE_FOLLOWUP_LOCKED!=='1')throw Error('Use scripts/run-core-followup-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,cold=process.argv.includes('--cold');
-const scripted=process.argv.includes('--scripted'),run=1;
+const scripted=process.argv.includes('--scripted');
 const pausedInference=true;let operationDeadline=Date.now()+P.wallMs;const b=new LabBridge(undefined,()=>operationDeadline);
 const runId=process.env.CONCORD_TRIAL_ID;
 if(!runId||!/^[0-9a-f-]{36}$/.test(runId)||process.env.CONCORD_TRIAL_POLICY!=='core-followup-v1')throw Error('Trial identity required');
+const run=runId;
 const receipt:any={passed:false,runId,policy:'core-followup-v1',mode:scripted?'scripted':'live-paused',run,views:[],rounds:[],samples:[]};
 const guard=new NeedsRunGuard(),controller=new AbortController(),end=operationDeadline;
 let c:Coordinator|undefined,s:Store|undefined,db:string|undefined,connected=true,coreAttempts=0,pawnAttempts=0,inferenceDeadline=end;
@@ -55,7 +56,7 @@ try{
   db=root+'/.runtime/core-followup-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();
   await c.initializeCore('Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan.');
   receipt.initial=await b.state();assert(receipt.initial.pawns.every((p:any)=>!p.downed));receipt.initialPerspective=await c.corePerspective();
-  if(run===1)await capture('initial',true);
+  await capture('initial',true);
   await c.configureCoreSchedule({maxAttempts:P.coreCalls,cooldownTicks:P.cooldownTicks,windowTicks:P.windowTicks});
   const nativeLimit=scripted?P.scriptedNativeMs:P.nativeMs;let nativeElapsed=0,midpointCaptured=false;
   const startTick=(await b.state()).ticks;
@@ -66,7 +67,7 @@ try{
    await c.advanceIntentions(()=>!guard.stopped&&nativeRemaining()>0);guard.check();
    const state=await b.state();guard.sample(state.paused,state.ticks,startTick);
    receipt.samples.push({tick:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,food:p.facts?.find(f=>f.key==='need'&&f.value==='Food')?.level}))});
-   if(run===1&&!midpointCaptured&&nativeRemaining()<=nativeLimit/2){midpointCaptured=true;await capture('midpoint');}
+   if(!midpointCaptured&&nativeRemaining()<=nativeLimit/2){midpointCaptured=true;await capture('midpoint');}
    const view=await c.corePerspective();guard.check();
    if(nativeRemaining()<=0)break;
    if(coreAdmission(c.inspect().coreState!.schedule!,view).ready){
@@ -84,7 +85,7 @@ try{
   }
   await b.admin('pause');guard.check();await c.reconcile();guard.check();
   receipt.nativeElapsedMs=nativeElapsed+(nativeStarted===undefined?0:Math.max(0,Date.now()-nativeStarted));
-  if(run===1)await capture('final');
+  await capture('final');
   await finish();guard.check();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();receipt.cleanup=await stopTrialWork(c);assert.equal(receipt.cleanup.errors.length,0);guard.check();receipt.summary=workSummary(c.inspect());receipt.production={campfires:Object.values(c.inspect().outcomes).filter(r=>r.kind==='build'&&r.status==='completed').length,meals:Object.values(c.inspect().outcomes).filter(r=>r.kind==='cook'&&r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0)};
   receipt.inferencePassed=followupInferencePassed(receipt.rounds);
   if(scripted){assert.equal(receipt.rounds[0]?.answer?.status,'delivered');assert.equal(receipt.rounds[1]?.result?.status,'applied');assert.equal(c.inspect().coreState?.turns[1]?.choice?.action.kind,'wait');assert.equal(Object.keys(c.inspect().proposals).length,0);}
