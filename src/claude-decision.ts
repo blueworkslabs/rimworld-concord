@@ -1,5 +1,5 @@
 import {CoreChoice,coreInstructions,coreChoiceSchema,corePrompt,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
-import {providerResultMetadata,validationIssues} from './provider-diagnostics.js';
+import {ProviderStreamCounts,providerResultMetadata,validationIssues} from './provider-diagnostics.js';
 import { spawn,execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdtemp,mkdir } from 'node:fs/promises';
@@ -66,7 +66,8 @@ export class ClaudeDecisionBackend {
  readonly name=CLAUDE_MODEL;
  readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string;authoredSize?:ReturnType<typeof promptAccounting>;providerChoice?:ReflectionChoice}>=[];
  readonly requestSizes:Array<{mode:string;authoredSize:ReturnType<typeof promptAccounting>}>=[];
- readonly rawResponses:Array<{mode:string;structuredOutput:unknown;result:ReturnType<typeof providerResultMetadata>}>=[];
+ readonly rawResponses:Array<{mode:string;structuredOutput:unknown;stream:ProviderStreamCounts['counts'];result:ReturnType<typeof providerResultMetadata>}>=[];
+ readonly streamDiagnostics:Array<{mode:string;counts:ProviderStreamCounts['counts']}>=[];
  readonly failures:Array<{stage:string;attemptReserved:boolean;cancelled:boolean;issues?:ReturnType<typeof validationIssues>}>=[];
  private budget:TrialBudget;
  private pending=false;
@@ -114,9 +115,10 @@ export class ClaudeDecisionBackend {
      stage='setup';signal.throwIfAborted();await mkdir(this.options.scratchRoot,{recursive:true});
      const cwd=await mkdtemp(join(this.options.scratchRoot,'pawn-'));
      stage='budget';id=this.budget.reserve(0.10);this.requestSizes.push({mode,authoredSize});const began=Date.now();
-     stage='transport';const events=await this.invoke(binary,args,prompt,cwd,env,signal,
+     const stream=new ProviderStreamCounts();this.streamDiagnostics.push({mode,counts:stream.counts});
+     stage='transport';const events=await this.invoke(binary,args,prompt,cwd,env,signal,stream,
        cost=>this.budget.settle(id!,cost),
-       raw=>this.rawResponses.push({mode,structuredOutput:(raw as {structured_output?:unknown}).structured_output??null,result:providerResultMetadata(raw,CLAUDE_MODEL)}));
+       raw=>this.rawResponses.push({mode,stream:{...stream.counts},structuredOutput:(raw as {structured_output?:unknown}).structured_output??null,result:providerResultMetadata(raw,CLAUDE_MODEL)}));
      stage='parsing';const parsed=parseClaudeResult(events.result,mode);
      const receipt={mode,authoredSize,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'rejected',...(parsed.providerChoice?{providerChoice:parsed.providerChoice}:{})};
      this.receipts.push(receipt);
@@ -126,7 +128,7 @@ export class ClaudeDecisionBackend {
    } catch(error) {this.failures.push({stage,attemptReserved:!!id,cancelled:signal.aborted,...(stage==='parsing'||stage==='validation'?{issues:validationIssues(error)}:{})});throw Error((id?'Live decision unavailable; attempt retained':'Claude decision preflight failed')+' ['+stage+']');}
    finally {this.pending=false;}
  }
- private invoke(binary:string,args:string[],prompt:string,cwd:string,env:NodeJS.ProcessEnv,signal:AbortSignal,onCost:(cost:number)=>void,onResult:(result:unknown)=>void):Promise<{result:unknown;tools:string[]}> {
+ private invoke(binary:string,args:string[],prompt:string,cwd:string,env:NodeJS.ProcessEnv,signal:AbortSignal,stream:ProviderStreamCounts,onCost:(cost:number)=>void,onResult:(result:unknown)=>void):Promise<{result:unknown;tools:string[]}> {
    return new Promise((resolve,reject)=>{
      const child=spawn(binary,args,{cwd,env,stdio:['pipe','pipe','pipe'],detached:true});
      let buffer='',bytes=0,result:unknown,init=false,tools:string[]=[],failure=false;
@@ -139,7 +141,7 @@ export class ClaudeDecisionBackend {
        bytes+=chunk.length;if(bytes>262144){stop();return;}buffer+=chunk.toString();
        for(;;){const end=buffer.indexOf('\n');if(end<0)break;const line=buffer.slice(0,end);buffer=buffer.slice(end+1);if(!line.trim())continue;
          try {
-           const event=JSON.parse(line);
+           const event=JSON.parse(line);stream.observe(event);
            if(event.type==='system'&&event.subtype==='init'){if(init)throw Error();verifyClaudeInit(event);init=true;tools=event.tools;}
            if(event.type==='system'&&String(event.subtype).startsWith('hook_'))throw Error();
            if(event.type==='assistant'&&event.message?.content?.some((c:any)=>c.type==='tool_use'&&c.name!=='StructuredOutput'))throw Error();

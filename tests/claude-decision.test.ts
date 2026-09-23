@@ -215,3 +215,19 @@ for(const trial of ['retention-game-v1','retention-indirect-v1'] as const)test(t
  }finally{b?.close();await rm(dir,{recursive:true,force:true});}
 });
 
+
+test('reported third turn remains rejected; text-free stream counters and charges survive parsing failure',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'concord-turn-diagnostic-')),binary=join(dir,'fake');
+ const events=[init,{type:'assistant',message:{id:'one',content:[{type:'tool_use',name:'StructuredOutput',input:{secret:'DO NOT RETAIN'}}]}},
+ {type:'user',message:{content:[{type:'tool_result',is_error:true,content:'PRIVATE PROVIDER TEXT'}]}},
+ {type:'assistant',message:{id:'two',content:[{type:'tool_use',name:'StructuredOutput',input:{secret:'DO NOT RETAIN'}}]}},
+ {type:'user',message:{content:[{type:'tool_result',is_error:false,content:'PRIVATE PROVIDER TEXT'}]}},{...result,num_turns:3}];
+ await writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\n'+events.map(e=>'console.log('+JSON.stringify(JSON.stringify(e))+');').join('\n'),{mode:0o700});
+ const b=new ClaudeDecisionBackend({binary,ledgerPath:join(dir,'ledger.db'),scratchRoot:join(dir,'scratch')});
+ try{
+  const view={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Wait',health:1},character:{id:'A',name:'Ada',memories:[]},proposal:{id:'d8caec56-f2fa-4b50-a58e-f3a7588a3d20',pawn:'A',action:{kind:'move' as const,x:2,z:1},reason:'test',status:'pending' as const}};
+  await assert.rejects(b.decide(view,new AbortController().signal));assert.equal(b.failures[0]!.stage,'parsing');
+  assert.deepEqual(b.rawResponses[0]!.stream,{assistantEvents:2,assistantMessages:2,userEvents:2,structuredOutputCalls:2,toolResults:2,toolErrors:1,resultEvents:1});
+  assert.equal(b.rawResponses[0]!.result.turns,3);assert.equal(b.summary().attempts,1);assert.equal(b.summary().estimatedUsageUSD,result.total_cost_usd);
+ }finally{b.close();await rm(dir,{recursive:true,force:true});}
+});

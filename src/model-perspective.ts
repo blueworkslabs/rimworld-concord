@@ -1,3 +1,4 @@
+import {foodKnowledge} from './food-observation.js';
 import type {Pawn,Perspective,Proposal} from './protocol.js';
 import type {AttentionView} from './attention.js';
 import {reflectionChoices} from './reflection-choice.js';
@@ -17,7 +18,7 @@ export function modelPerspective<T extends {pawn:Pawn}>(view:T) {
    meaning:name==='Food'?'0 = empty/starving; 1 = full/well fed. Higher is LESS hunger.':name==='Rest'?'0 = exhausted; 1 = fully rested. Higher is LESS tiredness.':name==='Mood'?'0 = lowest mood; 1 = highest mood. Mood alone is not a diagnosis or proof of a mental break.':'Normalized native need-meter fill: 0 = empty, 1 = full. Do not infer a diagnosis.',
    ...(!known?{unknownReason:values.length===0?'not observed':values.length>1?'conflicting observations':'invalid reading'}:{})};
  });
- return {...copy,pawn:{...copy.pawn,facts:facts.filter(f=>f.key!=='need'),needs}};
+ return {...copy,...(copy.pawn.foodObservation?{foodKnowledge}:{}),pawn:{...copy.pawn,facts:facts.filter(f=>f.key!=='need'),needs}};
 }
 function proposalChoices(p:Proposal){return [
  {choice:'accept',effect:p.replacesAgreementId?'Consent to replace the named agreement: stop old work before new dispatch, only after confirmed cancellation.':'Consent to this exact offered action. Not a claim it has started or completed.'},

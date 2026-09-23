@@ -22,3 +22,21 @@ export function validationIssues(error:unknown):{code:string;path:(string|number
  if(error instanceof Error&&error.message==='Unexpected model route')return [{code:'unexpected_model_route',path:['modelUsage']}];
  return [{code:'unclassified',path:[]}];
 }
+
+/** Event counts, NOT API-round-trip counts. Never retain text, tool inputs/results or IDs. */
+export class ProviderStreamCounts {
+ private messages=new Set<string>();
+ readonly counts={assistantEvents:0,assistantMessages:0,userEvents:0,structuredOutputCalls:0,toolResults:0,toolErrors:0,resultEvents:0};
+ observe(event:any){
+  const inc=(k:keyof typeof this.counts)=>{this.counts[k]=Math.min(4096,this.counts[k]+1);};
+  if(event?.type==='assistant'){
+   inc('assistantEvents');const id=event.message?.id;
+   if(typeof id==='string'&&id.length<=200){if(!this.messages.has(id)&&this.messages.size<4096){this.messages.add(id);inc('assistantMessages');}}
+   if(Array.isArray(event.message?.content))for(const c of event.message.content)if(c?.type==='tool_use'&&c.name==='StructuredOutput')inc('structuredOutputCalls');
+  }
+  if(event?.type==='user'){
+   inc('userEvents');if(Array.isArray(event.message?.content))for(const c of event.message.content)if(c?.type==='tool_result'){inc('toolResults');if(c.is_error===true)inc('toolErrors');}
+  }
+  if(event?.type==='result')inc('resultEvents');
+ }
+}
