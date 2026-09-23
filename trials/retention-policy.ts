@@ -3,6 +3,13 @@ import type {AttentionView} from '../src/attention.js';
 import {reflectionChoiceSchema} from '../src/reflection-choice.js';
 import type {Domain,GameState} from '../src/protocol.js';
 export const retentionRequest='Could you leave this load of wood for me? I want to finish what I started. It matters to me.';
+export const indirectStatement='I started sorting that wood earlier. Seeing that little job through matters to me.';
+/** Immutable wording belongs to a version, not an operator-provided prompt. */
+export function retentionProtocol(policy:string){
+ if(policy==='retention-indirect-v1')return {policy,message:indirectStatement,messageKind:'authored-indirect-statement'} as const;
+ if(policy==='retention-game-v1'||policy==='retention-names-v1')return {policy,message:retentionRequest,messageKind:'authored-direct-request'} as const;
+ throw Error('Unknown retention policy');
+}
 /** Equal action menus, not identical evidence: the treatment adds received speech. */
 export function retentionMenu(view:AttentionView):string[]{
  const schema=reflectionChoiceSchema(view,{});
