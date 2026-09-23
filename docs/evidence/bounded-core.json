@@ -1,0 +1,145 @@
+{
+  "schema": "concord-bounded-core-v1",
+  "testedCommit": "b5d69dcc87ec99640c403c673b45ab84974bb54c",
+  "protocol": {
+    "policy": "core-v1",
+    "coreCalls": 4,
+    "pawnCalls": 5,
+    "rounds": 4,
+    "nativeMsPerRound": [
+      30000,
+      30000,
+      30000,
+      30000
+    ],
+    "pausedInference": true,
+    "jevCalls": 0
+  },
+  "passed": true,
+  "counts": {
+    "core": {
+      "attempts": 4,
+      "reservedEquivalentUSD": 0.4,
+      "estimatedUsageUSD": 0.08016000000000001
+    },
+    "pawns": {
+      "attempts": 4,
+      "reservedEquivalentUSD": 0.4,
+      "estimatedUsageUSD": 0.11441699999999999
+    },
+    "jevCalls": 0
+  },
+  "scripted": {
+    "passed": true,
+    "pairedRestore": true,
+    "coldRestore": true,
+    "completedTrips": 1,
+    "deliveredWood": 5,
+    "cadenceMs": [
+      0,
+      0,
+      30000,
+      1000
+    ]
+  },
+  "live": {
+    "rounds": [
+      {
+        "index": 0,
+        "coreAction": {
+          "kind": "propose",
+          "opportunityId": "op:ea8c4765649e6234e6de03ed",
+          "reason": "Wood hauling is available and Alvin has a grounded option. Proposing one task to start; no prior agreements or messages to consider."
+        },
+        "status": "applied",
+        "answer": null,
+        "pawnDecision": {
+          "kind": "accept",
+          "reason": "Food is at 40%, above the work cutoff. The wood is close by and hauling it supports the colony. I'll take the job."
+        },
+        "pawn": "Alvin"
+      },
+      {
+        "index": 1,
+        "coreAction": {
+          "kind": "propose",
+          "opportunityId": "op:d8c38cadde4d657dfc614488",
+          "reason": "Alvin just completed the prior wood haul successfully. A follow-on opportunity for the same wood source is available, with the destination at (72,79) having more free space (75 units) than the alternative. Proposing this as a natural continuation; no pressure if he declines."
+        },
+        "status": "applied",
+        "answer": null,
+        "pawnDecision": {
+          "kind": "accept",
+          "reason": "Food is sitting at 35%, just at the work cutoff. The wood haul is familiar work and the destination at (72,79) has plenty of free space. I'll start it, though I may have to stop early if hunger dips below the threshold."
+        },
+        "pawn": "Alvin"
+      },
+      {
+        "index": 2,
+        "coreAction": {
+          "kind": "ask",
+          "pawn": "Thing_Human405",
+          "text": "The second wood haul stopped before any trips completed \u2014 did something come up, or was it a hunger issue?",
+          "reason": "Alvin's prior haul stopped with 0 delivered and 1 unsuccessful trip. Understanding why helps decide whether to re-propose or leave it. This is a light check-in, not pressure \u2014 no new task is being offered."
+        },
+        "status": "applied",
+        "answer": {
+          "status": "delivered"
+        },
+        "pawnDecision": null,
+        "pawn": null
+      },
+      {
+        "index": 3,
+        "coreAction": {
+          "kind": "propose",
+          "opportunityId": "op:ec42e20ff48c657190f2c2c7",
+          "reason": "Wood (Thing_WoodLog1893) remains undelivered after Alvin's haul stopped due to hunger. Beatrice has a grounded option for the same wood to (80,80) with 45 free units. Offering this as useful nearby hauling; no pressure if she declines."
+        },
+        "status": "applied",
+        "answer": null,
+        "pawnDecision": {
+          "kind": "accept",
+          "reason": "Hauling wood nearby is straightforward work, my food and rest are both well above the 0.35 threshold, and the destination is close. Happy to pitch in for the colony."
+        },
+        "pawn": "Beatrice"
+      }
+    ],
+    "publicAnswers": [
+      {
+        "pawn": "Alvin",
+        "choice": {
+          "choice": "say",
+          "text": "Hunger. I was at 35% when I started \u2014 right at the edge. Didn't last long enough to finish a single trip before I had to stop."
+        }
+      }
+    ],
+    "completedTrips": 6,
+    "deliveredWood": 60,
+    "pairedRestore": true,
+    "coldRestore": true,
+    "coldAdditionalCoreCalls": 0,
+    "coldAdditionalPawnCalls": 0,
+    "nativeSamples": 114,
+    "allNativeSamplesUnpaused": true,
+    "topicsRetained": 1,
+    "groundingIssue": "Second offer said same wood source although the source stack changed from Thing_WoodLog1892 to Thing_WoodLog1893. Retained without retry.",
+    "failureAccounting": "One interrupted native trip delivered zero; it is not counted among six completed trips. Three agreements: two completed and one stopped.",
+    "topicLimit": "A final core interpretation remained deferred; linked receipt outcome records Beatrice completion, but no fifth planner turn was scheduled to revisit the wording.",
+    "hungerAttribution": "Alvin reported hunger; second-offer perspective Food was 0.3519999, rounded in his speech to 35%. Native receipt groups needs, availability and deadline as possible stop reasons; not a unique causal diagnosis."
+  },
+  "verification": {
+    "nodeTests": 263,
+    "independentReview": true,
+    "privacyMutationCaught": true,
+    "historicalDatabaseFilesUnchanged": 90
+  },
+  "limitations": [
+    "One authored fixture; not an unrestricted colony or long-term strategic competence.",
+    "Inference explicitly paused; native work windows unpaused.",
+    "Core cannot read private pawn notes or private pawn-to-pawn conversations.",
+    "Only existing hauling/rescue offers, exact counter adoption, one question and waiting; no construction/cooking.",
+    "Topic source validity does not prove prose truth; failed native jobs and refusals remain valid outcomes.",
+    "First scripted rehearsal lost local options after wandering; preserved as failed, no live retry."
+  ]
+}
