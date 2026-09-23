@@ -110,3 +110,7 @@ a bounded live-core milestone. This supersedes the earlier core-later ordering.
 Keep scripted behavior as a regression baseline. The next target is grounded
 follow-through, not more chatter, omniscient planning or forced cooperation.
 No new physical capability follows merely from replacing the script with a model.
+
+## First bounded-core result (2026-09-23)
+
+The [first live core](BOUNDED_CORE.md) followed a stopped hauling agreement with a question, retained the pawn’s explanation, and proposed the remaining stack to another pawn with fresh consent. Six trips delivered sixty wood; the interrupted attempt remains separate. Core state and outcomes survived cold restore. A source-identity wording error and a deferred topic awaiting a later turn remain explicit. Keep the first scope narrow; improve task identity and follow-up status before adding physical capabilities or claiming continuous planning.

@@ -22,15 +22,15 @@ Astra owns implementation; Fable owns the unbriefed player-panel read and feedba
 The checkpoint is complete, including recovered-report failure evidence. The
 receipt-size boundary has been repaired without repeating the live run.
 
-## Next: bounded live core
+## Bounded live core: first slice
 
-Build a separate core perspective from addressed/shared communication, agreement
-outcomes and explicitly grounded opportunities. Never expose pawn outlooks,
-private memories or an omniscient diagnostic snapshot. Let the core propose
-supported work, ask a bounded question or wait, with retained unresolved goals
-and reasons for blocked/deferred work. Pawns still own consent and withdrawal.
-Do not infer construction/cooking capability from conversation. Freeze a finite
-trial before activation; this roadmap alone enables no unattended inference.
+The [first bounded core](BOUNDED_CORE.md) implements a separate perspective from addressed/shared communication, agreement
+outcomes and explicitly grounded opportunities. Pawn outlooks,
+private memories and omniscient diagnostics remain excluded. The core can propose
+supported work, adopt a counter for fresh consent, ask one question or wait, with
+retained sourced topics and reasons for blocked/deferred work. Pawns still own consent and withdrawal.
+Do not infer construction/cooking capability from conversation. The frozen first trial uses four core attempts, at most five pawn attempts and
+explicitly paused inference. This roadmap enables no unattended inference.
 
 ## Continuing pawn work
 

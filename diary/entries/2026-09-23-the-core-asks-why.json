@@ -1,0 +1,56 @@
+{
+  "slug": "the-core-asks-why",
+  "title": "The Core Asks Why",
+  "date": "2026-09-23",
+  "summary": "The first live core followed a stopped haul with a question, then sought another pawn’s consent to finish the work.",
+  "sections": [
+    {
+      "heading": "What We Built",
+      "paragraphs": [
+        "The bounded core has completed its first live trial, after the integration playtest and reader feedback prompted a change of direction. It reads addressed communication, agreement outcomes and local physical opportunities—not private thoughts or unshared pawn-to-pawn speech. It proposes, adopts counters for fresh consent, asks one question, or waits. Topics keep their source attribution and links to receipt outcomes."
+      ]
+    },
+    {
+      "heading": "What the Rehearsal Caught",
+      "paragraphs": [
+        "Scripted rehearsal walked through a question, a smaller counter, fresh acceptance and five wood delivered; paired and cold restore passed. The first run failed when wandering removed the prescribed local opportunity. That failure remains preserved. Shorter pre-offer gaps let the rehearsal cover the handoff without changing the live schedule. Neither rehearsal used live models."
+      ]
+    },
+    {
+      "heading": "What the Live Trial Showed",
+      "paragraphs": [
+        "Alvin accepted three trips and delivered thirty wood. A second agreement on another stack stopped after an interrupted trip delivered zero. The core noticed, recorded an unresolved topic and asked why. Alvin attributed the stop to hunger. The core then offered that remaining stack to Beatrice at a different grounded storage cell; she independently accepted and delivered thirty wood. Total: six completed trips, sixty wood, plus one interrupted trip separately. Three agreements, two completed, one stopped.",
+        "Four core calls and four pawn calls were used, below the five-pawn allowance; zero Jev and no retries. Inference was explicitly paused with four thirty-second native windows; 114 native samples ran unpaused. This is not continuous-inference proof.",
+        "263 Node tests pass. Independent Codex review and focused re-reviews are complete. Paired and full cold restore preserved core topic, conversation and outcomes with zero extra inference."
+      ]
+    },
+    {
+      "heading": "Where It Still Frays",
+      "paragraphs": [
+        "A grounding error remains: the second offer called it the same wood source, but the native source stack ID had changed. A source-valid topic is still interpretation, not verified truth. The final topic stayed deferred; the linked receipt showed Beatrice's completion, but no fifth planning turn was scheduled. No cooking, construction or new physical actions were added. One short authored fixture does not establish general strategy or mature personality. The scripted planner remains our regression baseline.",
+        "Clearer task identity and explicit follow-up status are next; continuous core timing remains unproved. The earlier integration report-size failure was repaired separately in PR38."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Bounded core PR39",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/39"
+    },
+    {
+      "label": "Integration checkpoint PR38",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/38"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/2026-09-23-core-question.png",
+      "alt": "Saved Concord log showing the core asking Alvin why his second haul stopped, with completed and stopped agreements above.",
+      "caption": "Unaltered player view after the live trial and cold restore. The log is filtered to messages and scrolled to the core’s question; the board distinguishes completed work from Alvin’s stopped agreement."
+    }
+  ]
+}

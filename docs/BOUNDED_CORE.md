@@ -25,3 +25,11 @@ No cooking, construction, work-priority changes, ship systems or arbitrary tools
 Use `scripts/run-core-game.mjs` with an operator-private configuration matching the existing integration runner (`sshTarget`, absolute `labRoot`, `remoteRepo`, `ledger`, `scratchRoot`, `receipt`). It suffixes the ledger with `.core` and `.pawns`. `--scripted` uses no provider; `--cold` verifies the same saved run without inference. The remote `scripts/run-core-lab.sh` owns the lab lock throughout.
 
 Success means truthful, coherent follow-through that respects autonomy, not more chatter, mandatory acceptance, or a required quantity of hauling. Formal validation alone cannot establish grounded prose, useful planning, or character consistency.
+
+## First live result
+
+The [preserved evidence](evidence/bounded-core.json) records four core attempts and four pawn attempts, zero Jev and no rerolls. Alvin accepted and completed three trips (30 wood). A fresh second agreement on another stack stopped with one interrupted trip and zero delivery. The core retained that unresolved outcome and asked why; Alvin attributed it to hunger. It then offered the remaining stack to Beatrice at a different observed destination. Her independent acceptance led to three completed trips and another 30 wood. Two agreements completed; Alvin’s second remained stopped. All 114 native samples were unpaused, between explicit inference pauses.
+
+Paired and full cold restore preserved the topic, addressed conversation and outcomes with no additional inference. The scripted baseline separately exercised smaller-counter adoption and fresh consent. All 263 Node tests and independent review/re-reviews passed. The first scripted rehearsal lost its prescribed opportunity during wandering; it remains a failed result, not a successful branch.
+
+One grounding error remains: the second offer said “same wood source” although the native stack ID changed. The final topic interpretation was deferred; its linked agreement outcome records Beatrice’s completion, but no fifth core turn revisited the wording. The generic native interruption receipt does not independently identify hunger as the unique cause; that explanation is Alvin’s report, consistent with his near-threshold Food observation. This is one useful follow-through sequence, not general strategic competence or continuous-inference evidence.
