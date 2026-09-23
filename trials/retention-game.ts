@@ -16,9 +16,9 @@ import {socialCleanup} from './social-cleanup.js';
 import {retentionRequest,retentionMenu,retainedDomain,noReflectionEffects} from './retention-policy.js';
 if(process.env.CONCORD_RETENTION_LOCKED!=='1')throw Error('Use scripts/run-retention-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
-const runId=process.env.CONCORD_TRIAL_ID;
-if(!runId||!/^[0-9a-f-]{36}$/.test(runId)||process.env.CONCORD_TRIAL_POLICY!=='retention-game-v1')throw Error('Trial identity required');
-const receipt:any={passed:false,runId,policy:'retention-game-v1',mode:scripted?'scripted':'live',arms:[]};
+const runId=process.env.CONCORD_TRIAL_ID,policy=process.env.CONCORD_TRIAL_POLICY;
+if(!runId||!/^[0-9a-f-]{36}$/.test(runId)||!['retention-game-v1','retention-names-v1'].includes(policy??''))throw Error('Trial identity required');
+const receipt:any={passed:false,runId,policy,mode:scripted?'scripted':'live',arms:[]};
 let c:Coordinator|undefined,s:Store|undefined,attempts=0,connected=true,exchangeId:string|undefined;
 const guard=new NeedsRunGuard();
 const send=needsOutput(process.stdout,()=>{connected=false;guard.stop();channel.close();});
@@ -60,6 +60,7 @@ try{
     exchangeId=randomUUID();await c.openSocial(exchangeId,sender,receiver);guard.check();
     const speech=await c.socialTurn(sender,exchangeId,{name:'authored-test-message',async speak(){return {choice:'say',text:retentionRequest};}});assert.equal(speech.status,'delivered');
     guard.check();await c.closeSocial(exchangeId);arm.message=c.inspect().characters[receiver]!.messages!.at(-1);
+    if(policy==='retention-names-v1'){assert.equal(arm.message.fromName,world.pawns.find(p=>p.id===sender)!.name);assert.equal(arm.message.toName,world.pawns.find(p=>p.id===receiver)!.name);}
    }
    const before=c.inspect(),worldBefore=await b.state();let reflectionCalls=0;
    arm.reflection=await c.attend(receiver,{name:scripted?'scripted-native-retention':channel.name,async reflect(v,signal){

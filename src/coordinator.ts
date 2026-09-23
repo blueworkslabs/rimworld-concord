@@ -1,3 +1,4 @@
+import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
 import {recordCrew,crewReport,agreementProgress} from './crew-log.js';
@@ -86,7 +87,10 @@ export class Coordinator {
     const cursor=this.domain.eventCursor??0;
     const events=(game.events??[]).filter(e=>e.seq>cursor).sort((a,b)=>a.seq-b.seq);
     if(events.length && events[0]!.seq>cursor+1) this.commit('native-event-gap','operator',{from:cursor+1,to:events[0]!.seq-1});
-    for(const event of events) {
+    for(const rawEvent of events) {
+      const own=game.pawns.find(p=>p.id===rawEvent.pawn);
+      const subject=own&&observedPeople(game,own).find(p=>p.id===rawEvent.subject);
+      const event={...rawEvent,...(subject?{subjectName:subject.name}:{})};
       const character=this.domain.characters[event.pawn];
       if(!character) continue;
       const {next,interrupt}=nativeAttention(event);
@@ -173,9 +177,9 @@ export class Coordinator {
         const game=await this.current();this.ingest(game);combined.throwIfAborted();
         const e=this.domain.exchanges?.[id];
         if(!e||e.status!=='running'||e.turn!==prepared.view.exchange.turn||game.ticks>e.expiresTick)throw Error('Social encounter superseded');
-        socialContact(game,prepared.from,prepared.to);
+        const contact=socialContact(game,prepared.from,prepared.to);
         if(choice.choice==='stay_silent'){e.status='closed';this.commit('social-silent',pawn,{id});return {status:'silent' as const};}
-        const message:SocialMessage={id:randomUUID(),exchangeId:id,tick:game.ticks,from:prepared.from,to:prepared.to,text:choice.text};
+        const message:SocialMessage={id:randomUUID(),exchangeId:id,tick:game.ticks,from:prepared.from,to:prepared.to,fromName:contact.own.name.slice(0,120),toName:contact.other.name.slice(0,120),text:choice.text};
         e.messages.push(message);e.status=e.turn==='opening'?'reply':'closed';e.turn='reply';
         for(const actor of [prepared.from,prepared.to]){
           const c=this.domain.characters[actor]!;c.messages=[...(c.messages??[]),structuredClone(message)].slice(-16);

@@ -1,0 +1,476 @@
+{
+  "version": "named-retention-v1",
+  "date": "2026-09-23",
+  "reviewedBehaviorHead": "9718e8f10f5002caa30f2615fac498be230caaf4",
+  "model": "claude-sonnet-4-6",
+  "design": {
+    "order": [
+      "control",
+      "message"
+    ],
+    "pairs": 1,
+    "sender": "Beatrice",
+    "receiver": "Alvin",
+    "authoredMessage": "Could you leave this load of wood for me? I want to finish what I started. It matters to me.",
+    "sameReflectionActions": true,
+    "commonNativeEvidence": true,
+    "scriptedAppraisalIfNeeded": true,
+    "laterPerspective": "recent messages and retained outlook",
+    "offer": "one trip carrying ten wood",
+    "decisionTiming": "paused",
+    "nativeObservationSecondsPerArm": 60,
+    "claudeAttemptCap": 4,
+    "jevAttemptCap": 0,
+    "rerolls": 0
+  },
+  "scripted": {
+    "passed": true,
+    "attempts": 0,
+    "jevCalls": 0,
+    "responses": 4,
+    "failures": [],
+    "rawDecisionOutputs": [],
+    "providerResultMetadata": [],
+    "responseKinds": [
+      "revise_outlook",
+      "accept",
+      "revise_outlook",
+      "refuse"
+    ],
+    "elapsedMs": [
+      2,
+      3,
+      5,
+      1
+    ],
+    "arms": [
+      {
+        "condition": "control",
+        "deliveredNameLabels": {
+          "fromName": null,
+          "toName": null
+        },
+        "reflectionChoices": [
+          "keep_current_activity",
+          "revise_private_outlook"
+        ],
+        "reflectionStatus": "continued",
+        "outlookRevision": 1,
+        "noteKinds": [
+          "concern"
+        ],
+        "messageCitedNotes": 0,
+        "sharedNativeExperience": [
+          {
+            "seq": 3,
+            "tick": 119,
+            "pawn": "Thing_Human405",
+            "kind": "food",
+            "detail": "1",
+            "subject": ""
+          }
+        ],
+        "needLevels": {
+          "Food": 0.3959999978542328,
+          "Rest": 0.8976249694824219
+        },
+        "decision": {
+          "kind": "accept",
+          "reason": "Scripted separate consent"
+        },
+        "proposalStatus": "accepted",
+        "decisionError": null,
+        "outcomes": [
+          {
+            "status": "completed",
+            "kind": "haul",
+            "delivered": 10
+          }
+        ],
+        "completedTrips": 1,
+        "deliveredUnits": 10,
+        "samples": 12,
+        "pausedSamples": 0,
+        "noteRewindAndRestore": true,
+        "pairedRestore": true,
+        "cleanup": {
+          "operatorStops": [],
+          "errors": []
+        },
+        "publicLog": [
+          {
+            "tick": 141,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional."
+          },
+          {
+            "tick": 141,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "text": "accept: Scripted separate consent"
+          },
+          {
+            "tick": 141,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "text": "haul: started."
+          },
+          {
+            "tick": 309,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "text": "haul: completed. Delivered 10 units."
+          }
+        ]
+      },
+      {
+        "condition": "message",
+        "deliveredNameLabels": {
+          "fromName": "Beatrice",
+          "toName": "Alvin"
+        },
+        "reflectionChoices": [
+          "keep_current_activity",
+          "revise_private_outlook"
+        ],
+        "reflectionStatus": "continued",
+        "outlookRevision": 1,
+        "noteKinds": [
+          "stance"
+        ],
+        "messageCitedNotes": 1,
+        "sharedNativeExperience": [
+          {
+            "seq": 3,
+            "tick": 119,
+            "pawn": "Thing_Human405",
+            "kind": "food",
+            "detail": "1",
+            "subject": ""
+          }
+        ],
+        "needLevels": {
+          "Food": 0.3959999978542328,
+          "Rest": 0.8976249694824219
+        },
+        "decision": {
+          "kind": "refuse",
+          "reason": "Scripted independent refusal after received request"
+        },
+        "proposalStatus": "refused",
+        "decisionError": null,
+        "outcomes": [],
+        "completedTrips": 0,
+        "deliveredUnits": 0,
+        "samples": 12,
+        "pausedSamples": 0,
+        "noteRewindAndRestore": true,
+        "pairedRestore": true,
+        "cleanup": {
+          "operatorStops": [],
+          "errors": []
+        },
+        "publicLog": [
+          {
+            "tick": 140,
+            "kind": "message",
+            "actor": "Beatrice",
+            "recipient": "Alvin",
+            "text": "Could you leave this load of wood for me? I want to finish what I started. It matters to me."
+          },
+          {
+            "tick": 141,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional."
+          },
+          {
+            "tick": 141,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "text": "refuse: Scripted independent refusal after received request"
+          }
+        ]
+      }
+    ],
+    "hostDrained": true,
+    "finalCleanup": {
+      "errors": [],
+      "work": {
+        "operatorStops": [],
+        "errors": []
+      }
+    }
+  },
+  "live": {
+    "passed": true,
+    "attempts": 4,
+    "jevCalls": 0,
+    "responses": 4,
+    "failures": [],
+    "rawDecisionOutputs": [
+      {
+        "kind": "accept",
+        "reason": "Food is low but still above the 0.35 work threshold, and the wood is close by. One trip is manageable before I need to eat."
+      },
+      {
+        "kind": "refuse",
+        "reason": "Beatrice asked me to leave this wood haul for her, and I want to respect that. My food is also getting low, so I should find something to eat rather than take on hauling work right now."
+      }
+    ],
+    "providerResultMetadata": [
+      {
+        "type": "result",
+        "subtype": "success",
+        "isError": false,
+        "turns": 2,
+        "reportedCostUSD": 0.024051,
+        "modelUsageObject": true,
+        "modelCount": 1,
+        "expectedModelPresent": true,
+        "otherModelCount": 0,
+        "structuredOutputPresent": true
+      },
+      {
+        "type": "result",
+        "subtype": "success",
+        "isError": false,
+        "turns": 2,
+        "reportedCostUSD": 0.026808000000000002,
+        "modelUsageObject": true,
+        "modelCount": 1,
+        "expectedModelPresent": true,
+        "otherModelCount": 0,
+        "structuredOutputPresent": true
+      },
+      {
+        "type": "result",
+        "subtype": "success",
+        "isError": false,
+        "turns": 2,
+        "reportedCostUSD": 0.028572,
+        "modelUsageObject": true,
+        "modelCount": 1,
+        "expectedModelPresent": true,
+        "otherModelCount": 0,
+        "structuredOutputPresent": true
+      },
+      {
+        "type": "result",
+        "subtype": "success",
+        "isError": false,
+        "turns": 2,
+        "reportedCostUSD": 0.028755,
+        "modelUsageObject": true,
+        "modelCount": 1,
+        "expectedModelPresent": true,
+        "otherModelCount": 0,
+        "structuredOutputPresent": true
+      }
+    ],
+    "responseKinds": [
+      "revise_outlook",
+      "accept",
+      "revise_outlook",
+      "refuse"
+    ],
+    "elapsedMs": [
+      4577,
+      4503,
+      5511,
+      4243
+    ],
+    "arms": [
+      {
+        "condition": "control",
+        "deliveredNameLabels": {
+          "fromName": null,
+          "toName": null
+        },
+        "reflectionChoices": [
+          "keep_current_activity",
+          "revise_private_outlook"
+        ],
+        "reflectionStatus": "continued",
+        "outlookRevision": 1,
+        "noteKinds": [
+          "concern"
+        ],
+        "messageCitedNotes": 0,
+        "sharedNativeExperience": [
+          {
+            "seq": 3,
+            "tick": 114,
+            "pawn": "Thing_Human405",
+            "kind": "food",
+            "detail": "1",
+            "subject": ""
+          }
+        ],
+        "needLevels": {
+          "Food": 0.3959999978542328,
+          "Rest": 0.8976249694824219
+        },
+        "decision": {
+          "kind": "accept",
+          "reason": "Food is low but still above the 0.35 work threshold, and the wood is close by. One trip is manageable before I need to eat."
+        },
+        "proposalStatus": "accepted",
+        "decisionError": null,
+        "outcomes": [
+          {
+            "status": "completed",
+            "kind": "haul",
+            "delivered": 10
+          }
+        ],
+        "completedTrips": 1,
+        "deliveredUnits": 10,
+        "samples": 48,
+        "pausedSamples": 0,
+        "noteRewindAndRestore": true,
+        "pairedRestore": true,
+        "cleanup": {
+          "operatorStops": [],
+          "errors": []
+        },
+        "publicLog": [
+          {
+            "tick": 156,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional."
+          },
+          {
+            "tick": 156,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "text": "accept: Food is low but still above the 0.35 work threshold, and the wood is close by. One trip is manageable before I need to eat."
+          },
+          {
+            "tick": 156,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "text": "haul: started."
+          },
+          {
+            "tick": 405,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "text": "haul: completed. Delivered 10 units."
+          }
+        ]
+      },
+      {
+        "condition": "message",
+        "deliveredNameLabels": {
+          "fromName": "Beatrice",
+          "toName": "Alvin"
+        },
+        "reflectionChoices": [
+          "keep_current_activity",
+          "revise_private_outlook"
+        ],
+        "reflectionStatus": "continued",
+        "outlookRevision": 1,
+        "noteKinds": [
+          "stance",
+          "value"
+        ],
+        "messageCitedNotes": 1,
+        "sharedNativeExperience": [
+          {
+            "seq": 3,
+            "tick": 114,
+            "pawn": "Thing_Human405",
+            "kind": "food",
+            "detail": "1",
+            "subject": ""
+          }
+        ],
+        "needLevels": {
+          "Food": 0.3959999978542328,
+          "Rest": 0.8976249694824219
+        },
+        "decision": {
+          "kind": "refuse",
+          "reason": "Beatrice asked me to leave this wood haul for her, and I want to respect that. My food is also getting low, so I should find something to eat rather than take on hauling work right now."
+        },
+        "proposalStatus": "refused",
+        "decisionError": null,
+        "outcomes": [],
+        "completedTrips": 0,
+        "deliveredUnits": 0,
+        "samples": 48,
+        "pausedSamples": 0,
+        "noteRewindAndRestore": true,
+        "pairedRestore": true,
+        "cleanup": {
+          "operatorStops": [],
+          "errors": []
+        },
+        "publicLog": [
+          {
+            "tick": 155,
+            "kind": "message",
+            "actor": "Beatrice",
+            "recipient": "Alvin",
+            "text": "Could you leave this load of wood for me? I want to finish what I started. It matters to me."
+          },
+          {
+            "tick": 156,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional."
+          },
+          {
+            "tick": 156,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "text": "refuse: Beatrice asked me to leave this wood haul for her, and I want to respect that. My food is also getting low, so I should find something to eat rather than take on hauling work right now."
+          }
+        ]
+      }
+    ],
+    "hostDrained": true,
+    "finalCleanup": {
+      "errors": [],
+      "work": {
+        "operatorStops": [],
+        "errors": []
+      }
+    }
+  },
+  "cold": {
+    "scripted": true,
+    "live": true
+  },
+  "checks": {
+    "node": 239,
+    "independentReview": "completed; no actionable defects; direct isolation probe verified separately",
+    "historicalDatabasesUnchanged": 73
+  },
+  "limits": [
+    "Names and their explanatory contract are newly supplied; this is a versioned follow-up, not an identical-prompt replication. PR35 remains unchanged, and these diagnostics cannot reconstruct its missing provider envelope.",
+    "One ordered pair, one model, one authored request; not general character consistency or a statistical causal estimate.",
+    "The message is authored test speech, not live sender output; its claimed prior work is not verified.",
+    "Both recent correspondence and outlook reach the later decision; note influence is not isolated.",
+    "Game restores change epochs and internal IDs; native activity may diverge after each choice.",
+    "Later correction/removal is not tested natively here.",
+    "No typed-claims model field or model response schema change; optional display-label fields were added.",
+    "Names are native display labels, not unique identities; historical snapshots do not establish current names. Old unlabelled messages remain unnamed."
+  ]
+}

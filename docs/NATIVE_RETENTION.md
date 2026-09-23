@@ -95,3 +95,7 @@ and validation issue paths, without weakening success, model-route or turn-limit
 checks. A live behavioral contrast and later native correction/removal remain
 unproved. The harness's successful completion means lifecycle assertions passed;
 it does not mean every provider call or intended behavioral measurement succeeded.
+
+The subsequent [diagnostics/name follow-up](PROVIDER_DIAGNOSTICS.md) uses the new
+`retention-names-v1` policy and fresh private paths. The original live policy is
+frozen against new calls through the host runner; no historical result is replaced.

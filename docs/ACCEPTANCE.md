@@ -742,3 +742,13 @@ refusal and native note privacy, rewind, paired/cold restore passed. Live contro
 delivered ten wood; message-based outlook survived restart. The later raw refusal
 failed provider parsing and was not applied: no claim of completed live behavioral
 contrast. Four Claude attempts, zero Jev, no retries; staging stopped.
+
+## Provider diagnostics and observed names — 2026-09-23
+
+[Protocol](PROVIDER_DIAGNOSTICS.md) · [evidence](evidence/named-retention.json).
+239 checks and independent Codex review passed. Scripted and live pairs passed
+paired/cold restore. Live control delivered ten wood; message condition applied
+refusal citing Beatrice and low Food, with no job. Four provider calls validated,
+zero Jev, no retries; 96 samples unpaused. Name labels and private notes persisted;
+no global directory or other-pawn private facts were added. Prior parsing failure
+is preserved and remains unexplained; current parser checks were not weakened.

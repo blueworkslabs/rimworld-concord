@@ -115,3 +115,14 @@ test('message evidence rejects foreign, outgoing, forged, duplicate and unrelate
  const choice=ReflectionChoice.parse({choice:'revise_private_outlook',reason:'Optional interpretation',update:{expectedRevision:0,notes:[note]}});validateReflectionChoice(choice,view);
  const out=reviseOutlook(character,{expectedRevision:0,notes:[note]},2);message.text='later mutation';assert.notEqual(out.notes[0]!.messages![0]!.text,message.text);
 });
+
+test('delivered display names survive note retention and reopen without revealing a third pawn',async()=>{
+ const g=new Game();g.data.pawns[0]!.name='Ada';g.data.pawns[1]!.name='Bea';g.data.pawns[2]!.name='Hidden';
+ const file=mkdtempSync(tmpdir()+'/message-names-')+'/state.db';let s=new Store(file),c=new Coordinator(s,g);await c.open();
+ const id=randomUUID();await c.openSocial(id,'A','B');assert.equal((await c.socialTurn('A',id,say('Please leave the wood.'))).status,'delivered');await c.closeSocial(id);
+ const m=c.inspect().characters.B!.messages![0]!;assert.equal(m.fromName,'Ada');assert.equal(m.toName,'Bea');assert.equal(c.inspect().characters.C!.messages,undefined);
+ const o=reviseOutlook(c.inspect().characters.B!,{expectedRevision:0,notes:[{kind:'stance',subject:'A',text:'Consider the request',messageIds:[m.id]}]},100);assert.equal(o.notes[0]!.messages![0]!.fromName,'Ada');
+ await c.checkpoint('lab-concord-names');s.close();s=new Store(file);c=new Coordinator(s,g);await c.open();assert.deepEqual(c.inspect().characters.B!.messages![0],m);
+ // Label is a delivery snapshot, not a retroactive rewrite after a rename.
+ g.data.pawns[0]!.name='Changed';assert.equal(c.inspect().characters.B!.messages![0]!.fromName,'Ada');await c.restore('lab-concord-names');assert.deepEqual(c.inspect().characters.B!.messages![0],m);s.close();
+});
