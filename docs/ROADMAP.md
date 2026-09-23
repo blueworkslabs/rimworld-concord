@@ -67,8 +67,9 @@ automated/offline verification only, with no new colony result. Earlier transpor
 errors remain unresolved. The [native recovery follow-through](RECOVERY_FOLLOWTHROUGH.md)
 now exercised one accepted repair and a later rejected repair with three stream
 events but two distinct messages. Five core attempts and two pawn replies produced
-no work; paired/cold restore passed. Next: robust distinct-message accounting with
-explicit identity coverage, checked offline before another colony allowance. Keep the
+no work; paired/cold restore passed. The [identity-checked accounting correction](PROVIDER_MESSAGE_ACCOUNTING.md) now
+passes offline split-message and malformed-stream checks, with no fresh live
+confirmation. Next: separately bounded native follow-through on that adapter. Keep the
 unexplained coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 
@@ -120,4 +121,4 @@ without exposing raw diagnostics to pawns. Keep this roadmap forward-looking;
 
 ## Local food before executable cooking
 
-[Local food sightings](FOOD_OBSERVATIONS.md) now reach the core and Supplies panel independently of cooking jobs. Scripted visibility and paired/cold restore pass. The subsequent [provider investigation](PROVIDER_FAILURE_PROBE.md) adds a narrowly traced core-formatting recovery rule; the [subsequent native test](RECOVERY_FOLLOWTHROUGH.md) accepted one recovery but rejected another stream shape. No work resulted. Next: verify message-level accounting offline before another native allowance. No new live allowance is enabled by this documentation.
+[Local food sightings](FOOD_OBSERVATIONS.md) now reach the core and Supplies panel independently of cooking jobs. Scripted visibility and paired/cold restore pass. The subsequent [provider investigation](PROVIDER_FAILURE_PROBE.md) adds a narrowly traced core-formatting recovery rule; the [subsequent native test](RECOVERY_FOLLOWTHROUGH.md) accepted one recovery but rejected another stream shape. No work resulted. The [message-accounting correction](PROVIDER_MESSAGE_ACCOUNTING.md) is now verified offline; fresh native behavior remains untested. No new live allowance is enabled by this documentation.

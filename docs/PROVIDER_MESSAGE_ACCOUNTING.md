@@ -15,7 +15,9 @@ are not retained in these diagnostics.
 For the existing core-only recovery rule:
 
 - Every assistant event must have a nonblank string message ID of at most 200
-  characters and a content array. Split text/thinking events may share the same
+  characters and a content array whose blocks have known valid shapes (text,
+  thinking, redacted thinking, or StructuredOutput tool use). Unknown types,
+  non-object blocks and malformed required fields invalidate coverage. Split text/thinking events may share the same
   current message ID. IDs are opaque; they are not treated as timestamps or order.
 - The first formatting call belongs to message 1, the second to message 2. Exactly
   two distinct messages and two formatting calls remain required. Each call must
@@ -53,3 +55,14 @@ Jev or game calls were made. Staging stays stopped.
 
 The correction has automated/offline verification, not fresh live confirmation.
 It does not establish useful planning, eating, construction or better explanations.
+
+[Ten synthetic event-shape cases](evidence/provider-message-accounting.json)
+retain the observed counts and new coverage metadata. The normal two-event repair
+and splits in either message pass; missing identity, a third message, reopening
+post-result events and malformed content blocks fail. They use the retained PR49 inner choice/view with
+an authored invalid first input and authored IDs; the original trace remains
+unproven and rejected.
+
+313 Node checks and ten Python checks pass. All 226 historical database-related
+files are unchanged. The privacy mutation and independent review artifacts remain
+private. No new allowance or model route is introduced.

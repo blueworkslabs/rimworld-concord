@@ -35,7 +35,7 @@ test('core recovery requires the complete ordered two-message formatting trace; 
 test('native adapter accepts one bounded core formatting repair but still rejects context-invalid final choices',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'concord-core-recovery-')),binary=join(dir,'fake');
  const init={type:'system',subtype:'init',model:CLAUDE_MODEL,tools:['StructuredOutput'],mcp_servers:[],plugins:[],skills:[],slash_commands:[]};
- const write=async(final:any,tail="")=>writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\n'+[init,{type:'assistant',message:{id:'m1',content:[{type:'text',text:'Formatting answer.'}]}},...events().slice(0,-1),final].map(e=>'console.log('+JSON.stringify(JSON.stringify(e))+');').join('\n')+'\nprocess.stdout.write('+JSON.stringify(tail)+');',{mode:0o700});
+ const write=async(final:any,tail="",block:any={type:'text',text:'Formatting answer.'})=>writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\n'+[init,{type:'assistant',message:{id:'m1',content:[block]}},...events().slice(0,-1),final].map(e=>'console.log('+JSON.stringify(JSON.stringify(e))+');').join('\n')+'\nprocess.stdout.write('+JSON.stringify(tail)+');',{mode:0o700});
  const b=new ClaudeDecisionBackend({ledgerPath:join(dir,'ledger.db'),scratchRoot:join(dir,'scratch'),binary,trial:'provider-diagnostic-v1'});
  try{
   await write(result);assert.deepEqual(await b.plan(view,new AbortController().signal),choice);assert.equal(b.receipts[0]!.formattingRecovery,true);assert.equal(b.receipts[0]!.status,'ok');assert.equal(b.summary().attempts,1);
@@ -46,13 +46,15 @@ test('native adapter accepts one bounded core formatting repair but still reject
    assert.equal(b.failures.at(-1)!.stage,'transport');assert.equal(b.rawResponses.at(-1)!.result.turns,3);
   }
   assert.equal(b.summary().attempts,4);
+  const malformed=new ClaudeDecisionBackend({ledgerPath:join(dir,'malformed.db'),scratchRoot:join(dir,'scratch-malformed'),binary,trial:'provider-diagnostic-v1'});
+  try{await write(result,'',{type:'text',text:7});await assert.rejects(malformed.plan(view,new AbortController().signal),/attempt retained/);assert.equal(malformed.failures[0]!.stage,'parsing');assert.equal(malformed.rawResponses[0]!.streamDetails.identity.complete,false);}finally{malformed.close();}
  }finally{b.close();await rm(dir,{recursive:true,force:true});}
 });
 
 
 test('split text/thinking events count as two identified messages without retaining their IDs or content',()=>{
  const base=events(),secret='private-identity-and-content-sentinel';
- for(const content of [{type:'text',text:secret},{type:'thinking',thinking:secret}]){
+ for(const content of [{type:'text',text:secret},{type:'thinking',thinking:secret},{type:'redacted_thinking',data:secret}]){
   const input:any[]=structuredClone(base);input.splice(0,0,{type:'assistant',message:{id:'m1',content:[content]}} as any);
   const p=proof(input);assert.equal(p.counts.assistantEvents,3);assert.equal(p.counts.assistantMessages,2);assert.equal(p.details.identity.complete,true);
   assert(boundedCoreFormattingRecovery(p));assert.equal(parseClaudeResult(result,'core',p).formattingRecovery,true);
@@ -67,6 +69,7 @@ test('split text/thinking events count as two identified messages without retain
 test('missing/ambiguous identities, reopened messages, third messages and legacy coverage fail closed',()=>{
  const text=(id:any)=>({type:'assistant',message:{id,content:[{type:'text',text:'not retained'}]}});
  const variants:any[][]=[];
+ for(const content of [[42],[null],[{}],[{type:'text',text:7}],[{type:'thinking',thinking:7}],[{type:'thinking',thinking:'x',signature:7}],[{type:'redacted_thinking',data:7}],[{type:'unrecognized'}],[{type:'tool_use',name:'StructuredOutput',id:'t',input:7}]]){const e:any[]=structuredClone(events());e.splice(0,0,{type:'assistant',message:{id:'m1',content}});variants.push(e);}
  for(const id of [undefined,null,'','   ','x'.repeat(201),7]){const e:any[]=structuredClone(events());e.splice(0,0,text(id));variants.push(e);}
  const malformed:any[]=structuredClone(events());malformed[0].message.content=null;variants.push(malformed);
  const third:any[]=structuredClone(events());third.splice(2,0,text('third'));variants.push(third);

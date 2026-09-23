@@ -33,6 +33,14 @@ export function validationIssues(error:unknown):{code:string;path:(string|number
 
 /** Event counts, NOT API-round-trip counts. Never retain text, tool inputs/results or IDs. */
 type Issue=ReturnType<typeof validationIssues>[number];
+function knownAssistantBlock(block:any){
+ if(!block||typeof block!=='object'||Array.isArray(block))return false;
+ if(block.type==='text')return typeof block.text==='string';
+ if(block.type==='thinking')return typeof block.thinking==='string'&&(block.signature===undefined||typeof block.signature==='string');
+ if(block.type==='redacted_thinking')return typeof block.data==='string';
+ return block.type==='tool_use'&&block.name==='StructuredOutput'&&typeof block.id==='string'&&!!block.id.trim()&&block.id.length<=200&&
+  !!block.input&&typeof block.input==='object'&&!Array.isArray(block.input);
+}
 type StreamEvent={kind:'api-error';metadata:ReturnType<typeof apiErrorMetadata>}|{kind:'format-call';ordinal:number;messageOrdinal:number|null;concordInputContract:'valid'|'invalid'|'unchecked';issues:Issue[]}|{kind:'format-result';ordinal:number|null;error:boolean;errorMarker:'schema-mismatch'|'input-validation'|'other'|'none'}|{kind:'result';turns:number|null;error:boolean|null};
 export class ProviderStreamCounts {
  constructor(private diagnose?:(input:unknown)=>Issue[]){}
@@ -49,7 +57,8 @@ export class ProviderStreamCounts {
   if(event?.type!=='assistant')return null;
   identity.assistantEvents=Math.min(4096,identity.assistantEvents+1);
   const id=event.message?.id;
-  if(this.counts.assistantEvents>=4096||typeof id!=='string'||!id.trim()||id.length>200||!Array.isArray(event.message?.content)){identity.complete=false;return null;}
+  if(this.counts.assistantEvents>=4096||typeof id!=='string'||!id.trim()||id.length>200){identity.complete=false;return null;}
+  if(!Array.isArray(event.message?.content)||!event.message.content.every(knownAssistantBlock))identity.complete=false;
   let ordinal=this.messages.get(id);
   if(ordinal===undefined){
    if(this.messages.size>=32){identity.complete=false;return null;}
