@@ -34,4 +34,16 @@ Use a new output only for a separately authorized experiment, never to bypass a 
 
 Separate provider success, strict runtime acceptance, action/topic-link consistency, supplied-ID use and manual explanation grounding. A valid ask is not a delivered conversation; a valid proposal is not pawn consent or completed work. Zero validation failures in six calls would support this small interface sample only, not general reliability, live planning or native campfire/cooking behavior. No automatic long-trial follow-up.
 
-Results pending. No production behavior change beyond adding the isolated trial policy and runner.
+## Result
+
+All **six replies passed provider parsing and strict runtime validation**: four questions to Alvin with null action-topic links, and two waits in the restricted wait-only cases. No proposal or counter branch was selected. Six attempts, no retries, zero pawn/Jev calls and zero game actions. Median host-observed latency was 7447.0 ms; reported API-equivalent usage was 0.1452912 USD (not cash billing).
+
+All replies described the supplied need bands consistently. Two questions used “your food looks low”; some topic/reason wording says the pawns “report” needs. Their surrounding text identifies telemetry, but the fixture contains neither a visual observation nor pawn testimony. This source-attribution ambiguity is retained, not counted as perfect grounding.
+
+The original-view cases freely selected questions rather than construction offers. The other waits were the only action allowed; they do not demonstrate character restraint. These offline choices were never delivered or applied, and no follow-up conversation occurred. Six valid answers support this corrected interface sample, not general model reliability or a working colony plan. The earlier 23 rejected outputs remain unchanged.
+
+[All outputs, raw structured returns and assessment](evidence/core-contract-check.json) · [Exact archived requests](../trials/fixtures/core-contract-requests-v1.json).
+
+293 Node checks and independent Codex review passed. All 218 historical database-related files are unchanged. Staging remained stopped. No production behavior change beyond adding the isolated trial policy and runner. No separate diary entry for this narrow contract check; the PR and evidence carry the result.
+
+Next useful evaluation: one separately bounded in-game question → voluntary reply → core follow-up, permitting work proposals or waiting without requiring construction. Do not automatically append another long colony run to this completed probe.

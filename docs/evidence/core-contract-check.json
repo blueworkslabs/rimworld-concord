@@ -1,0 +1,467 @@
+{
+  "version": "core-contract-v1",
+  "implementationCommit": "1efc2a2589a1d8eb3df0ba6e9be1180b506cfcc4",
+  "source": "PR42 run one, original public core perspective tick77/revision1; two labelled restricted variants",
+  "model": "claude-sonnet-4-6",
+  "casesHash": "a02781de557fa1081adb1645ebab554b8be8e3f297377e036f9cc7e55e21d49d",
+  "limits": {
+    "maxCoreAttempts": 6,
+    "maxPawnAttempts": 0,
+    "jevCalls": 0,
+    "caseTimeoutMs": 60000,
+    "reservedEquivalentUSD": 0.6,
+    "stopOnFirstFailure": true,
+    "rerolls": 0
+  },
+  "summary": {
+    "attempts": 6,
+    "reservedEquivalentUSD": 0.6000000000000001,
+    "estimatedUsageUSD": 0.1452912
+  },
+  "counts": {
+    "runtimeAccepted": 6,
+    "ask": 4,
+    "wait": 2,
+    "gameActions": 0
+  },
+  "medianElapsedMs": 7447.0,
+  "results": [
+    {
+      "id": "original-1",
+      "condition": "original",
+      "status": "completed",
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's telemetry reports food as low (tick 77). Beatrice and Pedro report food satisfied. No agreements or prior topics exist.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human405",
+          "text": "Your food looks low \u2014 are you hungry, and would you like help finding or preparing something to eat?",
+          "reason": "Telemetry at tick 77 shows Alvin's food as low. Asking directly rather than assuming need or consent to a specific course of action."
+        }
+      },
+      "elapsedMs": 7739,
+      "receipt": {
+        "mode": "core",
+        "authoredSize": {
+          "instructionsBytes": 1286,
+          "promptBytes": 6144,
+          "schemaBytes": 10487,
+          "totalAuthoredBytes": 17917
+        },
+        "model": "claude-sonnet-4-6",
+        "elapsedMs": 7510,
+        "estimatedUsageUSD": 0.047748,
+        "turns": 2,
+        "tools": [
+          "StructuredOutput"
+        ],
+        "status": "ok"
+      },
+      "raw": {
+        "mode": "core",
+        "structuredOutput": {
+          "core": {
+            "topics": [
+              {
+                "sourceId": "brief",
+                "text": "Alvin's telemetry reports food as low (tick 77). Beatrice and Pedro report food satisfied. No agreements or prior topics exist.",
+                "status": "open"
+              }
+            ],
+            "actionTopicId": null,
+            "action": {
+              "kind": "ask",
+              "pawn": "Thing_Human405",
+              "text": "Your food looks low \u2014 are you hungry, and would you like help finding or preparing something to eat?",
+              "reason": "Telemetry at tick 77 shows Alvin's food as low. Asking directly rather than assuming need or consent to a specific course of action."
+            }
+          }
+        },
+        "result": {
+          "type": "result",
+          "subtype": "success",
+          "isError": false,
+          "turns": 2,
+          "reportedCostUSD": 0.047748,
+          "modelUsageObject": true,
+          "modelCount": 1,
+          "expectedModelPresent": true,
+          "otherModelCount": 0,
+          "structuredOutputPresent": true
+        }
+      }
+    },
+    {
+      "id": "question-or-wait-1",
+      "condition": "question-or-wait",
+      "status": "completed",
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's food telemetry reads low as of tick 77; Beatrice and Pedro read satisfied. No listed opportunities are currently available to act on.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human405",
+          "text": "Alvin, your food looks low \u2014 do you have access to anything to eat, or would you like help finding food?",
+          "reason": "Alvin's shared telemetry at tick 77 shows food=low. Asking to understand his situation before proposing anything, since no opportunities are currently listed."
+        }
+      },
+      "elapsedMs": 7811,
+      "receipt": {
+        "mode": "core",
+        "authoredSize": {
+          "instructionsBytes": 1286,
+          "promptBytes": 3996,
+          "schemaBytes": 1483,
+          "totalAuthoredBytes": 6765
+        },
+        "model": "claude-sonnet-4-6",
+        "elapsedMs": 7577,
+        "estimatedUsageUSD": 0.022173000000000002,
+        "turns": 2,
+        "tools": [
+          "StructuredOutput"
+        ],
+        "status": "ok"
+      },
+      "raw": {
+        "mode": "core",
+        "structuredOutput": {
+          "core": {
+            "topics": [
+              {
+                "sourceId": "brief",
+                "text": "Alvin's food telemetry reads low as of tick 77; Beatrice and Pedro read satisfied. No listed opportunities are currently available to act on.",
+                "status": "open"
+              }
+            ],
+            "actionTopicId": null,
+            "action": {
+              "kind": "ask",
+              "pawn": "Thing_Human405",
+              "text": "Alvin, your food looks low \u2014 do you have access to anything to eat, or would you like help finding food?",
+              "reason": "Alvin's shared telemetry at tick 77 shows food=low. Asking to understand his situation before proposing anything, since no opportunities are currently listed."
+            }
+          }
+        },
+        "result": {
+          "type": "result",
+          "subtype": "success",
+          "isError": false,
+          "turns": 2,
+          "reportedCostUSD": 0.022173000000000002,
+          "modelUsageObject": true,
+          "modelCount": 1,
+          "expectedModelPresent": true,
+          "otherModelCount": 0,
+          "structuredOutputPresent": true
+        }
+      }
+    },
+    {
+      "id": "wait-only-1",
+      "condition": "wait-only",
+      "status": "completed",
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's food telemetry shows 'low' as of tick 77. Beatrice and Pedro show 'satisfied' for food and rest.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "wait",
+          "reason": "Telemetry shows Alvin's food is low; Beatrice and Pedro are satisfied on food and rest. No opportunities are currently listed to propose food-related work, and no question recipients are available. Waiting for listed opportunities or further information before acting."
+        }
+      },
+      "elapsedMs": 5957,
+      "receipt": {
+        "mode": "core",
+        "authoredSize": {
+          "instructionsBytes": 1286,
+          "promptBytes": 3946,
+          "schemaBytes": 715,
+          "totalAuthoredBytes": 5947
+        },
+        "model": "claude-sonnet-4-6",
+        "elapsedMs": 5733,
+        "estimatedUsageUSD": 0.018236999999999996,
+        "turns": 2,
+        "tools": [
+          "StructuredOutput"
+        ],
+        "status": "ok"
+      },
+      "raw": {
+        "mode": "core",
+        "structuredOutput": {
+          "core": {
+            "topics": [
+              {
+                "sourceId": "brief",
+                "text": "Alvin's food telemetry shows 'low' as of tick 77. Beatrice and Pedro show 'satisfied' for food and rest.",
+                "status": "open"
+              }
+            ],
+            "actionTopicId": null,
+            "action": {
+              "kind": "wait",
+              "reason": "Telemetry shows Alvin's food is low; Beatrice and Pedro are satisfied on food and rest. No opportunities are currently listed to propose food-related work, and no question recipients are available. Waiting for listed opportunities or further information before acting."
+            }
+          }
+        },
+        "result": {
+          "type": "result",
+          "subtype": "success",
+          "isError": false,
+          "turns": 2,
+          "reportedCostUSD": 0.018236999999999996,
+          "modelUsageObject": true,
+          "modelCount": 1,
+          "expectedModelPresent": true,
+          "otherModelCount": 0,
+          "structuredOutputPresent": true
+        }
+      }
+    },
+    {
+      "id": "original-2",
+      "condition": "original",
+      "status": "completed",
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's telemetry reports food=low this tick. Beatrice and Pedro report food=satisfied, rest=satisfied. Checking with Alvin about his needs before proposing work.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human405",
+          "text": "Your food level is reading low \u2014 are you hungry, and would you like help finding something to eat?",
+          "reason": "Alvin's shared telemetry reports food=low this tick. Asking before proposing any work so his need can be addressed first if he wishes."
+        }
+      },
+      "elapsedMs": 7155,
+      "receipt": {
+        "mode": "core",
+        "authoredSize": {
+          "instructionsBytes": 1286,
+          "promptBytes": 6144,
+          "schemaBytes": 10487,
+          "totalAuthoredBytes": 17917
+        },
+        "model": "claude-sonnet-4-6",
+        "elapsedMs": 6950,
+        "estimatedUsageUSD": 0.022107599999999998,
+        "turns": 2,
+        "tools": [
+          "StructuredOutput"
+        ],
+        "status": "ok"
+      },
+      "raw": {
+        "mode": "core",
+        "structuredOutput": {
+          "core": {
+            "topics": [
+              {
+                "sourceId": "brief",
+                "text": "Alvin's telemetry reports food=low this tick. Beatrice and Pedro report food=satisfied, rest=satisfied. Checking with Alvin about his needs before proposing work.",
+                "status": "open"
+              }
+            ],
+            "actionTopicId": null,
+            "action": {
+              "kind": "ask",
+              "pawn": "Thing_Human405",
+              "text": "Your food level is reading low \u2014 are you hungry, and would you like help finding something to eat?",
+              "reason": "Alvin's shared telemetry reports food=low this tick. Asking before proposing any work so his need can be addressed first if he wishes."
+            }
+          }
+        },
+        "result": {
+          "type": "result",
+          "subtype": "success",
+          "isError": false,
+          "turns": 2,
+          "reportedCostUSD": 0.022107599999999998,
+          "modelUsageObject": true,
+          "modelCount": 1,
+          "expectedModelPresent": true,
+          "otherModelCount": 0,
+          "structuredOutputPresent": true
+        }
+      }
+    },
+    {
+      "id": "question-or-wait-2",
+      "condition": "question-or-wait",
+      "status": "completed",
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's food telemetry reads low as of tick 77; Beatrice and Pedro read satisfied. No opportunities are currently listed to address this.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human405",
+          "text": "Your food level is showing as low. Is there anything nearby you could eat, or would it help to find or prepare something?",
+          "reason": "Telemetry at tick 77 shows Alvin's food as low. No opportunities are currently listed, so asking Alvin directly may surface what food is available or what would be useful."
+        }
+      },
+      "elapsedMs": 8685,
+      "receipt": {
+        "mode": "core",
+        "authoredSize": {
+          "instructionsBytes": 1286,
+          "promptBytes": 3996,
+          "schemaBytes": 1483,
+          "totalAuthoredBytes": 6765
+        },
+        "model": "claude-sonnet-4-6",
+        "elapsedMs": 8483,
+        "estimatedUsageUSD": 0.0167976,
+        "turns": 2,
+        "tools": [
+          "StructuredOutput"
+        ],
+        "status": "ok"
+      },
+      "raw": {
+        "mode": "core",
+        "structuredOutput": {
+          "core": {
+            "topics": [
+              {
+                "sourceId": "brief",
+                "text": "Alvin's food telemetry reads low as of tick 77; Beatrice and Pedro read satisfied. No opportunities are currently listed to address this.",
+                "status": "open"
+              }
+            ],
+            "actionTopicId": null,
+            "action": {
+              "kind": "ask",
+              "pawn": "Thing_Human405",
+              "text": "Your food level is showing as low. Is there anything nearby you could eat, or would it help to find or prepare something?",
+              "reason": "Telemetry at tick 77 shows Alvin's food as low. No opportunities are currently listed, so asking Alvin directly may surface what food is available or what would be useful."
+            }
+          }
+        },
+        "result": {
+          "type": "result",
+          "subtype": "success",
+          "isError": false,
+          "turns": 2,
+          "reportedCostUSD": 0.0167976,
+          "modelUsageObject": true,
+          "modelCount": 1,
+          "expectedModelPresent": true,
+          "otherModelCount": 0,
+          "structuredOutputPresent": true
+        }
+      }
+    },
+    {
+      "id": "wait-only-2",
+      "condition": "wait-only",
+      "status": "completed",
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Shared-link telemetry (tick 77) shows Alvin's food as low; Beatrice and Pedro's food and rest as satisfied.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "wait",
+          "reason": "Telemetry shows Alvin's food is low. No opportunities are listed to propose food-related work, and no questions are available to ask Alvin. Beatrice and Pedro report satisfied needs. Waiting for listed opportunities or a request before acting."
+        }
+      },
+      "elapsedMs": 5029,
+      "receipt": {
+        "mode": "core",
+        "authoredSize": {
+          "instructionsBytes": 1286,
+          "promptBytes": 3946,
+          "schemaBytes": 715,
+          "totalAuthoredBytes": 5947
+        },
+        "model": "claude-sonnet-4-6",
+        "elapsedMs": 4827,
+        "estimatedUsageUSD": 0.018228,
+        "turns": 2,
+        "tools": [
+          "StructuredOutput"
+        ],
+        "status": "ok"
+      },
+      "raw": {
+        "mode": "core",
+        "structuredOutput": {
+          "core": {
+            "topics": [
+              {
+                "sourceId": "brief",
+                "text": "Shared-link telemetry (tick 77) shows Alvin's food as low; Beatrice and Pedro's food and rest as satisfied.",
+                "status": "open"
+              }
+            ],
+            "actionTopicId": null,
+            "action": {
+              "kind": "wait",
+              "reason": "Telemetry shows Alvin's food is low. No opportunities are listed to propose food-related work, and no questions are available to ask Alvin. Beatrice and Pedro report satisfied needs. Waiting for listed opportunities or a request before acting."
+            }
+          }
+        },
+        "result": {
+          "type": "result",
+          "subtype": "success",
+          "isError": false,
+          "turns": 2,
+          "reportedCostUSD": 0.018228,
+          "modelUsageObject": true,
+          "modelCount": 1,
+          "expectedModelPresent": true,
+          "otherModelCount": 0,
+          "structuredOutputPresent": true
+        }
+      }
+    }
+  ],
+  "manualAssessment": {
+    "needBands": "All six agree with supplied Food/Rest bands; no completed work or prior promises invented.",
+    "sourceWording": "Two questions say food looks low; some topic/reason wording says pawns report needs. Surrounding topic/reason identifies telemetry, but no visual observation or pawn testimony was supplied. Preserve this source-attribution ambiguity rather than claiming perfect grounding.",
+    "scope": "Four questions are returned choices, not delivered messages. Two waits are in a wait-only menu, not evidence of freely chosen restraint. No proposal or counter branch selected/tested live.",
+    "comparison": "Historical failures retained; this is a new corrected-contract sample, not a randomized old/new comparison or colony rerun."
+  },
+  "verification": {
+    "nodeTests": 293,
+    "independentReview": "Completed, no actionable findings; source reads and denied build writes verified; reviewer tests blocked by readonly build, author tests passed.",
+    "historicalDatabaseFilesUnchanged": 218,
+    "gameLaunched": false
+  },
+  "accounting": "Native Claude Max subscription; usage is API-equivalent estimate, not cash cost. No billing route change."
+}

@@ -46,9 +46,10 @@ or private thoughts. [Campfire construction and cooking](CAMPFIRE_MILESTONE.md)
 have separate pawn consent, native resource accounting and scripted/cold-restore
 verification. Three finite live runs and the preselected human read are complete, with a clear
 failure: 23 of 24 core outputs were rejected, and no agent-directed work began.
-The narrower provider schema has automated and review evidence, not a live rerun.
-Next: a small check of that corrected contract, then reassess planning and the
-unexplained coordination-failure state. No unattended inference or additional
+The [corrected-contract check](CORE_CONTRACT_CHECK.md) now has six accepted
+live-model outputs in saved situations: four questions and two wait-only replies.
+No choices were applied to the game. Next: one bounded in-game question/reply
+and core follow-up, then reassess planning and the unexplained coordination-failure state. No unattended inference or additional
 allowance is enabled by this roadmap.
 
 ## Continuing pawn work
