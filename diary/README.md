@@ -66,7 +66,7 @@ Rules the build enforces:
 - `_headers`: Cloudflare Pages headers (same-origin only, no third-party requests).
 
 The only JavaScript is `site/assets/site.js`, a same-origin file that plays the
-explainer loops while they are visible and honours reduced-motion. The site loads
+explainer loops only after explicit play, pauses them offscreen, and never automatically resumes them. The site loads
 no third-party resources, so no model or API keys can end up in the browser.
 Model calls happen in the drafting workflow, not here.
 

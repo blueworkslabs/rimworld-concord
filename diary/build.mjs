@@ -262,7 +262,7 @@ async function main() {
   await cp(SITE_SRC, OUT, {recursive: true, filter: p => !p.startsWith(join(SITE_SRC, 'animations'))});
   const home = await readFile(join(SITE_SRC, 'index.html'), 'utf8');
   need(home.includes('<!--LATEST-->'), 'site/index.html', 'missing <!--LATEST--> marker');
-  await writeFile(join(OUT, 'index.html'), home.replace('<!--LATEST-->', latestList(entries)));
+  await writeFile(join(OUT, 'index.html'), home.replace('<!--LATEST-->', () => latestList(entries)));
   await mkdir(join(OUT, 'log'), {recursive: true});
   await writeFile(join(OUT, 'log', 'index.html'), indexPage(entries, epoch));
   await writeFile(join(OUT, 'feed.xml'), feed(entries));
