@@ -13,4 +13,4 @@ for p in pawns:
  for need in p.findall('needs/needs/li'):
   if need.findtext('def')=='Food':need.find('curLevel').text='.1'
 with open(dst,'xb') as out:r.write(out,encoding='utf-8',xml_declaration=True)
-print(json.dumps({'observer':pawns[0].findtext('id'),'thing':t.findtext('id'),'variant':variant,'authoredFood':.1,'forbidden':True,'quantity':75}))
+print(json.dumps({'observer':'Thing_'+pawns[0].findtext('id'),'thing':'Thing_'+t.findtext('id'),'variant':variant,'authoredFood':.1,'forbidden':True,'quantity':75}))

@@ -24,3 +24,12 @@ test('core launcher refuse an owned staging lock and direct entry points fail be
   }
  }finally{owner.stdin.end('release\n');await closed;await rm(dir,{recursive:true,force:true});}
 });
+
+test('a repeated food run cannot overwrite its receipt or reach the game',async()=>{
+ const {randomUUID}=await import('node:crypto'),{writeFile,readFile,unlink}=await import('node:fs/promises');
+ const run=randomUUID(),path='.runtime/food-'+run+'-game.json';await mkdir('.runtime',{recursive:true});await writeFile(path,'retained evidence',{flag:'wx'});
+ try{
+  const r=spawnSync(process.execPath,['dist/trials/food-observation-game.js','game',run],{env:{...process.env,CONCORD_FOOD_LOCKED:'1',RIMWORLD_LAB_ROOT:'/nonexistent-food-lab'},encoding:'utf8',timeout:5000});
+  assert.equal(r.status,1);assert.match(r.stderr,/EEXIST/);assert(!r.stderr.includes('Bridge timeout'));assert.equal(await readFile(path,'utf8'),'retained evidence');
+ }finally{await unlink(path);}
+});

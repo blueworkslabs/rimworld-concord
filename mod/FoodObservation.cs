@@ -18,9 +18,12 @@ namespace Concord {
    var ordered=seen.OrderBy(t=>(t.Position-p.Position).LengthHorizontalSquared).ThenBy(t=>t.GetUniqueLoadID()).ToArray();
    var food=ordered.Where(t=>t.def.category==ThingCategory.Item&&(t.def.IsNutritionGivingIngestible||Production.Ingredients(t)>0)).ToArray();
    var fires=ordered.OfType<Building_WorkTable>().Where(t=>t.def==Production.Campfire).ToArray();
-   return JsonUtility.ToJson(new FoodSight{epoch=epoch,tick=Find.TickManager.TicksGame,mapId=p.Map.uniqueID,truncated=food.Length>8||fires.Length>4,
+   var sight=new FoodSight{epoch=epoch,tick=Find.TickManager.TicksGame,mapId=p.Map.uniqueID,truncated=food.Length>8||fires.Length>4,
     items=food.Take(8).Select(t=>new FoodItem{thing=t.GetUniqueLoadID(),label=t.LabelNoCount,count=t.stackCount,x=t.Position.x,z=t.Position.z,nutritionGiving=t.def.IsNutritionGivingIngestible,forbidden=t.IsForbidden(p),simpleMealIngredientCount=Production.Ingredients(t)}).ToArray(),
-    campfires=fires.Take(4).Select(t=>new FoodFire{thing=t.GetUniqueLoadID(),x=t.Position.x,z=t.Position.z,usableForBills=t.CurrentlyUsableForBills(),forbidden=t.IsForbidden(p)}).ToArray()});
+    campfires=fires.Take(4).Select(t=>new FoodFire{thing=t.GetUniqueLoadID(),x=t.Position.x,z=t.Position.z,usableForBills=t.CurrentlyUsableForBills(),forbidden=t.IsForbidden(p)}).ToArray()};
+   // RimWorld JsonUtility omits these custom nested arrays; serialize their
+   // primitive records explicitly, as for the other native observation views.
+   return JsonUtility.ToJson(sight).TrimEnd('}')+",\"items\":["+String.Join(",",sight.items.Select(x=>JsonUtility.ToJson(x)).ToArray())+"],\"campfires\":["+String.Join(",",sight.campfires.Select(x=>JsonUtility.ToJson(x)).ToArray())+"]}";
   }
  }
 }
