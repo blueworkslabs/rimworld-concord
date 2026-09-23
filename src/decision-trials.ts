@@ -14,6 +14,7 @@ export const decisionTrials={
  'paced-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-paced-v1'},
  'outlook-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-outlook-v1'},
  'outlook-check-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-outlook-check-v1'},
+ 'retention-game-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-retention-game-v1'},
  'social-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-social-v1'},
  'interpretation-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-interpretation-v1'},
  'speech-check-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-speech-check-v1'},

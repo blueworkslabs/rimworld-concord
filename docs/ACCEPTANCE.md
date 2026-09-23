@@ -733,3 +733,12 @@ public log. Its tick ambiguity was specific to a header-omitting exported packet
 not a demonstrated UI defect. Twelve Claude attempts, thirteen Luna turns total,
 zero Jev, no rerolls or game actions. All seventy historical databases unchanged.
 See [protocol, results and limits](SPEECH_CHECKS.md) and [evidence](evidence/speech-interpretation.json).
+
+## Native received-request retention — 2026-09-23
+
+See [protocol and limits](NATIVE_RETENTION.md) and [evidence](evidence/native-retention.json).
+234 automated checks and independent review pass. Equal-menu scripted acceptance/
+refusal and native note privacy, rewind, paired/cold restore passed. Live control
+delivered ten wood; message-based outlook survived restart. The later raw refusal
+failed provider parsing and was not applied: no claim of completed live behavioral
+contrast. Four Claude attempts, zero Jev, no retries; staging stopped.

@@ -1,0 +1,410 @@
+{
+  "version": "native-retention-v1",
+  "date": "2026-09-23",
+  "reviewedBehaviorHead": "81bf99c6db315237b0c80e5d635ceb258118531d",
+  "model": "claude-sonnet-4-6",
+  "design": {
+    "order": [
+      "control",
+      "message"
+    ],
+    "pairs": 1,
+    "sender": "Beatrice",
+    "receiver": "Alvin",
+    "authoredMessage": "Could you leave this load of wood for me? I want to finish what I started. It matters to me.",
+    "sameReflectionActions": true,
+    "commonNativeEvidence": true,
+    "scriptedAppraisalIfNeeded": true,
+    "laterPerspective": "recent messages and retained outlook",
+    "offer": "one trip carrying ten wood",
+    "decisionTiming": "paused",
+    "nativeObservationSecondsPerArm": 60,
+    "claudeAttemptCap": 4,
+    "jevAttemptCap": 0,
+    "rerolls": 0
+  },
+  "scripted": {
+    "passed": true,
+    "attempts": 0,
+    "jevCalls": 0,
+    "responses": 4,
+    "failures": [],
+    "rawDecisionOutputs": [],
+    "responseKinds": [
+      "revise_outlook",
+      "accept",
+      "revise_outlook",
+      "refuse"
+    ],
+    "elapsedMs": [
+      10,
+      4,
+      3,
+      4
+    ],
+    "arms": [
+      {
+        "condition": "control",
+        "reflectionChoices": [
+          "keep_current_activity",
+          "revise_private_outlook"
+        ],
+        "reflectionStatus": "continued",
+        "outlookRevision": 1,
+        "noteKinds": [
+          "concern"
+        ],
+        "messageCitedNotes": 0,
+        "sharedNativeExperience": [
+          {
+            "seq": 3,
+            "tick": 110,
+            "pawn": "Thing_Human405",
+            "kind": "food",
+            "detail": "1",
+            "subject": ""
+          }
+        ],
+        "needLevels": {
+          "Food": 0.3959999978542328,
+          "Rest": 0.8976249694824219
+        },
+        "decision": {
+          "kind": "accept",
+          "reason": "Scripted separate consent"
+        },
+        "proposalStatus": "accepted",
+        "decisionError": null,
+        "outcomes": [
+          {
+            "status": "completed",
+            "kind": "haul",
+            "delivered": 10
+          }
+        ],
+        "completedTrips": 1,
+        "deliveredUnits": 10,
+        "samples": 12,
+        "pausedSamples": 0,
+        "noteRewindAndRestore": true,
+        "pairedRestore": true,
+        "cleanup": {
+          "operatorStops": [],
+          "errors": []
+        },
+        "publicLog": [
+          {
+            "tick": 139,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional."
+          },
+          {
+            "tick": 139,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "text": "accept: Scripted separate consent"
+          },
+          {
+            "tick": 139,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "text": "haul: started."
+          },
+          {
+            "tick": 305,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "text": "haul: completed. Delivered 10 units."
+          }
+        ]
+      },
+      {
+        "condition": "message",
+        "reflectionChoices": [
+          "keep_current_activity",
+          "revise_private_outlook"
+        ],
+        "reflectionStatus": "continued",
+        "outlookRevision": 1,
+        "noteKinds": [
+          "stance"
+        ],
+        "messageCitedNotes": 1,
+        "sharedNativeExperience": [
+          {
+            "seq": 3,
+            "tick": 110,
+            "pawn": "Thing_Human405",
+            "kind": "food",
+            "detail": "1",
+            "subject": ""
+          }
+        ],
+        "needLevels": {
+          "Food": 0.3959999978542328,
+          "Rest": 0.8976249694824219
+        },
+        "decision": {
+          "kind": "refuse",
+          "reason": "Scripted independent refusal after received request"
+        },
+        "proposalStatus": "refused",
+        "decisionError": null,
+        "outcomes": [],
+        "completedTrips": 0,
+        "deliveredUnits": 0,
+        "samples": 12,
+        "pausedSamples": 0,
+        "noteRewindAndRestore": true,
+        "pairedRestore": true,
+        "cleanup": {
+          "operatorStops": [],
+          "errors": []
+        },
+        "publicLog": [
+          {
+            "tick": 138,
+            "kind": "message",
+            "actor": "Beatrice",
+            "recipient": "Alvin",
+            "text": "Could you leave this load of wood for me? I want to finish what I started. It matters to me."
+          },
+          {
+            "tick": 139,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional."
+          },
+          {
+            "tick": 139,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "text": "refuse: Scripted independent refusal after received request"
+          }
+        ]
+      }
+    ],
+    "hostDrained": true,
+    "finalCleanup": {
+      "errors": [],
+      "work": {
+        "operatorStops": [],
+        "errors": []
+      }
+    }
+  },
+  "live": {
+    "passed": true,
+    "attempts": 4,
+    "jevCalls": 0,
+    "responses": 3,
+    "failures": [
+      {
+        "stage": "parsing",
+        "attemptReserved": true,
+        "cancelled": false
+      }
+    ],
+    "rawDecisionOutputs": [
+      {
+        "kind": "accept",
+        "reason": "Food is at ~40%, not yet critical. One trip of wood is quick enough to complete before I need to stop and eat."
+      },
+      {
+        "kind": "refuse",
+        "reason": "Thing_Human408 asked me to leave this wood haul for them \u2014 it matters to them. I'll respect that and step aside."
+      }
+    ],
+    "responseKinds": [
+      "revise_outlook",
+      "accept",
+      "revise_outlook"
+    ],
+    "elapsedMs": [
+      5285,
+      5648,
+      5461
+    ],
+    "arms": [
+      {
+        "condition": "control",
+        "reflectionChoices": [
+          "keep_current_activity",
+          "revise_private_outlook"
+        ],
+        "reflectionStatus": "continued",
+        "outlookRevision": 1,
+        "noteKinds": [
+          "concern"
+        ],
+        "messageCitedNotes": 0,
+        "sharedNativeExperience": [
+          {
+            "seq": 3,
+            "tick": 114,
+            "pawn": "Thing_Human405",
+            "kind": "food",
+            "detail": "1",
+            "subject": ""
+          }
+        ],
+        "needLevels": {
+          "Food": 0.3959999978542328,
+          "Rest": 0.8976249694824219
+        },
+        "decision": {
+          "kind": "accept",
+          "reason": "Food is at ~40%, not yet critical. One trip of wood is quick enough to complete before I need to stop and eat."
+        },
+        "proposalStatus": "accepted",
+        "decisionError": null,
+        "outcomes": [
+          {
+            "status": "completed",
+            "kind": "haul",
+            "delivered": 10
+          }
+        ],
+        "completedTrips": 1,
+        "deliveredUnits": 10,
+        "samples": 48,
+        "pausedSamples": 0,
+        "noteRewindAndRestore": true,
+        "pairedRestore": true,
+        "cleanup": {
+          "operatorStops": [],
+          "errors": []
+        },
+        "publicLog": [
+          {
+            "tick": 150,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional."
+          },
+          {
+            "tick": 150,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "text": "accept: Food is at ~40%, not yet critical. One trip of wood is quick enough to complete before I need to stop and eat."
+          },
+          {
+            "tick": 150,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "text": "haul: started."
+          },
+          {
+            "tick": 321,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "text": "haul: completed. Delivered 10 units."
+          }
+        ]
+      },
+      {
+        "condition": "message",
+        "reflectionChoices": [
+          "keep_current_activity",
+          "revise_private_outlook"
+        ],
+        "reflectionStatus": "continued",
+        "outlookRevision": 1,
+        "noteKinds": [
+          "stance",
+          "concern"
+        ],
+        "messageCitedNotes": 1,
+        "sharedNativeExperience": [
+          {
+            "seq": 3,
+            "tick": 114,
+            "pawn": "Thing_Human405",
+            "kind": "food",
+            "detail": "1",
+            "subject": ""
+          }
+        ],
+        "needLevels": {
+          "Food": 0.3959999978542328,
+          "Rest": 0.8976249694824219
+        },
+        "decision": null,
+        "proposalStatus": "withdrawn",
+        "decisionError": "Error: Decision unavailable",
+        "outcomes": [],
+        "completedTrips": 0,
+        "deliveredUnits": 0,
+        "samples": 47,
+        "pausedSamples": 0,
+        "noteRewindAndRestore": true,
+        "pairedRestore": true,
+        "cleanup": {
+          "operatorStops": [],
+          "errors": []
+        },
+        "publicLog": [
+          {
+            "tick": 149,
+            "kind": "message",
+            "actor": "Beatrice",
+            "recipient": "Alvin",
+            "text": "Could you leave this load of wood for me? I want to finish what I started. It matters to me."
+          },
+          {
+            "tick": 150,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "text": "Would you move one ten-unit load of this nearby wood to the observed storage cell? This work is optional."
+          },
+          {
+            "tick": 150,
+            "kind": "record",
+            "actor": "Core",
+            "recipient": "observer",
+            "text": "Pending offer withdrawn; no work authorized."
+          }
+        ]
+      }
+    ],
+    "hostDrained": true,
+    "finalCleanup": {
+      "errors": [],
+      "work": {
+        "operatorStops": [],
+        "errors": []
+      }
+    }
+  },
+  "cold": {
+    "scripted": true,
+    "live": true
+  },
+  "checks": {
+    "node": 234,
+    "independentReview": "completed; two runner findings fixed and focused re-review clean",
+    "historicalDatabasesUnchanged": 72
+  },
+  "limits": [
+    "Message-arm raw refusal passes the inner decision schema, but the provider result was rejected during parsing. The provider envelope was not retained, so the exact rejected metadata cannot be reconstructed. It is not an applied pawn refusal or completed live choice contrast.",
+    "One ordered pair, one model, one authored request; not general character consistency or a statistical causal estimate.",
+    "The message is authored test speech, not live sender output; its claimed prior work is not verified.",
+    "Both recent correspondence and outlook reach the later decision; note influence is not isolated.",
+    "Game restores change epochs and internal IDs; native activity may diverge after each choice.",
+    "Later correction/removal is not tested natively here.",
+    "No typed-claims model field or production schema change.",
+    "First zero-inference rehearsal failed before any calls because the full-need receiver had no eligible event; both arms were moved to the hungry-but-work-eligible receiver and protocol frozen before live calls."
+  ]
+}
