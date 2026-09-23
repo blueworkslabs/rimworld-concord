@@ -33,11 +33,16 @@ test('core recovery requires the complete ordered two-message formatting trace; 
 test('native adapter accepts one bounded core formatting repair but still rejects context-invalid final choices',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'concord-core-recovery-')),binary=join(dir,'fake');
  const init={type:'system',subtype:'init',model:CLAUDE_MODEL,tools:['StructuredOutput'],mcp_servers:[],plugins:[],skills:[],slash_commands:[]};
- const write=async(final:any)=>writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\n'+[init,...events().slice(0,-1),final].map(e=>'console.log('+JSON.stringify(JSON.stringify(e))+');').join('\n'),{mode:0o700});
+ const write=async(final:any,tail="")=>writeFile(binary,'#!/usr/bin/env node\nif(process.argv.includes("auth")){console.log(JSON.stringify({loggedIn:true,authMethod:"claude.ai",apiProvider:"firstParty",subscriptionType:"max"}));process.exit(0);}\n'+[init,...events().slice(0,-1),final].map(e=>'console.log('+JSON.stringify(JSON.stringify(e))+');').join('\n')+'\nprocess.stdout.write('+JSON.stringify(tail)+');',{mode:0o700});
  const b=new ClaudeDecisionBackend({ledgerPath:join(dir,'ledger.db'),scratchRoot:join(dir,'scratch'),binary,trial:'provider-diagnostic-v1'});
  try{
   await write(result);assert.deepEqual(await b.plan(view,new AbortController().signal),choice);assert.equal(b.receipts[0]!.formattingRecovery,true);assert.equal(b.receipts[0]!.status,'ok');assert.equal(b.summary().attempts,1);
   await write({...result,structured_output:{core:{...choice,topics:[{sourceId:'invented',status:'open',text:'Unknown source'}]}}});
   await assert.rejects(b.plan(view,new AbortController().signal),/attempt retained/);assert.equal(b.failures[0]!.stage,'validation');assert.equal(b.summary().attempts,2);
+  for(const tail of ['{"type":"assistant",','{"type":"assistant","message":{"id":"extra","content":[]}}']){
+   await write(result,tail);await assert.rejects(b.plan(view,new AbortController().signal),/attempt retained/);
+   assert.equal(b.failures.at(-1)!.stage,'transport');assert.equal(b.rawResponses.at(-1)!.result.turns,3);
+  }
+  assert.equal(b.summary().attempts,4);
  }finally{b.close();await rm(dir,{recursive:true,force:true});}
 });

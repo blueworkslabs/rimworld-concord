@@ -166,7 +166,7 @@ export class ClaudeDecisionBackend {
      });
      const cleanup=()=>{clearTimeout(timer);clearTimeout(force);signal.removeEventListener('abort',stop);};
      child.on('error',()=>{cleanup();reject(Error('CLI unavailable'));});
-     child.on('close',code=>{cleanup();if(isolationFailure){reject(new ClaudeIsolationFailure('CLI isolation failed'));return;}if(code!==0||failure||!init||!result||signal.aborted)reject(Error('CLI decision failed'));else resolve({result,tools});});
+     child.on('close',code=>{cleanup();if(isolationFailure){reject(new ClaudeIsolationFailure('CLI isolation failed'));return;}if(code!==0||failure||buffer.trim().length>0||!init||!result||signal.aborted)reject(Error('CLI decision failed'));else resolve({result,tools});});
      child.stdin.end(prompt);if(signal.aborted)stop();
    });
  }

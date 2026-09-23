@@ -85,7 +85,9 @@ correction now recognizes exactly this bounded recovery sequence:
    result with `num_turns: 3`. The five-event trace must be complete and ordered.
 
 Only that proof permits the three-valued result counter. Missing, truncated,
-extra, unmatched or differently failing traces retain rejection. Other character
+extra, unmatched or differently failing traces retain rejection. Transport also
+rejects unconsumed non-whitespace bytes after the final newline, including an
+unterminated extra event; retained usage and failure diagnostics are preserved. Other character
 modes retain the two-valued guard. CLI max-turns remains two; tools, model route,
 success envelope, cost/time limits and final choice/context validation remain
 mandatory. Counts describe stream events, not a guarantee about HTTP attempts.
@@ -103,3 +105,17 @@ calls observed berry stacks “patches”; topics also sometimes describe teleme
 as a pawn report. These descriptions are retained, not corrected in the outputs.
 Contract validity does not establish grounded prose, useful planning or a general
 failure rate. This operational check has no separate narrative diary entry.
+
+## Verification and retained artifacts
+
+[Complete public evidence](evidence/provider-failure-probe.json) contains all four
+exact requests, original statuses, structured outputs and text-free traces, plus
+a separate offline correction check. The latter reconstructs only the parser's
+required envelope fields from retained metadata; it does not recreate omitted
+model-usage payloads. Original receipt SHA-256 is recorded.
+
+309 Node checks and ten Python checks pass. The four attempts reported
+0.1679469 USD API-equivalent usage under the existing Max route, with 0.40 USD
+reserved; this is not cash billing. All 223 historical database-related files are
+unchanged. Staging remained stopped throughout. No new game receipt or diary
+story is claimed for this interface investigation.
