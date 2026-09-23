@@ -83,7 +83,9 @@ Two early reads (one model reading an exported log, one reader working from
 screenshots) found real gaps but did not scale: screenshot packs can't carry a
 ten-minute scene. Future legibility checks need a recording of the scene (watched by
 a person, or summarized by a video-capable model) and a protocol decided in advance.
-The recording pipeline is being calibrated; general legibility is not claimed.
+The [first recording review](evidence/video-feedback-pilot.json) recovered the main
+sequence but invented dialogue and misread ticks/quotes. Receipt checking helped but
+also introduced an unsupported explanation. General legibility is not claimed.
 
 ## Running trials
 

@@ -30,7 +30,9 @@ food sightings, and a live, event-driven core that proposes, asks and follows up
 
 The observer now has a compact, public-only sidebar with an expandable journal. A
 75-second **scripted** recording pilot checks capture overhead and basic presentation;
-human feedback and video-model review are still next, not completed. See
+Gemini’s two-pass review recovered the main sequence but invented a message and
+misquoted text. The receipt check helped, but also needed checking. See
+[video feedback evidence](docs/evidence/video-feedback-pilot.json) and
 [crew log and recording](docs/CREW_LOG.md).
 
 Not yet shown: the live core turning a need into a multi-step plan (build, then cook),
