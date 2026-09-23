@@ -77,3 +77,19 @@ export class ProviderStreamCounts {
   if(event?.type==='result')inc('resultEvents');
  }
 }
+
+/** Narrow recovery proof, not a generic relaxation of the result turn bound.
+ * Installed client counts input + user/tool-result events in successful num_turns.
+ * Exactly two distinct assistant messages and two formatting calls are allowed here.
+ */
+export function boundedCoreFormattingRecovery(stream:Pick<ProviderStreamCounts,'counts'|'details'>|undefined){
+ if(!stream||stream.details.truncated)return false;
+ const c=stream.counts,e=stream.details.events;
+ if(c.assistantEvents!==2||c.assistantMessages!==2||c.structuredOutputCalls!==2||c.userEvents!==2||c.toolResults!==2||c.toolErrors!==1||c.resultEvents!==1||e.length!==5)return false;
+ const [a,b,d,f,r]=e;
+ return a?.kind==='format-call'&&a.ordinal===1&&a.concordInputContract==='invalid'&&a.issues.length>0&&
+  b?.kind==='format-result'&&b.ordinal===1&&b.error===true&&b.errorMarker==='schema-mismatch'&&
+  d?.kind==='format-call'&&d.ordinal===2&&d.concordInputContract==='valid'&&d.issues.length===0&&
+  f?.kind==='format-result'&&f.ordinal===2&&f.error===false&&f.errorMarker==='none'&&
+  r?.kind==='result'&&r.turns===3&&r.error===false;
+}
