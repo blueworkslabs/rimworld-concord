@@ -18,7 +18,7 @@ Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decisi
 | Cheaper-model contract checks | `gpt-5.6-luna` | Native Codex app-server, ChatGPT login | offline only, not a game backend |
 | Diary drafts | `moonshotai/kimi-k2` | OpenRouter via OpenClaw `llm-task` | editorial only |
 
-No bare API mode, no Agent SDK, no extracted OAuth tokens. Subscription logins are
+Claude and Luna use no bare API mode, Agent SDK or extracted OAuth tokens. Their subscription logins are
 used through their native clients. For native subscription routes, usage figures are API-equivalent estimates, not
 per-call cash charges. Jev uses the paid OpenRouter API: its reported usage cost
 is monetary accounting, not a subscription estimate. Billing routes are never
