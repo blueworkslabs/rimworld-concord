@@ -1,0 +1,1746 @@
+{
+  "version": "core-followup-v1",
+  "behaviorCommit": "1be82ac4de3588f575a1d3f6be6f46a0c3b3109c",
+  "protocol": {
+    "policy": "core-followup-v1",
+    "coreCalls": 4,
+    "pawnCalls": 5,
+    "cooldownTicks": 60,
+    "windowTicks": 18000,
+    "nativeMs": 120000,
+    "pausedInference": true,
+    "wallMs": 900000,
+    "jevCalls": 0
+  },
+  "trialPassed": false,
+  "inferencePassed": false,
+  "nativeError": null,
+  "accounting": {
+    "core": {
+      "attempts": 4,
+      "reservedEquivalentUSD": 0.4,
+      "estimatedUsageUSD": 0.2581194
+    },
+    "pawns": {
+      "attempts": 3,
+      "reservedEquivalentUSD": 0.30000000000000004,
+      "estimatedUsageUSD": 0.067866
+    },
+    "jevCalls": 0
+  },
+  "responses": [
+    {
+      "id": "a1014ab5-b8f8-4c24-a66f-7819928f2568",
+      "mode": "core",
+      "pawn": null,
+      "receivedAt": "2026-09-23T12:38:33.802Z",
+      "elapsedMs": 8460,
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's telemetry reports food as low. No food opportunities are currently listed. Checking in with Alvin directly.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human405",
+          "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+          "reason": "Alvin's shared telemetry reports food as low. No food-related opportunities are listed at this tick, so asking Alvin directly is the appropriate first step before considering any action."
+        }
+      }
+    },
+    {
+      "id": "8de046e8-49b2-4def-bd4a-24cf9e72ee58",
+      "mode": "core-answer",
+      "pawn": "Thing_Human405",
+      "receivedAt": "2026-09-23T12:38:37.891Z",
+      "elapsedMs": 3678,
+      "output": {
+        "choice": "say",
+        "text": "Yeah, food's running low. I could use help getting something to eat \u2014 I've been focused on building. If someone can cook or point me to supplies, I'd appreciate it."
+      }
+    },
+    {
+      "id": "5598027b-6fde-4122-8d12-96668830f394",
+      "mode": "core",
+      "pawn": null,
+      "receivedAt": "2026-09-23T12:38:50.147Z",
+      "elapsedMs": 10044,
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's telemetry reports food as low; Alvin reported needing help getting food and pointed to being focused on building. No food opportunities are currently listed. Asking Beatrice if she can help locate food or cooking supplies for Alvin.",
+            "status": "open"
+          },
+          {
+            "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+            "text": "Alvin reported food is low and asked for help finding or preparing food. No food opportunities listed this tick. Checking with Beatrice for options.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human408",
+          "text": "Alvin mentioned his food is running low and he'd appreciate help finding supplies or someone who can cook. Do you know of any food nearby, or would you be willing to help him get something to eat?",
+          "reason": "Alvin reported low food and asked for help. No food opportunities are listed. Beatrice is available and may know of food sources or be willing to assist Alvin."
+        }
+      }
+    },
+    {
+      "id": "2d586cd2-0005-47d0-b659-78fe383a6e20",
+      "mode": "core-answer",
+      "pawn": "Thing_Human408",
+      "receivedAt": "2026-09-23T12:38:56.495Z",
+      "elapsedMs": 5969,
+      "output": {
+        "choice": "say",
+        "text": "Alvin's running low? I can try to cook something, though I'm no chef. I don't see food nearby from here. Worth checking the stockpiles \u2014 maybe haul first, then I'll do what I can."
+      }
+    },
+    {
+      "id": "1b5278e1-e007-49ca-b21e-aac46d99c384",
+      "mode": "core",
+      "pawn": null,
+      "receivedAt": "2026-09-23T12:39:58.290Z",
+      "elapsedMs": 11721,
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin and Pedro both report food as low per telemetry. Beatrice reported willingness to cook and suggested hauling to stockpiles first, but no food opportunities are currently listed. Following up with Pedro about his food situation.",
+            "status": "open"
+          },
+          {
+            "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+            "text": "Alvin reported food is low and asked for help. Beatrice reported willingness to cook and suggested checking stockpiles, but no food opportunities are listed this tick. No food work can be proposed yet.",
+            "status": "open"
+          },
+          {
+            "sourceId": "1d9d3897-2489-42f0-9e6d-25617efa95d5",
+            "text": "Beatrice reported she can try to cook, does not see food nearby, and suggested hauling from stockpiles first. No food opportunities listed; waiting for viable options.",
+            "status": "open"
+          },
+          {
+            "sourceId": "1514a4d0-9eb6-4826-b3dd-f088c9537ad3",
+            "text": "Beatrice reported willingness to try cooking and recommended hauling from stockpiles first. No food hauling or cooking opportunity is currently listed to propose.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human411",
+          "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+          "reason": "Pedro's telemetry reports food as low this tick. Asking him directly to understand his situation before considering any action, consistent with how Alvin was approached."
+        }
+      }
+    },
+    {
+      "id": "740fcc11-b085-4954-b88b-02ff901ca119",
+      "mode": "core-answer",
+      "pawn": "Thing_Human411",
+      "receivedAt": "2026-09-23T12:40:02.627Z",
+      "elapsedMs": 3977,
+      "output": {
+        "choice": "say",
+        "text": "Yeah, running low. Haven't found much to eat yet. Alvin's in the same boat. If someone can cook or we can find rations, that'd help. I can haul if needed."
+      }
+    }
+  ],
+  "providerDiagnostics": {
+    "core": {
+      "decisions": [
+        {
+          "mode": "core",
+          "authoredSize": {
+            "instructionsBytes": 1286,
+            "promptBytes": 6144,
+            "schemaBytes": 10487,
+            "totalAuthoredBytes": 17917
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 8167,
+          "estimatedUsageUSD": 0.047526,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        },
+        {
+          "mode": "core",
+          "authoredSize": {
+            "instructionsBytes": 1286,
+            "promptBytes": 7540,
+            "schemaBytes": 13794,
+            "totalAuthoredBytes": 22620
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 9758,
+          "estimatedUsageUSD": 0.059487000000000005,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        },
+        {
+          "mode": "core",
+          "authoredSize": {
+            "instructionsBytes": 1286,
+            "promptBytes": 7001,
+            "schemaBytes": 10477,
+            "totalAuthoredBytes": 18764
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 11455,
+          "estimatedUsageUSD": 0.052137,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        }
+      ],
+      "rawResponses": [
+        {
+          "mode": "core",
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "brief",
+                  "text": "Alvin's telemetry reports food as low. No food opportunities are currently listed. Checking in with Alvin directly.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "ask",
+                "pawn": "Thing_Human405",
+                "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+                "reason": "Alvin's shared telemetry reports food as low. No food-related opportunities are listed at this tick, so asking Alvin directly is the appropriate first step before considering any action."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "turns": 2,
+            "reportedCostUSD": 0.047526,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core",
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "brief",
+                  "text": "Alvin's telemetry reports food as low; Alvin reported needing help getting food and pointed to being focused on building. No food opportunities are currently listed. Asking Beatrice if she can help locate food or cooking supplies for Alvin.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+                  "text": "Alvin reported food is low and asked for help finding or preparing food. No food opportunities listed this tick. Checking with Beatrice for options.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "ask",
+                "pawn": "Thing_Human408",
+                "text": "Alvin mentioned his food is running low and he'd appreciate help finding supplies or someone who can cook. Do you know of any food nearby, or would you be willing to help him get something to eat?",
+                "reason": "Alvin reported low food and asked for help. No food opportunities are listed. Beatrice is available and may know of food sources or be willing to assist Alvin."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "turns": 2,
+            "reportedCostUSD": 0.059487000000000005,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core",
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "brief",
+                  "text": "Alvin's food low per telemetry. Beatrice reported no food visible, suggested stockpile check before cooking. No food opportunities listed. Asking Pedro about food sources.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+                  "text": "Alvin reported food low, asked for help. Beatrice reported no food nearby, suggested stockpile check first. No food opportunities listed. Asking Pedro.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "1514a4d0-9eb6-4826-b3dd-f088c9537ad3",
+                  "text": "Beatrice reported willingness to cook but no food visible from her position; suggested checking stockpiles first. No food or cooking opportunities listed this tick.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "ask",
+                "pawn": "Thing_Human411",
+                "text": "Alvin's food is running low. Beatrice said she'd try cooking but doesn't see food nearby and suggested checking stockpiles first. Do you know of any food supplies or sources nearby?",
+                "reason": "Beatrice reported no food visible and suggested stockpile check. Pedro has not been consulted and may know of food sources. No food opportunities are listed this tick."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "turns": 3,
+            "reportedCostUSD": 0.0989694,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core",
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "brief",
+                  "text": "Alvin and Pedro both report food as low per telemetry. Beatrice reported willingness to cook and suggested hauling to stockpiles first, but no food opportunities are currently listed. Following up with Pedro about his food situation.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+                  "text": "Alvin reported food is low and asked for help. Beatrice reported willingness to cook and suggested checking stockpiles, but no food opportunities are listed this tick. No food work can be proposed yet.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "1d9d3897-2489-42f0-9e6d-25617efa95d5",
+                  "text": "Beatrice reported she can try to cook, does not see food nearby, and suggested hauling from stockpiles first. No food opportunities listed; waiting for viable options.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "1514a4d0-9eb6-4826-b3dd-f088c9537ad3",
+                  "text": "Beatrice reported willingness to try cooking and recommended hauling from stockpiles first. No food hauling or cooking opportunity is currently listed to propose.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "ask",
+                "pawn": "Thing_Human411",
+                "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+                "reason": "Pedro's telemetry reports food as low this tick. Asking him directly to understand his situation before considering any action, consistent with how Alvin was approached."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "turns": 2,
+            "reportedCostUSD": 0.052137,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        }
+      ],
+      "failures": [
+        {
+          "stage": "parsing",
+          "attemptReserved": true,
+          "cancelled": false,
+          "issues": [
+            {
+              "code": "too_big",
+              "path": [
+                "num_turns"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "pawns": {
+      "decisions": [
+        {
+          "mode": "core-answer",
+          "authoredSize": {
+            "instructionsBytes": 674,
+            "promptBytes": 5843,
+            "schemaBytes": 392,
+            "totalAuthoredBytes": 6909
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 3402,
+          "estimatedUsageUSD": 0.020666999999999998,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        },
+        {
+          "mode": "core-answer",
+          "authoredSize": {
+            "instructionsBytes": 674,
+            "promptBytes": 6694,
+            "schemaBytes": 392,
+            "totalAuthoredBytes": 7760
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 5699,
+          "estimatedUsageUSD": 0.02331,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        },
+        {
+          "mode": "core-answer",
+          "authoredSize": {
+            "instructionsBytes": 674,
+            "promptBytes": 7497,
+            "schemaBytes": 392,
+            "totalAuthoredBytes": 8563
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 3701,
+          "estimatedUsageUSD": 0.023889,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        }
+      ],
+      "rawResponses": [
+        {
+          "mode": "core-answer",
+          "structuredOutput": {
+            "social": {
+              "choice": "say",
+              "text": "Yeah, food's running low. I could use help getting something to eat \u2014 I've been focused on building. If someone can cook or point me to supplies, I'd appreciate it."
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "turns": 2,
+            "reportedCostUSD": 0.020666999999999998,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core-answer",
+          "structuredOutput": {
+            "social": {
+              "choice": "say",
+              "text": "Alvin's running low? I can try to cook something, though I'm no chef. I don't see food nearby from here. Worth checking the stockpiles \u2014 maybe haul first, then I'll do what I can."
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "turns": 2,
+            "reportedCostUSD": 0.02331,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core-answer",
+          "structuredOutput": {
+            "social": {
+              "choice": "say",
+              "text": "Yeah, running low. Haven't found much to eat yet. Alvin's in the same boat. If someone can cook or we can find rations, that'd help. I can haul if needed."
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "turns": 2,
+            "reportedCostUSD": 0.023889,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        }
+      ],
+      "failures": []
+    }
+  },
+  "coreSituations": [
+    {
+      "tick": 76,
+      "wakeReasons": [
+        {
+          "sourceId": "brief",
+          "kind": "start",
+          "value": "initial"
+        },
+        {
+          "sourceId": "Thing_Human405",
+          "kind": "telemetry",
+          "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+        },
+        {
+          "sourceId": "Thing_Human408",
+          "kind": "telemetry",
+          "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+        },
+        {
+          "sourceId": "Thing_Human411",
+          "kind": "telemetry",
+          "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+        }
+      ],
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 76,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 76,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 76,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "op:204ba86e29fabd243b9c4848",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 83,
+            "z": 79,
+            "maxTicks": 3600
+          },
+          "observedTick": 76
+        },
+        {
+          "id": "op:c7601618e687f9f5d6d12017",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 84,
+            "z": 80,
+            "maxTicks": 3600
+          },
+          "observedTick": 76
+        },
+        {
+          "id": "op:ea8c4765649e6234e6de03ed",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 76,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:08a5e04af2f4779ef3f93b4a",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 75,
+            "z": 79,
+            "maxTicks": 3600
+          },
+          "observedTick": 76
+        },
+        {
+          "id": "op:da622cc443e5a8a3a31160bd",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 75,
+            "z": 78,
+            "maxTicks": 3600
+          },
+          "observedTick": 76
+        },
+        {
+          "id": "op:117185bf255cec6314c75940",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 76,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:ec42e20ff48c657190f2c2c7",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 76,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:906bb7ff17dd0b189d0a863f",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 84,
+            "maxTicks": 3600
+          },
+          "observedTick": 76
+        },
+        {
+          "id": "op:616dc4e1e555368a6c4e23e9",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 86,
+            "maxTicks": 3600
+          },
+          "observedTick": 76
+        },
+        {
+          "id": "op:a56ba1e6287fd2acc3afdd2a",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 76,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        }
+      ]
+    },
+    {
+      "tick": 165,
+      "wakeReasons": [
+        {
+          "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+          "kind": "message",
+          "value": "Yeah, food's running low. I could use help getting something to eat \u2014 I've been focused on building. If someone can cook or point me to supplies, I'd appreciate it."
+        },
+        {
+          "sourceId": "ec099547-c91d-45c1-aa70-9f925566eff9",
+          "kind": "answer",
+          "value": "answered"
+        }
+      ],
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 165,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 165,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 165,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "op:d0e999bab3980ae71aacd59c",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 85,
+            "z": 82,
+            "maxTicks": 3600
+          },
+          "observedTick": 165
+        },
+        {
+          "id": "op:cfc58b3fd985f456b4799f01",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 84,
+            "z": 82,
+            "maxTicks": 3600
+          },
+          "observedTick": 165
+        },
+        {
+          "id": "op:ea8c4765649e6234e6de03ed",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 165,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:0a3c2bd215a6976550be5716",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 77,
+            "z": 79,
+            "maxTicks": 3600
+          },
+          "observedTick": 165
+        },
+        {
+          "id": "op:c7855fabc46dd9fb3f4664b8",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 76,
+            "z": 79,
+            "maxTicks": 3600
+          },
+          "observedTick": 165
+        },
+        {
+          "id": "op:ec42e20ff48c657190f2c2c7",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 165,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:117185bf255cec6314c75940",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 165,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:7f8517c843f1b0be38005ed3",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 165,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:a4584ec6f836500fa66ad3bc",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 165,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:906bb7ff17dd0b189d0a863f",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 84,
+            "maxTicks": 3600
+          },
+          "observedTick": 165
+        },
+        {
+          "id": "op:616dc4e1e555368a6c4e23e9",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 86,
+            "maxTicks": 3600
+          },
+          "observedTick": 165
+        },
+        {
+          "id": "op:a56ba1e6287fd2acc3afdd2a",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 165,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        }
+      ]
+    },
+    {
+      "tick": 248,
+      "wakeReasons": [
+        {
+          "sourceId": "1514a4d0-9eb6-4826-b3dd-f088c9537ad3",
+          "kind": "message",
+          "value": "Alvin's running low? I can try to cook something, though I'm no chef. I don't see food nearby from here. Worth checking the stockpiles \u2014 maybe haul first, then I'll do what I can."
+        },
+        {
+          "sourceId": "31116639-93ab-4876-b055-3bb47cce6f7e",
+          "kind": "answer",
+          "value": "answered"
+        }
+      ],
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 248,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 248,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 248,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "op:650d60f5ef25cb7967b8062f",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 86,
+            "z": 83,
+            "maxTicks": 3600
+          },
+          "observedTick": 248
+        },
+        {
+          "id": "op:030822ef3fae94e44ef013bc",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 85,
+            "z": 83,
+            "maxTicks": 3600
+          },
+          "observedTick": 248
+        },
+        {
+          "id": "op:ea8c4765649e6234e6de03ed",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 248,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:fdd5253936063c58185bddc0",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 78,
+            "z": 80,
+            "maxTicks": 3600
+          },
+          "observedTick": 248
+        },
+        {
+          "id": "op:00248649cac2d83bbe8bb431",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 77,
+            "z": 80,
+            "maxTicks": 3600
+          },
+          "observedTick": 248
+        },
+        {
+          "id": "op:7f8517c843f1b0be38005ed3",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 248,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:a4584ec6f836500fa66ad3bc",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 248,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:ec42e20ff48c657190f2c2c7",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 248,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:117185bf255cec6314c75940",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 248,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:906bb7ff17dd0b189d0a863f",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 84,
+            "maxTicks": 3600
+          },
+          "observedTick": 248
+        },
+        {
+          "id": "op:616dc4e1e555368a6c4e23e9",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 86,
+            "maxTicks": 3600
+          },
+          "observedTick": 248
+        },
+        {
+          "id": "op:a56ba1e6287fd2acc3afdd2a",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 248,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        }
+      ]
+    },
+    {
+      "tick": 1914,
+      "wakeReasons": [
+        {
+          "sourceId": "Thing_Human411",
+          "kind": "telemetry",
+          "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+        }
+      ],
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 1914,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 1914,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "635edf0573fb48709408485a58e24b64",
+          "tick": 1914,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "op:036f1b2162121cbe7c5cfde4",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 70,
+            "z": 83,
+            "maxTicks": 3600
+          },
+          "observedTick": 1914
+        },
+        {
+          "id": "op:a8401c328d904740766014ba",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 69,
+            "z": 83,
+            "maxTicks": 3600
+          },
+          "observedTick": 1914
+        },
+        {
+          "id": "op:117185bf255cec6314c75940",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 1914,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:0d531da41565e30e92ca3c62",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 70,
+            "z": 81,
+            "maxTicks": 3600
+          },
+          "observedTick": 1914
+        },
+        {
+          "id": "op:60b00ab21e510ed75e5374aa",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 69,
+            "z": 81,
+            "maxTicks": 3600
+          },
+          "observedTick": 1914
+        },
+        {
+          "id": "op:1e476224ccbc8dcebcdc15a4",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 1914,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        }
+      ]
+    }
+  ],
+  "outcomes": {
+    "proposals": 0,
+    "nativeActionOutcomes": 0,
+    "campfires": 0,
+    "meals": 0,
+    "pawnReplies": 3,
+    "nativeElapsedMs": 120528,
+    "samples": 87,
+    "unpausedSamples": 87,
+    "sampledIngestJobs": 0
+  },
+  "publicCoreState": {
+    "revision": 11,
+    "brief": {
+      "id": "brief",
+      "text": "Consider the crew\u2019s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+    },
+    "topics": [
+      {
+        "sourceId": "brief",
+        "text": "Alvin and Pedro both report food as low per telemetry. Beatrice reported willingness to cook and suggested hauling to stockpiles first, but no food opportunities are currently listed. Following up with Pedro about his food situation.",
+        "status": "open",
+        "proposalIds": []
+      },
+      {
+        "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+        "text": "Alvin reported food is low and asked for help. Beatrice reported willingness to cook and suggested checking stockpiles, but no food opportunities are listed this tick. No food work can be proposed yet.",
+        "status": "open",
+        "proposalIds": []
+      },
+      {
+        "sourceId": "1d9d3897-2489-42f0-9e6d-25617efa95d5",
+        "text": "Beatrice reported she can try to cook, does not see food nearby, and suggested hauling from stockpiles first. No food opportunities listed; waiting for viable options.",
+        "status": "open",
+        "proposalIds": []
+      },
+      {
+        "sourceId": "1514a4d0-9eb6-4826-b3dd-f088c9537ad3",
+        "text": "Beatrice reported willingness to try cooking and recommended hauling from stockpiles first. No food hauling or cooking opportunity is currently listed to propose.",
+        "status": "open",
+        "proposalIds": []
+      }
+    ],
+    "questions": [
+      {
+        "id": "ec099547-c91d-45c1-aa70-9f925566eff9",
+        "pawn": "Thing_Human405",
+        "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+        "status": "answered",
+        "messages": [
+          {
+            "id": "b9af5f0e-ae07-48ff-ad85-d8b4154d8678",
+            "exchangeId": "ec099547-c91d-45c1-aa70-9f925566eff9",
+            "tick": 76,
+            "from": "core",
+            "to": "Thing_Human405",
+            "fromName": "Core",
+            "toName": "Alvin",
+            "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?"
+          },
+          {
+            "id": "258bbaf0-098c-49fa-8543-091368dae018",
+            "exchangeId": "ec099547-c91d-45c1-aa70-9f925566eff9",
+            "tick": 76,
+            "from": "Thing_Human405",
+            "to": "core",
+            "fromName": "Alvin",
+            "toName": "Core",
+            "text": "Yeah, food's running low. I could use help getting something to eat \u2014 I've been focused on building. If someone can cook or point me to supplies, I'd appreciate it."
+          }
+        ]
+      },
+      {
+        "id": "31116639-93ab-4876-b055-3bb47cce6f7e",
+        "pawn": "Thing_Human408",
+        "text": "Alvin mentioned his food is running low and he'd appreciate help finding supplies or someone who can cook. Do you know of any food nearby, or would you be willing to help him get something to eat?",
+        "status": "answered",
+        "messages": [
+          {
+            "id": "1d9d3897-2489-42f0-9e6d-25617efa95d5",
+            "exchangeId": "31116639-93ab-4876-b055-3bb47cce6f7e",
+            "tick": 165,
+            "from": "core",
+            "to": "Thing_Human408",
+            "fromName": "Core",
+            "toName": "Beatrice",
+            "text": "Alvin mentioned his food is running low and he'd appreciate help finding supplies or someone who can cook. Do you know of any food nearby, or would you be willing to help him get something to eat?"
+          },
+          {
+            "id": "1514a4d0-9eb6-4826-b3dd-f088c9537ad3",
+            "exchangeId": "31116639-93ab-4876-b055-3bb47cce6f7e",
+            "tick": 165,
+            "from": "Thing_Human408",
+            "to": "core",
+            "fromName": "Beatrice",
+            "toName": "Core",
+            "text": "Alvin's running low? I can try to cook something, though I'm no chef. I don't see food nearby from here. Worth checking the stockpiles \u2014 maybe haul first, then I'll do what I can."
+          }
+        ]
+      },
+      {
+        "id": "33187203-fb7f-426f-81d2-b7e5236415fe",
+        "pawn": "Thing_Human411",
+        "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+        "status": "answered",
+        "messages": [
+          {
+            "id": "092e8e73-2049-4d6a-b469-c1d0720ec6e1",
+            "exchangeId": "33187203-fb7f-426f-81d2-b7e5236415fe",
+            "tick": 1914,
+            "from": "core",
+            "to": "Thing_Human411",
+            "fromName": "Core",
+            "toName": "Pedro",
+            "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?"
+          },
+          {
+            "id": "f5f6fbe4-b090-404c-ab12-9610009624b4",
+            "exchangeId": "33187203-fb7f-426f-81d2-b7e5236415fe",
+            "tick": 1914,
+            "from": "Thing_Human411",
+            "to": "core",
+            "fromName": "Pedro",
+            "toName": "Core",
+            "text": "Yeah, running low. Haven't found much to eat yet. Alvin's in the same boat. If someone can cook or we can find rations, that'd help. I can haul if needed."
+          }
+        ]
+      }
+    ],
+    "turns": [
+      {
+        "id": "05c16bb1-b747-4915-aa7f-acb03fa76ff1",
+        "status": "applied",
+        "choice": {
+          "topics": [
+            {
+              "sourceId": "brief",
+              "text": "Alvin's telemetry reports food as low. No food opportunities are currently listed. Checking in with Alvin directly.",
+              "status": "open"
+            }
+          ],
+          "actionTopicId": null,
+          "action": {
+            "kind": "ask",
+            "pawn": "Thing_Human405",
+            "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+            "reason": "Alvin's shared telemetry reports food as low. No food-related opportunities are listed at this tick, so asking Alvin directly is the appropriate first step before considering any action."
+          }
+        },
+        "questionId": "ec099547-c91d-45c1-aa70-9f925566eff9"
+      },
+      {
+        "id": "d939136f-91a3-4564-8c76-32b9abbf366c",
+        "status": "applied",
+        "choice": {
+          "topics": [
+            {
+              "sourceId": "brief",
+              "text": "Alvin's telemetry reports food as low; Alvin reported needing help getting food and pointed to being focused on building. No food opportunities are currently listed. Asking Beatrice if she can help locate food or cooking supplies for Alvin.",
+              "status": "open"
+            },
+            {
+              "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+              "text": "Alvin reported food is low and asked for help finding or preparing food. No food opportunities listed this tick. Checking with Beatrice for options.",
+              "status": "open"
+            }
+          ],
+          "actionTopicId": null,
+          "action": {
+            "kind": "ask",
+            "pawn": "Thing_Human408",
+            "text": "Alvin mentioned his food is running low and he'd appreciate help finding supplies or someone who can cook. Do you know of any food nearby, or would you be willing to help him get something to eat?",
+            "reason": "Alvin reported low food and asked for help. No food opportunities are listed. Beatrice is available and may know of food sources or be willing to assist Alvin."
+          }
+        },
+        "questionId": "31116639-93ab-4876-b055-3bb47cce6f7e"
+      },
+      {
+        "id": "0978363d-7a62-4bff-ae70-35629fe174a8",
+        "status": "failed"
+      },
+      {
+        "id": "e0a2b839-db75-4c9d-bfa6-ca934be72ebd",
+        "status": "applied",
+        "choice": {
+          "topics": [
+            {
+              "sourceId": "brief",
+              "text": "Alvin and Pedro both report food as low per telemetry. Beatrice reported willingness to cook and suggested hauling to stockpiles first, but no food opportunities are currently listed. Following up with Pedro about his food situation.",
+              "status": "open"
+            },
+            {
+              "sourceId": "258bbaf0-098c-49fa-8543-091368dae018",
+              "text": "Alvin reported food is low and asked for help. Beatrice reported willingness to cook and suggested checking stockpiles, but no food opportunities are listed this tick. No food work can be proposed yet.",
+              "status": "open"
+            },
+            {
+              "sourceId": "1d9d3897-2489-42f0-9e6d-25617efa95d5",
+              "text": "Beatrice reported she can try to cook, does not see food nearby, and suggested hauling from stockpiles first. No food opportunities listed; waiting for viable options.",
+              "status": "open"
+            },
+            {
+              "sourceId": "1514a4d0-9eb6-4826-b3dd-f088c9537ad3",
+              "text": "Beatrice reported willingness to try cooking and recommended hauling from stockpiles first. No food hauling or cooking opportunity is currently listed to propose.",
+              "status": "open"
+            }
+          ],
+          "actionTopicId": null,
+          "action": {
+            "kind": "ask",
+            "pawn": "Thing_Human411",
+            "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+            "reason": "Pedro's telemetry reports food as low this tick. Asking him directly to understand his situation before considering any action, consistent with how Alvin was approached."
+          }
+        },
+        "questionId": "33187203-fb7f-426f-81d2-b7e5236415fe"
+      }
+    ],
+    "schedule": {
+      "config": {
+        "maxAttempts": 4,
+        "cooldownTicks": 60,
+        "windowTicks": 18000
+      },
+      "startTick": 2,
+      "endTick": 18002,
+      "attempts": 4,
+      "consumed": {
+        "start:brief": "initial",
+        "telemetry:Thing_Human405": "{\"food\":\"low\",\"rest\":\"satisfied\"}",
+        "telemetry:Thing_Human408": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}",
+        "telemetry:Thing_Human411": "{\"food\":\"low\",\"rest\":\"satisfied\"}",
+        "message:258bbaf0-098c-49fa-8543-091368dae018": "Yeah, food's running low. I could use help getting something to eat \u2014 I've been focused on building. If someone can cook or point me to supplies, I'd appreciate it.",
+        "answer:ec099547-c91d-45c1-aa70-9f925566eff9": "answered",
+        "message:1514a4d0-9eb6-4826-b3dd-f088c9537ad3": "Alvin's running low? I can try to cook something, though I'm no chef. I don't see food nearby from here. Worth checking the stockpiles \u2014 maybe haul first, then I'll do what I can.",
+        "answer:31116639-93ab-4876-b055-3bb47cce6f7e": "answered"
+      },
+      "lastAttemptTick": 1914
+    }
+  },
+  "report": {
+    "world": "bf5cd88a4b7a4288a575a3214ae511c0",
+    "epoch": "bfd8f21c576e409fa4cf36e8170bbcb0",
+    "branch": "499805c9-8427-428c-9c86-40363241c687",
+    "waiting": "No outstanding offer or running agreement.",
+    "revision": 191,
+    "tick": 7236,
+    "sharedStatus": [
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "source": "shared-link-telemetry",
+        "epoch": "bfd8f21c576e409fa4cf36e8170bbcb0",
+        "food": "low",
+        "rest": "satisfied",
+        "tick": 7236,
+        "fresh": true
+      },
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "source": "shared-link-telemetry",
+        "epoch": "bfd8f21c576e409fa4cf36e8170bbcb0",
+        "food": "low",
+        "rest": "satisfied",
+        "tick": 7236,
+        "fresh": true
+      },
+      {
+        "pawn": "Thing_Human411",
+        "name": "Pedro",
+        "source": "shared-link-telemetry",
+        "epoch": "bfd8f21c576e409fa4cf36e8170bbcb0",
+        "food": "low",
+        "rest": "satisfied",
+        "tick": 7236,
+        "fresh": true
+      }
+    ],
+    "entries": [
+      {
+        "seq": 1,
+        "tick": 76,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Alvin",
+        "subject": "ec099547-c91d-45c1-aa70-9f925566eff9",
+        "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+        "key": "core-talk:b9af5f0e-ae07-48ff-ad85-d8b4154d8678"
+      },
+      {
+        "seq": 2,
+        "tick": 76,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "crew",
+        "subject": "05c16bb1-b747-4915-aa7f-acb03fa76ff1",
+        "text": "Alvin's shared telemetry reports food as low. No food-related opportunities are listed at this tick, so asking Alvin directly is the appropriate first step before considering any action.",
+        "key": "core-plan:05c16bb1-b747-4915-aa7f-acb03fa76ff1"
+      },
+      {
+        "seq": 3,
+        "tick": 76,
+        "kind": "message",
+        "actor": "Alvin",
+        "recipient": "Core",
+        "subject": "ec099547-c91d-45c1-aa70-9f925566eff9",
+        "text": "Yeah, food's running low. I could use help getting something to eat \u2014 I've been focused on building. If someone can cook or point me to supplies, I'd appreciate it.",
+        "key": "core-talk:258bbaf0-098c-49fa-8543-091368dae018"
+      },
+      {
+        "seq": 4,
+        "tick": 165,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Beatrice",
+        "subject": "31116639-93ab-4876-b055-3bb47cce6f7e",
+        "text": "Alvin mentioned his food is running low and he'd appreciate help finding supplies or someone who can cook. Do you know of any food nearby, or would you be willing to help him get something to eat?",
+        "key": "core-talk:1d9d3897-2489-42f0-9e6d-25617efa95d5"
+      },
+      {
+        "seq": 5,
+        "tick": 165,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "crew",
+        "subject": "d939136f-91a3-4564-8c76-32b9abbf366c",
+        "text": "Alvin reported low food and asked for help. No food opportunities are listed. Beatrice is available and may know of food sources or be willing to assist Alvin.",
+        "key": "core-plan:d939136f-91a3-4564-8c76-32b9abbf366c"
+      },
+      {
+        "seq": 6,
+        "tick": 165,
+        "kind": "message",
+        "actor": "Beatrice",
+        "recipient": "Core",
+        "subject": "31116639-93ab-4876-b055-3bb47cce6f7e",
+        "text": "Alvin's running low? I can try to cook something, though I'm no chef. I don't see food nearby from here. Worth checking the stockpiles \u2014 maybe haul first, then I'll do what I can.",
+        "key": "core-talk:1514a4d0-9eb6-4826-b3dd-f088c9537ad3"
+      },
+      {
+        "seq": 7,
+        "tick": 1914,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Pedro",
+        "subject": "33187203-fb7f-426f-81d2-b7e5236415fe",
+        "text": "Your food telemetry is showing low \u2014 do you have access to food, or would you like help finding or preparing something?",
+        "key": "core-talk:092e8e73-2049-4d6a-b469-c1d0720ec6e1"
+      },
+      {
+        "seq": 8,
+        "tick": 1914,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "crew",
+        "subject": "e0a2b839-db75-4c9d-bfa6-ca934be72ebd",
+        "text": "Pedro's telemetry reports food as low this tick. Asking him directly to understand his situation before considering any action, consistent with how Alvin was approached.",
+        "key": "core-plan:e0a2b839-db75-4c9d-bfa6-ca934be72ebd"
+      },
+      {
+        "seq": 9,
+        "tick": 1914,
+        "kind": "message",
+        "actor": "Pedro",
+        "recipient": "Core",
+        "subject": "33187203-fb7f-426f-81d2-b7e5236415fe",
+        "text": "Yeah, running low. Haven't found much to eat yet. Alvin's in the same boat. If someone can cook or we can find rations, that'd help. I can haul if needed.",
+        "key": "core-talk:f5f6fbe4-b090-404c-ab12-9610009624b4"
+      }
+    ],
+    "agreements": []
+  },
+  "persistence": {
+    "paired": true,
+    "cold": true,
+    "coldVerifiesFailedInferenceRun": true,
+    "coldAllowanceUnchanged": true
+  },
+  "scripted": {
+    "passed": true,
+    "paired": true,
+    "cold": true,
+    "nativeMs": 15537,
+    "coreTurns": 2,
+    "pawnReplies": 1,
+    "outcome": "Authored question, preference reply, then event-triggered wait; no offers/jobs."
+  },
+  "manualAssessment": {
+    "alvin": "I have been focused on building is unsupported by supplied history/current GotoWander job. Construction skill and build options are not work history. Core subsequently attributes the claim as reported speech, not a native completion.",
+    "beatrice": "Willingness to try cooking is speech, not consent to an executable cooking job. Her no-food-visible statement is not proof of absence: no general food observations are supplied.",
+    "pedro": "Voluntary conditional hauling statement is not agreement or completed work. Fourth question followed a new telemetry event; rejected third question was never delivered.",
+    "providerFailure": "Third core result has subtype success and structured ask/null-topic choice, but reported num_turns=3 violates the existing two-turn parser bound. Failure retained; no parsing rule changed and cause of CLI turn-count discrepancy remains unestablished.",
+    "planning": "Zero work proposed. Core could see build/wood haul options but no cooking option. Current native projection only enumerates food supplies for executable cooking options; no standalone raw-food observation. This design gap does not establish causality for the model choice.",
+    "scope": "Paused-inference two-minute authored fixture, not sustained planning. No extra calls after cap. No new blind reader study."
+  },
+  "verification": {
+    "nodeTests": 294,
+    "independentReview": "Two runner findings fixed and focused re-review completed; raw reports private.",
+    "historicalDBFilesUnchanged": 219,
+    "stagingStopped": true
+  },
+  "limitations": [
+    "No live construction/cooking verified.",
+    "No Ingest sampled; sampling is not a complete eating event trace.",
+    "User-visible panel still does not explain rejected outputs or exhausted core allowance."
+  ]
+}

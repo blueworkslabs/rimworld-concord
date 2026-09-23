@@ -799,3 +799,16 @@ Manual review retains source-attribution wording ambiguity despite accurate
 need bands. All 218 historical database-related files unchanged; staging stayed
 stopped. This supports the corrected output contract in a small offline sample,
 not live planning, construction or cooking.
+
+## Short native core follow-up — 2026-09-23
+
+[Protocol/results](CORE_FOLLOWUP.md) · [retained evidence](evidence/core-followup.json).
+294 Node checks, independent full/focused review, scripted question/reply/wait
+and paired/cold restart passed. Live4core+3pawn attempts, zeroJev/rerolls:
+three questions/replies delivered; third core output rejected for reported
+num_turns3 (bound2). Fourth turn followed a new Pedro Food-band event. No
+offers/jobs/campfires/meals. All87 native samples unpaused outside inference,
+120528ms native activity. Live paired/cold restore preserved the failed trial
+and allowances without extra calls. Alvin's building claim is unsupported;
+core retained it as attributed speech. All219 historical DB-related files
+unchanged; staging stopped. No new continuous-inference or productive-plan proof.

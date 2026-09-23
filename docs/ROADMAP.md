@@ -48,8 +48,13 @@ verification. Three finite live runs and the preselected human read are complete
 failure: 23 of 24 core outputs were rejected, and no agent-directed work began.
 The [corrected-contract check](CORE_CONTRACT_CHECK.md) now has six accepted
 live-model outputs in saved situations: four questions and two wait-only replies.
-No choices were applied to the game. Next: one bounded in-game question/reply
-and core follow-up, then reassess planning and the unexplained coordination-failure state. No unattended inference or additional
+No choices from that probe were applied to the game. The subsequent
+[short native follow-up](CORE_FOLLOWUP.md) delivered three pawn replies, including
+a reply-triggered core decision, but produced no work offers and one rejected
+provider result (reported three internal turns versus a two-turn adapter bound).
+Next: diagnose that turn-count discrepancy and expose grounded food observations
+and prerequisites independently of executable jobs. Keep the unexplained
+coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 
 ## Continuing pawn work
