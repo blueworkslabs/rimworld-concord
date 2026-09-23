@@ -28,6 +28,11 @@ now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private
 evidence-linked outlooks, an in-game crew log, coarse shared Food/Rest status, local
 food sightings, and a live, event-driven core that proposes, asks and follows up.
 
+The observer now has a compact, public-only sidebar with an expandable journal. A
+75-second **scripted** recording pilot checks capture overhead and basic presentation;
+human feedback and video-model review are still next, not completed. See
+[crew log and recording](docs/CREW_LOG.md).
+
 Not yet shown: the live core turning a need into a multi-step plan (build, then cook),
 long-run character consistency, useful live-core planning in unpaused play, the gravship
 campaign, or an installer for players.
