@@ -4,7 +4,7 @@ import type {AgreementProgress} from './crew-log.js';
 import {modelPerspective} from './model-perspective.js';
 
 /** Delivered speech is attributed information, never a native fact or consent. */
-export type SocialMessage={id:string;exchangeId:string;tick:number;from:string;to:string;text:string};
+export type SocialMessage={id:string;exchangeId:string;tick:number;from:string;to:string;fromName?:string;toName?:string;text:string};
 export type SocialExchange={id:string;initiator:string;recipient:string;openedTick:number;expiresTick:number;
  status:'opening'|'reply'|'running'|'closed';turn:'opening'|'reply';messages:SocialMessage[]};
 export type SocialView={pawn:Pawn;character:Character;contact:{id:string;name:string};

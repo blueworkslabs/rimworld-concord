@@ -13,7 +13,8 @@ const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.arg
 
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
-const policy='retention-game-v1';
+const policy=config.policy??'retention-game-v1';
+if(!['retention-game-v1','retention-names-v1'].includes(policy))throw Error('Unknown retention policy');
 const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0}),close(){},async reflect(view){
  const m=view.character.messages?.find(m=>m.to===view.character.id);
  const note=m?{kind:'stance',subject:m.from,text:'The colleague requested this wood; I prefer to leave it for them.',messageIds:[m.id]}:
@@ -22,6 +23,7 @@ const backend=scripted?{receipts:[],summary:()=>({attempts:0,reservedEquivalentU
 },async decide(view){
  return view.character.messages?.length?{kind:'refuse',reason:'Scripted independent refusal after received request'}:{kind:'accept',reason:'Scripted separate consent'};
 }}:new ClaudeDecisionBackend({ledgerPath:config.ledger,scratchRoot:config.scratchRoot,trial:policy});
+if(!cold&&!scripted&&policy!=='retention-names-v1')throw Error('Historical retention live protocol is frozen; use the new named protocol');
 const before={claude:backend.summary()};
 if(!cold&&before.claude.attempts)throw Error('Fresh trial required');
 const maxDecisions=4-Number(before.claude.attempts);

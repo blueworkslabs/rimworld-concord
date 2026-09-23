@@ -1,3 +1,4 @@
+import {observedPeople} from './observed-names.js';
 import {rescueView} from './rescue-planning.js';
 import type {Domain,GameState,Haul,HaulingView,Pawn,Proposal} from './protocol.js';
 
@@ -27,6 +28,7 @@ export function haulingView(domain:Domain,game:GameState,own:Pawn):HaulingView|n
 export function groundedPawn(domain:Domain,game:GameState,own:Pawn):Pawn {
   const copy=structuredClone(own),view=haulingView(domain,game,own);
   if(view)copy.hauling=view;
+  const people=observedPeople(game,own);if(people.length)copy.observedPeople=people;else delete copy.observedPeople;
   const rescue=rescueView(domain,game,own);if(rescue)copy.rescue=rescue;
   return copy;
 }

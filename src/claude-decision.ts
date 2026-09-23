@@ -1,3 +1,4 @@
+import {providerResultMetadata,validationIssues} from './provider-diagnostics.js';
 import { spawn,execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdtemp,mkdir } from 'node:fs/promises';
@@ -62,8 +63,8 @@ export class ClaudeDecisionBackend {
  readonly name=CLAUDE_MODEL;
  readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string;authoredSize?:ReturnType<typeof promptAccounting>;providerChoice?:ReflectionChoice}>=[];
  readonly requestSizes:Array<{mode:string;authoredSize:ReturnType<typeof promptAccounting>}>=[];
- readonly rawResponses:Array<{mode:string;structuredOutput:unknown}>=[];
- readonly failures:Array<{stage:string;attemptReserved:boolean;cancelled:boolean}>=[];
+ readonly rawResponses:Array<{mode:string;structuredOutput:unknown;result:ReturnType<typeof providerResultMetadata>}>=[];
+ readonly failures:Array<{stage:string;attemptReserved:boolean;cancelled:boolean;issues?:ReturnType<typeof validationIssues>}>=[];
  private budget:TrialBudget;
  private pending=false;
  // Subscription usage only. This separate trial does not reset the Jev ledger.
@@ -109,18 +110,18 @@ export class ClaudeDecisionBackend {
      const cwd=await mkdtemp(join(this.options.scratchRoot,'pawn-'));
      stage='budget';id=this.budget.reserve(0.10);this.requestSizes.push({mode,authoredSize});const began=Date.now();
      stage='transport';const events=await this.invoke(binary,args,prompt,cwd,env,signal,
-       cost=>this.budget.settle(id!,cost));
-     this.rawResponses.push({mode,structuredOutput:(events.result as {structured_output?:unknown}).structured_output??null});
+       cost=>this.budget.settle(id!,cost),
+       raw=>this.rawResponses.push({mode,structuredOutput:(raw as {structured_output?:unknown}).structured_output??null,result:providerResultMetadata(raw,CLAUDE_MODEL)}));
      stage='parsing';const parsed=parseClaudeResult(events.result,mode);
      const receipt={mode,authoredSize,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'rejected',...(parsed.providerChoice?{providerChoice:parsed.providerChoice}:{})};
      this.receipts.push(receipt);
      stage='validation';if(parsed.providerChoice)validateReflectionChoice(parsed.providerChoice,view as AttentionView);
      signal.throwIfAborted();receipt.status='ok';
      return parsed.output;
-   } catch {this.failures.push({stage,attemptReserved:!!id,cancelled:signal.aborted});throw Error((id?'Live decision unavailable; attempt retained':'Claude decision preflight failed')+' ['+stage+']');}
+   } catch(error) {this.failures.push({stage,attemptReserved:!!id,cancelled:signal.aborted,...(stage==='parsing'||stage==='validation'?{issues:validationIssues(error)}:{})});throw Error((id?'Live decision unavailable; attempt retained':'Claude decision preflight failed')+' ['+stage+']');}
    finally {this.pending=false;}
  }
- private invoke(binary:string,args:string[],prompt:string,cwd:string,env:NodeJS.ProcessEnv,signal:AbortSignal,onCost:(cost:number)=>void):Promise<{result:unknown;tools:string[]}> {
+ private invoke(binary:string,args:string[],prompt:string,cwd:string,env:NodeJS.ProcessEnv,signal:AbortSignal,onCost:(cost:number)=>void,onResult:(result:unknown)=>void):Promise<{result:unknown;tools:string[]}> {
    return new Promise((resolve,reject)=>{
      const child=spawn(binary,args,{cwd,env,stdio:['pipe','pipe','pipe'],detached:true});
      let buffer='',bytes=0,result:unknown,init=false,tools:string[]=[],failure=false;
@@ -139,6 +140,7 @@ export class ClaudeDecisionBackend {
            if(event.type==='assistant'&&event.message?.content?.some((c:any)=>c.type==='tool_use'&&c.name!=='StructuredOutput'))throw Error();
            if(event.type==='result'){
              // Preserve reported usage even for invalid output, error results, or failed exits.
+             if(!result)onResult(event);
              const billing=z.object({total_cost_usd:z.number().finite().nonnegative()}).safeParse(event);
              if(billing.success)onCost(billing.data.total_cost_usd);
              if(!init||result)throw Error();result=event;

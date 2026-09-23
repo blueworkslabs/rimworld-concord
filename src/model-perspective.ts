@@ -34,6 +34,7 @@ export function modelPrompt(mode:'decision'|'reflection',view:Perspective|Attent
  if(pawn.hauling)kinds.add('haul');if(pawn.rescue)kinds.add('rescue');if(pawn.movement)kinds.add('move');
  const contracts:Record<string,unknown>={
   knowledge:'Only supplied local observations and your own received experiences. Unknown cause/condition is not a diagnosis. Disappearance from view is not recovery.',
+  identity:'Use supplied display names in prose when available; stable IDs still identify actions and citations. Names are not unique, and a historical label need not be current. Do not invent a missing name.',
   evidence:'Observed events are distinct from interpretations, addressed messages and action receipts. A record of no-longer-downed does not prove healing, treatment or rescue.',
  };
  if(kinds.has('move'))contracts.move='Nearby options are a bounded observed shortlist, not exhaustive, reserved or guaranteed safe. Prefer supplied coordinates. Acceptance is not arrival; native execution rechecks.';
