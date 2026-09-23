@@ -68,7 +68,7 @@ elif action == 'type':
     subprocess.run(['xdotool', 'type', '--clearmodifiers', '--', ' '.join(args)], env=env, check=True)
 elif action == 'command':
     op = args.pop(0) if args else 'state'
-    if op not in ('state', 'new', 'pause', 'run', 'save', 'load', 'quit'):
+    if op not in ('state', 'new', 'pause', 'run', 'save', 'load', 'quit', 'food-diagnostics'):
         raise SystemExit('Unknown game command')
     subprocess.run(['systemctl', '--user', 'is-active', '--quiet', 'rimworld-lab'], check=True)
     with (ROOT / 'command.lock').open('a') as lock:

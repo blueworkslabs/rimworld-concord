@@ -8,4 +8,4 @@ mcs -target:library -out:"$lab_source/mod/Assemblies/StagingLab.dll" \
   -r:"$lab_managed/Assembly-CSharp.dll" \
   -r:"$lab_managed/UnityEngine.CoreModule.dll" \
   -r:"$lab_managed/UnityEngine.JSONSerializeModule.dll" \
-  "$lab_source/mod/LabHarness.cs"
+  "$lab_source"/mod/*.cs

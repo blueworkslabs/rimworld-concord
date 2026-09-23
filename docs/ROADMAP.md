@@ -69,9 +69,12 @@ events but two distinct messages. Five core attempts and two pawn replies produc
 no work; paired/cold restore passed. The [identity-checked accounting correction](PROVIDER_MESSAGE_ACCOUNTING.md) now
 passes offline split-message and malformed-stream checks. Its [fresh native check](IDENTITY_FOLLOWTHROUGH.md)
 accepted six core turns and three pawn replies, including a complete two-message
-repair split across three events. No work or eating was observed. Next: inspect
-native food-selection conditions and the speech/action boundary before another
-planning trial; do not turn dialogue into orders. Keep the
+repair split across three events. No work or eating was observed. The [native food-selection diagnosis](NATIVE_FOOD_SELECTION.md) now shows why:
+raw berries are excluded by ordinary native preference before urgent hunger.
+Matched no-model checks at 20% and 10% Food found no eating versus 18 berries
+eaten; paired/cold restore passed. Shared guidance now distinguishes link bands,
+native selection and speech from jobs. Next: decide whether to add an explicit
+pawn-owned eat capability, not convert dialogue into orders. Keep the
 unexplained coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 

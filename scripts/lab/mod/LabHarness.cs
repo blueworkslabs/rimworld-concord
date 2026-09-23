@@ -4,6 +4,7 @@ using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace Shellmaster.StagingLab
 {
@@ -112,11 +113,16 @@ namespace Shellmaster.StagingLab
                     var request = JsonUtility.FromJson<Request>(payload);
                     var response = new Response { id = request.id };
                     bool quit = false;
+                    string diagnostics = "null";
                     try
                     {
                         switch (request.op)
                         {
                             case "state": break;
+                            case "food-diagnostics":
+                                RequireMap();
+                                if (!Find.TickManager.Paused) throw new Exception("Food diagnostics require a paused game");
+                                diagnostics = FoodDiagnostics.Json(); break;
                             case "new":
                                 if (Current.Game != null) throw new Exception("New fixture requires the main menu");
                                 pauseAfterLoad = true;
@@ -151,7 +157,7 @@ namespace Shellmaster.StagingLab
                     }
                     catch (Exception ex) { response.error = ex.Message; }
                     Write(Root + "/response.json", JsonUtility.ToJson(response).TrimEnd('}') +
-                        ",\"state\":" + EncodeState(Snapshot()) + "}");
+                        ",\"foodDiagnostics\":" + diagnostics + ",\"state\":" + EncodeState(Snapshot()) + "}");
                     if (quit) Application.Quit();
                 }
                 if (Time.realtimeSinceStartup >= nextState)
