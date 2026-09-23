@@ -52,3 +52,25 @@ This is a versioned follow-up, not an identical prompt replication: names and
 their explanatory contract are newly supplied. Both recent speech and outlook
 reach later choices, so note influence is not isolated. Indirect-message scenarios
 remain a separately frozen next experiment; no allowance is enabled here for them.
+
+## 2026-09-23 result
+
+[Sanitized receipts](evidence/named-retention.json) retain both scripted and live
+pairs. Live control formed a Food concern, accepted and delivered ten wood.
+The message condition formed a stance citing Beatrice's request plus a Food-related
+note, then **applied a refusal**, with no hauling job. Its reply used “Beatrice”
+and cited low Food as well as the request; the native public log preserved it.
+No prose rewriting was used. Both notes and outcomes survived paired/cold restore.
+
+All four provider calls validated: success, two turns, only the expected model
+route. All 96 activity samples were unpaused. Four attempts, zero Jev, no retries;
+cleanup clean, staging stopped. All 239 Node checks passed. Independent Codex
+source review found no actionable defects; direct sandbox probing separately
+verified readable source and denied writes. An intentionally injected global-name
+leak was rejected by the privacy test. All 73 historical databases were unchanged.
+
+This does **not** explain PR35's missing envelope or establish that its parser
+was incorrect. No validation rule was relaxed. Future failures can retain more
+useful diagnostics, but none occurred in this four-call pair. The next behavioral
+check is a separately frozen indirect-message contrast, not a claim that this
+explicit request demonstrated indirect persuasion.

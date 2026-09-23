@@ -1,0 +1,48 @@
+{
+  "slug": "a-name-with-the-request",
+  "title": "A Name With the Request",
+  "date": "2026-09-23",
+  "summary": "Speaker names survive alongside private notes, and a fresh native pair completes both acceptance and refusal.",
+  "sections": [
+    {
+      "heading": "Diagnostics and Boundaries",
+      "paragraphs": [
+        "Provider-result diagnostics now retain selected status fields, turn counts, numeric costs, model-route counts and bounded validation failure paths. Arbitrary provider, session and account strings stay out. A received result remains inspectable even after a nonzero process exit. Validation checks are unchanged: a plausible inner answer cannot bypass a rejected provider result. The strategic core stays scripted; UI polish waits."
+      ]
+    },
+    {
+      "heading": "Names That Survive",
+      "paragraphs": [
+        "Delivered speech now snapshots native sender and recipient names alongside stable IDs. Current local observations supply only visible people's IDs and names, not a colony-wide directory or their private state. Message citations and locally captured event labels survive saving and restoring. Historical unlabelled records are not rewritten; names are display labels, not unique identities or authority."
+      ]
+    },
+    {
+      "heading": "One Pair, One Request",
+      "paragraphs": [
+        "We ran one control-then-message pair with Alvin as receiver, the same physical baseline and captured Food event, equal reflection choices, and a separate one-trip offer for ten wood. The control formed a Food concern, accepted and delivered ten wood. The message condition received an operator-authored request from Beatrice: “Could you leave this load of wood for me? I want to finish what I started. It matters to me.” This was test speech, not a live sender's output or verified prior work.",
+        "Alvin retained the request and a Food-related note, then refused the separate offer. No hauling job started. His reply cited both “Beatrice” and his low Food level. That name reached the native public log without rewriting his words."
+      ]
+    },
+    {
+      "heading": "What Passed and What Waits",
+      "paragraphs": [
+        "All four Claude attempts passed validation: successful provider results, two turns each, expected model route only. Zero Jev calls, no retries. All 96 native-activity samples were unpaused; both outcomes and notes passed paired and cold restore without further inference. All 239 Node tests and independent Codex review passed; a mutation test caught an injected unseen name. Staging is stopped and all 73 historical databases are unchanged.",
+        "The new names and prompt contract make this a versioned follow-up, not an identical replication. It does not explain PR35's missing provider metadata or prove its parser was wrong. One direct-request pair, with both recent speech and outlook available, cannot isolate note influence or establish developed character. Next comes a separately frozen indirect-message test; native correction and removal remain open."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Diagnostics and names protocol",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PROVIDER_DIAGNOSTICS.md"
+    },
+    {
+      "label": "Named native pair results",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/named-retention.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
