@@ -1,8 +1,7 @@
 # Roadmap
 
 Forward-looking only; past results are in [HISTORY](HISTORY.md) and the
-[trial ledger](trials/README.md). Direction agreed on 2026-09-23 by Dario, Astra, Fable
-and Clawd.
+[trial ledger](trials/README.md). Direction agreed with the project owner and team on 2026-09-23.
 
 ## Next phase: a colony scene worth watching
 
@@ -20,7 +19,7 @@ honest assessment of what worked before we expand further.
   of refusals is not by itself evidence of broken agency.
 - **Continuous pawns.** Routine decisions happen while the colony keeps running.
   Pauses are deliberate, visible and explained (see [later](#later-experiments)).
-- **Luna first, escalate when justified.** Pawns and the core run on `gpt-5.6-luna`
+- **Luna first, escalate when justified.** The target default for pawns and the core is `gpt-5.6-luna`
   through native Codex; more capable models (Terra, Sol) are used for turns that need
   them, and every escalation is logged.
 - **Restraint without arbitrary caps.** No fixed turn counts for ongoing play. Calls
@@ -42,11 +41,13 @@ honest assessment of what worked before we expand further.
   activity and coarse needs; and what everyone is waiting on (thinking, blocked,
   paused, out of budget). Full history stays expandable, messages stay on screen long
   enough to read, and private thoughts stay private. No polish beyond that.
-- Screen capture at 1280×800, 15–30 fps MP4 (roughly 150–300 MB per ten minutes).
+- Screen capture at 1280×800, 15–30 fps MP4 (at 2–4 Mbps, roughly 150–300 MB per ten minutes;
+  estimates to verify in the pilot).
   Measure its effect on simulation speed before relying on it. Keep uncut recordings,
   label inference pauses and edited excerpts, and move recordings off the staging host.
-- A **60–90 second scripted pilot**, with no character-model calls, proves the UI,
-  the recorder and the review pipeline below.
+- A **60–90 second scripted pilot**, with no character-model calls, checks basic UI readability and recording performance. Use the resulting clip
+  to calibrate the review pipeline below; this does not establish human usability
+  or an engaging live scene.
 
 **2. Feedback from recordings**
 
@@ -77,20 +78,26 @@ honest assessment of what worked before we expand further.
   existing haul, build, cook and eat capabilities, so coordinating has real value.
   Verify the raw-food effect in the game's definitions first. A candidate, not a
   prescribed plot.
-- Several recorded runs of about ten minutes, reviewed as in step 2.
+- Several recorded runs of about ten minutes, reviewed as in step 2. Define
+  whether duration means wall-clock or active simulation time before running; keep
+  pause intervals and timestamps so both remain measurable.
 - Then stop and assess what worked before expanding.
 
 **Questions for the review** (for learning, not pass/fail gates):
 
 - Did a plan form between them, or did everyone solve it alone?
-- Was at least one consequential choice pawn-originated: a request, a counter, a
-  refusal, a conditional offer?
+- Were there consequential pawn choices, and were they self-initiated or responses
+  to a core offer/question? Record requests, counters, refusals and conditional
+  offers without treating every response as independent initiative.
 - Could a viewer follow intentions, disagreements, outcomes and waiting from the
   recording alone?
 - What did the core try, and where did it stall?
 
-**Stop and diagnose offline** if a run invents a capability or consent, if core outputs
-are repeatedly invalid, or if the core never proposes relevant work across runs.
+**Stop and diagnose offline** if unsupported capability or consent could reach
+execution, or repeated invalid outputs/non-progress prevent the scene from proceeding.
+Preserve rejected choices and prose errors without retrying for a preferred answer.
+If needs remain unresolved across runs despite relevant available work, investigate
+why it was never proposed. A successful raw-food alternative alone is not a stop condition.
 
 ### In parallel: Jev, offline
 
@@ -99,7 +106,9 @@ confidence) instead of a single yes/no. First slice, offline only:
 
 - Replay an appraisal battery over the existing outlook and speech banks. Report Jev's
   choice and confidence next to Claude's and Luna's, the agreement rate, and how many
-  model calls could have been avoided at high confidence for "keep current activity".
+  model calls might have been avoided at high confidence for "keep current activity".
+  These are counterfactual estimates, not measured live savings; use each case's
+  actual eligible choices and explicit assessment labels.
 - Include consequential events that must not be missed, and validate any threshold on
   separate held-out cases. Agreement with another model isn't correctness, and high
   confidence isn't proof.
