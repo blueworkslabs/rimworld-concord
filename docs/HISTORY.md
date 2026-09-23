@@ -126,6 +126,6 @@ Test suite growth along the way: 33 checks at the foundation, 145 at #20, 263 at
 - **#57, #58** — documentation consolidated against source; next phase agreed:
   observer video, Luna-first integration and sustained operation, with offline Jev
   exploration. Plans, not shipped live adapters.
-- **Observer recording pilot** — compact sidebar, expandable journal, non-pausing
+- **#59 Observer recording pilot** — compact sidebar, expandable journal, non-pausing
   held feed, and a silent scripted capture. Native consumption and refusal remain
   distinct from model behavior; human and automated video feedback still follow.
