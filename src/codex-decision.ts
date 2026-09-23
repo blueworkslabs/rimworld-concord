@@ -19,7 +19,16 @@ export function codexRequest(mode:Mode,view:any){
  const args=claudeArgs(mode,view),instructions=args[args.indexOf('--system-prompt')+1]!,schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);
  const prompt=JSON.stringify(mode==='core'?corePrompt(view):mode==='core-answer'?coreAnswerPrompt(view):mode==='social'?socialPrompt(view):modelPrompt(mode,view));
  if(Buffer.byteLength(prompt)>24000)throw Error('Context too large');
- return {id:mode,instructions,prompt,schema};
+ // JSON Schema references preserve the same topic constraints without repeating
+ // every source/status branch in each possible action's schema.
+ if(mode==='core'){
+  const branches=schema.properties.core.anyOf;
+  schema.$defs={coreTopicUpdate:branches[0].properties.topics.items};
+  for(const branch of branches)branch.properties.topics.items={$ref:'#/$defs/coreTopicUpdate'};
+ }
+ const request={id:mode,instructions,prompt,schema};
+ if(Buffer.byteLength(JSON.stringify(request))>64000)throw Error('Complete request too large');
+ return request;
 }
 export function parseCodexChoice(mode:Mode,text:string,view:any){
  const raw=JSON.parse(text);

@@ -26,6 +26,7 @@ const runId=process.env.CONCORD_TRIAL_ID;
 if(!runId||!/^[0-9a-f-]{36}$/.test(runId))throw Error('Trial identity required');
 const run=runId;
 const receipt:any={passed:false,runId,policy,mode:scripted?'scripted-continuous':'live-continuous',run,views:[],rounds:[],samples:[]};
+let active:Promise<void>|undefined;
 const guard=new NeedsRunGuard(),controller=new AbortController(),end=operationDeadline;
 let c:Coordinator|undefined,s:Store|undefined,db:string|undefined,connected=true,coreAttempts=0,pawnAttempts=0,inferenceDeadline=end;
 const stop=()=>{connected=false;guard.stop();controller.abort();channel.close();};
@@ -63,7 +64,7 @@ try{
   const startTick=(await b.state()).ticks;
   guard.check();(receipt.resumes??=[]).push(await startNative(b));guard.check();let nativeStarted:number|undefined=Date.now();
   const nativeRemaining=()=>nativeLimit-nativeElapsed-(nativeStarted===undefined?0:Date.now()-nativeStarted);
-  let active:Promise<void>|undefined,taskError:unknown,lastRole='pawn',failureStreak=0;
+  let taskError:unknown,lastRole='pawn',failureStreak=0;
   const note=(status:string)=>{failureStreak=['failed','interrupted'].includes(status)?failureStreak+1:0;if(failureStreak>=3)throw Error('Repeated inference failures; stopped for diagnosis');};receipt.attention=[];
   const launch=(task:()=>Promise<void>)=>{active=task().catch(e=>{taskError=e;}).finally(()=>{active=undefined;});};
   while(nativeRemaining()>0){
@@ -110,7 +111,7 @@ try{
  guard.check();receipt.passed=cold||receipt.inferencePassed===true;if(!receipt.passed)process.exitCode=1;
 }catch(e){receipt.error=String(e);process.exitCode=1;}
 finally{
- clearTimeout(timer);controller.abort();channel.close();if(!receipt.hostDrained)try{await finish();}catch(e){receipt.passed=false;receipt.drainError=String(e);process.exitCode=1;}
+ clearTimeout(timer);controller.abort();channel.close();await active;if(!receipt.hostDrained)try{await finish();}catch(e){receipt.passed=false;receipt.drainError=String(e);process.exitCode=1;}
  receipt.finalCleanup=await socialCleanup(async()=>{operationDeadline=Date.now()+10000;await b.admin('pause');},async()=>{},async()=>{operationDeadline=Date.now()+20000;return c&&!cold?stopTrialWork(c):{errors:[]};});
  if(receipt.finalCleanup.errors.length){receipt.passed=false;process.exitCode=1;}
  if(!cold&&c&&db&&!receipt.passed&&!receipt.pairedRestore&&!receipt.finalCleanup.errors.length)try{operationDeadline=Date.now()+130000;await save(true);receipt.partialSaved=true;}catch(e){receipt.partialSaveError=String(e);}

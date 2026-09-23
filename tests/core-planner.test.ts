@@ -1,3 +1,4 @@
+import {codexRequest} from '../src/codex-decision.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -298,4 +299,15 @@ test('ongoing prompt bounds answered history and archives closed topics without 
  const v=coreView(d,await g.state());assert.equal(v.questions.length,12);assert.equal(v.messages.length,12);assert.equal(v.topics.length,8);assert.equal(d.coreState!.topics.length,30);
  validateCoreChoice({topics:[{sourceId:'brief',text:'Still open',status:'open'}],actionTopicId:null,action:wait.action},v);
  assert.throws(()=>validateCoreChoice({topics:[{sourceId:'brief',text:'done',status:'resolved'}],actionTopicId:null,action:wait.action},v),/closure/);s.close();
+});
+
+test('Luna core schema references preserve all choice constraints while fitting accumulated history',async()=>{
+ const {c,s,g}=await setup();const v=await c.corePerspective();
+ for(let i=0;i<24;i++)v.messages.push({id:'m'+i,tick:i,from:'A',to:'core',text:'A public reported observation '+i,evidence:'attributed-speech'});
+ for(let i=0;i<12;i++)v.requests.push({id:'r'+i,pawn:'A',target:'B',status:'pending',reason:'A public request',evidence:'attributed-speech'} as any);
+ for(let i=0;i<24;i++)v.agreements.push({id:'a'+i,pawn:'A',action:{kind:'move',x:1,z:1},status:'refused',reason:'No',progress:{status:'refused'}} as any);
+ const req=codexRequest('core',v),original=JSON.parse(claudeArgs('core',v)[claudeArgs('core',v).indexOf('--json-schema')+1]!);
+ const expanded=structuredClone(req.schema);for(const b of expanded.properties.core.anyOf)b.properties.topics.items=expanded.$defs.coreTopicUpdate;delete expanded.$defs;
+ assert.deepEqual(expanded,original);assert(Buffer.byteLength(JSON.stringify(req))<64000);
+ v.messages[0]!.text='x'.repeat(25000);assert.throws(()=>codexRequest('core',v),/too large/);s.close();
 });

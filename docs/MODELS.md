@@ -6,7 +6,7 @@ action tool, a game handle or the database, and its prose never becomes an actio
 
 Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decision.ts`,
 `src/provider-diagnostics.ts`, `src/appraisal.ts`, `src/protected-jev.ts`,
-`src/decision-trials.ts`, `src/prompt-accounting.ts`, `scripts/run-codex-contract.py`.
+`src/decision-trials.ts`, `src/prompt-accounting.ts`, `scripts/run-codex-contract.py`, `src/codex-decision.ts`, `src/ongoing-usage.ts`.
 
 ## Routes
 
@@ -15,13 +15,12 @@ Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decisi
 | Pawn decisions, reflections, speech, core answers | `claude-sonnet-4-6` | Native Claude Code CLI, existing Max login | live trials |
 | Core planner | `claude-sonnet-4-6` | same, own system prompt and ledger | live trials |
 | Fast appraisal | `typesafe/jev-1.13` | OpenRouter System One (`POST /api/v1/systemone`), protected credential | bounded live trials; not in recent runs |
-| Cheaper-model contract checks | `gpt-5.6-luna` | Native Codex app-server, ChatGPT login | offline only, not a game backend |
+| Core and pawn decisions (ongoing mode) | `gpt-5.6-luna` | Native Codex app-server, ChatGPT login | implemented; verification recorded in trial ledger |
 | Recorded-session feedback | `google/gemini-3.8-flash` | Protected OpenRouter, MP4 `video_url` | two offline responses on one scripted clip; not a character backend |
 | Diary drafts | `moonshotai/kimi-k2` | OpenRouter via OpenClaw `llm-task` | editorial only |
 
 Claude and Luna use no bare API mode, Agent SDK or extracted OAuth tokens. Their subscription logins are
-used through their native clients. For native subscription routes, usage figures are API-equivalent estimates, not
-per-call cash charges. Jev and the Gemini video reviewer use the paid OpenRouter API: their reported usage cost
+used through their native clients. Claude subscription figures are API-equivalent estimates; the ongoing Luna route records native token usage, not per-call cash charges. Missing usage stays unknown. Jev and the Gemini video reviewer use the paid OpenRouter API: their reported usage cost
 is monetary accounting, not a subscription estimate. Billing routes are never
 switched silently.
 
@@ -113,8 +112,19 @@ tool results, events after the result) rejects the answer. `--max-turns` stays 2
 
 **Luna** runs through the native Codex app-server with a pinned per-process provider
 (ChatGPT endpoint, zero retries), a local catalog copy with tools and multi-agent
-disabled, and a mock preflight that rejects any advertised tool. It only ever runs on
-frozen offline suites and never touches a game bridge.
+disabled, and a mock preflight that rejects any advertised tool before each real call.
+The ongoing backend uses an ephemeral thread, replacement instructions, no dynamic
+tools, a fresh empty working directory, and only PATH/HOME/LANG. The existing native
+ChatGPT login must be present; no API/model fallback is allowed. Server tool requests
+and executable items fail closed. The final JSON is parsed and contextually validated,
+then the coordinator rechecks current game state before dispatch. No game handle is
+passed to the app-server.
+
+`run-codex-decision.py` bounds the authored request to 64 KB (prompt 24 KB), RPC output
+to 1 MiB and each inference to 60 seconds. The outer process budget is 110 seconds,
+including isolation/authentication. Cancellation terminates the entire helper process
+group, forcibly after 2.5 seconds. Selected final output and token usage are retained;
+reasoning and account identifiers are not. Frozen historical offline suites are unchanged.
 
 **Jev** runs through a Gateway-side protected transport: an injected opaque credential,
 a fixed OpenRouter destination, no redirects, a bounded response size, and errors
@@ -135,9 +145,17 @@ configured allowance. Both use separate SQLite ledgers (`TrialBudget`):
 - a ledger is bound to one policy and never rolls back with a game save; unused
   allowance stays unused, and no cap is raised mid-trial.
 
+Ongoing Luna uses a separate `luna-ongoing-v1` SQLite ledger, never a historical
+allowance database. It records each attempt before spawning, and settles success,
+failure or cancellation exactly once. There is **no turn ceiling**. An unfinished
+attempt blocks further calls after a crash; three consecutive failed/cancelled attempts
+also require diagnosis. Save restores cannot rewind this ledger. Native usage is
+recorded as tokens, not invented dollar charges. Escalation to Terra/Sol is not yet
+implemented and never happens silently.
+
 ## Diagnostics
 
-Failures keep bounded, text-free diagnostics so they can be understood without storing
+Claude failures keep bounded, text-free diagnostics so they can be understood without storing
 model output: the result type and subtype, API error status and allow-listed codes
 (unknown values become `other`), turns, cost, which models reported usage, whether
 structured output was present, up to 16 validation issues with truncated paths, and
