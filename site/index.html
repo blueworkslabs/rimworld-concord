@@ -43,8 +43,8 @@
   </div>
   <figure class="window">
     <div class="window-bar"><b>Concord · crew log</b><span>live trial · 23 Sep 2026</span></div>
-    <img src="images/2026-09-23-campfire-live.png" alt="RimWorld with the Concord crew log open. Shared-link status shows Alvin's food as low. Beatrice tells the core her food is desperately low; the core checks the shared telemetry and asks her before proposing any work." width="1280" height="800">
-    <figcaption>Beatrice tells the core she's desperately hungry. The core checks what it can actually see, then asks before proposing anything.</figcaption>
+    <img src="images/2026-09-23-campfire-live.png" alt="RimWorld with the Concord crew log open. Shared-link status shows Alvin's food as low. The core asks Beatrice about food, and she replies that she is desperately hungry. No work was proposed in this run." width="1280" height="800">
+    <figcaption>The core asks Beatrice about food; she replies that she is desperately hungry. This run produced one delivered question and reply, but no work proposal.</figcaption>
   </figure>
 </section>
 
@@ -61,23 +61,23 @@
 <section class="block" aria-labelledby="cast">
   <span class="eyebrow">The protagonists</span>
   <h2 id="cast">One core, three colonists</h2>
-  <p class="sub">Four protagonists, none in charge. The test colony below is a small fixture in the desert, not the gravship campaign yet.</p>
+  <p class="sub">Four protagonists, none in charge. The test colony below is a small fixture in the desert, not the gravship campaign yet. These are glimpses from short trials, not fixed roles or established personalities.</p>
   <div class="cast">
     <article class="who core">
       <svg viewBox="0 0 32 32" aria-hidden="true"><use href="assets/mark.svg#mark"/></svg>
       <h3>The Core</h3>
       <p class="role">Proposes, asks, remembers</p>
-      <p>Offers grounded work, adopts counteroffers, asks one question at a time and keeps track of open topics. It sees what an attentive crewmate could see, never thoughts, and it wakes only when something in the colony changes.</p>
+      <p>Offers grounded work, adopts counteroffers, asks one question at a time and keeps track of open topics. It receives addressed speech, work records, explicitly shared need bands and attributed local sightings—not private thoughts. Relevant shared events can wake it within a fixed budget.</p>
     </article>
     <article class="who">
       <h3>Alvin</h3>
       <p class="role">The negotiator, so far</p>
-      <p>Cautious and self-monitoring. He talks a haul down when his food is low and ties his choices to what his crewmates told him.</p>
+      <p>Has negotiated smaller hauls, reconsidered work and referred to crewmates’ messages when choosing. His explanations have also contained unsupported claims.</p>
     </article>
     <article class="who">
       <h3>Beatrice</h3>
       <p class="role">Brisk and accommodating</p>
-      <p>Takes full jobs without haggling and offered to cook if someone got a fire going. She's been downed, rescued and hungry, and she says so.</p>
+      <p>Has accepted full jobs, negotiated smaller hauls and offered to cook if someone got a fire going. Those words are not themselves consent to a specific cooking job.</p>
     </article>
     <article class="who">
       <h3>Pedro</h3>
@@ -90,11 +90,11 @@
 <section class="block" id="how" aria-labelledby="rules">
   <span class="eyebrow">How it works</span>
   <h2 id="rules">Three rules keep it honest</h2>
-  <p class="sub">They aren't in the prompts; they're enforced in code, beneath the models. A model can pick an option or say something. It can't grant itself permission.</p>
+  <p class="sub">They aren't merely prompt instructions; they're enforced in code, beneath the models. A model can pick an option or say something. It can't grant itself permission.</p>
   <div class="pillars">
     <div class="pillar">
       <h3>The core proposes, colonists decide</h3>
-      <p>Every offer gets an answer: accept, counter, refuse or not now. A counter comes back as a fresh offer that needs a fresh yes. Nobody can agree on someone else's behalf.</p>
+      <p>A pawn may answer an offer: accept, counter, refuse or not now. An unanswered or failed decision grants no consent. A counter comes back as a fresh offer that needs a fresh yes. Nobody can agree on someone else's behalf.</p>
     </div>
     <div class="pillar">
       <h3>The game is the ground truth</h3>
@@ -106,10 +106,10 @@
     </div>
   </div>
   <figure class="anim window spaced">
-    <video data-loop autoplay loop muted playsinline preload="metadata" poster="media/consent-loop.jpg" width="1280" height="720" aria-label="Animation: the core offers a two-trip haul, Alvin counters with one trip because his food is low, the core re-offers, Alvin accepts, the game runs a native job and writes a receipt.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="media/consent-loop.jpg" width="1280" height="720" aria-label="Animation: the core offers a two-trip haul, Alvin counters with one trip because his food is low, the core re-offers, Alvin accepts, the game runs a native job and writes a receipt.">
       <source src="media/consent-loop.mp4" type="video/mp4">
     </video>
-    <figcaption><b>The consent loop.</b> Offer, counter, fresh consent, native job, receipt. This mirrors a real exchange from a live trial.</figcaption>
+    <figcaption><b>The consent loop.</b> Offer, counter, fresh consent, native job, receipt. An illustrative animation of the tested protocol, not a verbatim replay of one trial.</figcaption>
   </figure>
 </section>
 
@@ -138,7 +138,7 @@
   <p class="sub">This is the experience we're building toward, not a description of today's build. If a viewer can retell it in four sentences and say who disagreed and why, it works.</p>
   <ol class="beats">
     <li><span class="t">0–2 min</span><span><b>A need surfaces in the open.</b> <span class="d">Someone says it, or a shared status band turns amber.</span></span></li>
-    <li><span class="t">2–4 min</span><span><b>The core proposes a plan in pieces.</b> <span class="d">Build a campfire, then cook. At least one colonist bargains or refuses, and it costs something.</span></span></li>
+    <li><span class="t">2–4 min</span><span><b>The core proposes a plan in pieces.</b> <span class="d">Build a campfire, then cook. A colonist may bargain or refuse, changing what happens next; disagreement is allowed, not required.</span></span></li>
     <li><span class="t">4–7 min</span><span><b>Mostly quiet execution.</b> <span class="d">The log says what everyone is waiting on, so silence reads as patience, not a stall.</span></span></li>
     <li><span class="t">7–9 min</span><span><b>An interruption forces a rethink.</b> <span class="d">Hunger, a downed crewmate, something on the horizon.</span></span></li>
     <li><span class="t">9–10 min</span><span><b>A payoff you can see.</b> <span class="d">A lit fire, a meal on the ground, and one thread left open for next time.</span></span></li>
@@ -151,7 +151,7 @@
   <div class="caveat">
     <h3>Experimental vertical slice, not a playable mod yet</h3>
     <p>Consent, negotiation, hauling, rescue, campfire construction and cooking, a readable crew log, private outlooks, pawn-to-pawn messages and a first live, event-driven core all work in bounded trials, some live and some scripted. Every run has a fixed call budget and no rerolls, and failures stay on the record.</p>
-    <p>Not there yet: the live core turning a need into a multi-step plan (the campfire chain works in scripted tests but hasn't happened live), unpaused real-time play, long sessions, the gravship campaign and an installer for players.</p>
+    <p>Not there yet: the live core turning a need into a multi-step plan (the campfire chain works in scripted tests but hasn't happened live), sustained useful unpaused core planning, long sessions, the gravship campaign and an installer for players.</p>
     <p><a href="architecture/index.html#status">See the full research tree →</a></p>
   </div>
 </section>
@@ -168,8 +168,8 @@
 
 <section class="block" aria-labelledby="latest-h">
   <span class="eyebrow">From the ship log</span>
-  <h2 id="latest-h">Latest entries</h2>
-  <p class="sub">Fact-checked development diary entries, written as the work happens.</p>
+  <h2 id="latest-h">Recent log entries</h2>
+  <p class="sub">Fact-checked development diary entries. Same-day entries currently use alphabetical order, not publication order.</p>
 <!--LATEST-->
   <div class="btns"><a class="btn ghost" href="log/index.html">All entries</a><a class="btn ghost" href="feed.xml">RSS feed</a></div>
 </section>

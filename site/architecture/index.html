@@ -150,7 +150,7 @@
     <p class="files">src/coordinator.ts · src/protocol.ts · mod/Hauling.cs · mod/Rescue.cs · mod/Production.cs</p>
   </div>
   <figure class="anim window">
-    <video data-loop autoplay loop muted playsinline preload="metadata" poster="../media/consent-loop.jpg" width="1280" height="720" aria-label="Animation of the consent loop: offer, counter, revised offer, acceptance, native job and receipt.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/consent-loop.jpg" width="1280" height="720" aria-label="Animation of the consent loop: offer, counter, revised offer, acceptance, native job and receipt.">
       <source src="../media/consent-loop.mp4" type="video/mp4">
     </video>
     <figcaption><b>Speech is testimony. Receipts are what happened.</b></figcaption>
@@ -161,11 +161,11 @@
   <div class="dive-text">
     <span class="eyebrow">02 · Knowledge boundaries</span>
     <h3>Who knows what</h3>
-    <p>Each mind gets an <strong>explicit projection</strong>, built field by field and never spread from internal state. A colonist sees its own traits, skills, exact needs, surviving memories, its own history and a private outlook of up to four revisable notes, each tied to its own experiences.</p>
-    <p>The core sees <strong>what an attentive crewmate could see</strong>: addressed messages, agreement receipts, grounded opportunities, and coarse Food/Rest bands (urgent, low, satisfied, unknown) with a timestamp. Stale readings become <em>unknown</em>, never zero.</p>
+    <p>Each mind gets a <strong>scoped perspective</strong>; the core uses an explicit allowlist rather than receiving pawn or character state wholesale. A colonist sees its own traits, skills, exact needs, surviving memories, its own history and a private outlook of up to four revisable notes, each tied to its own experiences.</p>
+    <p>The core receives <strong>explicitly shared information</strong>: addressed messages, agreement receipts, grounded opportunities, attributed local food/campfire sightings, and shared-link Food/Rest telemetry (urgent, low, satisfied, unknown) with a timestamp. Telemetry is not a visual observation. Stale readings become <em>unknown</em>, never zero.</p>
   </div>
   <figure class="anim window">
-    <video data-loop autoplay loop muted playsinline preload="metadata" poster="../media/who-knows-what.jpg" width="1280" height="720" aria-label="Animation: Alvin's exact food level stays private while a coarse band moves to the shared link; his private outlook is locked; messages and records appear in the crew log.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/who-knows-what.jpg" width="1280" height="720" aria-label="Animation: Alvin's exact food level stays private while a coarse band moves to the shared link; his private outlook is locked; messages and records appear in the crew log.">
       <source src="../media/who-knows-what.mp4" type="video/mp4">
     </video>
     <figcaption><b>Coarse bands cross the link. Thoughts don't.</b></figcaption>
@@ -184,6 +184,7 @@
       <tr><td>Private outlook &amp; memories</td><td class="y">own</td><td class="n">no</td><td class="n">no</td><td class="n">no</td></tr>
       <tr><td>Messages addressed to them</td><td class="y">yes</td><td class="p">participants only</td><td class="p">if addressed</td><td class="y">yes</td></tr>
       <tr><td>Agreement progress (receipts)</td><td class="y">own</td><td class="n">no</td><td class="y">yes</td><td class="y">yes</td></tr>
+      <tr><td>Local food/campfire sightings</td><td class="y">own sightings</td><td class="n">not automatically</td><td class="y">attributed shared list</td><td class="y">Supplies tab</td></tr>
       <tr><td>Nearby grounded opportunities</td><td class="y">own shortlist</td><td class="n">no</td><td class="y">bounded list</td><td class="n">no</td></tr>
     </tbody>
   </table></div>
@@ -195,7 +196,7 @@
   <div class="dive-text">
     <span class="eyebrow">03 · Model minds</span>
     <h3>Small views, real menus, no tools</h3>
-    <p>A decision is one bounded call. The model gets its perspective, where every need says what its scale means, plus a <strong>menu of executable choices</strong> with their effects spelled out. The response schema is generated from that menu, so the only IDs a model can return are ones that currently exist. The shared instructions are about 670 characters; action rules only appear when that action is on offer.</p>
+    <p>A decision is one bounded call. The model gets its perspective, where every need says what its scale means, plus a <strong>menu of executable choices</strong> with their effects spelled out. Contextual schemas constrain choices and supplied IDs where supported; runtime validation still checks every reply. Counterproposal actions have additional execution-time checks. Shared instructions are supplemented by relevant action and knowledge contracts.</p>
     <p>The Claude route runs with <strong>no tools, no MCP servers, no plugins</strong>, and checks that at start-up before every call. Every trial has a durable attempt ledger and no rerolls. Failures keep their reserved attempt and a bounded diagnostic stage. Backends are swappable: scripted, Claude, Luna (offline contract checks so far) and Jev for fast appraisal.</p>
     <p class="files">src/model-perspective.ts · src/reflection-choice.ts · src/claude-decision.ts · src/decision-trials.ts</p>
   </div>
@@ -210,12 +211,12 @@
   <div class="dive-text">
     <span class="eyebrow">04 · Attention and time</span>
     <h3>Three speeds of thought</h3>
-    <p><strong>Native habits</strong> never stop: eating, sleeping and ordinary jobs carry on while a colonist deliberates, with a thinking badge over their head. <strong>Fast appraisal</strong> decides whether an event deserves a thought. <strong>Deliberation</strong> handles negotiation, reconsideration and planning.</p>
+    <p>In continuous mode, <strong>native habits</strong> such as eating, sleeping and ordinary jobs can continue while a colonist deliberates, with a thinking badge over their head. Explicit inference pauses stop simulation. <strong>Fast appraisal</strong> decides whether an event deserves a thought. <strong>Deliberation</strong> handles negotiation, reconsideration and planning.</p>
     <p>Native events are archived and routed only to the pawn who experienced them. Repeated signals coalesce, health events bypass cooldowns, and mundane chatter waits instead of cancelling a thought in progress. Reflection pacing spreads a fixed allowance over the observation window. Play is continuous by default; pausing at decisions is an explicit test mode.</p>
     <p class="files">src/routing.ts · src/attention.ts · src/reflection-pacing.ts · mod/Awareness.cs · mod/DecisionPause.cs</p>
   </div>
   <figure class="window">
-    <div class="window-bar"><b>Thinking badge</b><span>early live trial</span></div>
+    <div class="window-bar"><b>Thinking badge</b><span>early scripted trial</span></div>
     <img src="../images/2026-09-21-thinking.png" alt="RimWorld map with a small blue thinking badge above a colonist who is deliberating while the colony keeps moving." width="1280" height="800" loading="lazy">
   </figure>
 </article>
@@ -226,10 +227,10 @@
     <h3>A planner that waits to be needed</h3>
     <p>Each core turn picks one of four moves: <strong>propose</strong> a listed opportunity, <strong>adopt</strong> a counter for fresh consent, <strong>ask</strong> one pawn one question, or <strong>wait</strong>. It keeps up to eight sourced topics marked open, blocked, deferred, resolved or declined. "Resolved" requires completed linked work, so its prose can't close a topic that the receipts don't close.</p>
     <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, band changes. Idle time and private needs don't wake it. Every turn spends from a fixed budget with a cooldown. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
-    <p class="files">src/core-planner.ts · src/core-scheduler.ts · mod/SharedStatus.cs</p>
+    <p class="files">src/core-planner.ts · src/core-scheduler.ts · mod/LinkTelemetry.cs</p>
   </div>
   <figure class="anim window">
-    <video data-loop autoplay loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of events. Completed work, a not-now reply and a received answer wake the core and spend its turn budget; passing time and private need changes do not.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of events. Completed work, a not-now reply and a received answer wake the core and spend its turn budget; passing time and private need changes do not.">
       <source src="../media/core-wakes.mp4" type="video/mp4">
     </video>
     <figcaption><b>Public changes wake it; everything else is quiet.</b></figcaption>
@@ -241,11 +242,11 @@
     <span class="eyebrow">06 · Timeline safety</span>
     <h3>Saves, reloads and slow thoughts</h3>
     <p>Model calls take seconds; players save, load and rewind. Every loaded game gets a fresh <strong>epoch</strong>, so an answer from before a reload can't act in the new timeline. Each accepted action gets an ID <strong>before</strong> dispatch, and the game's saved ledger makes a duplicate a no-op.</p>
-    <p><strong>Paired checkpoints</strong> save the paused game, hash it and store the matching character state together. Restoring checks the hash and forks the timeline. Every milestone is verified by a <strong>cold restore</strong>: full restart, same results, zero extra model calls.</p>
+    <p><strong>Paired checkpoints</strong> save the paused game, hash it and store the matching character state together. Restoring checks the hash and forks the timeline. Gameplay reports distinguish paired restore from a <strong>cold restore</strong>: a full process restart, with retained results and no extra model calls. Some experiments left restore gaps; offline checks do not demonstrate native persistence.</p>
     <p class="files">src/store.ts · src/lab-bridge.ts · mod/Concord.cs</p>
   </div>
   <figure class="anim window">
-    <video data-loop autoplay loop muted playsinline preload="metadata" poster="../media/timeline-guard.jpg" width="1280" height="720" aria-label="Animation: a restore from a checkpoint forks a new epoch; a late answer from the old epoch is rejected; a duplicate action ID has no second effect.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/timeline-guard.jpg" width="1280" height="720" aria-label="Animation: a restore from a checkpoint forks a new epoch; a late answer from the old epoch is rejected; a duplicate action ID has no second effect.">
       <source src="../media/timeline-guard.mp4" type="video/mp4">
     </video>
     <figcaption><b>Old answers can't reach into a new timeline.</b></figcaption>
@@ -260,8 +261,8 @@
       <li><strong>Scripted game tests</strong> for every mechanic, including refusal, withdrawal and restore.</li>
       <li><strong>Frozen live trials</strong> with a fixed call budget decided up front, no rerolls, failures kept.</li>
       <li><strong>Offline snapshot banks</strong>: the same situation, varied one thing at a time, across models.</li>
-      <li><strong>Typed claims scoring</strong> that separates facts, forecasts and preferences in explanations.</li>
-      <li><strong>Independent code review</strong> on every PR and a fact-checked diary entry for every milestone.</li>
+      <li><strong>Offline typed-claims prototype</strong> that distinguishes submitted facts, forecasts and preferences; it is not a production truth checker.</li>
+      <li><strong>Independent code review</strong> on every nontrivial PR and fact-checked diary entries for selected milestones.</li>
     </ul>
     <p>Well-formed output and grounded understanding are measured separately. Passing the schema doesn't count as understanding.</p>
     <p class="files">docs/ACCEPTANCE.md · docs/evidence/ · trials/</p>
@@ -278,8 +279,8 @@
 <section class="block" id="status" aria-labelledby="status-h">
   <span class="eyebrow">Research tree</span>
   <h2 id="status-h">What's built, what's next</h2>
-  <p class="sub">Status as of 23 September 2026. "Done" means verified in the real game within a bounded trial, not proven over long play.</p>
-  <p class="research-key"><span><span class="node done"></span>done</span><span><span class="node part"></span>partly there</span><span><span class="node next"></span>not started</span></p>
+  <p class="sub">Status as of 23 September 2026. "Verified slice" means bounded evidence for the named capability, not proven long-run reliability. Labels are qualitative, not completion percentages.</p>
+  <p class="research-key"><span><span class="node done"></span>verified slice</span><span><span class="node part"></span>partly there</span><span><span class="node next"></span>not started</span></p>
   <div class="research">
     <div class="tier">
       <h3>Foundation</h3>
@@ -295,23 +296,23 @@
       <div class="node done"><b>Event awareness</b><span>per-pawn routing, coalescing, interruptions</span></div>
       <div class="node done"><b>Reflection pacing</b><span>thinking spread across the window</span></div>
       <div class="node done"><b>Private outlook</b><span>up to four revisable, sourced notes</span></div>
-      <div class="node part p60"><b>Social exchange</b><span>messages work and persist; pawn-to-pawn proposals don't exist yet</span></div>
+      <div class="node part"><b>Social exchange</b><span>messages work and persist; pawn-to-pawn proposals don't exist yet</span></div>
     </div>
     <div class="tier">
       <h3>Colony work</h3>
       <div class="node done"><b>Movement</b><span>nearby grounded destinations</span></div>
       <div class="node done"><b>Hauling</b><span>exact stacks, up to three trips</span></div>
       <div class="node done"><b>Rescue</b><span>one casualty to one medical bed</span></div>
-      <div class="node part p50"><b>Campfire &amp; cooking</b><span>works in scripted tests; not yet reached in a live run</span></div>
+      <div class="node part"><b>Campfire &amp; cooking</b><span>works in scripted tests; not yet reached in a live run</span></div>
       <div class="node next"><b>Wider actions</b><span>building, treatment, defence, work priorities</span></div>
     </div>
     <div class="tier">
       <h3>Core &amp; beyond</h3>
       <div class="node done"><b>Live core v1</b><span>event-driven, budgeted, asks and follows up</span></div>
       <div class="node done"><b>Shared status bands</b><span>coarse Food/Rest for core, peers and board</span></div>
-      <div class="node part p30"><b>Multi-step plans</b><span>need → build → cook, live, with refusals possible</span></div>
-      <div class="node part p25"><b>Cheaper models</b><span>Luna passes offline contract checks; not a game backend yet</span></div>
-      <div class="node next"><b>Real-time play</b><span>long unpaused sessions with a live core</span></div>
+      <div class="node part"><b>Multi-step plans</b><span>need → build → cook, live, with refusals possible</span></div>
+      <div class="node part"><b>Cheaper models</b><span>Luna passes offline contract checks; not a game backend yet</span></div>
+      <div class="node part"><b>Real-time play</b><span>continuous trials exist; sustained useful live-core planning remains unproven</span></div>
       <div class="node next"><b>Human contact</b><span>core suggestions, letters, comms console</span></div>
       <div class="node next"><b>Gravship campaign</b><span>mechanoid pursuit, quests, installer</span></div>
     </div>
@@ -321,8 +322,8 @@
 <section class="block" aria-labelledby="missing-h">
   <h2 id="missing-h">Known gaps, stated plainly</h2>
   <div class="caveat">
-    <p><strong>The core hasn't turned a need into a plan live yet.</strong> In the first campfire runs, 23 of 24 core outputs were rejected by an interface mismatch. That's fixed and re-checked, but the follow-up run produced replies, not work offers. The current work is making food supplies and prerequisites visible to the core on their own, separate from the jobs it can offer.</p>
-    <p><strong>Most live trials pause the game during model calls</strong> to keep them measurable. Continuous play exists and has been tested, but not yet with the live core.</p>
+    <p><strong>The core hasn't turned a need into a plan live yet.</strong> In the first campfire runs, 23 of 24 core outputs were rejected by an interface mismatch. That's fixed and re-checked, but the follow-up run produced replies, not work offers. Local food supplies and prerequisites now reach the core separately from executable jobs (PR #45); scripted visibility and restore checks passed, but improved live planning remains untested.</p>
+    <p><strong>Most live trials pause the game during model calls</strong> to keep them measurable. Continuous pawn trials have succeeded, and the third campfire trial ran the live core unpaused. Its eight core outputs were rejected, so it proves continued simulation during inference—not useful live planning.</p>
     <p><strong>Character continuity is early.</strong> Outlooks form, persist and show up in later reasoning. Whether they add up to stable personalities over a long game is an open question.</p>
     <p><strong>It's a lab harness, not a player download.</strong> The mod only activates in a configured lab environment.</p>
   </div>
