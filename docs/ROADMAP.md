@@ -64,8 +64,11 @@ reproduced two overlong-topic schema failures followed by valid repairs rejected
 at result counter three. A core-only, complete-trace recovery rule now recognizes
 that bounded two-message sequence; CLI max-turns remains two. The correction has
 automated/offline verification only, with no new colony result. Earlier transport
-errors remain unresolved. Next: one separately bounded native follow-through on
-the corrected adapter, preserving every failure and allowing waiting. Keep the
+errors remain unresolved. The [native recovery follow-through](RECOVERY_FOLLOWTHROUGH.md)
+now exercised one accepted repair and a later rejected repair with three stream
+events but two distinct messages. Five core attempts and two pawn replies produced
+no work; paired/cold restore passed. Next: robust distinct-message accounting with
+explicit identity coverage, checked offline before another colony allowance. Keep the
 unexplained coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 
@@ -117,4 +120,4 @@ without exposing raw diagnostics to pawns. Keep this roadmap forward-looking;
 
 ## Local food before executable cooking
 
-[Local food sightings](FOOD_OBSERVATIONS.md) now reach the core and Supplies panel independently of cooking jobs. Scripted visibility and paired/cold restore pass. The subsequent [provider investigation](PROVIDER_FAILURE_PROBE.md) adds a narrowly traced core-formatting recovery rule; its correction remains untested in live gameplay. Next: a separately bounded test of informed follow-through, retaining wait/refusal/failure. No new live allowance is enabled by this documentation.
+[Local food sightings](FOOD_OBSERVATIONS.md) now reach the core and Supplies panel independently of cooking jobs. Scripted visibility and paired/cold restore pass. The subsequent [provider investigation](PROVIDER_FAILURE_PROBE.md) adds a narrowly traced core-formatting recovery rule; the [subsequent native test](RECOVERY_FOLLOWTHROUGH.md) accepted one recovery but rejected another stream shape. No work resulted. Next: verify message-level accounting offline before another native allowance. No new live allowance is enabled by this documentation.
