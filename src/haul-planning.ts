@@ -1,3 +1,5 @@
+import {held,productionView} from './production-planning.js';
+import {sharedStatus} from './shared-status.js';
 import {observedPeople} from './observed-names.js';
 import {rescueView} from './rescue-planning.js';
 import type {Domain,GameState,Haul,HaulingView,Pawn,Proposal} from './protocol.js';
@@ -10,7 +12,7 @@ function holds(domain:Domain):Proposal[] {
       (!!p.actionId&&domain.characters[p.pawn]?.commitment===p.actionId)));
 }
 function conflicts(p:Proposal,action:Haul,mapId:number):boolean {
-  return p.action.kind==='haul'&&(p.action.thing===action.thing||
+  return (p.action.kind==='haul'||p.action.kind==='build'||p.action.kind==='cook')&&(p.action.thing===action.thing||
     ((p.haulMap===undefined||p.haulMap===mapId)&&p.action.x===action.x&&p.action.z===action.z));
 }
 export function haulingView(domain:Domain,game:GameState,own:Pawn):HaulingView|null {
@@ -20,7 +22,7 @@ export function haulingView(domain:Domain,game:GameState,own:Pawn):HaulingView|n
   if(view.epoch!==game.epoch||view.tick!==game.ticks||!Number.isInteger(view.mapId)||!view.supplies) {
     view.options=[];view.supplies=[];return view;
   }
-  const other=holds(domain).filter(p=>p.pawn!==own.id);
+  const other=held(domain).filter(p=>p.pawn!==own.id);
   view.options=view.options.filter(a=>!other.some(p=>conflicts(p,a,view.mapId!)));
   view.supplies=view.supplies.filter(s=>view.options.some(a=>a.thing===s.thing&&a.x===s.x&&a.z===s.z));
   return view;
@@ -30,6 +32,8 @@ export function groundedPawn(domain:Domain,game:GameState,own:Pawn):Pawn {
   if(view)copy.hauling=view;
   const people=observedPeople(game,own);if(people.length)copy.observedPeople=people;else delete copy.observedPeople;
   const rescue=rescueView(domain,game,own);if(rescue)copy.rescue=rescue;
+  const production=productionView(domain,game,own);if(production)copy.production=production;
+  copy.sharedStatus=sharedStatus(domain,game);
   return copy;
 }
 export function planHaul(domain:Domain,game:GameState,pawn:string,action:Haul):number {
@@ -38,7 +42,7 @@ export function planHaul(domain:Domain,game:GameState,pawn:string,action:Haul):n
     !Number.isInteger(view.mapId)||view.mapId!<0)throw Error('Fresh mapped hauling observation required');
   if(Object.values(domain.proposals).some(p=>p.pawn===pawn&&p.action.kind==='rescue'&&
     (p.status==='pending'||p.standing?.status==='running'||domain.characters[pawn]?.commitment===p.actionId&&!!p.actionId)))throw Error('Pawn already held by rescue work');
-  if(holds(domain).some(p=>p.pawn===pawn||conflicts(p,action,view.mapId!)))
+  if(held(domain).some(p=>p.pawn===pawn||conflicts(p,action,view.mapId!)))
     throw Error('Hauling source, destination or pawn already held by an offer or commitment');
   const option=view.options.find(a=>a.thing===action.thing&&a.x===action.x&&a.z===action.z);
   const supply=view.supplies?.find(s=>s.thing===action.thing&&s.x===action.x&&s.z===action.z);

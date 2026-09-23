@@ -2,9 +2,9 @@ import type {Domain,Proposal,Receipt} from './protocol.js';
 export type AgreementProgress={id:string;kind:string;status:string;tick:number;agreed:number;completed:number;active:number;unconfirmed:number;unsuccessful:number;notStarted:number;unfulfilled:number;delivered:number;quantityUnknown:number};
 export type CrewEntry={seq:number;tick:number;kind:'message'|'record';actor:string;recipient:string;subject:string;text:string;key:string};
 export type CrewArchive={revision:number;nextSeq:number;entries:CrewEntry[]};
-export type CrewReport={world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
+export type CrewReport={sharedStatus?:import('./shared-status.js').SharedStatus[];waiting?:string;world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
 export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt[]):AgreementProgress {
- const agreed=p.action.kind==='haul'?p.action.trips:1;
+ const agreed=p.action.kind==='haul'?p.action.trips:p.action.kind==='cook'?p.action.meals:1;
  const ids=[...new Set(p.standing?.steps??(p.actionId?[p.actionId]:[]))];
  const receipts=ids.map(id=>fresh?.find(r=>r.id===id&&r.actor===p.pawn)??d.outcomes[id]).map(r=>r?.actor===p.pawn?r:undefined);
  const completed=receipts.filter(r=>r?.status==='completed').length,active=receipts.filter(r=>r?.status==='started').length;
@@ -12,7 +12,7 @@ export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt
   unconfirmed:receipts.filter(r=>!r).length,unsuccessful:receipts.filter(r=>r?.status==='failed'||r?.status==='interrupted').length,
   notStarted:Math.max(0,agreed-ids.length),unfulfilled:Math.max(0,agreed-completed),
   quantityUnknown:p.action.kind==='haul'?receipts.filter(r=>r?.status==='completed'&&r.delivered===undefined).length:0,
-  delivered:p.action.kind==='haul'?receipts.reduce((n,r)=>n+(r?.status==='completed'?r.delivered??0:0),0):0};
+  delivered:p.action.kind==='haul'||p.action.kind==='cook'?receipts.reduce((n,r)=>n+(r?.status==='completed'?r.delivered??0:0),0):0};
 }
 const safe=(s:unknown,max=1000)=>String(s??'').slice(0,max);
 /** Explicit allowlist: never copy general audit payloads or private reflections. */
@@ -57,14 +57,15 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
   if(!p)return;
   const delivered=r.status==='completed'&&p.action.kind==='haul'?(r.delivered===undefined?' Delivered quantity not reported.':` Delivered ${r.delivered} units.`):'';
   const rescue=r.status==='completed'&&p.action.kind==='rescue'?' Casualty placed in the agreed bed; treatment not implied.':'';
-  add('record',r.actor,'observer',p.id,`${p.action.kind}: ${r.status}.${delivered}${rescue}`,`outcome:${r.id}:${r.status}`);
+  add('record',r.actor,'observer',p.id,`${p.action.kind}: ${r.status}.${delivered}${rescue}${p.action.kind==='cook'&&r.status==='completed'?` Produced ${r.delivered??0} simple meals; eating is separate.`:''}`,`outcome:${r.id}:${r.status}`);
  }
 }
-export function crewReport(d:Domain,tick:number):CrewReport {
+export function crewReport(d:Domain,tick:number,status:import('./shared-status.js').SharedStatus[]=[]):CrewReport {
  // Explicit projection remains safe if future domain records gain private fields.
  const entries=(d.crew?.entries??[]).map(e=>({seq:e.seq,tick:e.tick,kind:e.kind,actor:e.actor,recipient:e.recipient,subject:e.subject,text:e.text,key:e.key}));
  const proposals=Object.values(d.proposals).filter(p=>p.status==='accepted');
  const ordered=[...proposals.filter(p=>p.standing?.status==='running'),...proposals.filter(p=>p.standing?.status!=='running').reverse()].slice(0,12);
- return {world:d.world,epoch:d.epoch,branch:d.branch,revision:d.crew?.revision??0,tick,entries,
+ const waiting=Object.values(d.proposals).filter(p=>p.status==='pending'||p.standing?.status==='running').map(p=>`${safe(d.characters[p.pawn]?.name??p.pawn,80)}: ${p.status==='pending'?'reply to': 'working on'} ${p.action.kind}`).join(' · ').slice(0,400);
+ return {world:d.world,epoch:d.epoch,branch:d.branch,revision:d.crew?.revision??0,tick,entries,sharedStatus:status,waiting:waiting||'No outstanding offer or running agreement.',
   agreements:ordered.map(p=>({pawn:p.pawn,name:safe(d.characters[p.pawn]?.name??p.pawn,80),progress:agreementProgress(d,p,tick)}))};
 }

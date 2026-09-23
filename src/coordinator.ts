@@ -1,3 +1,5 @@
+import {planProduction,workMap,workSteps,workReady,workKind} from './production-planning.js';
+import {sharedStatus,type SharedStatus} from './shared-status.js';
 import {deferredOffers} from './reoffers.js';
 import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
 import {coreView,validateCoreChoice,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
@@ -25,6 +27,7 @@ export class Coordinator {
   private questions=new Map<string,{controller:AbortController;proposal:string}>();
   private attending=new Map<string,{controller:AbortController;throughSeq:number}>();
   private observedTick=0;
+  private status:SharedStatus[]=[];
   private crewPublished='';
   crewSyncError:string|undefined;
   constructor(private store:Store,private game:GameBridge,private timing:{mode:'continuous'|'pause-at-decision'}={mode:'continuous'}) {
@@ -39,7 +42,7 @@ export class Coordinator {
   }
   private async publishCrew(){
     if(!this.domain||!this.game.setCrewLog)return;
-    const report=crewReport(this.domain,this.observedTick),key=JSON.stringify(report);
+    const report=crewReport(this.domain,this.observedTick,this.status.filter(s=>s.epoch===this.domain.epoch&&s.tick<=this.observedTick)),key=JSON.stringify(report);
     if(key===this.crewPublished)return;
     try{await this.game.setCrewLog(report);this.crewPublished=key;this.crewSyncError=undefined;}
     catch(e){this.crewSyncError=String(e); /* Presentation failure grants no gameplay authority. Retry on next operation. */}
@@ -63,17 +66,18 @@ export class Coordinator {
         for(const p of game.pawns) this.domain.characters[p.id]={id:p.id,name:p.name,memories:[]};
         this.commit('initialized','operator',{pawns:Object.keys(this.domain.characters)});
       }
-      this.observedTick=game.ticks;
+      this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);
     });
   }
   private async current():Promise<GameState> {
     if(!this.domain) throw Error('Coordinator not opened');
     const game=await this.game.state();
     if(!game.loaded || game.world!==this.domain.world || game.epoch!==this.domain.epoch) throw Error('Stale timeline');
+    this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);
     return game;
   }
   private ingest(game:GameState) {
-    this.observedTick=game.ticks;
+    this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);
     for(const e of Object.values(this.domain.exchanges??{}))if(e.status!=='closed'&&game.ticks>e.expiresTick){
       if(e.status==='running')this.pending.get(e.turn==='opening'?e.initiator:e.recipient)?.abort();
       e.status='closed';this.commit('social-expired','operator',{id:e.id});
@@ -594,12 +598,13 @@ export class Coordinator {
     }
     const reinvite=reofferRequestId?this.domain.reoffers?.[reofferRequestId]:undefined;
     if(reofferRequestId&&(!reinvite||reinvite.status!=='pending'||reinvite.pawn!==pawn||this.domain.proposals[reinvite.deferredId]?.status!=='deferred'||JSON.stringify(reinvite.action)!==JSON.stringify(action)))throw Error('Re-invitation unavailable');
+    const productionMap=action.kind==='build'||action.kind==='cook'?planProduction(this.domain,game,pawn,action):undefined;
     const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;
     const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action,replaces):undefined;
-    const p:Proposal={id,pawn,action,reason,status:'pending',...(reofferRequestId?{reofferRequestId,reoffersProposalId:reinvite!.deferredId}:{}),...(alternative?{requestId:alternative.id,...(replaces?{replacesAgreementId:replaces}:{})}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    const p:Proposal={id,pawn,action,reason,status:'pending',...(productionMap===undefined?{}:{productionMap}),...(reofferRequestId?{reofferRequestId,reoffersProposalId:reinvite!.deferredId}:{}),...(alternative?{requestId:alternative.id,...(replaces?{replacesAgreementId:replaces}:{})}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
     if(action.kind==='rescue'){const invalid=rescueQuestionInvalid(game,p);if(invalid)throw Error(invalid);}
     if(alternative){if(rescueMap!==alternative.mapId)throw Error('Request map changed');alternative.status='offered';alternative.proposalId=id;alternative.replyReason=reason;}
-    if(reinvite){if(reinvite.mapId!==(action.kind==='haul'?haulMap:rescueMap))throw Error('Re-invitation map changed');reinvite.status='offered';reinvite.proposalId=id;this.domain.proposals[reinvite.deferredId]!.reofferReplyId=id;}
+    if(reinvite){if(reinvite.mapId!==(action.kind==='haul'?haulMap:action.kind==='rescue'?rescueMap:productionMap))throw Error('Re-invitation map changed');reinvite.status='offered';reinvite.proposalId=id;this.domain.proposals[reinvite.deferredId]!.reofferReplyId=id;}
     if(parent)parent.replyId=id;
     this.domain.proposals[id]=p;this.commit(parent?'proposal-revised':'proposed','core',p);
     return structuredClone(p);
@@ -617,7 +622,7 @@ export class Coordinator {
     z.string().trim().min(1).max(1000).parse(reason);
     const p=deferredOffers(this.domain,pawn).find(p=>p.id===proposalId);
     if(!p||!g.pawns.some(p=>p.id===pawn&&!p.downed))throw Error('Deferred offer unavailable for this pawn');
-    const request:import('./protocol.js').ReofferRequest={id:randomUUID(),pawn,deferredId:p.id,action:structuredClone(p.action),mapId:p.action.kind==='haul'?p.haulMap:p.rescueMap,tick:g.ticks,reason,status:'pending'};
+    const request:import('./protocol.js').ReofferRequest={id:randomUUID(),pawn,deferredId:p.id,action:structuredClone(p.action),mapId:workMap(p),tick:g.ticks,reason,status:'pending'};
     (this.domain.reoffers??={})[request.id]=request;
     this.commit('reoffer-requested',pawn,request);return structuredClone(request);
   }
@@ -748,7 +753,7 @@ export class Coordinator {
   }
   private async dispatch(p:Proposal) {
     if(p.status!=='accepted' || !p.actionId) throw Error('Action requires pawn acceptance');
-    const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline,mapId:p.action.kind==='rescue'?p.rescueMap:p.haulMap});
+    const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline,mapId:workMap(p)});
     this.domain.outcomes[receipt.id]=receipt;
     if(receipt.status!=='started') {
       if(this.domain.characters[p.pawn]!.commitment===receipt.id)delete this.domain.characters[p.pawn]!.commitment;
@@ -765,7 +770,7 @@ export class Coordinator {
       for(const p of Object.values(this.domain.proposals)) {
         if(!p.actionId) continue;
         if(p.standing?.status==='stopped'&&this.domain.characters[p.pawn]!.commitment===p.actionId) {
-          const cancelled=await this.game.cancel!({epoch:this.domain.epoch,actor:p.pawn,id:p.actionId,kind:p.action.kind==='rescue'?'rescue':'haul'});
+          const cancelled=await this.game.cancel!({epoch:this.domain.epoch,actor:p.pawn,id:p.actionId,kind:workKind(p)});
           game.actions=game.actions.filter(a=>a.id!==cancelled.id).concat(cancelled);
         }
         const receipt=game.actions.find(a=>a.id===p.actionId);
@@ -784,14 +789,14 @@ export class Coordinator {
       }
       for(const p of Object.values(this.domain.proposals)) if(p.standing?.status==='running') {
         const own=game.pawns.find(x=>x.id===p.pawn);
-        if(game.ticks>=p.standing.deadline||!(p.action.kind==='rescue'?own?.rescueReady:own?.workReady))
+        if(game.ticks>=p.standing.deadline||!workReady(p,own))
           await this.withdraw(p.pawn,game.ticks>=p.standing.deadline?'Agreed time expired':'Needs or availability require a break');
       }
     });
   }
   private finishStanding(p:Proposal,status:string) {
     if(!p.standing||p.standing.status!=='running'||status==='started')return;
-    if(status!=='completed'||p.action.kind==='rescue'||(p.action.kind==='haul'&&p.standing.steps.length>=p.action.trips)) {
+    if(status!=='completed'||p.standing.steps.length>=workSteps(p)) {
       p.standing.status=status==='completed'?'completed':'stopped';
       p.standing.reason=status==='completed'?'Agreed work completed':'Work did not complete; no automatic retry';
       if(this.domain.characters[p.pawn]!.intention===p.id)delete this.domain.characters[p.pawn]!.intention;
@@ -809,10 +814,10 @@ export class Coordinator {
     character.memories.push(`Stopped ${p.action.kind}: ${reason}`);
     this.commit('intention-stopped',pawn,{proposal:p.id,reason});
     if(character.commitment&&p.actionId) {
-      const receipt=await this.game.cancel!({epoch:this.domain.epoch,actor:pawn,id:p.actionId,kind:p.action.kind==='rescue'?'rescue':'haul'});
+      const receipt=await this.game.cancel!({epoch:this.domain.epoch,actor:pawn,id:p.actionId,kind:workKind(p)});
       if(receipt.id!==p.actionId||receipt.actor!==pawn)throw Error('Cancellation receipt does not match prior job');
       this.domain.outcomes[receipt.id]=receipt;
-      if(receipt.status==='completed'&&p.action.kind==='haul'&&p.standing.steps.length>=p.action.trips){
+      if(receipt.status==='completed'&&p.standing.steps.length>=workSteps(p)){
         p.standing.status='completed';p.standing.reason='Agreed work completed before cancellation';
       }
       if(receipt.status!=='started')delete character.commitment;
@@ -830,10 +835,10 @@ export class Coordinator {
       if(!admit())return;
       for(const p of Object.values(this.domain.proposals)) {
         if(!admit())return;
-        if(p.standing?.status!=='running'||p.action.kind!=='haul')continue;
+        if(p.standing?.status!=='running'||(p.action.kind!=='haul'&&p.action.kind!=='cook'))continue;
         const c=this.domain.characters[p.pawn]!;
         if(c.commitment||this.pending.has(p.pawn))continue;
-        if(game.ticks>=p.standing.deadline||!game.pawns.find(x=>x.id===p.pawn)?.workReady) {
+        if(game.ticks>=p.standing.deadline||!workReady(p,game.pawns.find(x=>x.id===p.pawn))) {
           await this.withdraw(p.pawn,'Needs, availability or expiry require a break');continue;
         }
         p.actionId=randomUUID();p.standing.steps.push(p.actionId);c.commitment=p.actionId;
@@ -889,7 +894,7 @@ export class Coordinator {
       const game=await this.game.state();
       if(!game.loaded || game.world!==saved.state.world) throw Error('Restored world mismatch');
       this.domain={...saved.state,epoch:game.epoch,branch:randomUUID()};
-      this.observedTick=game.ticks;
+      this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);
       this.recoverAttention('Restored an unfinished attention attempt; no automatic retry');
       this.commit('restored','operator',{name,from:saved.state.branch});
     });

@@ -1,0 +1,433 @@
+{
+  "milestone": "campfire-cooking",
+  "frozenBehaviorRevision": "0ddb4ddf13b78fdc1ad285703f4a8d07e442a626",
+  "fixture": "campfire-v2",
+  "correctionRevision": "960bac499761c295818340fd81039999a7908d6a",
+  "correctionLiveTested": false,
+  "protocol": {
+    "runs": 3,
+    "coreAttemptsPerRun": 8,
+    "pawnAttemptsPerRun": 12,
+    "jevCalls": 0,
+    "nativeMsPerRun": 600000,
+    "wallMsPerRun": 1500000,
+    "noRerolls": true,
+    "coldReadRun": 1
+  },
+  "runs": [
+    {
+      "run": 1,
+      "mode": "paused",
+      "passed": false,
+      "inferencePassed": false,
+      "coreAttempts": 8,
+      "pawnAttempts": 1,
+      "coreTurnStatuses": [
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "applied"
+      ],
+      "rejectedChoices": [
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "op:a842510e6cc6f5cecb4681d4",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        }
+      ],
+      "production": {
+        "campfires": 0,
+        "meals": 0
+      },
+      "nativeElapsedMs": 600860,
+      "samples": 437,
+      "unpausedSamples": 437,
+      "coreInferenceTickAdvances": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pairedRestore": true,
+      "coldRestore": true,
+      "coldNoExtraCalls": true,
+      "cleanupErrors": [],
+      "report": {
+        "world": "206cb3ca2a4d48cf936572765e87c5b3",
+        "epoch": "3928dbee9316485aa3a1aec049f42694",
+        "branch": "ea0b3c89-6224-4818-ad7c-bb38a8bc611e",
+        "waiting": "No outstanding offer or running agreement.",
+        "revision": 852,
+        "tick": 35919,
+        "sharedStatus": [
+          {
+            "pawn": "Thing_Human405",
+            "name": "Alvin",
+            "source": "shared-link-telemetry",
+            "epoch": "3928dbee9316485aa3a1aec049f42694",
+            "food": "low",
+            "rest": "low",
+            "tick": 35919,
+            "fresh": true
+          },
+          {
+            "pawn": "Thing_Human408",
+            "name": "Beatrice",
+            "source": "shared-link-telemetry",
+            "epoch": "3928dbee9316485aa3a1aec049f42694",
+            "food": "satisfied",
+            "rest": "low",
+            "tick": 35919,
+            "fresh": true
+          },
+          {
+            "pawn": "Thing_Human411",
+            "name": "Pedro",
+            "source": "shared-link-telemetry",
+            "epoch": "3928dbee9316485aa3a1aec049f42694",
+            "food": "satisfied",
+            "rest": "low",
+            "tick": 35919,
+            "fresh": true
+          }
+        ],
+        "entries": [
+          {
+            "seq": 1,
+            "tick": 21461,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Beatrice",
+            "subject": "11b6fa05-0178-4995-88d4-383b379c8def",
+            "text": "Your food status shows urgent right now. Is there anything nearby you can eat, or would you like me to look into getting food to you?",
+            "key": "core-talk:00413f0b-4c1a-4842-9e01-fa3f3ac9b417"
+          },
+          {
+            "seq": 2,
+            "tick": 21461,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "crew",
+            "subject": "843b946a-7c11-49a1-8a46-d59f8261bde6",
+            "text": "Beatrice's shared telemetry (tick 21461) reports food as urgent. No grounded food options are currently listed for her. Asking to understand her situation before proposing any work.",
+            "key": "core-plan:843b946a-7c11-49a1-8a46-d59f8261bde6"
+          },
+          {
+            "seq": 3,
+            "tick": 21461,
+            "kind": "message",
+            "actor": "Beatrice",
+            "recipient": "Core",
+            "subject": "11b6fa05-0178-4995-88d4-383b379c8def",
+            "text": "My food is desperately low. I don't see anything to eat nearby. Please find me something \u2014 I can't keep wandering like this much longer.",
+            "key": "core-talk:23dea247-2dcd-46bc-8888-5f26d106f5e7"
+          }
+        ],
+        "agreements": []
+      }
+    },
+    {
+      "run": 2,
+      "mode": "paused",
+      "passed": false,
+      "inferencePassed": false,
+      "coreAttempts": 8,
+      "pawnAttempts": 0,
+      "coreTurnStatuses": [
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed"
+      ],
+      "rejectedChoices": [
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        }
+      ],
+      "production": {
+        "campfires": 0,
+        "meals": 0
+      },
+      "nativeElapsedMs": 600937,
+      "samples": 436,
+      "unpausedSamples": 436,
+      "coreInferenceTickAdvances": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pairedRestore": true,
+      "coldRestore": true,
+      "coldNoExtraCalls": true,
+      "cleanupErrors": [],
+      "report": {
+        "world": "837bf36440dc4004a6c1f2d06dcf1c3e",
+        "epoch": "86a116dba3dc4233b141f73a2c845088",
+        "branch": "d9b631cd-1cb8-433e-b1e0-0f520f76fd13",
+        "waiting": "No outstanding offer or running agreement.",
+        "revision": 825,
+        "tick": 35875,
+        "sharedStatus": [
+          {
+            "pawn": "Thing_Human405",
+            "name": "Alvin",
+            "source": "shared-link-telemetry",
+            "epoch": "86a116dba3dc4233b141f73a2c845088",
+            "food": "low",
+            "rest": "low",
+            "tick": 35875,
+            "fresh": true
+          },
+          {
+            "pawn": "Thing_Human408",
+            "name": "Beatrice",
+            "source": "shared-link-telemetry",
+            "epoch": "86a116dba3dc4233b141f73a2c845088",
+            "food": "satisfied",
+            "rest": "low",
+            "tick": 35875,
+            "fresh": true
+          },
+          {
+            "pawn": "Thing_Human411",
+            "name": "Pedro",
+            "source": "shared-link-telemetry",
+            "epoch": "86a116dba3dc4233b141f73a2c845088",
+            "food": "satisfied",
+            "rest": "low",
+            "tick": 35875,
+            "fresh": true
+          }
+        ],
+        "entries": [],
+        "agreements": []
+      }
+    },
+    {
+      "run": 3,
+      "mode": "continuous",
+      "passed": false,
+      "inferencePassed": false,
+      "coreAttempts": 8,
+      "pawnAttempts": 0,
+      "coreTurnStatuses": [
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed",
+        "failed"
+      ],
+      "rejectedChoices": [
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        },
+        {
+          "actionKind": "ask",
+          "actionTopicId": "brief",
+          "reason": "Only offers may link an action topic; ask requires null."
+        }
+      ],
+      "production": {
+        "campfires": 0,
+        "meals": 0
+      },
+      "nativeElapsedMs": 600629,
+      "samples": 397,
+      "unpausedSamples": 397,
+      "coreInferenceTickAdvances": [
+        377,
+        379,
+        380,
+        417,
+        386,
+        349,
+        445,
+        357
+      ],
+      "pairedRestore": true,
+      "coldRestore": true,
+      "coldNoExtraCalls": true,
+      "cleanupErrors": [],
+      "report": {
+        "world": "04fa8061ce47428a98d27cd54c6fa08a",
+        "epoch": "4a93b793ba0a402baea14e329c5ec89c",
+        "branch": "f7e1c0d7-d912-4634-a7e2-c77eabd109ea",
+        "waiting": "No outstanding offer or running agreement.",
+        "revision": 771,
+        "tick": 35849,
+        "sharedStatus": [
+          {
+            "pawn": "Thing_Human405",
+            "name": "Alvin",
+            "source": "shared-link-telemetry",
+            "epoch": "4a93b793ba0a402baea14e329c5ec89c",
+            "food": "low",
+            "rest": "low",
+            "tick": 35849,
+            "fresh": true
+          },
+          {
+            "pawn": "Thing_Human408",
+            "name": "Beatrice",
+            "source": "shared-link-telemetry",
+            "epoch": "4a93b793ba0a402baea14e329c5ec89c",
+            "food": "satisfied",
+            "rest": "low",
+            "tick": 35849,
+            "fresh": true
+          },
+          {
+            "pawn": "Thing_Human411",
+            "name": "Pedro",
+            "source": "shared-link-telemetry",
+            "epoch": "4a93b793ba0a402baea14e329c5ec89c",
+            "food": "satisfied",
+            "rest": "low",
+            "tick": 35849,
+            "fresh": true
+          }
+        ],
+        "entries": [],
+        "agreements": []
+      }
+    }
+  ],
+  "reader": {
+    "preselected": true,
+    "readBeforeDiagnostics": true,
+    "notFullyBlind": "Reader knew the project and knew some outputs had been rejected.",
+    "account": "Changing need bands were understandable; the core appeared helpless.",
+    "correction": "Native eating occurred. Seven rejected questions in run1 did not reach the crew; only the eighth question and one reply did. No work began.",
+    "visibilityGap": "No outstanding work does not explain unavailable coordination or the exhausted trial allowance.",
+    "limits": "One informed reader, not general usability evidence."
+  },
+  "interpretation": {
+    "coreOutputsRejected": 23,
+    "coreAttempts": 24,
+    "pawnReplies": 1,
+    "jevCalls": 0,
+    "liveAgentJobs": 0,
+    "limits": [
+      "No live construction/cooking, branch-variety or three-voice coordination demonstrated.",
+      "The question/offer-link schema correction was made after freezing these trials and was not rerun live.",
+      "First two runs explicitly paused inference; unpaused native samples do not mean those full runs were continuous.",
+      "Thirdrun tick advances establish simulation continued during core inference, not successful continuous production.",
+      "Native eating is not evidence of an agent food plan.",
+      "Raw rejected questions are not delivered crew speech."
+    ]
+  }
+}

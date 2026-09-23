@@ -41,7 +41,7 @@ test('broader fixed cases repeat exactly, omit rubrics from prompts and retain v
 });
 test('trial table preserves every historical policy and adds a distinct twelve-call evaluation',()=>{
  for(const [name,p] of Object.entries(decisionTrials)){
-  const calls=name==='legacy'?3:['core-pawns-v1','core-events-pawns-v1'].includes(name)?5:['core-events-planner-v1','core-planner-v1','reliability-v1','needs-v1','social-v1','retention-game-v1','retention-names-v1','retention-indirect-v1'].includes(name)?4:['integration-v1','work-v1','observer-v1','paced-v1','perspective-v1','outlook-check-v1','speech-check-v1','interpretation-v1'].includes(name)?12:6;
+  const calls=name==='campfire-core-v1'?8:name==='legacy'?3:['core-pawns-v1','core-events-pawns-v1'].includes(name)?5:['core-events-planner-v1','core-planner-v1','reliability-v1','needs-v1','social-v1','retention-game-v1','retention-names-v1','retention-indirect-v1'].includes(name)?4:['campfire-pawns-v1','integration-v1','work-v1','observer-v1','paced-v1','perspective-v1','outlook-check-v1','speech-check-v1','interpretation-v1'].includes(name)?12:6;
   assert.equal(p.calls,calls);assert.equal(p.reservedEquivalentUSD,Number((calls*.1).toFixed(2)));assert.equal(p.policy,name==='legacy'?'legacy':'claude-'+name);
  }
 });

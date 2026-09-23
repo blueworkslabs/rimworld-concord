@@ -27,7 +27,7 @@ receipt-size boundary has been repaired without repeating the live run.
 The [first bounded core](BOUNDED_CORE.md) implements a separate perspective from addressed/shared communication, agreement
 outcomes and explicitly grounded opportunities. Pawn outlooks,
 private memories and omniscient diagnostics remain excluded. The core can propose
-supported work, adopt a counter for fresh consent, ask one question or wait, with
+supported work, adopt a counter for fresh consent, ask bounded questions or wait, with
 retained sourced topics and reasons for blocked/deferred work. Pawns still own consent and withdrawal.
 Do not infer construction/cooking capability from conversation. The frozen first trial uses four core attempts, at most five pawn attempts and
 explicitly paused inference. This roadmap enables no unattended inference.
@@ -40,10 +40,16 @@ One live run used three core turns, then stayed quiet without a new shared event
 The [topic lifecycle and pawn-authored re-invitation](CORE_LIFECYCLE.md) contract
 has scripted native and cold-restart evidence for two resolved topics and a fresh refusal after an invitation request. Live use of the new contract remains untested. Automatic after-meal resumption
 is absent. Keep fresh consent and private needs out of the core view.
-The [coarse shared-link status decision](CORE_VISIBILITY.md) must receive a native
-sensor implementation before the capability trial. A campfire/cooking loop needs its own executable capability and native tests;
-it is not enabled by planning language or this milestone. No new live allowance
-is implied by these next steps.
+The [shared-link status projection](CORE_VISIBILITY.md) now provides coarse
+Food/Rest bands to the core, linked peers and observer board, without exact meters
+or private thoughts. [Campfire construction and cooking](CAMPFIRE_MILESTONE.md)
+have separate pawn consent, native resource accounting and scripted/cold-restore
+verification. Three finite live runs and the preselected human read are complete, with a clear
+failure: 23 of 24 core outputs were rejected, and no agent-directed work began.
+The narrower provider schema has automated and review evidence, not a live rerun.
+Next: a small check of that corrected contract, then reassess planning and the
+unexplained coordination-failure state. No unattended inference or additional
+allowance is enabled by this roadmap.
 
 ## Continuing pawn work
 

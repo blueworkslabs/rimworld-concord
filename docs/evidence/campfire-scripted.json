@@ -1,0 +1,109 @@
+{
+  "milestone": "campfire-cooking",
+  "kind": "scripted native mechanics, not live-model judgment",
+  "revision": "0ddb4ddf13b78fdc1ad285703f4a8d07e442a626",
+  "fixture": "campfire-mechanics-v2; all three Food0.90, native raw berries225 at60HP; unchanged skills/traits",
+  "tests": {
+    "node": 289,
+    "python": 10,
+    "nativeCompilation": true,
+    "independentReview": "completed, final behavior; no actionable findings"
+  },
+  "inventory": {
+    "initialInventory": {
+      "wood": 284,
+      "meals": 0,
+      "berries": 225,
+      "campfires": 0,
+      "invalidBerryHealth": 0,
+      "ownedBills": 0,
+      "unfinishedForbidden": 0
+    },
+    "builtInventory": {
+      "wood": 264,
+      "meals": 0,
+      "berries": 225,
+      "campfires": 1,
+      "invalidBerryHealth": 0,
+      "ownedBills": 0,
+      "unfinishedForbidden": 0
+    },
+    "betweenInventory": {
+      "wood": 264,
+      "meals": 1,
+      "berries": 215,
+      "campfires": 1,
+      "invalidBerryHealth": 0,
+      "ownedBills": 0,
+      "unfinishedForbidden": 0
+    },
+    "completedInventory": {
+      "wood": 264,
+      "meals": 2,
+      "berries": 205,
+      "campfires": 1,
+      "invalidBerryHealth": 0,
+      "ownedBills": 0,
+      "unfinishedForbidden": 0
+    },
+    "finalInventory": {
+      "wood": 264,
+      "meals": 0,
+      "berries": 225,
+      "campfires": 0,
+      "invalidBerryHealth": 0,
+      "ownedBills": 0,
+      "unfinishedForbidden": 1
+    }
+  },
+  "cases": [
+    {
+      "kind": "refusal",
+      "jobs": 0
+    },
+    {
+      "kind": "build"
+    },
+    {
+      "kind": "cook-refusal",
+      "jobs": 0
+    },
+    {
+      "kind": "cook",
+      "twoMeals": true,
+      "betweenMealRestore": true
+    },
+    {
+      "kind": "cook-withdrawal",
+      "zeroMeals": true
+    },
+    {
+      "kind": "build-withdrawal"
+    }
+  ],
+  "pairedRestore": true,
+  "coldRestore": true,
+  "coldCompletedInventory": {
+    "wood": 264,
+    "meals": 2,
+    "berries": 205,
+    "campfires": 1,
+    "invalidBerryHealth": 0,
+    "ownedBills": 0,
+    "unfinishedForbidden": 0
+  },
+  "inferenceCalls": 0,
+  "corrections": [
+    "Early custom cooking driver produced an object without consuming ingredients. Fixed scoped native placed-ingredient tracking and guarded exact consumption; final verification requires independent resource depletion.",
+    "Initial berry fixture omitted hit points; v2 sets native60HP. Missingberries in v1 are not evidence of native eating.",
+    "Native pause-on-load could override the first run request; a bounded second start checks that simulation is running.",
+    "Immediate material delivery could finish before scheduler return; now recognized as materials-ready."
+  ],
+  "limits": [
+    "The full chain is scripted; consent choices are authored, not evidence of model preference.",
+    "Paired checkpoints are quiescent, not mid-job.",
+    "Incomplete projects remain forbidden; resume/deconstruction unavailable.",
+    "Native ingestion and general planning quality are not implied by producing meals.",
+    "Live evidence and explanatory diary held separately for the preselected unbriefed reader."
+  ]
+}

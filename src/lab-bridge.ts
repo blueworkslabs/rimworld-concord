@@ -9,7 +9,7 @@ import type { Activity, DecisionPause, ActionRequest, GameBridge, GameState, Rec
 const exec=promisify(execFile);
 
 // Native cap is 2,000,000 UTF-16 characters: bounded 128 entries, including worst-case double JSON escaping.
-export function encodeCrewReport(report:CrewReport){return JSON.stringify({...report,entries:undefined,agreements:undefined,entryLines:report.entries.map(e=>JSON.stringify(e)).join('\n'),agreementLines:report.agreements.map(a=>JSON.stringify({...a.progress,pawn:a.pawn,name:a.name})).join('\n')});}
+export function encodeCrewReport(report:CrewReport){return JSON.stringify({...report,entries:undefined,agreements:undefined,sharedStatus:undefined,statusLines:(report.sharedStatus??[]).map(s=>JSON.stringify(s)).join('\n'),entryLines:report.entries.map(e=>JSON.stringify(e)).join('\n'),agreementLines:report.agreements.map(a=>JSON.stringify({...a.progress,pawn:a.pawn,name:a.name})).join('\n')});}
 
 /** Local trusted staging transport. Caller must own the process lock (scripts/run-lab.sh). */
 export class LabBridge implements GameBridge {
@@ -55,7 +55,7 @@ export class LabBridge implements GameBridge {
   async move(r:ActionRequest):Promise<Receipt> {
     return (await this.request({op:r.action.kind,...r.action,actionId:r.id,epoch:r.epoch,actor:r.actor,untilTick:r.untilTick,mapId:r.mapId??-1})).receipt;
   }
-  async cancel(r:{epoch:string;actor:string;id:string;kind?:'haul'|'rescue'}) {return (await this.request({op:'cancel',cancelKind:r.kind??'haul',epoch:r.epoch,actor:r.actor,actionId:r.id})).receipt;}
+  async cancel(r:{epoch:string;actor:string;id:string;kind?:'haul'|'rescue'|'build'|'cook'}) {return (await this.request({op:'cancel',cancelKind:r.kind??'haul',epoch:r.epoch,actor:r.actor,actionId:r.id})).receipt;}
   async admin(op:string,name?:string) {
     const {stdout}=await exec('python3',[join(this.root,'bin/lab.py'),'command',op,...name?[name]:[]],{timeout:this.timeout(130000),killSignal:'SIGKILL'});
     this.timeout(130000);return JSON.parse(stdout);

@@ -764,3 +764,25 @@ zero Jev or rerolls. All 102 native samples unpaused; decisions explicitly pause
 Paired/cold restore preserved outcomes and consumed events with zero further
 inference. No live deferral or question was chosen. Topic prose/label mismatch
 remains recorded; after-meal resumption and construction are not implemented.
+
+## Campfire construction, cooking and shared telemetry
+
+See [milestone contract and limits](CAMPFIRE_MILESTONE.md),
+[scripted resource evidence](evidence/campfire-scripted.json) and
+[all three frozen live results](evidence/campfire-live.json).
+
+- 290 Node + ten Python checks; installed-assembly C# compilation; final
+  independent review and focused output-schema review completed.
+- Scripted native campfire consumed20wood; a separately accepted two-meal
+  cooking agreement consumed20berries. Refusal, fresh counter consent,
+  withdrawal, between-meal paired restore and cold restart passed.
+- Live:24core+1pawn attempts, zero Jev, no rerolls.23corechoices failed the
+  question/offer-link cross-field rule. One question and reply reached the log;
+  no agent-directed job began. All three native windows and paired/cold restores
+  completed, including simulation progress during third-run inference.
+- The provider menu was corrected after the frozen trials; runtime validation
+  remains strict. No live call validates that correction yet.
+- The human read recovered need changes but saw a helpless core. The accurate
+  no-outstanding-work label did not explain rejected choices/exhausted allowance.
+- Earlier free-meal and invalid-health-fixture results remain recorded as
+  defects, not successful production or evidence of native eating.

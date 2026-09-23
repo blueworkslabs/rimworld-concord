@@ -8,12 +8,13 @@ export const CoreScheduleConfig=z.object({
 }).strict();
 export type CoreScheduleConfig=z.infer<typeof CoreScheduleConfig>;
 export type CoreSchedule={config:CoreScheduleConfig;startTick:number;endTick:number;attempts:number;lastAttemptTick?:number;consumed:Record<string,string>};
-export type CoreWake={sourceId:string;kind:'start'|'agreement'|'request'|'message'|'answer';value:string};
+export type CoreWake={sourceId:string;kind:'start'|'agreement'|'request'|'message'|'answer'|'telemetry';value:string};
 
 /** Only public/communicated changes qualify. Tick passage, private needs,
- * opportunity churn and the core's own prose do not wake it. */
+ * opportunity churn, telemetry timestamp refreshes and the core's own prose do not wake it. */
 export function coreWakeSnapshot(v:CoreView):CoreWake[]{
  const wakes:CoreWake[]=[{sourceId:v.brief.id,kind:'start',value:'initial'}];
+ for(const s of v.sharedStatus)wakes.push({sourceId:s.pawn,kind:'telemetry',value:JSON.stringify({food:s.food,rest:s.rest})});
  for(const p of v.agreements){
   const status=p.action.kind==='move'&&p.status==='accepted'
    ?p.progress.completed?'completed':p.progress.unsuccessful?'stopped':p.progress.status

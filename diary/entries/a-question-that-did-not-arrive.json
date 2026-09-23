@@ -1,0 +1,62 @@
+{
+  "slug": "a-question-that-did-not-arrive",
+  "title": "A Question That Did Not Arrive",
+  "date": "2026-09-23",
+  "summary": "Construction and cooking pass scripted checks, but live coordination stalls at an interface mismatch.",
+  "sections": [
+    {
+      "heading": "What We Built",
+      "paragraphs": [
+        "Concord now supports native campfire construction and simple-meal cooking, with exact resource tracking and separate pawn consent for each kind of work. A cooking agreement can cover up to three meals; refusing or withdrawing remains possible. In scripted game checks, twenty wood became one campfire and twenty berries became two meals. A smaller counter-offer needed fresh acceptance, and progress survived a save between meals and a full restart."
+      ]
+    },
+    {
+      "heading": "What the Scripts Caught",
+      "paragraphs": [
+        "Early custom cooking jobs created meal objects without consuming ingredients. Independent review caught the missing native tracking; corrected checks verify both ingredient depletion and product creation. The first berry fixture also omitted saved health, making disappearing food unreliable evidence. Its corrected version uses native health values. The implementation and later interface correction pass 290 Node checks and ten Python checks, with independent review."
+      ]
+    },
+    {
+      "heading": "What the Live Runs Revealed",
+      "paragraphs": [
+        "Three frozen live runs each reached the eight-attempt core limit. Twenty-three of twenty-four core outputs were rejected because a question carried a link reserved for work offers. Only one question reached Beatrice in run one, yielding one pawn reply. No construction, cooking or other agent-directed job began in these live runs. Native eating still occurred.",
+        "Our reader followed the changing need bands but described the core as helpless. The panel showed no outstanding work, without explaining the validation failures or exhausted allowance. That is useful feedback from one informed reader, not proof of general usability."
+      ]
+    },
+    {
+      "heading": "The Next Uncertainty",
+      "paragraphs": [
+        "A stricter output menu now excludes work-offer links from questions and waiting; runtime validation remains unchanged. This correction is implemented and independently reviewed, but has not been tested with a new live model call. The three runs were not replayed. All passed paired and cold restore; the continuous run advanced during inference. Their unsuccessful planning remains evidence. The next step is a small check of the corrected contract before another long playtest."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Implementation PR42",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/42"
+    },
+    {
+      "label": "Milestone and limits",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CAMPFIRE_MILESTONE.md"
+    },
+    {
+      "label": "Scripted resource checks",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/campfire-scripted.json"
+    },
+    {
+      "label": "Frozen live results",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/campfire-live.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/2026-09-23-campfire-live.png",
+      "alt": "Actual final crew panel from live run one: shared Food and Rest bands, no agreements, and a question and reply between the core and Beatrice.",
+      "caption": "Unaltered player capture from live run one. One question and reply reached the log; no agent-directed work began. The panel does not explain the earlier rejected outputs or exhausted core allowance."
+    }
+  ]
+}

@@ -34,7 +34,7 @@ test('core proposal executes nothing; refusal cannot be retried and counter need
 test('one addressed question, voluntary answer, no belief or consent, no private leakage',async()=>{
  const {g,s,c}=await setup();const r=await c.planCore(planner(()=>({topic:{sourceId:'brief',text:'Clarify needs before work',status:'open'},action:{kind:'ask',pawn:'A',text:'What would help?',reason:'Ask before proposing.'}})));if(r.status!=='applied')throw Error();assert.equal(g.moves,0);assert.equal(c.inspect().characters.B!.messages,undefined);
  let called=0;const a=await c.answerCoreQuestion(r.questionId!,{name:'answer',async answerCore(v){called++;assert.equal(v.question.from,'core');assert.equal(coreAnswerPrompt(v).task,'core-answer');return {choice:'say',text:'I might haul later, but that is not consent.'};}});assert.equal(a.status,'delivered');assert.equal(called,1);assert.equal(g.moves,0);assert.equal(Object.keys(c.inspect().proposals).length,0);assert.equal(c.inspect().characters.A!.outlook,undefined);
- const v=await c.corePerspective();assert.equal(v.messages.length,2);assert.deepEqual(v.questionRecipients,[]);await assert.rejects(c.answerCoreQuestion(r.questionId!,{name:'retry',async answerCore(){throw Error();}}));
+ const v=await c.corePerspective();assert.equal(v.messages.length,2);assert.deepEqual(v.questionRecipients,['B']);await assert.rejects(c.answerCoreQuestion(r.questionId!,{name:'retry',async answerCore(){throw Error();}}));
  assert.equal(crewReport(c.inspect(),100).entries.filter(e=>e.key.startsWith('core-talk:')).length,2);assert.equal(c.inspect().characters.B!.messages,undefined);s.close();
 });
 test('silence closes question without speech or re-asking; malformed authority is rejected',async()=>{
@@ -188,7 +188,7 @@ test('one turn closes multiple earlier topics only against completed linked rece
  const close={topics:view.topics.map(t=>({sourceId:t.sourceId,text:'Linked work completed',status:'resolved'})),actionTopicId:null,action:wait.action};
  assert.equal((await c.planCore(planner(()=>close))).status,'applied');assert.deepEqual(c.inspect().coreState!.topics.map(t=>t.status),['resolved','resolved']);assert.equal(g.moves,2);
  await c.checkpoint('lab-concord-topics-closed');await c.restore('lab-concord-topics-closed');assert.deepEqual(c.inspect().coreState!.topics.map(t=>t.status),['resolved','resolved']);
- const schema:any=coreChoiceSchema(await c.corePerspective());assert(schema.required.includes('topics'));assert(!schema.required.includes('topic'));assert.equal(schema.properties.topics.maxItems,8);s.close();
+ const schema:any=coreChoiceSchema(await c.corePerspective());assert(schema.anyOf.every((b:any)=>b.required.includes('topics')&&!b.required.includes('topic')&&b.properties.topics.maxItems===8));s.close();
 });
 test('topic closure distinguishes refusal from completion and never guesses from prose or unknown links',async()=>{
  const {c,s}=await setup();const r=await c.planCore(planner(v=>multiOffer(v,'A')));if(r.status!=='applied')throw Error();const t=(await c.corePerspective()).topics[0]!;
@@ -248,4 +248,18 @@ test('reflection exposes only own eligible defer IDs and communicates an explici
  assert.equal(result.status,'continued');assert.equal(g.moves,0);assert(seen);assert.deepEqual(reflectionChoices(seen).find(x=>x.choice==='request_fresh_offer')!.proposalIds,[id]);
  assert(reflectionChoiceSchema(seen,{}).oneOf.some((x:any)=>x.properties.choice.const==='request_fresh_offer'));assert.throws(()=>validateReflectionChoice({choice:'request_fresh_offer',proposalId:randomUUID(),reason:'Unknown'},seen));
  const req=Object.values(c.inspect().reoffers!)[0]!;assert.equal(req.pawn,'A');assert.equal(req.reason,'I would consider that offer again');assert.equal(c.inspect().characters.B!.messages,undefined);s.close();
+});
+
+// Preserved live failure: an otherwise available question was given an offer
+// topic link. The provider menu must exclude that combination, not repair it.
+test('core provider branches prohibit offer links on questions and waiting',async()=>{
+ const {c,s}=await setup();const v=await c.corePerspective();const schema:any=coreChoiceSchema(v);
+ for(const kind of ['ask','wait']){
+  const b=schema.anyOf.find((b:any)=>b.properties.action.properties.kind.const===kind);assert(b);assert.deepEqual(b.properties.actionTopicId,{type:'null'});
+  const action=kind==='ask'?{kind,pawn:v.questionRecipients[0],text:'What would help?',reason:'Ask'}:{kind,reason:'Wait'};
+  const output={topics:[{sourceId:'brief',text:'Shared need',status:'open'}],actionTopicId:'brief',action};
+  assert.throws(()=>validateCoreChoice(output,v),/Only offers link/);
+  assert.doesNotThrow(()=>validateCoreChoice({...output,actionTopicId:null},v));
+ }
+ const offer=schema.anyOf.find((b:any)=>b.properties.action.properties.kind.const==='propose');assert(offer);assert(offer.properties.actionTopicId.anyOf.some((b:any)=>b.enum?.includes('brief')));s.close();
 });
