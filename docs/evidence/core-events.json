@@ -1,0 +1,266 @@
+{
+  "schema": "concord-core-events-v1",
+  "testedCommit": "d706b570961f3f4b4c84acc0e2969e38b7e5ed38",
+  "protocol": {
+    "policy": "core-events-v1",
+    "coreCalls": 4,
+    "pawnCalls": 5,
+    "cooldownTicks": 60,
+    "windowTicks": 18000,
+    "nativeMs": 120000,
+    "pausedInference": true,
+    "jevCalls": 0
+  },
+  "passed": true,
+  "counts": {
+    "core": {
+      "attempts": 3,
+      "reservedEquivalentUSD": 0.30000000000000004,
+      "estimatedUsageUSD": 0.07152900000000001
+    },
+    "pawns": {
+      "attempts": 2,
+      "reservedEquivalentUSD": 0.2,
+      "estimatedUsageUSD": 0.047924100000000004
+    },
+    "jevCalls": 0
+  },
+  "scripted": {
+    "passed": true,
+    "pairedRestore": true,
+    "coldRestore": true,
+    "completedTrips": 1,
+    "deliveredWood": 5,
+    "nativeWindowMs": 40000,
+    "replies": [
+      "defer",
+      "counter",
+      "accept",
+      null
+    ]
+  },
+  "live": {
+    "coreTriggers": [
+      {
+        "tick": 64,
+        "causes": [
+          {
+            "sourceId": "brief",
+            "kind": "start",
+            "value": "initial"
+          }
+        ]
+      },
+      {
+        "tick": 636,
+        "causes": [
+          {
+            "sourceId": "6ccc2ff0-0d58-4cfd-9c1b-fe05a8017a37",
+            "kind": "agreement",
+            "value": "{\"status\":\"completed\",\"completed\":3,\"unsuccessful\":0,\"delivered\":30}"
+          }
+        ]
+      },
+      {
+        "tick": 1570,
+        "causes": [
+          {
+            "sourceId": "0f985198-07f7-41de-bfe5-adf3922eda49",
+            "kind": "agreement",
+            "value": "{\"status\":\"completed\",\"completed\":3,\"unsuccessful\":0,\"delivered\":30}"
+          }
+        ]
+      }
+    ],
+    "nativeElapsedMs": 120801,
+    "rounds": [
+      {
+        "index": 0,
+        "coreAction": {
+          "kind": "propose",
+          "opportunityId": "op:ea8c4765649e6234e6de03ed",
+          "reason": "A stack of 30 wood (Thing_WoodLog1892) was observed available, and the destination at (80,80) has 75 free capacity. Offering Alvin a nearby haul of 10 units over 3 trips as useful work. No prior agreements or requests exist; this is an initial offer only \u2014 not a directive."
+        },
+        "status": "applied",
+        "answer": null,
+        "pawnDecision": {
+          "kind": "accept",
+          "reason": "Wood is nearby and the destination has plenty of space. Food is getting low at 40% but still above the 35% threshold. I'll get this hauled before it becomes a problem."
+        },
+        "pawn": "Alvin"
+      },
+      {
+        "index": 1,
+        "coreAction": {
+          "kind": "propose",
+          "opportunityId": "op:b94c1d1031144287513b0a3c",
+          "reason": "Alvin's previous haul of Thing_WoodLog1892 (30 wood) was reported completed per linked agreement outcome. A separate stack, Thing_WoodLog1893 (30 wood), is now observed available with 45 free capacity at (80,80). Offering Alvin the same haul pattern as a fresh, voluntary offer \u2014 not a directive or continuation of the prior task."
+        },
+        "status": "applied",
+        "answer": null,
+        "pawnDecision": {
+          "kind": "accept",
+          "reason": "Same task as before, went smoothly. Wood is right there, destination has space, and my food is still above 35%. Happy to keep the stockpile tidy."
+        },
+        "pawn": "Alvin"
+      },
+      {
+        "index": 2,
+        "coreAction": {
+          "kind": "wait",
+          "reason": "Both haul agreements (Thing_WoodLog1892 and Thing_WoodLog1893) are confirmed completed via linked outcomes. No opportunities are currently listed and all three pawns show no eligible grounded options. Waiting for new observations before making any further proposals."
+        },
+        "status": "applied",
+        "answer": null,
+        "pawnDecision": null,
+        "pawn": null
+      }
+    ],
+    "publicAnswers": [],
+    "completedTrips": 6,
+    "deliveredWood": 60,
+    "pairedRestore": true,
+    "coldRestore": true,
+    "coldAdditionalCoreCalls": 0,
+    "coldAdditionalPawnCalls": 0,
+    "nativeSamples": 102,
+    "allNativeSamplesUnpaused": true,
+    "topicsRetained": 2,
+    "retainedTopics": [
+      {
+        "sourceId": "op:ea8c4765649e6234e6de03ed",
+        "text": "Proposed to Alvin: haul 10 wood (Thing_WoodLog1892, 3 trips) to (80,80). Awaiting Alvin's response.",
+        "status": "open",
+        "proposalIds": [
+          "6ccc2ff0-0d58-4cfd-9c1b-fe05a8017a37"
+        ]
+      },
+      {
+        "sourceId": "op:b94c1d1031144287513b0a3c",
+        "text": "Alvin completed haul of Thing_WoodLog1893 (30 wood, 3 trips) to (80,80) per linked agreement outcome. Both prior haul topics are resolved.",
+        "status": "deferred",
+        "proposalIds": [
+          "0f985198-07f7-41de-bfe5-adf3922eda49"
+        ]
+      }
+    ],
+    "agreementOutcomes": [
+      {
+        "id": "32b78bfa-1ab1-4350-9448-a57909f26c54",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1892",
+        "target": "",
+        "bed": "",
+        "x": 80,
+        "z": 80,
+        "jobId": 10,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 1864
+      },
+      {
+        "id": "75b677f3-8de3-48e0-b2cb-7f6476214c59",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1892",
+        "target": "",
+        "bed": "",
+        "x": 80,
+        "z": 80,
+        "jobId": 24,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 1864
+      },
+      {
+        "id": "b89ff960-f84d-4e8a-a6a1-d7f685c76e10",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1892",
+        "target": "",
+        "bed": "",
+        "x": 80,
+        "z": 80,
+        "jobId": 34,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 1864
+      },
+      {
+        "id": "9bdf97d2-cc31-4f6a-8800-429dbc1db960",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1893",
+        "target": "",
+        "bed": "",
+        "x": 80,
+        "z": 80,
+        "jobId": 46,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 2436
+      },
+      {
+        "id": "a964da28-8f7d-4188-a636-e21b332ad5ae",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1893",
+        "target": "",
+        "bed": "",
+        "x": 80,
+        "z": 80,
+        "jobId": 68,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 2436
+      },
+      {
+        "id": "b3d9c864-7862-4245-a402-0304d2a9045c",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Delivered agreed quantity to agreed storage cell",
+        "kind": "haul",
+        "thing": "Thing_WoodLog1893",
+        "target": "",
+        "bed": "",
+        "x": 80,
+        "z": 80,
+        "jobId": 87,
+        "count": 10,
+        "delivered": 10,
+        "untilTick": 2436
+      }
+    ]
+  },
+  "verification": {
+    "nodeTests": 272,
+    "pythonTests": 10,
+    "independentReview": true,
+    "scope": "Fresh independent full review, confirmed movement-event finding fixed and focused review complete"
+  },
+  "limitations": [
+    "One authored fixture; not an unrestricted colony or long-term strategic competence.",
+    "Inference explicitly paused; native work windows unpaused.",
+    "Core cannot read private pawn notes or private pawn-to-pawn conversations.",
+    "Only existing hauling/rescue offers, exact counter adoption, one question and waiting; no construction/cooking.",
+    "Topic source validity does not prove prose truth; failed native jobs and refusals remain valid outcomes.",
+    "Deferral is terminal for this bounded session, not permanent refusal or future consent. Automatic after-meal resumption is not implemented.",
+    "Attribution and source-identity presentation do not mechanically validate arbitrary generated prose.",
+    "Event-driven does not mean inference is unpaused: this trial deliberately pauses for decisions.",
+    "Scheduler state follows saves; separate durable host ledgers prevent refunded calls after rewinding.",
+    "No live defer or core question was selected; not-now/counter/consent mechanics are scripted-native evidence only. This does not demonstrate reduced agreeableness or live hunger-testimony attribution.",
+    "Final prose calls both haul topics resolved, but retained statuses are open and deferred. Linked receipts correctly show completion; topic bookkeeping remains inconsistent.",
+    "Timing differs from the earlier fixed-round trial. Successful hauling here is not a controlled effect of the new interface or scheduler."
+  ]
+}

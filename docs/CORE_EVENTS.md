@@ -23,3 +23,32 @@ New `core-events-planner-v1` / `core-events-pawns-v1` ledgers permit at most fou
 `scripts/run-core-events-game.mjs` uses the existing private operator-config shape; `scripts/run-core-events-lab.sh` holds the exclusive coordinator lock across loading, decisions, saves and restore. Native activity lasts up to 120 seconds (40 for scripted mechanics), cooldown 60 ticks, horizon 18000 ticks. Inference is explicitly paused. Quiet intervals do not generate fixed-round turns. The scripted baseline prescribes not-now, a smaller counter, fresh acceptance and completion; live choices are unconstrained by those outcomes. A single wait followed by no new events is valid, not failed planning.
 
 Verification must separate automated/mock lifecycle checks, native scripted execution, and any separately recorded live model result. No results are asserted by this protocol itself.
+
+## Recorded result — 2026-09-23
+
+[Sanitized evidence](evidence/core-events.json) records behavior commit
+`d706b570961f3f4b4c84acc0e2969e38b7e5ed38`. All 272 Node and ten Python
+transport checks passed. Independent full review found missed terminal movement
+events; the fix received regression coverage and a clean focused re-review.
+
+The final scripted native rehearsal exercised defer → smaller counter → fresh
+acceptance → five wood delivered → completion-triggered wait, with paired and
+cold restore. The live run instead used two accepted three-trip hauling offers
+to Alvin: six completed trips delivered sixty wood. The initial briefing and
+two completion events admitted three core turns; the last chose wait. Passing
+time through the rest of the window caused no fourth call. Three core and two
+pawn attempts, zero Jev, no rerolls; remaining allowances stayed unused.
+
+All 102 sampled activity states were unpaused across 120.801 seconds of native
+activity; inference was deliberately paused. Paired and cold restore preserved
+the scheduler and outcomes, with no additional calls. The inspected saved panel
+shows two completed agreements and the final wait message. Staging was stopped.
+
+The live core correctly distinguished the source stacks, but chose no deferral
+or question. Do not claim a demonstrated reduction in agreeableness or live
+verification of hunger-testimony attribution. Its final topic prose calls both
+hauls resolved while retained topic statuses remain `open` and `deferred`.
+Receipt-based completion remains correct; this bookkeeping mismatch is preserved.
+Different timing from the previous experiment prevents a controlled causal
+comparison. Explicit topic lifecycle and a legitimate re-invitation after
+not-now remain next steps; no extra call was made to tidy this result.
