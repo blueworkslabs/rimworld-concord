@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RimWorld Concord · Shared fate, not shared will</title>
+<meta name="description" content="An experimental RimWorld mod: an ancient AI core that can propose but never command, and three colonists who decide for themselves.">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="RimWorld Concord: shared fate, not shared will">
+<meta property="og:description" content="An ancient AI core proposes. Three colonists decide. The game keeps everyone honest.">
+<link rel="stylesheet" href="assets/log.css">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="alternate" type="application/rss+xml" title="Concord ship log" href="feed.xml">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<script src="assets/site.js" defer></script>
+</head>
+<body class="site home">
+<a class="skip" href="#main">Skip to content</a>
+<header class="mast">
+  <a class="mast-home" href="index.html">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><use href="assets/mark.svg#mark"/></svg>
+    <span class="mast-title">RimWorld Concord</span>
+  </a>
+  <nav class="mast-nav" aria-label="Site">
+    <a href="index.html" aria-current="page">Vision</a>
+    <a href="architecture/index.html">Architecture</a>
+    <a href="log/index.html">Ship log</a>
+    <a href="https://github.com/blueworkslabs/rimworld-concord" rel="noopener">Source</a>
+  </nav>
+</header>
+<main id="main" class="page">
+
+<section class="lead" aria-labelledby="title">
+  <div>
+    <p class="kicker">Experimental RimWorld mod · open source</p>
+    <h1 id="title">Shared fate,<br>not <em>shared will.</em></h1>
+    <p class="lede">Three colonists find an ancient AI core in an old gravship. Waking it sharpens their minds and binds all four of them together. <strong>The core can watch, reason and propose. It cannot command.</strong> Every plan needs a colonist's yes, and a no is a real answer.</p>
+    <div class="btns">
+      <a class="btn" href="#how">How it works</a>
+      <a class="btn ghost" href="architecture/index.html">Architecture deep dive</a>
+      <a class="btn ghost" href="log/index.html">Read the ship log</a>
+    </div>
+  </div>
+  <figure class="window">
+    <div class="window-bar"><b>Concord · crew log</b><span>live trial · 23 Sep 2026</span></div>
+    <img src="images/2026-09-23-campfire-live.png" alt="RimWorld with the Concord crew log open. Shared-link status shows Alvin's food as low. Beatrice tells the core her food is desperately low; the core checks the shared telemetry and asks her before proposing any work." width="1280" height="800">
+    <figcaption>Beatrice tells the core she's desperately hungry. The core checks what it can actually see, then asks before proposing anything.</figcaption>
+  </figure>
+</section>
+
+<section class="block" aria-labelledby="idea">
+  <span class="eyebrow">The idea</span>
+  <h2 id="idea">What if the colonists had to agree?</h2>
+  <div class="prose">
+    <p>RimWorld already tells great stories. Its colonists have traits, needs, grudges and breakdowns. But they don't make plans. They follow work priorities you set, and the drama comes from what happens to them.</p>
+    <p>Concord adds a layer of <em>deliberate</em> choice on top. An AI core offers work, asks questions and follows up on unfinished business. Each colonist weighs that offer against their own needs, memories and outlook, and can take it, bargain it down, turn it down, or say "not now". Whatever they agree to becomes an ordinary RimWorld job, so walking, eating, hauling and bleeding stay exactly as the game does them.</p>
+    <p>The upgrade isn't smarter pathfinding. It shows up in what they choose, and in being able to read <em>why</em>.</p>
+  </div>
+</section>
+
+<section class="block" aria-labelledby="cast">
+  <span class="eyebrow">The protagonists</span>
+  <h2 id="cast">One core, three colonists</h2>
+  <p class="sub">Four protagonists, none in charge. The test colony below is a small fixture in the desert, not the gravship campaign yet.</p>
+  <div class="cast">
+    <article class="who core">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><use href="assets/mark.svg#mark"/></svg>
+      <h3>The Core</h3>
+      <p class="role">Proposes, asks, remembers</p>
+      <p>Offers grounded work, adopts counteroffers, asks one question at a time and keeps track of open topics. It sees what an attentive crewmate could see, never thoughts, and it wakes only when something in the colony changes.</p>
+    </article>
+    <article class="who">
+      <h3>Alvin</h3>
+      <p class="role">The negotiator, so far</p>
+      <p>Cautious and self-monitoring. He talks a haul down when his food is low and ties his choices to what his crewmates told him.</p>
+    </article>
+    <article class="who">
+      <h3>Beatrice</h3>
+      <p class="role">Brisk and accommodating</p>
+      <p>Takes full jobs without haggling and offered to cook if someone got a fire going. She's been downed, rescued and hungry, and she says so.</p>
+    </article>
+    <article class="who">
+      <h3>Pedro</h3>
+      <p class="role">The quiet third</p>
+      <p>Mostly a bystander in early trials. The campfire milestone gives him the same choices as everyone else, including saying no.</p>
+    </article>
+  </div>
+</section>
+
+<section class="block" id="how" aria-labelledby="rules">
+  <span class="eyebrow">How it works</span>
+  <h2 id="rules">Three rules keep it honest</h2>
+  <p class="sub">They aren't in the prompts; they're enforced in code, beneath the models. A model can pick an option or say something. It can't grant itself permission.</p>
+  <div class="pillars">
+    <div class="pillar">
+      <h3>The core proposes, colonists decide</h3>
+      <p>Every offer gets an answer: accept, counter, refuse or not now. A counter comes back as a fresh offer that needs a fresh yes. Nobody can agree on someone else's behalf.</p>
+    </div>
+    <div class="pillar">
+      <h3>The game is the ground truth</h3>
+      <p>Accepted work becomes a real native job with a receipt. What a colonist <em>says</em> is testimony; what <em>happened</em> comes from the game. "My haul is wrapped up" doesn't count as done unless the receipts agree.</p>
+    </div>
+    <div class="pillar">
+      <h3>Minds stay private</h3>
+      <p>Traits, memories and a small, revisable private outlook shape each choice. The crew log shows speech and records, never thoughts. The core gets coarse bands like "food: low", not the meter.</p>
+    </div>
+  </div>
+  <figure class="anim window spaced">
+    <video data-loop autoplay loop muted playsinline preload="metadata" poster="media/consent-loop.jpg" width="1280" height="720" aria-label="Animation: the core offers a two-trip haul, Alvin counters with one trip because his food is low, the core re-offers, Alvin accepts, the game runs a native job and writes a receipt.">
+      <source src="media/consent-loop.mp4" type="video/mp4">
+    </video>
+    <figcaption><b>The consent loop.</b> Offer, counter, fresh consent, native job, receipt. This mirrors a real exchange from a live trial.</figcaption>
+  </figure>
+</section>
+
+<section class="block" aria-labelledby="heard">
+  <span class="eyebrow">Heard in the colony</span>
+  <h2 id="heard">Real lines from real runs</h2>
+  <p class="sub">Lines from bounded trials, each linked to its evidence. Colonist and core lines are unedited model output (trimmed only where marked …); records come from the game itself.</p>
+  <div class="two">
+    <div class="crewlog">
+      <div class="line msg"><span class="hdr">MESSAGE Alvin → Beatrice</span><q>Hey Beatrice. Quiet morning so far. My stomach's starting to remind me it exists, but other than that, all good.</q></div>
+      <div class="line msg"><span class="hdr">MESSAGE Beatrice → Alvin</span><q>Morning. Go find something to eat then.</q><span class="src">Live pawn-to-pawn exchange · <a href="https://github.com/blueworkslabs/rimworld-concord/pull/32" rel="noopener">PR #32</a></span></div>
+      <div class="line msg"><span class="hdr">MESSAGE Alvin → Core · refuse</span><q>Beatrice told me she started sorting that wood and that finishing it matters to her. I'd rather not cut across her work.</q><span class="src">Live trial. Beatrice's remark was authored by the test; Alvin's reading of it wasn't · <a href="https://github.com/blueworkslabs/rimworld-concord/pull/37" rel="noopener">PR #37</a></span></div>
+    </div>
+    <div class="crewlog">
+      <div class="line msg"><span class="hdr">MESSAGE Core → Alvin</span><q>The second wood haul stopped before any trips completed — did something come up, or was it a hunger issue?</q></div>
+      <div class="line msg"><span class="hdr">MESSAGE Alvin → Core</span><q>Hunger. I was at 35% when I started — right at the edge. Didn't last long enough to finish a single trip before I had to stop.</q><span class="src">First live core follow-up · <a href="https://github.com/blueworkslabs/rimworld-concord/pull/39" rel="noopener">PR #39</a></span></div>
+      <div class="line msg"><span class="hdr">REPLY when another pawn claimed to accept for him</span><q>…consent is mine to give. No one else can agree for me.</q><span class="src">Offline snapshot check · <a href="https://github.com/blueworkslabs/rimworld-concord/pull/33" rel="noopener">PR #33</a></span></div>
+      <div class="line rec"><span class="hdr">RECORD Alvin</span>rescue: completed. Casualty placed in the agreed bed; treatment not implied.<span class="src">In-game crew log, scripted test · <a href="https://github.com/blueworkslabs/rimworld-concord/pull/20" rel="noopener">PR #20</a></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" aria-labelledby="watch">
+  <span class="eyebrow">The target</span>
+  <h2 id="watch">What ten minutes of watching should feel like</h2>
+  <p class="sub">This is the experience we're building toward, not a description of today's build. If a viewer can retell it in four sentences and say who disagreed and why, it works.</p>
+  <ol class="beats">
+    <li><span class="t">0–2 min</span><span><b>A need surfaces in the open.</b> <span class="d">Someone says it, or a shared status band turns amber.</span></span></li>
+    <li><span class="t">2–4 min</span><span><b>The core proposes a plan in pieces.</b> <span class="d">Build a campfire, then cook. At least one colonist bargains or refuses, and it costs something.</span></span></li>
+    <li><span class="t">4–7 min</span><span><b>Mostly quiet execution.</b> <span class="d">The log says what everyone is waiting on, so silence reads as patience, not a stall.</span></span></li>
+    <li><span class="t">7–9 min</span><span><b>An interruption forces a rethink.</b> <span class="d">Hunger, a downed crewmate, something on the horizon.</span></span></li>
+    <li><span class="t">9–10 min</span><span><b>A payoff you can see.</b> <span class="d">A lit fire, a meal on the ground, and one thread left open for next time.</span></span></li>
+  </ol>
+</section>
+
+<section class="block" aria-labelledby="status">
+  <span class="eyebrow">Where we are</span>
+  <h2 id="status">An honest status report</h2>
+  <div class="caveat">
+    <h3>Experimental vertical slice, not a playable mod yet</h3>
+    <p>Consent, negotiation, hauling, rescue, campfire construction and cooking, a readable crew log, private outlooks, pawn-to-pawn messages and a first live, event-driven core all work in bounded trials, some live and some scripted. Every run has a fixed call budget and no rerolls, and failures stay on the record.</p>
+    <p>Not there yet: the live core turning a need into a multi-step plan (the campfire chain works in scripted tests but hasn't happened live), unpaused real-time play, long sessions, the gravship campaign and an installer for players.</p>
+    <p><a href="architecture/index.html#status">See the full research tree →</a></p>
+  </div>
+</section>
+
+<section class="block" aria-labelledby="next">
+  <span class="eyebrow">Later</span>
+  <h2 id="next">Where it's heading</h2>
+  <div class="future">
+    <div><h3>The gravship campaign</h3><p>Waking the core also wakes mechanoid pursuit. Quests reveal what the core was, and trust can become progression. Still a proposal, not canon.</p></div>
+    <div><h3>You, inside the fiction</h3><p>Send the core a suggestion, write to a colonist, or catch one at the comms console for a live chat. You get advice and persuasion, never remote control.</p></div>
+    <div><h3>Cheaper minds</h3><p>The interface is being hardened so smaller, cheaper models can run the colonists. The first cross-model checks are already in the repo.</p></div>
+  </div>
+</section>
+
+<section class="block" aria-labelledby="latest-h">
+  <span class="eyebrow">From the ship log</span>
+  <h2 id="latest-h">Latest entries</h2>
+  <p class="sub">Fact-checked development diary entries, written as the work happens.</p>
+<!--LATEST-->
+  <div class="btns"><a class="btn ghost" href="log/index.html">All entries</a><a class="btn ghost" href="feed.xml">RSS feed</a></div>
+</section>
+
+</main>
+<footer class="foot">
+  <p>Unofficial, non-commercial fan project. RimWorld is a trademark of Ludeon Studios; this site is not affiliated with or endorsed by Ludeon. Quoted colonist and core lines are model output from bounded test runs; follow the linked evidence before trusting the prose.</p>
+  <p><a href="https://github.com/blueworkslabs/rimworld-concord" rel="noopener">rimworld-concord on GitHub</a> · <a href="log/index.html">Ship log</a> · <a href="feed.xml">Feed</a></p>
+</footer>
+</body>
+</html>

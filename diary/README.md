@@ -57,11 +57,26 @@ Rules the build enforces:
 
 ## Output
 
-- `index.html`: the log, newest first.
-- `entries/<slug>/index.html`: one page per entry with earlier/later links.
+- `index.html`, `architecture/index.html`: the project pages, copied from `site/`.
+  The landing page gets the three newest entries at its `<!--LATEST-->` marker.
+- `log/index.html`: the log, newest first.
+- `entries/<slug>/index.html`: one page per entry with earlier/later links (URLs unchanged).
 - `feed.xml`: RSS of the latest 20 entries. `entries.json`: machine-readable index.
-- `_headers`: Cloudflare Pages headers (no scripts, no external requests).
+- `media/`: explainer animations (MP4 + poster), rendered from `site/animations/`.
+- `_headers`: Cloudflare Pages headers (same-origin only, no third-party requests).
 
-The site ships no JavaScript and loads no third-party resources, so no model or
-API keys can end up in the browser. Model calls happen in the drafting workflow,
-not here.
+The only JavaScript is `site/assets/site.js`, a same-origin file that plays the
+explainer loops while they are visible and honours reduced-motion. The site loads
+no third-party resources, so no model or API keys can end up in the browser.
+Model calls happen in the drafting workflow, not here.
+
+## Project pages and animations
+
+`site/` holds hand-written HTML. Keep claims there in step with `docs/ROADMAP.md`
+and link evidence for quoted model output. Animations use Manim Community:
+
+```sh
+cd site/animations
+manim render -qm --format mp4 concord_scenes.py ConsentLoop WhoKnowsWhat TimelineGuard CoreWakes
+./export.sh   # H.264 + poster frames into site/media/
+```
