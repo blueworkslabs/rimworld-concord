@@ -82,8 +82,8 @@ namespace Concord {
     bool fresh=r!=null&&r.epoch==w.epoch&&Time.realtimeSinceStartup-w.crewReceived<10f&&Find.TickManager.TicksGame-r.tick<=120;
     string clock=Find.TickManager.Paused?(DecisionPauses.Count>0?"Paused for deliberation":"Paused · game / operator"):"Game running";
     Widgets.Label(new Rect(0,30,rect.width,42),clock+" · tick "+Find.TickManager.TicksGame+"\n"+(fresh?"Current report":"Saved / stale report — not current"));
+    if(heldEpoch!=(w==null?null:w.epoch)){heldEntries=null;heldEpoch=w==null?null:w.epoch;compactScroll=Vector2.zero;}
     if(r==null){Widgets.Label(new Rect(0,80,rect.width,90),"No coordinator report. This observer view cannot start agents or issue jobs.");return;}
-    if(heldEpoch!=r.epoch){heldEntries=null;heldEpoch=r.epoch;compactScroll=Vector2.zero;}
     float y=78;
     foreach(var s in r.sharedStatus.Take(3)){
      bool current=fresh&&s.fresh&&Find.TickManager.TicksGame-s.tick<=120;
