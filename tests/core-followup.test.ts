@@ -18,3 +18,10 @@ test('food follow-up has separate finite identities without increasing the earli
  const six=Array.from({length:6},()=>({result:{status:'applied'}}));
  assert(followupInferencePassed(six,next.coreCalls));assert(!followupInferencePassed(six,old.coreCalls));assert(!followupInferencePassed([...six,...six],next.coreCalls));
 });
+
+test('recovery follow-through keeps prior caps and uses new independent ledgers',()=>{
+ const old=coreFollowupPolicy('food-followup-v1'),next=coreFollowupPolicy('recovery-followup-v1');
+ assert.equal(next.coreCalls,6);assert.equal(next.pawnCalls,6);assert.equal(next.nativeMs,120000);assert.equal(next.jevCalls,0);
+ assert.notEqual(old.coreTrial,next.coreTrial);assert.notEqual(old.pawnTrial,next.pawnTrial);
+ for(const p of [old,next]){assert.equal(decisionTrials[p.coreTrial].calls,6);assert.equal(decisionTrials[p.pawnTrial].calls,6);assert.equal(decisionTrials[p.coreTrial].reservedEquivalentUSD,.60);}
+});
