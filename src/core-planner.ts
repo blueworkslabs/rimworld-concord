@@ -1,4 +1,5 @@
 import {productionView} from './production-planning.js';
+import {sharedFood,foodKnowledge} from './food-observation.js';
 import {sharedStatus} from './shared-status.js';
 import {createHash} from 'node:crypto';
 import {z} from 'zod';
@@ -66,7 +67,7 @@ export function coreView(d:Domain,g:GameState){
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:core.revision,tick:g.ticks,brief:{...core.brief},
   questions:core.questions.map(q=>({id:q.id,pawn:q.pawn,status:q.status})),
   topicClosures,reoffers:reoffers.map(r=>({id:r.id,pawn:r.pawn,deferredId:r.deferredId,tick:r.tick,status:r.status,reason:r.reason,evidence:'attributed-speech' as const})),
-  sharedStatus:sharedStatus(d,g),crew:Object.values(d.characters).map(c=>({id:c.id,name:c.name})),messages,agreements,counters,requests,topics,opportunities,availability,
+  ...(g.pawns.some(p=>p.foodObservation)?{foodSightings:sharedFood(d,g),foodKnowledge}:{}),sharedStatus:sharedStatus(d,g),crew:Object.values(d.characters).map(c=>({id:c.id,name:c.name})),messages,agreements,counters,requests,topics,opportunities,availability,
   questionRecipients:core.questions.length>=3?[]:g.pawns.filter(p=>d.characters[p.id]&&!p.downed&&!core.questions.some(q=>q.pawn===p.id)).map(p=>p.id),
   capabilities:['propose listed hauling/rescue/campfire construction/simple meals','adopt counter with fresh consent','one optional addressed question per pawn, at most three total','wait'],
   limits:'Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.'};

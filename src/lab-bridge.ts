@@ -9,7 +9,7 @@ import type { Activity, DecisionPause, ActionRequest, GameBridge, GameState, Rec
 const exec=promisify(execFile);
 
 // Native cap is 2,000,000 UTF-16 characters: bounded 128 entries, including worst-case double JSON escaping.
-export function encodeCrewReport(report:CrewReport){return JSON.stringify({...report,entries:undefined,agreements:undefined,sharedStatus:undefined,statusLines:(report.sharedStatus??[]).map(s=>JSON.stringify(s)).join('\n'),entryLines:report.entries.map(e=>JSON.stringify(e)).join('\n'),agreementLines:report.agreements.map(a=>JSON.stringify({...a.progress,pawn:a.pawn,name:a.name})).join('\n')});}
+export function encodeCrewReport(report:CrewReport){return JSON.stringify({...report,entries:undefined,agreements:undefined,sharedStatus:undefined,foodLines:undefined,foodText:(report.foodLines??[]).join('\n'),statusLines:(report.sharedStatus??[]).map(s=>JSON.stringify(s)).join('\n'),entryLines:report.entries.map(e=>JSON.stringify(e)).join('\n'),agreementLines:report.agreements.map(a=>JSON.stringify({...a.progress,pawn:a.pawn,name:a.name})).join('\n')});}
 
 /** Local trusted staging transport. Caller must own the process lock (scripts/run-lab.sh). */
 export class LabBridge implements GameBridge {
