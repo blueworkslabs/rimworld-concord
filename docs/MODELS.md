@@ -15,7 +15,7 @@ Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decisi
 | Pawn decisions, reflections, speech, core answers | `claude-sonnet-4-6` | Native Claude Code CLI, existing Max login | live trials |
 | Core planner | `claude-sonnet-4-6` | same, own system prompt and ledger | live trials |
 | Fast appraisal | `typesafe/jev-1.13` | OpenRouter System One (`POST /api/v1/systemone`), protected credential | bounded live trials; not in recent runs |
-| Core and pawn decisions (ongoing mode) | `gpt-5.6-luna` | Native Codex app-server, ChatGPT login | implemented; verification recorded in trial ledger |
+| Core and pawn decisions (ongoing mode) | `gpt-5.6-luna` | Native Codex app-server, ChatGPT login | live core/answers/reflections in one continuous check; work decisions and encounters not exercised through this adapter |
 | Recorded-session feedback | `google/gemini-3.8-flash` | Protected OpenRouter, MP4 `video_url` | two offline responses on one scripted clip; not a character backend |
 | Diary drafts | `moonshotai/kimi-k2` | OpenRouter via OpenClaw `llm-task` | editorial only |
 

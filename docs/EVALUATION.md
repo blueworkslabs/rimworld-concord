@@ -23,19 +23,23 @@ an authored fixture is not a personality, and a single timing is not a benchmark
 
 **Before any call**
 
-- Freeze the protocol: fixture, question, call allowance, time limits and assessment.
+- Freeze the protocol: fixture, question, usage policy, time limits and assessment.
+  Historical trials keep their fixed call allowances; ongoing mode has no turn count
+  ceiling and uses event admission, cooldowns and failure diagnosis instead.
   Offline suites are versioned and must match their canonical export exactly; a
   corrected bank gets a new version, and old runners only accept their own.
 - For game trials: relevant automated checks → mod compilation when native code
   changed → a scripted, zero-inference rehearsal → at most then the live run.
   Offline-only probes need their own contract/runner checks, not a game launch.
-- Each live trial gets its own ledger and allowance ([MODELS](MODELS.md#ledgers)).
+- Each live trial gets its own non-rewindable ledger and declared usage policy ([MODELS](MODELS.md#ledgers)).
 
 **During and after**
 
 - **No rerolls.** Failed, invalid and cancelled attempts keep their reservation and
-  their record. A continuation may only use the remaining calls on the same state and
-  ledger. Unused allowance stays unused.
+  their record. A continuation keeps the same state and ledger; finite-policy continuations may
+  only use their remaining allowance. Ongoing mode does not refill or reinterpret
+  historical allowances. A corrected adapter may get a separately labelled new run
+  after offline diagnosis/review; it must not replace the failed original.
 - **Keep every failure,** including setup and fixture failures, labelled as what they
   are. Later fixes never rewrite earlier results.
 - **Receipts decide.** Outcomes come from game receipts; a model's claim is recorded
@@ -141,3 +145,23 @@ Run `node --test scripts/review-video.test.mjs` for the transport and retention 
 Model summaries help navigate footage; human feedback remains optional timestamped
 observations, not a compulsory retelling. A scripted clip tests presentation and the
 review method, not live agency or whether the game is engaging.
+
+### Continuous Luna integration check
+
+`node scripts/run-ongoing.mjs /absolute/operator-config.json [--scripted|--cold]`
+uses the locked `run-ongoing-lab.sh` launcher. Configuration supplies absolute
+`labRoot`, `remoteRepo`, `ledger`, `scratchRoot`, `receipt`, `catalogPath` and an
+SSH target. The catalog is an operator-owned single-model Luna catalog, not a
+credential; native login stays on the inference host. The runner refuses replay
+of its start marker or reuse of an already-used ledger as a fresh run.
+
+The initial check observes 180 seconds of continuous native activity (45 scripted),
+with a ten-minute enclosing setup/cleanup deadline. Core and pawn attention are
+interleaved through one inference lane while reconciliation and native jobs continue.
+No model turn count is prescribed. Calls stop at the observation deadline, disconnect,
+operator interruption or repeated failure, and cleanup pauses/stops outstanding work.
+The unchanged broad brief permits questions, work or waiting; it prescribes no meal.
+This is a finite integration observation of an uncapped scheduler, not an unattended
+service or the planned ten-minute recorded colony scene. Three successful waits are
+not three failures. An accepted provider answer may still be rejected as stale by the
+coordinator; report those outcomes separately.

@@ -40,7 +40,7 @@ baseline/capture pair ran at 59.04/59.57 game ticks per second; the silent 15 fp
 was 1.89 MB with no reported duplicated/dropped frames. This is a small performance
 sample and author inspection, not human usability or live-model evidence. See
 [the evidence](evidence/observer-recording-pilot.json) and [controls/protocol](CREW_LOG.md).
-The first two-pass video review is complete (below); Luna and ongoing scheduling remain unimplemented.
+The first two-pass video review is complete (below); Luna and ongoing scheduling now have a first continuous integration result (below).
 
 - The colony stays the main view. The full-screen text window becomes a compact strip
   or sidebar showing: who is speaking to whom; intentions (topics and who raised them)
@@ -78,12 +78,29 @@ initial retained TLS failure; no unprotected route was used.
   summaries triage footage; they can't establish whether people find it followable or
   engaging.
 
-**3. Luna live, and sustained scheduling**
+**3. Luna live, and sustained scheduling — first integration completed**
+
+The explicit ongoing mode has no lifetime turn ceiling. Native Luna ran eight core
+attempts and eight pawn attempts over three minutes of unpaused native play. Seven
+core turns applied; the final one was cancelled at the observation deadline. Beatrice
+ate 9 berries and three linked topics resolved, while the broad brief stayed open.
+Alvin's first choice failed a fresh-state check; a later urgent-hunger event permitted
+a new question, but its native eating action also failed availability checks. No work
+or cooking followed. Initial schema failures, offline diagnosis and the corrected run
+are all retained. Paired/cold restore passed. [Evidence](evidence/luna-ongoing-integration.json).
+
+**Still to assess:** stale availability during thought, inaccurate planner explanations
+(including claims of no eligible question when recipients existed), and escalation on
+retained harder snapshots. These observations do not yet establish a need for a more
+capable model; no Terra/Sol comparison has been run. Automatic escalation remains
+unimplemented. The three-minute check is not the planned recorded scene.
+
 
 - A native Codex backend for pawn and core calls with the same guarantees the Claude
   route has today: tool isolation, cancellation, persistence and accounting, verified in
-  the game rather than assumed from a model-name swap. Luna's current evidence is
-  offline only ([MODELS](MODELS.md#routes)).
+  the game rather than assumed from a model-name swap. Core questions, answers and
+  reflections now have live evidence; other modes remain unverified through this
+  adapter ([MODELS](MODELS.md#routes)).
 - An escalation policy (when a core or pawn turn goes to Terra or Sol), logged per turn.
 - A usage policy for ongoing play in place of fixed trial allowances, and a review of
   the hard-coded limits that don't fit sustained play: three core questions in total,
