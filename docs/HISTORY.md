@@ -130,6 +130,6 @@ Test suite growth along the way: 33 checks at the foundation, 145 at #20, 263 at
   held feed, and a silent scripted capture. Native consumption and refusal remain
   distinct from model behavior; human and automated video feedback still follow.
 
-- **Video feedback calibration** — Gemini read the main scripted eating/refusal sequence,
+- **#60 Video feedback calibration** — Gemini read the main scripted eating/refusal sequence,
   but invented a line and misquoted text. Receipt checking helped, not an independent
   truth test. Two paid responses, no gameplay; initial TLS failure retained.
