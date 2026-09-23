@@ -828,3 +828,7 @@ the unchanged two-turn bound. New stream counts show 2 formatting calls and 1 to
 error on that result. No work offers/jobs. Paired/cold restore preserved the mixed
 result and budgets; 221 historical database-related files unchanged, staging stopped.
 No general planning or causal food-visibility improvement established.
+
+## Pawn-owned eating
+
+[Contract and native evidence](PAWN_EATING.md): typed core-question answer, not core order or speech parsing. Scripted berries at 20% Food, speech-only/explicit eat/pawn withdrawal/operator cleanup, exact consumption receipts, relay integration, paired/cold restore. 324 Node +11 Python checks and final independent review. Live model use untested.

@@ -73,8 +73,7 @@ repair split across three events. No work or eating was observed. The [native fo
 raw berries are excluded by ordinary native preference before urgent hunger.
 Matched no-model checks at 20% and 10% Food found no eating versus 18 berries
 eaten; paired/cold restore passed. Shared guidance now distinguishes link bands,
-native selection and speech from jobs. Next: decide whether to add an explicit
-pawn-owned eat capability, not convert dialogue into orders. Keep the
+native selection and speech from jobs. An explicit [pawn-owned eating choice](PAWN_EATING.md) now separates typed self-care from dialogue. Verify its native execution before any new live planning claim. Keep the
 unexplained coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 
