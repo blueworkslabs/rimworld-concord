@@ -816,3 +816,15 @@ unchanged; staging stopped. No new continuous-inference or productive-plan proof
 ## Local food observations, independent of job availability
 
 [Contract and evidence](FOOD_OBSERVATIONS.md): 299 Node + ten Python checks, real mod compilation, scripted forbidden/near/far sightings, board/core parity, paired rewind and cold restart. No live character inference or new jobs. Existing scripted campfire inspected without replay. Initial serialization failure retained; reviewed fixes include fixture IDs and receipt preservation. Provider stream counters are diagnostic only; limits remain unchanged and the historical three-turn result is not reconstructed.
+
+
+## Food-sighting follow-through (2026-09-23)
+
+[Protocol and full result](FOOD_FOLLOWTHROUGH.md): 300 Node + 10 Python checks,
+independent review and scripted question/reply/wait paired/cold restore passed.
+The one live run used 6 core + 3 pawn attempts, zero Jev/operator rerolls. Two early
+provider errors preceded three applied questions/replies; final wait output failed
+the unchanged two-turn bound. New stream counts show 2 formatting calls and 1 tool
+error on that result. No work offers/jobs. Paired/cold restore preserved the mixed
+result and budgets; 221 historical database-related files unchanged, staging stopped.
+No general planning or causal food-visibility improvement established.

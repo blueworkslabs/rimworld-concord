@@ -1,5 +1,7 @@
 /** Immutable policy identities: old ledgers must retain their original ceilings. */
 export const decisionTrials={
+ 'food-followup-core-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-food-followup-core-v1'},
+ 'food-followup-pawns-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-food-followup-pawns-v1'},
  'core-followup-core-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-core-followup-core-v1'},
  'core-followup-pawns-v1':{calls:5,reservedEquivalentUSD:0.50,policy:'claude-core-followup-pawns-v1'},
  'core-contract-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-core-contract-v1'},
