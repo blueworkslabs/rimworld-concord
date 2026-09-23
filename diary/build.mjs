@@ -13,6 +13,7 @@ import {fileURLToPath} from 'node:url';
 const root = dirname(fileURLToPath(import.meta.url));
 const args = new Set(process.argv.slice(2));
 const OUT = join(root, 'dist');
+const SITE_SRC = join(root, '..', 'site');
 const SITE = {
   title: 'Concord ship log',
   tagline: 'Development diary for RimWorld Concord',
@@ -94,6 +95,7 @@ function layout({title, description, body, depth, kind}) {
 <meta property="og:title" content="${attr(title)}">
 <meta property="og:description" content="${attr(description)}">
 <link rel="stylesheet" href="${up}assets/log.css">
+<link rel="stylesheet" href="${up}assets/site.css">
 <link rel="alternate" type="application/rss+xml" title="${attr(SITE.title)}" href="${up}feed.xml">
 <link rel="icon" href="${up}assets/mark.svg" type="image/svg+xml">
 </head>
@@ -102,12 +104,13 @@ function layout({title, description, body, depth, kind}) {
 <header class="mast">
   <a class="mast-home" href="${up}index.html">
     <svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><use href="${up}assets/mark.svg#mark"/></svg>
-    <span class="mast-title">${esc(SITE.title)}</span>
+    <span class="mast-title">RimWorld Concord</span>
   </a>
   <nav class="mast-nav" aria-label="Site">
-    <a href="${up}index.html">Log</a>
+    <a href="${up}index.html">Vision</a>
+    <a href="${up}architecture/index.html">Architecture</a>
+    <a href="${up}log/index.html"${kind === 'index' ? ' aria-current="page"' : ''}>Ship log</a>
     <a href="${SITE.repo}" rel="noopener">Source</a>
-    <a href="${up}feed.xml">Feed</a>
   </nav>
 </header>
 <main id="main" class="page">
@@ -115,7 +118,7 @@ ${body}
 </main>
 <footer class="foot">
   <p>Unofficial, non-commercial fan project. RimWorld is a trademark of Ludeon Studios; this diary is not affiliated with or endorsed by Ludeon. Entries are drafted by a language model and reviewed by a project maintainer before publication.</p>
-  <p><a href="${SITE.repo}" rel="noopener">rimworld-concord on GitHub</a></p>
+  <p><a href="${SITE.repo}" rel="noopener">rimworld-concord on GitHub</a> · <a href="${up}feed.xml">Feed</a></p>
 </footer>
 </body>
 </html>
@@ -127,7 +130,7 @@ function stamp(entry, epoch, {link = false} = {}) {
   const inner = `<span class="stamp-day"><span class="stamp-k">Ship day</span><span class="stamp-v">${pad(t.day)}</span></span>
       <span class="stamp-q">${esc(t.label)}</span>
       <time class="stamp-real" datetime="${attr(entry.date)}">${esc(longDate(entry.date))}</time>`;
-  return link ? `<a class="stamp" href="entries/${attr(entry.slug)}/index.html" aria-label="Ship day ${t.day}, ${esc(longDate(entry.date))}">${inner}</a>` : `<div class="stamp">${inner}</div>`;
+  return link ? `<a class="stamp" href="../entries/${attr(entry.slug)}/index.html" aria-label="Ship day ${t.day}, ${esc(longDate(entry.date))}">${inner}</a>` : `<div class="stamp">${inner}</div>`;
 }
 
 function indexPage(entries, epoch) {
@@ -136,7 +139,7 @@ function indexPage(entries, epoch) {
     ${stamp(e, epoch, {link: true})}
     <div class="log-body">
       ${e.fixture ? '<p class="fixture-flag">Development fixture, not a real entry</p>' : ''}
-      <h2 class="log-title"><a href="entries/${attr(e.slug)}/index.html">${esc(e.title)}</a></h2>
+      <h2 class="log-title"><a href="../entries/${attr(e.slug)}/index.html">${esc(e.title)}</a></h2>
       <p class="log-summary">${esc(e.summary)}</p>
       <p class="log-meta">${e.sections.length} ${e.sections.length === 1 ? 'section' : 'sections'}${e.evidence.length ? ` · ${e.evidence.length} ${e.evidence.length === 1 ? 'record' : 'records'}` : ''}${e.images.length ? ` · ${e.images.length} ${e.images.length === 1 ? 'image' : 'images'}` : ''}</p>
     </div>
@@ -149,7 +152,7 @@ function indexPage(entries, epoch) {
   <p class="hero-count">${entries.length === 0 ? 'No entries logged yet.' : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}, newest first.`}</p>
 </section>
 ${entries.length ? `<ol class="log" reversed aria-label="Diary entries">${items}\n</ol>` : `<p class="empty">The log is empty. Add an entry to <code>diary/entries/</code> and run the build.</p>`}`;
-  return layout({title: SITE.title, description: SITE.tagline, body, depth: 0, kind: 'index'});
+  return layout({title: SITE.title, description: SITE.tagline, body, depth: 1, kind: 'index'});
 }
 
 function entryPage(entry, epoch, neighbours) {
@@ -194,6 +197,12 @@ function entryPage(entry, epoch, neighbours) {
   ${nav}
 </article>`;
   return layout({title: `${entry.title} · ${SITE.title}`, description: entry.summary, body, depth: 2, kind: 'entry'});
+}
+// Landing-page teaser: the three newest entries, injected at <!--LATEST--> in site/index.html.
+function latestList(entries) {
+  const items = entries.slice(0, 3).map(e => `
+    <li><time datetime="${attr(e.date)}">${esc(longDate(e.date))}</time><a href="entries/${attr(e.slug)}/index.html">${esc(e.title)}</a><p>${esc(e.summary)}</p></li>`).join('');
+  return entries.length ? `  <ul class="latest">${items}\n  </ul>` : '  <p class="empty">No entries logged yet.</p>';
 }
 function safeHost(url) { try { return new URL(url).host; } catch { return ''; } }
 
@@ -249,10 +258,16 @@ async function main() {
   await cp(join(root, 'assets'), join(OUT, 'assets'), {recursive: true});
   try { await cp(join(root, 'images'), join(OUT, 'images'), {recursive: true}); } catch { /* no images yet */ }
   if (args.has('--fixtures')) await cp(join(root, 'fixtures'), join(OUT, 'fixtures'), {recursive: true, filter: p => !p.endsWith('.json')});
-  await writeFile(join(OUT, 'index.html'), indexPage(entries, epoch));
+  // Project pages (site/) sit at the root; the diary index lives at /log/. Entry URLs are unchanged.
+  await cp(SITE_SRC, OUT, {recursive: true, filter: p => !p.startsWith(join(SITE_SRC, 'animations'))});
+  const home = await readFile(join(SITE_SRC, 'index.html'), 'utf8');
+  need(home.includes('<!--LATEST-->'), 'site/index.html', 'missing <!--LATEST--> marker');
+  await writeFile(join(OUT, 'index.html'), home.replace('<!--LATEST-->', () => latestList(entries)));
+  await mkdir(join(OUT, 'log'), {recursive: true});
+  await writeFile(join(OUT, 'log', 'index.html'), indexPage(entries, epoch));
   await writeFile(join(OUT, 'feed.xml'), feed(entries));
   await writeFile(join(OUT, 'entries.json'), JSON.stringify(entries.map(({slug, title, date, summary}) => ({slug, title, date, summary})), null, 2) + '\n');
-  await writeFile(join(OUT, '_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  Content-Security-Policy: default-src \'none\'; img-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'none\'; form-action \'none\'\n');
+  await writeFile(join(OUT, '_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  Content-Security-Policy: default-src \'none\'; img-src \'self\'; media-src \'self\'; script-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'none\'; form-action \'none\'\n');
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
     const dir = join(OUT, 'entries', e.slug);
