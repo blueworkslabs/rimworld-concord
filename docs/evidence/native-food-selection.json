@@ -1,0 +1,3717 @@
+{
+  "version": "native-food-v1",
+  "nativeBehaviorCommit": "d827afc17719babbdd4f1554168f5c0dc18e959b",
+  "gameVersion": "1.6.4871",
+  "assemblySHA256": "082db1dd4f7f1d0b72960d7e1beead8fbfe6957200e8627f65bda0dbbe1dd8f8",
+  "protocol": {
+    "run": "9c85bf43-ae3f-4759-a07c-5975949145bd",
+    "behavior": "d827afc17719babbdd4f1554168f5c0dc18e959b",
+    "models": 0,
+    "issuedJobs": 0,
+    "cases": [
+      "original-paused",
+      "Alvin.20-other.90",
+      "Alvin.10-other.90"
+    ],
+    "nativeSecondsPerVariant": 20,
+    "wallMs": 300000,
+    "selectionOverride": "read-only search result only, never dispatch",
+    "restore": "paired and cold"
+  },
+  "native": {
+    "run": "9c85bf43-ae3f-4759-a07c-5975949145bd",
+    "mode": "game",
+    "passed": true,
+    "inferenceCalls": 0,
+    "issuedJobs": 0,
+    "cases": [
+      {
+        "variant": "hungry",
+        "fixture": {
+          "variant": "hungry",
+          "actor": "Thing_Human405",
+          "food": 0.2,
+          "otherFood": 0.9,
+          "otherState": "unchanged campfire-v2; no issued jobs"
+        },
+        "before": {
+          "tick": 2,
+          "pawns": [
+            {
+              "pawn": "Thing_Human405",
+              "category": "Hungry",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1878",
+              "job": "GotoWander",
+              "food": 0.20000000298023224,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 9.5,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            },
+            {
+              "pawn": "Thing_Human408",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1880",
+              "job": "GotoWander",
+              "food": 0.8999999761581421,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            },
+            {
+              "pawn": "Thing_Human411",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1878",
+              "job": "",
+              "food": 0.8999999761581421,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            }
+          ]
+        },
+        "samples": [
+          {
+            "tick": 7,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.20000000298023224
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8999999761581421
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8999999761581421
+              }
+            ]
+          },
+          {
+            "tick": 25,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.20000000298023224
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8999999761581421
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8999999761581421
+              }
+            ]
+          },
+          {
+            "tick": 44,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.20000000298023224
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8999999761581421
+              }
+            ]
+          },
+          {
+            "tick": 63,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.20000000298023224
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 82,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.20000000298023224
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 100,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.20000000298023224
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 120,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1979999989271164
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 138,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1979999989271164
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 157,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1979999989271164
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 176,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1979999989271164
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 200,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1979999989271164
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 218,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1979999989271164
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 236,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1979999989271164
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 256,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1979999989271164
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 275,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.19599999487400055
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 294,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.19599999487400055
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 314,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19599999487400055
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 333,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19599999487400055
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_MaintainPosture",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 352,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19599999487400055
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 371,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19599999487400055
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 390,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19599999487400055
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 415,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.1939999908208847
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 435,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.1939999908208847
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 453,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.1939999908208847
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 472,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1939999908208847
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 492,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1939999908208847
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 511,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.1939999908208847
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 529,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.1939999908208847
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 549,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.1939999908208847
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 568,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19199998676776886
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 588,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19199998676776886
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 607,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19199998676776886
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 627,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19199998676776886
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 645,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19199998676776886
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 663,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.19199998676776886
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 682,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.19199998676776886
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 700,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.19199998676776886
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 719,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18999998271465302
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 738,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18999998271465302
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 757,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18999998271465302
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 776,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18999998271465302
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 794,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18999998271465302
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 812,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18999998271465302
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 832,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18999998271465302
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 850,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18999998271465302
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 870,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18799997866153717
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 890,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18799997866153717
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 909,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18799997866153717
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 927,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18799997866153717
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 945,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18799997866153717
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 964,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18799997866153717
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 983,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18799997866153717
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_MaintainPosture",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1000,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18799997866153717
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1020,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18599997460842133
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1038,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18599997460842133
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1057,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18599997460842133
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1075,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18599997460842133
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1100,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18599997460842133
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1119,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18599997460842133
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              }
+            ]
+          },
+          {
+            "tick": 1138,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.18599997460842133
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              }
+            ]
+          },
+          {
+            "tick": 1156,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18599997460842133
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8679999113082886
+              }
+            ]
+          },
+          {
+            "tick": 1175,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.18399997055530548
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8679999113082886
+              }
+            ]
+          }
+        ],
+        "after": {
+          "tick": 1210,
+          "pawns": [
+            {
+              "pawn": "Thing_Human405",
+              "category": "Hungry",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1878",
+              "job": "Wait_Wander",
+              "food": 0.18399997055530548,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 9.5,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            },
+            {
+              "pawn": "Thing_Human408",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1878",
+              "job": "GotoWander",
+              "food": 0.8679999113082886,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            },
+            {
+              "pawn": "Thing_Human411",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1878",
+              "job": "Wait_Wander",
+              "food": 0.8679999113082886,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "variant": "urgent",
+        "fixture": {
+          "variant": "urgent",
+          "actor": "Thing_Human405",
+          "food": 0.1,
+          "otherFood": 0.9,
+          "otherState": "unchanged campfire-v2; no issued jobs"
+        },
+        "before": {
+          "tick": 2,
+          "pawns": [
+            {
+              "pawn": "Thing_Human405",
+              "category": "UrgentlyHungry",
+              "defaultSource": "Thing_RawBerries1878",
+              "rawMinimumSource": "Thing_RawBerries1878",
+              "job": "Ingest",
+              "food": 0.10000000149011612,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 9.5,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            },
+            {
+              "pawn": "Thing_Human408",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1880",
+              "job": "GotoWander",
+              "food": 0.8999999761581421,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            },
+            {
+              "pawn": "Thing_Human411",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1878",
+              "job": "",
+              "food": 0.8999999761581421,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            }
+          ]
+        },
+        "samples": [
+          {
+            "tick": 10,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.10000000149011612
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8999999761581421
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8999999761581421
+              }
+            ]
+          },
+          {
+            "tick": 30,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.10000000149011612
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8999999761581421
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8999999761581421
+              }
+            ]
+          },
+          {
+            "tick": 50,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.10000000149011612
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8999999761581421
+              }
+            ]
+          },
+          {
+            "tick": 69,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.10000000149011612
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 88,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.10000000149011612
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 107,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.10000000149011612
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 127,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.0989999994635582
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 145,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.0989999994635582
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 170,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.0989999994635582
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 189,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.0989999994635582
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8959999680519104
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 208,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.0989999994635582
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8959999680519104
+              }
+            ]
+          },
+          {
+            "tick": 233,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.0989999994635582
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 251,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.0989999994635582
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 270,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09799999743700027
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 289,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09799999743700027
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 308,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09799999743700027
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 327,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09799999743700027
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8919999599456787
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 346,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09799999743700027
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8919999599456787
+              }
+            ]
+          },
+          {
+            "tick": 365,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09799999743700027
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 383,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09799999743700027
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 401,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09799999743700027
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 420,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09699999541044235
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 444,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09699999541044235
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 463,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09699999541044235
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 482,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09699999541044235
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.887999951839447
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 502,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09699999541044235
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.887999951839447
+              }
+            ]
+          },
+          {
+            "tick": 521,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09699999541044235
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 540,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09699999541044235
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 559,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Ingest",
+                "food": 0.09699999541044235
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 578,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9960000514984131
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 596,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9960000514984131
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 616,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9960000514984131
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 635,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9960000514984131
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8839999437332153
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 655,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9960000514984131
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8839999437332153
+              }
+            ]
+          },
+          {
+            "tick": 673,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9960000514984131
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 692,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9960000514984131
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 710,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9920000433921814
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 729,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9920000433921814
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 753,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9920000433921814
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 772,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9920000433921814
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 792,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9920000433921814
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_Wander",
+                "food": 0.8799999356269836
+              }
+            ]
+          },
+          {
+            "tick": 811,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9920000433921814
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 831,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9920000433921814
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 851,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9920000433921814
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 870,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9880000352859497
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 889,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9880000352859497
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 909,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9880000352859497
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 929,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9880000352859497
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.875999927520752
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 947,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9880000352859497
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.875999927520752
+              }
+            ]
+          },
+          {
+            "tick": 966,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9880000352859497
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 985,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9880000352859497
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1004,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "Wait_Wander",
+                "food": 0.9880000352859497
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "Wait_Wander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1023,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.984000027179718
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1042,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.984000027179718
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1061,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.984000027179718
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1080,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.984000027179718
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8719999194145203
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1099,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.984000027179718
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8719999194145203
+              }
+            ]
+          },
+          {
+            "tick": 1118,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.984000027179718
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "HaulToCell",
+                "food": 0.8679999113082886
+              }
+            ]
+          },
+          {
+            "tick": 1138,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.984000027179718
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "Wait_MaintainPosture",
+                "food": 0.8679999113082886
+              }
+            ]
+          },
+          {
+            "tick": 1158,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.984000027179718
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              }
+            ]
+          },
+          {
+            "tick": 1176,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9800000190734863
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              }
+            ]
+          },
+          {
+            "tick": 1195,
+            "paused": false,
+            "pawns": [
+              {
+                "id": "Thing_Human405",
+                "job": "GotoWander",
+                "food": 0.9800000190734863
+              },
+              {
+                "id": "Thing_Human408",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              },
+              {
+                "id": "Thing_Human411",
+                "job": "GotoWander",
+                "food": 0.8679999113082886
+              }
+            ]
+          }
+        ],
+        "after": {
+          "tick": 1219,
+          "pawns": [
+            {
+              "pawn": "Thing_Human405",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1878",
+              "job": "GotoWander",
+              "food": 0.9800000190734863,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 57,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            },
+            {
+              "pawn": "Thing_Human408",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1879",
+              "job": "GotoWander",
+              "food": 0.8679999113082886,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 57,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            },
+            {
+              "pawn": "Thing_Human411",
+              "category": "Fed",
+              "defaultSource": "",
+              "rawMinimumSource": "Thing_RawBerries1880",
+              "job": "GotoWander",
+              "food": 0.8679999113082886,
+              "wantEatThreshold": 0.30000001192092896,
+              "urgentThreshold": 0.12000000476837158,
+              "foodJobPriority": 0,
+              "rawFoodGene": false,
+              "berries": [
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 57,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "def": "RawBerries",
+                  "preference": "RawTasty",
+                  "count": 75,
+                  "forbidden": false,
+                  "ingestibleNow": true,
+                  "willEat": true,
+                  "canReserve": true,
+                  "canReach": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "original": {
+      "tick": 2,
+      "pawns": [
+        {
+          "pawn": "Thing_Human405",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1878",
+          "job": "GotoWander",
+          "food": 0.4000000059604645,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        },
+        {
+          "pawn": "Thing_Human408",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1880",
+          "job": "GotoWander",
+          "food": 0.6499999761581421,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        },
+        {
+          "pawn": "Thing_Human411",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1878",
+          "job": "",
+          "food": 0.550000011920929,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        }
+      ]
+    },
+    "restored": {
+      "tick": 1220,
+      "pawns": [
+        {
+          "pawn": "Thing_Human405",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1878",
+          "job": "GotoWander",
+          "food": 0.9800000190734863,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 57,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        },
+        {
+          "pawn": "Thing_Human408",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1879",
+          "job": "GotoWander",
+          "food": 0.8679999113082886,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 57,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        },
+        {
+          "pawn": "Thing_Human411",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1880",
+          "job": "GotoWander",
+          "food": 0.8679999113082886,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 57,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        }
+      ]
+    },
+    "pairedRestore": true,
+    "noAgreements": true
+  },
+  "cold": {
+    "run": "9c85bf43-ae3f-4759-a07c-5975949145bd",
+    "mode": "cold",
+    "passed": true,
+    "inferenceCalls": 0,
+    "issuedJobs": 0,
+    "cases": [],
+    "restored": {
+      "tick": 1220,
+      "pawns": [
+        {
+          "pawn": "Thing_Human405",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1878",
+          "job": "GotoWander",
+          "food": 0.9800000190734863,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 57,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        },
+        {
+          "pawn": "Thing_Human408",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1879",
+          "job": "GotoWander",
+          "food": 0.8679999113082886,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 57,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        },
+        {
+          "pawn": "Thing_Human411",
+          "category": "Fed",
+          "defaultSource": "",
+          "rawMinimumSource": "Thing_RawBerries1880",
+          "job": "GotoWander",
+          "food": 0.8679999113082886,
+          "wantEatThreshold": 0.30000001192092896,
+          "urgentThreshold": 0.12000000476837158,
+          "foodJobPriority": 0,
+          "rawFoodGene": false,
+          "berries": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 57,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "def": "RawBerries",
+              "preference": "RawTasty",
+              "count": 75,
+              "forbidden": false,
+              "ingestibleNow": true,
+              "willEat": true,
+              "canReserve": true,
+              "canReach": true
+            }
+          ]
+        }
+      ]
+    },
+    "coldRestore": true,
+    "noAgreements": true
+  },
+  "verification": {
+    "nodeTests": 315,
+    "pythonChecks": 11,
+    "compiledAgainstInstalledGame": true,
+    "review": "Independent initial and final-wording Codex reviews complete, no actionable findings; actual read-only enforcement verified. Reviewer gameplay not independently repeated.",
+    "historicalDatabaseFilesUnchanged": 228
+  },
+  "interpretation": {
+    "nativeWantEatBelow": 0.3,
+    "nativeUrgentlyHungryBelow": 0.12,
+    "sharedLinkLow": ".20 <= Food < .50",
+    "sharedLinkUrgent": "Food < .20",
+    "hungryCase": "Default search excludes RawTasty berries; overriding only minimum preference for a read-only search finds them.",
+    "urgentCase": "Normal search finds berries and native Ingest consumes18.",
+    "speech": "No typed eat action exists. Questions/replies create messages, not eating jobs."
+  },
+  "limitations": [
+    "Matched authored scenarios; no live model choices or improved planning demonstrated.",
+    "20-second samples are not a complete native event archive; consumption supported by 18-unit berry decrease and Food increase.",
+    "Readonly override is diagnostic comparison, not a diet change or issued job.",
+    "Thresholds depend on native race/genes/context; these observed humans have no raw-food-tolerance gene.",
+    "Old live failures and evidence remain unchanged."
+  ],
+  "operatorSetupIssue": "First host start omitted required lab-root environment before service launch; retained error, corrected staging configuration, no trial or model attempt consumed.",
+  "finalBehaviorCommit": "306ca5395707d8698425ab5a0ba559335afbb8cd"
+}

@@ -1,0 +1,39 @@
+{
+  "slug": "hungry-is-not-urgent",
+  "title": "Hungry Is Not Urgent",
+  "date": "2026-09-23",
+  "summary": "A native hunger threshold explains the untouched berries—and why saying “I’ll eat” never started a job.",
+  "sections": [
+    {
+      "heading": "The Gap Between Wanting and Doing",
+      "paragraphs": [
+        "Our earlier live runs showed pawns saying they would eat, yet no eating appeared in the samples. The latest run accepted all six core turns and three pawn replies, including formatting repairs, but no work was proposed. We needed to check our expectation of native self-care before asking the models to plan again.",
+        "For these ordinary humans, RimWorld begins seeking food below thirty percent Food and marks urgent hunger below twelve percent. Without a raw-food-tolerance gene, its normal search excludes raw berries until that urgent threshold. Concord’s shared-link bands are different: low below fifty percent, urgent below twenty. Those labels are not native hunger categories."
+      ]
+    },
+    {
+      "heading": "What the Native Tests Revealed",
+      "paragraphs": [
+        "We compared otherwise matched disposable saves: Alvin at twenty percent Food versus ten percent, with his companions at ninety. At twenty percent, the berries were reachable, allowed and ingestible, but the normal food search selected nothing. A read-only search relaxing just the minimum preference found them; it issued no job. After twenty seconds, all 225 berries remained and Alvin’s Food had fallen to 18.4 percent.",
+        "At ten percent, native selection found berries and Alvin ate eighteen, ending at ninety-eight percent Food. No model or operator told him to eat. The result survived paired save/restore and a full restart. This demonstrates native self-care, not an agent carrying out its earlier promise. The previous live run had ended with every pawn still above the twelve-percent threshold."
+      ]
+    },
+    {
+      "heading": "Clarified Boundaries and Next Steps",
+      "paragraphs": [
+        "We clarified the shared guidance: spoken intentions do not start jobs, raw-food selection may wait, and link bands differ from native hunger categories. We did not lower thresholds, change diets, force eating or add an eat action. Exact diagnostic meters remain operator-only. The checks passed—315 Node and eleven Python tests, native compilation and independent review—and staging is stopped.",
+        "The remaining design question is whether a pawn should have an explicit, executable choice to eat before native preference would select the food. That would need its own checks and ownership rules. For now, conversation remains conversation: neither a promise nor the core’s concern silently becomes an order."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Native food diagnosis",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/NATIVE_FOOD_SELECTION.md"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
