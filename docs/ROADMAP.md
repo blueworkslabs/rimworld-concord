@@ -4,6 +4,15 @@ Current direction, 2026-09-23: the user approved a bounded live core after the
 integration checkpoint and Fable’s reader feedback. Keep the scripted core as
 a regression baseline. UI polish remains deferred.
 
+## Planning checkpoint after live self-care closure
+
+The [latest bounded check](CLOSURE_FOLLOWTHROUGH.md) completed: Alvin ate 12 berries,
+Pedro 10, and the core resolved their six linked topics while keeping the broad
+brief open. No work or cooking followed; raw food remains a valid alternative.
+Pause implementation for the requested team recap and one next playable milestone.
+Retain prose-grounding, communication and sustained-play limitations; do not create
+another model allowance simply because this check passed.
+
 ## Now: meaning and breadth
 
 - Self-describing model perspectives: clear need scales, unknown values and
