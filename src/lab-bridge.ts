@@ -13,8 +13,13 @@ export function encodeCrewReport(report:CrewReport){return JSON.stringify({...re
 
 /** Local trusted staging transport. Caller must own the process lock (scripts/run-lab.sh). */
 export class LabBridge implements GameBridge {
-  constructor(readonly root=process.env.RIMWORLD_LAB_ROOT ?? '') {
+  constructor(readonly root=process.env.RIMWORLD_LAB_ROOT ?? '',private deadline?:()=>number) {
     if(!root || !root.startsWith('/')) throw Error('Set RIMWORLD_LAB_ROOT to an absolute isolated lab directory');
+  }
+  private timeout(cap:number){
+    const remaining=this.deadline?this.deadline()-Date.now():cap;
+    if(!Number.isFinite(remaining)||remaining<=0)throw Error('Lab operation deadline exhausted');
+    return Math.max(1,Math.min(cap,Math.floor(remaining)));
   }
   private queue:Promise<unknown>=Promise.resolve();
   private request(payload:Record<string,unknown>):Promise<{state:GameState;receipt:Receipt}> {
@@ -25,22 +30,24 @@ export class LabBridge implements GameBridge {
   async setDecisionPause(pause:DecisionPause) { await this.request({op:'decision-pause',...pause}); }
   async setActivity(activity:Activity) { await this.request({op:'activity',...activity}); }
   private async exchange(payload:Record<string,unknown>):Promise<{state:GameState;receipt:Receipt}> {
+    this.timeout(10000);
     const request=join(this.root,'concord/request.json');
     try { await access(request); throw Error('Previous domain command pending: inspect before retry'); }
     catch(e) { if((e as NodeJS.ErrnoException).code!=='ENOENT') throw e; }
     const id=String(payload.id??randomUUID());
-    await writeFile(request+'.tmp',JSON.stringify({...payload,id}),{mode:0o600});
+    await writeFile(request+'.tmp',JSON.stringify({...payload,id}),{mode:0o600,signal:AbortSignal.timeout(this.timeout(10000))});
+    this.timeout(10000);
     await rename(request+'.tmp',request);
-    const end=Date.now()+10000;
+    const end=Date.now()+this.timeout(10000);
     while(Date.now()<end) {
       try {
-        const response=JSON.parse(await readFile(join(this.root,'concord/response.json'),'utf8'));
+        const response=JSON.parse(await readFile(join(this.root,'concord/response.json'),{encoding:'utf8',signal:AbortSignal.timeout(this.timeout(Math.max(1,end-Date.now())))}));
         if(response.id===id) {
           if(!response.ok) throw Error(response.error);
           return response;
         }
       } catch(e) { if((e as NodeJS.ErrnoException).code!=='ENOENT') throw e; }
-      await delay(30);
+      await delay(Math.min(30,this.timeout(Math.max(1,end-Date.now()))));
     }
     throw Error('Bridge timeout; command may have executed: reconcile before retry');
   }
@@ -50,12 +57,12 @@ export class LabBridge implements GameBridge {
   }
   async cancel(r:{epoch:string;actor:string;id:string;kind?:'haul'|'rescue'}) {return (await this.request({op:'cancel',cancelKind:r.kind??'haul',epoch:r.epoch,actor:r.actor,actionId:r.id})).receipt;}
   async admin(op:string,name?:string) {
-    const {stdout}=await exec('python3',[join(this.root,'bin/lab.py'),'command',op,...name?[name]:[]],{timeout:130000});
-    return JSON.parse(stdout);
+    const {stdout}=await exec('python3',[join(this.root,'bin/lab.py'),'command',op,...name?[name]:[]],{timeout:this.timeout(130000),killSignal:'SIGKILL'});
+    this.timeout(130000);return JSON.parse(stdout);
   }
   async hash(name:string) {
     if(!/^lab-concord-[a-zA-Z0-9-]{1,40}$/.test(name)) throw Error('Invalid checkpoint name');
-    return createHash('sha256').update(await readFile(join(this.root,'profile/Saves',name+'.rws'))).digest('hex');
+    return createHash('sha256').update(await readFile(join(this.root,'profile/Saves',name+'.rws'),{signal:AbortSignal.timeout(this.timeout(130000))})).digest('hex');
   }
   async verify(name:string,hash:string) {if(await this.hash(name)!==hash) throw Error('Checkpoint hash mismatch');}
   async save(name:string) {
@@ -66,11 +73,11 @@ export class LabBridge implements GameBridge {
   }
   async load(name:string) {
     await this.admin('load',name);
-    const end=Date.now()+120000;
+    const end=Date.now()+this.timeout(120000);
     while(Date.now()<end) {
       const response=await this.admin('state');
       if(response.state.loaded && !response.state.loading) return;
-      await delay(200);
+      await delay(Math.min(200,this.timeout(Math.max(1,end-Date.now()))));
     }
     throw Error('Load timed out');
   }

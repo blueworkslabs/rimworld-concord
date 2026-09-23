@@ -7,10 +7,12 @@ import {Store} from '../src/store.js';
 import {LabBridge} from '../src/lab-bridge.js';
 import type {CoreView} from '../src/core-planner.js';
 import {stopTrialWork,workSummary} from '../src/work-trial.js';
+import {socialCleanup} from './social-cleanup.js';
 import {retainedDomain} from './retention-policy.js';
 if(process.env.CONCORD_CORE_LIFECYCLE_LOCKED!=='1')throw Error('Use scripts/run-core-lifecycle-lab.sh game|cold');
-const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold');
-const receipt:any={passed:false,mode:cold?'cold':'scripted-native',inferenceCalls:0,cases:[]},deadline=Date.now()+240000;
+const deadline=Date.now()+240000;let operationDeadline=deadline;
+const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(undefined,()=>operationDeadline),cold=process.argv.includes('--cold');
+const receipt:any={passed:false,mode:cold?'cold':'scripted-native',inferenceCalls:0,cases:[]};
 let c:Coordinator|undefined,s:Store|undefined;
 const check=()=>{if(Date.now()>deadline)throw Error('Native verification deadline');};
 const planner=(fn:(v:CoreView)=>unknown)=>({name:'scripted-core-lifecycle',async plan(v:CoreView){check();return fn(v);}});
@@ -22,10 +24,12 @@ async function pulse(until:()=>boolean,ms=35000){
 }
 try{
  for(const response of ['accept','refuse'] as const){
+  check();
   const marker=root+'/.runtime/core-lifecycle-'+response+'-latest.json';
   if(cold){
+   check();
    const saved=JSON.parse(await readFile(marker,'utf8'));s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().reoffers,saved.domain.reoffers);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);
-   receipt.cases.push({response,coldRestore:true,coreState:c.inspect().coreState,reoffers:c.inspect().reoffers,report:(await b.state()).crewLog});s.close();s=undefined;c=undefined;continue;
+   check();receipt.cases.push({response,coldRestore:true,coreState:c.inspect().coreState,reoffers:c.inspect().reoffers,report:(await b.state()).crewLog});s.close();s=undefined;c=undefined;continue;
   }
   const f=JSON.parse(await readFile(root+'/.runtime/needs-fixture.json','utf8'));await b.load(f.name);await b.admin('pause');check();
   const runId=randomUUID(),db=root+'/.runtime/core-lifecycle-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();await c.initializeCore('Optional wood hauling. Track linked work accurately; a declined offer is not completed work.');
@@ -50,9 +54,14 @@ try{
   const checkpoint='lab-concord-lifecycle-final-'+Date.now();await c.checkpoint(checkpoint);const domain=c.inspect();await c.restore(checkpoint);retainedDomain(c.inspect(),domain);assert.deepEqual(c.inspect().coreState,domain.coreState);assert.deepEqual(c.inspect().reoffers,domain.reoffers);
   await writeFile(marker,JSON.stringify({runId,db,checkpoint,domain}));receipt.cases.push({response,runId,pairedRestore:true,rewindRequest:true,summary:workSummary(c.inspect()),coreState:c.inspect().coreState,reoffers:c.inspect().reoffers,report:(await b.state()).crewLog});s.close();s=undefined;c=undefined;
  }
- receipt.passed=true;
+ check();receipt.passed=true;
 }catch(error){receipt.error=String(error);process.exitCode=1;}
 finally{
- try{await b.admin('pause');if(c){receipt.cleanup=await stopTrialWork(c);if(receipt.cleanup.errors.length)throw Error('Cleanup incomplete');}}catch(e){receipt.cleanupError=String(e);receipt.passed=false;process.exitCode=1;}s?.close();
+ const cleanup=await socialCleanup(
+  async()=>{operationDeadline=Date.now()+10000;await b.admin('pause');},
+  async()=>{},
+  async()=>{operationDeadline=Date.now()+20000;return c?stopTrialWork(c):{errors:[]};});
+ receipt.cleanup=cleanup;
+ if(cleanup.errors.length){receipt.passed=false;process.exitCode=1;}s?.close();
  await writeFile(root+'/.runtime/core-lifecycle-'+(cold?'cold':'game')+'.json',JSON.stringify(receipt,null,2));console.log(JSON.stringify(receipt));
 }
