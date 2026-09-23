@@ -5,7 +5,8 @@ import { pathToFileURL } from 'node:url';
 const hash = value => createHash('sha256').update(value).digest('hex');
 export function protectedEnvironment(env) {
   return env.OPENROUTER_API_KEY?.startsWith('oc-sent-v2') && Boolean(env.HTTPS_PROXY) &&
-    Boolean(env.NODE_EXTRA_CA_CERTS) && env.NODE_USE_ENV_PROXY === '1';
+    Boolean(env.NODE_EXTRA_CA_CERTS) && env.NODE_USE_ENV_PROXY === '1' &&
+    !env.NO_PROXY && !env.no_proxy && (!env.https_proxy || env.https_proxy === env.HTTPS_PROXY);
 }
 export function requestBody(config, video) {
   if (config.model !== 'google/gemini-3.8-flash' || !['video-only', 'receipt-check'].includes(config.phase) ||
@@ -87,5 +88,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const result = await review(config, process.argv[3]);
     console.log(JSON.stringify(result));
     if (result.status !== 'completed') process.exitCode = 1;
-  } catch { console.error('Video review stopped before request; inspect configuration and protected gateway setup.'); process.exitCode = 1; }
+  } catch { console.error('Video review stopped; request status may be uncertain. Inspect retained attempt before any further call.'); process.exitCode = 1; }
 }

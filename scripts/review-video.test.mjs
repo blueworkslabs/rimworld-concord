@@ -14,6 +14,9 @@ test('true video request pins model, no tools/fallback and checks asset hash', (
  assert.equal(body.tools,undefined); assert.equal(body.provider.allow_fallbacks,false);
  assert.throws(()=>requestBody({...config,videoSha256:'bad'},video));
  assert.equal(protectedEnvironment({...env,OPENROUTER_API_KEY:'unprotected'}),false);
+ for (const patch of [{NO_PROXY:'*'},{no_proxy:'openrouter.ai'},{https_proxy:'different'}])
+  assert.equal(protectedEnvironment({...env,...patch}),false);
+ assert.equal(protectedEnvironment(env),true);
 });
 test('allowlist omits injected private fields, reasoning and extra usage fields; retains incomplete answers for inspection', () => {
  const result=publicResponse(raw); assert.deepEqual(Object.keys(result).sort(),['finishReason','hasToolCalls','model','provider','text','usage']);
