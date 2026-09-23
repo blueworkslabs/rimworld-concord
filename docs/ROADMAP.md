@@ -15,6 +15,12 @@ future milestone, not the next dependency.
 - Keep real-game tests for integration, timing, native behavior and persistence.
   Offline evaluations complement rather than replace them.
 
+## Current checkpoint
+
+Pause correction micro-tests for the [bounded integration playtest](INTEGRATION_CHECKPOINT.md).
+Astra owns implementation; Fable owns the unbriefed player-panel read and feedback.
+Core stays scripted, and UI polish remains deferred.
+
 ## Next: broader embodied pawn behavior
 
 - Keep corrected v2 needs and the matched-outlook bank separate from old evidence.
