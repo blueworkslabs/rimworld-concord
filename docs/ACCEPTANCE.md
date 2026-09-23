@@ -781,8 +781,21 @@ See [milestone contract and limits](CAMPFIRE_MILESTONE.md),
   no agent-directed job began. All three native windows and paired/cold restores
   completed, including simulation progress during third-run inference.
 - The provider menu was corrected after the frozen trials; runtime validation
-  remains strict. No live call validates that correction yet.
+  remains strict. No corrected live call occurred in that milestone; see the
+  subsequent offline contract check below.
 - The human read recovered need changes but saw a helpless core. The accurate
   no-outstanding-work label did not explain rejected choices/exhausted allowance.
 - Earlier free-meal and invalid-health-fixture results remain recorded as
   defects, not successful production or evidence of native eating.
+
+## Corrected core contract — 2026-09-23
+
+[Protocol and limits](CORE_CONTRACT_CHECK.md) · [all outputs](evidence/core-contract-check.json).
+293 Node checks and independent Codex review passed. Six native Claude Max
+attempts produced four valid questions and two valid waits, all with null
+action-topic links. Wait-only cases deliberately removed other choices.
+No pawn/Jev calls, retries, game actions or new game/restoration test.
+Manual review retains source-attribution wording ambiguity despite accurate
+need bands. All 218 historical database-related files unchanged; staging stayed
+stopped. This supports the corrected output contract in a small offline sample,
+not live planning, construction or cooking.
