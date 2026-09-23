@@ -1,5 +1,7 @@
 /** Immutable policy identities: old ledgers must retain their original ceilings. */
 export const decisionTrials={
+ 'eating-followup-core-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-eating-followup-core-v1'},
+ 'eating-followup-pawns-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-eating-followup-pawns-v1'},
  'identity-followup-core-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-identity-followup-core-v1'},
  'identity-followup-pawns-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-identity-followup-pawns-v1'},
  'recovery-followup-core-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-recovery-followup-core-v1'},

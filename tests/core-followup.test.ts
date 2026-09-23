@@ -32,3 +32,10 @@ test('identity follow-through keeps prior caps and uses new independent ledgers'
  assert.notEqual(old.coreTrial,next.coreTrial);assert.notEqual(old.pawnTrial,next.pawnTrial);
  for(const p of [old,next]){assert.equal(decisionTrials[p.coreTrial].calls,6);assert.equal(decisionTrials[p.pawnTrial].calls,6);assert.equal(decisionTrials[p.coreTrial].reservedEquivalentUSD,.60);}
 });
+
+test('eating follow-through owns fresh ledgers and preserves all earlier caps',()=>{
+ const next=coreFollowupPolicy('eating-followup-v1');
+ assert.equal(next.coreCalls,6);assert.equal(next.pawnCalls,6);assert.equal(next.nativeMs,120000);assert.equal(next.scriptedNativeMs,30000);assert.equal(next.jevCalls,0);
+ for(const id of ['core-followup-v1','food-followup-v1','recovery-followup-v1','identity-followup-v1']){const old=coreFollowupPolicy(id);assert.notEqual(old.coreTrial,next.coreTrial);assert.notEqual(old.pawnTrial,next.pawnTrial);assert.equal(old.scriptedNativeMs,15000);}
+ for(const id of [next.coreTrial,next.pawnTrial]){assert.equal(decisionTrials[id].calls,6);assert.equal(decisionTrials[id].reservedEquivalentUSD,.60);}
+});

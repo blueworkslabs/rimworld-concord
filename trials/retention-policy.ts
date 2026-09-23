@@ -20,7 +20,7 @@ export function retentionMenu(view:AttentionView):string[]{
  return choices;
 }
 export function retainedDomain(actual:Domain,expected:Domain){
- for(const key of ['characters','proposals','outcomes','exchanges'] as const)assert.deepEqual(actual[key],expected[key]);
+ for(const key of ['characters','proposals','outcomes','exchanges','selfCare'] as const)assert.deepEqual(actual[key],expected[key]);
  assert.deepEqual(actual.crew?.entries,expected.crew?.entries);
 }
 export function noReflectionEffects(before:Domain,after:Domain,worldBefore:GameState,worldAfter:GameState,owner:string){
