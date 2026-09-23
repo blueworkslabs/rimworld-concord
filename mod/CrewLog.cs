@@ -60,6 +60,11 @@ namespace Concord {
   private string filter="all";
   private bool expanded=false,topics=false;
   private Vector2 compactScroll,boardScroll;
+  private CrewEntry[] heldEntries;private string heldEpoch;
+  private static string ActivityLabel(Pawn pawn){
+   if(pawn==null)return "not on this map";if(pawn.CurJobDef==null)return "idle";
+   switch(pawn.CurJobDef.defName){case "Concord_Eat":return "eating chosen food";case "Concord_Haul":return "agreed hauling";case "Concord_Rescue":return "agreed rescue";case "Concord_Cook":return "agreed cooking";case "Concord_BuildMaterials":return "delivering building materials";case "Concord_BuildFinish":return "agreed construction";case "Wait_Wander":case "GotoWander":return "wandering";case "Ingest":return "native eating";case "LayDown":return "resting";case "Wait":case "Wait_MaintainPosture":return "waiting";default:return "other native activity";}
+  }
   public override Vector2 InitialSize {get{return new Vector2(420,Math.Min(670,UI.screenHeight-100));}}
   public override void DoWindowContents(Rect rect){
    if(Widgets.ButtonText(new Rect(rect.width-120,0,120,28),expanded?"Compact":"Full journal")){
@@ -78,23 +83,25 @@ namespace Concord {
     string clock=Find.TickManager.Paused?(DecisionPauses.Count>0?"Paused for deliberation":"Paused · game / operator"):"Game running";
     Widgets.Label(new Rect(0,30,rect.width,42),clock+" · tick "+Find.TickManager.TicksGame+"\n"+(fresh?"Current report":"Saved / stale report — not current"));
     if(r==null){Widgets.Label(new Rect(0,80,rect.width,90),"No coordinator report. This observer view cannot start agents or issue jobs.");return;}
+    if(heldEpoch!=r.epoch){heldEntries=null;heldEpoch=r.epoch;compactScroll=Vector2.zero;}
     float y=78;
     foreach(var s in r.sharedStatus.Take(3)){
      bool current=fresh&&s.fresh&&Find.TickManager.TicksGame-s.tick<=120;
      var pawn=Find.CurrentMap==null?null:Find.CurrentMap.mapPawns.FreeColonistsSpawned.FirstOrDefault(p=>p.GetUniqueLoadID()==s.pawn);
-     string job=pawn==null?"not on this map":pawn.CurJobDef==null?"idle":pawn.CurJobDef.defName=="Concord_Eat"?"eating":pawn.CurJobDef.label??pawn.CurJobDef.defName;
+     string job=ActivityLabel(pawn);
      Widgets.Label(new Rect(0,y,rect.width,42),s.name+" · "+job+"\nFood "+(current?s.food:"unknown")+" · Rest "+(current?s.rest:"unknown")+" · shared link");y+=45;
     }
     var status=(fresh?"":"Last report: ")+(r.observerText??"Scheduler state not reported.")+"\n"+r.waiting;
     float statusHeight=Text.CalcHeight(status,rect.width-20);
     Widgets.BeginScrollView(new Rect(0,y,rect.width,76),ref boardScroll,new Rect(0,0,rect.width-20,Math.Max(76,statusHeight)));
     Widgets.Label(new Rect(0,0,rect.width-20,statusHeight),status);Widgets.EndScrollView();y+=80;
-    if(Widgets.ButtonText(new Rect(0,y,135,27),topics?"Show events":"Core topics")){topics=!topics;compactScroll=Vector2.zero;}
-    Widgets.Label(new Rect(145,y,rect.width-145,27),topics?"Interpretations, not receipts":"Speech ≠ completion");y+=33;
+    if(Widgets.ButtonText(new Rect(0,y,105,27),topics?"Events":"Core topics")){topics=!topics;compactScroll=Vector2.zero;}
+    if(!topics&&Widgets.ButtonText(new Rect(112,y,90,27),heldEntries==null?"Hold feed":"Live feed")){heldEntries=heldEntries==null?r.entries.ToArray():null;compactScroll=Vector2.zero;}
+    Widgets.Label(new Rect(210,y,rect.width-210,27),topics?"Core interpretation":heldEntries==null?"Speech ≠ outcome":"Feed held");y+=33;
     var area=new Rect(0,y,rect.width,Math.Max(40,rect.height-y));float width=rect.width-22;
     if(topics){string board="Core-authored topic board\n"+(String.IsNullOrEmpty(r.topicText)?"No topics reported.":r.topicText);float h=Text.CalcHeight(board,width);Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(h,area.height)));Widgets.Label(new Rect(0,0,width,h),board);Widgets.EndScrollView();}
     else{
-     var entries=r.entries.Reverse().ToArray();
+     var entries=(heldEntries??r.entries).Reverse().ToArray();
      Func<CrewEntry,string> heading=e=>(e.kind=="message"?e.actor+" → "+e.recipient:e.actor+" · RECORD")+" · t"+e.tick;
      float total=entries.Sum(e=>Text.CalcHeight(heading(e),width)+Text.CalcHeight(e.text,width)+14);
      Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(total,area.height)));float ey=0;

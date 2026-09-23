@@ -206,6 +206,7 @@ export class Coordinator {
       try{await this.decisionPause(prepared.activity,true);}catch{}
       for(const actor of [prepared.from,prepared.to])if(this.pending.get(actor)===prepared.controller)this.pending.delete(actor);
       try{await this.game.setActivity?.({...prepared.activity,ttlMs:0});}catch{}
+      await this.serial(async()=>{});
     }
   }
   /** Operator scheduling hints only. Every condition is checked again at claim time. */
@@ -377,6 +378,7 @@ export class Coordinator {
       if(this.questions.get(pawn)?.controller===prepared.controller)this.questions.delete(pawn);
       if(this.attending.get(pawn)?.controller===prepared.controller) this.attending.delete(pawn);
       try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* old timeline or expired badge */ }
+      await this.serial(async()=>{});
     }
   }
   /** Explicit bounded appraisal; important events routed directly to deliberation cannot be downgraded. */
@@ -482,7 +484,7 @@ export class Coordinator {
     }catch(error){
       await this.serial(async()=>{if(this.generation===prepared.generation){const state=this.domain.coreState!,turn=state.turns.find(t=>t.id===prepared.id)!;turn.status='failed';state.revision++;this.commit('core-failed','core',{id:prepared.id,error:String(error)});}});
       return {status:combined.aborted?'interrupted' as const:'failed' as const};
-    }finally{clearTimeout(timer);if(this.pending.get('core')===prepared.controller)this.pending.delete('core');}
+    }finally{clearTimeout(timer);if(this.pending.get('core')===prepared.controller)this.pending.delete('core');await this.serial(async()=>{});}
   }
   async answerCoreQuestion(id:string,backend:CoreAnswerBackend,timeoutMs=45000,signal=new AbortController().signal){
     if(!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>115000)throw Error('Invalid question timeout');
@@ -521,7 +523,7 @@ export class Coordinator {
         return {status:'delivered' as const};
       });
     }catch(error){await this.serial(async()=>{if(this.generation===prepared.generation){const q=this.domain.coreState!.questions.find(q=>q.id===id)!;q.status='failed';this.domain.coreState!.revision++;this.commit('core-answer-failed',q.pawn,{id,error:String(error)});}});return {status:combined.aborted?'interrupted' as const:'failed' as const};}
-    finally{clearTimeout(timer);if(this.pending.get(prepared.pawn)===prepared.controller)this.pending.delete(prepared.pawn);}
+    finally{clearTimeout(timer);if(this.pending.get(prepared.pawn)===prepared.controller)this.pending.delete(prepared.pawn);await this.serial(async()=>{});}
   }
   /** Physical movement opportunities and communicated replies only; no private character state. */
   core() {
@@ -699,6 +701,7 @@ export class Coordinator {
       if(this.pending.get(pawn)===prepared.controller) this.pending.delete(pawn);
       if(this.questions.get(pawn)?.controller===prepared.controller)this.questions.delete(pawn);
       try {await this.game.setActivity?.({...prepared.activity,ttlMs:0});} catch { /* expired or old timeline */ }
+      await this.serial(async()=>{});
     }
   }
   private replacementActive(p:Proposal):boolean {

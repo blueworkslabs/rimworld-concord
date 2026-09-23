@@ -69,3 +69,12 @@ test('observer reports public scheduling state and core-authored topics, never p
  const wire=JSON.parse(encodeCrewReport(r));assert.equal(wire.observerText,r.observerText);assert.equal(wire.topicText,r.topicText);
  delete d.coreState;assert.equal(crewReport(d,100).topicText,'');assert.match(crewReport(d,100).observerText!,/not initialized/);
 });
+
+test('completed and failed core/pawn thoughts immediately clear the published thinking status',async()=>{
+ const state:GameState={world:'w',epoch:'e',loaded:true,paused:false,ticks:10,pawns:[{id:'A',name:'Ada',job:'Wait',health:1,x:0,z:0}],actions:[]};let report:CrewReport|undefined;
+ const store=new Store(':memory:'),c=new Coordinator(store,{async state(){return state;},async move(){throw Error('No moves');},async setCrewLog(r:CrewReport){report=r;}} as any);
+ await c.open();await c.initializeCore('Optional question');
+ const q=await c.planCore({name:'scripted',async plan(){return {topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'Hello?',reason:'Ask'}};}});assert.equal(q.status,'applied');assert(!report!.observerText!.includes('thinking'));assert.equal(c.activity().length,0);
+ const answer=await c.answerCoreQuestion(q.questionId!,{name:'scripted',async answerCore(){return {choice:'say',text:'Hello.'};}});assert.equal(answer.status,'delivered');assert(!report!.observerText!.includes('thinking'));assert(!report!.observerText!.includes('answering'));
+ const failed=await c.planCore({name:'fails',async plan(){throw Error('Provider failed');}});assert.equal(failed.status,'failed');assert(!report!.observerText!.includes('thinking'));store.close();
+});
