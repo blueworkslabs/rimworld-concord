@@ -33,3 +33,7 @@ The [preserved evidence](evidence/bounded-core.json) records four core attempts 
 Paired and full cold restore preserved the topic, addressed conversation and outcomes with no additional inference. The scripted baseline separately exercised smaller-counter adoption and fresh consent. All 263 Node tests and independent review/re-reviews passed. The first scripted rehearsal lost its prescribed opportunity during wandering; it remains a failed result, not a successful branch.
 
 One grounding error remains: the second offer said “same wood source” although the native stack ID changed. The final topic interpretation was deferred; its linked agreement outcome records Beatrice’s completion, but no fifth core turn revisited the wording. The generic native interruption receipt does not independently identify hunger as the unique cause; that explanation is Alvin’s report, consistent with his near-threshold Food observation. This is one useful follow-through sequence, not general strategic competence or continuous-inference evidence.
+
+## Successor protocol
+
+The [bounded event-driven follow-up](CORE_EVENTS.md) adds an explicit not-now reply and event admission. The four-round result above is preserved as its historical baseline, not silently rerun under the changed contract.

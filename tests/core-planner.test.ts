@@ -86,3 +86,96 @@ test('runner cancellation after a pawn response but during the final state read 
  await assert.rejects(c.pawn(p.pawn).decide(p.id,{name:'late-disconnect',async decide(){called++;g.state=async()=>{const result=await state();controller.abort();return result;};return {kind:'accept',reason:'I agree'};}},1000,controller.signal));
  assert.equal(called,1);assert.equal(g.moves,0);assert.equal(c.inspect().proposals[p.id]!.status,'pending');s.close();
 });
+
+test('defer is communicated non-consent, persists, and suppresses repeated ordinary offers to that pawn',async()=>{
+ const {c,s,g}=await setup();const r=await c.planCore(planner(offer));if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;
+ const reply=await c.pawn(p.pawn).decide(p.id,{name:'not-now',async decide(){return {kind:'defer',reason:'Not now; I want to eat before considering more work.'};}});
+ assert.equal(reply.status,'deferred');assert.equal(reply.actionId,undefined);assert.equal(g.moves,0);assert.equal(c.inspect().characters[p.pawn]!.intention,undefined);
+ let v=await c.corePerspective();assert(!v.opportunities.some(o=>o.pawn===p.pawn));assert.equal(v.agreements[0]!.reply!.kind,'defer');assert.equal(v.agreements[0]!.replyEvidence,'attributed-speech');
+ assert(crewReport(c.inspect(),100).entries.some(e=>e.text.startsWith('defer:')));
+ await c.checkpoint('lab-concord-core-deferred');await c.restore('lab-concord-core-deferred');g.data.ticks+=1000;
+ v=await c.corePerspective();assert(!v.opportunities.some(o=>o.pawn===p.pawn));assert.equal(c.inspect().proposals[p.id]!.status,'deferred');assert.equal(g.moves,0);s.close();
+});
+test('defer is available through the provider and reflection contracts; attribution and source identity are explicit',async()=>{
+ const {c,s}=await setup();const {modelPrompt}=await import('../src/model-perspective.js');
+ const r=await c.planCore(planner(offer));if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;
+ let prompt:any;await c.pawn(p.pawn).decide(p.id,{name:'inspect',async decide(v){prompt=modelPrompt('decision',v);return {kind:'defer',reason:'Later, not now'};}});
+ assert(prompt.executableChoices.some((x:any)=>x.choice==='defer'));
+ const args=claudeArgs('decision');const schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);assert(schema.properties.decision.oneOf.some((x:any)=>x.properties.kind.const==='defer'));
+ assert.equal(parseClaudeResult({type:'result',subtype:'success',is_error:false,total_cost_usd:0,structured_output:{decision:{kind:'defer',reason:'Not now'}},modelUsage:{[CLAUDE_MODEL]:{}},num_turns:1},'decision').output.kind,'defer');
+ const v=await c.corePerspective();assert(v.opportunities.length);for(const o of v.opportunities){assert.equal(o.action.kind,'haul');if(o.action.kind==='haul')assert.equal(o.supply?.sourceThingId,o.action.thing);assert.equal(o.supply?.label,'Wood');}
+ s.close();
+});
+test('event scheduler coalesces terminal outcomes, waits through cooldown and does not wake on polling or its own thoughts',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:3,cooldownTicks:60,windowTicks:1000});let calls=0;
+ const backend=planner(v=>{calls++;return offer(v);});
+ const r=await c.planCoreWhenDue(backend);assert.equal(r.status,'applied');if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;
+ assert.equal((await c.planCoreWhenDue(backend)).status,'idle');assert.equal(calls,1);
+ await c.pawn(p.pawn).decide(p.id,{name:'accept',async decide(){return {kind:'accept',reason:'One trip'};}});await c.reconcile();
+ assert.equal((await c.corePerspective()).agreements[0]!.progress.status,'completed');
+ assert.equal((await c.planCoreWhenDue(backend)).status,'idle');g.data.ticks+=60;
+ let triggers:any;assert.equal((await c.planCoreWhenDue(planner(v=>{calls++;triggers=(v as any).wakeReasons;return wait;}))).status,'applied');
+ assert.equal(triggers.length,1);assert.equal(triggers[0].kind,'agreement');assert.equal(triggers[0].sourceId,p.id);
+ g.data.ticks+=60;g.data.pawns[0]!.facts![0]!.level=.1;g.available=false;
+ for(let i=0;i<3;i++)assert.equal((await c.planCoreWhenDue(backend)).status,'idle');assert.equal(calls,2);
+ assert.equal(c.inspect().coreState!.schedule!.attempts,2);await assert.rejects(c.planCore(backend),/mode mismatch/);s.close();
+});
+test('scheduled failure consumes its event and attempt; new replies wake once, and budget cannot be reset',async()=>{
+ const {c,s,g}=await setup();const cfg={maxAttempts:2,cooldownTicks:60,windowTicks:1000};await c.configureCoreSchedule(cfg);
+ assert.equal((await c.planCoreWhenDue(planner(()=>({nonsense:true})))).status,'failed');g.data.ticks+=60;
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');
+ const p=await c.core().propose('A',{kind:'move',x:2,z:1},'Separate operator offer');await c.pawn('A').decide(p.id,{name:'no',async decide(){return {kind:'defer',reason:'Not now'};}});
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');g.data.ticks+=60;
+ const q=await c.core().propose('B',{kind:'move',x:2,z:1},'Separate operator offer');await c.pawn('B').decide(q.id,{name:'no',async decide(){return {kind:'refuse',reason:'No'};}});
+ const result=await c.planCoreWhenDue(planner(()=>{throw Error('Must not call');}));assert.equal(result.status,'idle');if(result.status==='idle')assert.equal(result.reason,'budget-exhausted');
+ await c.configureCoreSchedule(cfg);assert.equal(c.inspect().coreState!.schedule!.attempts,2);await assert.rejects(c.configureCoreSchedule({...cfg,maxAttempts:3}),/immutable/);s.close();
+});
+test('scheduler preserves consumed events and caps across reopen and paired restore; late results expire',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:2,cooldownTicks:60,windowTicks:120});
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');await c.checkpoint('lab-concord-core-events');const before=c.inspect().coreState;
+ const reopened=new Coordinator(s,g);await reopened.open();assert.deepEqual(reopened.inspect().coreState,before);
+ await reopened.restore('lab-concord-core-events');g.data.ticks+=60;assert.equal((await reopened.planCoreWhenDue(planner(()=>wait))).status,'idle');
+ const p=await reopened.core().propose('A',{kind:'move',x:2,z:1},'Optional');await reopened.pawn('A').decide(p.id,{name:'no',async decide(){return {kind:'refuse',reason:'No'};}});
+ const result=await reopened.planCoreWhenDue(planner(()=>{g.data.ticks+=60;return wait;}));assert.equal(result.status,'failed');assert.equal(g.moves,0);assert.equal(reopened.inspect().coreState!.schedule!.attempts,2);s.close();
+});
+test('concurrent scheduler polls never admit two turns and events arriving during inference remain pending',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:3,cooldownTicks:60,windowTicks:1000});
+ let enter!:()=>void,release!:(v:unknown)=>void;const entered=new Promise<void>(r=>enter=r);
+ const pending=c.planCoreWhenDue({name:'blocked',async plan(){enter();return new Promise(r=>release=r);}});await entered;
+ assert.equal((await c.planCoreWhenDue(planner(()=>{throw Error('Concurrent inference');}))).status,'idle');
+ const p=await c.core().propose('A',{kind:'move',x:2,z:1},'Optional');await c.pawn('A').decide(p.id,{name:'no',async decide(){return {kind:'defer',reason:'Not now'};}});
+ release(wait);assert.equal((await pending).status,'applied');g.data.ticks+=60;
+ let wakes:any;assert.equal((await c.planCoreWhenDue(planner(v=>{wakes=(v as any).wakeReasons;return wait;}))).status,'applied');assert.equal(wakes[0].sourceId,p.id);assert.equal(g.moves,0);s.close();
+});
+test('scheduled unanswered question does not wake; voluntary answer and silence both do, without granting consent',async()=>{
+ for(const choice of [{choice:'say',text:'I report hunger.'},{choice:'stay_silent'}]){
+  const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:3,cooldownTicks:60,windowTicks:1000});
+  const r=await c.planCoreWhenDue(planner(()=>({topic:null,action:{kind:'ask',pawn:'A',text:'What matters?',reason:'One question'}})));if(r.status!=='applied')throw Error();
+  g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');
+  await c.answerCoreQuestion(r.questionId!,{name:'optional',async answerCore(){return choice;}});
+  let causes:any;assert.equal((await c.planCoreWhenDue(planner(v=>{causes=(v as any).wakeReasons;return wait;}))).status,'applied');
+  assert(causes.some((w:any)=>w.kind==='answer'));assert.equal(g.moves,0);
+  if(choice.choice==='say')assert.equal((await c.corePerspective()).messages[1]!.evidence,'attributed-speech');
+  g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');s.close();
+ }
+});
+test('event trial permits unused calls and deferral but never hides inference failure',async()=>{
+ const {coreEventsInferencePassed}=await import('../trials/core-events-policy.js');
+ assert(coreEventsInferencePassed([{result:{status:'applied'},proposal:{decision:{kind:'defer'}}}]));
+ assert(!coreEventsInferencePassed([]));assert(!coreEventsInferencePassed([{result:{status:'failed'}}]));
+ assert(!coreEventsInferencePassed([{result:{status:'applied'},pawnError:'Failed'}]));
+ assert(!coreEventsInferencePassed(Array.from({length:5},()=>({result:{status:'applied'}}))));
+});
+test('terminal movement receipts wake the core even without a standing agreement',async()=>{
+ for(const outcome of ['completed','interrupted','failed'] as const){
+  const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:3,cooldownTicks:60,windowTicks:1000});
+  await c.planCoreWhenDue(planner(()=>wait));g.data.ticks+=60;
+  g.move=async r=>{g.moves++;const receipt={id:r.id,actor:r.actor,status:'started' as const,reason:'In progress',x:0,z:0};g.data.actions.push(receipt);return receipt;};
+  const p=await c.core().propose('A',{kind:'move',x:2,z:1},'Optional movement');await c.pawn('A').decide(p.id,{name:'accept',async decide(){return {kind:'accept',reason:'I agree'};}});
+  assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');
+  g.data.actions[0]!.status=outcome;await c.reconcile();let wakes:any;
+  assert.equal((await c.planCoreWhenDue(planner(v=>{wakes=(v as any).wakeReasons;return wait;}))).status,'applied');
+  assert.equal(wakes.length,1);assert.equal(wakes[0].sourceId,p.id);assert.equal(JSON.parse(wakes[0].value).status,outcome==='completed'?'completed':'stopped');
+  g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');s.close();
+ }
+});

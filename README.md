@@ -8,13 +8,13 @@ An experimental foundation for an ancient AI core and three autonomous colonists
 
 An experimental vertical slice, not a playable campaign or unattended AI colony:
 
-- Pawns negotiate and carry out bounded movement, hauling and rescue; the core is still scripted.
+- Pawns negotiate and carry out bounded movement, hauling and rescue. An opt-in bounded live core proposes grounded work; scripted planning remains a regression baseline.
 - Nearby pawns can exchange one optional opener and reply; attributed speech does not authorize work or automatically change beliefs. See [social contract](docs/SOCIAL_EXCHANGE.md).
 - Consent, native outcome checks and paired/cold restore are enforced below the model layer.
 - The in-game crew log separates addressed messages, observed events and work records; private outlooks remain private.
-- Optional outlook revisions can retain attributed received speech. Automated persistence/privacy and a small offline decision contrast pass; native-game validation of this new citation path is next.
+- Optional outlook revisions can retain attributed received speech. Automated persistence/privacy, native retention and paired/cold restore have been verified in bounded trials. This is not proof of long-term personality.
 - Claude has bounded real-game evidence; Luna has offline contract evidence, not a game backend. Sustained character quality remains unproved.
-- Current focus: broader native scenarios and grounded explanations. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
+- Current focus: event-driven core follow-through, attributed explanations and pawn deferral. See the [bounded event contract](docs/CORE_EVENTS.md). See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
 
 ## Layout
 

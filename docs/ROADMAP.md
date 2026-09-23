@@ -32,6 +32,18 @@ retained sourced topics and reasons for blocked/deferred work. Pawns still own c
 Do not infer construction/cooking capability from conversation. The frozen first trial uses four core attempts, at most five pawn attempts and
 explicitly paused inference. This roadmap enables no unattended inference.
 
+## Event-driven core follow-up
+
+The [bounded event-driven successor](CORE_EVENTS.md) is tested: a not-now reply,
+explicit stack identity, attributed-speech labels and budgeted event admission.
+One live run used three core turns, then stayed quiet without a new shared event.
+Next: explicit topic lifecycle (the live prose and retained labels disagreed)
+and a legitimate re-invitation after deferral. Automatic after-meal resumption
+is absent. Keep fresh consent and private needs out of the core view.
+A campfire/cooking loop needs its own executable capability and native tests;
+it is not enabled by planning language or this milestone. No new live allowance
+is implied by these next steps.
+
 ## Continuing pawn work
 
 - Keep corrected v2 needs and the matched-outlook bank separate from old evidence.

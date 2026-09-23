@@ -1,0 +1,51 @@
+{
+  "slug": "a-reason-to-wake",
+  "title": "A Reason to Wake",
+  "date": "2026-09-23",
+  "summary": "Completed work now wakes the core; passing time alone does not. A bounded trial delivered sixty wood, then stayed quiet.",
+  "sections": [
+    {
+      "heading": "A reason for the next turn",
+      "paragraphs": [
+        "The bounded core now waits for the initial briefing or a relevant shared event, such as completed work or an incoming message, before taking another planning turn. Time passing alone does not wake it. Its budget, cooldown and consumed events survive a save. It can still see grounded opportunities when it plans, but changing opportunities alone are not a trigger. Private pawn needs and thoughts stay private.",
+        "Pawns also gain a not-now reply. Deferring retires the offer without a job or a promise; this bounded planner suppresses further ordinary offers to that pawn for the session. Automatic after-meal resumption is not implemented. A legitimate later invitation will still need fresh consent."
+      ]
+    },
+    {
+      "heading": "Rehearsal and live choices",
+      "paragraphs": [
+        "In scripted rehearsal, Alvin deferred. Beatrice countered with a smaller haul, received a revised offer, then freshly accepted and delivered five wood. Completion triggered a wait. This tested the mechanics, not a live preference.",
+        "In the live trial, Alvin accepted two separate offers. Three trips delivered thirty wood from the first stack; that completion triggered a fresh offer on a different stack. Three more trips delivered thirty more wood, then completion triggered a wait. The core correctly distinguished the source IDs. Passing time produced no fourth turn.",
+        "Three core and two pawn calls were used, below the four-and-five ceilings, with no Jev calls or rerolls. All 102 sampled native-activity states were unpaused across roughly two minutes; inference was explicitly paused. No live deferral or question was chosen, so this does not show reduced agreeableness or verify the hunger-testimony wording fix in live use."
+      ]
+    },
+    {
+      "heading": "The unfinished record",
+      "paragraphs": [
+        "The last topic prose called both hauls resolved, but the stored topic labels remained open and deferred. Completion receipts were correct; topic bookkeeping was not. Paired and full cold restore preserved both the results and that mismatch without extra calls. The saved result was not rerun to tidy it.",
+        "All 272 Node tests and ten Python transport checks passed. Independent review found missed movement-completion events; the fix passed regression tests and focused review. Next are explicit topic lifecycle and a legitimate route back from not-now. Construction and cooking remain separate work. This is one authored fixture, not general strategy, and its changed timing prevents a controlled comparison with the earlier fixed-round trial."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Event-driven core protocol and evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CORE_EVENTS.md"
+    },
+    {
+      "label": "Sanitized trial receipt",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/core-events.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/2026-09-23-core-events.png",
+      "alt": "Saved Concord crew log with two completed three-trip hauling agreements and the core waiting for new observations.",
+      "caption": "Actual saved player panel after the live trial: thirty confirmed wood in each completed agreement, with the final wait message below. Core topic labels are not shown in this panel; their mismatch is retained in the evidence."
+    }
+  ]
+}

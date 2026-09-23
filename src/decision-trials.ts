@@ -1,5 +1,7 @@
 /** Immutable policy identities: old ledgers must retain their original ceilings. */
 export const decisionTrials={
+ 'core-events-planner-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-core-events-planner-v1'},
+ 'core-events-pawns-v1':{calls:5,reservedEquivalentUSD:0.50,policy:'claude-core-events-pawns-v1'},
  'core-planner-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-core-planner-v1'},
  'core-pawns-v1':{calls:5,reservedEquivalentUSD:0.50,policy:'claude-core-pawns-v1'},
  'integration-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-integration-v1'},

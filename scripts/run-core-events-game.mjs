@@ -12,21 +12,22 @@ import {ClaudeDecisionBackend} from '../dist/src/claude-decision.js';
 
 const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
 
-if(!scripted&&!cold)throw Error('Historical core-v1 live protocol retired; use a new versioned trial');
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
-const policy='core-v1';
-const protocol={policy,coreCalls:4,pawnCalls:5,rounds:4,nativeMsPerRound:scripted?[0,0,30000,1000]:[30000,30000,30000,30000],pausedInference:true,jevCalls:0};
+const policy='core-events-v1';
+const protocol={policy,coreCalls:4,pawnCalls:5,cooldownTicks:60,windowTicks:18000,nativeMs:scripted?40000:120000,pausedInference:true,jevCalls:0};
 let scriptedTurn=0;
 const mock={receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0}),close(){},async plan(v){
- const turn=scriptedTurn++;const topic={sourceId:'brief',text:'Optional hauling, subject to fresh consent',status:'open'};
- if(turn===0)return {topic,action:{kind:'ask',pawn:v.crew[0].id,text:'What is your preference before we discuss work?',reason:'Ask before proposing.'}};
- if(turn===1){const op=v.opportunities.find(o=>o.pawn===v.crew[1].id);if(!op)throw Error('Scripted grounded option absent');return {topic,action:{kind:'propose',opportunityId:op.id,reason:'Would you take this observed work?'}};}
- if(turn===2)return {topic,action:{kind:'adopt_counter',proposalId:v.counters[0].id,reason:'Here is your smaller scope, for fresh consent.'}};
- return {topic,action:{kind:'wait',reason:'Review recorded outcomes; no further work requested.'}};
-},async answerCore(){return {choice:'say',text:'I would prefer a meal before discussing work. That is a preference, not a decision for anybody else.'};},async decide(v){return v.proposal.parentId?{kind:'accept',reason:'Scripted fresh consent'}:{kind:'counter',reason:'Scripted smaller amount',action:{...v.proposal.action,count:5,trips:1}};}};
-const coreBackend=scripted?mock:new ClaudeDecisionBackend({ledgerPath:config.ledger+'.core',scratchRoot:config.scratchRoot+'/core',trial:'core-planner-v1'});
-const pawnBackend=scripted?mock:new ClaudeDecisionBackend({ledgerPath:config.ledger+'.pawns',scratchRoot:config.scratchRoot+'/pawns',trial:'core-pawns-v1'});
+ const turn=scriptedTurn++,topic={sourceId:'brief',text:'Optional work with fresh consent',status:'open'};
+ if(turn<2){const op=v.opportunities.find(o=>o.pawn===v.crew[turn].id);if(!op)throw Error('Scripted grounded option absent');return {topic,action:{kind:'propose',opportunityId:op.id,reason:'Optional work on stack '+op.action.thing}};}
+ if(turn===2)return {topic,action:{kind:'adopt_counter',proposalId:v.counters[0].id,reason:'Smaller amount, fresh consent required.'}};
+ return {topic,action:{kind:'wait',reason:'Receipts establish completion. No further request.'}};
+},async answerCore(){return {choice:'stay_silent'};},async decide(v){
+ if(v.pawn.id===v.character.id&&v.pawn.name==='Alvin')return {kind:'defer',reason:'Not now; I would like to eat first.'};
+ return v.proposal.parentId?{kind:'accept',reason:'Fresh consent to five units'}:{kind:'counter',reason:'One short trip',action:{...v.proposal.action,count:5,trips:1}};
+}};
+const coreBackend=scripted?mock:new ClaudeDecisionBackend({ledgerPath:config.ledger+'.core',scratchRoot:config.scratchRoot+'/core',trial:'core-events-planner-v1'});
+const pawnBackend=scripted?mock:new ClaudeDecisionBackend({ledgerPath:config.ledger+'.pawns',scratchRoot:config.scratchRoot+'/pawns',trial:'core-events-pawns-v1'});
 const summary=()=>({core:coreBackend.summary(),pawns:pawnBackend.summary()});
 const diagnostics=()=>({core:{decisions:coreBackend.receipts,rawResponses:coreBackend.rawResponses,failures:coreBackend.failures},pawns:{decisions:pawnBackend.receipts,rawResponses:pawnBackend.rawResponses,failures:pawnBackend.failures}});
 const before=summary();
@@ -42,7 +43,7 @@ const runId=cold?JSON.parse(await readFile(marker,'utf8')).runId:randomUUID();
 if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,policy,protocol,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
 if(cold&&JSON.stringify(JSON.parse(await readFile(marker,'utf8')).protocol)!==JSON.stringify(protocol))throw Error('Cold protocol mismatch');
 if(cold&&(JSON.parse(await readFile(marker,'utf8')).policy!==policy||JSON.parse(await readFile(marker,'utf8')).scripted!==scripted))throw Error('Cold policy mismatch');
-const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-core-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}`;
+const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-core-events-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}`;
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
 const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],responses=[];
@@ -84,7 +85,7 @@ input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill(
 const timer=setTimeout(()=>{failed=true;child.kill();},1200000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
-const result={at:new Date().toISOString(),policy,protocol,kind:cold?'core-cold':scripted?'core-scripted':'core-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
+const result={at:new Date().toISOString(),policy,protocol,kind:cold?'core-events-cold':scripted?'core-events-scripted':'core-events-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
  before,after:{...summary(),jevCalls:0},diagnostics:diagnostics(),responses,game:receipt,
  accounting:'Claude native Max API-equivalent usage estimates; No Jev calls. Fresh immutable ledgers, no rerolls.'};
 coreBackend.close();pawnBackend.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;

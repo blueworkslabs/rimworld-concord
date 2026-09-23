@@ -16,7 +16,7 @@ export function negotiationPreferences(pawns:Pawn[]) {
 }
 export function withinPreference(p:Proposal,fixture:ReturnType<typeof negotiationPreferences>[number]) {
  if(!p.decision)return false;
- if(p.decision.kind==='refuse')return true;
+ if((p.decision.kind==='refuse'||p.decision.kind==='defer'))return true;
  if(fixture.tag==='native-routine')return false;
  const action=p.decision.kind==='accept'?p.action:p.decision.action;
  return Math.abs(action.x-fixture.anchor.x)+Math.abs(action.z-fixture.anchor.z)<=fixture.maxDistance;

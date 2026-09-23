@@ -752,3 +752,15 @@ refusal citing Beatrice and low Food, with no job. Four provider calls validated
 zero Jev, no retries; 96 samples unpaused. Name labels and private notes persisted;
 no global directory or other-pawn private facts were added. Prior parsing failure
 is preserved and remains unexplained; current parser checks were not weakened.
+
+## Bounded event-driven core — 2026-09-23
+
+[Protocol/results](CORE_EVENTS.md) · [evidence](evidence/core-events.json).
+272 Node tests, ten Python checks and independent full/focused Codex review
+passed. Scripted native defer, smaller counter, fresh acceptance and five-wood
+delivery passed paired/cold restore. Live: three event-admitted core turns and
+two consenting pawn replies, six trips/sixty wood, then no-event quiet time;
+zero Jev or rerolls. All 102 native samples unpaused; decisions explicitly paused.
+Paired/cold restore preserved outcomes and consumed events with zero further
+inference. No live deferral or question was chosen. Topic prose/label mismatch
+remains recorded; after-meal resumption and construction are not implemented.
