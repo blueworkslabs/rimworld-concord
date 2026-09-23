@@ -30,7 +30,7 @@
   "evidence": [
     {
       "label": "Frozen indirect-message protocol",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/INDIRECT_MESSAGE.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/INDIRECT_MESSAGE.md"
     },
     {
       "label": "Native indirect-message results",

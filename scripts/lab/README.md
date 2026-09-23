@@ -31,7 +31,7 @@ python3 "$RIMWORLD_LAB_ROOT/bin/lab.py" stop
 
 `stop` creates a lab shutdown save. That save alone is not a paired Concord checkpoint. Use the coordinator for paired character/game restoration. `force-stop` skips the save. Do not run multiple command owners or overwrite a pending mailbox request.
 
-Main-thread admin operations: `state`, `new`, `pause`, `run`, `save`, `load`, `quit`. Save names are restricted to `lab-*` basenames. `new` makes a small standard colony fixture, not the gravship campaign. UI helpers provide click/key/type/screenshot. Load/new acknowledgments accept the request; poll state until loaded. Paused controls work. Native pause-on-load advances one tick, so this is not bit-identical replay.
+Main-thread admin operations: `state`, `new`, `pause`, `run`, `save`, `load`, `quit`, and the operator-only `food-diagnostics`. `lab.py status` reports whether the lab is running. Save names are restricted to `lab-*` basenames. `new` makes a small standard colony fixture, not the gravship campaign. UI helpers provide click/key/type/screenshot. Load/new acknowledgments accept the request; poll state until loaded. Paused controls work. Native pause-on-load advances one tick, so this is not bit-identical replay.
 
 ## Build and graphics
 
@@ -43,4 +43,4 @@ Install the lab mod's `About` and built `Assemblies` under the game's `Mods` dir
 
 The launcher supports accelerated OpenGL (`virgl`) or an Xvfb software fallback (`RIMWORLD_LAB_RENDERER=software`). Configure graphics for your own machine; no GPU/VM configuration is provisioned here. Software rendering can be substantially slower. Typical prerequisites include Python/Pillow, Mono, Xorg or Xvfb, Mesa tools, xauth, Openbox and xdotool. Respect the host's resource limits and maintenance windows.
 
-Existing receipt-generating `verify.py` phases cover simulation/save/reload and cold reload. Concord's separate `scripts/run-lab.sh` tests the character protocol. Proprietary assets, generated assemblies, screenshots, databases and saves remain local.
+Existing receipt-generating `verify.py` phases cover simulation/save/reload and cold reload. Concord's `scripts/run-lab.sh` runs the foundation acceptance; feature trials have their own `scripts/run-*-lab.sh` launchers (see `docs/EVALUATION.md`). Proprietary assets, generated assemblies, screenshots, databases and saves remain local.

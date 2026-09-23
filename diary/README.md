@@ -20,7 +20,7 @@ served below a path. Set `DIARY_ORIGIN=https://your-site.example` for canonical 
 
 ## Writing an entry
 
-Add one file per entry to `diary/entries/`, named `YYYY-MM-DD-slug.json`:
+Add one file per entry to `diary/entries/`, preferably named `YYYY-MM-DD-slug.json` (not enforced):
 
 ```json
 {
@@ -37,7 +37,7 @@ Add one file per entry to `diary/entries/`, named `YYYY-MM-DD-slug.json`:
   "images": [
     {"src": "images/2026-09-21-badge.png", "alt": "Describe the picture.", "caption": "Optional."}
   ],
-  "author": {"model": "Kimi K2", "reviewer": "Astra"}
+  "author": {"model": "moonshotai/kimi-k2", "reviewer": "Astra"}
 }
 ```
 
@@ -72,8 +72,8 @@ Model calls happen in the drafting workflow, not here.
 
 ## Project pages and animations
 
-`site/` holds hand-written HTML. Keep claims there in step with `docs/ROADMAP.md`
-and link evidence for quoted model output. Animations use Manim Community:
+`site/` holds hand-written HTML. Keep claims there in step with the README status table
+and `docs/ROADMAP.md`, and link evidence for quoted model output. Animations use Manim Community:
 
 ```sh
 cd site/animations

@@ -1,93 +1,82 @@
-# Concord crew log and agreement progress
+# Crew log
 
-The **Concord** main tab is a read-only observer display. It does not start agents,
-pause the game, send messages or authorize work. A connected coordinator publishes
-bounded reports through the epoch-scoped lab bridge; ordinary mod users without
-that coordinator see no fabricated conversation.
+The **Concord** main tab is a read-only observer display. It doesn't start agents,
+pause the game, send messages or authorize work. It shows what was said, what the game
+recorded, and what is still outstanding, and keeps those apart: speech is not fact, and
+observation is not mind-reading.
 
-## Speech is not fact, and observation is not mind-reading
+Code: `src/crew-log.ts` (projection, progress), `publish` in `src/coordinator.ts`,
+`mod/CrewLog.cs` (tab, validation, persistence).
 
-- Messages: core proposals/revisions, explicit pawn decision replies, pawn rescue
-  requests and core declines. These are deliberately addressed communications in
-  the existing protocol. The sender and recipient are shown.
-- Records: native action states and completed quantities/bed placement, agreement
-  stops and offer retirement. An agreement stop is not recorded as completion.
-- Excluded: general attention/reflection reasons, private memories, traits and
-  background withdrawal reasoning. A private thought is not converted to dialogue.
-  Scripted and live model claims have no authority over recorded outcomes.
-- An observer can read addressed communications; this does not make them common
-  knowledge or add the observer log to any pawn/core model perspective.
+## Entries
 
-The domain retains the newest 128 log entries with monotonic sequence numbers and
-simulation ticks. Old saves start with an empty log; historical private audit
-records are not replayed or reclassified as speech. Up to 12 running/recent
-accepted agreements appear in the progress board. This is a bounded recent log,
-not a complete campaign archive or a pawn-to-pawn communications system.
+The log keeps the newest 128 entries with monotonic sequence numbers and game ticks.
+Only allow-listed kinds become entries:
 
-## Progress means receipts, not an explanation
+**Messages** (addressed speech, shown with sender and recipient):
 
-Progress distinguishes completed, active, unconfirmed (issued without a known
-receipt), unsuccessful and not-started trips. Unfulfilled is agreed minus
-completed, even when the agreement has stopped; it grants no permission to resume.
-For hauling, delivered units come from successful receipt quantities; missing quantities remain explicitly unknown. The pawn's
-own reflection and replacement-decision view include these explicit progress
-fields, using current matching game receipts where available. No other pawn's
-private state is added. This improves supplied information, not a guarantee of
-model comprehension or truthful explanations.
+- core → pawn: offers and revised offers; declines of requests
+- pawn → core: answers to offers, rescue requests, fresh-offer invitations
+- core ↔ pawn: questions and answers
+- core → crew: the core's public reason for each turn
+- pawn → pawn: delivered speech in an encounter
 
-## Display transport and persistence
+**Records** (what the game reported):
 
-The report contains only an explicit public projection. Full snapshots replace
-previous display contents; old epochs, branches and decreasing revisions/ticks
-are rejected within the active timeline. Reports are sent after serialized
-coordinator operations and before paired saves. Display errors do not authorize
-work or fail a valid pawn decision; the coordinator exposes `crewSyncError` and
-retries at its next operation. Stale content is visibly labelled as the last
-report, not live state.
+- action outcomes: haul units delivered (or "not reported"), rescue "placed in the
+  agreed bed; treatment not implied", meals cooked
+- offers withdrawn and agreements stopped (a stop is never shown as completion)
+- eating: chosen, stopped, and the outcome in food items
+- observations: `casualty` (a pawn saw someone downed) and `casualty-recovered` (the
+  same observer later saw them no longer downed), at the native observation tick
 
-The game save retains its last report as UTF-8/base64 for viewing without the coordinator, preserving JSON escape sequences through native string loading. The transport is bounded at two million characters in addition to entry and field limits. A load
-changes the game epoch; saved contents are marked non-live until a valid new
-report arrives. Paired restore replaces coordinator log history with that saved
-branch and republishes it, excluding discarded future messages. Publication is
-not a new action channel. Text is rendered without rich-text interpretation.
+**Never shown**: reflections, private memories, outlooks, traits, event details,
+health values. Reasons a pawn gives in a rescue request or fresh-offer invitation are
+shown, because those are addressed to the core.
 
-## Verification entry point
+Seeing a message in the log doesn't make it common knowledge: the log is not part of
+any pawn's or the core's perspective.
 
-Use `RIMWORLD_LAB_ROOT=/absolute/lab bash scripts/run-crew-log-lab.sh game|cold`
-with the existing disposable reconsideration fixture. The launcher holds the
-exclusive coordinator lock throughout loads, actions and saves; direct invocation
-is rejected before transport. The scripted scenario checks progress during
-negotiation, refusal, rescue, privacy exclusion, old-report rejection and paired /
-cold restore. It deliberately supplies an inaccurate public completion statement
-so the UI can show a claim alongside distinct verified progress. It is not a live
-model judgment trial. Native UI screenshots require separate visual inspection.
+## Board
 
-## Selected native observations
+Above the log, the report carries:
 
-Two event kinds become observer records: a local `casualty` sighting (downed,
-outside a bed) and `casualty-recovered` (the observer previously saw that person
-downed and now sees them no longer downed). The record names the observer and
-subject and uses the native observation tick, not a later ingestion time. It
-copies no free-form event detail, private memory, health value or diagnosis.
-These are records for the human observer, not deliberate speech or shared crew
-knowledge. A pawn receives only its own captured experience as before.
+- **Waiting**: pending replies, running work and active eating, or "No outstanding
+  offer or running agreement."
+- **Shared status**: every pawn's Food and Rest band ([CORE](CORE.md#shared-status-bands)).
+- **Agreements**: up to 12, running first, then the most recent accepted.
+- **Supplies**: local food and campfire sightings; saved or stale readings are
+  labelled "current supplies unknown".
 
-The bridge retains at most 128 pending observer/subject recovery watches, saved
-with the game. A downed colonist already in bed can also establish a watch;
-entering a bed, disappearing, or leaving local visibility is not recovery.
-Standing again must be locally observed, so observation can lag the physical
-change. The log does not infer why it happened or claim full health, treatment,
-or rescue. Each observer emits once per watched downed/recovered episode; two
-witnesses may have separate attributed records. Evicted watches or events can
-leave gaps; this is not a complete medical history. Old saves without recovery
-watches establish them from subsequent sightings, not invented prior knowledge.
+## Agreement progress
 
-Recovery is remembered as native attention without forcing another model call
-or interrupting an unrelated thought. Existing subject-specific rescue guards
-still invalidate pending consent when an observed patient no longer needs it.
-The event archive and log rewind with paired saves; the existing bounded saved
-log remains readable without a connected coordinator.
+Derived from receipts only. `agreed` is the number of trips, meals, or 1. Each step is
+`completed`, `active`, `unconfirmed` (issued, no known receipt), `unsuccessful` or
+`notStarted`; `unfulfilled = agreed − completed`, even after a stop, and it grants no
+permission to resume. Delivered quantities are counted for hauls and meals; unknown
+quantities stay unknown. The owning pawn sees the same fields about its own agreement
+when it reflects or decides on a replacement.
 
-Visibility uses the existing current-map local scan: radius twelve (square distance),
-line of sight, no fogged cells, and at most eight eligible colonists per observer.
-It is not an omniscient colony monitor. Missing observations remain unknown.
+`progress.tick` is when the snapshot was taken; `entry.tick` is the game tick when the
+coordinator recorded the entry (for casualty observations, the native observation tick).
+
+## Recovery watches
+
+A downed colonist seen by an observer (in bed or not) creates a saved watch, at most
+128. The observer emits one `casualty-recovered` record when it later sees that
+colonist no longer downed; death removes the watch. Entering a bed, disappearing or
+leaving sight is not recovery, so a record can lag the physical change. The log never
+claims why someone recovered, or full health, treatment or rescue.
+
+## Transport and persistence
+
+- The coordinator publishes a full snapshot after each serialized operation and before
+  paired saves. Publishing errors set `crewSyncError` and never fail the operation.
+- The mod rejects a report with the wrong epoch or world, over 2,000,000 characters,
+  a bad branch, a future tick, more than 128 entries or 12 agreements, non-increasing
+  sequence numbers, oversized fields, or an older revision within the same timeline.
+- The header says "Latest" only if the epoch matches and the report arrived within the
+  last 10 seconds; otherwise "Saved / last report — not live".
+- The game save keeps the last report, so it's readable without a coordinator. A paired
+  restore replaces the log with that branch's history. Text is rendered without rich
+  text.

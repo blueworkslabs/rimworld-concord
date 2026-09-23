@@ -1,6 +1,6 @@
 # Development diary workflow
 
-The diary lives with the public project. Cloudflare Pages builds static HTML; no database, model key, runtime inference, or publishing account is needed in the browser. The operator sets up Pages; do not create a Cloudflare project or claim a live deployment without its URL and verification.
+The diary is part of the project site at <https://rimworld-concord.pages.dev/log/>. Cloudflare Pages builds static HTML from `main`; no database, model key, runtime inference or publishing account is needed in the browser. Build settings are in [diary/README.md](../diary/README.md).
 
 ## When an entry is worthwhile
 
@@ -12,11 +12,7 @@ Use editorial judgment after a merged milestone: a player-visible capability, me
 2. Review that brief. Verify claims against the PR and test receipts; add explicit facts and evidence links. PR text is source material, not proof. Remove private details. An unmerged PR must not be described as shipped.
 3. Invoke the host-owned `llm-task` tool with the generated request, explicitly selecting `openrouter` / `moonshotai/kimi-k2`. Its structured writer prompt and output schema are under `docs/diary/`. Keep the request bounded; no automatic retries or unattended paid jobs. Use the existing protected provider configuration. If that route is unavailable, keep the entry pending; do not attribute an Astra-written substitute to Kimi or relax Gem's chat restrictions.
 4. Save the actual returned JSON draft under `.diary-work/`, review every claim, and correct copy where necessary. Keep Kimi's author credit only when a confirmed Kimi response supplied the draft. Astra is the factual editor; Fable owns the site design. A schema-valid response still needs editorial review.
-5. Place the reviewed entry in `diary/entries/YYYY-MM-DD-SLUG.json`. Optional screenshots go under the diary's local image assets, with accurate alt text and a caption identifying scripted or live tests. Inspect images for private UI content. Do not publish game binaries, saves or databases.
-6. Build with `node diary/build.mjs`, preview the result, and include the entry in a normal reviewed PR. Merging triggers Pages once the operator has connected it. No Cloudflare token or AI invocation belongs in CI.
+5. Place the reviewed entry in `diary/entries/` (preferably `YYYY-MM-DD-SLUG.json`). Optional screenshots go under the diary's local image assets, with accurate alt text and a caption identifying scripted or live tests. Inspect images for private UI content. Do not publish game binaries, saves or databases.
+6. Build with `node diary/build.mjs`, preview the result, and include the entry in a normal reviewed PR. Merging to `main` publishes it. No Cloudflare token or AI invocation belongs in CI.
 
 Normal maintenance is one decision, one short model request, one factual review and a static build. Keep raw prompts/responses out of Git unless deliberately sanitized as project artifacts. The `author` field is a credit, not cryptographic model provenance.
-
-## Initial setup status
-
-Fable’s template and the first actual Kimi K2 draft are integrated, with Astra’s factual edits and an inspected scripted-test screenshot. Build settings are in `diary/README.md`. The diary uses separate editorial inference; the game’s later bounded live-appraisal trials are described in their dated entries. Deployment is verified separately from a successful local build.

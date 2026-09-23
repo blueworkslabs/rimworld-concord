@@ -1,88 +1,134 @@
-# Model access and adapter plan
+# Models
 
-Checked 2026-09-21. No live inference was used in foundation acceptance. A later protected synthetic Jev fixture verified transport and response parsing only. Runtime authentication and billing configuration stay outside this repository.
+What each model sees, what it may return, and how it is run and accounted for. The
+rule underneath all of it: a model chooses among options it was given; it never gets a
+tool, a game handle or the database, and its prose never becomes an action.
 
-## Jev on OpenRouter
+Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decision.ts`,
+`src/provider-diagnostics.ts`, `src/appraisal.ts`, `src/protected-jev.ts`,
+`src/decision-trials.ts`, `src/prompt-accounting.ts`, `scripts/run-codex-contract.py`.
 
-Confirmed via the model page and the model-specific endpoint:
+## Routes
 
-- Model: `typesafe/jev-1.13`
-- Provider: TypeSafe
-- Context: 32,000 tokens
-- Listed input price: USD 0.042 per million tokens; output: free
-- Modality: `text->decisions`
-- Interface: **OpenRouter Decisions API**, not the OpenAI-compatible chat-completions endpoint. A chat SDK/adapter is not sufficient.
+| Use | Model | Route | Status |
+|---|---|---|---|
+| Pawn decisions, reflections, speech, core answers | `claude-sonnet-4-6` | Native Claude Code CLI, existing Max login | live trials |
+| Core planner | `claude-sonnet-4-6` | same, own system prompt and ledger | live trials |
+| Fast appraisal | `typesafe/jev-1.13` | OpenRouter System One (`POST /api/v1/systemone`), protected credential | bounded live trials; not in recent runs |
+| Cheaper-model contract checks | `gpt-5.6-luna` | Native Codex app-server, ChatGPT login | offline only, not a game backend |
+| Diary drafts | `moonshotai/kimi-k2` | OpenRouter via OpenClaw `llm-task` | editorial only |
 
-The general `/api/v1/models` catalog did not include Jev during the check, while the model-specific endpoint did. Availability checks must account for specialized APIs; absence from the general catalog does not establish absence from OpenRouter. A protected live call later confirmed account-specific access to `POST /api/v1/systemone` for one synthetic appraisal fixture.
+No bare API mode, no Agent SDK, no extracted OAuth tokens. Subscription logins are
+used through their native clients. Usage figures are API-equivalent estimates, not
+cash charges. Billing routes are never switched silently.
 
-Sources:
-- https://openrouter.ai/typesafe/jev-1.13
-- https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints
+## What a pawn sees
 
-TypeSafe documents Choice, Score and Noul primitives. Choice/Score include probability distributions and a derived confidence statistic. These fit bounded appraisal questions. Schema validity does not establish good judgment, and vendor speed/cost figures are not local measurements. OpenRouter also documents a TypeSafe-compatible `POST /api/v1/systemone` endpoint: TypeSafe SDK base URL `https://openrouter.ai/api`, with the existing OpenRouter authentication route. It accepts bare `jev-1.13` or the namespaced ID and returns answers plus usage/cost. This means a separate direct TypeSafe account is not inherently required. The native Decisions API is currently labeled alpha; use a version-pinned, validated adapter rather than a chat-completions shim.
+Offer decisions and reflections go through `modelPrompt`, which sends
+`{task, perspective, executableChoices, contracts}`. Encounter turns (`socialPrompt`)
+and core answers (`coreAnswerPrompt`) send the same perspective with a single fixed
+contract. All pawn calls share a short fixed system prompt (`pawnInstructions`, about
+670 characters).
 
-Compatibility guide: https://openrouter.ai/docs/guides/community/typesafe-sdk.md
+- **Perspective**: the pawn's own facts and history, plus explicitly shared facts
+  ([SOCIAL](SOCIAL.md#who-knows-what)). Needs are **self-describing**: Food, Rest and
+  Mood are always listed, each with `known`, `fractionFilled`, `percentFilled` and a
+  plain meaning ("0 = empty/starving; 1 = full/well fed. Higher is LESS hunger.").
+  A missing, conflicting or invalid reading is `known: false` with a reason, never
+  zero.
+- **Contracts**: short rules. `knowledge`, `identity`, `evidence` and `sharedStatus`
+  always; `move`, `haul`, `rescue` and `production` whenever the pawn has that
+  observation (in the live game, always); `progress` when agreement progress is
+  present; `offers` when offers are in view.
+- **Choices**: every option carries its effect in words, e.g. counter: "Suggest
+  different implemented work; execute nothing. Adoption requires another offer and
+  fresh consent."
 
-TypeSafe docs: https://docs.typesafe.ai/ and https://docs.typesafe.ai/confidence
+## What a model may return
 
-## Agent runtimes versus model APIs
+The JSON schema for each call is generated from the current view, so IDs can only be
+ones that exist right now. The coordinator then validates the answer again against a
+fresh view before anything happens.
 
-Codex documents ChatGPT sign-in for subscription access, API keys for usage-based access, and an app-server interface for embedding the Codex client. Its authentication page recommends API-key authentication for programmatic workflows. Do not treat subscription credentials as a generic API key or assume unlimited unattended inference. A client adapter needs a supported access path and isolation from coding-agent shell/file tools.
+### Offer decisions
 
-Claude Code documents noninteractive CLI operation. Its bare mode does not read subscription OAuth credentials and requires supported API/provider authentication. The Agent SDK overview also distinguishes supported SDK authentication from offering third-party subscription login/rate limits. Verify the precise route before wiring an embedded game-agent backend.
+`accept`, `refuse`, `defer` or `counter {action}`, each with a reason (1–1000
+characters). A counter must be an implemented action; it executes nothing.
 
-Sources:
-- https://developers.openai.com/codex/auth
-- https://developers.openai.com/codex/app-server
-- https://code.claude.com/docs/en/headless
-- https://code.claude.com/docs/en/agent-sdk/overview
+### Reflection choices
 
-## Runtime policy
+| Choice | Offered when | Effect |
+|---|---|---|
+| `keep_current_activity` | always | nothing |
+| `withdraw_current_agreement` | the pawn has a running agreement | stops it (persisted first) |
+| `request_rescue_alternative` | running haul, no request yet, a casualty observed | asks the core for a rescue instead |
+| `answer_pending_proposal` | no commitment or agreement; up to 8 own pending offers | accept, refuse, defer or counter |
+| `request_fresh_offer` | a deferred offer and nothing pending or running | invites one fresh offer |
+| `revise_private_outlook` | own evidence, received messages or an existing outlook | replaces the outlook ([SOCIAL](SOCIAL.md#private-outlook)) |
 
-Start with scripted fixtures, then one explicitly configured live backend. Keep secrets in host-owned protected configuration. Set project budgets before unattended paid trials; never silently switch billing routes. Native clients/OpenClaw and Pi remain optional runtime implementations rather than game-protocol dependencies.
+In the schema, agreement IDs are constants, proposal and target IDs are enums, outlook
+citations are enums of eligible sources, and `expectedRevision` is fixed. The canonical
+coordinator kinds are `continue`, `withdraw`, `request_rescue`, `proposal`,
+`request_reoffer` and `revise_outlook`. Prose is never parsed: a choice whose
+explanation says otherwise is still the choice.
 
-Compare rules+LLM with rules+appraisal+LLM on identical recorded perspective episodes. Measure missed escalation, character consistency, actual action outcomes, latency tails, total cost including downstream LLM calls, and timeout recovery.
+### Speech and core answers
 
-## Implemented appraisal adapter
+Encounter turns: `say {text ≤240}` or `stay_silent`. Answers to the core: the same,
+plus `eat {thing, text}` when eating options are offered. Core choices are in
+[CORE](CORE.md#what-the-core-may-do).
 
-`src/appraisal.ts` now implements the System One `noul` request and validates its response, with an injected operator-owned transport. `TrialBudget` keeps conservative call reservations in a separate SQLite ledger that must not roll back with game saves. Mocked unit coverage covers malformed output, cancellation and budget behavior. One protected live synthetic fixture returned `typesafe/jev-1.13-20260917`, score `0.64`, route `deliberation`, latency `1078ms` and reported cost USD `0.000020244`; see [live evidence](evidence/jev-live.json). A subsequent [real-game trial](evidence/jev-game.json) returned scores `0.23` and `0.21` for captured food and mood events (704ms and 362ms end-to-end API waits). Both retained native behavior. Across the synthetic and game runs, three calls reported USD `0.000133266`; the three-call trial is exhausted, without changing its allowance. This is not a character-quality comparison. See [live operation](LIVE_APPRAISAL.md) and [awareness](AWARENESS.md).
+## Isolation
 
-## Native Claude Code deliberation trial
+Each Claude call is a fresh CLI process:
 
-Claude Code 2.1.263 was verified with its normal noninteractive CLI and existing
-first-party Max login, fixed to `claude-sonnet-4-6`. We do not use bare mode, the
-Agent SDK, extracted OAuth tokens or a generic model API. A restricted environment,
-empty tool/MCP configuration, safe mode and stream checks enforce the pawn's
-limited interface. The only advertised tool was `StructuredOutput`.
+- flags: `--safe-mode`, `--tools ''`, `--disallowedTools mcp__*`, `--strict-mcp-config`
+  with an empty MCP config, `--setting-sources ''`, `--disable-slash-commands`,
+  `--no-session-persistence`, `--permission-mode dontAsk`, `--effort low`, thinking
+  off, `--max-turns 2`, `--max-budget-usd 0.10`, fixed model and a replacement system
+  prompt;
+- a new temporary working directory and only `PATH`, `HOME` and `LANG` in the
+  environment, plus `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`; the native login must report a first-party Max subscription;
+- a start-up preflight that fails closed unless the only advertised tool is the
+  `StructuredOutput` return format and there are no MCP servers, plugins, skills or
+  slash commands; any other tool use or hook event aborts the call;
+- limits: prompt ≤24,000 bytes, output ≤256 KiB, 90 s per process, cancellation kills
+  the process group (SIGKILL after 1 s); one pending call per backend;
+- the result must be a success, from the expected model only, with at most 2 turns.
 
-The synthetic decision took 3133ms; a real-game explicit decision took 3448ms and
-accepted a move that actually completed. A second real-game reflection was
-cancelled after a newer conversation memory arrived; it produced no accepted
-answer. The three-attempt allowance is exhausted and no retry was made. Successful
-responses reported USD 0.021867 total **API-equivalent estimated usage**, not cash
-charges. Cancelled-call usage is unknown; its full reservation remains, bringing
-reserved equivalent usage to USD 0.30. The Jev ledger and paid-call cap are unchanged.
+**Core formatting recovery.** A core answer may use a third turn only when the stream
+proves one narrow pattern: two identified assistant messages, a first StructuredOutput
+call rejected for a schema mismatch, a second valid call, and a final result. Messages
+may span several stream events, but identities must be complete and consistent, no
+message may reopen, and anything else (a third message, malformed blocks, unmatched
+tool results, events after the result) rejects the answer. `--max-turns` stays 2.
 
-See [runtime controls and operator guide](LIVE_DELIBERATION.md). Native subscription
-rate limits still apply. This result proves a narrow integration, not unlimited
-subscription use, narrative quality or an unattended service.
+**Luna** runs through the native Codex app-server with a pinned per-process provider
+(ChatGPT endpoint, zero retries), a local catalog copy with tools and multi-agent
+disabled, and a mock preflight that rejects any advertised tool. It only ever runs on
+frozen offline suites and never touches a game bridge.
 
+**Jev** runs through a Gateway-side protected transport: an injected opaque credential,
+a fixed OpenRouter destination, no redirects, a bounded response size, and errors
+without raw transport details. The lab host never receives the credential. Each call
+asks one `reflect` question, and the serialized perspective is at most 16,000 bytes.
 
-## Follow-up thought reliability
+## Ledgers
 
-A separately bounded four-attempt native Max trial completed two calls per mode:
-paused explicit decision 3253ms and reflection 4179ms; continuous explicit decision
-3622ms and reflection 6183ms. Both accepted the nearby move (completed in-game)
-and refused the implausible waypoint during native-event reflection. Paired and
-cold restore passed separately in each mode. These are individual observations,
-not a model ranking or latency benchmark.
+Every live trial has its own policy in `src/decision-trials.ts` (calls and an
+API-equivalent reservation) and a separate SQLite ledger (`TrialBudget`):
 
-The new ledger reserved USD 0.40 API-equivalent usage and reported USD 0.06234 in
-successful completion estimates, not cash charges. Both historical ledgers remained
-byte-for-byte unchanged. No Jev calls or automatic retries occurred. The four-attempt
-allowance is now exhausted. See [timing](DECISION_TIMING.md) and dated acceptance.
+- each Claude attempt reserves USD 0.10 and each Jev attempt USD 0.002 before the call;
+- failed, invalid and cancelled attempts keep their reservation; reported usage is
+  settled even for invalid output;
+- a ledger is bound to one policy and never rolls back with a game save; unused
+  allowance stays unused, and no cap is raised mid-trial.
 
+## Diagnostics
 
-## Three-pawn negotiation follow-up
-
-The separate `negotiation-v1` profile permits six native Claude Max attempts at the unchanged USD 0.10 per-attempt API-equivalent reservation (USD 0.60 total). The completed trial used all six, reported USD 0.087609 estimated subscription usage (not cash), and did not alter prior ledgers. Three real pawn self-views plus labelled authored test preferences yielded two decisions each, including a completed counter/revision/fresh-consent movement exchange. Core replies were scripted; live calls sequential and paused. Paired/cold restore passed without further inference. See [bounded negotiation](NEGOTIATION.md) and [receipt](evidence/negotiation-live.json). No automatic replays, model swaps or expanded allowance.
+Failures keep bounded, text-free diagnostics so they can be understood without storing
+model output: the result type and subtype, API error status and allow-listed codes
+(unknown values become `other`), turns, cost, which models reported usage, whether
+structured output was present, up to 16 validation issues with truncated paths, and
+per-message stream counts (capped). Each attempt also records the authored request
+size in UTF-8 bytes (instructions, perspective and contracts, schema), not tokens.

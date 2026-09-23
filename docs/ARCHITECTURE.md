@@ -1,63 +1,145 @@
-# Architecture and accepted decisions
+# Architecture
 
-2026-09-21 baseline. New repository explicitly requested; the old rimworld-gm repository remains intact.
+Concord splits responsibility so that no model is ever trusted with authority. The
+game executes and records, the coordinator decides who may do what and remembers
+everything, and each model call only chooses among options it was given.
 
 ## Components
 
-1. Native C# mod owns physical action validation and saved execution receipts.
-2. Standalone TypeScript coordinator owns event order, character state, proposals, commitments, decisions and paired checkpoints. One local process writes through the bridge.
-3. Replaceable decision backends consume bounded perspective objects; no game/admin handles are passed to them.
-4. Optional thin OpenClaw integration will provide operator controls and possibly isolated decision execution. It is not the simulation's state database or clock.
+```text
+ Minds (replaceable, tool-free)      Claude pawn/core calls · Jev appraisal · scripted backends
+        ▲ perspective + menu   │ one validated choice
+        │                      ▼
+ Coordinator (TypeScript, SQLite)   perspectives · consent · attention · core scheduling · checkpoints
+        ▲ observations, events, receipts   │ actions with IDs
+        │                                  ▼
+ Concord mod (C#, inside RimWorld)  shortlists · native jobs · action ledger · crew-log tab
+        │
+ RimWorld                           jobs, needs, pathing, skills, social memories, storyteller
+```
 
-The human is initially an observer/test director, communicating through the core when desired. Debug interventions are separate from in-world agency. Direct possession is deferred.
+**The mod** (`mod/`) observes each pawn's own facts, samples native events, builds
+bounded shortlists of what is physically possible nearby, validates every requested
+action again at dispatch, runs native jobs, and keeps a saved ledger of action
+records. It also draws the read-only crew-log tab and owns decision-pause claims. One
+file per capability: `Movement.cs`, `Hauling.cs`, `Rescue.cs`, `Production.cs`
+(campfire and cooking), `Eating.cs`, plus `Awareness.cs`, `Casualties.cs`,
+`FoodObservation.cs`, `SharedStatus.cs`, `DecisionPause.cs`, `CrewLog.cs`.
 
-## First action contract
+**The bridge** (`src/lab-bridge.ts`) is a file mailbox under
+`$RIMWORLD_LAB_ROOT/concord/`. Operator actions (save, load, fixtures) go through the
+lab harness, never through a model. Exactly one coordinator process holds the
+lifetime lock.
 
-The core creates a proposal for a known pawn. Only the bound pawn handle can decide it. Strict response validation permits acceptance, refusal or a counterproposal; additional fields such as a forged actor/action are rejected. Acceptance persists an action ID before dispatch. An uncertain transport outcome retains that ID; reconciliation queries the game ledger before any retry. Action receipts distinguish started/completed/failed/interrupted. A counterproposal is recorded for further discussion, not automatically executed. The core's communicated-counter inbox excludes private character state. Its bounded `revise` operation adopts the exact alternative into a new pending offer for the same pawn, requiring fresh acceptance; owner-only thread history and lineage persist. See [negotiation](NEGOTIATION.md).
+**The coordinator** (`src/coordinator.ts`) serializes every operation. It hands out
+identity-bound handles: `core()` can propose, withdraw pending offers, adopt counters
+and answer requests; `pawn(id)` can decide, withdraw its own agreement, request a
+fresh offer and stop eating. State lives in SQLite (`src/store.ts`): one state row, an
+append-only event log committed atomically with it, and checkpoint records.
 
-The mod supplies bounded owner-specific [nearby movement observations](MOVEMENT.md), also available to the core as a physical-only read projection. Options are advisory and rechecked at execution; they create no action authority.
+**Minds** receive a projection and return one structured choice:
+scripted backends (`src/backends.ts`) for regression, Claude through the native CLI
+for pawns and the core (`src/claude-decision.ts`), and Jev as an optional fast
+appraiser (`src/appraisal.ts`). See [MODELS](MODELS.md).
 
-The mod supports movement and [bounded hauling](HAULING.md) on the current map. It rejects unavailable, downed, mentally breaking or drafted pawns, and unsafe/unreachable destinations. Native game behavior may interrupt an accepted job. Movement completion means reaching the requested cell; hauling completion means the job-specific exact-cell drop delivered the agreed quantity. Neither is established by merely receiving a tool response. The core does not possess the mod transport; actor checks supplement rather than replace coordinator identity binding.
+**Trial ledgers** (`src/decision-trials.ts`, `TrialBudget` in `src/appraisal.ts`) are
+separate SQLite files that count every model attempt. They never roll back with a game
+save.
 
-## Continuity
+## The main loop
 
-Each saved game has a persistent world ID and a fresh, nonserialized epoch for every loaded GameComponent. Request IDs are distinct from action IDs: retrying an action cannot accidentally consume an old transport response. Saved action records deduplicate effects in that timeline.
+1. The coordinator ingests game state and new native events. Each event goes only to
+   the pawn who experienced it and is routed to native behaviour, appraisal or
+   deliberation ([ATTENTION](ATTENTION.md)).
+2. The core, when a public change wakes it, sees an allow-listed view and proposes
+   listed work, adopts a counter, asks one pawn a question, or waits ([CORE](CORE.md)).
+3. The addressed pawn answers the offer: accept, refuse, counter or not now
+   ([ACTIONS](ACTIONS.md)).
+4. Acceptance persists an action ID, then dispatches it. The mod validates and runs a
+   native job, and reports a receipt.
+5. Receipts update agreement progress, the crew log and the core's view. Completion is
+   whatever the receipt says, never what a model said.
 
-SQLite commits character state and audit events atomically. Checkpoints currently require no active commitments. The coordinator cancels pending inference, saves the paused game under a unique name, hashes it and stores the corresponding character snapshot. A crash before checkpoint metadata exists leaves an unusable orphan, never a falsely complete pair. Restore verifies the save hash before loading, marks the binding invalid during transition, restores memories and forks the branch ID. Unknown external loads fail closed. Native pause-on-load advances one tick; no bit-identical replay claim.
+## Invariants
 
-Audits retain discarded branches for operators; character views derive only from the active state, not all historical events. A DB backup and its referenced immutable game saves must be retained together. Active-job checkpoints, database migrations beyond schema 1, retention and crash-recovery UX are deferred.
+### Consent
 
-## Three speeds of cognition
+- Only the bound pawn's handle can answer an offer. Decisions are strictly validated:
+  `accept`, `refuse`, `defer` ("not now") or `counter` with an alternative action.
+- A counter executes nothing. If the core adopts it, it becomes a new offer that needs
+  fresh consent; a thread allows at most two revisions.
+- Replacing running work requires consent to the replacement and a confirmed stop of
+  the old job before the new one is dispatched.
+- Speech, topics and requests never create jobs. Eating happens only when the pawn
+  itself picks the `eat` option while answering a core question.
+- A model failure or timeout leaves the offer pending. It never turns into forced
+  obedience or a fallback decision.
 
-- Native habits/needs/job execution continue during ordinary deliberation.
-- Fast appraisal assesses bounded contextual choices; Jev is a candidate, not a dependency.
-- Deliberation handles negotiation, novelty and planning, and may establish bounded hauling intentions or withdraw them.
+### Identity and deduplication
 
-All layers should use consistent traits, relationships, commitments and relevant memories. No confidence score can prevent explicit significant-event escalation. Immediate native reactions and later reflection can both be scheduled for one event. Selected native events now feed the routing policy. See [pawn awareness](AWARENESS.md) for sampling, retention and perception limits. Routing produces attention records, not orders. An opt-in [bounded attention pump](ATTENTION.md) now consumes them, invokes injected appraisal/reflection backends and applies only pawn-owned responses. Scripted behavior is verified. Jev appraisal has a bounded adapter, mocked tests and one protected synthetic call plus two bounded real-game appraisals. The [split-host live runner](LIVE_APPRAISAL.md) keeps credentials away from the game. A [native Claude CLI backend](LIVE_DELIBERATION.md) now supplies bounded live decisions without action-capable model tools. One explicit live decision completed a move; an event-triggered thought was cancelled on newer experience. The subsequent reliability trial completed live reflection and cold restore in paused and continuous modes. Standing-intention execution now has a bounded hauling implementation; long-run character-quality evaluation remains pending.
+- Request IDs (transport) are distinct from action IDs (effects).
+- An action ID is persisted before dispatch. The mod's saved ledger makes a repeated ID
+  a no-op and rejects a reused ID with a different payload.
+- After an uncertain dispatch, reconciliation asks the game's ledger before any
+  re-dispatch of the same ID. There is no automatic retry of failed work.
 
-Live play is the target. The activity API drives an expiring visual badge above deliberating pawns. Activity IDs prevent an old completion from clearing a newer badge; epoch validation rejects clears from discarded timelines. Expensive calls must be bounded/cancellable, stale results revalidated, and backend failures must not turn into forced obedience. Current fallback leaves the proposal pending and native behavior unchanged. Extended planning pauses should be explicit and visible, not an invisible default for every decision.
+### Timelines
 
-## Scope boundaries
+- Every loaded game gets a fresh, unsaved epoch. Requests from an older epoch fail
+  closed in the mod, and unknown external loads fail closed in the coordinator.
+- A generation counter invalidates in-flight thoughts when the coordinator checkpoints
+  or restores: offer decisions, reflections, encounter turns, core turns and answers are
+  aborted and not retried. Late answers are discarded, never applied.
 
-There is no general remote API, hostile code sandbox, full pawn perception system, autonomous core planner, OpenClaw plugin runtime, unattended live model operation, campaign or gravship-control layer in this slice. These should be added incrementally against the same authority and timeline invariants.
+### Paired checkpoints
 
+- A checkpoint pairs a paused game save (hashed) with the character state. It is only
+  allowed when no action is in flight; between trips of a standing agreement is fine.
+- Restore verifies the hash, marks the timeline as restoring, loads, and forks a new
+  branch ID. Running core turns and in-progress answers become failed and running
+  encounters are closed; nothing is retried.
+- Cold restore is the same restore from a fresh process. Native pause-on-load advances
+  one tick, so replay is not bit-identical.
+- A database backup is only valid together with the saves it references.
 
-### Explicit timing and queued experience
+### Knowledge
 
-The coordinator defaults to continuous play. An explicit pause-at-decision mode
-uses owner/epoch-scoped game pause claims, not changes to the player's time-speed
-setting. Claims coexist, release independently and expire on wall time even when
-simulation is paused. The model never receives this capability. Known mundane
-Chitchat and DeepTalk are retained for background reflection without invalidating current thought;
-other memory/health events retain conservative cancellation. See [timing policy](DECISION_TIMING.md).
+Each mind gets an explicit projection, never a spread of internal state:
 
-## Pawn-requested alternatives
+- A pawn sees its own facts, needs (self-describing, unknown never zero), memories,
+  outlook, messages addressed to it, its own shortlists, and explicitly shared facts:
+  coarse Food/Rest bands of the crew, names of visible people, local food sightings.
+- The core sees public and addressed information only: crew names, bands, agreements
+  and receipts, messages and requests as attributed speech, grounded opportunities,
+  food sightings. Never memories, outlooks or exact meters.
+- The crew log shows an allow-list of messages and records, never reflections.
 
-A deliberating pawn may communicate one locally grounded rescue request while
-retaining its running hauling agreement. The scripted core sees that explicit
-message, not the pawn's private reflection, and may decline or offer a concrete
-same-patient replacement. Refusal and countering preserve the old agreement;
-acceptance authorizes a checked handover, not simultaneous jobs. Confirmed old-job
-cancellation precedes rescue dispatch; completed old work invalidates stale
-replacement consent. Interrupted handovers persist without automatic switch
-retries. See [bounded request semantics](ALTERNATIVE_REQUESTS.md).
+The full matrix is in [SOCIAL](SOCIAL.md#who-knows-what).
+
+### Model isolation
+
+Every call is a fresh CLI process with no tools, no MCP servers, no settings, no
+session persistence, a reduced environment and a fixed model. The output schema is
+built from the IDs that exist right now, and the coordinator validates the answer
+again against a fresh view before applying it. See [MODELS](MODELS.md#isolation).
+
+### Timing
+
+Play is continuous by default; native routines keep running while a pawn thinks, with
+a thinking badge over its head. Pausing the game at decisions is an explicit test
+mode using owner- and epoch-scoped pause claims that expire on wall-clock time.
+
+## Split-host trials
+
+Live trials run the models on a host with the native logins and protected egress, and
+the game on the lab host. The inference side reaches the lab over SSH; both sides
+check they run the same build. Messages are line-delimited JSON, capped at 32,000
+bytes per inference message and 16 MiB per receipt (`src/trial-wire.ts`), and each
+inference lane is serialized (`src/inference-lane.ts`).
+
+## Not built
+
+No general remote API, no sandbox against a hostile operator or plugin, no full
+perception model, no unattended inference, no campaign or gravship layer, no installed
+OpenClaw plugin (the planned contract is in `adapters/openclaw/`), and no checkpoints
+in the middle of an active job.
