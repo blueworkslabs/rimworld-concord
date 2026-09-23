@@ -832,3 +832,7 @@ No general planning or causal food-visibility improvement established.
 ## Pawn-owned eating
 
 [Contract and native evidence](PAWN_EATING.md): typed core-question answer, not core order or speech parsing. Scripted berries at 20% Food, speech-only/explicit eat/pawn withdrawal/operator cleanup, exact consumption receipts, relay integration, paired/cold restore. 324 Node +11 Python checks and final independent review. Live model use untested.
+
+## Live pawn-owned eating
+
+[Protocol and evidence](EATING_FOLLOWTHROUGH.md): six core +three pawn attempts, all applied/delivered, two bounded core formatting repairs, zero Jev/rerolls. Alvin typed eat and consumed 12 berries; Pedro/Beatrice speech only, no work proposals/cooking. One unit error and reply-routing gap retained. 326 Node +11 Python checks, independent review, scripted/live paired+cold restore; all 228 historical database-related files unchanged.

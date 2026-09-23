@@ -1,0 +1,56 @@
+{
+  "slug": "twelve-berries-chosen",
+  "title": "Twelve Berries Chosen",
+  "date": "2026-09-23",
+  "summary": "Alvin chose to eat and consumed twelve berries. Helping another pawn still required more than words.",
+  "sections": [
+    {
+      "heading": "What Ran",
+      "paragraphs": [
+        "This session exercised the pawn-owned eating choice already built in PR53, now in its first bounded live test. Six core turns and three pawn replies passed validation, including two verified formatting repairs. Three unused pawn attempts stayed unused. The same campfire fixture ran for two minutes of native activity, with explicit pauses for inference. No action was prescribed, and there were no Jev calls or operator rerolls."
+      ]
+    },
+    {
+      "heading": "What Worked",
+      "paragraphs": [
+        "Alvin chose to eat. The core asked about berries; Alvin selected eat with a specific stack ID. Native receipt confirmed twelve berries consumed. His Food need rose from roughly 40 percent to near 98 percent, then settled around 81 percent by session end. The core waited while the receipt showed started and consumed at zero, then recognized confirmed completion. One summary line incorrectly stated twelve nutrition rather than twelve food units; the raw error was retained for inspection.",
+        "Separately, scripted relay rehearsal consumed the same twelve berries with zero model calls. Both scripted and live versions passed paired and cold-restore checks: self-care identities held, consumption remained intact, and allowances stayed unchanged."
+      ]
+    },
+    {
+      "heading": "What Did Not",
+      "paragraphs": [
+        "Pedro had no eligible eating options and no food in his local sighting; he replied with speech only. Beatrice replied with prose addressing Pedro, but the actual message recipient was core, not Pedro. Pedro never received those directions. Neither speech generated a movement or eating job. Zero work proposals, campfires, or cooking occurred. Only one self-care action completed. We cannot claim all hungry pawns were helped or that a full planning loop executed.",
+        "The scope here is one authored live situation, not general reliability or character development."
+      ]
+    },
+    {
+      "heading": "Verified and Next",
+      "paragraphs": [
+        "All 326 Node and eleven Python checks passed, alongside independent review and paired/full-restart checks. The historical databases remained unchanged, and staging is stopped. These checks support the recorded result; they do not establish general character reliability.",
+        "Next, make food units and communication destinations clearer. Naming Pedro in a reply must not silently forward it to him. Alvin’s follow-up topics also remained open despite the completed eating receipt: current closure rules link work proposals, not self-care. That is unfinished bookkeeping, not failed eating."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Trial protocol and retained result",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/EATING_FOLLOWTHROUGH.md"
+    },
+    {
+      "label": "Retained evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/eating-followthrough.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/eating-followthrough-records.png",
+      "alt": "Saved Concord Records panel showing Alvin chose to eat up to twelve berries, started eating, then completed consumption of twelve units.",
+      "caption": "Actual live-trial record after cold restart. Choice, start and confirmed consumption are separate entries. Link bands show unknown in this saved report, not fresh telemetry."
+    }
+  ]
+}

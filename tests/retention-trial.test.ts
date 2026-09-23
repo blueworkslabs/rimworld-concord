@@ -40,3 +40,10 @@ test('retention protocol freezes old requests and binds indirect wording to a di
  assert.equal(indirectStatement,'I started sorting that wood earlier. Seeing that little job through matters to me.');
  assert.throws(()=>retentionProtocol('unknown'));
 });
+
+test('restore must retain self-care identity and request, not merely its outcome',()=>{
+ const before:any={characters:{},proposals:{},outcomes:{eat:{status:'completed',delivered:16}},selfCare:{eat:{id:'eat',pawn:'A',questionId:'q',action:{thing:'berries',count:16}}}};
+ retainedDomain(structuredClone(before),before);
+ const missing=structuredClone(before);delete missing.selfCare;assert.throws(()=>retainedDomain(missing,before));
+ const changed=structuredClone(before);changed.selfCare.eat.action.count=25;assert.throws(()=>retainedDomain(changed,before));
+});

@@ -6,6 +6,7 @@ export function coreFollowupPolicy(id:string){
  if(id==='food-followup-v1')return {...FOOD_FOLLOWUP_POLICY,coreTrial:'food-followup-core-v1' as const,pawnTrial:'food-followup-pawns-v1' as const};
  if(id==='recovery-followup-v1')return {...FOOD_FOLLOWUP_POLICY,coreTrial:'recovery-followup-core-v1' as const,pawnTrial:'recovery-followup-pawns-v1' as const};
  if(id==='identity-followup-v1')return {...FOOD_FOLLOWUP_POLICY,coreTrial:'identity-followup-core-v1' as const,pawnTrial:'identity-followup-pawns-v1' as const};
+ if(id==='eating-followup-v1')return {...FOOD_FOLLOWUP_POLICY,scriptedNativeMs:30000,coreTrial:'eating-followup-core-v1' as const,pawnTrial:'eating-followup-pawns-v1' as const};
  throw Error('Unknown follow-up policy');
 }
 export function followupInferencePassed(rounds:{result:{status:string};answer?:{status:string};pawnError?:string;proposal?:{decision?:{kind:string}}}[],maxAttempts:number=CORE_FOLLOWUP_POLICY.coreCalls){return rounds.length>=1&&rounds.length<=maxAttempts&&rounds.every(r=>r.result.status==='applied'&&(!r.answer||['delivered','silent'].includes(r.answer.status))&&r.pawnError===undefined&&(!r.proposal||!!r.proposal.decision));}
