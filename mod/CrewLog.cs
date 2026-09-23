@@ -7,10 +7,10 @@ namespace Concord {
  [Serializable] public class CrewEntry { public int seq,tick;public string kind,actor,recipient,subject,text,key; }
  [Serializable] public class AgreementProgress { public string id,kind,status;public int tick,agreed,completed,active,unconfirmed,unsuccessful,notStarted,unfulfilled,delivered,quantityUnknown; }
  [Serializable] public class CrewAgreement { public string pawn,name;public AgreementProgress progress; }
- [Serializable] public class CrewReport { public string world,epoch,branch;public int revision,tick;public CrewEntry[] entries;public CrewAgreement[] agreements;public SharedStatus[] sharedStatus;public string waiting; }
- [Serializable] public class CrewWire {public string world,epoch,branch,entryLines,agreementLines,statusLines,waiting;public int revision,tick;}
+ [Serializable] public class CrewReport { public string world,epoch,branch;public int revision,tick;public CrewEntry[] entries;public CrewAgreement[] agreements;public SharedStatus[] sharedStatus;public string waiting,foodText; }
+ [Serializable] public class CrewWire {public string world,epoch,branch,entryLines,agreementLines,statusLines,waiting,foodText;public int revision,tick;}
  [Serializable] public class CrewAgreementWire {public string pawn,name,id,kind,status;public int tick,agreed,completed,active,unconfirmed,unsuccessful,notStarted,unfulfilled,delivered,quantityUnknown;}
- [Serializable] public class CrewHeader {public string world,epoch,branch,waiting;public int revision,tick;}
+ [Serializable] public class CrewHeader {public string world,epoch,branch,waiting,foodText;public int revision,tick;}
  [Serializable] public class CrewAgreementHeader {public string pawn,name;}
  public static class CrewLog {
   private static CrewReport Parse(string json){
@@ -19,11 +19,11 @@ namespace Concord {
    var agreements=String.IsNullOrEmpty(w.agreementLines)?new CrewAgreement[0]:w.agreementLines.Split('\n').Select(x=>{
     var a=JsonUtility.FromJson<CrewAgreementWire>(x);return new CrewAgreement {pawn=a.pawn,name=a.name,progress=new AgreementProgress {id=a.id,kind=a.kind,status=a.status,tick=a.tick,agreed=a.agreed,completed=a.completed,active=a.active,unconfirmed=a.unconfirmed,unsuccessful=a.unsuccessful,notStarted=a.notStarted,unfulfilled=a.unfulfilled,delivered=a.delivered,quantityUnknown=a.quantityUnknown}};
    }).ToArray();
-   return new CrewReport {world=w.world,epoch=w.epoch,branch=w.branch,revision=w.revision,tick=w.tick,entries=entries,agreements=agreements,waiting=w.waiting??"",sharedStatus=String.IsNullOrEmpty(w.statusLines)?new SharedStatus[0]:w.statusLines.Split('\n').Select(x=>JsonUtility.FromJson<SharedStatus>(x)).ToArray()};
+   return new CrewReport {world=w.world,epoch=w.epoch,branch=w.branch,revision=w.revision,tick=w.tick,entries=entries,agreements=agreements,waiting=w.waiting??"",foodText=w.foodText??"",sharedStatus=String.IsNullOrEmpty(w.statusLines)?new SharedStatus[0]:w.statusLines.Split('\n').Select(x=>JsonUtility.FromJson<SharedStatus>(x)).ToArray()};
   }
   public static string Json(WorldState w){
    var r=Read(w);if(r==null)return "null";
-   return JsonUtility.ToJson(new CrewHeader {world=r.world,epoch=r.epoch,branch=r.branch,revision=r.revision,tick=r.tick,waiting=r.waiting}).TrimEnd('}')+",\"sharedStatus\":["+String.Join(",",r.sharedStatus.Select(s=>JsonUtility.ToJson(s)).ToArray())+"],\"entries\":["+String.Join(",",r.entries.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"agreements\":["+String.Join(",",r.agreements.Select(a=>JsonUtility.ToJson(new CrewAgreementHeader {pawn=a.pawn,name=a.name}).TrimEnd('}')+",\"progress\":"+JsonUtility.ToJson(a.progress)+"}").ToArray())+"]}";
+   return JsonUtility.ToJson(new CrewHeader {world=r.world,epoch=r.epoch,branch=r.branch,revision=r.revision,tick=r.tick,waiting=r.waiting,foodText=r.foodText}).TrimEnd('}')+",\"sharedStatus\":["+String.Join(",",r.sharedStatus.Select(s=>JsonUtility.ToJson(s)).ToArray())+"],\"entries\":["+String.Join(",",r.entries.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"agreements\":["+String.Join(",",r.agreements.Select(a=>JsonUtility.ToJson(new CrewAgreementHeader {pawn=a.pawn,name=a.name}).TrimEnd('}')+",\"progress\":"+JsonUtility.ToJson(a.progress)+"}").ToArray())+"]}";
   }
 
   private static bool Short(string s,int n){return s!=null&&s.Length<=n;}
@@ -40,7 +40,7 @@ namespace Concord {
    if(!Guid.TryParse(r.branch,out branch)||r.revision<0)throw new Exception("Crew report branch/revision invalid");
    if(r.tick<0||r.tick>Find.TickManager.TicksGame)throw new Exception("Crew report tick invalid");
    if(r.entries==null||r.entries.Length>128||r.agreements==null||r.agreements.Length>12)throw new Exception("Crew report arrays invalid");
-   if(r.sharedStatus.Length>16||!Short(r.waiting,400))throw new Exception("Invalid shared status bounds");
+   if(r.sharedStatus.Length>16||!Short(r.waiting,400)||!Short(r.foodText,60000))throw new Exception("Invalid shared status bounds");
    foreach(var s in r.sharedStatus)if(s==null||!Short(s.pawn,120)||!Short(s.name,80)||s.source!="shared-link-telemetry"||s.epoch!=r.epoch||s.tick<0||s.tick>r.tick||!new[]{"satisfied","low","urgent","unknown"}.Contains(s.food)||!new[]{"satisfied","low","urgent","unknown"}.Contains(s.rest))throw new Exception("Invalid shared telemetry");
    int seq=0;
    foreach(var e in r.entries){
@@ -56,7 +56,7 @@ namespace Concord {
   }
  }
  public class MainTabWindow_Concord : MainTabWindow {
-  private Vector2 logScroll,workScroll;
+  private Vector2 logScroll,workScroll,supplyScroll;
   private string filter="all";
   public override Vector2 InitialSize {get{return new Vector2(900,670);}}
   public override void DoWindowContents(Rect rect){
@@ -82,7 +82,12 @@ namespace Concord {
     if(Widgets.ButtonText(new Rect(0,296,110,28),"All")){filter="all";logScroll=Vector2.zero;}
     if(Widgets.ButtonText(new Rect(120,296,110,28),"Messages")){filter="message";logScroll=Vector2.zero;}
     if(Widgets.ButtonText(new Rect(240,296,110,28),"Records")){filter="record";logScroll=Vector2.zero;}
-    Widgets.Label(new Rect(365,299,rect.width-365,25),"Newest first · "+filter+" · last 128 entries");
+    if(Widgets.ButtonText(new Rect(355,296,110,28),"Supplies")){filter="supplies";}
+    Widgets.Label(new Rect(475,299,rect.width-475,25),"Newest first · "+filter+" · last 128 entries");
+    if(filter=="supplies"){
+     string text=(fresh&&Find.TickManager.TicksGame-r.tick<=120?"Shared local sightings":"Saved / stale sightings — current supplies unknown")+"\n"+r.foodText;
+     float h=Text.CalcHeight(text,rect.width-24);Widgets.BeginScrollView(new Rect(0,334,rect.width,rect.height-334),ref supplyScroll,new Rect(0,0,rect.width-24,Math.Max(h,rect.height-340)));Widgets.Label(new Rect(0,0,rect.width-24,h),text);Widgets.EndScrollView();return;
+    }
     var entries=r.entries.Where(e=>filter=="all"||e.kind==filter).Reverse().ToArray();float width=rect.width-24;
     float total=entries.Sum(e=>36+Text.CalcHeight(e.text,width));
     Widgets.BeginScrollView(new Rect(0,334,rect.width,rect.height-334),ref logScroll,new Rect(0,0,width,Math.Max(total,rect.height-340)));

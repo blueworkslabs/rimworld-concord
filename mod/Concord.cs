@@ -169,7 +169,7 @@ namespace Concord
             var pawns=Find.CurrentMap.mapPawns.FreeColonistsSpawned.Select(p=>JsonUtility.ToJson(new PawnView {
                 id=p.GetUniqueLoadID(),name=p.LabelShort,job=p.CurJobDef==null?"":p.CurJobDef.defName,
                 x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent,workReady=Hauling.Ready(p),buildReady=Production.Ready(p,"build"),cookReady=Production.Ready(p,"cook"),rescueReady=Rescue.Ready(p),downed=p.Downed,currentBed=p.CurrentBed()==null?"":p.CurrentBed().GetUniqueLoadID(),carrying=p.carryTracker.CarriedThing==null?"":p.carryTracker.CarriedThing.GetUniqueLoadID()
-            }).TrimEnd('}')+",\"production\":"+Production.Options(p,w.epoch)+",\"linkStatus\":"+LinkTelemetry.Json(p,w.epoch)+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
+            }).TrimEnd('}')+",\"foodObservation\":"+FoodObservation.Json(p,w.epoch)+",\"production\":"+Production.Options(p,w.epoch)+",\"linkStatus\":"+LinkTelemetry.Json(p,w.epoch)+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
                 String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"crewLog\":"+CrewLog.Json(w)+"}";

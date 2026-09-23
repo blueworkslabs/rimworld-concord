@@ -812,3 +812,7 @@ offers/jobs/campfires/meals. All87 native samples unpaused outside inference,
 and allowances without extra calls. Alvin's building claim is unsupported;
 core retained it as attributed speech. All219 historical DB-related files
 unchanged; staging stopped. No new continuous-inference or productive-plan proof.
+
+## Local food observations, independent of job availability
+
+[Contract and evidence](FOOD_OBSERVATIONS.md): 299 Node + ten Python checks, real mod compilation, scripted forbidden/near/far sightings, board/core parity, paired rewind and cold restart. No live character inference or new jobs. Existing scripted campfire inspected without replay. Initial serialization failure retained; reviewed fixes include fixture IDs and receipt preservation. Provider stream counters are diagnostic only; limits remain unchanged and the historical three-turn result is not reconstructed.

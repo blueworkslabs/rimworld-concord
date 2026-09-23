@@ -2,7 +2,7 @@ import type {Domain,Proposal,Receipt} from './protocol.js';
 export type AgreementProgress={id:string;kind:string;status:string;tick:number;agreed:number;completed:number;active:number;unconfirmed:number;unsuccessful:number;notStarted:number;unfulfilled:number;delivered:number;quantityUnknown:number};
 export type CrewEntry={seq:number;tick:number;kind:'message'|'record';actor:string;recipient:string;subject:string;text:string;key:string};
 export type CrewArchive={revision:number;nextSeq:number;entries:CrewEntry[]};
-export type CrewReport={sharedStatus?:import('./shared-status.js').SharedStatus[];waiting?:string;world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
+export type CrewReport={foodLines?:string[];sharedStatus?:import('./shared-status.js').SharedStatus[];waiting?:string;world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
 export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt[]):AgreementProgress {
  const agreed=p.action.kind==='haul'?p.action.trips:p.action.kind==='cook'?p.action.meals:1;
  const ids=[...new Set(p.standing?.steps??(p.actionId?[p.actionId]:[]))];

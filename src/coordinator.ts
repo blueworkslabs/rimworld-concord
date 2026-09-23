@@ -1,4 +1,5 @@
 import {planProduction,workMap,workSteps,workReady,workKind} from './production-planning.js';
+import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
 import {deferredOffers} from './reoffers.js';
 import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
@@ -28,6 +29,7 @@ export class Coordinator {
   private attending=new Map<string,{controller:AbortController;throughSeq:number}>();
   private observedTick=0;
   private status:SharedStatus[]=[];
+  private food:{epoch:string;lines:string[]}={epoch:'',lines:[]};
   private crewPublished='';
   crewSyncError:string|undefined;
   constructor(private store:Store,private game:GameBridge,private timing:{mode:'continuous'|'pause-at-decision'}={mode:'continuous'}) {
@@ -42,7 +44,7 @@ export class Coordinator {
   }
   private async publishCrew(){
     if(!this.domain||!this.game.setCrewLog)return;
-    const report=crewReport(this.domain,this.observedTick,this.status.filter(s=>s.epoch===this.domain.epoch&&s.tick<=this.observedTick)),key=JSON.stringify(report);
+    const report=crewReport(this.domain,this.observedTick,this.status.filter(s=>s.epoch===this.domain.epoch&&s.tick<=this.observedTick));report.foodLines=this.food.epoch===this.domain.epoch?this.food.lines:[];const key=JSON.stringify(report);
     if(key===this.crewPublished)return;
     try{await this.game.setCrewLog(report);this.crewPublished=key;this.crewSyncError=undefined;}
     catch(e){this.crewSyncError=String(e); /* Presentation failure grants no gameplay authority. Retry on next operation. */}
@@ -66,18 +68,18 @@ export class Coordinator {
         for(const p of game.pawns) this.domain.characters[p.id]={id:p.id,name:p.name,memories:[]};
         this.commit('initialized','operator',{pawns:Object.keys(this.domain.characters)});
       }
-      this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);
+      this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);this.food={epoch:game.epoch,lines:foodLines(sharedFood(this.domain,game))};
     });
   }
   private async current():Promise<GameState> {
     if(!this.domain) throw Error('Coordinator not opened');
     const game=await this.game.state();
     if(!game.loaded || game.world!==this.domain.world || game.epoch!==this.domain.epoch) throw Error('Stale timeline');
-    this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);
+    this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);this.food={epoch:game.epoch,lines:foodLines(sharedFood(this.domain,game))};
     return game;
   }
   private ingest(game:GameState) {
-    this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);
+    this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);this.food={epoch:game.epoch,lines:foodLines(sharedFood(this.domain,game))};
     for(const e of Object.values(this.domain.exchanges??{}))if(e.status!=='closed'&&game.ticks>e.expiresTick){
       if(e.status==='running')this.pending.get(e.turn==='opening'?e.initiator:e.recipient)?.abort();
       e.status='closed';this.commit('social-expired','operator',{id:e.id});
@@ -894,7 +896,7 @@ export class Coordinator {
       const game=await this.game.state();
       if(!game.loaded || game.world!==saved.state.world) throw Error('Restored world mismatch');
       this.domain={...saved.state,epoch:game.epoch,branch:randomUUID()};
-      this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);
+      this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);this.food={epoch:game.epoch,lines:foodLines(sharedFood(this.domain,game))};
       this.recoverAttention('Restored an unfinished attention attempt; no automatic retry');
       this.commit('restored','operator',{name,from:saved.state.branch});
     });
