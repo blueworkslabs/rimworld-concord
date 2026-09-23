@@ -1,5 +1,7 @@
 /** Immutable policy identities: old ledgers must retain their original ceilings. */
 export const decisionTrials={
+ 'core-followup-core-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-core-followup-core-v1'},
+ 'core-followup-pawns-v1':{calls:5,reservedEquivalentUSD:0.50,policy:'claude-core-followup-pawns-v1'},
  'core-contract-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-core-contract-v1'},
  'campfire-core-v1':{calls:8,reservedEquivalentUSD:0.80,policy:'claude-campfire-core-v1'},
  'campfire-pawns-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-campfire-pawns-v1'},

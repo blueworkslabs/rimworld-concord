@@ -1,0 +1,3 @@
+/** One independently bounded follow-up, never a reroll of campfire-v1. */
+export const CORE_FOLLOWUP_POLICY={coreCalls:4,pawnCalls:5,jevCalls:0,nativeMs:120000,scriptedNativeMs:15000,wallMs:900000,cooldownTicks:60,windowTicks:18000} as const;
+export function followupInferencePassed(rounds:{result:{status:string};answer?:{status:string};pawnError?:string;proposal?:{decision?:{kind:string}}}[]){return rounds.length>=1&&rounds.length<=4&&rounds.every(r=>r.result.status==='applied'&&(!r.answer||['delivered','silent'].includes(r.answer.status))&&r.pawnError===undefined&&(!r.proposal||!!r.proposal.decision));}
