@@ -102,3 +102,7 @@ until there is a concrete benefit. Provider failures retain bounded stage labels
 without exposing raw diagnostics to pawns. Keep this roadmap forward-looking;
 [historical checkpoints](HISTORY.md), [acceptance evidence](ACCEPTANCE.md) and the
 [diary](https://rimworld-concord.pages.dev/) hold past results.
+
+## Local food before executable cooking
+
+[Local food sightings](FOOD_OBSERVATIONS.md) now reach the core and Supplies panel independently of cooking jobs. Scripted visibility and paired/cold restore pass. Provider event counters add diagnostics without loosening the two-turn guard; the old failed sequence remains unresolved. Next: a separately bounded live test of informed follow-through, retaining wait/refusal/failure. No new live allowance is enabled by this documentation.

@@ -1,0 +1,59 @@
+{
+  "slug": "food-before-a-job",
+  "title": "Food Before a Job",
+  "date": "2026-09-23",
+  "summary": "Nearby food can now be seen before a cooking job exists. Scripted checks verify local visibility and shared visibility\u2014not better live planning.",
+  "sections": [
+    {
+      "heading": "Problem and Approach",
+      "paragraphs": [
+        "After PR44\u2019s three replies without a work proposal, we implemented local food observations independently of executable cooking jobs. Previously, no usable campfire meant no food source appeared in the production view. That was an information gap, not a proven cause of the core\u2019s choices. Fixing visibility does not establish better planning."
+      ]
+    },
+    {
+      "heading": "Sightings Protocol",
+      "paragraphs": [
+        "Each observer shares sightings from within twelve cells, with unfogged line of sight and a map, timeline and game tick. The bounded list includes stack identity and quantity, forbidden state, native nutrition properties, simple-meal ingredient requirements and campfire presence. Overlapping sightings do not mean extra stock; missing or stale information remains unknown. This is explicitly shared local knowledge, not private thoughts or a colony-wide inventory."
+      ]
+    },
+    {
+      "heading": "Integration and Scope",
+      "paragraphs": [
+        "The core and observing pawn receive the filtered data. The crew log\u2019s Supplies tab displays the same sightings with their prerequisites and limitations. Seeing food authorizes neither work nor consent. Building and cooking remain separate optional agreements, and sightings do not add a new scheduler wake."
+      ]
+    },
+    {
+      "heading": "Verification and Fixes",
+      "paragraphs": [
+        "In the paused scripted fixture, a pawn at 10% Food saw a forbidden stack of 75 berries beside him despite having no eligible work options. With that stack thirteen cells away, it was absent from his local view\u2014not from the map. An existing scripted campfire checkpoint was also inspected without replaying its work. Board/core agreement, paired rewind and full cold restart passed. An earlier native failure exposed omitted nested arrays in serialization; it is preserved alongside the correction. Independent review also caught fixture-ID and receipt-overwrite defects, now fixed. All 299 Node and ten Python checks pass. No new live character inference was used."
+      ]
+    },
+    {
+      "heading": "The Counter Is Not Yet the Answer",
+      "paragraphs": [
+        "Read-only inspection of the installed provider found different counting paths for successful results and max-turn failures. The old rejected answer\u2019s event stream was not saved, so its exact sequence remains unresolved. We now retain text-free stream-event counts for diagnosis, without treating them as API-call counts. The two-turn guard, tool isolation and spending limits remain unchanged."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Food observation contract and verification",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/FOOD_OBSERVATIONS.md"
+    },
+    {
+      "label": "Scripted native evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/food-observations.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/2026-09-23-food-supplies.png",
+      "alt": "Actual RimWorld Concord Supplies tab showing attributed local berry and raw-fungus sightings, forbidden flags, and no locally observed campfire.",
+      "caption": "Scripted, paused visibility fixture: all three pawns have authored low Food. Repeated stack IDs are overlapping sightings, not extra supplies. No work or model choices were issued."
+    }
+  ]
+}
