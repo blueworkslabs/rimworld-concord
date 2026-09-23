@@ -840,3 +840,13 @@ No general planning or causal food-visibility improvement established.
 ## Self-care follow-up boundaries
 
 [Contract and native checks](SELFCARE_FOLLOWUP.md): explicit food-item units and Core-only replies; own completed eating may resolve its receipt/question/reply topic, not the broad goal or unfinished work. Four scripted native cases, paired persistence, 330 Node +11 Python checks and final independent source review. No new model calls or live reliability claim.
+
+## Live self-care follow-up closure
+
+[Protocol and retained evidence](CLOSURE_FOLLOWTHROUGH.md): six core +two pawn
+attempts, all accepted, zero formatter recoveries/Jev/rerolls. Alvin ate 12 berries,
+Pedro 10; core waited for each receipt then resolved their six linked topics, broad
+brief stayed open. No work or cooking, no Beatrice question. Food-item/portion and
+telemetry wording errors retained. 331 Node +11 Python checks, independent final
+behavior review, scripted/live paired+cold restore; 230 historical database-related
+files unchanged, staging stopped. Team recap and planning follows, not another trial.
