@@ -29,7 +29,7 @@
   "evidence": [
     {
       "label": "Lifecycle contract",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CORE_LIFECYCLE.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/CORE_LIFECYCLE.md"
     },
     {
       "label": "Scripted evidence",

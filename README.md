@@ -2,82 +2,114 @@
 
 **Shared fate, not shared will.**
 
-An experimental foundation for an ancient AI core and three autonomous colonists. The core proposes strategy; each pawn decides whether and how to cooperate. Native RimWorld mechanics remain responsible for physical execution.
+An experimental RimWorld mod about an ancient AI core and three colonists. The core
+watches, reasons and proposes. Each colonist decides for themselves. Whatever they
+agree to is carried out by ordinary RimWorld jobs, and the game's receipts, not the
+models' prose, decide what actually happened.
+
+Site and dev diary: <https://rimworld-concord.pages.dev/> · Vision: [docs/VISION.md](docs/VISION.md)
 
 ## Status
 
-An experimental vertical slice, not a playable campaign or unattended AI colony:
+An experimental vertical slice in a private lab, **not a playable mod or an unattended
+AI colony**. Every live-model run is a finite, pre-declared trial with no rerolls.
 
-- Pawns negotiate and carry out bounded movement, hauling, rescue, campfire construction and cooking. An opt-in bounded live core proposes grounded work; scripted planning remains a regression baseline.
-- Nearby pawns can exchange one optional opener and reply; attributed speech does not authorize work or automatically change beliefs. See [social contract](docs/SOCIAL_EXCHANGE.md).
-- Consent, native outcome checks and paired/cold restore are enforced below the model layer.
-- The in-game crew log separates addressed messages, observed events and work records; private outlooks remain private.
-- Optional outlook revisions can retain attributed received speech. Automated persistence/privacy, native retention and paired/cold restore have been verified in bounded trials. This is not proof of long-term personality.
-- Claude has bounded real-game evidence; Luna has offline contract evidence, not a game backend. Sustained character quality remains unproved.
-- Current focus: [a visible campfire/cooking loop](docs/CAMPFIRE_MILESTONE.md), with separately consented work and coarse shared-link Food/Rest telemetry. Scripted native resource-use and restart checks pass. Three live trials exposed a question/offer-link contract mismatch; a subsequent [six-call offline check](docs/CORE_CONTRACT_CHECK.md) passed with the corrected menu. A [short in-game follow-up](docs/CORE_FOLLOWUP.md) delivered three pawn replies, but one provider-turn-limit rejection and no work offers keep planning unproved. The [provider investigation](docs/PROVIDER_FAILURE_PROBE.md) reproduced an overlong-topic formatting repair and adds a narrowly traced core recovery rule, verified offline and exercised in a [mixed native follow-through](docs/RECOVERY_FOLLOWTHROUGH.md): one accepted repair, one rejected stream shape, and no work. After [identity-aware accounting](docs/PROVIDER_MESSAGE_ACCOUNTING.md), a [fresh native check](docs/IDENTITY_FOLLOWTHROUGH.md) accepted all six core turns and three pawn replies, including a split-event repair; still no work or observed eating. A [native food-selection diagnosis](docs/NATIVE_FOOD_SELECTION.md) now explains the raw-berry wait: native preference depends on hunger category, while speech starts no job. A matched no-model check ate 18 berries only in its urgently-hungry case. The new [pawn-owned eat choice](docs/PAWN_EATING.md) separates deliberate self-care from speech; scripted native verification consumed a chosen 16-berry portion before urgent hunger, while speech and withdrawal consumed none. A [bounded live follow-through](docs/EATING_FOLLOWTHROUGH.md) now records Alvin choosing and consuming 12 berries; all six core turns and three replies passed. Pedro and Beatrice spoke only; a reply naming Pedro was still addressed to Core, and one core summary confused food units with nutrition. A [focused follow-up](docs/SELFCARE_FOLLOWUP.md) now names food-item units, makes reply recipients explicit and permits receipt-backed self-care topic closure, with scripted native verification. A [fresh live closure check](docs/CLOSURE_FOLLOWTHROUGH.md) now records Alvin eating 12 berries and Pedro 10; the core resolved six linked topics after consumption while keeping the broad brief open. Unit wording remains imperfect. This is live self-care, not a completed cooking plan. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
+| Capability | Native mechanics | Live-model evidence |
+|---|---|---|
+| Move to a nearby grounded cell | yes | yes |
+| Haul an exact stack (≤10 per trip as offered, ≤3 trips) | yes | yes, including core-proposed work |
+| Rescue a downed colonist into an exact medical bed | yes | yes, with a scripted core |
+| Build a campfire (20 wood) | yes | scripted game tests only |
+| Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
+| Eat, chosen by the pawn itself | yes | yes |
 
-## Layout
+Also built and exercised in bounded trials: counteroffers with fresh consent, "not
+now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private
+evidence-linked outlooks, an in-game crew log, coarse shared Food/Rest status, local
+food sightings, and a live, event-driven core that proposes, asks and follows up.
 
-```text
-mod/                  C# local game action bridge and saved action ledger
-src/protocol.ts       Narrow action, observation and backend contracts
-src/coordinator.ts    Proposals, identity binding, decisions, outcomes, checkpoints
-src/store.ts          SQLite state, audit events and paired checkpoint metadata
-src/lab-bridge.ts     Trusted staging transport and separate admin controls
-src/backends.ts       Scripted decisions for repeatable mechanics tests
-src/routing.ts        Native event attention routing
-src/attention.ts      Bounded attention pump and reflection response contract
-src/appraisal.ts      Jev question/response validation and separate trial budget ledger
-src/claude-decision.ts Native Claude CLI with tool isolation and bounded trial accounting
-scripts/lab/          Reused working lab controls; NOT a character tool surface
-adapters/openclaw/    Integration contract; no installed OpenClaw plugin yet
-docs/                 Design decisions, model research, provenance, evidence
-```
+Not yet shown: the live core turning a need into a multi-step plan (build, then cook),
+long-run character consistency, useful live-core planning in unpaused play, the gravship
+campaign, or an installer for players.
 
-## Local development
+What happened when: [HISTORY](docs/HISTORY.md) · every trial: [trial ledger](docs/trials/README.md) · what's next: [ROADMAP](docs/ROADMAP.md)
 
-Node 22.13+ (validated on 22.23.2), npm, and Mono `mcs` for the mod:
+## How it works
+
+1. The C# mod observes the game and executes validated native jobs (`mod/`).
+2. A TypeScript coordinator owns characters, offers, consent, scheduling and
+   checkpoints in SQLite (`src/`).
+3. Each model call gets a narrow, self-describing perspective and a menu of real
+   options, and returns one structured choice. No action tools, game handle or database.
+4. Consent, identity, deduplication and timeline safety are enforced below the models.
+
+Details: [ARCHITECTURE](docs/ARCHITECTURE.md). All documentation: [docs/README.md](docs/README.md).
+
+## Development
+
+Node 22.13+ (CI uses 22.23.2). Node's built-in SQLite prints an experimental warning;
+that is expected.
 
 ```bash
 npm ci
-npm test
-bash scripts/build-mod.sh /path/to/RimWorldLinux_Data/Managed
+npm test                       # tsc + node --test, same as CI
+node diary/build.mjs --check   # validate diary entries
 ```
 
-Reference assemblies come from an owned RimWorld 1.6 installation. Game/DLC binaries, assemblies, saves, databases and credentials are never committed. Node 22's SQLite implementation emits an experimental warning.
+The mod needs Mono `mcs` and an owned RimWorld 1.6 installation. Reference assemblies
+are never committed.
 
-## Real-game test
+```bash
+bash scripts/build-mod.sh /path/to/RimWorldLinux_Data/Managed   # -> mod/Assemblies/Concord.dll
+```
 
-The current mod activates only with `-rimworld-lab` and an explicitly configured `RIMWORLD_LAB_ROOT`; the save profile must match its `profile` directory. This is a development harness, not a portable end-user installer. See [lab setup](scripts/lab/README.md).
+## Running in the real game
 
-Deploy `mod/About`, `mod/Defs` and the compiled `mod/Assemblies` to the private lab's `game/Mods/Concord`, enable `blueworkslabs.concord`, and restart the game after mod changes. Preserve the original ModsConfig backup. Run the built coordinator on the same staging host:
+The mod activates only in the private lab: RimWorld must run with `-rimworld-lab`,
+`RIMWORLD_LAB_ROOT` must be set, and the save profile must match. Lab setup and
+operation: [scripts/lab/README.md](scripts/lab/README.md).
+
+Deploy `mod/About`, `mod/Defs` and `mod/Assemblies` to the lab's `game/Mods/Concord`,
+enable `blueworkslabs.concord`, and restart the game after mod changes. The foundation
+acceptance uses scripted decisions and no models:
 
 ```bash
 export RIMWORLD_LAB_ROOT="$HOME/rimworld-lab"
 python3 "$RIMWORLD_LAB_ROOT/bin/lab.py" start
-bash scripts/run-lab.sh
+npm run lab:acceptance          # build + scripts/run-lab.sh under the lifetime lock
+# stop and start the lab, then check a cold restore:
+bash scripts/run-lab.sh --cold
+python3 "$RIMWORLD_LAB_ROOT/bin/lab.py" stop
 ```
 
-The script acquires a lifetime process lock. Do not run another coordinator or manually manipulate the domain mailbox concurrently. It loads the disposable `lab-initial` fixture, writes receipts under `.runtime/`, and leaves the game paused. To verify a cold restore after a stop/start, use the same lock with `node dist/src/acceptance.js --cold`. Finish with `lab.py stop`; Android and RimWorld remain mutually exclusive workloads.
-
-A copied lab-only shutdown save does **not** automatically become a paired Concord checkpoint. Restore through the coordinator using the checkpoint name, SQLite database and matching game save; copying only a `.rws` is insufficient. Checkpoints currently require completed/reconciled actions. Do not overwrite or prune referenced saves independently of their database.
+Feature trials have their own launchers; see [EVALUATION](docs/EVALUATION.md#running-trials).
 
 ## Authority and trust
 
-Model backends receive only their own pawn's supplied perspective and proposal. Their typed response cannot choose another actor or access admin operations. Core handles can propose but cannot execute. The coordinator binds pawn identity; the game rejects invalid actors, epochs, duplicate payload mismatches and infeasible movement, hauling, rescue or production.
+- Only the bound pawn's handle can answer an offer. The core can propose, ask and
+  wait. It cannot accept for anyone, and it cannot make anyone eat.
+- The game rejects stale epochs, reused action IDs with changed payloads, and
+  infeasible moves, hauls, rescues, builds, cooking or eating.
+- A pawn's model sees its own perspective plus explicitly shared facts (coarse
+  Food/Rest bands, addressed messages, local sightings). The core sees an explicit
+  allow-listed view, never private memories or outlooks.
+- This is an application boundary, not a sandbox. The file bridge, SQLite and the
+  operator (`inspect()`, `LabBridge.admin()`) are trusted.
+- A lab shutdown save is not a paired checkpoint. Keep a database together with the
+  game saves it references.
 
-This is an application boundary, **not** a sandbox for hostile plugin code or the local operator. The file bridge and SQLite database are trusted local components. Future live runtimes must not inherit shell/file/admin access that bypasses the domain tools. `inspect()` and `LabBridge.admin()` are operator-only. Current perspective filtering is intentionally narrow, not a full sight/hearing/rumour model.
+## Layout
 
-## Direction
+```text
+mod/               C# mod: observation, native jobs, action ledger, crew-log tab
+src/               Coordinator, perspectives, core planner, attention, model adapters
+trials/            Trial runners, fixtures and offline scorers
+tests/             Node test suite
+scripts/           Launchers, fixtures, mod build; scripts/lab/ is the lab harness
+docs/              Documentation; docs/evidence/ holds sanitized trial evidence
+diary/, site/      Static site and dev diary (Cloudflare Pages)
+adapters/openclaw/ Planned operator plugin contract (not installed)
+```
 
-Smooth continuous play is the goal. Pauses are appropriate for controlled tests or explicitly requested extended planning, not every model call. The planned cognition stack is native habits → fast appraisal → deliberate reasoning, with personality across all layers and direct escalation for significant conflicts. The in-game deliberation badge is implemented. An opt-in bounded attention pump consumes event routes. Native-client live decisions and reflections now have bounded paused/continuous evidence. Long-running operation and broader goals remain to be proved. See [attention consumption](docs/ATTENTION.md).
-
-See [architecture](docs/ARCHITECTURE.md), [narrative](docs/NARRATIVE.md), and [model access](docs/MODELS.md).
-
-The [interruption policy](docs/INTERRUPTIONS.md) distinguishes locally observed
-rescue contradictions from missing shortlist information. Its bounded live
-follow-up preserved a prose/action mismatch, not a completed live rescue.
-
-[Explicit reflection choices](docs/INTENT_CHOICES.md) name their executable effects
-and validate agreement scope. A single live follow-up produced matching choice
-and explanation; broader consistency and pawn-originated alternatives remain open.
+MIT licensed; see [PROVENANCE](docs/PROVENANCE.md). Contributor and agent rules:
+[AGENTS.md](AGENTS.md).

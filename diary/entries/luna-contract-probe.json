@@ -34,7 +34,7 @@
   "evidence": [
     {
       "label": "Fixed-snapshot contract and limits",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/MODEL_CONTRACT_PROBE.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/MODEL_CONTRACT_PROBE.md"
     },
     {
       "label": "Five-case evidence",

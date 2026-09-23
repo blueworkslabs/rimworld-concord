@@ -1,6 +1,8 @@
 # Optional OpenClaw adapter — contract only
 
-No plugin is installed or executable in this slice. Do not create a runtime manifest that implies otherwise.
+No plugin is installed or executable. Do not create a runtime manifest that implies otherwise.
+
+OpenClaw is already used outside the game protocol: the Gateway hosts the protected Jev transport (the credential never reaches the lab host), launches split-host trial runners, and runs the diary writer through `llm-task`.
 
 Planned operator tools: start/stop lab, status/activity, inspect recorded events, create/restore paired checkpoints, run acceptance fixtures, retrieve chronicles. Observer tools must be separate from character-facing proposals/decisions. A potential model backend must supply isolated per-character context, narrow tools and supported authentication; it must not inherit operator/admin access.
 

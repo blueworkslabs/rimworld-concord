@@ -29,7 +29,7 @@
   "evidence": [
     {
       "label": "Crew log contract",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CREW_LOG.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/CREW_LOG.md"
     },
     {
       "label": "Scripted test evidence",
@@ -37,7 +37,7 @@
     },
     {
       "label": "Playable direction",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PLAYABLE_DIRECTION.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/PLAYABLE_DIRECTION.md"
     }
   ],
   "author": {

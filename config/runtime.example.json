@@ -4,7 +4,7 @@
   "testMode": "pause-at-decision",
   "decisionTimeoutMs": 5000,
   "paidInferenceEnabled": false,
-  "note": "Planning example, not an active configuration loader. Attention pump and separate trial ledger exist; live transport/model inference remains unverified. Pump limits do not replace persistent billing quotas.",
+  "note": "Planning example; no code loads this file. Live inference runs only through finite trial ledgers (see docs/EVALUATION.md). Pump limits do not replace billing quotas.",
   "attention": {
     "cooldownTicks": 300,
     "timeoutMs": 5000,

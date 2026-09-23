@@ -63,4 +63,4 @@ save/reload, selected pawn-specific experiences and a visible thinking badge had
 been verified. The Jev adapter was mock-tested only. Autonomous attention handling,
 live in-game inference, strategic core planning, the OpenClaw plugin and the actual
 campaign were still ahead. See [architecture](ARCHITECTURE.md),
-[acceptance](ACCEPTANCE.md), and [roadmap](ROADMAP.md) for implementation details.
+[acceptance](https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/ACCEPTANCE.md), and [roadmap](ROADMAP.md) for implementation details.

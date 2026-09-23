@@ -34,7 +34,7 @@
   "evidence": [
     {
       "label": "Contextual choices contract",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CONTEXTUAL_CHOICES.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/CONTEXTUAL_CHOICES.md"
     },
     {
       "label": "Scripted and live evidence",
@@ -42,7 +42,7 @@
     },
     {
       "label": "Playable direction and model evaluation",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PLAYABLE_DIRECTION.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/PLAYABLE_DIRECTION.md"
     }
   ],
   "author": {

@@ -127,7 +127,7 @@
         <rect x="416" y="464" width="180" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
         <text x="428" y="494">Crew log panel</text>
         <rect x="606" y="464" width="358" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="618" y="494">Move · Haul · Rescue · Build · Cook</text>
+        <text x="618" y="494">Move · Haul · Rescue · Build · Cook · Eat</text>
       </g>
       <!-- RimWorld -->
       <rect x="20" y="546" width="960" height="44" rx="4" fill="#3A3024" stroke="#8A7456"/>
@@ -227,7 +227,7 @@
     <h3>A planner that waits to be needed</h3>
     <p>Each core turn picks one of four moves: <strong>propose</strong> a listed opportunity, <strong>adopt</strong> a counter for fresh consent, <strong>ask</strong> one pawn one question, or <strong>wait</strong>. It keeps up to eight sourced topics marked open, blocked, deferred, resolved or declined. "Resolved" requires completed linked work, so its prose can't close a topic that the receipts don't close.</p>
     <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, band changes. Idle time and private needs don't wake it. Every turn spends from a fixed budget with a cooldown. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
-    <p class="files">src/core-planner.ts · src/core-scheduler.ts · mod/LinkTelemetry.cs</p>
+    <p class="files">src/core-planner.ts · src/core-scheduler.ts · mod/SharedStatus.cs</p>
   </div>
   <figure class="anim window">
     <video data-loop controls loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of events. Completed work, a not-now reply and a received answer wake the core and spend its turn budget; passing time and private need changes do not.">
@@ -265,7 +265,7 @@
       <li><strong>Independent code review</strong> on every nontrivial PR and fact-checked diary entries for selected milestones.</li>
     </ul>
     <p>Well-formed output and grounded understanding are measured separately. Passing the schema doesn't count as understanding.</p>
-    <p class="files">docs/ACCEPTANCE.md · docs/evidence/ · trials/</p>
+    <p class="files">docs/EVALUATION.md · docs/trials/ · docs/evidence/</p>
   </div>
   <figure class="window">
     <div class="window-bar"><b>Concord · crew log</b><span>first live core</span></div>
@@ -303,6 +303,7 @@
       <div class="node done"><b>Movement</b><span>nearby grounded destinations</span></div>
       <div class="node done"><b>Hauling</b><span>exact stacks, up to three trips</span></div>
       <div class="node done"><b>Rescue</b><span>one casualty to one medical bed</span></div>
+      <div class="node done"><b>Pawn-owned eating</b><span>chosen by the pawn, never ordered; live-verified</span></div>
       <div class="node part"><b>Campfire &amp; cooking</b><span>works in scripted tests; not yet reached in a live run</span></div>
       <div class="node next"><b>Wider actions</b><span>building, treatment, defence, work priorities</span></div>
     </div>
@@ -322,7 +323,7 @@
 <section class="block" aria-labelledby="missing-h">
   <h2 id="missing-h">Known gaps, stated plainly</h2>
   <div class="caveat">
-    <p><strong>The core hasn't turned a need into a plan live yet.</strong> In the first campfire runs, 23 of 24 core outputs were rejected by an interface mismatch. That's fixed and re-checked, but the follow-up run produced replies, not work offers. Local food supplies and prerequisites now reach the core separately from executable jobs (PR #45); scripted visibility and restore checks passed, but improved live planning remains untested.</p>
+    <p><strong>The live build-and-cook chain remains unproved.</strong> In the first campfire runs, 23 of 24 core outputs were rejected by an interface mismatch. After that was fixed, and provider formatting failures were diagnosed and bounded, bounded live trials show the core asking, waiting for receipts and closing follow-ups: colonists chose to eat and the core closed those topics. But no live run has yet produced a build or cooking offer.</p>
     <p><strong>Most live trials pause the game during model calls</strong> to keep them measurable. Continuous pawn trials have succeeded, and the third campfire trial ran the live core unpaused. Its eight core outputs were rejected, so it proves continued simulation during inference—not useful live planning.</p>
     <p><strong>Character continuity is early.</strong> Outlooks form, persist and show up in later reasoning. Whether they add up to stable personalities over a long game is an open question.</p>
     <p><strong>It's a lab harness, not a player download.</strong> The mod only activates in a configured lab environment.</p>

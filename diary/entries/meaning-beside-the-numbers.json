@@ -30,7 +30,7 @@
   "evidence": [
     {
       "label": "Semantic perspective and evaluation limits",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/MODEL_PERSPECTIVE.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/MODEL_PERSPECTIVE.md"
     },
     {
       "label": "Retained responses and findings",
@@ -38,7 +38,7 @@
     },
     {
       "label": "Current roadmap",
-      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/ROADMAP.md"
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/ac5baf8d5044cdfaef9666e75249fc897a66a553/docs/ROADMAP.md"
     }
   ],
   "author": {
