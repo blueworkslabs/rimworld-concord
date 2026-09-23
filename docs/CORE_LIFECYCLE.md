@@ -58,3 +58,15 @@ Both rewind a later request, restore its saved version, and verify paired restor
 wall-clock deadline and bounded native waits. Direct invocation and an occupied
 staging lock are rejected before game access. These are mechanics checks, not
 live evidence that a model will choose to resume or manage topics well.
+
+## Verified result
+
+Final behavior `42af8ebe981506e8984b15b16f48ff6d0a995852`: **281 Node tests and ten Python checks** pass. Independent source review and focused re-review completed; deadline propagation and independent pause/work cleanup were fixed before final native verification.
+
+- Scripted acceptance: six trips delivered sixty wood across two accepted agreements, then one core turn resolved both linked topics.
+- Separate scripted refusal: requesting the invitation was followed by refusal, zero jobs and a declined topic.
+- Both cases passed request rewind, paired restore and full cold restart on the final build. No live core, pawn or Jev inference was used.
+- Native checks invoke the core turns explicitly. Reflection-mediated requests, one-event wake/deduplication, ownership, stale grounding and closure rejection have automated coordinator coverage. This is not evidence of a live model choosing these responses.
+- All 164 pre-existing local database-related files matched their original hashes; staging was stopped after capture.
+
+[Sanitized scripted evidence](evidence/core-lifecycle.json) preserves both outcomes. The prior live mismatch remains in its original evidence.
