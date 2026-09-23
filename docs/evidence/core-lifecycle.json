@@ -1,0 +1,679 @@
+{
+  "version": "concord-core-lifecycle-scripted-v1",
+  "date": "2026-09-23",
+  "behaviorCommit": "42af8ebe981506e8984b15b16f48ff6d0a995852",
+  "mode": "scripted-native",
+  "inferenceCalls": 0,
+  "nodeTests": 281,
+  "pythonChecks": 10,
+  "independentReview": "Completed source review and focused re-review; two runner boundary findings fixed. Private reports retained.",
+  "historicalEvidence": "PR40 live result unchanged. New checks are not live model behavior.",
+  "cases": [
+    {
+      "response": "accept",
+      "runId": "6ab60006-99e7-46d9-b58d-420f81789b3f",
+      "pairedRestore": true,
+      "requestRewind": true,
+      "coldRestore": true,
+      "completedTrips": 6,
+      "deliveredWood": 60,
+      "decisions": [
+        {
+          "pawn": "Thing_Human405",
+          "id": "93e00386-849d-4955-ab85-111045ffd538",
+          "decision": {
+            "kind": "defer",
+            "reason": "Not now. No promise to accept later."
+          },
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          }
+        },
+        {
+          "pawn": "Thing_Human405",
+          "id": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+          "decision": {
+            "kind": "accept",
+            "reason": "I accept this fresh offer."
+          },
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          }
+        },
+        {
+          "pawn": "Thing_Human408",
+          "id": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+          "decision": {
+            "kind": "accept",
+            "reason": "Yes to this distinct agreement."
+          },
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "id": "53ed72a9-dc1b-4698-a039-8070e4d2ef8f",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_WoodLog1892",
+          "target": "",
+          "bed": "",
+          "x": 80,
+          "z": 80,
+          "jobId": 4,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1803
+        },
+        {
+          "id": "3a916785-79bb-4451-98bb-8d53fa332012",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_WoodLog1892",
+          "target": "",
+          "bed": "",
+          "x": 80,
+          "z": 80,
+          "jobId": 13,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1803
+        },
+        {
+          "id": "7ac0adea-fb6d-4bb8-aaed-10dcee792ff5",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_WoodLog1892",
+          "target": "",
+          "bed": "",
+          "x": 80,
+          "z": 80,
+          "jobId": 26,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 1803
+        },
+        {
+          "id": "c0da7401-831b-41c6-a542-51c933d92787",
+          "actor": "Thing_Human408",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_WoodLog1893",
+          "target": "",
+          "bed": "",
+          "x": 72,
+          "z": 79,
+          "jobId": 40,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 2324
+        },
+        {
+          "id": "d546bc4a-e15b-4b20-919b-884b53a2e5e6",
+          "actor": "Thing_Human408",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_WoodLog1893",
+          "target": "",
+          "bed": "",
+          "x": 72,
+          "z": 79,
+          "jobId": 51,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 2324
+        },
+        {
+          "id": "b399732b-5e2c-448f-8371-ec96981fe517",
+          "actor": "Thing_Human408",
+          "status": "completed",
+          "reason": "Delivered agreed quantity to agreed storage cell",
+          "kind": "haul",
+          "thing": "Thing_WoodLog1893",
+          "target": "",
+          "bed": "",
+          "x": 72,
+          "z": 79,
+          "jobId": 64,
+          "count": 10,
+          "delivered": 10,
+          "untilTick": 2324
+        }
+      ],
+      "topics": [
+        {
+          "sourceId": "op:ea8c4765649e6234e6de03ed",
+          "text": "Linked work completed.",
+          "status": "resolved",
+          "proposalIds": [
+            "93e00386-849d-4955-ab85-111045ffd538",
+            "a3751148-9116-4155-aee9-cb1ba0f5b745"
+          ]
+        },
+        {
+          "sourceId": "op:117185bf255cec6314c75940",
+          "text": "Linked work completed.",
+          "status": "resolved",
+          "proposalIds": [
+            "a2549dff-c25c-4136-bed9-c332ec90d90b"
+          ]
+        }
+      ],
+      "reoffers": [
+        {
+          "id": "2a2d78f9-333d-42ee-b6d1-7b106d78a576",
+          "pawn": "Thing_Human405",
+          "deferredId": "93e00386-849d-4955-ab85-111045ffd538",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "mapId": 0,
+          "tick": 2,
+          "reason": "You may offer that same haul once again; I will decide on the fresh terms.",
+          "status": "offered",
+          "proposalId": "a3751148-9116-4155-aee9-cb1ba0f5b745"
+        }
+      ],
+      "publicReport": {
+        "world": "98a96c55b3094a7c9a79cf8bdb767a57",
+        "epoch": "ca232c746b4b46d691cf1b02d2f832c7",
+        "branch": "d27975ba-75f7-410f-a670-65d8494da448",
+        "revision": 84,
+        "tick": 1070,
+        "entries": [
+          {
+            "seq": 1,
+            "tick": 2,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "subject": "93e00386-849d-4955-ab85-111045ffd538",
+            "text": "One optional agreement",
+            "key": "offer:93e00386-849d-4955-ab85-111045ffd538"
+          },
+          {
+            "seq": 2,
+            "tick": 2,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "crew",
+            "subject": "9e0052ac-3d89-4ab4-b641-b89b458bb9ea",
+            "text": "One optional agreement",
+            "key": "core-plan:9e0052ac-3d89-4ab4-b641-b89b458bb9ea"
+          },
+          {
+            "seq": 3,
+            "tick": 2,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "subject": "93e00386-849d-4955-ab85-111045ffd538",
+            "text": "defer: Not now. No promise to accept later.",
+            "key": "reply:93e00386-849d-4955-ab85-111045ffd538"
+          },
+          {
+            "seq": 4,
+            "tick": 2,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "subject": "93e00386-849d-4955-ab85-111045ffd538",
+            "text": "Request one fresh offer: You may offer that same haul once again; I will decide on the fresh terms.",
+            "key": "reoffer:2a2d78f9-333d-42ee-b6d1-7b106d78a576"
+          },
+          {
+            "seq": 5,
+            "tick": 3,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "subject": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+            "text": "Fresh optional offer after your request",
+            "key": "offer:a3751148-9116-4155-aee9-cb1ba0f5b745"
+          },
+          {
+            "seq": 6,
+            "tick": 3,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "crew",
+            "subject": "4d4a6c7f-75f7-420d-ab24-4d6ef5cc9b00",
+            "text": "Fresh optional offer after your request",
+            "key": "core-plan:4d4a6c7f-75f7-420d-ab24-4d6ef5cc9b00"
+          },
+          {
+            "seq": 7,
+            "tick": 3,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "subject": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+            "text": "accept: I accept this fresh offer.",
+            "key": "reply:a3751148-9116-4155-aee9-cb1ba0f5b745"
+          },
+          {
+            "seq": 8,
+            "tick": 3,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "subject": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+            "text": "haul: started.",
+            "key": "outcome:53ed72a9-dc1b-4698-a039-8070e4d2ef8f:started"
+          },
+          {
+            "seq": 9,
+            "tick": 55,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "subject": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+            "text": "haul: completed. Delivered 10 units.",
+            "key": "outcome:53ed72a9-dc1b-4698-a039-8070e4d2ef8f:completed"
+          },
+          {
+            "seq": 10,
+            "tick": 68,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "subject": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+            "text": "haul: started.",
+            "key": "outcome:3a916785-79bb-4451-98bb-8d53fa332012:started"
+          },
+          {
+            "seq": 11,
+            "tick": 223,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "subject": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+            "text": "haul: completed. Delivered 10 units.",
+            "key": "outcome:3a916785-79bb-4451-98bb-8d53fa332012:completed"
+          },
+          {
+            "seq": 12,
+            "tick": 243,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "subject": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+            "text": "haul: started.",
+            "key": "outcome:7ac0adea-fb6d-4bb8-aaed-10dcee792ff5:started"
+          },
+          {
+            "seq": 13,
+            "tick": 484,
+            "kind": "record",
+            "actor": "Alvin",
+            "recipient": "observer",
+            "subject": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+            "text": "haul: completed. Delivered 10 units.",
+            "key": "outcome:7ac0adea-fb6d-4bb8-aaed-10dcee792ff5:completed"
+          },
+          {
+            "seq": 14,
+            "tick": 524,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Beatrice",
+            "subject": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+            "text": "Separate optional work",
+            "key": "offer:a2549dff-c25c-4136-bed9-c332ec90d90b"
+          },
+          {
+            "seq": 15,
+            "tick": 524,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "crew",
+            "subject": "c4e03e63-53f5-47b8-a975-2a2b077c6631",
+            "text": "Separate optional work",
+            "key": "core-plan:c4e03e63-53f5-47b8-a975-2a2b077c6631"
+          },
+          {
+            "seq": 16,
+            "tick": 524,
+            "kind": "message",
+            "actor": "Beatrice",
+            "recipient": "Core",
+            "subject": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+            "text": "accept: Yes to this distinct agreement.",
+            "key": "reply:a2549dff-c25c-4136-bed9-c332ec90d90b"
+          },
+          {
+            "seq": 17,
+            "tick": 524,
+            "kind": "record",
+            "actor": "Beatrice",
+            "recipient": "observer",
+            "subject": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+            "text": "haul: started.",
+            "key": "outcome:c0da7401-831b-41c6-a542-51c933d92787:started"
+          },
+          {
+            "seq": 18,
+            "tick": 689,
+            "kind": "record",
+            "actor": "Beatrice",
+            "recipient": "observer",
+            "subject": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+            "text": "haul: completed. Delivered 10 units.",
+            "key": "outcome:c0da7401-831b-41c6-a542-51c933d92787:completed"
+          },
+          {
+            "seq": 19,
+            "tick": 701,
+            "kind": "record",
+            "actor": "Beatrice",
+            "recipient": "observer",
+            "subject": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+            "text": "haul: started.",
+            "key": "outcome:d546bc4a-e15b-4b20-919b-884b53a2e5e6:started"
+          },
+          {
+            "seq": 20,
+            "tick": 855,
+            "kind": "record",
+            "actor": "Beatrice",
+            "recipient": "observer",
+            "subject": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+            "text": "haul: completed. Delivered 10 units.",
+            "key": "outcome:d546bc4a-e15b-4b20-919b-884b53a2e5e6:completed"
+          },
+          {
+            "seq": 21,
+            "tick": 874,
+            "kind": "record",
+            "actor": "Beatrice",
+            "recipient": "observer",
+            "subject": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+            "text": "haul: started.",
+            "key": "outcome:b399732b-5e2c-448f-8371-ec96981fe517:started"
+          },
+          {
+            "seq": 22,
+            "tick": 1029,
+            "kind": "record",
+            "actor": "Beatrice",
+            "recipient": "observer",
+            "subject": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+            "text": "haul: completed. Delivered 10 units.",
+            "key": "outcome:b399732b-5e2c-448f-8371-ec96981fe517:completed"
+          },
+          {
+            "seq": 23,
+            "tick": 1069,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "crew",
+            "subject": "5b09d823-32b5-4d49-b42f-9308502bd58c",
+            "text": "No further offer.",
+            "key": "core-plan:5b09d823-32b5-4d49-b42f-9308502bd58c"
+          }
+        ],
+        "agreements": [
+          {
+            "pawn": "Thing_Human408",
+            "name": "Beatrice",
+            "progress": {
+              "id": "a2549dff-c25c-4136-bed9-c332ec90d90b",
+              "kind": "haul",
+              "status": "completed",
+              "tick": 1070,
+              "agreed": 3,
+              "completed": 3,
+              "active": 0,
+              "unconfirmed": 0,
+              "unsuccessful": 0,
+              "notStarted": 0,
+              "unfulfilled": 0,
+              "delivered": 30,
+              "quantityUnknown": 0
+            }
+          },
+          {
+            "pawn": "Thing_Human405",
+            "name": "Alvin",
+            "progress": {
+              "id": "a3751148-9116-4155-aee9-cb1ba0f5b745",
+              "kind": "haul",
+              "status": "completed",
+              "tick": 1070,
+              "agreed": 3,
+              "completed": 3,
+              "active": 0,
+              "unconfirmed": 0,
+              "unsuccessful": 0,
+              "notStarted": 0,
+              "unfulfilled": 0,
+              "delivered": 30,
+              "quantityUnknown": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "response": "refuse",
+      "runId": "1e6add1b-a1b1-47aa-a57e-ecf10a9059b7",
+      "pairedRestore": true,
+      "requestRewind": true,
+      "coldRestore": true,
+      "completedTrips": 0,
+      "deliveredWood": 0,
+      "decisions": [
+        {
+          "pawn": "Thing_Human405",
+          "id": "36ec8087-0cc5-42c3-ad76-10c36db0997b",
+          "decision": {
+            "kind": "defer",
+            "reason": "Not now. No promise to accept later."
+          },
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          }
+        },
+        {
+          "pawn": "Thing_Human405",
+          "id": "af0a0a7a-7575-402e-822c-aa528f88d81b",
+          "decision": {
+            "kind": "refuse",
+            "reason": "I reconsidered. No."
+          },
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          }
+        }
+      ],
+      "outcomes": [],
+      "topics": [
+        {
+          "sourceId": "op:ea8c4765649e6234e6de03ed",
+          "text": "Fresh offer declined; no work performed.",
+          "status": "declined",
+          "proposalIds": [
+            "36ec8087-0cc5-42c3-ad76-10c36db0997b",
+            "af0a0a7a-7575-402e-822c-aa528f88d81b"
+          ]
+        }
+      ],
+      "reoffers": [
+        {
+          "id": "e3533fae-1b28-4b10-9b8a-bdb5d14b6f7f",
+          "pawn": "Thing_Human405",
+          "deferredId": "36ec8087-0cc5-42c3-ad76-10c36db0997b",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "mapId": 0,
+          "tick": 2,
+          "reason": "You may offer that same haul once again; I will decide on the fresh terms.",
+          "status": "offered",
+          "proposalId": "af0a0a7a-7575-402e-822c-aa528f88d81b"
+        }
+      ],
+      "publicReport": {
+        "world": "f6832ffd5eb14f33a1eeef699ce2112d",
+        "epoch": "1bbd0da5ac054cc1a1ccc045f89ea47e",
+        "branch": "752c775d-9a1c-4a13-8f3b-22765848f730",
+        "revision": 20,
+        "tick": 4,
+        "entries": [
+          {
+            "seq": 1,
+            "tick": 2,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "subject": "36ec8087-0cc5-42c3-ad76-10c36db0997b",
+            "text": "One optional agreement",
+            "key": "offer:36ec8087-0cc5-42c3-ad76-10c36db0997b"
+          },
+          {
+            "seq": 2,
+            "tick": 2,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "crew",
+            "subject": "857166cf-dd07-4a71-87fb-747b3671b91e",
+            "text": "One optional agreement",
+            "key": "core-plan:857166cf-dd07-4a71-87fb-747b3671b91e"
+          },
+          {
+            "seq": 3,
+            "tick": 2,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "subject": "36ec8087-0cc5-42c3-ad76-10c36db0997b",
+            "text": "defer: Not now. No promise to accept later.",
+            "key": "reply:36ec8087-0cc5-42c3-ad76-10c36db0997b"
+          },
+          {
+            "seq": 4,
+            "tick": 2,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "subject": "36ec8087-0cc5-42c3-ad76-10c36db0997b",
+            "text": "Request one fresh offer: You may offer that same haul once again; I will decide on the fresh terms.",
+            "key": "reoffer:e3533fae-1b28-4b10-9b8a-bdb5d14b6f7f"
+          },
+          {
+            "seq": 5,
+            "tick": 3,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "Alvin",
+            "subject": "af0a0a7a-7575-402e-822c-aa528f88d81b",
+            "text": "Fresh optional offer after your request",
+            "key": "offer:af0a0a7a-7575-402e-822c-aa528f88d81b"
+          },
+          {
+            "seq": 6,
+            "tick": 3,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "crew",
+            "subject": "1a41975c-b2ec-4878-86bc-2f595c8c94f4",
+            "text": "Fresh optional offer after your request",
+            "key": "core-plan:1a41975c-b2ec-4878-86bc-2f595c8c94f4"
+          },
+          {
+            "seq": 7,
+            "tick": 3,
+            "kind": "message",
+            "actor": "Alvin",
+            "recipient": "Core",
+            "subject": "af0a0a7a-7575-402e-822c-aa528f88d81b",
+            "text": "refuse: I reconsidered. No.",
+            "key": "reply:af0a0a7a-7575-402e-822c-aa528f88d81b"
+          },
+          {
+            "seq": 8,
+            "tick": 3,
+            "kind": "message",
+            "actor": "Core",
+            "recipient": "crew",
+            "subject": "14ec70ff-9603-483f-8c8c-b3644d2eef40",
+            "text": "No further offer.",
+            "key": "core-plan:14ec70ff-9603-483f-8c8c-b3644d2eef40"
+          }
+        ],
+        "agreements": []
+      }
+    }
+  ],
+  "limits": [
+    "Authored wood fixture and scripted choices, not an autonomous campaign.",
+    "Native checks invoke core turns explicitly. Request event deduplication and reflection-choice application have automated coordinator coverage, not live-model evidence.",
+    "One exact deferred action/map may be offered once after the pawn request; current grounding and fresh consent remain necessary.",
+    "Topic closure describes linked work, not proof of every assertion in topic prose.",
+    "Coarse shared-link bodily status is a documented future direction, not implemented telemetry."
+  ],
+  "cleanup": {
+    "errors": [],
+    "work": {
+      "errors": []
+    }
+  },
+  "coldCleanup": {
+    "errors": [],
+    "work": {
+      "errors": []
+    }
+  }
+}

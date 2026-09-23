@@ -1,0 +1,50 @@
+{
+  "slug": "one-fresh-invitation",
+  "title": "One Fresh Invitation",
+  "date": "2026-09-23",
+  "summary": "A pawn can invite one fresh offer without accepting it, and verified work can now close several topics together.",
+  "sections": [
+    {
+      "heading": "A place for finished work",
+      "paragraphs": [
+        "The previous live trial delivered its wood, but the core’s topic labels lagged behind its prose. That historical mismatch remains preserved. The new contract gives the core room to update up to eight sourced topics in one turn, while explicitly linking each new offer to one topic.",
+        "Resolved now requires completed receipts for every linked final offer. Declined requires every final offer to have been refused and never implies work occurred. Pending, stopped and unknown work cannot close. Counterproposals and fresh invitations lead to the final offer, but closing linked work does not prove that a broader strategic goal is satisfied."
+      ]
+    },
+    {
+      "heading": "An invitation is not consent",
+      "paragraphs": [
+        "A pawn may deliberately request one fresh exact deferred offer during eligible reflection. The typed reason serves as public communication, not consent. No timer, meal, or hidden need automatically triggers this request. Fresh acceptance, refusal, counter, or defer responses remain required regardless of the request.",
+        "In the final-build scripted game test, deferral was followed by a pawn-authored request and fresh acceptance: thirty wood delivered. A second distinct agreement delivered thirty more. Six trips delivered sixty wood; afterward, one core turn closed both topics. The separate refusal case created no jobs and closed its topic as declined. Rewinding removed the later request, and paired restore brought its saved version back."
+      ]
+    },
+    {
+      "heading": "What these checks establish",
+      "paragraphs": [
+        "Both cases survived a full restart on the final build. All 281 Node tests and ten Python checks passed. Independent Codex review and focused re-review completed after fixes to the test runner’s deadline and cleanup. No live core, pawn or Jev inference was used: these are scripted mechanics checks, not proof that a model will choose the new responses well.",
+        "Future coarse Food and Rest bands will use explicit shared-link telemetry with timestamp, freshness, and unknown states—no exact need values or private thoughts. Campfire and cooking remain separate next capabilities, documented but not yet implemented."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Lifecycle contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/CORE_LIFECYCLE.md"
+    },
+    {
+      "label": "Scripted evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/core-lifecycle.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/2026-09-23-core-lifecycle.png",
+      "alt": "Saved Concord panel showing Alvin requesting one fresh offer, then refusing it, with no work agreements on the board.",
+      "caption": "Actual player panel from the scripted refusal check. Asking to receive an offer did not commit Alvin to doing the work. Topic labels are not displayed in this panel."
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import {deferredOffers} from './reoffers.js';
 import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
 import {coreView,validateCoreChoice,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
@@ -264,6 +265,7 @@ export class Coordinator {
       this.commit('attention-started',pawn,{throughSeq,count:events.length,backend:backend.name,appraiser:significant?null:appraiser?.name});
       const view=structuredClone({pawn:groundedPawn(this.domain,game,own),character,...(character.intention?{intention:this.domain.proposals[character.intention],agreementProgress:agreementProgress(this.domain,this.domain.proposals[character.intention]!,game.ticks,game.actions)}:{}),events:coalesce(events).filter(e=>e.route!=='native').map(e=>e.event),
         proposals:Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending').slice(0,8),
+        deferredOffers:deferredOffers(this.domain,pawn),
         requests:Object.values(this.domain.requests??{}).filter(r=>r.pawn===pawn).slice(-8),
         histories:Object.fromEntries(Object.values(this.domain.proposals).filter(p=>p.pawn===pawn&&p.status==='pending'&&p.parentId).slice(0,8).map(p=>[p.id,this.history(p)]))});
       return {status:'running' as const,generation:this.generation,controller,activity,view,throughSeq,significant,lease};
@@ -309,6 +311,14 @@ export class Coordinator {
           character.attention!.last={status:'continued',throughSeq,reason};
           character.reflections=[...(character.reflections??[]),reflection].slice(-16);
           this.commit('outlook-revised',pawn,{...reflection,outlook:next});
+          return {pawn,status:'continued',throughSeq};
+        }
+        if(result.kind==='request_reoffer') {
+          if(!prepared.view.deferredOffers.some(p=>p.id===result.proposalId))throw Error('Re-invitation outside supplied perspective');
+          this.requestReoffer(pawn,result.proposalId,result.reason,fresh);
+          character.attention!.last={status:'continued',throughSeq,reason};
+          character.reflections=[...(character.reflections??[]),reflection].slice(-16);
+          this.commit('attention-requested',pawn,reflection);
           return {pawn,status:'continued',throughSeq};
         }
         if(result.kind==='request_rescue') {
@@ -443,7 +453,7 @@ export class Coordinator {
         const a=choice.action;let proposalId:string|undefined,questionId:string|undefined;
         if(a.kind==='propose'){
           const op=prepared.view.opportunities.find(o=>o.id===a.opportunityId)!;
-          proposalId=this.propose(g,op.pawn,op.action,a.reason,randomUUID()).id;
+          proposalId=this.propose(g,op.pawn,op.action,a.reason,randomUUID(),undefined,undefined,false,op.reofferRequestId).id;
         }else if(a.kind==='adopt_counter'){
           const parent=this.domain.proposals[a.proposalId];
           if(!parent||parent.status!=='countered'||parent.decision?.kind!=='counter'||parent.replyId||(parent.round??0)>=2)throw Error('Counter unavailable');
@@ -454,10 +464,10 @@ export class Coordinator {
           const ch=this.domain.characters[a.pawn]!;ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
           this.commit('core-question','core',m);
         }
-        if(choice.topic){let topic=state.topics.find(t=>t.sourceId===choice.topic!.sourceId);
-          if(!topic){topic={...choice.topic,proposalIds:[]};state.topics.push(topic);}else Object.assign(topic,choice.topic);
-          if(proposalId)topic.proposalIds.push(proposalId);
+        for(const update of choice.topics){let topic=state.topics.find(t=>t.sourceId===update.sourceId);
+          if(!topic){topic={...update,proposalIds:this.domain.proposals[update.sourceId]?[update.sourceId]:[]};state.topics.push(topic);}else Object.assign(topic,update);
         }
+        if(proposalId&&choice.actionTopicId){const topic=state.topics.find(t=>t.sourceId===choice.actionTopicId)!;if(!topic.proposalIds.includes(proposalId))topic.proposalIds.push(proposalId);}
         Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{})});state.revision++;
         this.commit('core-planned','core',{id:prepared.id,reason:a.reason});
         return {status:'applied' as const,proposalId,questionId,choice};
@@ -564,7 +574,7 @@ export class Coordinator {
       })
     };
   }
-  private propose(game:GameState,pawn:string,action:Action,reason:string,id:string,parent?:Proposal,request?:AlternativeRequest,standalone=false) {
+  private propose(game:GameState,pawn:string,action:Action,reason:string,id:string,parent?:Proposal,request?:AlternativeRequest,standalone=false,reofferRequestId?:string) {
     action=Action.parse(action);z.string().uuid().parse(id);
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
     if(!reason.trim()||reason.length>1000) throw Error('Invalid proposal reason');
@@ -582,11 +592,14 @@ export class Coordinator {
       if(!replaces&&!this.completedRequestAvailable(candidate))throw Error('Completed request origin or free pawn required');
       if(replaces&&!this.replacementActive(candidate))throw Error('Requested agreement is no longer active');
     }
+    const reinvite=reofferRequestId?this.domain.reoffers?.[reofferRequestId]:undefined;
+    if(reofferRequestId&&(!reinvite||reinvite.status!=='pending'||reinvite.pawn!==pawn||this.domain.proposals[reinvite.deferredId]?.status!=='deferred'||JSON.stringify(reinvite.action)!==JSON.stringify(action)))throw Error('Re-invitation unavailable');
     const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;
     const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action,replaces):undefined;
-    const p:Proposal={id,pawn,action,reason,status:'pending',...(alternative?{requestId:alternative.id,...(replaces?{replacesAgreementId:replaces}:{})}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    const p:Proposal={id,pawn,action,reason,status:'pending',...(reofferRequestId?{reofferRequestId,reoffersProposalId:reinvite!.deferredId}:{}),...(alternative?{requestId:alternative.id,...(replaces?{replacesAgreementId:replaces}:{})}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
     if(action.kind==='rescue'){const invalid=rescueQuestionInvalid(game,p);if(invalid)throw Error(invalid);}
     if(alternative){if(rescueMap!==alternative.mapId)throw Error('Request map changed');alternative.status='offered';alternative.proposalId=id;alternative.replyReason=reason;}
+    if(reinvite){if(reinvite.mapId!==(action.kind==='haul'?haulMap:rescueMap))throw Error('Re-invitation map changed');reinvite.status='offered';reinvite.proposalId=id;this.domain.proposals[reinvite.deferredId]!.reofferReplyId=id;}
     if(parent)parent.replyId=id;
     this.domain.proposals[id]=p;this.commit(parent?'proposal-revised':'proposed','core',p);
     return structuredClone(p);
@@ -600,9 +613,17 @@ export class Coordinator {
     }
     return history;
   }
+  private requestReoffer(pawn:string,proposalId:string,reason:string,g:GameState){
+    z.string().trim().min(1).max(1000).parse(reason);
+    const p=deferredOffers(this.domain,pawn).find(p=>p.id===proposalId);
+    if(!p||!g.pawns.some(p=>p.id===pawn&&!p.downed))throw Error('Deferred offer unavailable for this pawn');
+    const request:import('./protocol.js').ReofferRequest={id:randomUUID(),pawn,deferredId:p.id,action:structuredClone(p.action),mapId:p.action.kind==='haul'?p.haulMap:p.rescueMap,tick:g.ticks,reason,status:'pending'};
+    (this.domain.reoffers??={})[request.id]=request;
+    this.commit('reoffer-requested',pawn,request);return structuredClone(request);
+  }
   pawn(pawn:string) {
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
-    return {withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000,signal=new AbortController().signal)=>this.decide(pawn,id,backend,timeoutMs,signal)};
+    return {requestReoffer:(id:string,reason:string)=>this.serial(async()=>{const g=await this.current();if(this.pending.has(pawn))throw Error('Pawn already deliberating');return this.requestReoffer(pawn,id,reason,g);}),withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000,signal=new AbortController().signal)=>this.decide(pawn,id,backend,timeoutMs,signal)};
   }
   private async decide(pawn:string,id:string,backend:DecisionBackend,timeoutMs:number,signal:AbortSignal) {
     const prepared=await this.serial(async()=>{

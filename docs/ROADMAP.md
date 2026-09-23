@@ -37,10 +37,11 @@ explicitly paused inference. This roadmap enables no unattended inference.
 The [bounded event-driven successor](CORE_EVENTS.md) is tested: a not-now reply,
 explicit stack identity, attributed-speech labels and budgeted event admission.
 One live run used three core turns, then stayed quiet without a new shared event.
-Next: explicit topic lifecycle (the live prose and retained labels disagreed)
-and a legitimate re-invitation after deferral. Automatic after-meal resumption
+The [topic lifecycle and pawn-authored re-invitation](CORE_LIFECYCLE.md) contract
+has scripted native and cold-restart evidence for two resolved topics and a fresh refusal after an invitation request. Live use of the new contract remains untested. Automatic after-meal resumption
 is absent. Keep fresh consent and private needs out of the core view.
-A campfire/cooking loop needs its own executable capability and native tests;
+The [coarse shared-link status decision](CORE_VISIBILITY.md) must receive a native
+sensor implementation before the capability trial. A campfire/cooking loop needs its own executable capability and native tests;
 it is not enabled by planning language or this milestone. No new live allowance
 is implied by these next steps.
 

@@ -14,6 +14,7 @@ const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.arg
 
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
+if(!scripted&&!cold)throw Error('Historical core-events-v1 live policy is closed; use a separately authorized versioned trial.');
 const policy='core-events-v1';
 const protocol={policy,coreCalls:4,pawnCalls:5,cooldownTicks:60,windowTicks:18000,nativeMs:scripted?40000:120000,pausedInference:true,jevCalls:0};
 let scriptedTurn=0;

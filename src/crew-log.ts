@@ -44,6 +44,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
   const p=data as Proposal;
   if(p.decision)add('message',p.pawn,'core',p.id,`${p.decision.kind}: ${p.decision.reason}`,`reply:${p.id}`);
  }
+ if(kind==='reoffer-requested')add('message',actor,'core',data.deferredId,`Request one fresh offer: ${data.reason}`,`reoffer:${data.id}`);
  if(kind==='alternative-requested')add('message',actor,'core',data.id,data.reason,`request:${data.id}`);
  if(kind==='core-question'||kind==='core-answer')add('message',data.from,data.to,data.exchangeId,data.text,`core-talk:${data.id}`);
  if(kind==='core-planned')add('message','core','crew',data.id,data.reason,`core-plan:${data.id}`);
