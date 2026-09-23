@@ -62,14 +62,16 @@ No work was proposed. Stream counts on the three-turn result show two formatting
 calls and one tool-result error. The subsequent [four-call diagnostic probe](PROVIDER_FAILURE_PROBE.md)
 reproduced two overlong-topic schema failures followed by valid repairs rejected
 at result counter three. A core-only, complete-trace recovery rule now recognizes
-that bounded two-message sequence; CLI max-turns remains two. The correction has
-automated/offline verification only, with no new colony result. Earlier transport
+that bounded two-message sequence; CLI max-turns remains two. That correction initially had automated/offline verification only. Earlier transport
 errors remain unresolved. The [native recovery follow-through](RECOVERY_FOLLOWTHROUGH.md)
 now exercised one accepted repair and a later rejected repair with three stream
 events but two distinct messages. Five core attempts and two pawn replies produced
 no work; paired/cold restore passed. The [identity-checked accounting correction](PROVIDER_MESSAGE_ACCOUNTING.md) now
-passes offline split-message and malformed-stream checks, with no fresh live
-confirmation. Next: separately bounded native follow-through on that adapter. Keep the
+passes offline split-message and malformed-stream checks. Its [fresh native check](IDENTITY_FOLLOWTHROUGH.md)
+accepted six core turns and three pawn replies, including a complete two-message
+repair split across three events. No work or eating was observed. Next: inspect
+native food-selection conditions and the speech/action boundary before another
+planning trial; do not turn dialogue into orders. Keep the
 unexplained coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 

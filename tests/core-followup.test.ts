@@ -25,3 +25,10 @@ test('recovery follow-through keeps prior caps and uses new independent ledgers'
  assert.notEqual(old.coreTrial,next.coreTrial);assert.notEqual(old.pawnTrial,next.pawnTrial);
  for(const p of [old,next]){assert.equal(decisionTrials[p.coreTrial].calls,6);assert.equal(decisionTrials[p.pawnTrial].calls,6);assert.equal(decisionTrials[p.coreTrial].reservedEquivalentUSD,.60);}
 });
+
+test('identity follow-through keeps prior caps and uses new independent ledgers',()=>{
+ const old=coreFollowupPolicy('recovery-followup-v1'),next=coreFollowupPolicy('identity-followup-v1');
+ assert.equal(next.coreCalls,6);assert.equal(next.pawnCalls,6);assert.equal(next.nativeMs,120000);assert.equal(next.jevCalls,0);
+ assert.notEqual(old.coreTrial,next.coreTrial);assert.notEqual(old.pawnTrial,next.pawnTrial);
+ for(const p of [old,next]){assert.equal(decisionTrials[p.coreTrial].calls,6);assert.equal(decisionTrials[p.pawnTrial].calls,6);assert.equal(decisionTrials[p.coreTrial].reservedEquivalentUSD,.60);}
+});
