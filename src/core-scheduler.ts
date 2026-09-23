@@ -15,9 +15,11 @@ export type CoreWake={sourceId:string;kind:'start'|'agreement'|'request'|'messag
 export function coreWakeSnapshot(v:CoreView):CoreWake[]{
  const wakes:CoreWake[]=[{sourceId:v.brief.id,kind:'start',value:'initial'}];
  for(const p of v.agreements){
-  const status=p.progress.status;
+  const status=p.action.kind==='move'&&p.status==='accepted'
+   ?p.progress.completed?'completed':p.progress.unsuccessful?'stopped':p.progress.status
+   :p.progress.status;
   if(['completed','stopped','refused','deferred','countered','withdrawn'].includes(status))
-   wakes.push({sourceId:p.id,kind:'agreement',value:JSON.stringify({status,completed:p.progress.completed,delivered:p.progress.delivered})});
+   wakes.push({sourceId:p.id,kind:'agreement',value:JSON.stringify({status,completed:p.progress.completed,unsuccessful:p.progress.unsuccessful,delivered:p.progress.delivered})});
  }
  for(const r of v.requests)wakes.push({sourceId:r.id,kind:'request',value:r.status});
  for(const m of v.messages)if(m.to==='core'&&m.from!=='core')wakes.push({sourceId:m.id,kind:'message',value:m.text});

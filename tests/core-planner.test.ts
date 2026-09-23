@@ -166,3 +166,16 @@ test('event trial permits unused calls and deferral but never hides inference fa
  assert(!coreEventsInferencePassed([{result:{status:'applied'},pawnError:'Failed'}]));
  assert(!coreEventsInferencePassed(Array.from({length:5},()=>({result:{status:'applied'}}))));
 });
+test('terminal movement receipts wake the core even without a standing agreement',async()=>{
+ for(const outcome of ['completed','interrupted','failed'] as const){
+  const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:3,cooldownTicks:60,windowTicks:1000});
+  await c.planCoreWhenDue(planner(()=>wait));g.data.ticks+=60;
+  g.move=async r=>{g.moves++;const receipt={id:r.id,actor:r.actor,status:'started' as const,reason:'In progress',x:0,z:0};g.data.actions.push(receipt);return receipt;};
+  const p=await c.core().propose('A',{kind:'move',x:2,z:1},'Optional movement');await c.pawn('A').decide(p.id,{name:'accept',async decide(){return {kind:'accept',reason:'I agree'};}});
+  assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');
+  g.data.actions[0]!.status=outcome;await c.reconcile();let wakes:any;
+  assert.equal((await c.planCoreWhenDue(planner(v=>{wakes=(v as any).wakeReasons;return wait;}))).status,'applied');
+  assert.equal(wakes.length,1);assert.equal(wakes[0].sourceId,p.id);assert.equal(JSON.parse(wakes[0].value).status,outcome==='completed'?'completed':'stopped');
+  g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');s.close();
+ }
+});
