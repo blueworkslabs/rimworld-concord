@@ -59,3 +59,21 @@ Native activity can diverge after decisions; restore changes epochs/internal IDs
 A failed provider call remains a failed call even if its raw inner answer looks
 sensible. PR35's missing-envelope failure stays unexplained. Correction/removal
 and third-party relay remain later, separately bounded checks.
+
+## Completed results
+
+[Sanitized evidence](evidence/indirect-message.json) retains the full public
+decision reasons and provider metadata. All four live calls validated. Control
+formed a Food concern, accepted and delivered ten wood; the statement arm formed
+an attributed stance and refused, with no hauling job. Its reply inferred a
+preference not to cut across Beatrice's work, without inventing an explicit request
+or a prior promise. The control note's eating/food gloss remains an ambiguity:
+the actual supplied event establishes a Food-band change, not eating.
+
+All 96 activity samples were unpaused. Both scripted and live pairs passed note
+rewind/restore and final paired/full-restart verification, with no additional
+inference during cold checks. All 241 Node and ten Python checks passed. The
+independent read-only Codex review of af85f0a found no actionable introduced defects;
+parent tests supply the full-suite evidence. Staging stopped; 74 historical
+databases remained unchanged. This completes only the frozen indirect-information
+pair. The limitations and later correction/removal step above still apply.
