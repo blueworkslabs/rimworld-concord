@@ -83,7 +83,7 @@ Two early reads (one model reading an exported log, one reader working from
 screenshots) found real gaps but did not scale: screenshot packs can't carry a
 ten-minute scene. Future legibility checks need a recording of the scene (watched by
 a person, or summarized by a video-capable model) and a protocol decided in advance.
-Until then, legibility is not claimed.
+The recording pipeline is being calibrated; general legibility is not claimed.
 
 ## Running trials
 
@@ -107,3 +107,35 @@ emulation and RimWorld never run at the same time on the shared host.
 
 A finished run writes a receipt under `.runtime/`; the sanitized version goes to
 `docs/evidence/` and a row in the [trial ledger](trials/README.md).
+
+## Recorded-session review protocol
+
+Use the retained uncut MP4, identified by hash. Freeze the model, prompt and questions
+before inference. A **video-only pass** receives no receipts or expected events; it
+reports timestamped observations, sources (map, speech or outcome record), uncertainty
+and concrete readability problems. A second **receipt check** receives the unchanged
+first answer and sanitized public evidence. It must distinguish facts missing from
+the video from facts it failed to notice. The second pass is not an independent judge.
+An author checks both accounts; neither output can change game state or override receipts.
+
+`scripts/review-video.mjs <private-config.json> <new-private-attempt-directory>` is an
+offline probe, run only through the protected gateway. The config supplies `model`,
+`phase` (`video-only` or `receipt-check`), `prompt`, `videoPath` and `videoSha256`.
+The initial model is pinned to `google/gemini-3.8-flash`; changing it is a new protocol.
+The request carries native `video_url` base64 input, not a screenshot pack. Upstream
+default video processing is used; no specific sampling rate is claimed. Provider
+fallbacks and automatic retries are disabled. The deadline is 180 seconds, output
+limit 6,000 tokens, input clip limit 10 MB and response-body limit 256 KiB.
+
+Credentials remain behind protected gateway egress. The probe refuses proxy exclusions
+and conflicting lowercase HTTPS-proxy settings, never follows redirects, and retains
+only selected response fields—not headers, hidden reasoning or raw transport errors.
+Attempt directories are exclusive. An unresolved `reserved` receipt after interruption
+or a persistence failure means a request **may have happened**; inspect before further
+work. This is a supervised calibration tool, not unattended scheduling or a replacement
+for the character ledgers. Inspect model text before publication.
+
+Run `node --test scripts/review-video.test.mjs` for the transport and retention checks.
+Model summaries help navigate footage; human feedback remains optional timestamped
+observations, not a compulsory retelling. A scripted clip tests presentation and the
+review method, not live agency or whether the game is engaging.
