@@ -77,6 +77,22 @@ an unannotated log for a short retelling; keep diagnostics separate until after
 that read. Measure whether the situation is understandable, not whether it
 matches a ten-minute scripted beat sheet.
 
-**Status:** implementation and scripted verification in progress; no live calls
-under this protocol yet. No claim of native acceptance or general model planning
-is made by this design document.
+## Verified mechanics
+
+[Scripted evidence](evidence/campfire-scripted.json): 289 Node and ten Python
+checks, compilation against the installed game assemblies, final independent
+review, native execution and cold restore passed. One campfire used twenty wood;
+two separately consented meals used twenty berries. A smaller counter required
+fresh acceptance. Refusal created no job; withdrawal left unfinished work
+incomplete and removed the scoped cooking bill. Save/restore between meals and
+full restart preserved the verified outcomes.
+
+An early custom cooking driver produced a meal without consuming ingredients:
+native placement tracking is keyed to specific job definitions. The corrected
+driver records placement, rejects missing ingredients before finishing, and
+confirms both consumption and product creation. The incorrect early result is
+not counted as successful cooking.
+
+The frozen live protocol is a separate behavioral experiment. Its outcomes and
+explanatory diary are withheld until the preselected player-artifact read.
+Scripted success alone does not establish model planning or character quality.

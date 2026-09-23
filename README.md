@@ -8,13 +8,13 @@ An experimental foundation for an ancient AI core and three autonomous colonists
 
 An experimental vertical slice, not a playable campaign or unattended AI colony:
 
-- Pawns negotiate and carry out bounded movement, hauling and rescue. An opt-in bounded live core proposes grounded work; scripted planning remains a regression baseline.
+- Pawns negotiate and carry out bounded movement, hauling, rescue, campfire construction and cooking. An opt-in bounded live core proposes grounded work; scripted planning remains a regression baseline.
 - Nearby pawns can exchange one optional opener and reply; attributed speech does not authorize work or automatically change beliefs. See [social contract](docs/SOCIAL_EXCHANGE.md).
 - Consent, native outcome checks and paired/cold restore are enforced below the model layer.
 - The in-game crew log separates addressed messages, observed events and work records; private outlooks remain private.
 - Optional outlook revisions can retain attributed received speech. Automated persistence/privacy, native retention and paired/cold restore have been verified in bounded trials. This is not proof of long-term personality.
 - Claude has bounded real-game evidence; Luna has offline contract evidence, not a game backend. Sustained character quality remains unproved.
-- Current focus: [receipt-supported topic closure and pawn-authored re-invitation](docs/CORE_LIFECYCLE.md), with event-driven follow-through. Coarse shared-link status and campfire/cooking remain future capabilities. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
+- Current focus: [a visible campfire/cooking loop](docs/CAMPFIRE_MILESTONE.md), with separately consented work and coarse shared-link Food/Rest telemetry. Scripted native resource-use and restart checks pass; live outcomes are reported separately. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
 
 ## Layout
 
@@ -64,7 +64,7 @@ A copied lab-only shutdown save does **not** automatically become a paired Conco
 
 ## Authority and trust
 
-Model backends receive only their own pawn's supplied perspective and proposal. Their typed response cannot choose another actor or access admin operations. Core handles can propose but cannot execute. The coordinator binds pawn identity; the game rejects invalid actors, epochs, duplicate payload mismatches and infeasible movement, hauling or rescue.
+Model backends receive only their own pawn's supplied perspective and proposal. Their typed response cannot choose another actor or access admin operations. Core handles can propose but cannot execute. The coordinator binds pawn identity; the game rejects invalid actors, epochs, duplicate payload mismatches and infeasible movement, hauling, rescue or production.
 
 This is an application boundary, **not** a sandbox for hostile plugin code or the local operator. The file bridge and SQLite database are trusted local components. Future live runtimes must not inherit shell/file/admin access that bypasses the domain tools. `inspect()` and `LabBridge.admin()` are operator-only. Current perspective filtering is intentionally narrow, not a full sight/hearing/rumour model.
 

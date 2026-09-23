@@ -9,5 +9,5 @@ A band is neither consent, a medical diagnosis nor a guarantee of work readiness
 Deliberate reports remain separately attributed even when they disagree with
 telemetry. Fresh invitation and work consent are still required after deferral.
 
-Implementation is under verification; scripted and live evidence will be reported
+The projection is implemented and tested; scripted and live evidence are reported
 separately. The previous lifecycle milestone did not implement this telemetry.
