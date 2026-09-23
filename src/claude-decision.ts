@@ -66,8 +66,8 @@ export class ClaudeDecisionBackend {
  readonly name=CLAUDE_MODEL;
  readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string;authoredSize?:ReturnType<typeof promptAccounting>;providerChoice?:ReflectionChoice}>=[];
  readonly requestSizes:Array<{mode:string;authoredSize:ReturnType<typeof promptAccounting>}>=[];
- readonly rawResponses:Array<{mode:string;structuredOutput:unknown;stream:ProviderStreamCounts['counts'];result:ReturnType<typeof providerResultMetadata>}>=[];
- readonly streamDiagnostics:Array<{mode:string;counts:ProviderStreamCounts['counts']}>=[];
+ readonly rawResponses:Array<{mode:string;structuredOutput:unknown;stream:ProviderStreamCounts['counts'];streamDetails:ProviderStreamCounts['details'];result:ReturnType<typeof providerResultMetadata>}>=[];
+ readonly streamDiagnostics:Array<{mode:string;counts:ProviderStreamCounts['counts'];details:ProviderStreamCounts['details']}>=[];
  readonly failures:Array<{stage:string;attemptReserved:boolean;cancelled:boolean;issues?:ReturnType<typeof validationIssues>}>=[];
  private budget:TrialBudget;
  private pending=false;
@@ -115,10 +115,17 @@ export class ClaudeDecisionBackend {
      stage='setup';signal.throwIfAborted();await mkdir(this.options.scratchRoot,{recursive:true});
      const cwd=await mkdtemp(join(this.options.scratchRoot,'pawn-'));
      stage='budget';id=this.budget.reserve(0.10);this.requestSizes.push({mode,authoredSize});const began=Date.now();
-     const stream=new ProviderStreamCounts();this.streamDiagnostics.push({mode,counts:stream.counts});
+     const stream=new ProviderStreamCounts(input=>{
+       try{
+         const parsed=parseClaudeResult({type:'result',subtype:'success',is_error:false,total_cost_usd:0,modelUsage:{[CLAUDE_MODEL]:{}},num_turns:1,structured_output:input},mode);
+         if(mode==='core')validateCoreChoice(parsed.output,view as CoreView);
+         if(parsed.providerChoice)validateReflectionChoice(parsed.providerChoice,view as AttentionView);
+         return [];
+       }catch(e){return validationIssues(e);}
+     });this.streamDiagnostics.push({mode,counts:stream.counts,details:stream.details});
      stage='transport';const events=await this.invoke(binary,args,prompt,cwd,env,signal,stream,
        cost=>this.budget.settle(id!,cost),
-       raw=>this.rawResponses.push({mode,stream:{...stream.counts},structuredOutput:(raw as {structured_output?:unknown}).structured_output??null,result:providerResultMetadata(raw,CLAUDE_MODEL)}));
+       raw=>this.rawResponses.push({mode,stream:{...stream.counts},streamDetails:structuredClone(stream.details),structuredOutput:(raw as {structured_output?:unknown}).structured_output??null,result:providerResultMetadata(raw,CLAUDE_MODEL)}));
      stage='parsing';const parsed=parseClaudeResult(events.result,mode);
      const receipt={mode,authoredSize,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'rejected',...(parsed.providerChoice?{providerChoice:parsed.providerChoice}:{})};
      this.receipts.push(receipt);

@@ -1,0 +1,688 @@
+[
+  {
+    "world": "80bd012710a9477889092676a82dac2a",
+    "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+    "branch": "05c5f3a4-b2aa-405b-8663-fdeca90de1d5",
+    "revision": 1,
+    "tick": 91,
+    "brief": {
+      "id": "brief",
+      "text": "Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+    },
+    "questions": [],
+    "topicClosures": [],
+    "reoffers": [],
+    "foodSightings": [
+      {
+        "observer": "Thing_Human405",
+        "name": "Alvin",
+        "status": "observed",
+        "source": "shared-local-sighting",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 91,
+        "mapId": 0,
+        "radius": 12,
+        "truncated": false,
+        "items": [
+          {
+            "thing": "Thing_RawBerries1878",
+            "x": 81,
+            "z": 79,
+            "forbidden": false,
+            "label": "berries",
+            "count": 75,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          },
+          {
+            "thing": "Thing_RawFungus1876",
+            "x": 83,
+            "z": 81,
+            "forbidden": true,
+            "label": "raw fungus",
+            "count": 46,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          },
+          {
+            "thing": "Thing_RawBerries1880",
+            "x": 74,
+            "z": 80,
+            "forbidden": false,
+            "label": "berries",
+            "count": 75,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          },
+          {
+            "thing": "Thing_RawBerries1879",
+            "x": 73,
+            "z": 78,
+            "forbidden": false,
+            "label": "berries",
+            "count": 75,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          }
+        ],
+        "campfires": []
+      },
+      {
+        "observer": "Thing_Human408",
+        "name": "Beatrice",
+        "status": "observed",
+        "source": "shared-local-sighting",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 91,
+        "mapId": 0,
+        "radius": 12,
+        "truncated": false,
+        "items": [
+          {
+            "thing": "Thing_RawBerries1880",
+            "x": 74,
+            "z": 80,
+            "forbidden": false,
+            "label": "berries",
+            "count": 75,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          },
+          {
+            "thing": "Thing_RawBerries1879",
+            "x": 73,
+            "z": 78,
+            "forbidden": false,
+            "label": "berries",
+            "count": 75,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          },
+          {
+            "thing": "Thing_RawBerries1878",
+            "x": 81,
+            "z": 79,
+            "forbidden": false,
+            "label": "berries",
+            "count": 75,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          },
+          {
+            "thing": "Thing_RawFungus1876",
+            "x": 83,
+            "z": 81,
+            "forbidden": true,
+            "label": "raw fungus",
+            "count": 46,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          }
+        ],
+        "campfires": []
+      },
+      {
+        "observer": "Thing_Human411",
+        "name": "Pedro",
+        "status": "observed",
+        "source": "shared-local-sighting",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 91,
+        "mapId": 0,
+        "radius": 12,
+        "truncated": false,
+        "items": [
+          {
+            "thing": "Thing_RawFungus1876",
+            "x": 83,
+            "z": 81,
+            "forbidden": true,
+            "label": "raw fungus",
+            "count": 46,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          },
+          {
+            "thing": "Thing_RawBerries1878",
+            "x": 81,
+            "z": 79,
+            "forbidden": false,
+            "label": "berries",
+            "count": 75,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          },
+          {
+            "thing": "Thing_RawBerries1880",
+            "x": 74,
+            "z": 80,
+            "forbidden": false,
+            "label": "berries",
+            "count": 75,
+            "nutritionGiving": true,
+            "simpleMealIngredientCount": 10
+          }
+        ],
+        "campfires": []
+      }
+    ],
+    "foodKnowledge": "Shared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent.",
+    "sharedStatus": [
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "source": "shared-link-telemetry",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 91,
+        "fresh": true,
+        "food": "low",
+        "rest": "satisfied"
+      },
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "source": "shared-link-telemetry",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 91,
+        "fresh": true,
+        "food": "satisfied",
+        "rest": "satisfied"
+      },
+      {
+        "pawn": "Thing_Human411",
+        "name": "Pedro",
+        "source": "shared-link-telemetry",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 91,
+        "fresh": true,
+        "food": "satisfied",
+        "rest": "satisfied"
+      }
+    ],
+    "crew": [
+      {
+        "id": "Thing_Human405",
+        "name": "Alvin"
+      },
+      {
+        "id": "Thing_Human408",
+        "name": "Beatrice"
+      },
+      {
+        "id": "Thing_Human411",
+        "name": "Pedro"
+      }
+    ],
+    "messages": [],
+    "agreements": [],
+    "counters": [],
+    "requests": [],
+    "topics": [],
+    "opportunities": [
+      {
+        "id": "op:09adfde44042d54423ebe63c",
+        "pawn": "Thing_Human405",
+        "action": {
+          "kind": "build",
+          "thing": "Thing_WoodLog1892",
+          "x": 80,
+          "z": 80,
+          "maxTicks": 3600
+        },
+        "observedTick": 91
+      },
+      {
+        "id": "op:67973e7e7a0931c67c184578",
+        "pawn": "Thing_Human405",
+        "action": {
+          "kind": "build",
+          "thing": "Thing_WoodLog1892",
+          "x": 81,
+          "z": 81,
+          "maxTicks": 3600
+        },
+        "observedTick": 91
+      },
+      {
+        "id": "op:ea8c4765649e6234e6de03ed",
+        "pawn": "Thing_Human405",
+        "action": {
+          "kind": "haul",
+          "thing": "Thing_WoodLog1892",
+          "x": 80,
+          "z": 80,
+          "count": 10,
+          "trips": 3,
+          "maxTicks": 1800
+        },
+        "observedTick": 91,
+        "supply": {
+          "sourceThingId": "Thing_WoodLog1892",
+          "label": "wood",
+          "sourceCount": 30,
+          "destinationFree": 75
+        }
+      },
+      {
+        "id": "op:08a5e04af2f4779ef3f93b4a",
+        "pawn": "Thing_Human408",
+        "action": {
+          "kind": "build",
+          "thing": "Thing_WoodLog1893",
+          "x": 75,
+          "z": 79,
+          "maxTicks": 3600
+        },
+        "observedTick": 91
+      },
+      {
+        "id": "op:da622cc443e5a8a3a31160bd",
+        "pawn": "Thing_Human408",
+        "action": {
+          "kind": "build",
+          "thing": "Thing_WoodLog1893",
+          "x": 75,
+          "z": 78,
+          "maxTicks": 3600
+        },
+        "observedTick": 91
+      },
+      {
+        "id": "op:117185bf255cec6314c75940",
+        "pawn": "Thing_Human408",
+        "action": {
+          "kind": "haul",
+          "thing": "Thing_WoodLog1893",
+          "x": 72,
+          "z": 79,
+          "count": 10,
+          "trips": 3,
+          "maxTicks": 1800
+        },
+        "observedTick": 91,
+        "supply": {
+          "sourceThingId": "Thing_WoodLog1893",
+          "label": "wood",
+          "sourceCount": 30,
+          "destinationFree": 75
+        }
+      },
+      {
+        "id": "op:ec42e20ff48c657190f2c2c7",
+        "pawn": "Thing_Human408",
+        "action": {
+          "kind": "haul",
+          "thing": "Thing_WoodLog1893",
+          "x": 80,
+          "z": 80,
+          "count": 10,
+          "trips": 3,
+          "maxTicks": 1800
+        },
+        "observedTick": 91,
+        "supply": {
+          "sourceThingId": "Thing_WoodLog1893",
+          "label": "wood",
+          "sourceCount": 30,
+          "destinationFree": 75
+        }
+      },
+      {
+        "id": "op:906bb7ff17dd0b189d0a863f",
+        "pawn": "Thing_Human411",
+        "action": {
+          "kind": "build",
+          "thing": "Thing_WoodLog1892",
+          "x": 82,
+          "z": 84,
+          "maxTicks": 3600
+        },
+        "observedTick": 91
+      },
+      {
+        "id": "op:616dc4e1e555368a6c4e23e9",
+        "pawn": "Thing_Human411",
+        "action": {
+          "kind": "build",
+          "thing": "Thing_WoodLog1892",
+          "x": 82,
+          "z": 86,
+          "maxTicks": 3600
+        },
+        "observedTick": 91
+      },
+      {
+        "id": "op:a56ba1e6287fd2acc3afdd2a",
+        "pawn": "Thing_Human411",
+        "action": {
+          "kind": "haul",
+          "thing": "Thing_WoodLog1892",
+          "x": 80,
+          "z": 80,
+          "count": 10,
+          "trips": 3,
+          "maxTicks": 1800
+        },
+        "observedTick": 91,
+        "supply": {
+          "sourceThingId": "Thing_WoodLog1892",
+          "label": "wood",
+          "sourceCount": 30,
+          "destinationFree": 75
+        }
+      }
+    ],
+    "availability": [
+      {
+        "pawn": "Thing_Human405",
+        "status": "Grounded options listed; availability is not consent or guaranteed success."
+      },
+      {
+        "pawn": "Thing_Human408",
+        "status": "Grounded options listed; availability is not consent or guaranteed success."
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "Grounded options listed; availability is not consent or guaranteed success."
+      }
+    ],
+    "questionRecipients": [
+      "Thing_Human405",
+      "Thing_Human408",
+      "Thing_Human411"
+    ],
+    "capabilities": [
+      "propose listed hauling/rescue/campfire construction/simple meals",
+      "adopt counter with fresh consent",
+      "one optional addressed question per pawn, at most three total",
+      "wait"
+    ],
+    "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.",
+    "wakeReasons": [
+      {
+        "sourceId": "brief",
+        "kind": "start",
+        "value": "initial"
+      },
+      {
+        "sourceId": "Thing_Human405",
+        "kind": "telemetry",
+        "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+      },
+      {
+        "sourceId": "Thing_Human408",
+        "kind": "telemetry",
+        "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+      },
+      {
+        "sourceId": "Thing_Human411",
+        "kind": "telemetry",
+        "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+      }
+    ]
+  },
+  {
+    "world": "80bd012710a9477889092676a82dac2a",
+    "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+    "branch": "05c5f3a4-b2aa-405b-8663-fdeca90de1d5",
+    "revision": 14,
+    "tick": 6040,
+    "brief": {
+      "id": "brief",
+      "text": "Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+    },
+    "questions": [
+      {
+        "id": "2fea978a-3a8b-4196-bdd2-3077f6b81516",
+        "pawn": "Thing_Human405",
+        "status": "answered"
+      },
+      {
+        "id": "7301b721-54b8-4bd8-9c77-bf37547b1c00",
+        "pawn": "Thing_Human408",
+        "status": "answered"
+      },
+      {
+        "id": "294951c9-4be0-4729-bd85-61975b2f0c37",
+        "pawn": "Thing_Human411",
+        "status": "answered"
+      }
+    ],
+    "topicClosures": [
+      {
+        "sourceId": "brief",
+        "statuses": []
+      },
+      {
+        "sourceId": "dc8c312a-ca70-444e-8cee-cec5e9b478cf",
+        "statuses": []
+      },
+      {
+        "sourceId": "0e4b8225-f212-4b9b-83fa-e35c53365cda",
+        "statuses": []
+      },
+      {
+        "sourceId": "80af9560-02a1-4308-8c77-b37de7710437",
+        "statuses": []
+      },
+      {
+        "sourceId": "230bbb69-5bfc-4eb1-9cd2-e912d4ecd0ae",
+        "statuses": []
+      }
+    ],
+    "reoffers": [],
+    "foodSightings": [
+      {
+        "observer": "Thing_Human405",
+        "name": "Alvin",
+        "status": "observed",
+        "source": "shared-local-sighting",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 6040,
+        "mapId": 0,
+        "radius": 12,
+        "truncated": false,
+        "items": [],
+        "campfires": []
+      },
+      {
+        "observer": "Thing_Human408",
+        "name": "Beatrice",
+        "status": "observed",
+        "source": "shared-local-sighting",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 6040,
+        "mapId": 0,
+        "radius": 12,
+        "truncated": false,
+        "items": [],
+        "campfires": []
+      },
+      {
+        "observer": "Thing_Human411",
+        "name": "Pedro",
+        "status": "observed",
+        "source": "shared-local-sighting",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 6040,
+        "mapId": 0,
+        "radius": 12,
+        "truncated": false,
+        "items": [],
+        "campfires": []
+      }
+    ],
+    "foodKnowledge": "Shared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent.",
+    "sharedStatus": [
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "source": "shared-link-telemetry",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 6040,
+        "fresh": true,
+        "food": "low",
+        "rest": "satisfied"
+      },
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "source": "shared-link-telemetry",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 6040,
+        "fresh": true,
+        "food": "low",
+        "rest": "satisfied"
+      },
+      {
+        "pawn": "Thing_Human411",
+        "name": "Pedro",
+        "source": "shared-link-telemetry",
+        "epoch": "5f8676cb946c4d8a92b18e79c38c0360",
+        "tick": 6040,
+        "fresh": true,
+        "food": "low",
+        "rest": "satisfied"
+      }
+    ],
+    "crew": [
+      {
+        "id": "Thing_Human405",
+        "name": "Alvin"
+      },
+      {
+        "id": "Thing_Human408",
+        "name": "Beatrice"
+      },
+      {
+        "id": "Thing_Human411",
+        "name": "Pedro"
+      }
+    ],
+    "messages": [
+      {
+        "id": "dc8c312a-ca70-444e-8cee-cec5e9b478cf",
+        "tick": 5639,
+        "from": "core",
+        "to": "Thing_Human405",
+        "text": "Alvin, you and the others are running low on food and nothing is visible nearby. Do you know of any food sources or supplies within reach?",
+        "evidence": "attributed-speech"
+      },
+      {
+        "id": "0e4b8225-f212-4b9b-83fa-e35c53365cda",
+        "tick": 5639,
+        "from": "Thing_Human405",
+        "to": "core",
+        "text": "Nothing in sight within my range — no food, no campfire. All three of us are low. I don't know of any sources close by right now.",
+        "evidence": "attributed-speech"
+      },
+      {
+        "id": "80af9560-02a1-4308-8c77-b37de7710437",
+        "tick": 5801,
+        "from": "core",
+        "to": "Thing_Human408",
+        "text": "Beatrice, all three of you are showing low food and nothing is visible nearby. Do you know of any food sources or supplies within reach?",
+        "evidence": "attributed-speech"
+      },
+      {
+        "id": "230bbb69-5bfc-4eb1-9cd2-e912d4ecd0ae",
+        "tick": 5801,
+        "from": "Thing_Human408",
+        "to": "core",
+        "text": "Nothing in my sightings — no food, no campfire within 12 cells. I'm low too, same as Alvin and Pedro. We'll need to search further out or find wood to build a fire if we locate anything raw.",
+        "evidence": "attributed-speech"
+      },
+      {
+        "id": "c4bb6808-1795-4c05-9878-1c20d55b6425",
+        "tick": 5888,
+        "from": "core",
+        "to": "Thing_Human411",
+        "text": "Pedro, all three of you are showing low food and neither Alvin nor Beatrice could spot any food or campfire within 12 cells. Do you know of any food sources or supplies within reach from where you are?",
+        "evidence": "attributed-speech"
+      },
+      {
+        "id": "2518b34c-eccf-45b5-9d12-93153dabed4a",
+        "tick": 5888,
+        "from": "Thing_Human411",
+        "to": "core",
+        "text": "My sighting matches — nothing within 12 cells here either. No food on me. At 39% food, hungry but not urgent yet. We may need to search further out or prioritize finding a food source soon.",
+        "evidence": "attributed-speech"
+      }
+    ],
+    "agreements": [],
+    "counters": [],
+    "requests": [],
+    "topics": [
+      {
+        "sourceId": "brief",
+        "text": "Shared telemetry (tick 5888) reports Alvin, Beatrice, and Pedro all at food:low, rest:satisfied. No food items or campfires observed within 12 cells by any crew member at tick 5888.",
+        "status": "open",
+        "proposalIds": [],
+        "outcomes": []
+      },
+      {
+        "sourceId": "dc8c312a-ca70-444e-8cee-cec5e9b478cf",
+        "text": "Core asked Alvin about nearby food sources (tick 5639). Alvin reported no food or campfire in sight, no sources known (tick 5639).",
+        "status": "open",
+        "proposalIds": [],
+        "outcomes": []
+      },
+      {
+        "sourceId": "0e4b8225-f212-4b9b-83fa-e35c53365cda",
+        "text": "Alvin reported no food or campfire in sight, no nearby sources known, all three low on food (tick 5639).",
+        "status": "open",
+        "proposalIds": [],
+        "outcomes": []
+      },
+      {
+        "sourceId": "80af9560-02a1-4308-8c77-b37de7710437",
+        "text": "Core asked Beatrice about nearby food sources (tick 5801).",
+        "status": "open",
+        "proposalIds": [],
+        "outcomes": []
+      },
+      {
+        "sourceId": "230bbb69-5bfc-4eb1-9cd2-e912d4ecd0ae",
+        "text": "Beatrice reported no food or campfire within 12 cells, confirmed all three are low on food; suggested searching further out or finding wood if raw food is located (tick 5801).",
+        "status": "open",
+        "proposalIds": [],
+        "outcomes": []
+      }
+    ],
+    "opportunities": [],
+    "availability": [
+      {
+        "pawn": "Thing_Human405",
+        "status": "No currently eligible grounded option; unknown is not refusal."
+      },
+      {
+        "pawn": "Thing_Human408",
+        "status": "No currently eligible grounded option; unknown is not refusal."
+      },
+      {
+        "pawn": "Thing_Human411",
+        "status": "No currently eligible grounded option; unknown is not refusal."
+      }
+    ],
+    "questionRecipients": [],
+    "capabilities": [
+      "propose listed hauling/rescue/campfire construction/simple meals",
+      "adopt counter with fresh consent",
+      "one optional addressed question per pawn, at most three total",
+      "wait"
+    ],
+    "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.",
+    "wakeReasons": [
+      {
+        "sourceId": "2518b34c-eccf-45b5-9d12-93153dabed4a",
+        "kind": "message",
+        "value": "My sighting matches — nothing within 12 cells here either. No food on me. At 39% food, hungry but not urgent yet. We may need to search further out or prioritize finding a food source soon."
+      },
+      {
+        "sourceId": "294951c9-4be0-4729-bd85-61975b2f0c37",
+        "kind": "answer",
+        "value": "answered"
+      }
+    ]
+  }
+]
