@@ -66,3 +66,32 @@ required to match the scripted rehearsal's control acceptance/message refusal.
 Native correction/removal after a second message is outside this pair; those
 paths retain the existing coordinator/SQLite tests, not a new gameplay claim.
 Optional typed-claims evaluation remains a separate offline follow-up.
+
+## 2026-09-23 results
+
+[Sanitized evidence](evidence/native-retention.json) preserves scripted and live
+outcomes separately. All 234 Node checks passed; independent review identified
+two runner issues (host-local deadline and disconnect during startup), fixed and
+re-reviewed before inference. The final scripted pair delivered ten wood in the
+control and applied a refusal in the message arm, with no message-arm job.
+
+Live, both conditions revised their private outlook. Control retained a Food
+concern, gave fresh consent to the offer and delivered ten wood. The message condition
+retained a Food concern plus an attributed message-based stance. Its later raw
+answer said `refuse`, but provider-result parsing rejected the call. The operator
+retired the unanswered offer; **this was not an applied pawn refusal**. The raw
+inner decision validates, but the surrounding provider envelope was not retained,
+so the exact failed validation cannot be reconstructed. No retry was made.
+
+Four Claude attempts were reserved; three responses validated, one failed parsing.
+Both conditions passed note rewind/restore and final paired/cold restore, with
+zero further inference during cold checks. All 95 live activity samples were
+unpaused (48 control, 47 message). Cleanup reported no remaining work, staging was
+stopped, and all 72 historical databases remained unchanged. The earlier failed
+zero-inference fixture rehearsal is retained privately and disclosed in evidence.
+
+The next diagnostic improvement is bounded, non-secret provider-result metadata
+and validation issue paths, without weakening success, model-route or turn-limit
+checks. A live behavioral contrast and later native correction/removal remain
+unproved. The harness's successful completion means lifecycle assertions passed;
+it does not mean every provider call or intended behavioral measurement succeeded.

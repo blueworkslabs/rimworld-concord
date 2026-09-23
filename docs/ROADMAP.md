@@ -1,6 +1,6 @@
 # Roadmap
 
-Current direction, 2026-09-22. The core remains scripted while we learn how to
+Current direction, 2026-09-23. The core remains scripted while we learn how to
 make pawn behavior grounded, deliberate and understandable. A live core is a
 future milestone, not the next dependency.
 
@@ -24,11 +24,14 @@ future milestone, not the next dependency.
   facts, private outlook revisions and permission to act; see [social contract](SOCIAL_EXCHANGE.md).
   The first [offline interpretation check](SPEECH_CHECKS.md) and optional
   [received-message outlook retention](PRIVATE_OUTLOOK.md#received-message-evidence)
-  are complete; next verify the new citation path in the native game.
+  are complete; the [native retention protocol](NATIVE_RETENTION.md) now checks
+  the citation path with equal reflection menus, paired restore and fresh consent.
 - Test durable outlook reuse without treating a later acceptance as proof of
   persuasion. The small offline message/no-message contrast is complete; next
-  test correction/reconsideration and fresh work consent in a bounded native
-  scenario. No live allowance for that next scenario is enabled by this roadmap.
+  add bounded provider-result diagnostics after the native trial retained a
+  raw refusal but lost the surrounding failed result metadata, then test correction or removal
+  after a later message. Retention plus recent correspondence does not isolate
+  the note's influence. No further allowance is enabled by this roadmap.
   Native chatter stays distinct from coordinator-mediated speech.
 - Reassess legibility before adding entry kinds. One fresh-context model reader
   of a retained exported log is complete, but its packet omitted UI/report-header

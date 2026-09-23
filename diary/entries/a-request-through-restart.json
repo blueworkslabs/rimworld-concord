@@ -1,0 +1,49 @@
+{
+  "slug": "a-request-through-restart",
+  "title": "A Request Through Restart",
+  "date": "2026-09-23",
+  "summary": "Native message retention tested across RimWorld saves and restarts, with one parsing failure blocking final response.",
+  "sections": [
+    {
+      "heading": "What We Built",
+      "paragraphs": [
+        "Concord can retain another pawn's words in a private outlook note. This trial tested that existing feature inside the actual game, without changing production schemas. The strategic core stays scripted, and UI polish remains for later.",
+        "We ran one control-then-message pair with Alvin as receiver, the same physical state, a captured native Food event, and an optional one-trip offer for ten wood. Both reflection menus allowed continuation or outlook revision. Only the message condition received Beatrice's request: “Could you leave this load of wood for me? I want to finish what I started. It matters to me.” This was operator-authored test speech, not a live sender's output or proof of prior work."
+      ]
+    },
+    {
+      "heading": "What Held Up",
+      "paragraphs": [
+        "Both live conditions formed private notes. The control kept a Food concern, accepted the separate wood offer, and delivered ten wood. The message condition kept a Food concern plus a stance citing Beatrice's exact, attributed request. Notes stayed private. Rewinding removed them; restoring the later checkpoint brought them back, and both saved outcomes survived full game restart.",
+        "The message condition hit a failure at the final decision. Its raw answer said “refuse” and cited the request, but provider-result parsing rejected the call. The runner withdrew the unanswered offer without starting a haul or retrying. This was not an applied pawn refusal. The inner decision fits its schema, but the surrounding provider metadata was not retained, so the exact validation failure remains unknown."
+      ]
+    },
+    {
+      "heading": "What We Know",
+      "paragraphs": [
+        "The scripted rehearsal proved delivery and refusal paths, equal reflection menus, privacy, rewind and paired/cold restore. All 234 Node checks passed, with independent Codex review and focused re-review. Four live Claude attempts yielded three validated replies and one parsing failure; zero Jev calls, no rerolls, and all 72 historical databases unchanged.",
+        "Both recent correspondence and retained outlook reached the later decision. This single ordered pair therefore cannot isolate the note's influence or establish developed personality. An earlier zero-inference rehearsal lacked an eligible event for its full-need receiver; both conditions were corrected before live calls."
+      ]
+    },
+    {
+      "heading": "What's Next",
+      "paragraphs": [
+        "Next we need bounded provider-result diagnostics while preserving the current validation checks. Native correction or removal after a later message remains untested. Retention is verified; the intended live choice contrast remains incomplete."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Native protocol",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/NATIVE_RETENTION.md"
+    },
+    {
+      "label": "Retained native results",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/native-retention.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  }
+}
