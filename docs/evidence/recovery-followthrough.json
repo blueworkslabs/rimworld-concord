@@ -1,0 +1,3513 @@
+{
+  "version": "recovery-followup-v1",
+  "behaviorCommit": "dc1e51ffd7d729c01a8f5d20eec8d9f9332d7ef0",
+  "protocol": {
+    "policy": "recovery-followup-v1",
+    "coreCalls": 6,
+    "pawnCalls": 6,
+    "cooldownTicks": 60,
+    "windowTicks": 18000,
+    "nativeMs": 120000,
+    "pausedInference": true,
+    "wallMs": 900000,
+    "jevCalls": 0
+  },
+  "trialPassed": false,
+  "inferencePassed": false,
+  "nativeError": null,
+  "accounting": {
+    "core": {
+      "attempts": 5,
+      "reservedEquivalentUSD": 0.5,
+      "estimatedUsageUSD": 0.3154635
+    },
+    "pawns": {
+      "attempts": 2,
+      "reservedEquivalentUSD": 0.2,
+      "estimatedUsageUSD": 0.051861000000000004
+    },
+    "jevCalls": 0
+  },
+  "responses": [
+    {
+      "id": "5c9f01da-6cb0-4154-9fb5-57a3d6ef4b11",
+      "mode": "core",
+      "pawn": null,
+      "receivedAt": "2026-09-23T15:20:01.338Z",
+      "elapsedMs": 7060,
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's food telemetry reported low this tick. Berries are visible nearby and accessible (not forbidden). Raw fungus stack is forbidden.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human405",
+          "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+          "reason": "Telemetry reports Alvin's food as low. Multiple berry stacks are visible nearby and are not forbidden. Asking rather than proposing work, since eating raw food is a legitimate option and no campfire is available."
+        }
+      }
+    },
+    {
+      "id": "dfb463ef-11e4-4750-a141-972979bf37d7",
+      "mode": "core-answer",
+      "pawn": "Thing_Human405",
+      "receivedAt": "2026-09-23T15:20:05.539Z",
+      "elapsedMs": 3752,
+      "output": {
+        "choice": "say",
+        "text": "Yeah, berries sound fine. I'll head over and eat some now."
+      }
+    },
+    {
+      "id": "a2a8ad6f-aeea-428d-a2a1-a60cd4ee7c94",
+      "mode": "core",
+      "pawn": null,
+      "receivedAt": "2026-09-23T15:20:20.727Z",
+      "elapsedMs": 11664,
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin's food telemetry reported low at tick 237. Alvin reported (tick 77) he would eat berries. No receipt confirms completion. Beatrice and Pedro report food and rest satisfied. Raw fungus remains forbidden; berries accessible.",
+            "status": "open"
+          },
+          {
+            "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+            "text": "Alvin reported he would eat berries. No linked receipt confirms this occurred; telemetry still shows food low at tick 237.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "wait",
+          "reason": "Alvin reported intent to eat berries at tick 77; telemetry at tick 237 still shows food low but no receipt confirms or denies the outcome. Beatrice and Pedro are satisfied. Waiting for updated telemetry or further signal before acting."
+        }
+      }
+    },
+    {
+      "id": "dc8d74a3-4215-4e28-82c3-85322eebd432",
+      "mode": "core",
+      "pawn": null,
+      "receivedAt": "2026-09-23T15:21:04.030Z",
+      "elapsedMs": 14416,
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin food low (tick 1915). Pedro food low (tick 1915). Beatrice satisfied. Alvin reported eating berries (tick 77); no receipt confirms. Berries accessible; fungus forbidden.",
+            "status": "open"
+          },
+          {
+            "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+            "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 1915.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "ask",
+          "pawn": "Thing_Human411",
+          "text": "Pedro, your food looks low. There are berries nearby you could eat raw — would you like to grab some?",
+          "reason": "Pedro's telemetry reports food low at tick 1915. Berries are observed nearby and not forbidden. Asking if Pedro would like to eat them; no pressure to respond."
+        }
+      }
+    },
+    {
+      "id": "69ed4157-d02a-4d51-891c-276871efc39e",
+      "mode": "core-answer",
+      "pawn": "Thing_Human411",
+      "receivedAt": "2026-09-23T15:21:08.760Z",
+      "elapsedMs": 4360,
+      "output": {
+        "choice": "say",
+        "text": "Yeah, I'm feeling it. Those berries nearby look good enough — I'll go grab some."
+      }
+    },
+    {
+      "id": "cec47246-cdbe-4a4d-9c47-0e11c7c07fa9",
+      "mode": "core",
+      "pawn": null,
+      "receivedAt": "2026-09-23T15:21:21.743Z",
+      "elapsedMs": 10647,
+      "output": {
+        "topics": [
+          {
+            "sourceId": "brief",
+            "text": "Alvin food low (tick 2003). Pedro food low (tick 2003). Beatrice satisfied. Alvin reported eating berries (tick 77), no receipt confirms. Pedro reported eating berries (tick 1915), no receipt confirms. Berries accessible; fungus forbidden.",
+            "status": "open"
+          },
+          {
+            "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+            "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 2003.",
+            "status": "open"
+          },
+          {
+            "sourceId": "679e2b57-118c-4d87-a6d3-3a243a035978",
+            "text": "Pedro reported he would eat berries (tick 1915). No receipt confirms; telemetry still shows food low at tick 2003.",
+            "status": "open"
+          }
+        ],
+        "actionTopicId": null,
+        "action": {
+          "kind": "wait",
+          "reason": "Pedro reported he would eat berries at tick 1915 and Alvin at tick 77; neither has a receipt yet and telemetry still shows both food low at tick 2003. Berries remain accessible. Waiting to see if telemetry confirms either outcome before taking further action."
+        }
+      }
+    }
+  ],
+  "providerDiagnostics": {
+    "core": {
+      "decisions": [
+        {
+          "mode": "core",
+          "authoredSize": {
+            "instructionsBytes": 1286,
+            "promptBytes": 9172,
+            "schemaBytes": 10487,
+            "totalAuthoredBytes": 20945
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 6550,
+          "estimatedUsageUSD": 0.05297399999999999,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        },
+        {
+          "mode": "core",
+          "authoredSize": {
+            "instructionsBytes": 1286,
+            "promptBytes": 10399,
+            "schemaBytes": 13794,
+            "totalAuthoredBytes": 25479
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 11376,
+          "estimatedUsageUSD": 0.06786600000000001,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        },
+        {
+          "mode": "core",
+          "authoredSize": {
+            "instructionsBytes": 1286,
+            "promptBytes": 9764,
+            "schemaBytes": 10482,
+            "totalAuthoredBytes": 21532
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 14113,
+          "estimatedUsageUSD": 0.07782450000000002,
+          "turns": 3,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok",
+          "formattingRecovery": true
+        },
+        {
+          "mode": "core",
+          "authoredSize": {
+            "instructionsBytes": 1286,
+            "promptBytes": 10377,
+            "schemaBytes": 12133,
+            "totalAuthoredBytes": 23796
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 10354,
+          "estimatedUsageUSD": 0.064815,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        }
+      ],
+      "rawResponses": [
+        {
+          "mode": "core",
+          "stream": {
+            "assistantEvents": 1,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "streamDetails": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          },
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "brief",
+                  "text": "Alvin's food telemetry reported low this tick. Berries are visible nearby and accessible (not forbidden). Raw fungus stack is forbidden.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "ask",
+                "pawn": "Thing_Human405",
+                "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+                "reason": "Telemetry reports Alvin's food as low. Multiple berry stacks are visible nearby and are not forbidden. Asking rather than proposing work, since eating raw food is a legitimate option and no campfire is available."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "apiError": {
+              "status": null,
+              "kind": "missing",
+              "code": "missing"
+            },
+            "turns": 2,
+            "reportedCostUSD": 0.05297399999999999,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core",
+          "stream": {
+            "assistantEvents": 2,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "streamDetails": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          },
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "brief",
+                  "text": "Alvin's food telemetry reported low at tick 237. Alvin reported (tick 77) he would eat berries. No receipt confirms completion. Beatrice and Pedro report food and rest satisfied. Raw fungus remains forbidden; berries accessible.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+                  "text": "Alvin reported he would eat berries. No linked receipt confirms this occurred; telemetry still shows food low at tick 237.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "wait",
+                "reason": "Alvin reported intent to eat berries at tick 77; telemetry at tick 237 still shows food low but no receipt confirms or denies the outcome. Beatrice and Pedro are satisfied. Waiting for updated telemetry or further signal before acting."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "apiError": {
+              "status": null,
+              "kind": "missing",
+              "code": "missing"
+            },
+            "turns": 2,
+            "reportedCostUSD": 0.06786600000000001,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core",
+          "stream": {
+            "assistantEvents": 2,
+            "assistantMessages": 2,
+            "userEvents": 2,
+            "structuredOutputCalls": 2,
+            "toolResults": 2,
+            "toolErrors": 1,
+            "resultEvents": 1
+          },
+          "streamDetails": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "invalid",
+                "issues": [
+                  {
+                    "code": "too_big",
+                    "path": [
+                      "core",
+                      "topics",
+                      0,
+                      "text"
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": true,
+                "errorMarker": "schema-mismatch"
+              },
+              {
+                "kind": "format-call",
+                "ordinal": 2,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 2,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 3,
+                "error": false
+              }
+            ],
+            "truncated": false
+          },
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "brief",
+                  "text": "Alvin food low (tick 1915). Pedro food low (tick 1915). Beatrice satisfied. Alvin reported eating berries (tick 77); no receipt confirms. Berries accessible; fungus forbidden.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+                  "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 1915.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "ask",
+                "pawn": "Thing_Human411",
+                "text": "Pedro, your food looks low. There are berries nearby you could eat raw — would you like to grab some?",
+                "reason": "Pedro's telemetry reports food low at tick 1915. Berries are observed nearby and not forbidden. Asking if Pedro would like to eat them; no pressure to respond."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "apiError": {
+              "status": null,
+              "kind": "missing",
+              "code": "missing"
+            },
+            "turns": 3,
+            "reportedCostUSD": 0.07782450000000002,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core",
+          "stream": {
+            "assistantEvents": 2,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "streamDetails": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          },
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "brief",
+                  "text": "Alvin food low (tick 2003). Pedro food low (tick 2003). Beatrice satisfied. Alvin reported eating berries (tick 77), no receipt confirms. Pedro reported eating berries (tick 1915), no receipt confirms. Berries accessible; fungus forbidden.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+                  "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 2003.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "679e2b57-118c-4d87-a6d3-3a243a035978",
+                  "text": "Pedro reported he would eat berries (tick 1915). No receipt confirms; telemetry still shows food low at tick 2003.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "wait",
+                "reason": "Pedro reported he would eat berries at tick 1915 and Alvin at tick 77; neither has a receipt yet and telemetry still shows both food low at tick 2003. Berries remain accessible. Waiting to see if telemetry confirms either outcome before taking further action."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "apiError": {
+              "status": null,
+              "kind": "missing",
+              "code": "missing"
+            },
+            "turns": 2,
+            "reportedCostUSD": 0.064815,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core",
+          "stream": {
+            "assistantEvents": 3,
+            "assistantMessages": 2,
+            "userEvents": 2,
+            "structuredOutputCalls": 2,
+            "toolResults": 2,
+            "toolErrors": 1,
+            "resultEvents": 1
+          },
+          "streamDetails": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "invalid",
+                "issues": [
+                  {
+                    "code": "too_big",
+                    "path": [
+                      "core",
+                      "topics",
+                      0,
+                      "text"
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": true,
+                "errorMarker": "schema-mismatch"
+              },
+              {
+                "kind": "format-call",
+                "ordinal": 2,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 2,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 3,
+                "error": false
+              }
+            ],
+            "truncated": false
+          },
+          "structuredOutput": {
+            "core": {
+              "topics": [
+                {
+                  "sourceId": "1bd86ccd-0d93-402c-be70-68b1c17b5f5a",
+                  "text": "Core asked Alvin about berries (tick 77). Alvin reported he would eat them. No receipt; telemetry still food low at tick 5707.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+                  "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; food still low at tick 5707. No food visible in sighting radius.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "679e2b57-118c-4d87-a6d3-3a243a035978",
+                  "text": "Pedro reported he would eat berries (tick 1915). No receipt confirms; food still low at tick 5707. No food visible in sighting radius.",
+                  "status": "open"
+                },
+                {
+                  "sourceId": "brief",
+                  "text": "All three food low at tick 5707. No food in sighting radii. Alvin/Pedro reported berry intent, unconfirmed. Beatrice not yet asked.",
+                  "status": "open"
+                }
+              ],
+              "actionTopicId": null,
+              "action": {
+                "kind": "ask",
+                "pawn": "Thing_Human408",
+                "text": "Beatrice, your food looks low. Do you know of any food nearby, or is there something you'd like to do about it?",
+                "reason": "Beatrice's telemetry shows food low at tick 5707. She has not been asked previously. No food is visible in any sighting radius, so asking what she knows or prefers is the right step."
+              }
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "apiError": {
+              "status": null,
+              "kind": "missing",
+              "code": "missing"
+            },
+            "turns": 3,
+            "reportedCostUSD": 0.051983999999999995,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        }
+      ],
+      "failures": [
+        {
+          "stage": "parsing",
+          "attemptReserved": true,
+          "cancelled": false,
+          "issues": [
+            {
+              "code": "too_big",
+              "path": [
+                "num_turns"
+              ]
+            }
+          ]
+        }
+      ],
+      "streamDiagnostics": [
+        {
+          "mode": "core",
+          "counts": {
+            "assistantEvents": 1,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "details": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          }
+        },
+        {
+          "mode": "core",
+          "counts": {
+            "assistantEvents": 2,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "details": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          }
+        },
+        {
+          "mode": "core",
+          "counts": {
+            "assistantEvents": 2,
+            "assistantMessages": 2,
+            "userEvents": 2,
+            "structuredOutputCalls": 2,
+            "toolResults": 2,
+            "toolErrors": 1,
+            "resultEvents": 1
+          },
+          "details": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "invalid",
+                "issues": [
+                  {
+                    "code": "too_big",
+                    "path": [
+                      "core",
+                      "topics",
+                      0,
+                      "text"
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": true,
+                "errorMarker": "schema-mismatch"
+              },
+              {
+                "kind": "format-call",
+                "ordinal": 2,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 2,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 3,
+                "error": false
+              }
+            ],
+            "truncated": false
+          }
+        },
+        {
+          "mode": "core",
+          "counts": {
+            "assistantEvents": 2,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "details": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          }
+        },
+        {
+          "mode": "core",
+          "counts": {
+            "assistantEvents": 3,
+            "assistantMessages": 2,
+            "userEvents": 2,
+            "structuredOutputCalls": 2,
+            "toolResults": 2,
+            "toolErrors": 1,
+            "resultEvents": 1
+          },
+          "details": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "invalid",
+                "issues": [
+                  {
+                    "code": "too_big",
+                    "path": [
+                      "core",
+                      "topics",
+                      0,
+                      "text"
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": true,
+                "errorMarker": "schema-mismatch"
+              },
+              {
+                "kind": "format-call",
+                "ordinal": 2,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 2,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 3,
+                "error": false
+              }
+            ],
+            "truncated": false
+          }
+        }
+      ]
+    },
+    "pawns": {
+      "decisions": [
+        {
+          "mode": "core-answer",
+          "authoredSize": {
+            "instructionsBytes": 674,
+            "promptBytes": 7381,
+            "schemaBytes": 392,
+            "totalAuthoredBytes": 8447
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 3486,
+          "estimatedUsageUSD": 0.023628,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        },
+        {
+          "mode": "core-answer",
+          "authoredSize": {
+            "instructionsBytes": 674,
+            "promptBytes": 9666,
+            "schemaBytes": 392,
+            "totalAuthoredBytes": 10732
+          },
+          "model": "claude-sonnet-4-6",
+          "elapsedMs": 4093,
+          "estimatedUsageUSD": 0.028233,
+          "turns": 2,
+          "tools": [
+            "StructuredOutput"
+          ],
+          "status": "ok"
+        }
+      ],
+      "rawResponses": [
+        {
+          "mode": "core-answer",
+          "stream": {
+            "assistantEvents": 2,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "streamDetails": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          },
+          "structuredOutput": {
+            "social": {
+              "choice": "say",
+              "text": "Yeah, berries sound fine. I'll head over and eat some now."
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "apiError": {
+              "status": null,
+              "kind": "missing",
+              "code": "missing"
+            },
+            "turns": 2,
+            "reportedCostUSD": 0.023628,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        },
+        {
+          "mode": "core-answer",
+          "stream": {
+            "assistantEvents": 2,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "streamDetails": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          },
+          "structuredOutput": {
+            "social": {
+              "choice": "say",
+              "text": "Yeah, I'm feeling it. Those berries nearby look good enough — I'll go grab some."
+            }
+          },
+          "result": {
+            "type": "result",
+            "subtype": "success",
+            "isError": false,
+            "apiError": {
+              "status": null,
+              "kind": "missing",
+              "code": "missing"
+            },
+            "turns": 2,
+            "reportedCostUSD": 0.028233,
+            "modelUsageObject": true,
+            "modelCount": 1,
+            "expectedModelPresent": true,
+            "otherModelCount": 0,
+            "structuredOutputPresent": true
+          }
+        }
+      ],
+      "failures": [],
+      "streamDiagnostics": [
+        {
+          "mode": "core-answer",
+          "counts": {
+            "assistantEvents": 2,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "details": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          }
+        },
+        {
+          "mode": "core-answer",
+          "counts": {
+            "assistantEvents": 2,
+            "assistantMessages": 1,
+            "userEvents": 1,
+            "structuredOutputCalls": 1,
+            "toolResults": 1,
+            "toolErrors": 0,
+            "resultEvents": 1
+          },
+          "details": {
+            "events": [
+              {
+                "kind": "format-call",
+                "ordinal": 1,
+                "concordInputContract": "valid",
+                "issues": []
+              },
+              {
+                "kind": "format-result",
+                "ordinal": 1,
+                "error": false,
+                "errorMarker": "none"
+              },
+              {
+                "kind": "result",
+                "turns": 2,
+                "error": false
+              }
+            ],
+            "truncated": false
+          }
+        }
+      ]
+    }
+  },
+  "coreSituations": [
+    {
+      "world": "d9b91b4146b3424fac4f62112f7934b5",
+      "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+      "branch": "cd61fb9d-9450-44c2-9069-51d336d45c03",
+      "revision": 1,
+      "tick": 77,
+      "brief": {
+        "id": "brief",
+        "text": "Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+      },
+      "questions": [],
+      "topicClosures": [],
+      "reoffers": [],
+      "foodSightings": [
+        {
+          "observer": "Thing_Human405",
+          "name": "Alvin",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 77,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "x": 73,
+              "z": 78,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human408",
+          "name": "Beatrice",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 77,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "x": 73,
+              "z": 78,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human411",
+          "name": "Pedro",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 77,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        }
+      ],
+      "foodKnowledge": "Shared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent.",
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 77,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 77,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 77,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        }
+      ],
+      "crew": [
+        {
+          "id": "Thing_Human405",
+          "name": "Alvin"
+        },
+        {
+          "id": "Thing_Human408",
+          "name": "Beatrice"
+        },
+        {
+          "id": "Thing_Human411",
+          "name": "Pedro"
+        }
+      ],
+      "messages": [],
+      "agreements": [],
+      "counters": [],
+      "requests": [],
+      "topics": [],
+      "opportunities": [
+        {
+          "id": "op:67973e7e7a0931c67c184578",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 81,
+            "z": 81,
+            "maxTicks": 3600
+          },
+          "observedTick": 77
+        },
+        {
+          "id": "op:c7a6bc5f2391b046eecf766b",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 82,
+            "maxTicks": 3600
+          },
+          "observedTick": 77
+        },
+        {
+          "id": "op:ea8c4765649e6234e6de03ed",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 77,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:08a5e04af2f4779ef3f93b4a",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 75,
+            "z": 79,
+            "maxTicks": 3600
+          },
+          "observedTick": 77
+        },
+        {
+          "id": "op:da622cc443e5a8a3a31160bd",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 75,
+            "z": 78,
+            "maxTicks": 3600
+          },
+          "observedTick": 77
+        },
+        {
+          "id": "op:117185bf255cec6314c75940",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 77,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:ec42e20ff48c657190f2c2c7",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 77,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:906bb7ff17dd0b189d0a863f",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 84,
+            "maxTicks": 3600
+          },
+          "observedTick": 77
+        },
+        {
+          "id": "op:616dc4e1e555368a6c4e23e9",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 86,
+            "maxTicks": 3600
+          },
+          "observedTick": 77
+        },
+        {
+          "id": "op:a56ba1e6287fd2acc3afdd2a",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 77,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        }
+      ],
+      "availability": [
+        {
+          "pawn": "Thing_Human405",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        }
+      ],
+      "questionRecipients": [
+        "Thing_Human405",
+        "Thing_Human408",
+        "Thing_Human411"
+      ],
+      "capabilities": [
+        "propose listed hauling/rescue/campfire construction/simple meals",
+        "adopt counter with fresh consent",
+        "one optional addressed question per pawn, at most three total",
+        "wait"
+      ],
+      "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.",
+      "wakeReasons": [
+        {
+          "sourceId": "brief",
+          "kind": "start",
+          "value": "initial"
+        },
+        {
+          "sourceId": "Thing_Human405",
+          "kind": "telemetry",
+          "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+        },
+        {
+          "sourceId": "Thing_Human408",
+          "kind": "telemetry",
+          "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+        },
+        {
+          "sourceId": "Thing_Human411",
+          "kind": "telemetry",
+          "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+        }
+      ]
+    },
+    {
+      "world": "d9b91b4146b3424fac4f62112f7934b5",
+      "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+      "branch": "cd61fb9d-9450-44c2-9069-51d336d45c03",
+      "revision": 4,
+      "tick": 237,
+      "brief": {
+        "id": "brief",
+        "text": "Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+      },
+      "questions": [
+        {
+          "id": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+          "pawn": "Thing_Human405",
+          "status": "answered"
+        }
+      ],
+      "topicClosures": [
+        {
+          "sourceId": "brief",
+          "statuses": []
+        }
+      ],
+      "reoffers": [],
+      "foodSightings": [
+        {
+          "observer": "Thing_Human405",
+          "name": "Alvin",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 237,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "x": 73,
+              "z": 78,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human408",
+          "name": "Beatrice",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 237,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "x": 73,
+              "z": 78,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human411",
+          "name": "Pedro",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 237,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        }
+      ],
+      "foodKnowledge": "Shared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent.",
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 237,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 237,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 237,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        }
+      ],
+      "crew": [
+        {
+          "id": "Thing_Human405",
+          "name": "Alvin"
+        },
+        {
+          "id": "Thing_Human408",
+          "name": "Beatrice"
+        },
+        {
+          "id": "Thing_Human411",
+          "name": "Pedro"
+        }
+      ],
+      "messages": [
+        {
+          "id": "1bd86ccd-0d93-402c-be70-68b1c17b5f5a",
+          "tick": 77,
+          "from": "core",
+          "to": "Thing_Human405",
+          "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+          "evidence": "attributed-speech"
+        },
+        {
+          "id": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "tick": 77,
+          "from": "Thing_Human405",
+          "to": "core",
+          "text": "Yeah, berries sound fine. I'll head over and eat some now.",
+          "evidence": "attributed-speech"
+        }
+      ],
+      "agreements": [],
+      "counters": [],
+      "requests": [],
+      "topics": [
+        {
+          "sourceId": "brief",
+          "text": "Alvin's food telemetry reported low this tick. Berries are visible nearby and accessible (not forbidden). Raw fungus stack is forbidden.",
+          "status": "open",
+          "proposalIds": [],
+          "outcomes": []
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "op:cb1e4e43a3f37e13a4180f38",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 83,
+            "maxTicks": 3600
+          },
+          "observedTick": 237
+        },
+        {
+          "id": "op:1882e1f115bb687de9e8a549",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 81,
+            "z": 83,
+            "maxTicks": 3600
+          },
+          "observedTick": 237
+        },
+        {
+          "id": "op:ea8c4765649e6234e6de03ed",
+          "pawn": "Thing_Human405",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 237,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:cb6294b963d2f1c3baf4a2f2",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 78,
+            "z": 79,
+            "maxTicks": 3600
+          },
+          "observedTick": 237
+        },
+        {
+          "id": "op:0a3c2bd215a6976550be5716",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 77,
+            "z": 79,
+            "maxTicks": 3600
+          },
+          "observedTick": 237
+        },
+        {
+          "id": "op:ec42e20ff48c657190f2c2c7",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 237,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:117185bf255cec6314c75940",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 237,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:7f8517c843f1b0be38005ed3",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 237,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:a4584ec6f836500fa66ad3bc",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 237,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:906bb7ff17dd0b189d0a863f",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 84,
+            "maxTicks": 3600
+          },
+          "observedTick": 237
+        },
+        {
+          "id": "op:616dc4e1e555368a6c4e23e9",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 82,
+            "z": 86,
+            "maxTicks": 3600
+          },
+          "observedTick": 237
+        },
+        {
+          "id": "op:a56ba1e6287fd2acc3afdd2a",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 237,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        }
+      ],
+      "availability": [
+        {
+          "pawn": "Thing_Human405",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        }
+      ],
+      "questionRecipients": [
+        "Thing_Human408",
+        "Thing_Human411"
+      ],
+      "capabilities": [
+        "propose listed hauling/rescue/campfire construction/simple meals",
+        "adopt counter with fresh consent",
+        "one optional addressed question per pawn, at most three total",
+        "wait"
+      ],
+      "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.",
+      "wakeReasons": [
+        {
+          "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "kind": "message",
+          "value": "Yeah, berries sound fine. I'll head over and eat some now."
+        },
+        {
+          "sourceId": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+          "kind": "answer",
+          "value": "answered"
+        }
+      ]
+    },
+    {
+      "world": "d9b91b4146b3424fac4f62112f7934b5",
+      "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+      "branch": "cd61fb9d-9450-44c2-9069-51d336d45c03",
+      "revision": 6,
+      "tick": 1915,
+      "brief": {
+        "id": "brief",
+        "text": "Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+      },
+      "questions": [
+        {
+          "id": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+          "pawn": "Thing_Human405",
+          "status": "answered"
+        }
+      ],
+      "topicClosures": [
+        {
+          "sourceId": "brief",
+          "statuses": []
+        },
+        {
+          "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "statuses": []
+        }
+      ],
+      "reoffers": [],
+      "foodSightings": [
+        {
+          "observer": "Thing_Human405",
+          "name": "Alvin",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 1915,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "x": 73,
+              "z": 78,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human408",
+          "name": "Beatrice",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 1915,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human411",
+          "name": "Pedro",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 1915,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "x": 73,
+              "z": 78,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        }
+      ],
+      "foodKnowledge": "Shared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent.",
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 1915,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 1915,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 1915,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        }
+      ],
+      "crew": [
+        {
+          "id": "Thing_Human405",
+          "name": "Alvin"
+        },
+        {
+          "id": "Thing_Human408",
+          "name": "Beatrice"
+        },
+        {
+          "id": "Thing_Human411",
+          "name": "Pedro"
+        }
+      ],
+      "messages": [
+        {
+          "id": "1bd86ccd-0d93-402c-be70-68b1c17b5f5a",
+          "tick": 77,
+          "from": "core",
+          "to": "Thing_Human405",
+          "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+          "evidence": "attributed-speech"
+        },
+        {
+          "id": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "tick": 77,
+          "from": "Thing_Human405",
+          "to": "core",
+          "text": "Yeah, berries sound fine. I'll head over and eat some now.",
+          "evidence": "attributed-speech"
+        }
+      ],
+      "agreements": [],
+      "counters": [],
+      "requests": [],
+      "topics": [
+        {
+          "sourceId": "brief",
+          "text": "Alvin's food telemetry reported low at tick 237. Alvin reported (tick 77) he would eat berries. No receipt confirms completion. Beatrice and Pedro report food and rest satisfied. Raw fungus remains forbidden; berries accessible.",
+          "status": "open",
+          "proposalIds": [],
+          "outcomes": []
+        },
+        {
+          "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "text": "Alvin reported he would eat berries. No linked receipt confirms this occurred; telemetry still shows food low at tick 237.",
+          "status": "open",
+          "proposalIds": [],
+          "outcomes": []
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "op:771b9ac413b6e6d1f1eff486",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 88,
+            "maxTicks": 3600
+          },
+          "observedTick": 1915
+        },
+        {
+          "id": "op:bba3375b1423515bf2ac93da",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 79,
+            "z": 88,
+            "maxTicks": 3600
+          },
+          "observedTick": 1915
+        },
+        {
+          "id": "op:2c20ba1d25be29b114b1c497",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 76,
+            "z": 85,
+            "maxTicks": 3600
+          },
+          "observedTick": 1915
+        },
+        {
+          "id": "op:329a26f8eadc45e6fb45f4c0",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1893",
+            "x": 75,
+            "z": 85,
+            "maxTicks": 3600
+          },
+          "observedTick": 1915
+        },
+        {
+          "id": "op:2521c8120b31c127e4f57c64",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 1915,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:1e476224ccbc8dcebcdc15a4",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 1915,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:a56ba1e6287fd2acc3afdd2a",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 1915,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:af22351ef09c880694f5c7df",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 1915,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        }
+      ],
+      "availability": [
+        {
+          "pawn": "Thing_Human405",
+          "status": "No currently eligible grounded option; unknown is not refusal."
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        }
+      ],
+      "questionRecipients": [
+        "Thing_Human408",
+        "Thing_Human411"
+      ],
+      "capabilities": [
+        "propose listed hauling/rescue/campfire construction/simple meals",
+        "adopt counter with fresh consent",
+        "one optional addressed question per pawn, at most three total",
+        "wait"
+      ],
+      "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.",
+      "wakeReasons": [
+        {
+          "sourceId": "Thing_Human411",
+          "kind": "telemetry",
+          "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+        }
+      ]
+    },
+    {
+      "world": "d9b91b4146b3424fac4f62112f7934b5",
+      "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+      "branch": "cd61fb9d-9450-44c2-9069-51d336d45c03",
+      "revision": 9,
+      "tick": 2003,
+      "brief": {
+        "id": "brief",
+        "text": "Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+      },
+      "questions": [
+        {
+          "id": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+          "pawn": "Thing_Human405",
+          "status": "answered"
+        },
+        {
+          "id": "5675f922-3fe5-4172-b1f3-b5c91e703742",
+          "pawn": "Thing_Human411",
+          "status": "answered"
+        }
+      ],
+      "topicClosures": [
+        {
+          "sourceId": "brief",
+          "statuses": []
+        },
+        {
+          "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "statuses": []
+        }
+      ],
+      "reoffers": [],
+      "foodSightings": [
+        {
+          "observer": "Thing_Human405",
+          "name": "Alvin",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 2003,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "x": 73,
+              "z": 78,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human408",
+          "name": "Beatrice",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 2003,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human411",
+          "name": "Pedro",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 2003,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [
+            {
+              "thing": "Thing_RawBerries1880",
+              "x": 74,
+              "z": 80,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawFungus1876",
+              "x": 83,
+              "z": 81,
+              "forbidden": true,
+              "label": "raw fungus",
+              "count": 46,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1878",
+              "x": 81,
+              "z": 79,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            },
+            {
+              "thing": "Thing_RawBerries1879",
+              "x": 73,
+              "z": 78,
+              "forbidden": false,
+              "label": "berries",
+              "count": 75,
+              "nutritionGiving": true,
+              "simpleMealIngredientCount": 10
+            }
+          ],
+          "campfires": []
+        }
+      ],
+      "foodKnowledge": "Shared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent.",
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 2003,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 2003,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 2003,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        }
+      ],
+      "crew": [
+        {
+          "id": "Thing_Human405",
+          "name": "Alvin"
+        },
+        {
+          "id": "Thing_Human408",
+          "name": "Beatrice"
+        },
+        {
+          "id": "Thing_Human411",
+          "name": "Pedro"
+        }
+      ],
+      "messages": [
+        {
+          "id": "1bd86ccd-0d93-402c-be70-68b1c17b5f5a",
+          "tick": 77,
+          "from": "core",
+          "to": "Thing_Human405",
+          "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+          "evidence": "attributed-speech"
+        },
+        {
+          "id": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "tick": 77,
+          "from": "Thing_Human405",
+          "to": "core",
+          "text": "Yeah, berries sound fine. I'll head over and eat some now.",
+          "evidence": "attributed-speech"
+        },
+        {
+          "id": "28039eb4-88a4-4313-8b1c-25cf2638bdd8",
+          "tick": 1915,
+          "from": "core",
+          "to": "Thing_Human411",
+          "text": "Pedro, your food looks low. There are berries nearby you could eat raw — would you like to grab some?",
+          "evidence": "attributed-speech"
+        },
+        {
+          "id": "679e2b57-118c-4d87-a6d3-3a243a035978",
+          "tick": 1915,
+          "from": "Thing_Human411",
+          "to": "core",
+          "text": "Yeah, I'm feeling it. Those berries nearby look good enough — I'll go grab some.",
+          "evidence": "attributed-speech"
+        }
+      ],
+      "agreements": [],
+      "counters": [],
+      "requests": [],
+      "topics": [
+        {
+          "sourceId": "brief",
+          "text": "Alvin food low (tick 1915). Pedro food low (tick 1915). Beatrice satisfied. Alvin reported eating berries (tick 77); no receipt confirms. Berries accessible; fungus forbidden.",
+          "status": "open",
+          "proposalIds": [],
+          "outcomes": []
+        },
+        {
+          "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 1915.",
+          "status": "open",
+          "proposalIds": [],
+          "outcomes": []
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "op:601282ddd7f0dbf3d7ad385c",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 89,
+            "maxTicks": 3600
+          },
+          "observedTick": 2003
+        },
+        {
+          "id": "op:4857bcb31294d805b6725d8f",
+          "pawn": "Thing_Human408",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 79,
+            "z": 89,
+            "maxTicks": 3600
+          },
+          "observedTick": 2003
+        },
+        {
+          "id": "op:501d7621f9fb3d2429c9991a",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 78,
+            "z": 85,
+            "maxTicks": 3600
+          },
+          "observedTick": 2003
+        },
+        {
+          "id": "op:671d9438371fbc4df4b94553",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "build",
+            "thing": "Thing_WoodLog1892",
+            "x": 77,
+            "z": 85,
+            "maxTicks": 3600
+          },
+          "observedTick": 2003
+        },
+        {
+          "id": "op:a56ba1e6287fd2acc3afdd2a",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 2003,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:af22351ef09c880694f5c7df",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1892",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 2003,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1892",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:2521c8120b31c127e4f57c64",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 80,
+            "z": 80,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 2003,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        },
+        {
+          "id": "op:1e476224ccbc8dcebcdc15a4",
+          "pawn": "Thing_Human411",
+          "action": {
+            "kind": "haul",
+            "thing": "Thing_WoodLog1893",
+            "x": 72,
+            "z": 79,
+            "count": 10,
+            "trips": 3,
+            "maxTicks": 1800
+          },
+          "observedTick": 2003,
+          "supply": {
+            "sourceThingId": "Thing_WoodLog1893",
+            "label": "wood",
+            "sourceCount": 30,
+            "destinationFree": 75
+          }
+        }
+      ],
+      "availability": [
+        {
+          "pawn": "Thing_Human405",
+          "status": "No currently eligible grounded option; unknown is not refusal."
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "Grounded options listed; availability is not consent or guaranteed success."
+        }
+      ],
+      "questionRecipients": [
+        "Thing_Human408"
+      ],
+      "capabilities": [
+        "propose listed hauling/rescue/campfire construction/simple meals",
+        "adopt counter with fresh consent",
+        "one optional addressed question per pawn, at most three total",
+        "wait"
+      ],
+      "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.",
+      "wakeReasons": [
+        {
+          "sourceId": "679e2b57-118c-4d87-a6d3-3a243a035978",
+          "kind": "message",
+          "value": "Yeah, I'm feeling it. Those berries nearby look good enough — I'll go grab some."
+        },
+        {
+          "sourceId": "5675f922-3fe5-4172-b1f3-b5c91e703742",
+          "kind": "answer",
+          "value": "answered"
+        }
+      ]
+    },
+    {
+      "world": "d9b91b4146b3424fac4f62112f7934b5",
+      "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+      "branch": "cd61fb9d-9450-44c2-9069-51d336d45c03",
+      "revision": 11,
+      "tick": 5707,
+      "brief": {
+        "id": "brief",
+        "text": "Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+      },
+      "questions": [
+        {
+          "id": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+          "pawn": "Thing_Human405",
+          "status": "answered"
+        },
+        {
+          "id": "5675f922-3fe5-4172-b1f3-b5c91e703742",
+          "pawn": "Thing_Human411",
+          "status": "answered"
+        }
+      ],
+      "topicClosures": [
+        {
+          "sourceId": "brief",
+          "statuses": []
+        },
+        {
+          "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "statuses": []
+        },
+        {
+          "sourceId": "679e2b57-118c-4d87-a6d3-3a243a035978",
+          "statuses": []
+        }
+      ],
+      "reoffers": [],
+      "foodSightings": [
+        {
+          "observer": "Thing_Human405",
+          "name": "Alvin",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 5707,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human408",
+          "name": "Beatrice",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 5707,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [],
+          "campfires": []
+        },
+        {
+          "observer": "Thing_Human411",
+          "name": "Pedro",
+          "status": "observed",
+          "source": "shared-local-sighting",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 5707,
+          "mapId": 0,
+          "radius": 12,
+          "truncated": false,
+          "items": [],
+          "campfires": []
+        }
+      ],
+      "foodKnowledge": "Shared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent.",
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 5707,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 5707,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "ad2efefa67ba4f93afb52c6f27005fdb",
+          "tick": 5707,
+          "fresh": true,
+          "food": "low",
+          "rest": "satisfied"
+        }
+      ],
+      "crew": [
+        {
+          "id": "Thing_Human405",
+          "name": "Alvin"
+        },
+        {
+          "id": "Thing_Human408",
+          "name": "Beatrice"
+        },
+        {
+          "id": "Thing_Human411",
+          "name": "Pedro"
+        }
+      ],
+      "messages": [
+        {
+          "id": "1bd86ccd-0d93-402c-be70-68b1c17b5f5a",
+          "tick": 77,
+          "from": "core",
+          "to": "Thing_Human405",
+          "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+          "evidence": "attributed-speech"
+        },
+        {
+          "id": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "tick": 77,
+          "from": "Thing_Human405",
+          "to": "core",
+          "text": "Yeah, berries sound fine. I'll head over and eat some now.",
+          "evidence": "attributed-speech"
+        },
+        {
+          "id": "28039eb4-88a4-4313-8b1c-25cf2638bdd8",
+          "tick": 1915,
+          "from": "core",
+          "to": "Thing_Human411",
+          "text": "Pedro, your food looks low. There are berries nearby you could eat raw — would you like to grab some?",
+          "evidence": "attributed-speech"
+        },
+        {
+          "id": "679e2b57-118c-4d87-a6d3-3a243a035978",
+          "tick": 1915,
+          "from": "Thing_Human411",
+          "to": "core",
+          "text": "Yeah, I'm feeling it. Those berries nearby look good enough — I'll go grab some.",
+          "evidence": "attributed-speech"
+        }
+      ],
+      "agreements": [],
+      "counters": [],
+      "requests": [],
+      "topics": [
+        {
+          "sourceId": "brief",
+          "text": "Alvin food low (tick 2003). Pedro food low (tick 2003). Beatrice satisfied. Alvin reported eating berries (tick 77), no receipt confirms. Pedro reported eating berries (tick 1915), no receipt confirms. Berries accessible; fungus forbidden.",
+          "status": "open",
+          "proposalIds": [],
+          "outcomes": []
+        },
+        {
+          "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+          "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 2003.",
+          "status": "open",
+          "proposalIds": [],
+          "outcomes": []
+        },
+        {
+          "sourceId": "679e2b57-118c-4d87-a6d3-3a243a035978",
+          "text": "Pedro reported he would eat berries (tick 1915). No receipt confirms; telemetry still shows food low at tick 2003.",
+          "status": "open",
+          "proposalIds": [],
+          "outcomes": []
+        }
+      ],
+      "opportunities": [],
+      "availability": [
+        {
+          "pawn": "Thing_Human405",
+          "status": "No currently eligible grounded option; unknown is not refusal."
+        },
+        {
+          "pawn": "Thing_Human408",
+          "status": "No currently eligible grounded option; unknown is not refusal."
+        },
+        {
+          "pawn": "Thing_Human411",
+          "status": "No currently eligible grounded option; unknown is not refusal."
+        }
+      ],
+      "questionRecipients": [
+        "Thing_Human408"
+      ],
+      "capabilities": [
+        "propose listed hauling/rescue/campfire construction/simple meals",
+        "adopt counter with fresh consent",
+        "one optional addressed question per pawn, at most three total",
+        "wait"
+      ],
+      "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.",
+      "wakeReasons": [
+        {
+          "sourceId": "Thing_Human408",
+          "kind": "telemetry",
+          "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+        }
+      ]
+    }
+  ],
+  "workRecords": {
+    "proposals": {},
+    "outcomes": {}
+  },
+  "outcomes": {
+    "proposals": 0,
+    "nativeActionOutcomes": 0,
+    "campfires": 0,
+    "meals": 0,
+    "pawnReplies": 2,
+    "coreFormattingRecoveries": 1,
+    "nativeElapsedMs": 120957,
+    "samples": 87,
+    "unpausedSamples": 87,
+    "sampledIngestJobs": 0
+  },
+  "publicCoreState": {
+    "revision": 12,
+    "brief": {
+      "id": "brief",
+      "text": "Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+    },
+    "topics": [
+      {
+        "sourceId": "brief",
+        "text": "Alvin food low (tick 2003). Pedro food low (tick 2003). Beatrice satisfied. Alvin reported eating berries (tick 77), no receipt confirms. Pedro reported eating berries (tick 1915), no receipt confirms. Berries accessible; fungus forbidden.",
+        "status": "open",
+        "proposalIds": []
+      },
+      {
+        "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+        "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 2003.",
+        "status": "open",
+        "proposalIds": []
+      },
+      {
+        "sourceId": "679e2b57-118c-4d87-a6d3-3a243a035978",
+        "text": "Pedro reported he would eat berries (tick 1915). No receipt confirms; telemetry still shows food low at tick 2003.",
+        "status": "open",
+        "proposalIds": []
+      }
+    ],
+    "questions": [
+      {
+        "id": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+        "pawn": "Thing_Human405",
+        "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+        "status": "answered",
+        "messages": [
+          {
+            "id": "1bd86ccd-0d93-402c-be70-68b1c17b5f5a",
+            "exchangeId": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+            "tick": 77,
+            "from": "core",
+            "to": "Thing_Human405",
+            "fromName": "Core",
+            "toName": "Alvin",
+            "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?"
+          },
+          {
+            "id": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+            "exchangeId": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+            "tick": 77,
+            "from": "Thing_Human405",
+            "to": "core",
+            "fromName": "Alvin",
+            "toName": "Core",
+            "text": "Yeah, berries sound fine. I'll head over and eat some now."
+          }
+        ]
+      },
+      {
+        "id": "5675f922-3fe5-4172-b1f3-b5c91e703742",
+        "pawn": "Thing_Human411",
+        "text": "Pedro, your food looks low. There are berries nearby you could eat raw — would you like to grab some?",
+        "status": "answered",
+        "messages": [
+          {
+            "id": "28039eb4-88a4-4313-8b1c-25cf2638bdd8",
+            "exchangeId": "5675f922-3fe5-4172-b1f3-b5c91e703742",
+            "tick": 1915,
+            "from": "core",
+            "to": "Thing_Human411",
+            "fromName": "Core",
+            "toName": "Pedro",
+            "text": "Pedro, your food looks low. There are berries nearby you could eat raw — would you like to grab some?"
+          },
+          {
+            "id": "679e2b57-118c-4d87-a6d3-3a243a035978",
+            "exchangeId": "5675f922-3fe5-4172-b1f3-b5c91e703742",
+            "tick": 1915,
+            "from": "Thing_Human411",
+            "to": "core",
+            "fromName": "Pedro",
+            "toName": "Core",
+            "text": "Yeah, I'm feeling it. Those berries nearby look good enough — I'll go grab some."
+          }
+        ]
+      }
+    ],
+    "turns": [
+      {
+        "id": "8e6a1e67-784a-4237-a357-65574de5b59c",
+        "status": "applied",
+        "choice": {
+          "topics": [
+            {
+              "sourceId": "brief",
+              "text": "Alvin's food telemetry reported low this tick. Berries are visible nearby and accessible (not forbidden). Raw fungus stack is forbidden.",
+              "status": "open"
+            }
+          ],
+          "actionTopicId": null,
+          "action": {
+            "kind": "ask",
+            "pawn": "Thing_Human405",
+            "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+            "reason": "Telemetry reports Alvin's food as low. Multiple berry stacks are visible nearby and are not forbidden. Asking rather than proposing work, since eating raw food is a legitimate option and no campfire is available."
+          }
+        },
+        "questionId": "1ce22816-6f9b-4c29-825a-25e96f3d7260"
+      },
+      {
+        "id": "65eb7d52-0aab-446d-ab00-6b26dedf5280",
+        "status": "applied",
+        "choice": {
+          "topics": [
+            {
+              "sourceId": "brief",
+              "text": "Alvin's food telemetry reported low at tick 237. Alvin reported (tick 77) he would eat berries. No receipt confirms completion. Beatrice and Pedro report food and rest satisfied. Raw fungus remains forbidden; berries accessible.",
+              "status": "open"
+            },
+            {
+              "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+              "text": "Alvin reported he would eat berries. No linked receipt confirms this occurred; telemetry still shows food low at tick 237.",
+              "status": "open"
+            }
+          ],
+          "actionTopicId": null,
+          "action": {
+            "kind": "wait",
+            "reason": "Alvin reported intent to eat berries at tick 77; telemetry at tick 237 still shows food low but no receipt confirms or denies the outcome. Beatrice and Pedro are satisfied. Waiting for updated telemetry or further signal before acting."
+          }
+        }
+      },
+      {
+        "id": "9c5c76f5-ba49-471d-9b8c-4eef62b0e693",
+        "status": "applied",
+        "choice": {
+          "topics": [
+            {
+              "sourceId": "brief",
+              "text": "Alvin food low (tick 1915). Pedro food low (tick 1915). Beatrice satisfied. Alvin reported eating berries (tick 77); no receipt confirms. Berries accessible; fungus forbidden.",
+              "status": "open"
+            },
+            {
+              "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+              "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 1915.",
+              "status": "open"
+            }
+          ],
+          "actionTopicId": null,
+          "action": {
+            "kind": "ask",
+            "pawn": "Thing_Human411",
+            "text": "Pedro, your food looks low. There are berries nearby you could eat raw — would you like to grab some?",
+            "reason": "Pedro's telemetry reports food low at tick 1915. Berries are observed nearby and not forbidden. Asking if Pedro would like to eat them; no pressure to respond."
+          }
+        },
+        "questionId": "5675f922-3fe5-4172-b1f3-b5c91e703742"
+      },
+      {
+        "id": "23a09081-1b9a-4095-9c1e-cb49fc287702",
+        "status": "applied",
+        "choice": {
+          "topics": [
+            {
+              "sourceId": "brief",
+              "text": "Alvin food low (tick 2003). Pedro food low (tick 2003). Beatrice satisfied. Alvin reported eating berries (tick 77), no receipt confirms. Pedro reported eating berries (tick 1915), no receipt confirms. Berries accessible; fungus forbidden.",
+              "status": "open"
+            },
+            {
+              "sourceId": "9a8cf3ce-a0d1-47d6-b494-b70ac4f85960",
+              "text": "Alvin reported he would eat berries (tick 77). No receipt confirms; telemetry still shows food low at tick 2003.",
+              "status": "open"
+            },
+            {
+              "sourceId": "679e2b57-118c-4d87-a6d3-3a243a035978",
+              "text": "Pedro reported he would eat berries (tick 1915). No receipt confirms; telemetry still shows food low at tick 2003.",
+              "status": "open"
+            }
+          ],
+          "actionTopicId": null,
+          "action": {
+            "kind": "wait",
+            "reason": "Pedro reported he would eat berries at tick 1915 and Alvin at tick 77; neither has a receipt yet and telemetry still shows both food low at tick 2003. Berries remain accessible. Waiting to see if telemetry confirms either outcome before taking further action."
+          }
+        }
+      },
+      {
+        "id": "11ef2e92-8487-443e-9de7-51b8fa3d2575",
+        "status": "failed"
+      }
+    ],
+    "schedule": {
+      "config": {
+        "maxAttempts": 6,
+        "cooldownTicks": 60,
+        "windowTicks": 18000
+      },
+      "startTick": 2,
+      "endTick": 18002,
+      "attempts": 5,
+      "consumed": {
+        "start:brief": "initial",
+        "telemetry:Thing_Human405": "{\"food\":\"low\",\"rest\":\"satisfied\"}",
+        "telemetry:Thing_Human408": "{\"food\":\"low\",\"rest\":\"satisfied\"}",
+        "telemetry:Thing_Human411": "{\"food\":\"low\",\"rest\":\"satisfied\"}",
+        "message:9a8cf3ce-a0d1-47d6-b494-b70ac4f85960": "Yeah, berries sound fine. I'll head over and eat some now.",
+        "answer:1ce22816-6f9b-4c29-825a-25e96f3d7260": "answered",
+        "message:679e2b57-118c-4d87-a6d3-3a243a035978": "Yeah, I'm feeling it. Those berries nearby look good enough — I'll go grab some.",
+        "answer:5675f922-3fe5-4172-b1f3-b5c91e703742": "answered"
+      },
+      "lastAttemptTick": 5707
+    }
+  },
+  "report": {
+    "world": "d9b91b4146b3424fac4f62112f7934b5",
+    "epoch": "fcdbfd3e41494ad8b938c66148dfe27b",
+    "branch": "c469ba6a-b15b-4308-be74-9e46872b6871",
+    "waiting": "No outstanding offer or running agreement.",
+    "foodText": "Alvin @7245, map 0, radius 12: local sightings only; not colony inventory.\nNo nutrition items in this local sighting; elsewhere unknown.\nNo campfire in this local sighting; elsewhere unknown.\nBeatrice @7245, map 0, radius 12: local sightings only; not colony inventory.\nNo nutrition items in this local sighting; elsewhere unknown.\nNo campfire in this local sighting; elsewhere unknown.\nPedro @7245, map 0, radius 12: local sightings only; not colony inventory.\nNo nutrition items in this local sighting; elsewhere unknown.\nNo campfire in this local sighting; elsewhere unknown.\nShared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent.",
+    "revision": 221,
+    "tick": 7245,
+    "sharedStatus": [
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "source": "shared-link-telemetry",
+        "epoch": "fcdbfd3e41494ad8b938c66148dfe27b",
+        "food": "low",
+        "rest": "satisfied",
+        "tick": 7245,
+        "fresh": true
+      },
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "source": "shared-link-telemetry",
+        "epoch": "fcdbfd3e41494ad8b938c66148dfe27b",
+        "food": "low",
+        "rest": "satisfied",
+        "tick": 7245,
+        "fresh": true
+      },
+      {
+        "pawn": "Thing_Human411",
+        "name": "Pedro",
+        "source": "shared-link-telemetry",
+        "epoch": "fcdbfd3e41494ad8b938c66148dfe27b",
+        "food": "low",
+        "rest": "satisfied",
+        "tick": 7245,
+        "fresh": true
+      }
+    ],
+    "entries": [
+      {
+        "seq": 1,
+        "tick": 77,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Alvin",
+        "subject": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+        "text": "Alvin, your food looks low. There are berries nearby you could eat raw — would you like to grab some, or is there something else you'd prefer?",
+        "key": "core-talk:1bd86ccd-0d93-402c-be70-68b1c17b5f5a"
+      },
+      {
+        "seq": 2,
+        "tick": 77,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "crew",
+        "subject": "8e6a1e67-784a-4237-a357-65574de5b59c",
+        "text": "Telemetry reports Alvin's food as low. Multiple berry stacks are visible nearby and are not forbidden. Asking rather than proposing work, since eating raw food is a legitimate option and no campfire is available.",
+        "key": "core-plan:8e6a1e67-784a-4237-a357-65574de5b59c"
+      },
+      {
+        "seq": 3,
+        "tick": 77,
+        "kind": "message",
+        "actor": "Alvin",
+        "recipient": "Core",
+        "subject": "1ce22816-6f9b-4c29-825a-25e96f3d7260",
+        "text": "Yeah, berries sound fine. I'll head over and eat some now.",
+        "key": "core-talk:9a8cf3ce-a0d1-47d6-b494-b70ac4f85960"
+      },
+      {
+        "seq": 4,
+        "tick": 237,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "crew",
+        "subject": "65eb7d52-0aab-446d-ab00-6b26dedf5280",
+        "text": "Alvin reported intent to eat berries at tick 77; telemetry at tick 237 still shows food low but no receipt confirms or denies the outcome. Beatrice and Pedro are satisfied. Waiting for updated telemetry or further signal before acting.",
+        "key": "core-plan:65eb7d52-0aab-446d-ab00-6b26dedf5280"
+      },
+      {
+        "seq": 5,
+        "tick": 1915,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Pedro",
+        "subject": "5675f922-3fe5-4172-b1f3-b5c91e703742",
+        "text": "Pedro, your food looks low. There are berries nearby you could eat raw — would you like to grab some?",
+        "key": "core-talk:28039eb4-88a4-4313-8b1c-25cf2638bdd8"
+      },
+      {
+        "seq": 6,
+        "tick": 1915,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "crew",
+        "subject": "9c5c76f5-ba49-471d-9b8c-4eef62b0e693",
+        "text": "Pedro's telemetry reports food low at tick 1915. Berries are observed nearby and not forbidden. Asking if Pedro would like to eat them; no pressure to respond.",
+        "key": "core-plan:9c5c76f5-ba49-471d-9b8c-4eef62b0e693"
+      },
+      {
+        "seq": 7,
+        "tick": 1915,
+        "kind": "message",
+        "actor": "Pedro",
+        "recipient": "Core",
+        "subject": "5675f922-3fe5-4172-b1f3-b5c91e703742",
+        "text": "Yeah, I'm feeling it. Those berries nearby look good enough — I'll go grab some.",
+        "key": "core-talk:679e2b57-118c-4d87-a6d3-3a243a035978"
+      },
+      {
+        "seq": 8,
+        "tick": 2003,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "crew",
+        "subject": "23a09081-1b9a-4095-9c1e-cb49fc287702",
+        "text": "Pedro reported he would eat berries at tick 1915 and Alvin at tick 77; neither has a receipt yet and telemetry still shows both food low at tick 2003. Berries remain accessible. Waiting to see if telemetry confirms either outcome before taking further action.",
+        "key": "core-plan:23a09081-1b9a-4095-9c1e-cb49fc287702"
+      }
+    ],
+    "agreements": []
+  },
+  "persistence": {
+    "paired": true,
+    "cold": true,
+    "coldVerifiesFailedInferenceRun": true,
+    "coldAllowanceUnchanged": true
+  },
+  "scripted": {
+    "passed": true,
+    "paired": true,
+    "cold": true,
+    "nativeMs": 15809,
+    "coreTurns": 2,
+    "pawnReplies": 1,
+    "outcome": "Authored question, preference reply, then event-triggered wait; no offers/jobs."
+  },
+  "verification": {
+    "nodeTests": 310,
+    "pythonChecks": 10,
+    "independentReview": "Completed final-behavior review, no actionable findings; actual read-only enforcement verified. Raw report private.",
+    "historicalDBFilesUnchanged": 224,
+    "stagingStopped": true
+  },
+  "limitations": [
+    "Same authored fixture, not a controlled causal estimate of the adapter change.",
+    "No inference fallback, budget reset or operator reroll.",
+    "Complete bounded formatting recovery is distinct from useful planning or grounded explanations.",
+    "One core repair accepted, one later repair rejected: three assistant events versus two distinct messages. No API error recurred. Counts do not identify the extra content block.",
+    "The panel does not explain provider failures or exhausted allowance."
+  ],
+  "groundingReview": [
+    "Some topic text changes reported he would eat into reported eating despite a no-receipt caveat; public wait reasons preserve intended/not verified distinction.",
+    "Looks low and report satisfied blur shared telemetry with observation or deliberate testimony.",
+    "Observed/not forbidden supplies do not prove reachability; accessible overstates the sighting.",
+    "No Ingest job sampled and end Food lower for all pawns; not a complete eating-event archive."
+  ]
+}
