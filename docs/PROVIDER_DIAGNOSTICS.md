@@ -84,3 +84,8 @@ error text remain excluded. Concord input checks are distinct from provider
 JSON-schema checks. The linked report documents the subsequent core-only,
 trace-proven formatting-recovery rule; it is not a blanket turn-limit increase.
 The saved-situation probe is not a new colony allowance.
+
+
+[Identity-checked message accounting](PROVIDER_MESSAGE_ACCOUNTING.md) subsequently
+replaces the exact-event shortcut with complete per-message coverage. Raw IDs
+remain private to the in-memory observer; old receipts are not backfilled.

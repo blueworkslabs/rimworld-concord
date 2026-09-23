@@ -33,25 +33,57 @@ export function validationIssues(error:unknown):{code:string;path:(string|number
 
 /** Event counts, NOT API-round-trip counts. Never retain text, tool inputs/results or IDs. */
 type Issue=ReturnType<typeof validationIssues>[number];
-type StreamEvent={kind:'api-error';metadata:ReturnType<typeof apiErrorMetadata>}|{kind:'format-call';ordinal:number;concordInputContract:'valid'|'invalid'|'unchecked';issues:Issue[]}|{kind:'format-result';ordinal:number|null;error:boolean;errorMarker:'schema-mismatch'|'input-validation'|'other'|'none'}|{kind:'result';turns:number|null;error:boolean|null};
+function knownAssistantBlock(block:any){
+ if(!block||typeof block!=='object'||Array.isArray(block))return false;
+ if(block.type==='text')return typeof block.text==='string';
+ if(block.type==='thinking')return typeof block.thinking==='string'&&(block.signature===undefined||typeof block.signature==='string');
+ if(block.type==='redacted_thinking')return typeof block.data==='string';
+ return block.type==='tool_use'&&block.name==='StructuredOutput'&&typeof block.id==='string'&&!!block.id.trim()&&block.id.length<=200&&
+  !!block.input&&typeof block.input==='object'&&!Array.isArray(block.input);
+}
+type StreamEvent={kind:'api-error';metadata:ReturnType<typeof apiErrorMetadata>}|{kind:'format-call';ordinal:number;messageOrdinal:number|null;concordInputContract:'valid'|'invalid'|'unchecked';issues:Issue[]}|{kind:'format-result';ordinal:number|null;error:boolean;errorMarker:'schema-mismatch'|'input-validation'|'other'|'none'}|{kind:'result';turns:number|null;error:boolean|null};
 export class ProviderStreamCounts {
  constructor(private diagnose?:(input:unknown)=>Issue[]){}
- readonly details:{events:StreamEvent[];truncated:boolean}={events:[],truncated:false};
+ readonly details:{events:StreamEvent[];truncated:boolean;identity:{version:1;complete:boolean;assistantEvents:number}}={events:[],truncated:false,identity:{version:1,complete:true,assistantEvents:0}};
  private toolOrdinals=new Map<string,number>();
+ private toolMessages=new Map<string,number|null>();
+ private messages=new Map<string,number>();
+ private closedMessages=new Set<number>();
+ private ended=false;
+ private observeIdentity(event:any):number|null{
+  const identity=this.details.identity;
+  if(this.ended&&['assistant','user'].includes(event?.type))identity.complete=false;
+  if(event?.type==='result')this.ended=true;
+  if(event?.type!=='assistant')return null;
+  identity.assistantEvents=Math.min(4096,identity.assistantEvents+1);
+  const id=event.message?.id;
+  if(this.counts.assistantEvents>=4096||typeof id!=='string'||!id.trim()||id.length>200){identity.complete=false;return null;}
+  if(!Array.isArray(event.message?.content)||!event.message.content.every(knownAssistantBlock))identity.complete=false;
+  let ordinal=this.messages.get(id);
+  if(ordinal===undefined){
+   if(this.messages.size>=32){identity.complete=false;return null;}
+   ordinal=this.messages.size+1;this.messages.set(id,ordinal);this.counts.assistantMessages=this.messages.size;
+  }
+  // A completed or earlier message cannot reopen under an old identity.
+  if(ordinal!==this.messages.size||this.closedMessages.has(ordinal))identity.complete=false;
+  return ordinal;
+ }
  private record(event:StreamEvent){if(this.details.events.length<32)this.details.events.push(event);else this.details.truncated=true;}
- private diagnosticEvent(event:any){
+ private diagnosticEvent(event:any,messageOrdinal:number|null){
   if(event?.type==='assistant'&&event.is_api_error_message===true)this.record({kind:'api-error',metadata:apiErrorMetadata(event)});
   if(event?.type==='assistant'&&Array.isArray(event.message?.content))for(const c of event.message.content){
    if(c?.type!=='tool_use'||c.name!=='StructuredOutput')continue;
-   if(typeof c.id!=='string'||c.id.length>200){this.details.truncated=true;continue;}
+   if(typeof c.id!=='string'||!c.id.trim()||c.id.length>200){this.details.truncated=true;continue;}
    if(this.toolOrdinals.has(c.id))continue;
    if(this.toolOrdinals.size>=32){this.details.truncated=true;continue;}
-   const ordinal=this.toolOrdinals.size+1;this.toolOrdinals.set(c.id,ordinal);
+   const ordinal=this.toolOrdinals.size+1;this.toolOrdinals.set(c.id,ordinal);this.toolMessages.set(c.id,messageOrdinal);
    const issues=this.diagnose?.(c.input)??[];
-   this.record({kind:'format-call',ordinal,concordInputContract:this.diagnose?(issues.length?'invalid':'valid'):'unchecked',issues});
+   this.record({kind:'format-call',ordinal,messageOrdinal,concordInputContract:this.diagnose?(issues.length?'invalid':'valid'):'unchecked',issues});
   }
   if(event?.type==='user'&&Array.isArray(event.message?.content))for(const c of event.message.content){
    if(c?.type!=='tool_result')continue;
+   const owner=typeof c.tool_use_id==='string'?this.toolMessages.get(c.tool_use_id):undefined;
+   if(owner==null)this.details.identity.complete=false;else this.closedMessages.add(owner);
    const error=c.is_error===true;
    // Classification only: never retain the text or anything extracted from it.
    const content=typeof c.content==='string'?c.content.slice(0,8192):Array.isArray(c.content)?c.content.slice(0,8).filter((b:any)=>b?.type==='text'&&typeof b.text==='string').map((b:any)=>b.text.slice(0,1024)).join(' '):'';
@@ -61,14 +93,13 @@ export class ProviderStreamCounts {
   if(event?.type==='result')this.record({kind:'result',turns:number(event.num_turns),error:typeof event.is_error==='boolean'?event.is_error:null});
  }
 
- private messages=new Set<string>();
  readonly counts={assistantEvents:0,assistantMessages:0,userEvents:0,structuredOutputCalls:0,toolResults:0,toolErrors:0,resultEvents:0};
  observe(event:any){
-  this.diagnosticEvent(event);
+  const messageOrdinal=this.observeIdentity(event);
+  this.diagnosticEvent(event,messageOrdinal);
   const inc=(k:keyof typeof this.counts)=>{this.counts[k]=Math.min(4096,this.counts[k]+1);};
   if(event?.type==='assistant'){
-   inc('assistantEvents');const id=event.message?.id;
-   if(typeof id==='string'&&id.length<=200){if(!this.messages.has(id)&&this.messages.size<4096){this.messages.add(id);inc('assistantMessages');}}
+   inc('assistantEvents');
    if(Array.isArray(event.message?.content))for(const c of event.message.content)if(c?.type==='tool_use'&&c.name==='StructuredOutput')inc('structuredOutputCalls');
   }
   if(event?.type==='user'){
@@ -83,13 +114,13 @@ export class ProviderStreamCounts {
  * Exactly two distinct assistant messages and two formatting calls are allowed here.
  */
 export function boundedCoreFormattingRecovery(stream:Pick<ProviderStreamCounts,'counts'|'details'>|undefined){
- if(!stream||stream.details.truncated)return false;
+ if(!stream||stream.details.truncated||stream.details.identity?.version!==1||!stream.details.identity.complete)return false;
  const c=stream.counts,e=stream.details.events;
- if(c.assistantEvents!==2||c.assistantMessages!==2||c.structuredOutputCalls!==2||c.userEvents!==2||c.toolResults!==2||c.toolErrors!==1||c.resultEvents!==1||e.length!==5)return false;
+ if(c.assistantEvents<2||c.assistantEvents>4096||c.assistantEvents!==stream.details.identity.assistantEvents||c.assistantMessages!==2||c.structuredOutputCalls!==2||c.userEvents!==2||c.toolResults!==2||c.toolErrors!==1||c.resultEvents!==1||e.length!==5)return false;
  const [a,b,d,f,r]=e;
- return a?.kind==='format-call'&&a.ordinal===1&&a.concordInputContract==='invalid'&&a.issues.length>0&&
+ return a?.kind==='format-call'&&a.ordinal===1&&a.messageOrdinal===1&&a.concordInputContract==='invalid'&&a.issues.length>0&&
   b?.kind==='format-result'&&b.ordinal===1&&b.error===true&&b.errorMarker==='schema-mismatch'&&
-  d?.kind==='format-call'&&d.ordinal===2&&d.concordInputContract==='valid'&&d.issues.length===0&&
+  d?.kind==='format-call'&&d.ordinal===2&&d.messageOrdinal===2&&d.concordInputContract==='valid'&&d.issues.length===0&&
   f?.kind==='format-result'&&f.ordinal===2&&f.error===false&&f.errorMarker==='none'&&
   r?.kind==='result'&&r.turns===3&&r.error===false;
 }

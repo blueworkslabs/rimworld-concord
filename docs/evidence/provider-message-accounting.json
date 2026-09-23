@@ -1,0 +1,663 @@
+{
+  "kind": "offline-synthetic-identity-coverage",
+  "source": "docs/evidence/recovery-followthrough.json",
+  "sourceSha256": "ab78f41e0a8c057510f8169c4e932c85d57a43b315c652395c29fa188e301a8d",
+  "limitation": "Uses a retained inner choice/view with synthetic first invalid input and synthetic stream identities. Not reconstruction of the original missing identity trace; not fresh inference.",
+  "cases": [
+    {
+      "id": "two-events",
+      "expectedAccepted": true,
+      "accepted": true,
+      "counts": {
+        "assistantEvents": 2,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": true,
+          "assistantEvents": 2
+        }
+      }
+    },
+    {
+      "id": "split-first",
+      "expectedAccepted": true,
+      "accepted": true,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": true,
+          "assistantEvents": 3
+        }
+      }
+    },
+    {
+      "id": "split-second",
+      "expectedAccepted": true,
+      "accepted": true,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": true,
+          "assistantEvents": 3
+        }
+      }
+    },
+    {
+      "id": "missing-id",
+      "expectedAccepted": false,
+      "accepted": false,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": false,
+          "assistantEvents": 3
+        }
+      }
+    },
+    {
+      "id": "third-message",
+      "expectedAccepted": false,
+      "accepted": false,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 3,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 2,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 3,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": true,
+          "assistantEvents": 3
+        }
+      }
+    },
+    {
+      "id": "reopened-first",
+      "expectedAccepted": false,
+      "accepted": false,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": false,
+          "assistantEvents": 3
+        }
+      }
+    },
+    {
+      "id": "post-result",
+      "expectedAccepted": false,
+      "accepted": false,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": false,
+          "assistantEvents": 3
+        }
+      }
+    },
+    {
+      "id": "numeric-block",
+      "expectedAccepted": false,
+      "accepted": false,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": false,
+          "assistantEvents": 3
+        }
+      }
+    },
+    {
+      "id": "missing-block-type",
+      "expectedAccepted": false,
+      "accepted": false,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": false,
+          "assistantEvents": 3
+        }
+      }
+    },
+    {
+      "id": "malformed-text",
+      "expectedAccepted": false,
+      "accepted": false,
+      "counts": {
+        "assistantEvents": 3,
+        "assistantMessages": 2,
+        "userEvents": 2,
+        "structuredOutputCalls": 2,
+        "toolResults": 2,
+        "toolErrors": 1,
+        "resultEvents": 1
+      },
+      "details": {
+        "events": [
+          {
+            "kind": "format-call",
+            "ordinal": 1,
+            "messageOrdinal": 1,
+            "concordInputContract": "invalid",
+            "issues": [
+              {
+                "code": "too_big",
+                "path": [
+                  "core",
+                  "topics",
+                  0,
+                  "text"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 1,
+            "error": true,
+            "errorMarker": "schema-mismatch"
+          },
+          {
+            "kind": "format-call",
+            "ordinal": 2,
+            "messageOrdinal": 2,
+            "concordInputContract": "valid",
+            "issues": []
+          },
+          {
+            "kind": "format-result",
+            "ordinal": 2,
+            "error": false,
+            "errorMarker": "none"
+          },
+          {
+            "kind": "result",
+            "turns": 3,
+            "error": false
+          }
+        ],
+        "truncated": false,
+        "identity": {
+          "version": 1,
+          "complete": false,
+          "assistantEvents": 3
+        }
+      }
+    }
+  ],
+  "originalTraceAccepted": false,
+  "originalFailureUnchanged": true,
+  "characterCalls": 0,
+  "jevCalls": 0,
+  "gameActions": 0
+}
