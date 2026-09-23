@@ -1,5 +1,5 @@
 import {CoreChoice,coreInstructions,coreChoiceSchema,corePrompt,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
-import {ProviderStreamCounts,providerResultMetadata,validationIssues} from './provider-diagnostics.js';
+import {ProviderStreamCounts,boundedCoreFormattingRecovery,providerResultMetadata,validationIssues} from './provider-diagnostics.js';
 import { spawn,execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdtemp,mkdir } from 'node:fs/promises';
@@ -14,6 +14,7 @@ import {promptAccounting} from './prompt-accounting.js';
 import { TrialBudget } from './appraisal.js';
 import {SocialChoice,socialChoiceSchema,socialPrompt,type SocialView} from './social.js';
 
+class ClaudeIsolationFailure extends Error {}
 export const CLAUDE_MODEL='claude-sonnet-4-6';
 const moveAction={type:'object',additionalProperties:false,required:['kind','x','z'],properties:{kind:{const:'move'},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0}}};
 const rescueAction={type:'object',additionalProperties:false,required:['kind','target','bed','x','z','maxTicks'],properties:{kind:{const:'rescue'},target:{type:'string',minLength:1,maxLength:120},bed:{type:'string',minLength:1,maxLength:120},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},maxTicks:{type:'integer',minimum:60,maximum:3600}}};
@@ -46,28 +47,29 @@ export function verifyClaudeInit(event:any) {
    (event.plugins?.length??0)||(event.skills?.length??0)||(event.slash_commands?.length??0))
    throw Error('Claude isolation preflight failed');
 }
-type ParsedClaude<T>={output:T;providerChoice:ReflectionChoice|undefined;estimatedUsageUSD:number;turns:number};
+type ParsedClaude<T>={output:T;providerChoice:ReflectionChoice|undefined;estimatedUsageUSD:number;turns:number;formattingRecovery:boolean};
 export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'):ParsedClaude<Decision|Reflection>;
 export function parseClaudeResult(event:unknown,mode:'social'):ParsedClaude<z.infer<typeof SocialChoice>>;
-export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social'|'core'|'core-answer'):ParsedClaude<Decision|Reflection|z.infer<typeof SocialChoice>|CoreChoice>;
-export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social'|'core'|'core-answer') {
+export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social'|'core'|'core-answer',stream?:Pick<ProviderStreamCounts,'counts'|'details'>):ParsedClaude<Decision|Reflection|z.infer<typeof SocialChoice>|CoreChoice>;
+export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social'|'core'|'core-answer',stream?:Pick<ProviderStreamCounts,'counts'|'details'>) {
+ const recoveryAllowed=mode==='core'&&boundedCoreFormattingRecovery(stream);
  const result=z.object({type:z.literal('result'),subtype:z.literal('success'),is_error:z.literal(false),
    total_cost_usd:z.number().finite().nonnegative(),structured_output:z.unknown(),
-   modelUsage:z.record(z.unknown()),num_turns:z.number().int().min(1).max(2)}).parse(event);
+   modelUsage:z.record(z.unknown()),num_turns:z.number().int().min(1).max(recoveryAllowed?3:2)}).parse(event);
  if(Object.keys(result.modelUsage).some(m=>m!==CLAUDE_MODEL)||!Object.keys(result.modelUsage).length)
    throw Error('Unexpected model route');
  const providerChoice=mode==='reflection'?z.object({reflection:ReflectionChoice}).strict().parse(result.structured_output).reflection:undefined;
  const output=mode==='core'?z.object({core:CoreChoice}).strict().parse(result.structured_output).core:mode==='social'||mode==='core-answer'?z.object({social:SocialChoice}).strict().parse(result.structured_output).social:providerChoice?reflectionFromChoice(providerChoice):z.object({decision:Decision}).strict().parse(result.structured_output).decision;
- return {output,providerChoice,estimatedUsageUSD:result.total_cost_usd,turns:result.num_turns};
+ return {output,providerChoice,estimatedUsageUSD:result.total_cost_usd,turns:result.num_turns,formattingRecovery:recoveryAllowed&&result.num_turns===3};
 }
 
 const exec=promisify(execFile);
 export class ClaudeDecisionBackend {
  readonly name=CLAUDE_MODEL;
- readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string;authoredSize?:ReturnType<typeof promptAccounting>;providerChoice?:ReflectionChoice}>=[];
+ readonly receipts:Array<{mode:string;model:string;elapsedMs:number;estimatedUsageUSD:number;turns:number;tools:string[];status:string;formattingRecovery?:boolean;authoredSize?:ReturnType<typeof promptAccounting>;providerChoice?:ReflectionChoice}>=[];
  readonly requestSizes:Array<{mode:string;authoredSize:ReturnType<typeof promptAccounting>}>=[];
- readonly rawResponses:Array<{mode:string;structuredOutput:unknown;stream:ProviderStreamCounts['counts'];result:ReturnType<typeof providerResultMetadata>}>=[];
- readonly streamDiagnostics:Array<{mode:string;counts:ProviderStreamCounts['counts']}>=[];
+ readonly rawResponses:Array<{mode:string;structuredOutput:unknown;stream:ProviderStreamCounts['counts'];streamDetails:ProviderStreamCounts['details'];result:ReturnType<typeof providerResultMetadata>}>=[];
+ readonly streamDiagnostics:Array<{mode:string;counts:ProviderStreamCounts['counts'];details:ProviderStreamCounts['details']}>=[];
  readonly failures:Array<{stage:string;attemptReserved:boolean;cancelled:boolean;issues?:ReturnType<typeof validationIssues>}>=[];
  private budget:TrialBudget;
  private pending=false;
@@ -115,23 +117,30 @@ export class ClaudeDecisionBackend {
      stage='setup';signal.throwIfAborted();await mkdir(this.options.scratchRoot,{recursive:true});
      const cwd=await mkdtemp(join(this.options.scratchRoot,'pawn-'));
      stage='budget';id=this.budget.reserve(0.10);this.requestSizes.push({mode,authoredSize});const began=Date.now();
-     const stream=new ProviderStreamCounts();this.streamDiagnostics.push({mode,counts:stream.counts});
+     const stream=new ProviderStreamCounts(input=>{
+       try{
+         const parsed=parseClaudeResult({type:'result',subtype:'success',is_error:false,total_cost_usd:0,modelUsage:{[CLAUDE_MODEL]:{}},num_turns:1,structured_output:input},mode);
+         if(mode==='core')validateCoreChoice(parsed.output,view as CoreView);
+         if(parsed.providerChoice)validateReflectionChoice(parsed.providerChoice,view as AttentionView);
+         return [];
+       }catch(e){return validationIssues(e);}
+     });this.streamDiagnostics.push({mode,counts:stream.counts,details:stream.details});
      stage='transport';const events=await this.invoke(binary,args,prompt,cwd,env,signal,stream,
        cost=>this.budget.settle(id!,cost),
-       raw=>this.rawResponses.push({mode,stream:{...stream.counts},structuredOutput:(raw as {structured_output?:unknown}).structured_output??null,result:providerResultMetadata(raw,CLAUDE_MODEL)}));
-     stage='parsing';const parsed=parseClaudeResult(events.result,mode);
-     const receipt={mode,authoredSize,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'rejected',...(parsed.providerChoice?{providerChoice:parsed.providerChoice}:{})};
+       raw=>this.rawResponses.push({mode,stream:{...stream.counts},streamDetails:structuredClone(stream.details),structuredOutput:(raw as {structured_output?:unknown}).structured_output??null,result:providerResultMetadata(raw,CLAUDE_MODEL)}));
+     stage='parsing';const parsed=parseClaudeResult(events.result,mode,stream);
+     const receipt={mode,authoredSize,model:CLAUDE_MODEL,elapsedMs:Date.now()-began,estimatedUsageUSD:parsed.estimatedUsageUSD,turns:parsed.turns,tools:events.tools,status:'rejected',...(parsed.formattingRecovery?{formattingRecovery:true}:{}),...(parsed.providerChoice?{providerChoice:parsed.providerChoice}:{})};
      this.receipts.push(receipt);
      stage='validation';if(mode==='core')validateCoreChoice(parsed.output,view as CoreView);if(parsed.providerChoice)validateReflectionChoice(parsed.providerChoice,view as AttentionView);
      signal.throwIfAborted();receipt.status='ok';
      return parsed.output;
-   } catch(error) {this.failures.push({stage,attemptReserved:!!id,cancelled:signal.aborted,...(stage==='parsing'||stage==='validation'?{issues:validationIssues(error)}:{})});throw Error((id?'Live decision unavailable; attempt retained':'Claude decision preflight failed')+' ['+stage+']');}
+   } catch(error) {if(error instanceof ClaudeIsolationFailure)stage='isolation';this.failures.push({stage,attemptReserved:!!id,cancelled:signal.aborted,...(stage==='parsing'||stage==='validation'?{issues:validationIssues(error)}:{})});throw Error((id?'Live decision unavailable; attempt retained':'Claude decision preflight failed')+' ['+stage+']');}
    finally {this.pending=false;}
  }
  private invoke(binary:string,args:string[],prompt:string,cwd:string,env:NodeJS.ProcessEnv,signal:AbortSignal,stream:ProviderStreamCounts,onCost:(cost:number)=>void,onResult:(result:unknown)=>void):Promise<{result:unknown;tools:string[]}> {
    return new Promise((resolve,reject)=>{
      const child=spawn(binary,args,{cwd,env,stdio:['pipe','pipe','pipe'],detached:true});
-     let buffer='',bytes=0,result:unknown,init=false,tools:string[]=[],failure=false;
+     let buffer='',bytes=0,result:unknown,init=false,tools:string[]=[],failure=false,isolationFailure=false;
      let force:ReturnType<typeof setTimeout>|undefined;
      const stop=()=>{failure=true;try{process.kill(-child.pid!,'SIGTERM');}catch{}
        force??=setTimeout(()=>{try{process.kill(-child.pid!,'SIGKILL');}catch{}},1000);};
@@ -142,9 +151,9 @@ export class ClaudeDecisionBackend {
        for(;;){const end=buffer.indexOf('\n');if(end<0)break;const line=buffer.slice(0,end);buffer=buffer.slice(end+1);if(!line.trim())continue;
          try {
            const event=JSON.parse(line);stream.observe(event);
-           if(event.type==='system'&&event.subtype==='init'){if(init)throw Error();verifyClaudeInit(event);init=true;tools=event.tools;}
-           if(event.type==='system'&&String(event.subtype).startsWith('hook_'))throw Error();
-           if(event.type==='assistant'&&event.message?.content?.some((c:any)=>c.type==='tool_use'&&c.name!=='StructuredOutput'))throw Error();
+           if(event.type==='system'&&event.subtype==='init'){try{if(init)throw Error();verifyClaudeInit(event);}catch{isolationFailure=true;throw Error();}init=true;tools=event.tools;}
+           if(event.type==='system'&&String(event.subtype).startsWith('hook_')){isolationFailure=true;throw Error();}
+           if(event.type==='assistant'&&event.message?.content?.some((c:any)=>c.type==='tool_use'&&c.name!=='StructuredOutput')){isolationFailure=true;throw Error();}
            if(event.type==='result'){
              // Preserve reported usage even for invalid output, error results, or failed exits.
              if(!result)onResult(event);
@@ -157,7 +166,7 @@ export class ClaudeDecisionBackend {
      });
      const cleanup=()=>{clearTimeout(timer);clearTimeout(force);signal.removeEventListener('abort',stop);};
      child.on('error',()=>{cleanup();reject(Error('CLI unavailable'));});
-     child.on('close',code=>{cleanup();if(code!==0||failure||!init||!result||signal.aborted)reject(Error('CLI decision failed'));else resolve({result,tools});});
+     child.on('close',code=>{cleanup();if(isolationFailure){reject(new ClaudeIsolationFailure('CLI isolation failed'));return;}if(code!==0||failure||buffer.trim().length>0||!init||!result||signal.aborted)reject(Error('CLI decision failed'));else resolve({result,tools});});
      child.stdin.end(prompt);if(signal.aborted)stop();
    });
  }

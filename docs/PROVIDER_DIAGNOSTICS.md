@@ -74,3 +74,13 @@ was incorrect. No validation rule was relaxed. Future failures can retain more
 useful diagnostics, but none occurred in this four-call pair. The next behavioral
 check is a separately frozen indirect-message contrast, not a claim that this
 explicit request demonstrated indirect persuasion.
+
+
+## Bounded typed failure sequence
+
+The [provider failure investigation](PROVIDER_FAILURE_PROBE.md) adds allowlisted
+API-error metadata and a bounded ordered formatting sequence. Inputs and raw
+error text remain excluded. Concord input checks are distinct from provider
+JSON-schema checks. The linked report documents the subsequent core-only,
+trace-proven formatting-recovery rule; it is not a blanket turn-limit increase.
+The saved-situation probe is not a new colony allowance.
