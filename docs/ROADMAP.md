@@ -52,8 +52,15 @@ No choices from that probe were applied to the game. The subsequent
 [short native follow-up](CORE_FOLLOWUP.md) delivered three pawn replies, including
 a reply-triggered core decision, but produced no work offers and one rejected
 provider result (reported three internal turns versus a two-turn adapter bound).
-Next: diagnose that turn-count discrepancy and expose grounded food observations
-and prerequisites independently of executable jobs. Keep the unexplained
+The [food-observation slice](FOOD_OBSERVATIONS.md) now exposes local supplies
+and campfires independently of executable jobs. Its native checks passed, and
+text-free provider event diagnostics are retained; the historical three-turn
+sequence remains unexplained and the strict guard is unchanged. The
+[new finite follow-through](FOOD_FOLLOWTHROUGH.md) retained two early provider
+errors, three later delivered questions/replies and a final rejected wait choice.
+No work was proposed. Stream counts on the three-turn result show two formatting
+calls and one tool-result error; exact cause remains unknown. Investigate that
+failure before another live allowance, without silently loosening validation. Keep the unexplained
 coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 
