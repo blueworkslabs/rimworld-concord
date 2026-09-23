@@ -13,8 +13,9 @@ Code: `src/core-planner.ts` (view, choices, validation, topics),
 ## Setup
 
 The operator initializes the core once with a brief (1–600 characters, immutable) and,
-for event-driven operation, a schedule (below). A domain allows at most 16 core turns
-in its lifetime, one at a time. Each turn has a timeout (default 45 s, at most 115 s).
+for event-driven operation, a schedule (below). Legacy domains allow at most 16 core
+turns in their lifetime. Explicit ongoing schedules have no lifetime turn ceiling;
+only one core turn runs at a time. Each turn has a timeout (default 45 s, at most 115 s).
 
 ## What the core sees
 
@@ -46,7 +47,7 @@ One action per turn, each with a public reason (≤600 characters):
 |---|---|
 | `propose {opportunityId}` | Creates an offer for that opportunity; the pawn still decides |
 | `adopt_counter {proposalId}` | Turns a pawn's counter into a revised offer needing fresh consent |
-| `ask {pawn, text ≤240}` | Asks one question; at most one per pawn and three in total, never to a downed pawn |
+| `ask {pawn, text ≤240}` | Asks one question to a listed eligible pawn, never a downed pawn; legacy mode permits one per pawn, three total |
 | `wait` | Nothing; native behaviour continues |
 
 The output schema only contains IDs that exist in the current view, and the
@@ -67,7 +68,7 @@ to them. Speech starts no work.
 
 ## Topics
 
-The core keeps up to 8 topics, each tied to a source it can see (the brief, a message,
+The legacy core keeps up to 8 topics, each tied to a source it can see (the brief, a message,
 an agreement, a request, an opportunity, a re-invitation or a self-care record). A turn
 may update several topics at once; `actionTopicId` links a new offer to a topic (it
 must be null for `ask` and `wait`). Invalid updates reject the whole turn before any
@@ -92,16 +93,33 @@ no commitment, running agreement, pending offer or unanswered counter. The core 
 sees a re-invitation and may propose that exact work again; the pawn answers it
 freshly. The invitation is consumed by the new offer, not by the answer.
 
+## Ongoing context and questions
+
+With `maxAttempts: null` and `windowTicks: null`, a pawn can be asked again only after
+its public Food/Rest band or work/self-care state changes. A pending question blocks
+another one. Reply text, private need values, and elapsed time alone do not make a
+pawn eligible again. This is permission to ask, not pressure to accept.
+
+The prompt keeps the last 12 questions and their messages, 12 self-care records, 24 agreements,
+up to eight active topics and the last eight closed topics. Closed history remains
+in the audit/domain; it is not erased to make room. Ongoing topic admission counts
+active topics, and closure still requires the exact linked receipts. Deduplication
+survives context eviction and checkpoint restore. Persistent audit storage is not a
+bounded-memory service; this is an operator-run slice, not indefinite unattended hosting.
+
 ## Wake-ups
 
 With a schedule, the core runs only when admitted:
 
 - **Schedule**: `maxAttempts` 1–16, `cooldownTicks` 60–3600, `windowTicks` 60–36000,
-  set once before the first turn; the window starts at that tick.
+  set once before the first turn; the window starts at that tick. Both limits may
+  instead be explicitly null for ongoing mode (never just one). The same cooldown
+  and event checks apply; three consecutive failed core turns block for diagnosis.
 - **Admission order**: inside the window, budget left, cooldown passed since the last
   attempt, and at least one new wake cause. The attempt and the causes it consumed are
   persisted before inference, so the same consumed causes do not automatically retry a failed turn. A later new
-  cause may admit another attempt within the remaining allowance.
+  cause may admit another attempt within the remaining allowance, or without a count
+  ceiling in ongoing mode. Waiting is a valid success, not a non-progress failure.
 
 Wake causes are public changes only:
 

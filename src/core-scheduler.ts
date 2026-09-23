@@ -2,12 +2,12 @@ import {z} from 'zod';
 import type {CoreView} from './core-planner.js';
 
 export const CoreScheduleConfig=z.object({
- maxAttempts:z.number().int().min(1).max(16),
+ maxAttempts:z.number().int().min(1).max(16).nullable(),
  cooldownTicks:z.number().int().min(60).max(3600),
- windowTicks:z.number().int().min(60).max(36000)
-}).strict();
+ windowTicks:z.number().int().min(60).max(36000).nullable()
+}).strict().refine(c=>(c.maxAttempts===null)===(c.windowTicks===null),"Ongoing schedules require both limits null");
 export type CoreScheduleConfig=z.infer<typeof CoreScheduleConfig>;
-export type CoreSchedule={config:CoreScheduleConfig;startTick:number;endTick:number;attempts:number;lastAttemptTick?:number;consumed:Record<string,string>};
+export type CoreSchedule={config:CoreScheduleConfig;startTick:number;endTick:number|null;blocked?:string;attempts:number;lastAttemptTick?:number;consumed:Record<string,string>};
 export type CoreWake={sourceId:string;kind:'start'|'agreement'|'request'|'message'|'answer'|'telemetry'|'self-care';value:string};
 
 /** Only public/communicated changes qualify. Tick passage, private needs,
@@ -31,12 +31,13 @@ export function coreWakeSnapshot(v:CoreView):CoreWake[]{
 }
 const key=(w:CoreWake)=>w.kind+':'+w.sourceId;
 export function coreAdmission(s:CoreSchedule,v:CoreView):{ready:true;causes:CoreWake[];snapshot:Record<string,string>}|{ready:false;reason:string}{
- if(v.tick<s.startTick||v.tick>=s.endTick)return {ready:false,reason:'outside-window'};
- if(s.attempts>=s.config.maxAttempts)return {ready:false,reason:'budget-exhausted'};
+ if(s.blocked)return {ready:false,reason:s.blocked};
+ if(v.tick<s.startTick||s.endTick!==null&&v.tick>=s.endTick)return {ready:false,reason:'outside-window'};
+ if(s.config.maxAttempts!==null&&s.attempts>=s.config.maxAttempts)return {ready:false,reason:'budget-exhausted'};
  if(s.lastAttemptTick!==undefined&&v.tick-s.lastAttemptTick<s.config.cooldownTicks)return {ready:false,reason:'cooldown'};
  const wakes=coreWakeSnapshot(v),causes=wakes.filter(w=>s.consumed[key(w)]!==w.value);
  if(!causes.length)return {ready:false,reason:'no-new-event'};
  // Keep prior keys: a temporarily absent observation must not re-wake later.
- // Domain lifetime is separately bounded to sixteen core turns.
+ // Persistent deduplication is separate from bounded prompt history.
  return {ready:true,causes,snapshot:{...s.consumed,...Object.fromEntries(wakes.map(w=>[key(w),w.value]))}};
 }

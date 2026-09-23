@@ -133,3 +133,11 @@ Test suite growth along the way: 33 checks at the foundation, 145 at #20, 263 at
 - **#60 Video feedback calibration** — Gemini read the main scripted eating/refusal sequence,
   but invented a line and misquoted text. Receipt checking helped, not an independent
   truth test. Two paid responses, no gameplay; initial TLS failure retained.
+
+- **#61 Native Luna ongoing integration** — no lifetime turn ceiling in the new event-driven
+  mode; legacy trials unchanged. The first game attempt failed provider schema checks.
+  After the existing Codex dialect was wired in, Luna ran core/answer/reflection turns
+  while native play continued. Beatrice ate 9 berries with receipt-backed closures;
+  Alvin's two choices encountered changed availability. One core turn cancelled at the
+  fixed observation deadline. No work/cooking; no automatic escalation. Failures and
+  misleading planner explanations remain in [the evidence](evidence/luna-ongoing-integration.json).

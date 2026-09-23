@@ -12,7 +12,9 @@ Site and dev diary: <https://rimworld-concord.pages.dev/> · Vision: [docs/VISIO
 ## Status
 
 An experimental vertical slice in a private lab, **not a playable mod or an unattended
-AI colony**. Every live-model run is a finite, pre-declared trial with no rerolls.
+AI colony**. Live-model observations remain finite and pre-declared, with no model-choice rerolls.
+The new ongoing policy has no arbitrary turn ceiling; historical trial allowances
+remain unchanged.
 
 | Capability | Native mechanics | Live-model evidence |
 |---|---|---|
@@ -35,8 +37,14 @@ misquoted text. The receipt check helped, but also needed checking. See
 [video feedback evidence](docs/evidence/video-feedback-pilot.json) and
 [crew log and recording](docs/CREW_LOG.md).
 
+Native Luna now runs core questions, pawn answers and reflections during continuous
+play, without a fixed turn count. In the first corrected three-minute check, Beatrice
+ate 9 berries and the core closed her three linked topics; two Alvin choices failed
+fresh availability checks. The last core turn was cancelled at the observation deadline.
+Initial schema failures are preserved. [Integration evidence](docs/evidence/luna-ongoing-integration.json).
+
 Not yet shown: the live core turning a need into a multi-step plan (build, then cook),
-long-run character consistency, useful live-core planning in unpaused play, the gravship
+long-run character consistency, automatic model escalation, the gravship
 campaign, or an installer for players.
 
 What happened when: [HISTORY](docs/HISTORY.md) · every trial: [trial ledger](docs/trials/README.md) · what's next: [ROADMAP](docs/ROADMAP.md)

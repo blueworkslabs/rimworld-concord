@@ -122,7 +122,7 @@ The full matrix is in [SOCIAL](SOCIAL.md#who-knows-what).
 Every Claude character call is a fresh CLI process with no action tools, no MCP
 servers, no settings, no session persistence, a reduced environment and a fixed
 model. `StructuredOutput` is a return-format mechanism, not an action tool. Jev
-uses a protected HTTP transport; Luna's offline route uses Codex app-server. Contextual schemas enumerate supplied choice IDs, and the coordinator revalidates
+uses a protected HTTP transport; Luna's offline and ongoing decision routes use isolated native Codex app-server processes. Contextual schemas enumerate supplied choice IDs, and the coordinator revalidates
 those choices before application. Counter-action payloads are a documented exception:
 they use bounded strings, and fresh grounding is enforced when adoption creates an
 offer, not when the counter is first recorded. See [MODELS](MODELS.md#isolation).
