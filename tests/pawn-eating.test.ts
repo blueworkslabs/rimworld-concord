@@ -1,3 +1,4 @@
+import {coreView,validateCoreChoice,coreChoiceSchema,coreAnswerPrompt} from '../src/core-planner.js';
 import {stopTrialWork,workSummary} from '../src/work-trial.js';
 import {DecisionChannel} from '../src/decision-channel.js';
 import {eatingOptions} from '../src/pawn-eating.js';
@@ -28,7 +29,7 @@ test('eat is pawn-only, absent from core offers and ordinary social speech; plai
 });
 test('typed eating tracks actual receipt, wakes core, preserves restore and never creates a core agreement',async()=>{
  const {g,s,c}=await setup();await c.checkpoint('lab-concord-before-eat');const q=await ask(c);assert.equal((await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}})).status,'delivered');assert.equal(g.calls,1);assert.equal(Object.keys(c.inspect().proposals).length,0);await assert.rejects(c.checkpoint('lab-concord-active-eat'));await assert.rejects(c.answerCoreQuestion(q,{name:'retry',async answerCore(){return eat;}}));
- g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();assert.equal(c.inspect().characters.A!.commitment,undefined);assert.equal((await c.corePerspective()).selfCare[0]!.consumed,16);assert(coreWakeSnapshot(await c.corePerspective()).some(w=>w.kind==='self-care'));assert(c.inspect().crew!.entries.some(e=>e.text==='eat: completed. Consumed 16 units.'));
+ g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();assert.equal(c.inspect().characters.A!.commitment,undefined);assert.equal((await c.corePerspective()).selfCare[0]!.consumed,16);assert(coreWakeSnapshot(await c.corePerspective()).some(w=>w.kind==='self-care'));assert(c.inspect().crew!.entries.some(e=>e.text==='eat: completed. Consumed 16 food items.'));
  await c.checkpoint('lab-concord-after-eat');const after=c.inspect().selfCare;await c.restore('lab-concord-before-eat');assert.equal(c.inspect().selfCare,undefined);await c.restore('lab-concord-after-eat');assert.deepEqual(c.inspect().selfCare,after);await c.reconcile();assert.equal(g.calls,1);s.close();
 });
 test('lost dispatch response reconciles same action; pawn-bound stop records interruption',async()=>{
@@ -62,4 +63,29 @@ test('shared trial shutdown cancels self-care and leaves a checkpointable state'
 });
 test('self-care consumption is not counted as delivered work or hauling trips',async()=>{
  const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();const summary=workSummary(c.inspect());assert.equal(summary.deliveredUnits,0);assert.equal(summary.completedTrips,0);assert.equal(summary.selfCare[0]!.delivered,16);s.close();
+});
+
+const resolve=(sourceId:string)=>({topics:[{sourceId,text:'This bounded eating action completed.',status:'resolved'}],actionTopicId:null,action:{kind:'wait',reason:'No further action.'}});
+test('only matched positive completed eating resolves its receipt/question/reply, never brief or unrelated work',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);assert.equal((await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}})).status,'delivered');
+ const care=Object.values(c.inspect().selfCare!)[0]!,sources=[care.id,...c.inspect().coreState!.questions[0]!.messages.map(m=>m.id)];
+ let v=await c.corePerspective();for(const id of sources)assert.throws(()=>validateCoreChoice(resolve(id),v),/closure unsupported/);
+ g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();v=await c.corePerspective();
+ assert.equal(v.selfCare[0]!.consumedUnit,'food-items');assert.equal(v.selfCare[0]!.food.label,'berries');assert.equal(v.selfCare[0]!.portionCount,16);
+ for(const id of sources){validateCoreChoice(resolve(id),v);const schema:any=coreChoiceSchema(v);assert(schema.anyOf[0].properties.topics.items.anyOf.find((b:any)=>b.properties.sourceId.const===id).properties.status.enum.includes('resolved'));}
+ assert.throws(()=>validateCoreChoice(resolve('brief'),v),/closure unsupported/);
+ const d=c.inspect();d.proposals.work={id:'work',pawn:'A',status:'pending',action:{kind:'move',x:1,z:1},reason:'Still separate'};d.coreState!.topics.push({sourceId:sources[1]!,text:'Mixed scope',status:'open',proposalIds:['work']});
+ const mixed=coreView(d,await g.state());assert.throws(()=>validateCoreChoice(resolve(sources[1]!),mixed),/closure unsupported/);assert.throws(()=>validateCoreChoice(resolve('work'),mixed),/closure unsupported/);validateCoreChoice(resolve(care.id),mixed);
+ s.close();
+});
+test('eating closure fails closed for interrupted, empty, mismatched and multiply linked receipts',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();const original=c.inspect(),care=Object.values(original.selfCare!)[0]!,world=await g.state();
+ for(const patch of [{status:'interrupted'},{status:'failed'},{status:'started'},{delivered:0},{delivered:17},{delivered:1.5},{actor:'B'},{kind:'haul'},{thing:'other'},{count:25},{id:'wrong'}]){const d=structuredClone(original);Object.assign(d.outcomes[care.id]!,patch);assert.throws(()=>validateCoreChoice(resolve(care.id),coreView(d,world)),/closure unsupported/);}
+ const d=structuredClone(original);delete d.outcomes[care.id];assert.throws(()=>validateCoreChoice(resolve(care.id),coreView(d,world)),/closure unsupported/);
+ const multi=structuredClone(original);multi.selfCare!.other={...care,id:'other'};const v=coreView(multi,await g.state()),message=original.coreState!.questions[0]!.messages[0]!.id;assert.throws(()=>validateCoreChoice(resolve(message),v),/closure unsupported/);validateCoreChoice(resolve(care.id),v);s.close();
+});
+test('resolved self-care topics survive rewind/restore without closing unrelated goals or replaying food',async()=>{
+ const {g,s,c}=await setup();await c.checkpoint('lab-concord-empty');const q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();const care=Object.values(c.inspect().selfCare!)[0]!;
+ const outcome=await c.planCore({name:'close',async plan(){return resolve(care.id);}});assert.equal(outcome.status,'applied');assert.equal(c.inspect().coreState!.topics[0]!.status,'resolved');await c.checkpoint('lab-concord-closed');
+ await c.restore('lab-concord-empty');assert.equal(c.inspect().coreState!.topics.length,0);assert.equal(c.inspect().selfCare,undefined);await c.restore('lab-concord-closed');assert.equal(c.inspect().coreState!.topics[0]!.status,'resolved');assert.equal(g.calls,1);s.close();
 });

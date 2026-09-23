@@ -836,3 +836,7 @@ No general planning or causal food-visibility improvement established.
 ## Live pawn-owned eating
 
 [Protocol and evidence](EATING_FOLLOWTHROUGH.md): six core +three pawn attempts, all applied/delivered, two bounded core formatting repairs, zero Jev/rerolls. Alvin typed eat and consumed 12 berries; Pedro/Beatrice speech only, no work proposals/cooking. One unit error and reply-routing gap retained. 326 Node +11 Python checks, independent review, scripted/live paired+cold restore; all 228 historical database-related files unchanged.
+
+## Self-care follow-up boundaries
+
+[Contract and native checks](SELFCARE_FOLLOWUP.md): explicit food-item units and Core-only replies; own completed eating may resolve its receipt/question/reply topic, not the broad goal or unfinished work. Four scripted native cases, paired persistence, 330 Node +11 Python checks and final independent source review. No new model calls or live reliability claim.

@@ -263,3 +263,9 @@ test('core provider branches prohibit offer links on questions and waiting',asyn
  }
  const offer=schema.anyOf.find((b:any)=>b.properties.action.properties.kind.const==='propose');assert(offer);assert(offer.properties.actionTopicId.anyOf.some((b:any)=>b.enum?.includes('brief')));s.close();
 });
+
+test('naming another pawn in a core reply never changes delivery or forwards to them',async()=>{
+ const {c,s,g}=await setup();const q=await c.planCore(planner(()=>({topic:null,action:{kind:'ask',pawn:'A',text:'Can you help B?',reason:'Ask'}})));if(q.status!=='applied')throw Error();let envelope:any;
+ const answer=await c.answerCoreQuestion(q.questionId!,{name:'reply',async answerCore(v){envelope=coreAnswerPrompt(v).delivery;return {choice:'say',text:'B, the food is south.'};}});
+ assert.equal(answer.status,'delivered');assert.deepEqual(envelope,{from:'A',to:'core',forwarding:'none'});assert.equal(c.inspect().characters.B!.messages?.length??0,0);assert.equal(c.inspect().coreState!.questions[0]!.messages.at(-1)!.to,'core');assert.equal(g.moves,0);s.close();
+});

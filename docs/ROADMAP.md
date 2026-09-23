@@ -73,7 +73,7 @@ repair split across three events. No work or eating was observed. The [native fo
 raw berries are excluded by ordinary native preference before urgent hunger.
 Matched no-model checks at 20% and 10% Food found no eating versus 18 berries
 eaten; paired/cold restore passed. Shared guidance now distinguishes link bands,
-native selection and speech from jobs. An explicit [pawn-owned eating choice](PAWN_EATING.md) now separates typed self-care from dialogue. Its [first bounded live follow-through](EATING_FOLLOWTHROUGH.md) now confirms Alvin chose and consumed 12 berries, while Pedro/Beatrice spoke only. Next clarify receipt units and actual communication destinations, then self-care-linked topic completion; no prose-based forwarding or navigation. This is not a proved cooking plan. Keep the
+native selection and speech from jobs. An explicit [pawn-owned eating choice](PAWN_EATING.md) now separates typed self-care from dialogue. Its [first bounded live follow-through](EATING_FOLLOWTHROUGH.md) now confirms Alvin chose and consumed 12 berries, while Pedro/Beatrice spoke only. A [focused clarification](SELFCARE_FOLLOWUP.md) now supplies item units, Core-only reply destinations and receipt-linked self-care closure, verified with scripted native cases. Live understanding remains untested; no prose-based forwarding or navigation. This is not a proved cooking plan. Keep the
 unexplained coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 

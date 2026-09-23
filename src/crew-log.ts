@@ -54,7 +54,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  if(kind==='intention-stopped')add('record',actor,'observer',data.proposal,'Agreement stopped. Any completed work remains recorded; unfinished work is not completion.',`stopped:${data.proposal}`);
  if(kind==='self-care-stopped')add('record',actor,'observer',data.id,`Eating stop requested: ${safe(data.reason,240)}`,`self-care-stop:${data.id}`);
  if(kind==='self-care-chosen')add('record',actor,'observer',data.id,`Chose to eat up to ${data.action.count} ${safe(data.action.label,80)}; consumption not yet confirmed.`,`self-care:${data.id}`);
- if(kind==='self-care-outcome')add('record',actor,'observer',data.id,`eat: ${data.status}. Consumed ${Number(data.delivered??0)} units.`,`self-care-outcome:${data.id}:${data.status}`);
+ if(kind==='self-care-outcome')add('record',actor,'observer',data.id,`eat: ${data.status}. Consumed ${Number(data.delivered??0)} food items.`,`self-care-outcome:${data.id}:${data.status}`);
  if(kind==='action-outcome'){
   const r=data as Receipt,p=Object.values(d.proposals).find(p=>p.pawn===r.actor&&(p.actionId===r.id||p.standing?.steps.includes(r.id)));
   if(!p)return;
