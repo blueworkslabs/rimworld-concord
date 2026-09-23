@@ -64,3 +64,15 @@ test('social entry is locked and has its own four-attempt allowance',()=>{
  }
  assert.equal(decisionTrials['social-v1'].calls,4);assert.equal(decisionTrials['social-v1'].reservedEquivalentUSD,.4);
 });
+
+test('retention entry is locked and has its own four-attempt allowance',()=>{
+ const root=mkdtempSync(tmpdir()+'/retention-guards-');mkdirSync(root+'/concord');
+ const env:NodeJS.ProcessEnv={...process.env,RIMWORLD_LAB_ROOT:root};delete env.CONCORD_RETENTION_LOCKED;
+ const direct=spawnSync(process.execPath,['dist/trials/retention-game.js'],{env,encoding:'utf8'});
+ assert.notEqual(direct.status,0);assert.match(direct.stderr,/Use scripts\/run-retention-lab/);
+ for(const mode of ['fixture','game','cold']){
+  const r=spawnSync('flock',['-n',root+'/concord/coordinator.lock','bash','scripts/run-retention-lab.sh',mode],{env,encoding:'utf8'});
+  assert.notEqual(r.status,0);assert.equal(existsSync(root+'/concord/request.json'),false);
+ }
+ assert.equal(decisionTrials['retention-game-v1'].calls,4);assert.equal(decisionTrials['retention-game-v1'].reservedEquivalentUSD,.4);
+});
