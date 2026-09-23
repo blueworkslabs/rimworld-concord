@@ -34,7 +34,7 @@ test('core proposal executes nothing; refusal cannot be retried and counter need
 test('one addressed question, voluntary answer, no belief or consent, no private leakage',async()=>{
  const {g,s,c}=await setup();const r=await c.planCore(planner(()=>({topic:{sourceId:'brief',text:'Clarify needs before work',status:'open'},action:{kind:'ask',pawn:'A',text:'What would help?',reason:'Ask before proposing.'}})));if(r.status!=='applied')throw Error();assert.equal(g.moves,0);assert.equal(c.inspect().characters.B!.messages,undefined);
  let called=0;const a=await c.answerCoreQuestion(r.questionId!,{name:'answer',async answerCore(v){called++;assert.equal(v.question.from,'core');assert.equal(coreAnswerPrompt(v).task,'core-answer');return {choice:'say',text:'I might haul later, but that is not consent.'};}});assert.equal(a.status,'delivered');assert.equal(called,1);assert.equal(g.moves,0);assert.equal(Object.keys(c.inspect().proposals).length,0);assert.equal(c.inspect().characters.A!.outlook,undefined);
- const v=await c.corePerspective();assert.equal(v.messages.length,2);assert.deepEqual(v.questionRecipients,[]);await assert.rejects(c.answerCoreQuestion(r.questionId!,{name:'retry',async answerCore(){throw Error();}}));
+ const v=await c.corePerspective();assert.equal(v.messages.length,2);assert.deepEqual(v.questionRecipients,['B']);await assert.rejects(c.answerCoreQuestion(r.questionId!,{name:'retry',async answerCore(){throw Error();}}));
  assert.equal(crewReport(c.inspect(),100).entries.filter(e=>e.key.startsWith('core-talk:')).length,2);assert.equal(c.inspect().characters.B!.messages,undefined);s.close();
 });
 test('silence closes question without speech or re-asking; malformed authority is rejected',async()=>{

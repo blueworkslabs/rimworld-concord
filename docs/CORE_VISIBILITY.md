@@ -1,25 +1,13 @@
-# Coarse core status: design decision, not implemented telemetry
+# Shared-link status
 
-The agreed direction permits useful coarse bodily status without private-thought
-access. We will use **explicit shared-link telemetry**, not claim that a hidden
-need meter is something the core visually observed. This is a future sensor
-capability, to be implemented and tested before the campfire/cooking trial; the
-current lifecycle PR does not add it to the core perspective.
+The core and linked pawn peers receive deliberately shared Food/Rest bands,
+not relabelled visual observations. The same timestamped projection appears on
+the crew board. Exact meters and private thoughts remain unavailable to the core.
 
-- Limit initial telemetry to Food and Rest status bands. Exclude mood, private
-  memories, relationships, personal interpretations and exact need fractions.
-- Label each reading with pawn, source `shared-link`, observed tick and freshness.
-  Unavailable, stale or conflicting readings become unknown, never comfortable.
-- The link reports coarse embodied state, not motives, willingness, medical
-  diagnoses, guaranteed job readiness or permission to act. It does not manufacture
-  visual cues, and the observer player's debug access is not its justification.
-- Keep a pawn's deliberate report separately attributed even if it disagrees with
-  telemetry. A reading and a claim are not interchangeable evidence.
-- Only meaningful band transitions should be considered for bounded scheduling;
-  polling must not create thoughts. Exact thresholds, expiry and deduplication
-  belong in the versioned sensor contract and native acceptance tests.
-- Better status does not reopen deferred work or override refusal. Re-invitation
-  still needs the pawn's deliberate request and fresh work consent.
+The versioned contract is in [Campfire milestone](CAMPFIRE_MILESTONE.md).
+A band is neither consent, a medical diagnosis nor a guarantee of work readiness.
+Deliberate reports remain separately attributed even when they disagree with
+telemetry. Fresh invitation and work consent are still required after deferral.
 
-This resolves the design direction before expanding physical capabilities, while
-keeping the current evidence honest: no core bodily sensor has yet been added.
+Implementation is under verification; scripted and live evidence will be reported
+separately. The previous lifecycle milestone did not implement this telemetry.

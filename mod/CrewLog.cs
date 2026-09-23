@@ -7,10 +7,10 @@ namespace Concord {
  [Serializable] public class CrewEntry { public int seq,tick;public string kind,actor,recipient,subject,text,key; }
  [Serializable] public class AgreementProgress { public string id,kind,status;public int tick,agreed,completed,active,unconfirmed,unsuccessful,notStarted,unfulfilled,delivered,quantityUnknown; }
  [Serializable] public class CrewAgreement { public string pawn,name;public AgreementProgress progress; }
- [Serializable] public class CrewReport { public string world,epoch,branch;public int revision,tick;public CrewEntry[] entries;public CrewAgreement[] agreements; }
- [Serializable] public class CrewWire {public string world,epoch,branch,entryLines,agreementLines;public int revision,tick;}
+ [Serializable] public class CrewReport { public string world,epoch,branch;public int revision,tick;public CrewEntry[] entries;public CrewAgreement[] agreements;public SharedStatus[] sharedStatus;public string waiting; }
+ [Serializable] public class CrewWire {public string world,epoch,branch,entryLines,agreementLines,statusLines,waiting;public int revision,tick;}
  [Serializable] public class CrewAgreementWire {public string pawn,name,id,kind,status;public int tick,agreed,completed,active,unconfirmed,unsuccessful,notStarted,unfulfilled,delivered,quantityUnknown;}
- [Serializable] public class CrewHeader {public string world,epoch,branch;public int revision,tick;}
+ [Serializable] public class CrewHeader {public string world,epoch,branch,waiting;public int revision,tick;}
  [Serializable] public class CrewAgreementHeader {public string pawn,name;}
  public static class CrewLog {
   private static CrewReport Parse(string json){
@@ -19,11 +19,11 @@ namespace Concord {
    var agreements=String.IsNullOrEmpty(w.agreementLines)?new CrewAgreement[0]:w.agreementLines.Split('\n').Select(x=>{
     var a=JsonUtility.FromJson<CrewAgreementWire>(x);return new CrewAgreement {pawn=a.pawn,name=a.name,progress=new AgreementProgress {id=a.id,kind=a.kind,status=a.status,tick=a.tick,agreed=a.agreed,completed=a.completed,active=a.active,unconfirmed=a.unconfirmed,unsuccessful=a.unsuccessful,notStarted=a.notStarted,unfulfilled=a.unfulfilled,delivered=a.delivered,quantityUnknown=a.quantityUnknown}};
    }).ToArray();
-   return new CrewReport {world=w.world,epoch=w.epoch,branch=w.branch,revision=w.revision,tick=w.tick,entries=entries,agreements=agreements};
+   return new CrewReport {world=w.world,epoch=w.epoch,branch=w.branch,revision=w.revision,tick=w.tick,entries=entries,agreements=agreements,waiting=w.waiting??"",sharedStatus=String.IsNullOrEmpty(w.statusLines)?new SharedStatus[0]:w.statusLines.Split('\n').Select(x=>JsonUtility.FromJson<SharedStatus>(x)).ToArray()};
   }
   public static string Json(WorldState w){
    var r=Read(w);if(r==null)return "null";
-   return JsonUtility.ToJson(new CrewHeader {world=r.world,epoch=r.epoch,branch=r.branch,revision=r.revision,tick=r.tick}).TrimEnd('}')+",\"entries\":["+String.Join(",",r.entries.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"agreements\":["+String.Join(",",r.agreements.Select(a=>JsonUtility.ToJson(new CrewAgreementHeader {pawn=a.pawn,name=a.name}).TrimEnd('}')+",\"progress\":"+JsonUtility.ToJson(a.progress)+"}").ToArray())+"]}";
+   return JsonUtility.ToJson(new CrewHeader {world=r.world,epoch=r.epoch,branch=r.branch,revision=r.revision,tick=r.tick,waiting=r.waiting}).TrimEnd('}')+",\"sharedStatus\":["+String.Join(",",r.sharedStatus.Select(s=>JsonUtility.ToJson(s)).ToArray())+"],\"entries\":["+String.Join(",",r.entries.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"agreements\":["+String.Join(",",r.agreements.Select(a=>JsonUtility.ToJson(new CrewAgreementHeader {pawn=a.pawn,name=a.name}).TrimEnd('}')+",\"progress\":"+JsonUtility.ToJson(a.progress)+"}").ToArray())+"]}";
   }
 
   private static bool Short(string s,int n){return s!=null&&s.Length<=n;}
@@ -40,6 +40,8 @@ namespace Concord {
    if(!Guid.TryParse(r.branch,out branch)||r.revision<0)throw new Exception("Crew report branch/revision invalid");
    if(r.tick<0||r.tick>Find.TickManager.TicksGame)throw new Exception("Crew report tick invalid");
    if(r.entries==null||r.entries.Length>128||r.agreements==null||r.agreements.Length>12)throw new Exception("Crew report arrays invalid");
+   if(r.sharedStatus.Length>16||!Short(r.waiting,400))throw new Exception("Invalid shared status bounds");
+   foreach(var s in r.sharedStatus)if(s==null||!Short(s.pawn,120)||!Short(s.name,80)||s.source!="shared-link-telemetry"||s.epoch!=r.epoch||s.tick<0||s.tick>r.tick||!new[]{"satisfied","low","urgent","unknown"}.Contains(s.food)||!new[]{"satisfied","low","urgent","unknown"}.Contains(s.rest))throw new Exception("Invalid shared telemetry");
    int seq=0;
    foreach(var e in r.entries){
     if(e==null||e.seq<=seq||e.tick<0||e.tick>r.tick||(e.kind!="message"&&e.kind!="record")||!Short(e.actor,80)||!Short(e.recipient,80)||!Short(e.subject,120)||!Short(e.text,1000)||!Short(e.key,160))throw new Exception("Invalid crew entry");seq=e.seq;
@@ -66,8 +68,10 @@ namespace Concord {
     if(r==null){Widgets.Label(new Rect(0,100,rect.width,80),"No coordinator report yet. This panel is read-only; it does not start agents or change pawn work.");return;}
     bool fresh=r.epoch==w.epoch&&Time.realtimeSinceStartup-w.crewReceived<10f;
     Widgets.Label(new Rect(0,83,rect.width,28),(fresh?"Latest coordinator report":"Saved / last report — not live")+"  |  game tick "+r.tick);
-    Widgets.Label(new Rect(0,112,rect.width,25),"Agreements — receipt-based progress (up to 12 recent / running)");
-    var workRect=new Rect(0,140,rect.width,145);var workView=new Rect(0,0,rect.width-22,Math.Max(140,r.agreements.Length*62));
+    Widgets.Label(new Rect(0,112,rect.width,42),"Shared link · "+String.Join(" | ",r.sharedStatus.Select(s=>s.name+": Food "+(fresh&&s.fresh&&Find.TickManager.TicksGame-s.tick<=120?s.food:"unknown")+", Rest "+(fresh&&s.fresh&&Find.TickManager.TicksGame-s.tick<=120?s.rest:"unknown")+" @"+s.tick).ToArray()));
+    Widgets.Label(new Rect(0,155,rect.width,25),"Waiting: "+r.waiting);
+    Widgets.Label(new Rect(0,180,rect.width,25),"Agreements — receipt-based progress (up to 12 recent / running)");
+    var workRect=new Rect(0,208,rect.width,77);var workView=new Rect(0,0,rect.width-22,Math.Max(140,r.agreements.Length*62));
     Widgets.BeginScrollView(workRect,ref workScroll,workView);
     float y=0;
     foreach(var a in r.agreements){var p=a.progress;

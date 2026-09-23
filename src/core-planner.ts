@@ -1,3 +1,5 @@
+import {productionView} from './production-planning.js';
+import {sharedStatus} from './shared-status.js';
 import {createHash} from 'node:crypto';
 import {z} from 'zod';
 import type {Domain,GameState,Action,Character,Pawn} from './protocol.js';
@@ -42,9 +44,9 @@ export function coreView(d:Domain,g:GameState){
   const invitations=reoffers.filter(r=>r.pawn===own.id&&r.status==='pending'&&d.proposals[r.deferredId]?.status==='deferred');
   if(deferred&&!invitations.length){availability.push({pawn:own.id,status:'Pawn said not now. No ordinary offers without a pawn-authored request for one fresh offer.'});continue;}
   if(!available(own.id)){availability.push({pawn:own.id,status:'Existing offer, counter or active agreement; no new ordinary offer.'});continue;}
-  const haul=haulingView(d,g,own),rescue=rescueView(d,g,own);
-  const invitation=(a:Action)=>invitations.find(r=>JSON.stringify(r.action)===JSON.stringify(a)&&r.mapId===(a.kind==='haul'?haul?.mapId:rescue?.mapId));
-  const options=[...(haul?.options??[]),...(rescue?.options??[])].filter(a=>(!deferred||!!invitation(a))&&!proposals.some(p=>p.pawn===own.id&&(p.status==='refused'||p.status==='withdrawn'||p.standing?.status==='stopped')&&sameWork(a,p.action))).slice(0,6);
+  const haul=haulingView(d,g,own),rescue=rescueView(d,g,own),production=productionView(d,g,own);
+  const invitation=(a:Action)=>invitations.find(r=>JSON.stringify(r.action)===JSON.stringify(a)&&r.mapId===(a.kind==='haul'?haul?.mapId:a.kind==='rescue'?rescue?.mapId:production?.mapId));
+  const options=[...(production?.options??[]),...(rescue?.options??[]),...(haul?.options??[])].filter(a=>(!deferred||!!invitation(a))&&!proposals.some(p=>p.pawn===own.id&&(p.status==='refused'||p.status==='withdrawn'||p.standing?.status==='stopped')&&sameWork(a,p.action))).slice(0,6);
   for(const a of options)opportunities.push({id:'op:'+signature(own.id,a)+(invitation(a)?':'+invitation(a)!.id:''),pawn:own.id,action:structuredClone(a),observedTick:g.ticks,...(invitation(a)?{reofferRequestId:invitation(a)!.id}:{}),...(a.kind==='haul'&&haul?.supplies?.find(s=>s.thing===a.thing&&s.x===a.x&&s.z===a.z)?{supply:(()=>{const s=haul!.supplies!.find(s=>s.thing===a.thing&&s.x===a.x&&s.z===a.z)!;return {sourceThingId:s.thing,label:s.label,sourceCount:s.sourceCount,destinationFree:s.destinationFree};})()}: {})});
   availability.push({pawn:own.id,status:options.length?'Grounded options listed; availability is not consent or guaranteed success.':'No currently eligible grounded option; unknown is not refusal.'});
  }
@@ -64,10 +66,10 @@ export function coreView(d:Domain,g:GameState){
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:core.revision,tick:g.ticks,brief:{...core.brief},
   questions:core.questions.map(q=>({id:q.id,pawn:q.pawn,status:q.status})),
   topicClosures,reoffers:reoffers.map(r=>({id:r.id,pawn:r.pawn,deferredId:r.deferredId,tick:r.tick,status:r.status,reason:r.reason,evidence:'attributed-speech' as const})),
-  crew:Object.values(d.characters).map(c=>({id:c.id,name:c.name})),messages,agreements,counters,requests,topics,opportunities,availability,
-  questionRecipients:core.questions.length?[]:g.pawns.filter(p=>d.characters[p.id]&&!p.downed).map(p=>p.id),
-  capabilities:['propose listed hauling/rescue','adopt counter with fresh consent','one optional addressed question','wait'],
-  limits:'No construction, cooking, work-priority changes or direct pawn control. No private needs, memories or outlooks. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.'};
+  sharedStatus:sharedStatus(d,g),crew:Object.values(d.characters).map(c=>({id:c.id,name:c.name})),messages,agreements,counters,requests,topics,opportunities,availability,
+  questionRecipients:core.questions.length>=3?[]:g.pawns.filter(p=>d.characters[p.id]&&!p.downed&&!core.questions.some(q=>q.pawn===p.id)).map(p=>p.id),
+  capabilities:['propose listed hauling/rescue/campfire construction/simple meals','adopt counter with fresh consent','one optional addressed question per pawn, at most three total','wait'],
+  limits:'Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.'};
 }
 export type CoreView=ReturnType<typeof coreView>;
 export function validateCoreChoice(raw:unknown,v:CoreView){
