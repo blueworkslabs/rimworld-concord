@@ -1,3 +1,4 @@
+import {CoreAnswerChoice,coreAnswerSchema} from './pawn-eating.js';
 import {CoreChoice,coreInstructions,coreChoiceSchema,corePrompt,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
 import {ProviderStreamCounts,boundedCoreFormattingRecovery,providerResultMetadata,validationIssues} from './provider-diagnostics.js';
 import { spawn,execFile } from 'node:child_process';
@@ -24,10 +25,10 @@ const decision={oneOf:[...['accept','refuse','defer'].map(kind=>({type:'object',
  {type:'object',additionalProperties:false,required:['kind','reason','action'],properties:{kind:{const:'counter'},reason:{type:'string',minLength:1,maxLength:1000},action}}]};
 
 
-export function claudeArgs(mode:'decision'|'reflection'|'social'|'core'|'core-answer',view?:AttentionView|CoreView) {
+export function claudeArgs(mode:'decision'|'reflection'|'social'|'core'|'core-answer',view?:AttentionView|CoreView|CoreQuestionView) {
  if(mode==='reflection'&&!view)throw Error('Reflection schema requires a supplied perspective');
  if(mode==='core'&&!view)throw Error('Core schema requires a perspective');
- const schema=mode==='core'?{type:'object',additionalProperties:false,required:['core'],properties:{core:coreChoiceSchema(view as CoreView)}}:mode==='core-answer'?{type:'object',additionalProperties:false,required:['social'],properties:{social:socialChoiceSchema}}:mode==='social'?{type:'object',additionalProperties:false,required:['social'],properties:{social:socialChoiceSchema}}:mode==='decision'?{type:'object',additionalProperties:false,required:['decision'],properties:{decision}}:
+ const schema=mode==='core'?{type:'object',additionalProperties:false,required:['core'],properties:{core:coreChoiceSchema(view as CoreView)}}:mode==='core-answer'?{type:'object',additionalProperties:false,required:['social'],properties:{social:coreAnswerSchema(view as CoreQuestionView)}}:mode==='social'?{type:'object',additionalProperties:false,required:['social'],properties:{social:socialChoiceSchema}}:mode==='decision'?{type:'object',additionalProperties:false,required:['decision'],properties:{decision}}:
  {type:'object',additionalProperties:false,required:['reflection'],properties:{reflection:reflectionChoiceSchema(view as AttentionView,decision)}};
  return ['--print','--safe-mode','--tools','','--disallowedTools','mcp__*','--strict-mcp-config','--mcp-config','{"mcpServers":{}}',
  '--disable-slash-commands','--no-session-persistence','--no-chrome','--permission-mode','dontAsk','--permission-prompts','none',
@@ -50,7 +51,7 @@ export function verifyClaudeInit(event:any) {
 type ParsedClaude<T>={output:T;providerChoice:ReflectionChoice|undefined;estimatedUsageUSD:number;turns:number;formattingRecovery:boolean};
 export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'):ParsedClaude<Decision|Reflection>;
 export function parseClaudeResult(event:unknown,mode:'social'):ParsedClaude<z.infer<typeof SocialChoice>>;
-export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social'|'core'|'core-answer',stream?:Pick<ProviderStreamCounts,'counts'|'details'>):ParsedClaude<Decision|Reflection|z.infer<typeof SocialChoice>|CoreChoice>;
+export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social'|'core'|'core-answer',stream?:Pick<ProviderStreamCounts,'counts'|'details'>):ParsedClaude<Decision|Reflection|z.infer<typeof CoreAnswerChoice>|CoreChoice>;
 export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'social'|'core'|'core-answer',stream?:Pick<ProviderStreamCounts,'counts'|'details'>) {
  const recoveryAllowed=mode==='core'&&boundedCoreFormattingRecovery(stream);
  const result=z.object({type:z.literal('result'),subtype:z.literal('success'),is_error:z.literal(false),
@@ -59,7 +60,7 @@ export function parseClaudeResult(event:unknown,mode:'decision'|'reflection'|'so
  if(Object.keys(result.modelUsage).some(m=>m!==CLAUDE_MODEL)||!Object.keys(result.modelUsage).length)
    throw Error('Unexpected model route');
  const providerChoice=mode==='reflection'?z.object({reflection:ReflectionChoice}).strict().parse(result.structured_output).reflection:undefined;
- const output=mode==='core'?z.object({core:CoreChoice}).strict().parse(result.structured_output).core:mode==='social'||mode==='core-answer'?z.object({social:SocialChoice}).strict().parse(result.structured_output).social:providerChoice?reflectionFromChoice(providerChoice):z.object({decision:Decision}).strict().parse(result.structured_output).decision;
+ const output=mode==='core'?z.object({core:CoreChoice}).strict().parse(result.structured_output).core:mode==='core-answer'?z.object({social:CoreAnswerChoice}).strict().parse(result.structured_output).social:mode==='social'?z.object({social:SocialChoice}).strict().parse(result.structured_output).social:providerChoice?reflectionFromChoice(providerChoice):z.object({decision:Decision}).strict().parse(result.structured_output).decision;
  return {output,providerChoice,estimatedUsageUSD:result.total_cost_usd,turns:result.num_turns,formattingRecovery:recoveryAllowed&&result.num_turns===3};
 }
 
@@ -97,11 +98,11 @@ export class ClaudeDecisionBackend {
    return SocialChoice.parse(await this.run('social',view,signal));
  }
  async plan(view:CoreView,signal:AbortSignal){return CoreChoice.parse(await this.run('core',view,signal));}
- async answerCore(view:CoreQuestionView,signal:AbortSignal){if(view.pawn.id!==view.character.id||view.question.from!=='core')throw Error('Question ownership mismatch');return SocialChoice.parse(await this.run('core-answer',view,signal));}
+ async answerCore(view:CoreQuestionView,signal:AbortSignal){if(view.pawn.id!==view.character.id||view.question.from!=='core')throw Error('Question ownership mismatch');return CoreAnswerChoice.parse(await this.run('core-answer',view,signal));}
  private async run(mode:'decision'|'reflection'|'social'|'core'|'core-answer',view:unknown,signal:AbortSignal) {
    signal.throwIfAborted();if(this.pending)throw Error('Decision backend busy');
    view=structuredClone(view);
-   const args=claudeArgs(mode,mode==='core'?view as CoreView:mode==='reflection'?view as AttentionView:undefined);
+   const args=claudeArgs(mode,mode==='core'?view as CoreView:mode==='reflection'?view as AttentionView:mode==='core-answer'?view as CoreQuestionView:undefined);
    const prompt=JSON.stringify(mode==='core'?corePrompt(view as CoreView):mode==='core-answer'?coreAnswerPrompt(view as CoreQuestionView):mode==='social'?socialPrompt(view as SocialView):modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
    const authoredSize=promptAccounting(args[args.indexOf('--system-prompt')+1]!,prompt,JSON.parse(args[args.indexOf('--json-schema')+1]!));
    this.pending=true;

@@ -52,6 +52,8 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  if(kind==='alternative-declined')add('message','core',data.pawn,data.id,data.replyReason,`decline:${data.id}`);
  if(kind==='offer-withdrawn')add('record','core','observer',data.id,'Pending offer withdrawn; no work authorized.',`retired:${data.id}`);
  if(kind==='intention-stopped')add('record',actor,'observer',data.proposal,'Agreement stopped. Any completed work remains recorded; unfinished work is not completion.',`stopped:${data.proposal}`);
+ if(kind==='self-care-chosen')add('record',actor,'observer',data.id,`Chose to eat up to ${data.action.count} ${safe(data.action.label,80)}; consumption not yet confirmed.`,`self-care:${data.id}`);
+ if(kind==='self-care-outcome')add('record',actor,'observer',data.id,`eat: ${data.status}. Consumed ${Number(data.delivered??0)} units.`,`self-care-outcome:${data.id}:${data.status}`);
  if(kind==='action-outcome'){
   const r=data as Receipt,p=Object.values(d.proposals).find(p=>p.pawn===r.actor&&(p.actionId===r.id||p.standing?.steps.includes(r.id)));
   if(!p)return;
@@ -65,7 +67,10 @@ export function crewReport(d:Domain,tick:number,status:import('./shared-status.j
  const entries=(d.crew?.entries??[]).map(e=>({seq:e.seq,tick:e.tick,kind:e.kind,actor:e.actor,recipient:e.recipient,subject:e.subject,text:e.text,key:e.key}));
  const proposals=Object.values(d.proposals).filter(p=>p.status==='accepted');
  const ordered=[...proposals.filter(p=>p.standing?.status==='running'),...proposals.filter(p=>p.standing?.status!=='running').reverse()].slice(0,12);
- const waiting=Object.values(d.proposals).filter(p=>p.status==='pending'||p.standing?.status==='running').map(p=>`${safe(d.characters[p.pawn]?.name??p.pawn,80)}: ${p.status==='pending'?'reply to': 'working on'} ${p.action.kind}`).join(' · ').slice(0,400);
+ const selfCare=Object.values(d.selfCare??{}).filter(a=>d.characters[a.pawn]?.commitment===a.id).map(a=>`${nameForCare(d,a.pawn)}: eating`);
+ const waiting=Object.values(d.proposals).filter(p=>p.status==='pending'||p.standing?.status==='running').map(p=>`${safe(d.characters[p.pawn]?.name??p.pawn,80)}: ${p.status==='pending'?'reply to': 'working on'} ${p.action.kind}`).concat(selfCare).join(' · ').slice(0,400);
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:d.crew?.revision??0,tick,entries,sharedStatus:status,waiting:waiting||'No outstanding offer or running agreement.',
   agreements:ordered.map(p=>({pawn:p.pawn,name:safe(d.characters[p.pawn]?.name??p.pawn,80),progress:agreementProgress(d,p,tick)}))};
 }
+
+function nameForCare(d:Domain,pawn:string){return safe(d.characters[pawn]?.name??pawn,80);}

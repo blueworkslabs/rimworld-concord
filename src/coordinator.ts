@@ -1,3 +1,4 @@
+import {CoreAnswerChoice,eatingOptions} from './pawn-eating.js';
 import {planProduction,workMap,workSteps,workReady,workKind} from './production-planning.js';
 import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
@@ -492,20 +493,32 @@ export class Coordinator {
       const own=g.pawns.find(p=>p.id===q.pawn);if(!own||own.downed){q.status='failed';this.commit('core-answer-unavailable',q.pawn,{id});throw Error('Pawn unavailable');}
       const controller=new AbortController();this.pending.set(q.pawn,controller);q.status='running';this.commit('core-answer-started',q.pawn,{id});
       const view:CoreQuestionView={pawn:groundedPawn(this.domain,g,own),character:structuredClone(this.domain.characters[q.pawn]!),question:{id,text:q.text,from:'core'}};
+      view.pawn.eating=own.eating?{...structuredClone(own.eating),options:this.game.eat?eatingOptions(this.domain,g,own):[]}:undefined;
       return {pawn:q.pawn,controller,generation:this.generation,view};
     });
     const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
     try{
-      const choice=SocialChoice.parse(await bounded(combined,()=>backend.answerCore(prepared.view,combined)));
+      const choice=CoreAnswerChoice.parse(await bounded(combined,()=>backend.answerCore(prepared.view,combined)));
+      if(choice.choice==='eat'&&!prepared.view.pawn.eating?.options.some(o=>o.thing===choice.thing))throw Error('Eating choice was not offered');
       return await this.serial(async()=>{
         combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale answer');
         const g=await this.current();this.ingest(g);combined.throwIfAborted();const q=this.domain.coreState!.questions.find(q=>q.id===id)!;
         if(q.status!=='running'||!g.pawns.some(p=>p.id===q.pawn&&!p.downed))throw Error('Question no longer answerable');
         if(choice.choice==='stay_silent'){q.status='silent';this.domain.coreState!.revision++;this.commit('core-answer-silent',q.pawn,{id});return {status:'silent' as const};}
         const ch=this.domain.characters[q.pawn]!;
+        let care:import('./protocol.js').SelfCare|undefined;
+        if(choice.choice==='eat'){
+          const own=g.pawns.find(p=>p.id===q.pawn)!;const action=eatingOptions(this.domain,g,own).find(o=>o.thing===choice.thing);
+          const original=prepared.view.pawn.eating!.options.find(o=>o.thing===choice.thing)!;
+          if(!this.game.eat||!action||action.count>original.count||own.eating!.mapId!==prepared.view.pawn.eating!.mapId)throw Error('Eating option changed or pawn committed');
+          care={id:randomUUID(),pawn:q.pawn,questionId:id,action:structuredClone(action),mapId:own.eating!.mapId,untilTick:g.ticks+action.maxTicks};
+          (this.domain.selfCare??={})[care.id]=care;ch.commitment=care.id;
+        }
         const m:SocialMessage={id:randomUUID(),exchangeId:id,tick:g.ticks,from:q.pawn,to:'core',fromName:ch.name,toName:'Core',text:choice.text};
         q.messages.push(m);q.status='answered';ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
-        this.domain.coreState!.revision++;this.commit('core-answer',q.pawn,m);return {status:'delivered' as const};
+        this.domain.coreState!.revision++;this.commit('core-answer',q.pawn,m);
+        if(care){this.commit('self-care-chosen',q.pawn,care);await this.dispatchEating(care);}
+        return {status:'delivered' as const};
       });
     }catch(error){await this.serial(async()=>{if(this.generation===prepared.generation){const q=this.domain.coreState!.questions.find(q=>q.id===id)!;q.status='failed';this.domain.coreState!.revision++;this.commit('core-answer-failed',q.pawn,{id,error:String(error)});}});return {status:combined.aborted?'interrupted' as const:'failed' as const};}
     finally{clearTimeout(timer);if(this.pending.get(prepared.pawn)===prepared.controller)this.pending.delete(prepared.pawn);}
@@ -630,7 +643,7 @@ export class Coordinator {
   }
   pawn(pawn:string) {
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
-    return {requestReoffer:(id:string,reason:string)=>this.serial(async()=>{const g=await this.current();if(this.pending.has(pawn))throw Error('Pawn already deliberating');return this.requestReoffer(pawn,id,reason,g);}),withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000,signal=new AbortController().signal)=>this.decide(pawn,id,backend,timeoutMs,signal)};
+    return {stopEating:()=>this.stopEating(pawn),requestReoffer:(id:string,reason:string)=>this.serial(async()=>{const g=await this.current();if(this.pending.has(pawn))throw Error('Pawn already deliberating');return this.requestReoffer(pawn,id,reason,g);}),withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000,signal=new AbortController().signal)=>this.decide(pawn,id,backend,timeoutMs,signal)};
   }
   private async decide(pawn:string,id:string,backend:DecisionBackend,timeoutMs:number,signal:AbortSignal) {
     const prepared=await this.serial(async()=>{
@@ -753,6 +766,26 @@ export class Coordinator {
     this.commit('decided',p.pawn,p);
     if(result.kind==='accept') await this.dispatch(p);
   }
+  private recordEating(care:import('./protocol.js').SelfCare,r:import('./protocol.js').Receipt){
+    if(r.id!==care.id||r.actor!==care.pawn||r.kind!=='eat')throw Error('Eating receipt ownership mismatch');
+    if(JSON.stringify(this.domain.outcomes[r.id])===JSON.stringify(r))return;
+    this.domain.outcomes[r.id]=structuredClone(r);
+    const ch=this.domain.characters[care.pawn]!;
+    if(r.status!=='started'&&ch.commitment===r.id){delete ch.commitment;ch.memories.push(`Self-care eat ${r.status}: ${r.reason}`);}
+    this.commit('self-care-outcome',care.pawn,r);
+  }
+  private async dispatchEating(care:import('./protocol.js').SelfCare){
+    if(care.stopped)throw Error('Eating was stopped');
+    if(!this.game.eat)throw Error('Eating bridge unavailable');
+    this.recordEating(care,await this.game.eat({id:care.id,epoch:this.domain.epoch,actor:care.pawn,action:care.action,mapId:care.mapId,untilTick:care.untilTick}));
+  }
+  /** Pawn-bound cancellation; no new choice or retry is implied. */
+  private async stopEating(pawn:string){return this.serial(async()=>{
+    await this.current();const ch=this.domain.characters[pawn],care=this.domain.selfCare?.[ch?.commitment??''];
+    if(!care||care.pawn!==pawn||!this.game.cancel)throw Error('No owned eating action');
+    care.stopped=true;this.commit('self-care-stopped',pawn,{id:care.id});
+    this.recordEating(care,await this.game.cancel({epoch:this.domain.epoch,actor:pawn,id:care.id,kind:'eat'}));
+  });}
   private async dispatch(p:Proposal) {
     if(p.status!=='accepted' || !p.actionId) throw Error('Action requires pawn acceptance');
     const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline,mapId:workMap(p)});
@@ -769,6 +802,11 @@ export class Coordinator {
     return this.serial(async()=>{
       const game=await this.current();
       this.ingest(game);
+      for(const care of Object.values(this.domain.selfCare??{})){
+        if(care.stopped&&this.domain.characters[care.pawn]?.commitment===care.id){this.recordEating(care,await this.game.cancel!({epoch:this.domain.epoch,actor:care.pawn,id:care.id,kind:'eat'}));continue;}
+        const receipt=game.actions.find(a=>a.id===care.id);
+        if(receipt)this.recordEating(care,receipt);else if(!this.domain.outcomes[care.id])await this.dispatchEating(care);
+      }
       for(const p of Object.values(this.domain.proposals)) {
         if(!p.actionId) continue;
         if(p.standing?.status==='stopped'&&this.domain.characters[p.pawn]!.commitment===p.actionId) {

@@ -69,7 +69,7 @@ namespace Concord
                 var pawn=FindActor(a.actor);
                 if(pawn==null || pawn.Dead || pawn.Downed) { a.status="interrupted"; a.reason="Pawn unavailable"; }
                 else if((a.kind??"move")=="move" && pawn.Position==new IntVec3(a.x,0,a.z)) { a.status="completed"; a.reason="Reached destination"; }
-                else if((a.kind=="haul"||a.kind=="rescue"||a.kind=="build"||a.kind=="cook") && (!(a.kind=="rescue"?Rescue.Ready(pawn):a.kind=="build"||a.kind=="cook"?Production.Ready(pawn,a.kind):Hauling.Ready(pawn))||Find.TickManager.TicksGame>=a.untilTick)) {
+                else if((a.kind=="haul"||a.kind=="rescue"||a.kind=="build"||a.kind=="cook"||a.kind=="eat") && (!(a.kind=="eat"?Eating.Ready(pawn):a.kind=="rescue"?Rescue.Ready(pawn):a.kind=="build"||a.kind=="cook"?Production.Ready(pawn,a.kind):Hauling.Ready(pawn))||Find.TickManager.TicksGame>=a.untilTick)) {
                     a.status="interrupted";a.reason="Needs, availability or agreed deadline require stopping";
                     if(pawn.CurJob!=null&&pawn.CurJob.loadID==a.jobId)pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
                 }
@@ -169,7 +169,7 @@ namespace Concord
             var pawns=Find.CurrentMap.mapPawns.FreeColonistsSpawned.Select(p=>JsonUtility.ToJson(new PawnView {
                 id=p.GetUniqueLoadID(),name=p.LabelShort,job=p.CurJobDef==null?"":p.CurJobDef.defName,
                 x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent,workReady=Hauling.Ready(p),buildReady=Production.Ready(p,"build"),cookReady=Production.Ready(p,"cook"),rescueReady=Rescue.Ready(p),downed=p.Downed,currentBed=p.CurrentBed()==null?"":p.CurrentBed().GetUniqueLoadID(),carrying=p.carryTracker.CarriedThing==null?"":p.carryTracker.CarriedThing.GetUniqueLoadID()
-            }).TrimEnd('}')+",\"foodObservation\":"+FoodObservation.Json(p,w.epoch)+",\"production\":"+Production.Options(p,w.epoch)+",\"linkStatus\":"+LinkTelemetry.Json(p,w.epoch)+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
+            }).TrimEnd('}')+",\"eating\":"+Eating.Options(p,w.epoch)+",\"foodObservation\":"+FoodObservation.Json(p,w.epoch)+",\"production\":"+Production.Options(p,w.epoch)+",\"linkStatus\":"+LinkTelemetry.Json(p,w.epoch)+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
                 String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"crewLog\":"+CrewLog.Json(w)+"}";
@@ -183,7 +183,7 @@ namespace Concord
             w.Reconcile();
             var prior=w.actions.FirstOrDefault(a=>a.id==r.actionId);
             if(prior!=null) {
-                if(prior.actor!=r.actor || prior.x!=r.x || prior.z!=r.z || (prior.kind??"move")!=r.op || ((r.op=="haul"||r.op=="build"||r.op=="cook")&&(prior.thing!=r.thing||prior.count!=r.count||prior.target!=r.target)) || (r.op=="rescue"&&(prior.target!=r.target||prior.bed!=r.bed))) throw new Exception("Action ID collision");
+                if(prior.actor!=r.actor || prior.x!=r.x || prior.z!=r.z || (prior.kind??"move")!=r.op || ((r.op=="haul"||r.op=="build"||r.op=="cook"||r.op=="eat")&&(prior.thing!=r.thing||prior.count!=r.count||prior.target!=r.target)) || (r.op=="rescue"&&(prior.target!=r.target||prior.bed!=r.bed))) throw new Exception("Action ID collision");
                 return prior;
             }
             if(w.actions.Any(a=>a.actor==r.actor && a.status=="started")) throw new Exception("Pawn has an active commitment");
@@ -191,6 +191,7 @@ namespace Concord
             w.actions.Add(aNew);
             var cell=new IntVec3(r.x,0,r.z);
             if(pawn==null) { aNew.reason="Pawn is no longer available on this map"; return aNew; }
+            if(r.op=="eat"){Eating.Start(pawn,r,aNew);return aNew;}
             if(r.op=="build"||r.op=="cook"){Production.Start(pawn,r,aNew);return aNew;}
             if(r.op=="rescue") {
                 if(r.mapId!=pawn.Map.uniqueID) {aNew.reason="Rescue observation belongs to a different or unknown map";return aNew;}
@@ -234,8 +235,8 @@ namespace Concord
             var a=w.actions.FirstOrDefault(x=>x.id==r.actionId);
             Guid parsed;if(!Guid.TryParse(r.actionId,out parsed))throw new Exception("Action ID must be UUID");
             // Cancellation tombstone also covers a dispatch which never reached the game.
-            if(a==null) {a=new ActionRecord {id=r.actionId,actor=r.actor,kind=new[]{"rescue","build","cook"}.Contains(r.cancelKind)?r.cancelKind:"haul",status="interrupted",reason="Withdrawn before dispatch"};w.actions.Add(a);}
-            if(a.actor!=r.actor||(a.kind!="haul"&&a.kind!="rescue"&&a.kind!="build"&&a.kind!="cook"))throw new Exception("No owned work action");
+            if(a==null) {a=new ActionRecord {id=r.actionId,actor=r.actor,kind=new[]{"rescue","build","cook","eat"}.Contains(r.cancelKind)?r.cancelKind:"haul",status="interrupted",reason="Withdrawn before dispatch"};w.actions.Add(a);}
+            if(a.actor!=r.actor||(a.kind!="haul"&&a.kind!="rescue"&&a.kind!="build"&&a.kind!="cook"&&a.kind!="eat"))throw new Exception("No owned work action");
             if(a.status=="started") {
                 a.status="interrupted";a.reason="Pawn withdrew work commitment";
                 var p=WorldState.FindActor(r.actor);
@@ -254,7 +255,7 @@ namespace Concord
             try {
                 var payload=File.ReadAllText(path); File.Delete(path);
                 var r=JsonUtility.FromJson<Request>(payload); response.id=r.id;
-                if(r.op=="move"||r.op=="haul"||r.op=="rescue"||r.op=="build"||r.op=="cook") receipt=JsonUtility.ToJson(Move(r));
+                if(r.op=="move"||r.op=="haul"||r.op=="rescue"||r.op=="build"||r.op=="cook"||r.op=="eat") receipt=JsonUtility.ToJson(Move(r));
                 else if(r.op=="crew-log") {var w=World();CrewLog.Set(w,r.epoch,r.crewJson);}
                 else if(r.op=="cancel") receipt=JsonUtility.ToJson(Cancel(r));
                 else if(r.op=="decision-pause") {World();DecisionPauses.Set(r.epoch,r.actor,r.leaseId,r.ttlMs);}

@@ -37,7 +37,7 @@ export function coreView(d:Domain,g:GameState){
  const core=d.coreState;if(!core)throw Error('Core not initialized');
  const proposals=Object.values(d.proposals);
  const reoffers=Object.values(d.reoffers??{});
- const available=(pawn:string)=>!proposals.some(p=>p.pawn===pawn&&(p.status==='pending'||(p.status==='countered'&&!p.replyId)||p.standing?.status==='running'));
+ const available=(pawn:string)=>!d.characters[pawn]?.commitment&&!d.characters[pawn]?.intention&&!proposals.some(p=>p.pawn===pawn&&(p.status==='pending'||(p.status==='countered'&&!p.replyId)||p.standing?.status==='running'));
  const opportunities:{id:string;pawn:string;action:Action;observedTick:number;reofferRequestId?:string;supply?:{sourceThingId:string;label:string;sourceCount:number;destinationFree:number}}[]=[];
  const availability:{pawn:string;status:string}[]=[];
  for(const own of g.pawns.filter(p=>d.characters[p.id])){
@@ -65,6 +65,7 @@ export function coreView(d:Domain,g:GameState){
  const topicClosures=[...core.topics.map(t=>({sourceId:t.sourceId,statuses:closure(t.proposalIds)})),...proposals.filter(p=>!core.topics.some(t=>t.sourceId===p.id)).map(p=>({sourceId:p.id,statuses:closure([p.id])}))];
  const topics=core.topics.map(t=>({...structuredClone(t),outcomes:t.proposalIds.map(id=>{const p=d.proposals[id];return {id,status:p?agreementProgress(d,p,g.ticks,g.actions).status:'unknown'};})}));
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:core.revision,tick:g.ticks,brief:{...core.brief},
+  selfCare:Object.values(d.selfCare??{}).slice(-12).map(a=>{const r=d.outcomes[a.id];return {id:a.id,pawn:a.pawn,kind:'eat' as const,status:r?.status??'unconfirmed',consumed:r?.delivered??0};}),
   questions:core.questions.map(q=>({id:q.id,pawn:q.pawn,status:q.status})),
   topicClosures,reoffers:reoffers.map(r=>({id:r.id,pawn:r.pawn,deferredId:r.deferredId,tick:r.tick,status:r.status,reason:r.reason,evidence:'attributed-speech' as const})),
   ...(g.pawns.some(p=>p.foodObservation)?{foodSightings:sharedFood(d,g),foodKnowledge}:{}),sharedStatus:sharedStatus(d,g),crew:Object.values(d.characters).map(c=>({id:c.id,name:c.name})),messages,agreements,counters,requests,topics,opportunities,availability,
@@ -105,4 +106,4 @@ export function coreChoiceSchema(v:CoreView){
  const topicBranches=sources.map(sourceId=>({type:'object',additionalProperties:false,required:['sourceId','text','status'],properties:{sourceId:{const:sourceId},text:string(240),status:{enum:['open','blocked','deferred',...(v.topicClosures.find(c=>c.sourceId===sourceId)?.statuses??[])]}}}));
  return {anyOf:actions.map(action=>({type:'object',additionalProperties:false,required:['topics','actionTopicId','action'],properties:{topics:{type:'array',maxItems:8,items:{anyOf:topicBranches}},actionTopicId:['propose','adopt_counter'].includes(action.properties.kind.const)?{anyOf:[{type:'null'},{type:'string',enum:sources}]}:{type:'null'},action}}))};
 }
-export function coreAnswerPrompt(v:CoreQuestionView){return {task:'core-answer',perspective:modelPerspective(v),contract:'The core asks you this one question. You may say up to 240 characters or stay silent. Your reply is deliberate speech to the core, not private reflection or consent. Do not invent facts; a request or promise in speech starts no work. There are no further automatic conversation turns.'};}
+export function coreAnswerPrompt(v:CoreQuestionView){return {task:'core-answer',perspective:modelPerspective(v),contract:'The core asks you this one question. You may say up to 240 characters or stay silent. The say response is deliberate speech to the core, not private reflection or consent. Do not invent facts; a request or promise in speech starts no work. If eating options are supplied, only the explicit eat choice authorizes one bounded self-care action for yourself. Say and stay_silent never issue jobs. The core cannot choose eating for you. There are no further automatic conversation turns.'};}

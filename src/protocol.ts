@@ -35,7 +35,11 @@ export type Outcome = 'started'|'completed'|'failed'|'interrupted';
 /** Bounded local opportunities, not a route, reservation or future success guarantee. */
 export type MovementView = {epoch:string;tick:number;originX:number;originZ:number;radius:number;
   status:'available'|'unavailable';options:Move[]};
-export type Pawn = {foodObservation?:import('./food-observation.js').FoodObservation;production?:ProductionView;buildReady?:boolean;cookReady?:boolean;linkStatus?:import('./shared-status.js').LinkStatus;sharedStatus?:import('./shared-status.js').SharedStatus[];observedPeople?:{id:string;name:string}[];id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[];visibleSubjects?:{target:string;downed:boolean;inBed:boolean}[];visibleBeds?:{bed:string;x:number;z:number;medical:boolean;occupied:boolean;prisoner:boolean;slave:boolean;colonyOwned:boolean;forbidden:boolean}[]};downed?:boolean;currentBed?:string;carrying?:string;rescue?:RescueView;rescueReady?:boolean;workReady?:boolean};
+export type EatOption={thing:string;label:string;x:number;z:number;count:number;maxTicks:number};
+export type EatingView={epoch:string;tick:number;mapId:number;options:EatOption[]};
+export type EatRequest={id:string;epoch:string;actor:string;action:EatOption;mapId:number;untilTick:number};
+export type SelfCare={id:string;pawn:string;questionId:string;action:EatOption;mapId:number;untilTick:number;stopped?:boolean};
+export type Pawn = {eating?:EatingView;foodObservation?:import('./food-observation.js').FoodObservation;production?:ProductionView;buildReady?:boolean;cookReady?:boolean;linkStatus?:import('./shared-status.js').LinkStatus;sharedStatus?:import('./shared-status.js').SharedStatus[];observedPeople?:{id:string;name:string}[];id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[];visibleSubjects?:{target:string;downed:boolean;inBed:boolean}[];visibleBeds?:{bed:string;x:number;z:number;medical:boolean;occupied:boolean;prisoner:boolean;slave:boolean;colonyOwned:boolean;forbidden:boolean}[]};downed?:boolean;currentBed?:string;carrying?:string;rescue?:RescueView;rescueReady?:boolean;workReady?:boolean};
 export type Receipt = {id:string;actor:string;status:Outcome;reason:string;x:number;z:number;kind?:string;thing?:string;count?:number;delivered?:number;target?:string;bed?:string};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
@@ -52,7 +56,8 @@ export interface GameBridge {
   setCrewLog?(report:CrewReport):Promise<void>;
   setActivity?(activity:Activity):Promise<void>;
   setDecisionPause?(pause:DecisionPause):Promise<void>;
-  cancel?(request:{epoch:string;actor:string;id:string;kind?:'haul'|'rescue'|'build'|'cook'}):Promise<Receipt>;
+  cancel?(request:{epoch:string;actor:string;id:string;kind?:'haul'|'rescue'|'build'|'cook'|'eat'}):Promise<Receipt>;
+  eat?(request:EatRequest):Promise<Receipt>;
   move(request:ActionRequest):Promise<Receipt>;
   save(name:string):Promise<{sha256:string}>;
   load(name:string):Promise<void>;
@@ -75,6 +80,7 @@ export interface DecisionBackend {
   decide(view:Perspective, signal:AbortSignal):Promise<unknown>;
 }
 export type Domain = {
+  selfCare?:Record<string,SelfCare>;
   reoffers?:Record<string,ReofferRequest>;
   coreState?:import('./core-planner.js').CoreState;
   exchanges?:Record<string,SocialExchange>;
