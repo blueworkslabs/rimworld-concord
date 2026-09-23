@@ -10101,7 +10101,8 @@
     "No inference fallback, budget reset or operator reroll.",
     "Complete bounded formatting recovery is distinct from useful planning or grounded explanations.",
     "No API error or formatting recovery is required to occur.",
-    "The panel does not explain provider failures or exhausted allowance."
+    "The panel does not explain provider failures or exhausted allowance.",
+    "After the core allowance ended at tick 2693, Beatrice reached low Food; final sample approximately 46%. The earlier all-satisfied message is not current end-of-window status."
   ],
   "groundingReview": {
     "unitWording": "Correct berries/food-items appear alongside incorrect plural portions for individual items.",

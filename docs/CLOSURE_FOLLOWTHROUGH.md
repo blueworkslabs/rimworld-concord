@@ -54,7 +54,10 @@ Raw food was an explicitly legitimate alternative, not a failed required recipe.
 The exact window was 120,945 ms of native activity with inference paused. The
 six-turn allowance ended at tick 2693; later native observation did not authorize
 more calls. Its final needs summary is timestamped, not a claim about the end of
-the whole observation window or indefinite food security.
+the whole observation window or indefinite food security. Beatrice reached the low
+Food band later (about 46% Food in the last sample), after the core allowance was
+exhausted. The final player panel shows that low band alongside the older
+timestamped all-satisfied message. No additional call was added to address it.
 
 ### Grounding and routing limits
 
