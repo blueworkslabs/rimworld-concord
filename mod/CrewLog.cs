@@ -7,10 +7,10 @@ namespace Concord {
  [Serializable] public class CrewEntry { public int seq,tick;public string kind,actor,recipient,subject,text,key; }
  [Serializable] public class AgreementProgress { public string id,kind,status;public int tick,agreed,completed,active,unconfirmed,unsuccessful,notStarted,unfulfilled,delivered,quantityUnknown; }
  [Serializable] public class CrewAgreement { public string pawn,name;public AgreementProgress progress; }
- [Serializable] public class CrewReport { public string world,epoch,branch;public int revision,tick;public CrewEntry[] entries;public CrewAgreement[] agreements;public SharedStatus[] sharedStatus;public string waiting,foodText; }
- [Serializable] public class CrewWire {public string world,epoch,branch,entryLines,agreementLines,statusLines,waiting,foodText;public int revision,tick;}
+ [Serializable] public class CrewReport { public string world,epoch,branch;public int revision,tick;public CrewEntry[] entries;public CrewAgreement[] agreements;public SharedStatus[] sharedStatus;public string waiting,foodText,observerText,topicText; }
+ [Serializable] public class CrewWire {public string world,epoch,branch,entryLines,agreementLines,statusLines,waiting,foodText,observerText,topicText;public int revision,tick;}
  [Serializable] public class CrewAgreementWire {public string pawn,name,id,kind,status;public int tick,agreed,completed,active,unconfirmed,unsuccessful,notStarted,unfulfilled,delivered,quantityUnknown;}
- [Serializable] public class CrewHeader {public string world,epoch,branch,waiting,foodText;public int revision,tick;}
+ [Serializable] public class CrewHeader {public string world,epoch,branch,waiting,foodText,observerText,topicText;public int revision,tick;}
  [Serializable] public class CrewAgreementHeader {public string pawn,name;}
  public static class CrewLog {
   private static CrewReport Parse(string json){
@@ -19,11 +19,11 @@ namespace Concord {
    var agreements=String.IsNullOrEmpty(w.agreementLines)?new CrewAgreement[0]:w.agreementLines.Split('\n').Select(x=>{
     var a=JsonUtility.FromJson<CrewAgreementWire>(x);return new CrewAgreement {pawn=a.pawn,name=a.name,progress=new AgreementProgress {id=a.id,kind=a.kind,status=a.status,tick=a.tick,agreed=a.agreed,completed=a.completed,active=a.active,unconfirmed=a.unconfirmed,unsuccessful=a.unsuccessful,notStarted=a.notStarted,unfulfilled=a.unfulfilled,delivered=a.delivered,quantityUnknown=a.quantityUnknown}};
    }).ToArray();
-   return new CrewReport {world=w.world,epoch=w.epoch,branch=w.branch,revision=w.revision,tick=w.tick,entries=entries,agreements=agreements,waiting=w.waiting??"",foodText=w.foodText??"",sharedStatus=String.IsNullOrEmpty(w.statusLines)?new SharedStatus[0]:w.statusLines.Split('\n').Select(x=>JsonUtility.FromJson<SharedStatus>(x)).ToArray()};
+   return new CrewReport {world=w.world,epoch=w.epoch,branch=w.branch,revision=w.revision,tick=w.tick,entries=entries,agreements=agreements,waiting=w.waiting??"",foodText=w.foodText??"",observerText=w.observerText??"",topicText=w.topicText??"",sharedStatus=String.IsNullOrEmpty(w.statusLines)?new SharedStatus[0]:w.statusLines.Split('\n').Select(x=>JsonUtility.FromJson<SharedStatus>(x)).ToArray()};
   }
   public static string Json(WorldState w){
    var r=Read(w);if(r==null)return "null";
-   return JsonUtility.ToJson(new CrewHeader {world=r.world,epoch=r.epoch,branch=r.branch,revision=r.revision,tick=r.tick,waiting=r.waiting,foodText=r.foodText}).TrimEnd('}')+",\"sharedStatus\":["+String.Join(",",r.sharedStatus.Select(s=>JsonUtility.ToJson(s)).ToArray())+"],\"entries\":["+String.Join(",",r.entries.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"agreements\":["+String.Join(",",r.agreements.Select(a=>JsonUtility.ToJson(new CrewAgreementHeader {pawn=a.pawn,name=a.name}).TrimEnd('}')+",\"progress\":"+JsonUtility.ToJson(a.progress)+"}").ToArray())+"]}";
+   return JsonUtility.ToJson(new CrewHeader {world=r.world,epoch=r.epoch,branch=r.branch,revision=r.revision,tick=r.tick,waiting=r.waiting,foodText=r.foodText,observerText=r.observerText,topicText=r.topicText}).TrimEnd('}')+",\"sharedStatus\":["+String.Join(",",r.sharedStatus.Select(s=>JsonUtility.ToJson(s)).ToArray())+"],\"entries\":["+String.Join(",",r.entries.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"agreements\":["+String.Join(",",r.agreements.Select(a=>JsonUtility.ToJson(new CrewAgreementHeader {pawn=a.pawn,name=a.name}).TrimEnd('}')+",\"progress\":"+JsonUtility.ToJson(a.progress)+"}").ToArray())+"]}";
   }
 
   private static bool Short(string s,int n){return s!=null&&s.Length<=n;}
@@ -40,7 +40,7 @@ namespace Concord {
    if(!Guid.TryParse(r.branch,out branch)||r.revision<0)throw new Exception("Crew report branch/revision invalid");
    if(r.tick<0||r.tick>Find.TickManager.TicksGame)throw new Exception("Crew report tick invalid");
    if(r.entries==null||r.entries.Length>128||r.agreements==null||r.agreements.Length>12)throw new Exception("Crew report arrays invalid");
-   if(r.sharedStatus.Length>16||!Short(r.waiting,400)||!Short(r.foodText,60000))throw new Exception("Invalid shared status bounds");
+   if(r.sharedStatus.Length>16||!Short(r.waiting,400)||!Short(r.foodText,60000)||!Short(r.observerText,1600)||!Short(r.topicText,2400))throw new Exception("Invalid shared status bounds");
    foreach(var s in r.sharedStatus)if(s==null||!Short(s.pawn,120)||!Short(s.name,80)||s.source!="shared-link-telemetry"||s.epoch!=r.epoch||s.tick<0||s.tick>r.tick||!new[]{"satisfied","low","urgent","unknown"}.Contains(s.food)||!new[]{"satisfied","low","urgent","unknown"}.Contains(s.rest))throw new Exception("Invalid shared telemetry");
    int seq=0;
    foreach(var e in r.entries){
@@ -58,12 +58,63 @@ namespace Concord {
  public class MainTabWindow_Concord : MainTabWindow {
   private Vector2 logScroll,workScroll,supplyScroll;
   private string filter="all";
-  public override Vector2 InitialSize {get{return new Vector2(900,670);}}
+  private bool expanded=false,topics=false;
+  private Vector2 compactScroll,boardScroll;
+  private CrewEntry[] heldEntries;private string heldEpoch;
+  private static string ActivityLabel(Pawn pawn){
+   if(pawn==null)return "not on this map";if(pawn.CurJobDef==null)return "idle";
+   switch(pawn.CurJobDef.defName){case "Concord_Eat":return "eating chosen food";case "Concord_Haul":return "agreed hauling";case "Concord_Rescue":return "agreed rescue";case "Concord_Cook":return "agreed cooking";case "Concord_BuildMaterials":return "delivering building materials";case "Concord_BuildFinish":return "agreed construction";case "Wait_Wander":case "GotoWander":return "wandering";case "Ingest":return "native eating";case "LayDown":return "resting";case "Wait":case "Wait_MaintainPosture":return "waiting";default:return "other native activity";}
+  }
+  public override Vector2 InitialSize {get{return new Vector2(420,Math.Min(670,UI.screenHeight-100));}}
   public override void DoWindowContents(Rect rect){
+   if(Widgets.ButtonText(new Rect(rect.width-120,0,120,28),expanded?"Compact":"Full journal")){
+    expanded=!expanded;windowRect.width=expanded?900:420;
+    windowRect.x=Mathf.Clamp(windowRect.x,0,Math.Max(0,UI.screenWidth-windowRect.width));
+    return;
+   }
+   if(expanded)DrawJournal(rect);else DrawCompact(rect);
+  }
+  private void DrawCompact(Rect rect){
+   var w=Current.Game==null?null:Current.Game.GetComponent<WorldState>();var r=w==null?null:CrewLog.Read(w);
+   Text.Font=GameFont.Small;var style=Text.CurFontStyle;bool rich=style.richText;style.richText=false;
+   try{
+    Widgets.Label(new Rect(0,0,rect.width-125,28),"CONCORD · Observer");
+    bool fresh=r!=null&&r.epoch==w.epoch&&Time.realtimeSinceStartup-w.crewReceived<10f&&Find.TickManager.TicksGame-r.tick<=120;
+    string clock=Find.TickManager.Paused?(DecisionPauses.Count>0?"Paused for deliberation":"Paused · game / operator"):"Game running";
+    Widgets.Label(new Rect(0,30,rect.width,42),clock+" · tick "+Find.TickManager.TicksGame+"\n"+(fresh?"Current report":"Saved / stale report — not current"));
+    if(heldEpoch!=(w==null?null:w.epoch)){heldEntries=null;heldEpoch=w==null?null:w.epoch;compactScroll=Vector2.zero;}
+    if(r==null){Widgets.Label(new Rect(0,80,rect.width,90),"No coordinator report. This observer view cannot start agents or issue jobs.");return;}
+    float y=78;
+    foreach(var s in r.sharedStatus.Take(3)){
+     bool current=fresh&&s.fresh&&Find.TickManager.TicksGame-s.tick<=120;
+     var pawn=Find.CurrentMap==null?null:Find.CurrentMap.mapPawns.FreeColonistsSpawned.FirstOrDefault(p=>p.GetUniqueLoadID()==s.pawn);
+     string job=ActivityLabel(pawn);
+     Widgets.Label(new Rect(0,y,rect.width,42),s.name+" · "+job+"\nFood "+(current?s.food:"unknown")+" · Rest "+(current?s.rest:"unknown")+" · shared link");y+=45;
+    }
+    var status=(fresh?"":"Last report: ")+(r.observerText??"Scheduler state not reported.")+"\n"+r.waiting;
+    float statusHeight=Text.CalcHeight(status,rect.width-20);
+    Widgets.BeginScrollView(new Rect(0,y,rect.width,76),ref boardScroll,new Rect(0,0,rect.width-20,Math.Max(76,statusHeight)));
+    Widgets.Label(new Rect(0,0,rect.width-20,statusHeight),status);Widgets.EndScrollView();y+=80;
+    if(Widgets.ButtonText(new Rect(0,y,105,27),topics?"Events":"Core topics")){topics=!topics;compactScroll=Vector2.zero;}
+    if(!topics&&Widgets.ButtonText(new Rect(112,y,90,27),heldEntries==null?"Hold feed":"Live feed")){heldEntries=heldEntries==null?r.entries.ToArray():null;compactScroll=Vector2.zero;}
+    Widgets.Label(new Rect(210,y,rect.width-210,27),topics?"Core interpretation":heldEntries==null?"Speech ≠ outcome":"Feed held");y+=33;
+    var area=new Rect(0,y,rect.width,Math.Max(40,rect.height-y));float width=rect.width-22;
+    if(topics){string board="Core-authored topic board\n"+(String.IsNullOrEmpty(r.topicText)?"No topics reported.":r.topicText);float h=Text.CalcHeight(board,width);Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(h,area.height)));Widgets.Label(new Rect(0,0,width,h),board);Widgets.EndScrollView();}
+    else{
+     var entries=(heldEntries??r.entries).Reverse().ToArray();
+     Func<CrewEntry,string> heading=e=>(e.kind=="message"?e.actor+" → "+e.recipient:e.actor+" · RECORD")+" · t"+e.tick;
+     float total=entries.Sum(e=>Text.CalcHeight(heading(e),width)+Text.CalcHeight(e.text,width)+14);
+     Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(total,area.height)));float ey=0;
+     foreach(var e in entries){float hh=Text.CalcHeight(heading(e),width),th=Text.CalcHeight(e.text,width);GUI.color=e.kind=="message"?new Color(1f,.8f,.45f):new Color(.65f,.85f,1f);Widgets.Label(new Rect(0,ey,width,hh),heading(e));GUI.color=Color.white;Widgets.Label(new Rect(0,ey+hh,width,th),e.text);ey+=hh+th+14;}
+     Widgets.EndScrollView();
+    }
+   }finally{GUI.color=Color.white;Text.Font=GameFont.Small;style.richText=rich;}
+  }
+  private void DrawJournal(Rect rect){
    var w=Current.Game==null?null:Current.Game.GetComponent<WorldState>();var r=w==null?null:CrewLog.Read(w);
    Text.Font=GameFont.Small;var style=Text.CurFontStyle;var rich=style.richText;style.richText=false;
    try {
-    Text.Font=GameFont.Medium;Widgets.Label(new Rect(0,0,rect.width,32),"Concord — crew log");Text.Font=GameFont.Small;
+    Text.Font=GameFont.Medium;Widgets.Label(new Rect(0,0,rect.width-125,32),"Concord — crew log");Text.Font=GameFont.Small;
     Widgets.Label(new Rect(0,38,rect.width,45),"Observer view: addressed messages are not shared thoughts. Statements may be mistaken; records report game outcomes.");
     if(r==null){Widgets.Label(new Rect(0,100,rect.width,80),"No coordinator report yet. This panel is read-only; it does not start agents or change pawn work.");return;}
     bool fresh=r.epoch==w.epoch&&Time.realtimeSinceStartup-w.crewReceived<10f;

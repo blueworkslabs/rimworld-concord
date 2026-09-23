@@ -1,0 +1,647 @@
+{
+  "kind": "scripted-native-observer-recording-pilot",
+  "date": "2026-09-23",
+  "characterModelCalls": 0,
+  "videoModelCalls": 0,
+  "tests": {
+    "node": 336,
+    "python": 11
+  },
+  "runs": [
+    {
+      "run": "a4480115-9ca7-4790-aa5c-cb7c19776a24",
+      "label": "pre-review pair",
+      "passed": true,
+      "error": null,
+      "cases": [
+        {
+          "variant": "baseline",
+          "sampleCount": 94,
+          "sampleIntervalSeconds": 74.613,
+          "ticksPerSecond": 59.68128878345597,
+          "allSampledUnpaused": true,
+          "markers": [
+            {
+              "elapsedMs": 10491,
+              "event": "scripted question"
+            },
+            {
+              "elapsedMs": 20866,
+              "event": "scripted eat choice"
+            },
+            {
+              "elapsedMs": 40647,
+              "event": "receipt-backed closure"
+            },
+            {
+              "elapsedMs": 51531,
+              "event": "scripted work offer"
+            },
+            {
+              "elapsedMs": 62758,
+              "event": "scripted refusal; no job"
+            }
+          ],
+          "consumedFoodItems": 16,
+          "eatingStatus": "completed",
+          "workStatuses": [
+            "refused"
+          ],
+          "topics": [
+            {
+              "text": "Food and optional work remain open.",
+              "status": "open"
+            },
+            {
+              "text": "Alvin finished his chosen eating action; the wider plan remains open.",
+              "status": "resolved"
+            }
+          ],
+          "publicEntries": [
+            {
+              "seq": 1,
+              "tick": 599,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "8f979521-c65c-4b26-a278-5242eccf779a",
+              "text": "Would you like to eat before considering any work?",
+              "key": "core-talk:53e6454c-99cb-453e-b119-2049b2e07a7e"
+            },
+            {
+              "seq": 2,
+              "tick": 599,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "64bd2c56-95bd-4fc1-8dd9-e912de0a8faa",
+              "text": "Ask Alvin; his answer is optional.",
+              "key": "core-plan:64bd2c56-95bd-4fc1-8dd9-e912de0a8faa"
+            },
+            {
+              "seq": 3,
+              "tick": 1215,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "8f979521-c65c-4b26-a278-5242eccf779a",
+              "text": "I choose to eat these berries now. Work can wait.",
+              "key": "core-talk:9b39c2a6-b253-4ff7-adb3-fb31b793d821"
+            },
+            {
+              "seq": 4,
+              "tick": 1215,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "64b68f5a-2c28-4228-8bd8-3db083d29117",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:64b68f5a-2c28-4228-8bd8-3db083d29117"
+            },
+            {
+              "seq": 5,
+              "tick": 1215,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "64b68f5a-2c28-4228-8bd8-3db083d29117",
+              "text": "eat: started. Consumed 0 food items.",
+              "key": "self-care-outcome:64b68f5a-2c28-4228-8bd8-3db083d29117:started"
+            },
+            {
+              "seq": 6,
+              "tick": 1870,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "64b68f5a-2c28-4228-8bd8-3db083d29117",
+              "text": "eat: completed. Consumed 16 food items.",
+              "key": "self-care-outcome:64b68f5a-2c28-4228-8bd8-3db083d29117:completed"
+            },
+            {
+              "seq": 7,
+              "tick": 2400,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "17bbce26-1c88-4f02-855d-052fbc730fe9",
+              "text": "Consumption confirmed by a receipt. No further work authorized.",
+              "key": "core-plan:17bbce26-1c88-4f02-855d-052fbc730fe9"
+            },
+            {
+              "seq": 8,
+              "tick": 3049,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Beatrice",
+              "subject": "0750d588-f4b2-4bb0-a6b8-436e983ac10c",
+              "text": "Would you take this optional build task?",
+              "key": "offer:0750d588-f4b2-4bb0-a6b8-436e983ac10c"
+            },
+            {
+              "seq": 9,
+              "tick": 3714,
+              "kind": "message",
+              "actor": "Beatrice",
+              "recipient": "Core",
+              "subject": "0750d588-f4b2-4bb0-a6b8-436e983ac10c",
+              "text": "refuse: No thanks. I want to keep this time for myself.",
+              "key": "reply:0750d588-f4b2-4bb0-a6b8-436e983ac10c"
+            }
+          ],
+          "gameCpuSeconds": 74.457591,
+          "gameMemoryAfterBytes": 758009856
+        },
+        {
+          "variant": "capture",
+          "sampleCount": 93,
+          "sampleIntervalSeconds": 74.186,
+          "ticksPerSecond": 59.43169870325937,
+          "allSampledUnpaused": true,
+          "markers": [
+            {
+              "elapsedMs": 10629,
+              "event": "scripted question"
+            },
+            {
+              "elapsedMs": 21053,
+              "event": "scripted eat choice"
+            },
+            {
+              "elapsedMs": 40691,
+              "event": "receipt-backed closure"
+            },
+            {
+              "elapsedMs": 52024,
+              "event": "scripted work offer"
+            },
+            {
+              "elapsedMs": 63301,
+              "event": "scripted refusal; no job"
+            }
+          ],
+          "consumedFoodItems": 16,
+          "eatingStatus": "completed",
+          "workStatuses": [
+            "refused"
+          ],
+          "topics": [
+            {
+              "text": "Food and optional work remain open.",
+              "status": "open"
+            },
+            {
+              "text": "Alvin finished his chosen eating action; the wider plan remains open.",
+              "status": "resolved"
+            }
+          ],
+          "publicEntries": [
+            {
+              "seq": 1,
+              "tick": 613,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "ca1c4a0a-bc51-4824-aba2-d15faa15d619",
+              "text": "Would you like to eat before considering any work?",
+              "key": "core-talk:bef96b3a-b552-482b-80b3-cb3eae849711"
+            },
+            {
+              "seq": 2,
+              "tick": 613,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "562bb476-7d76-43b1-b1d6-e9b30853b2de",
+              "text": "Ask Alvin; his answer is optional.",
+              "key": "core-plan:562bb476-7d76-43b1-b1d6-e9b30853b2de"
+            },
+            {
+              "seq": 3,
+              "tick": 1226,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "ca1c4a0a-bc51-4824-aba2-d15faa15d619",
+              "text": "I choose to eat these berries now. Work can wait.",
+              "key": "core-talk:50034a6d-ff5d-45c8-9b38-7461a4d411dc"
+            },
+            {
+              "seq": 4,
+              "tick": 1226,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "7ea6f656-dbb9-4f54-ae8d-c78d76c54ee1",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:7ea6f656-dbb9-4f54-ae8d-c78d76c54ee1"
+            },
+            {
+              "seq": 5,
+              "tick": 1226,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "7ea6f656-dbb9-4f54-ae8d-c78d76c54ee1",
+              "text": "eat: started. Consumed 0 food items.",
+              "key": "self-care-outcome:7ea6f656-dbb9-4f54-ae8d-c78d76c54ee1:started"
+            },
+            {
+              "seq": 6,
+              "tick": 2056,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "7ea6f656-dbb9-4f54-ae8d-c78d76c54ee1",
+              "text": "eat: completed. Consumed 16 food items.",
+              "key": "self-care-outcome:7ea6f656-dbb9-4f54-ae8d-c78d76c54ee1:completed"
+            },
+            {
+              "seq": 7,
+              "tick": 2402,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "8c449072-0e65-485d-81d5-7c3d63198316",
+              "text": "Consumption confirmed by a receipt. No further work authorized.",
+              "key": "core-plan:8c449072-0e65-485d-81d5-7c3d63198316"
+            },
+            {
+              "seq": 8,
+              "tick": 3073,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Beatrice",
+              "subject": "48f86c20-a086-4624-931b-ef9aa9ac72db",
+              "text": "Would you take this optional build task?",
+              "key": "offer:48f86c20-a086-4624-931b-ef9aa9ac72db"
+            },
+            {
+              "seq": 9,
+              "tick": 3737,
+              "kind": "message",
+              "actor": "Beatrice",
+              "recipient": "Core",
+              "subject": "48f86c20-a086-4624-931b-ef9aa9ac72db",
+              "text": "refuse: No thanks. I want to keep this time for myself.",
+              "key": "reply:48f86c20-a086-4624-931b-ef9aa9ac72db"
+            }
+          ],
+          "gameCpuSeconds": 67.169376,
+          "gameMemoryAfterBytes": 785760256,
+          "recording": {
+            "durationSeconds": 75.0,
+            "bytes": 2145290,
+            "sha256": "34607cbcd63b847a174034813cc292465f420cb16cd62e1630da7d8ddc8ed6ff",
+            "codec": "h264",
+            "width": 1280,
+            "height": 800,
+            "frameRate": "15/1",
+            "readFrames": "1125",
+            "audio": false,
+            "timeOrigin": "Recorder spawn; approximate, not frame-exact",
+            "uncut": true,
+            "scriptedOverlay": true
+          },
+          "pairedRestore": true
+        }
+      ]
+    },
+    {
+      "run": "20ba62c7-7546-4a4c-bf37-3a09496014a0",
+      "label": "final pair",
+      "passed": true,
+      "error": null,
+      "cases": [
+        {
+          "variant": "baseline",
+          "sampleCount": 93,
+          "sampleIntervalSeconds": 74.029,
+          "ticksPerSecond": 59.044428534763405,
+          "allSampledUnpaused": true,
+          "markers": [
+            {
+              "elapsedMs": 10645,
+              "event": "scripted question"
+            },
+            {
+              "elapsedMs": 20861,
+              "event": "scripted eat choice"
+            },
+            {
+              "elapsedMs": 41082,
+              "event": "receipt-backed closure"
+            },
+            {
+              "elapsedMs": 51453,
+              "event": "scripted work offer"
+            },
+            {
+              "elapsedMs": 63571,
+              "event": "scripted refusal; no job"
+            }
+          ],
+          "consumedFoodItems": 16,
+          "eatingStatus": "completed",
+          "workStatuses": [
+            "refused"
+          ],
+          "topics": [
+            {
+              "text": "Food and optional work remain open.",
+              "status": "open"
+            },
+            {
+              "text": "Alvin finished his chosen eating action; the wider plan remains open.",
+              "status": "resolved"
+            }
+          ],
+          "publicEntries": [
+            {
+              "seq": 1,
+              "tick": 599,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "b8e8f6a0-c238-448f-97a5-e40f388d6635",
+              "text": "Would you like to eat before considering any work?",
+              "key": "core-talk:9c39d8f3-4214-4e56-9327-fefeffff9f02"
+            },
+            {
+              "seq": 2,
+              "tick": 599,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "4e4e7fba-b69c-4135-bad8-a8915c902e07",
+              "text": "Ask Alvin; his answer is optional.",
+              "key": "core-plan:4e4e7fba-b69c-4135-bad8-a8915c902e07"
+            },
+            {
+              "seq": 3,
+              "tick": 1199,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "b8e8f6a0-c238-448f-97a5-e40f388d6635",
+              "text": "I choose to eat these berries now. Work can wait.",
+              "key": "core-talk:4f98bdd6-dca8-4371-b151-5723719f26ae"
+            },
+            {
+              "seq": 4,
+              "tick": 1199,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "aa7f6273-68e1-4fbd-8614-3fd0ddadaf3c",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:aa7f6273-68e1-4fbd-8614-3fd0ddadaf3c"
+            },
+            {
+              "seq": 5,
+              "tick": 1199,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "aa7f6273-68e1-4fbd-8614-3fd0ddadaf3c",
+              "text": "eat: started. Consumed 0 food items.",
+              "key": "self-care-outcome:aa7f6273-68e1-4fbd-8614-3fd0ddadaf3c:started"
+            },
+            {
+              "seq": 6,
+              "tick": 1971,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "aa7f6273-68e1-4fbd-8614-3fd0ddadaf3c",
+              "text": "eat: completed. Consumed 16 food items.",
+              "key": "self-care-outcome:aa7f6273-68e1-4fbd-8614-3fd0ddadaf3c:completed"
+            },
+            {
+              "seq": 7,
+              "tick": 2402,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "da1e72c1-180b-4a25-8a46-a6539e237ce8",
+              "text": "Consumption confirmed by a receipt. No further work authorized.",
+              "key": "core-plan:da1e72c1-180b-4a25-8a46-a6539e237ce8"
+            },
+            {
+              "seq": 8,
+              "tick": 3025,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Beatrice",
+              "subject": "195a166e-a661-4bd7-9da1-ec1a1d3eaf50",
+              "text": "Would you take this optional build task?",
+              "key": "offer:195a166e-a661-4bd7-9da1-ec1a1d3eaf50"
+            },
+            {
+              "seq": 9,
+              "tick": 3719,
+              "kind": "message",
+              "actor": "Beatrice",
+              "recipient": "Core",
+              "subject": "195a166e-a661-4bd7-9da1-ec1a1d3eaf50",
+              "text": "refuse: No thanks. I want to keep this time for myself.",
+              "key": "reply:195a166e-a661-4bd7-9da1-ec1a1d3eaf50"
+            }
+          ],
+          "gameCpuSeconds": 76.031574,
+          "gameMemoryAfterBytes": 789819392
+        },
+        {
+          "variant": "capture",
+          "sampleCount": 92,
+          "sampleIntervalSeconds": 73.882,
+          "ticksPerSecond": 59.567959719552796,
+          "allSampledUnpaused": true,
+          "markers": [
+            {
+              "elapsedMs": 10680,
+              "event": "scripted question"
+            },
+            {
+              "elapsedMs": 21110,
+              "event": "scripted eat choice"
+            },
+            {
+              "elapsedMs": 40980,
+              "event": "receipt-backed closure"
+            },
+            {
+              "elapsedMs": 51417,
+              "event": "scripted work offer"
+            },
+            {
+              "elapsedMs": 63031,
+              "event": "scripted refusal; no job"
+            }
+          ],
+          "consumedFoodItems": 16,
+          "eatingStatus": "completed",
+          "workStatuses": [
+            "refused"
+          ],
+          "topics": [
+            {
+              "text": "Food and optional work remain open.",
+              "status": "open"
+            },
+            {
+              "text": "Alvin finished his chosen eating action; the wider plan remains open.",
+              "status": "resolved"
+            }
+          ],
+          "publicEntries": [
+            {
+              "seq": 1,
+              "tick": 605,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "ed525afb-c482-4845-97f5-ab5c24cab048",
+              "text": "Would you like to eat before considering any work?",
+              "key": "core-talk:52d506f8-151a-488b-a458-ae7afb110ec7"
+            },
+            {
+              "seq": 2,
+              "tick": 605,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "67d99a15-3bbb-41bd-86d0-fe9e855e2a3d",
+              "text": "Ask Alvin; his answer is optional.",
+              "key": "core-plan:67d99a15-3bbb-41bd-86d0-fe9e855e2a3d"
+            },
+            {
+              "seq": 3,
+              "tick": 1220,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "ed525afb-c482-4845-97f5-ab5c24cab048",
+              "text": "I choose to eat these berries now. Work can wait.",
+              "key": "core-talk:0711016c-c49c-447f-b06c-2b2cf4814c82"
+            },
+            {
+              "seq": 4,
+              "tick": 1220,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "d07d6c22-effa-42f4-8378-772c56b599d7",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:d07d6c22-effa-42f4-8378-772c56b599d7"
+            },
+            {
+              "seq": 5,
+              "tick": 1220,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "d07d6c22-effa-42f4-8378-772c56b599d7",
+              "text": "eat: started. Consumed 0 food items.",
+              "key": "self-care-outcome:d07d6c22-effa-42f4-8378-772c56b599d7:started"
+            },
+            {
+              "seq": 6,
+              "tick": 2061,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "d07d6c22-effa-42f4-8378-772c56b599d7",
+              "text": "eat: completed. Consumed 16 food items.",
+              "key": "self-care-outcome:d07d6c22-effa-42f4-8378-772c56b599d7:completed"
+            },
+            {
+              "seq": 7,
+              "tick": 2410,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "51f4143f-c27d-4985-9aff-6f3d26625471",
+              "text": "Consumption confirmed by a receipt. No further work authorized.",
+              "key": "core-plan:51f4143f-c27d-4985-9aff-6f3d26625471"
+            },
+            {
+              "seq": 8,
+              "tick": 3039,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Beatrice",
+              "subject": "613a991b-15af-4ed8-ad2b-7ac40feedfd4",
+              "text": "Would you take this optional build task?",
+              "key": "offer:613a991b-15af-4ed8-ad2b-7ac40feedfd4"
+            },
+            {
+              "seq": 9,
+              "tick": 3718,
+              "kind": "message",
+              "actor": "Beatrice",
+              "recipient": "Core",
+              "subject": "613a991b-15af-4ed8-ad2b-7ac40feedfd4",
+              "text": "refuse: No thanks. I want to keep this time for myself.",
+              "key": "reply:613a991b-15af-4ed8-ad2b-7ac40feedfd4"
+            }
+          ],
+          "gameCpuSeconds": 66.51453,
+          "gameMemoryAfterBytes": 779972608,
+          "recorderCpuSecondsThroughLastSample": 22.57,
+          "recorderResidentBytesAtLastSample": 175087616,
+          "recording": {
+            "durationSeconds": 75.0,
+            "bytes": 1889424,
+            "sha256": "4f7fdfb8b0306178ce2e4b75090f4c41532c7972e9930a6543c32481fe2ce66a",
+            "codec": "h264",
+            "width": 1280,
+            "height": 800,
+            "frameRate": "15/1",
+            "readFrames": "1125",
+            "audio": false,
+            "timeOrigin": "Recorder spawn; approximate, not frame-exact",
+            "uncut": true,
+            "scriptedOverlay": true
+          },
+          "pairedRestore": true
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Scripted choices and refusal are not evidence of model agency.",
+    "One sequential baseline/capture pair per build; no randomized performance confidence interval.",
+    "Author inspected native UI and sampled video frames; no human feedback or video-model analysis yet.",
+    "Spawn-time synchronization is approximate; event sidecar is for navigation, not frame-exact adjudication.",
+    "No live continuous-model or Luna adapter evidence."
+  ],
+  "reviewedBehavior": "be2966b",
+  "nativeAssemblySha256": "1eb0ef85f5b0ff23bae666d7187f349e39734cee7e132c5fe1bd0599f621f2f8",
+  "signalCheck": {
+    "run": "01f8b421-16c2-4f54-8ca3-b8fb653dc9e2",
+    "expected": "Operator terminated pilot",
+    "retainedFailure": true,
+    "gamePausedAfter": true
+  },
+  "captureProgress": {
+    "frame": 1125,
+    "duplicatedFrames": 0,
+    "droppedFrames": 0,
+    "progress": "end"
+  },
+  "uiAuthorChecks": [
+    "compact map visibility",
+    "expanded journal and return",
+    "held feed while game ticks advance",
+    "core interpretation board",
+    "stale report and unknown need bands"
+  ],
+  "fullVideoDecodePassed": true,
+  "coldRestore": {
+    "run": "20ba62c7-7546-4a4c-bf37-3a09496014a0",
+    "passed": true,
+    "selfCareOutcomesAndCoreTopicsEqual": true
+  },
+  "historicalLocalDatabaseFilesCheckedUnchanged": 184
+}

@@ -1,12 +1,34 @@
 # Crew log
 
-The **Concord** main tab is a read-only observer display. It doesn't start agents,
+The **Concord** main tab opens a compact, read-only observer sidebar (420 pixels wide at the lab’s 1280×800 resolution). **Full journal** expands the existing message, record, agreement and supplies views; **Compact** returns to the map-friendly view. It doesn't start agents,
 pause the game, send messages or authorize work. It shows what was said, what the game
 recorded, and what is still outstanding, and keeps those apart: speech is not fact, and
 observation is not mind-reading.
 
 Code: `src/crew-log.ts` (projection, progress), `publish` in `src/coordinator.ts`,
 `mod/CrewLog.cs` (tab, validation, persistence).
+
+## Watching without covering the colony
+
+The compact view shows the actual game’s running/paused state, native pawn activity,
+coarse shared Food/Rest bands, known scheduler state, and newest addressed events.
+Activity is a current native job label, not the character’s claimed intention. The
+**Core topics** button shows the core-authored interpretation board, not verified
+outcomes or private pawn thoughts. Disagreements retain their addressed reasons in
+the event feed; blue records distinguish physical outcomes from amber speech.
+
+**Hold feed** freezes only the displayed event list. The game, needs and activity
+continue; **Live feed** returns to current entries. A live timeline change clears
+held events, including when the coordinator is disconnected. Full history remains
+bounded to the most recent 128 entries. Fast bursts can still exceed comfortable
+reading speed; holding or scrubbing the recording is available, not proof of usability.
+
+The observer can show known legacy allowance/window exhaustion, cooldowns, pending
+answers and thinking. Without a known scheduler it says the next call depends on the
+operator/scheduler; it does not guess why an external launcher stopped. Stale reports
+are labelled as such. The compact view shows unknown need bands after ten seconds or
+120 game ticks without a fresh report; native activity and game pause state remain
+current. This does not change any character’s perspective or scheduling policy.
 
 ## Entries
 
@@ -80,3 +102,22 @@ claims why someone recovered, or full health, treatment or rescue.
 - The game save keeps the last report, so it's readable without a coordinator. A paired
   restore replaces the log with that branch's history. Text is rendered without rich
   text.
+
+## Recording pilot
+
+The operator-only `scripts/run-observer-pilot-lab.sh pair RUN_UUID` compares a
+75-second scripted scene without capture and then with capture. It requires the owned
+game, current mod/coordinator, prepared campfire-v2 fixture, ffmpeg, xdotool and the
+fixed lab display. Set `RIMWORLD_LAB_ROOT` to the isolated lab root. The launcher
+holds the coordinator lock through loads, work cleanup and recorder finalization;
+direct Node invocation is refused. `cold RUN_UUID` checks the final paired checkpoint
+after a full game restart. These are diagnostic commands, not character capabilities.
+
+The silent MP4 is 1280×800 at 15 fps, H.264, with an explicit scripted-pilot overlay.
+It is uncut; the sidecar retains wall times, game ticks, pause state and scripted event
+markers. Recorder spawn is only an approximate time origin, not frame-exact alignment.
+Capture stops at 75 seconds or 128 MiB, with 512 MiB free required before starting.
+SIGINT/SIGTERM goes through cleanup; a launch failure is retained, not rerolled.
+Original footage, detailed receipts and process logs stay outside Git. A recording
+can support timestamped human comments and later video-model checks; neither a
+successful encode nor author inspection establishes usability or engagement.

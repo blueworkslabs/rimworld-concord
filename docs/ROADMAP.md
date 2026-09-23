@@ -33,7 +33,14 @@ honest assessment of what worked before we expand further.
 
 ### Committed next work, in order
 
-**1. Compact observer UI and a recording pilot**
+**1. Compact observer UI and a recording pilot — scripted pilot completed**
+
+The compact sidebar and 75-second recording passed native checks. The single final
+baseline/capture pair ran at 59.04/59.57 game ticks per second; the silent 15 fps MP4
+was 1.89 MB with no reported duplicated/dropped frames. This is a small performance
+sample and author inspection, not human usability or live-model evidence. See
+[the evidence](evidence/observer-recording-pilot.json) and [controls/protocol](CREW_LOG.md).
+Video feedback is the next step; Luna and ongoing scheduling remain unimplemented.
 
 - The colony stays the main view. The full-screen text window becomes a compact strip
   or sidebar showing: who is speaking to whom; intentions (topics and who raised them)
