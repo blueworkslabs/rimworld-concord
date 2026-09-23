@@ -68,6 +68,7 @@ export interface DecisionBackend {
   decide(view:Perspective, signal:AbortSignal):Promise<unknown>;
 }
 export type Domain = {
+  coreState?:import('./core-planner.js').CoreState;
   exchanges?:Record<string,SocialExchange>;
   eventCursor?:number;crew?:CrewArchive;
   schema:1;world:string;epoch:string;branch:string;

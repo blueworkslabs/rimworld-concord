@@ -1,3 +1,4 @@
+import {coreView,validateCoreChoice,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
@@ -385,6 +386,87 @@ export class Coordinator {
   }
   inspect() { return structuredClone(this.domain); }
   activity() { return [...this.pending.keys()].map(pawn=>({pawn,status:'deliberating' as const})); }
+  /** Explicit operator briefing starts a bounded core; not inferred from private state. */
+  async initializeCore(brief:string) {return this.serial(async()=>{
+    await this.current();z.string().trim().min(1).max(600).parse(brief);
+    if(this.domain.coreState){if(this.domain.coreState.brief.text!==brief)throw Error('Core already initialized');return;}
+    this.domain.coreState={revision:0,brief:{id:'brief',text:brief},topics:[],questions:[],turns:[]};
+    this.commit('core-initialized','operator',{brief});
+  });}
+  async corePerspective(){return this.serial(async()=>{const g=await this.current();return coreView(this.domain,g);});}
+  async planCore(backend:CoreBackend,timeoutMs=45000,signal=new AbortController().signal){
+    if(!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>115000)throw Error('Invalid core timeout');
+    const prepared=await this.serial(async()=>{
+      signal.throwIfAborted();const game=await this.current();signal.throwIfAborted();
+      const state=this.domain.coreState;if(!state||state.turns.length>=16||this.pending.has('core'))throw Error('Core turn unavailable');
+      const controller=new AbortController(),id=randomUUID();this.pending.set('core',controller);
+      state.turns.push({id,status:'running'});state.revision++;this.commit('core-started','core',{id});
+      return {id,controller,generation:this.generation,view:coreView(this.domain,game)};
+    });
+    const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
+    try{
+      const choice=validateCoreChoice(await bounded(combined,()=>backend.plan(structuredClone(prepared.view),combined)),prepared.view);
+      return await this.serial(async()=>{
+        combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale core turn');
+        const g=await this.current();combined.throwIfAborted();
+        const state=this.domain.coreState!;
+        if(state.revision!==prepared.view.revision)throw Error('Core perspective superseded');
+        validateCoreChoice(choice,coreView(this.domain,g)); // physical/consent availability can change during thought
+        const turn=state.turns.find(t=>t.id===prepared.id)!;if(turn.status!=='running')throw Error('Core attempt retired');
+        const a=choice.action;let proposalId:string|undefined,questionId:string|undefined;
+        if(a.kind==='propose'){
+          const op=prepared.view.opportunities.find(o=>o.id===a.opportunityId)!;
+          proposalId=this.propose(g,op.pawn,op.action,a.reason,randomUUID()).id;
+        }else if(a.kind==='adopt_counter'){
+          const parent=this.domain.proposals[a.proposalId];
+          if(!parent||parent.status!=='countered'||parent.decision?.kind!=='counter'||parent.replyId||(parent.round??0)>=2)throw Error('Counter unavailable');
+          proposalId=this.propose(g,parent.pawn,parent.decision.action,a.reason,randomUUID(),parent).id;
+        }else if(a.kind==='ask'){
+          questionId=randomUUID();const m:SocialMessage={id:randomUUID(),exchangeId:questionId,tick:g.ticks,from:'core',to:a.pawn,fromName:'Core',toName:this.domain.characters[a.pawn]!.name,text:a.text};
+          state.questions.push({id:questionId,pawn:a.pawn,text:a.text,status:'pending',messages:[m]});
+          const ch=this.domain.characters[a.pawn]!;ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
+          this.commit('core-question','core',m);
+        }
+        if(choice.topic){let topic=state.topics.find(t=>t.sourceId===choice.topic!.sourceId);
+          if(!topic){topic={...choice.topic,proposalIds:[]};state.topics.push(topic);}else Object.assign(topic,choice.topic);
+          if(proposalId)topic.proposalIds.push(proposalId);
+        }
+        Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{})});state.revision++;
+        this.commit('core-planned','core',{id:prepared.id,reason:a.reason});
+        return {status:'applied' as const,proposalId,questionId,choice};
+      });
+    }catch(error){
+      await this.serial(async()=>{if(this.generation===prepared.generation){const state=this.domain.coreState!,turn=state.turns.find(t=>t.id===prepared.id)!;turn.status='failed';state.revision++;this.commit('core-failed','core',{id:prepared.id,error:String(error)});}});
+      return {status:combined.aborted?'interrupted' as const:'failed' as const};
+    }finally{clearTimeout(timer);if(this.pending.get('core')===prepared.controller)this.pending.delete('core');}
+  }
+  async answerCoreQuestion(id:string,backend:CoreAnswerBackend,timeoutMs=45000,signal=new AbortController().signal){
+    if(!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>115000)throw Error('Invalid question timeout');
+    const prepared=await this.serial(async()=>{
+      signal.throwIfAborted();const g=await this.current();signal.throwIfAborted();
+      const q=this.domain.coreState?.questions.find(q=>q.id===id);
+      if(!q||q.status!=='pending'||this.pending.has(q.pawn))throw Error('Question unavailable');
+      const own=g.pawns.find(p=>p.id===q.pawn);if(!own||own.downed){q.status='failed';this.commit('core-answer-unavailable',q.pawn,{id});throw Error('Pawn unavailable');}
+      const controller=new AbortController();this.pending.set(q.pawn,controller);q.status='running';this.commit('core-answer-started',q.pawn,{id});
+      const view:CoreQuestionView={pawn:groundedPawn(this.domain,g,own),character:structuredClone(this.domain.characters[q.pawn]!),question:{id,text:q.text,from:'core'}};
+      return {pawn:q.pawn,controller,generation:this.generation,view};
+    });
+    const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
+    try{
+      const choice=SocialChoice.parse(await bounded(combined,()=>backend.answerCore(prepared.view,combined)));
+      return await this.serial(async()=>{
+        combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale answer');
+        const g=await this.current();combined.throwIfAborted();const q=this.domain.coreState!.questions.find(q=>q.id===id)!;
+        if(q.status!=='running'||!g.pawns.some(p=>p.id===q.pawn&&!p.downed))throw Error('Question no longer answerable');
+        if(choice.choice==='stay_silent'){q.status='silent';this.domain.coreState!.revision++;this.commit('core-answer-silent',q.pawn,{id});return {status:'silent' as const};}
+        const ch=this.domain.characters[q.pawn]!;
+        const m:SocialMessage={id:randomUUID(),exchangeId:id,tick:g.ticks,from:q.pawn,to:'core',fromName:ch.name,toName:'Core',text:choice.text};
+        q.messages.push(m);q.status='answered';ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
+        this.domain.coreState!.revision++;this.commit('core-answer',q.pawn,m);return {status:'delivered' as const};
+      });
+    }catch(error){await this.serial(async()=>{if(this.generation===prepared.generation){const q=this.domain.coreState!.questions.find(q=>q.id===id)!;q.status='failed';this.domain.coreState!.revision++;this.commit('core-answer-failed',q.pawn,{id,error:String(error)});}});return {status:combined.aborted?'interrupted' as const:'failed' as const};}
+    finally{clearTimeout(timer);if(this.pending.get(prepared.pawn)===prepared.controller)this.pending.delete(prepared.pawn);}
+  }
   /** Physical movement opportunities and communicated replies only; no private character state. */
   core() {
     return {
@@ -720,6 +802,7 @@ export class Coordinator {
   }
   private recoverAttention(reason:string) {
     if(!this.domain) return;
+    if(this.domain.coreState){const state=this.domain.coreState;let changed=false;for(const t of state.turns)if(t.status==='running'){t.status='failed';changed=true;}for(const q of state.questions)if(q.status==='running'){q.status='failed';changed=true;}if(changed){state.revision++;this.commit('core-interrupted','operator',{reason});}}
     for(const e of Object.values(this.domain.exchanges??{}))if(e.status==='running'){
       e.status='closed';this.commit('social-interrupted','operator',{id:e.id,reason});
     }
