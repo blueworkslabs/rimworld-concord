@@ -1,0 +1,777 @@
+{
+  "version": "selfcare-followup-v1",
+  "behaviorCommit": "baa3544daa0ff6b8eeee101f20d7ff79e9710498",
+  "mode": "scripted real game; no inference",
+  "characterCalls": 0,
+  "jevCalls": 0,
+  "editorialCalls": 0,
+  "fixture": ".20 Food matched PR53 mechanics fixture; live PR54 .40 remains separate",
+  "cases": [
+    {
+      "variant": "speech",
+      "eating": [],
+      "eligibleTopicClosures": [
+        {
+          "sourceId": "brief",
+          "selfCareIds": [],
+          "statuses": []
+        },
+        {
+          "sourceId": "3a8cba6f-4b9e-46cf-90f5-f29c526906d0",
+          "selfCareIds": [],
+          "statuses": []
+        }
+      ],
+      "closureAttempt": {
+        "status": "failed"
+      },
+      "broadClosureAttempt": {
+        "status": "failed"
+      },
+      "topics": [
+        {
+          "sourceId": "brief",
+          "text": "Food coordination remains broader than one eating action.",
+          "status": "open",
+          "proposalIds": []
+        },
+        {
+          "sourceId": "3a8cba6f-4b9e-46cf-90f5-f29c526906d0",
+          "text": "This question response and any eating action.",
+          "status": "open",
+          "proposalIds": []
+        }
+      ],
+      "questions": [
+        {
+          "id": "48e9c508-c0ef-4661-af54-ba55e3e273e6",
+          "pawn": "Thing_Human405",
+          "text": "Would you like something to eat?",
+          "status": "answered",
+          "messages": [
+            {
+              "id": "5d47e84a-1f85-4517-a51f-d02af4248a96",
+              "exchangeId": "48e9c508-c0ef-4661-af54-ba55e3e273e6",
+              "tick": 2,
+              "from": "core",
+              "to": "Thing_Human405",
+              "fromName": "Core",
+              "toName": "Alvin",
+              "text": "Would you like something to eat?"
+            },
+            {
+              "id": "3a8cba6f-4b9e-46cf-90f5-f29c526906d0",
+              "exchangeId": "48e9c508-c0ef-4661-af54-ba55e3e273e6",
+              "tick": 2,
+              "from": "Thing_Human405",
+              "to": "core",
+              "fromName": "Alvin",
+              "toName": "Core",
+              "text": "Pedro, I will eat some berries."
+            }
+          ]
+        }
+      ],
+      "outcomes": {},
+      "pairedRestore": true,
+      "coldRestore": true,
+      "crewRecords": [
+        {
+          "seq": 1,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "Alvin",
+          "subject": "48e9c508-c0ef-4661-af54-ba55e3e273e6",
+          "text": "Would you like something to eat?",
+          "key": "core-talk:5d47e84a-1f85-4517-a51f-d02af4248a96"
+        },
+        {
+          "seq": 2,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "76b4f779-dc7d-4c9e-b179-1b88ce99ccda",
+          "text": "Optional self-care question",
+          "key": "core-plan:76b4f779-dc7d-4c9e-b179-1b88ce99ccda"
+        },
+        {
+          "seq": 3,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Alvin",
+          "recipient": "Core",
+          "subject": "48e9c508-c0ef-4661-af54-ba55e3e273e6",
+          "text": "Pedro, I will eat some berries.",
+          "key": "core-talk:3a8cba6f-4b9e-46cf-90f5-f29c526906d0"
+        },
+        {
+          "seq": 4,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "070a0a26-ebb2-4b97-ad5d-766d4caa6db5",
+          "text": "No new authority.",
+          "key": "core-plan:070a0a26-ebb2-4b97-ad5d-766d4caa6db5"
+        }
+      ]
+    },
+    {
+      "variant": "eat",
+      "eating": [
+        {
+          "id": "003fa7fd-4e68-4ca7-a747-98f11baf2855",
+          "pawn": "Thing_Human405",
+          "kind": "eat",
+          "questionId": "3325d6cd-4051-4de0-8067-bb0fa1123f65",
+          "sourceIds": [
+            "003fa7fd-4e68-4ca7-a747-98f11baf2855",
+            "2ed4e221-25ee-44a3-a868-65683aeeb493",
+            "9a077483-8227-4257-881c-7eda3fbef6e3"
+          ],
+          "food": {
+            "thing": "Thing_RawBerries1879",
+            "label": "berries"
+          },
+          "portionCount": 16,
+          "status": "completed",
+          "consumed": 16,
+          "consumedUnit": "food-items",
+          "completed": true
+        }
+      ],
+      "eligibleTopicClosures": [
+        {
+          "sourceId": "brief",
+          "selfCareIds": [],
+          "statuses": []
+        },
+        {
+          "sourceId": "9a077483-8227-4257-881c-7eda3fbef6e3",
+          "selfCareIds": [
+            "003fa7fd-4e68-4ca7-a747-98f11baf2855"
+          ],
+          "statuses": [
+            "resolved"
+          ]
+        },
+        {
+          "sourceId": "003fa7fd-4e68-4ca7-a747-98f11baf2855",
+          "selfCareIds": [
+            "003fa7fd-4e68-4ca7-a747-98f11baf2855"
+          ],
+          "statuses": [
+            "resolved"
+          ]
+        },
+        {
+          "sourceId": "2ed4e221-25ee-44a3-a868-65683aeeb493",
+          "selfCareIds": [
+            "003fa7fd-4e68-4ca7-a747-98f11baf2855"
+          ],
+          "statuses": [
+            "resolved"
+          ]
+        }
+      ],
+      "closureAttempt": {
+        "status": "applied",
+        "choice": {
+          "topics": [
+            {
+              "sourceId": "9a077483-8227-4257-881c-7eda3fbef6e3",
+              "text": "This question response and any eating action.",
+              "status": "resolved"
+            }
+          ],
+          "actionTopicId": null,
+          "action": {
+            "kind": "wait",
+            "reason": "No new authority."
+          }
+        }
+      },
+      "broadClosureAttempt": {
+        "status": "failed"
+      },
+      "topics": [
+        {
+          "sourceId": "brief",
+          "text": "Food coordination remains broader than one eating action.",
+          "status": "open",
+          "proposalIds": []
+        },
+        {
+          "sourceId": "9a077483-8227-4257-881c-7eda3fbef6e3",
+          "text": "This question response and any eating action.",
+          "status": "resolved",
+          "proposalIds": []
+        }
+      ],
+      "questions": [
+        {
+          "id": "3325d6cd-4051-4de0-8067-bb0fa1123f65",
+          "pawn": "Thing_Human405",
+          "text": "Would you like something to eat?",
+          "status": "answered",
+          "messages": [
+            {
+              "id": "2ed4e221-25ee-44a3-a868-65683aeeb493",
+              "exchangeId": "3325d6cd-4051-4de0-8067-bb0fa1123f65",
+              "tick": 2,
+              "from": "core",
+              "to": "Thing_Human405",
+              "fromName": "Core",
+              "toName": "Alvin",
+              "text": "Would you like something to eat?"
+            },
+            {
+              "id": "9a077483-8227-4257-881c-7eda3fbef6e3",
+              "exchangeId": "3325d6cd-4051-4de0-8067-bb0fa1123f65",
+              "tick": 2,
+              "from": "Thing_Human405",
+              "to": "core",
+              "fromName": "Alvin",
+              "toName": "Core",
+              "text": "I choose this portion of berries now."
+            }
+          ]
+        }
+      ],
+      "outcomes": {
+        "003fa7fd-4e68-4ca7-a747-98f11baf2855": {
+          "id": "003fa7fd-4e68-4ca7-a747-98f11baf2855",
+          "actor": "Thing_Human405",
+          "status": "completed",
+          "reason": "Native ingestion consumed 16 units from the chosen portion",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1879",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "x": 73,
+          "z": 78,
+          "jobId": 3,
+          "count": 16,
+          "delivered": 16,
+          "untilTick": 1802
+        }
+      },
+      "pairedRestore": true,
+      "coldRestore": true,
+      "crewRecords": [
+        {
+          "seq": 1,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "Alvin",
+          "subject": "3325d6cd-4051-4de0-8067-bb0fa1123f65",
+          "text": "Would you like something to eat?",
+          "key": "core-talk:2ed4e221-25ee-44a3-a868-65683aeeb493"
+        },
+        {
+          "seq": 2,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "db4a76dd-7d8f-4678-9fea-520c86ff72cd",
+          "text": "Optional self-care question",
+          "key": "core-plan:db4a76dd-7d8f-4678-9fea-520c86ff72cd"
+        },
+        {
+          "seq": 3,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Alvin",
+          "recipient": "Core",
+          "subject": "3325d6cd-4051-4de0-8067-bb0fa1123f65",
+          "text": "I choose this portion of berries now.",
+          "key": "core-talk:9a077483-8227-4257-881c-7eda3fbef6e3"
+        },
+        {
+          "seq": 4,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "003fa7fd-4e68-4ca7-a747-98f11baf2855",
+          "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+          "key": "self-care:003fa7fd-4e68-4ca7-a747-98f11baf2855"
+        },
+        {
+          "seq": 5,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "003fa7fd-4e68-4ca7-a747-98f11baf2855",
+          "text": "eat: started. Consumed 0 food items.",
+          "key": "self-care-outcome:003fa7fd-4e68-4ca7-a747-98f11baf2855:started"
+        },
+        {
+          "seq": 6,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "3a56a5f4-9d8a-40dd-9742-ddf495ead880",
+          "text": "No new authority.",
+          "key": "core-plan:3a56a5f4-9d8a-40dd-9742-ddf495ead880"
+        },
+        {
+          "seq": 7,
+          "tick": 776,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "003fa7fd-4e68-4ca7-a747-98f11baf2855",
+          "text": "eat: completed. Consumed 16 food items.",
+          "key": "self-care-outcome:003fa7fd-4e68-4ca7-a747-98f11baf2855:completed"
+        },
+        {
+          "seq": 8,
+          "tick": 1217,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "1e0c991e-05ff-4f36-9891-f54237d85c25",
+          "text": "No new authority.",
+          "key": "core-plan:1e0c991e-05ff-4f36-9891-f54237d85c25"
+        }
+      ]
+    },
+    {
+      "variant": "stop",
+      "eating": [
+        {
+          "id": "771cddfc-f0a6-4594-8a7c-7c993b53b5cb",
+          "pawn": "Thing_Human405",
+          "kind": "eat",
+          "questionId": "3bdc8589-063c-4177-bc10-93c0d99430c5",
+          "sourceIds": [
+            "771cddfc-f0a6-4594-8a7c-7c993b53b5cb",
+            "c4d2c8f1-18f6-49e9-bf85-87751808ea58",
+            "86bdc84d-6cfa-4c29-8412-cd4e7051f036"
+          ],
+          "food": {
+            "thing": "Thing_RawBerries1879",
+            "label": "berries"
+          },
+          "portionCount": 16,
+          "status": "interrupted",
+          "consumed": 0,
+          "consumedUnit": "food-items",
+          "completed": false
+        }
+      ],
+      "eligibleTopicClosures": [
+        {
+          "sourceId": "brief",
+          "selfCareIds": [],
+          "statuses": []
+        },
+        {
+          "sourceId": "86bdc84d-6cfa-4c29-8412-cd4e7051f036",
+          "selfCareIds": [
+            "771cddfc-f0a6-4594-8a7c-7c993b53b5cb"
+          ],
+          "statuses": []
+        },
+        {
+          "sourceId": "771cddfc-f0a6-4594-8a7c-7c993b53b5cb",
+          "selfCareIds": [
+            "771cddfc-f0a6-4594-8a7c-7c993b53b5cb"
+          ],
+          "statuses": []
+        },
+        {
+          "sourceId": "c4d2c8f1-18f6-49e9-bf85-87751808ea58",
+          "selfCareIds": [
+            "771cddfc-f0a6-4594-8a7c-7c993b53b5cb"
+          ],
+          "statuses": []
+        }
+      ],
+      "closureAttempt": {
+        "status": "failed"
+      },
+      "broadClosureAttempt": {
+        "status": "failed"
+      },
+      "topics": [
+        {
+          "sourceId": "brief",
+          "text": "Food coordination remains broader than one eating action.",
+          "status": "open",
+          "proposalIds": []
+        },
+        {
+          "sourceId": "86bdc84d-6cfa-4c29-8412-cd4e7051f036",
+          "text": "This question response and any eating action.",
+          "status": "open",
+          "proposalIds": []
+        }
+      ],
+      "questions": [
+        {
+          "id": "3bdc8589-063c-4177-bc10-93c0d99430c5",
+          "pawn": "Thing_Human405",
+          "text": "Would you like something to eat?",
+          "status": "answered",
+          "messages": [
+            {
+              "id": "c4d2c8f1-18f6-49e9-bf85-87751808ea58",
+              "exchangeId": "3bdc8589-063c-4177-bc10-93c0d99430c5",
+              "tick": 2,
+              "from": "core",
+              "to": "Thing_Human405",
+              "fromName": "Core",
+              "toName": "Alvin",
+              "text": "Would you like something to eat?"
+            },
+            {
+              "id": "86bdc84d-6cfa-4c29-8412-cd4e7051f036",
+              "exchangeId": "3bdc8589-063c-4177-bc10-93c0d99430c5",
+              "tick": 2,
+              "from": "Thing_Human405",
+              "to": "core",
+              "fromName": "Alvin",
+              "toName": "Core",
+              "text": "I choose this portion of berries now."
+            }
+          ]
+        }
+      ],
+      "outcomes": {
+        "771cddfc-f0a6-4594-8a7c-7c993b53b5cb": {
+          "id": "771cddfc-f0a6-4594-8a7c-7c993b53b5cb",
+          "actor": "Thing_Human405",
+          "status": "interrupted",
+          "reason": "Eating action cancelled; no further consumption authorized",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1879",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "x": 73,
+          "z": 78,
+          "jobId": 3,
+          "count": 16,
+          "delivered": 0,
+          "untilTick": 1802
+        }
+      },
+      "pairedRestore": true,
+      "coldRestore": true,
+      "crewRecords": [
+        {
+          "seq": 1,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "Alvin",
+          "subject": "3bdc8589-063c-4177-bc10-93c0d99430c5",
+          "text": "Would you like something to eat?",
+          "key": "core-talk:c4d2c8f1-18f6-49e9-bf85-87751808ea58"
+        },
+        {
+          "seq": 2,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "5890333a-26a4-445a-bbb5-bf0c6ca7888d",
+          "text": "Optional self-care question",
+          "key": "core-plan:5890333a-26a4-445a-bbb5-bf0c6ca7888d"
+        },
+        {
+          "seq": 3,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Alvin",
+          "recipient": "Core",
+          "subject": "3bdc8589-063c-4177-bc10-93c0d99430c5",
+          "text": "I choose this portion of berries now.",
+          "key": "core-talk:86bdc84d-6cfa-4c29-8412-cd4e7051f036"
+        },
+        {
+          "seq": 4,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "771cddfc-f0a6-4594-8a7c-7c993b53b5cb",
+          "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+          "key": "self-care:771cddfc-f0a6-4594-8a7c-7c993b53b5cb"
+        },
+        {
+          "seq": 5,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "771cddfc-f0a6-4594-8a7c-7c993b53b5cb",
+          "text": "eat: started. Consumed 0 food items.",
+          "key": "self-care-outcome:771cddfc-f0a6-4594-8a7c-7c993b53b5cb:started"
+        },
+        {
+          "seq": 6,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "99f0c21f-b511-40e0-b6c7-2517ba9d557c",
+          "text": "No new authority.",
+          "key": "core-plan:99f0c21f-b511-40e0-b6c7-2517ba9d557c"
+        },
+        {
+          "seq": 7,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "771cddfc-f0a6-4594-8a7c-7c993b53b5cb",
+          "text": "Eating stop requested: Pawn withdrew eating choice",
+          "key": "self-care-stop:771cddfc-f0a6-4594-8a7c-7c993b53b5cb"
+        },
+        {
+          "seq": 8,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "771cddfc-f0a6-4594-8a7c-7c993b53b5cb",
+          "text": "eat: interrupted. Consumed 0 food items.",
+          "key": "self-care-outcome:771cddfc-f0a6-4594-8a7c-7c993b53b5cb:interrupted"
+        }
+      ]
+    },
+    {
+      "variant": "cleanup",
+      "eating": [
+        {
+          "id": "f37f6247-3bf1-495c-a74d-2eec77f8cda6",
+          "pawn": "Thing_Human405",
+          "kind": "eat",
+          "questionId": "aa3f43c3-36da-4fda-a23a-2936654af723",
+          "sourceIds": [
+            "f37f6247-3bf1-495c-a74d-2eec77f8cda6",
+            "fe1b0b0e-9cdc-452d-859f-467008f73f7a",
+            "018397a2-47e7-466e-b38e-171498233f6a"
+          ],
+          "food": {
+            "thing": "Thing_RawBerries1879",
+            "label": "berries"
+          },
+          "portionCount": 16,
+          "status": "interrupted",
+          "consumed": 0,
+          "consumedUnit": "food-items",
+          "completed": false
+        }
+      ],
+      "eligibleTopicClosures": [
+        {
+          "sourceId": "brief",
+          "selfCareIds": [],
+          "statuses": []
+        },
+        {
+          "sourceId": "018397a2-47e7-466e-b38e-171498233f6a",
+          "selfCareIds": [
+            "f37f6247-3bf1-495c-a74d-2eec77f8cda6"
+          ],
+          "statuses": []
+        },
+        {
+          "sourceId": "f37f6247-3bf1-495c-a74d-2eec77f8cda6",
+          "selfCareIds": [
+            "f37f6247-3bf1-495c-a74d-2eec77f8cda6"
+          ],
+          "statuses": []
+        },
+        {
+          "sourceId": "fe1b0b0e-9cdc-452d-859f-467008f73f7a",
+          "selfCareIds": [
+            "f37f6247-3bf1-495c-a74d-2eec77f8cda6"
+          ],
+          "statuses": []
+        }
+      ],
+      "closureAttempt": {
+        "status": "failed"
+      },
+      "broadClosureAttempt": {
+        "status": "failed"
+      },
+      "topics": [
+        {
+          "sourceId": "brief",
+          "text": "Food coordination remains broader than one eating action.",
+          "status": "open",
+          "proposalIds": []
+        },
+        {
+          "sourceId": "018397a2-47e7-466e-b38e-171498233f6a",
+          "text": "This question response and any eating action.",
+          "status": "open",
+          "proposalIds": []
+        }
+      ],
+      "questions": [
+        {
+          "id": "aa3f43c3-36da-4fda-a23a-2936654af723",
+          "pawn": "Thing_Human405",
+          "text": "Would you like something to eat?",
+          "status": "answered",
+          "messages": [
+            {
+              "id": "fe1b0b0e-9cdc-452d-859f-467008f73f7a",
+              "exchangeId": "aa3f43c3-36da-4fda-a23a-2936654af723",
+              "tick": 2,
+              "from": "core",
+              "to": "Thing_Human405",
+              "fromName": "Core",
+              "toName": "Alvin",
+              "text": "Would you like something to eat?"
+            },
+            {
+              "id": "018397a2-47e7-466e-b38e-171498233f6a",
+              "exchangeId": "aa3f43c3-36da-4fda-a23a-2936654af723",
+              "tick": 2,
+              "from": "Thing_Human405",
+              "to": "core",
+              "fromName": "Alvin",
+              "toName": "Core",
+              "text": "I choose this portion of berries now."
+            }
+          ]
+        }
+      ],
+      "outcomes": {
+        "f37f6247-3bf1-495c-a74d-2eec77f8cda6": {
+          "id": "f37f6247-3bf1-495c-a74d-2eec77f8cda6",
+          "actor": "Thing_Human405",
+          "status": "interrupted",
+          "reason": "Eating action cancelled; no further consumption authorized",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1879",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "x": 73,
+          "z": 78,
+          "jobId": 3,
+          "count": 16,
+          "delivered": 0,
+          "untilTick": 1802
+        }
+      },
+      "pairedRestore": true,
+      "coldRestore": true,
+      "crewRecords": [
+        {
+          "seq": 1,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "Alvin",
+          "subject": "aa3f43c3-36da-4fda-a23a-2936654af723",
+          "text": "Would you like something to eat?",
+          "key": "core-talk:fe1b0b0e-9cdc-452d-859f-467008f73f7a"
+        },
+        {
+          "seq": 2,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "a828aef7-5ef3-4369-b9af-2c03102d1875",
+          "text": "Optional self-care question",
+          "key": "core-plan:a828aef7-5ef3-4369-b9af-2c03102d1875"
+        },
+        {
+          "seq": 3,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Alvin",
+          "recipient": "Core",
+          "subject": "aa3f43c3-36da-4fda-a23a-2936654af723",
+          "text": "I choose this portion of berries now.",
+          "key": "core-talk:018397a2-47e7-466e-b38e-171498233f6a"
+        },
+        {
+          "seq": 4,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "f37f6247-3bf1-495c-a74d-2eec77f8cda6",
+          "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+          "key": "self-care:f37f6247-3bf1-495c-a74d-2eec77f8cda6"
+        },
+        {
+          "seq": 5,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "f37f6247-3bf1-495c-a74d-2eec77f8cda6",
+          "text": "eat: started. Consumed 0 food items.",
+          "key": "self-care-outcome:f37f6247-3bf1-495c-a74d-2eec77f8cda6:started"
+        },
+        {
+          "seq": 6,
+          "tick": 2,
+          "kind": "message",
+          "actor": "Core",
+          "recipient": "crew",
+          "subject": "3d2201ef-ad50-4b35-9e67-bf8f0fb6fbd0",
+          "text": "No new authority.",
+          "key": "core-plan:3d2201ef-ad50-4b35-9e67-bf8f0fb6fbd0"
+        },
+        {
+          "seq": 7,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "f37f6247-3bf1-495c-a74d-2eec77f8cda6",
+          "text": "Eating stop requested: Operator trial ended; not a pawn-originated withdrawal",
+          "key": "self-care-stop:f37f6247-3bf1-495c-a74d-2eec77f8cda6"
+        },
+        {
+          "seq": 8,
+          "tick": 2,
+          "kind": "record",
+          "actor": "Alvin",
+          "recipient": "observer",
+          "subject": "f37f6247-3bf1-495c-a74d-2eec77f8cda6",
+          "text": "eat: interrupted. Consumed 0 food items.",
+          "key": "self-care-outcome:f37f6247-3bf1-495c-a74d-2eec77f8cda6:interrupted"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "nodeTests": 330,
+    "pythonChecks": 11,
+    "pairedAndCold": true,
+    "historicalDBFilesUnchanged": 230,
+    "independentSourceReview": "Completed, no actionable defect; actual reads/denied writes. Focused tests+typecheck passed; wider reviewer suites not claimed green; author full suite330/330.",
+    "stagingStopped": true
+  },
+  "limitations": [
+    "No live model test of clearer units, recipients or closing choice.",
+    "No forwarding capability added; addressing a name in text cannot deliver to that pawn.",
+    "Completion of eating does not resolve a broad food plan or another pawn need.",
+    "Prior live outputs, errors, databases and allowances are unchanged."
+  ]
+}
