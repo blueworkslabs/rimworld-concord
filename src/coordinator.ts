@@ -690,11 +690,15 @@ export class Coordinator {
   }
   /** Explicit operator polling advances only previously accepted, fixed-scope work.
    * Separate from reconciliation so quiescent between-trip checkpoints are possible. */
-  async advanceIntentions() {
+  async advanceIntentions(admit:()=>boolean=()=>true) {
+    if(!admit())return;
     await this.reconcile();
+    if(!admit())return;
     return this.serial(async()=>{
       const game=await this.current();
+      if(!admit())return;
       for(const p of Object.values(this.domain.proposals)) {
+        if(!admit())return;
         if(p.standing?.status!=='running'||p.action.kind!=='haul')continue;
         const c=this.domain.characters[p.pawn]!;
         if(c.commitment||this.pending.has(p.pawn))continue;

@@ -1,5 +1,6 @@
 /** Immutable policy identities: old ledgers must retain their original ceilings. */
 export const decisionTrials={
+ 'integration-v1':{calls:12,reservedEquivalentUSD:1.20,policy:'claude-integration-v1'},
  'legacy':{calls:3,reservedEquivalentUSD:0.30,policy:'legacy'},
  'reliability-v1':{calls:4,reservedEquivalentUSD:0.40,policy:'claude-reliability-v1'},
  'negotiation-v1':{calls:6,reservedEquivalentUSD:0.60,policy:'claude-negotiation-v1'},

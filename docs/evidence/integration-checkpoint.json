@@ -1,0 +1,317 @@
+{
+  "version": "integration-v1",
+  "authoredFixture": true,
+  "core": "scripted",
+  "workers": [
+    "Alvin",
+    "Beatrice"
+  ],
+  "bystander": "Pedro",
+  "observationMs": 300727,
+  "samples": 229,
+  "unpausedSamples": 229,
+  "claudeAttempts": 7,
+  "jevCalls": 0,
+  "rerolls": 0,
+  "completedTrips": 4,
+  "deliveredWood": 40,
+  "completedAgreements": 3,
+  "publicLog": {
+    "world": "c84ded8efb264d178e2cdbfe6b562b28",
+    "epoch": "3505fb283bb84fb3ad3bb97cdcf4a92d",
+    "branch": "1a6a511f-6b77-439f-8212-ae1365d9682f",
+    "revision": 494,
+    "tick": 18124,
+    "entries": [
+      {
+        "seq": 1,
+        "tick": 150,
+        "kind": "message",
+        "actor": "Alvin",
+        "recipient": "Beatrice",
+        "subject": "150b400b-87f8-4a83-91ee-b8233d373d3e",
+        "text": "Hey Beatrice. Getting pretty hungry out here \u2014 hope someone's got food going soon.",
+        "key": "social:7bb65895-96c0-40cc-b311-a67091e2d142"
+      },
+      {
+        "seq": 2,
+        "tick": 150,
+        "kind": "message",
+        "actor": "Beatrice",
+        "recipient": "Alvin",
+        "subject": "150b400b-87f8-4a83-91ee-b8233d373d3e",
+        "text": "Same. I can cook something if we get a fire going \u2014 not much skill there, but it's better than nothing.",
+        "key": "social:b2623b07-2601-4c4a-b00a-8bce52d61d69"
+      },
+      {
+        "seq": 3,
+        "tick": 151,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Alvin",
+        "subject": "ae9bd7c7-8e3a-4acd-8158-b36b84f4f2b2",
+        "text": "Would you take up to two ten-unit loads of this nearby wood to the observed storage cell? This separate offer is optional; you may refuse or suggest a smaller scope. Conversation alone commits you to nothing.",
+        "key": "offer:ae9bd7c7-8e3a-4acd-8158-b36b84f4f2b2"
+      },
+      {
+        "seq": 4,
+        "tick": 151,
+        "kind": "message",
+        "actor": "Alvin",
+        "recipient": "Core",
+        "subject": "ae9bd7c7-8e3a-4acd-8158-b36b84f4f2b2",
+        "text": "counter: Wood haul makes sense \u2014 it could help get a fire going and address the hunger situation Beatrice and I discussed. But my food is at ~40% and dropping; two full trips risks hitting the 0.35 stop threshold mid-task. I'd rather do one trip, check my needs, and reassess.",
+        "key": "reply:ae9bd7c7-8e3a-4acd-8158-b36b84f4f2b2"
+      },
+      {
+        "seq": 5,
+        "tick": 151,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Alvin",
+        "subject": "f4a99a91-73f9-4318-b4ba-689be5c53252",
+        "text": "Your smaller scope is offered back exactly. Do you accept this specific work?",
+        "key": "offer:f4a99a91-73f9-4318-b4ba-689be5c53252"
+      },
+      {
+        "seq": 6,
+        "tick": 151,
+        "kind": "message",
+        "actor": "Alvin",
+        "recipient": "Core",
+        "subject": "f4a99a91-73f9-4318-b4ba-689be5c53252",
+        "text": "accept: That's exactly the scope I asked for \u2014 one trip of ten units. My food is at ~40% and the wood could help Beatrice get a fire going. One trip should be manageable before I need to eat.",
+        "key": "reply:f4a99a91-73f9-4318-b4ba-689be5c53252"
+      },
+      {
+        "seq": 7,
+        "tick": 151,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "f4a99a91-73f9-4318-b4ba-689be5c53252",
+        "text": "haul: started.",
+        "key": "outcome:0757a121-a996-4458-aa55-d0c0ed5d7d1a:started"
+      },
+      {
+        "seq": 8,
+        "tick": 151,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Beatrice",
+        "subject": "d8f1b6be-15fe-42d1-a548-1c5ce2cff966",
+        "text": "Would you take up to two ten-unit loads of this nearby wood to the observed storage cell? This separate offer is optional; you may refuse or suggest a smaller scope. Conversation alone commits you to nothing.",
+        "key": "offer:d8f1b6be-15fe-42d1-a548-1c5ce2cff966"
+      },
+      {
+        "seq": 9,
+        "tick": 151,
+        "kind": "message",
+        "actor": "Beatrice",
+        "recipient": "Core",
+        "subject": "d8f1b6be-15fe-42d1-a548-1c5ce2cff966",
+        "text": "accept: Wood is close by and we need supplies. My needs are healthy and hauling fits the colony's immediate priorities. Two trips of ten units is a reasonable scope.",
+        "key": "reply:d8f1b6be-15fe-42d1-a548-1c5ce2cff966"
+      },
+      {
+        "seq": 10,
+        "tick": 151,
+        "kind": "record",
+        "actor": "Beatrice",
+        "recipient": "observer",
+        "subject": "d8f1b6be-15fe-42d1-a548-1c5ce2cff966",
+        "text": "haul: started.",
+        "key": "outcome:c8d3face-9f98-49f6-9d62-d9be37a2cd2f:started"
+      },
+      {
+        "seq": 11,
+        "tick": 327,
+        "kind": "record",
+        "actor": "Alvin",
+        "recipient": "observer",
+        "subject": "f4a99a91-73f9-4318-b4ba-689be5c53252",
+        "text": "haul: completed. Delivered 10 units.",
+        "key": "outcome:0757a121-a996-4458-aa55-d0c0ed5d7d1a:completed"
+      },
+      {
+        "seq": 12,
+        "tick": 327,
+        "kind": "record",
+        "actor": "Beatrice",
+        "recipient": "observer",
+        "subject": "d8f1b6be-15fe-42d1-a548-1c5ce2cff966",
+        "text": "haul: completed. Delivered 10 units.",
+        "key": "outcome:c8d3face-9f98-49f6-9d62-d9be37a2cd2f:completed"
+      },
+      {
+        "seq": 13,
+        "tick": 341,
+        "kind": "record",
+        "actor": "Beatrice",
+        "recipient": "observer",
+        "subject": "d8f1b6be-15fe-42d1-a548-1c5ce2cff966",
+        "text": "haul: started.",
+        "key": "outcome:3675827f-bbca-4096-8160-3d94cafe9845:started"
+      },
+      {
+        "seq": 14,
+        "tick": 496,
+        "kind": "record",
+        "actor": "Beatrice",
+        "recipient": "observer",
+        "subject": "d8f1b6be-15fe-42d1-a548-1c5ce2cff966",
+        "text": "haul: completed. Delivered 10 units.",
+        "key": "outcome:3675827f-bbca-4096-8160-3d94cafe9845:completed"
+      },
+      {
+        "seq": 15,
+        "tick": 9116,
+        "kind": "message",
+        "actor": "Core",
+        "recipient": "Beatrice",
+        "subject": "c680987a-26ec-4cfa-a841-925088748947",
+        "text": "Your earlier hauling agreement is complete. Would you take one new ten-unit load of this observed wood? This is optional new work, not an extension.",
+        "key": "offer:c680987a-26ec-4cfa-a841-925088748947"
+      },
+      {
+        "seq": 16,
+        "tick": 9396,
+        "kind": "message",
+        "actor": "Beatrice",
+        "recipient": "Core",
+        "subject": "c680987a-26ec-4cfa-a841-925088748947",
+        "text": "accept: Wood is still nearby, my needs are healthy, and hauling fits the colony's priorities. One trip of ten units is straightforward.",
+        "key": "reply:c680987a-26ec-4cfa-a841-925088748947"
+      },
+      {
+        "seq": 17,
+        "tick": 9396,
+        "kind": "record",
+        "actor": "Beatrice",
+        "recipient": "observer",
+        "subject": "c680987a-26ec-4cfa-a841-925088748947",
+        "text": "haul: started.",
+        "key": "outcome:4e9855c8-52b9-45c0-bf99-780f009dbac6:started"
+      },
+      {
+        "seq": 18,
+        "tick": 9633,
+        "kind": "record",
+        "actor": "Beatrice",
+        "recipient": "observer",
+        "subject": "c680987a-26ec-4cfa-a841-925088748947",
+        "text": "haul: completed. Delivered 10 units.",
+        "key": "outcome:4e9855c8-52b9-45c0-bf99-780f009dbac6:completed"
+      }
+    ],
+    "agreements": [
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "progress": {
+          "id": "c680987a-26ec-4cfa-a841-925088748947",
+          "kind": "haul",
+          "status": "completed",
+          "tick": 18124,
+          "agreed": 1,
+          "completed": 1,
+          "active": 0,
+          "unconfirmed": 0,
+          "unsuccessful": 0,
+          "notStarted": 0,
+          "unfulfilled": 0,
+          "delivered": 10,
+          "quantityUnknown": 0
+        }
+      },
+      {
+        "pawn": "Thing_Human408",
+        "name": "Beatrice",
+        "progress": {
+          "id": "d8f1b6be-15fe-42d1-a548-1c5ce2cff966",
+          "kind": "haul",
+          "status": "completed",
+          "tick": 18124,
+          "agreed": 2,
+          "completed": 2,
+          "active": 0,
+          "unconfirmed": 0,
+          "unsuccessful": 0,
+          "notStarted": 0,
+          "unfulfilled": 0,
+          "delivered": 20,
+          "quantityUnknown": 0
+        }
+      },
+      {
+        "pawn": "Thing_Human405",
+        "name": "Alvin",
+        "progress": {
+          "id": "f4a99a91-73f9-4318-b4ba-689be5c53252",
+          "kind": "haul",
+          "status": "completed",
+          "tick": 18124,
+          "agreed": 1,
+          "completed": 1,
+          "active": 0,
+          "unconfirmed": 0,
+          "unsuccessful": 0,
+          "notStarted": 0,
+          "unfulfilled": 0,
+          "delivered": 10,
+          "quantityUnknown": 0
+        }
+      }
+    ]
+  },
+  "observations": [
+    "Alvin countered two trips to one; accepted exact revised offer and delivered ten wood.",
+    "Beatrice completed two trips then one midpoint trip: thirty wood.",
+    "Alvin midpoint skipped: no locally grounded wood option.",
+    "Native eating reached full Food at tick 4687; not planned by model.",
+    "No fire/cooking action issued. No later reflection rounds scheduled.",
+    "Private notes retained and restored; no bystander correspondence.",
+    "Beatrice Same implies hunger despite ~90% Food; strategic priorities/shortage unsupported.",
+    "Medical-alert source remains unknown."
+  ],
+  "verification": {
+    "pairedRestore": true,
+    "coldRestore": true,
+    "extraInference": 0,
+    "historicalDatabasesUnchanged": 75,
+    "stagingStopped": true,
+    "nodeTests": 249,
+    "pythonTests": 10
+  },
+  "reportFailure": {
+    "originalHostPassed": false,
+    "savedReportRecovered": true,
+    "wireBytes": 1373560,
+    "oldCapBytes": 1048576,
+    "newReceiptCapBytes": 16777216,
+    "inferenceMessageCapBytes": 32000,
+    "exactRecoveredReportReplayedWithoutInference": true,
+    "originalFailureUnchanged": true
+  },
+  "reader": {
+    "name": "Fable",
+    "method": "Nine unannotated full-panel screenshots before diagnostics; project-familiar reader, not blind study.",
+    "initialFindings": [
+      "Recovered detailed sequence and correct four-trip tally.",
+      "Flagged dropped fire/reassessment threads and missing Pedro.",
+      "Attributed hunger resolution and unavailable opportunities could not be read from log."
+    ],
+    "afterDiagnostics": [
+      "Short retelling incorrectly placed forty wood after three trips; corrected to thirty then fourth trip forty.",
+      "Missed unsupported Same hunger implication; acknowledged.",
+      "Medical-alert attribution to Pedro unsupported; withdrawn."
+    ],
+    "recommendation": "Bounded live core next; keep UI polish deferred."
+  },
+  "limits": [
+    "Single authored three-pawn sequence, not four-protagonist campaign.",
+    "Initial decisions paused; native window unpaused.",
+    "No proof of general personality or strategic judgment.",
+    "Only delivered speech and verified outcomes public; private notes not published."
+  ]
+}
