@@ -238,7 +238,7 @@ namespace Concord
             if(a==null) {a=new ActionRecord {id=r.actionId,actor=r.actor,kind=new[]{"rescue","build","cook","eat"}.Contains(r.cancelKind)?r.cancelKind:"haul",status="interrupted",reason="Withdrawn before dispatch"};w.actions.Add(a);}
             if(a.actor!=r.actor||(a.kind!="haul"&&a.kind!="rescue"&&a.kind!="build"&&a.kind!="cook"&&a.kind!="eat"))throw new Exception("No owned work action");
             if(a.status=="started") {
-                a.status="interrupted";a.reason="Pawn withdrew work commitment";
+                a.status="interrupted";a.reason=a.kind=="eat"?"Eating action cancelled; no further consumption authorized":"Pawn withdrew work commitment";
                 var p=WorldState.FindActor(r.actor);
                 if(p!=null&&p.CurJob!=null&&p.CurJob.loadID==a.jobId)p.jobs.EndCurrentJob(JobCondition.InterruptForced);
             }

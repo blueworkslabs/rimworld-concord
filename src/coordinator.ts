@@ -643,7 +643,7 @@ export class Coordinator {
   }
   pawn(pawn:string) {
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
-    return {stopEating:()=>this.stopEating(pawn),requestReoffer:(id:string,reason:string)=>this.serial(async()=>{const g=await this.current();if(this.pending.has(pawn))throw Error('Pawn already deliberating');return this.requestReoffer(pawn,id,reason,g);}),withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000,signal=new AbortController().signal)=>this.decide(pawn,id,backend,timeoutMs,signal)};
+    return {stopEating:(reason?:string)=>this.stopEating(pawn,reason),requestReoffer:(id:string,reason:string)=>this.serial(async()=>{const g=await this.current();if(this.pending.has(pawn))throw Error('Pawn already deliberating');return this.requestReoffer(pawn,id,reason,g);}),withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000,signal=new AbortController().signal)=>this.decide(pawn,id,backend,timeoutMs,signal)};
   }
   private async decide(pawn:string,id:string,backend:DecisionBackend,timeoutMs:number,signal:AbortSignal) {
     const prepared=await this.serial(async()=>{
@@ -780,10 +780,11 @@ export class Coordinator {
     this.recordEating(care,await this.game.eat({id:care.id,epoch:this.domain.epoch,actor:care.pawn,action:care.action,mapId:care.mapId,untilTick:care.untilTick}));
   }
   /** Pawn-bound cancellation; no new choice or retry is implied. */
-  private async stopEating(pawn:string){return this.serial(async()=>{
+  private async stopEating(pawn:string,reason='Pawn withdrew eating choice'){return this.serial(async()=>{
+    if(!reason.trim()||reason.length>240)throw Error('Invalid eating stop reason');
     await this.current();const ch=this.domain.characters[pawn],care=this.domain.selfCare?.[ch?.commitment??''];
     if(!care||care.pawn!==pawn||!this.game.cancel)throw Error('No owned eating action');
-    care.stopped=true;this.commit('self-care-stopped',pawn,{id:care.id});
+    care.stopped=true;this.commit('self-care-stopped',pawn,{id:care.id,reason});
     this.recordEating(care,await this.game.cancel({epoch:this.domain.epoch,actor:pawn,id:care.id,kind:'eat'}));
   });}
   private async dispatch(p:Proposal) {

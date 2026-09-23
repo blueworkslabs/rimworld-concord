@@ -1,3 +1,4 @@
+import {stopTrialWork,workSummary} from '../src/work-trial.js';
 import {DecisionChannel} from '../src/decision-channel.js';
 import {eatingOptions} from '../src/pawn-eating.js';
 import {test} from 'node:test';
@@ -53,4 +54,12 @@ test('decision relay carries typed core eating but remains speech-only for socia
 test('answered counter does not permanently suppress self-care; unresolved counter still holds',async()=>{
  const {g,s,c}=await setup();const d=c.inspect(),p={id:'counter',pawn:'A',status:'countered' as const,reason:'less work',action:{kind:'move' as const,x:1,z:1}};d.proposals.counter=p;
  const state=await g.state();assert.equal(eatingOptions(d,state,state.pawns[0]!).length,0);d.proposals.counter!.replyId='revision';d.proposals.revision={...p,id:'revision',status:'refused'};assert.equal(eatingOptions(d,state,state.pawns[0]!).length,1);s.close();
+});
+
+test('shared trial shutdown cancels self-care and leaves a checkpointable state',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);assert.equal((await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}})).status,'delivered');
+ const cleanup=await stopTrialWork(c);assert.deepEqual(cleanup.errors,[]);assert.deepEqual(cleanup.operatorStops,['A']);assert.equal(g.data.actions[0]!.status,'interrupted');await c.checkpoint('lab-concord-cleanup-eating');assert(c.inspect().crew!.entries.some(e=>e.text.includes('Operator trial ended')));s.close();
+});
+test('self-care consumption is not counted as delivered work or hauling trips',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();const summary=workSummary(c.inspect());assert.equal(summary.deliveredUnits,0);assert.equal(summary.completedTrips,0);assert.equal(summary.selfCare[0]!.delivered,16);s.close();
 });

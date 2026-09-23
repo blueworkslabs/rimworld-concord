@@ -52,6 +52,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  if(kind==='alternative-declined')add('message','core',data.pawn,data.id,data.replyReason,`decline:${data.id}`);
  if(kind==='offer-withdrawn')add('record','core','observer',data.id,'Pending offer withdrawn; no work authorized.',`retired:${data.id}`);
  if(kind==='intention-stopped')add('record',actor,'observer',data.proposal,'Agreement stopped. Any completed work remains recorded; unfinished work is not completion.',`stopped:${data.proposal}`);
+ if(kind==='self-care-stopped')add('record',actor,'observer',data.id,`Eating stop requested: ${safe(data.reason,240)}`,`self-care-stop:${data.id}`);
  if(kind==='self-care-chosen')add('record',actor,'observer',data.id,`Chose to eat up to ${data.action.count} ${safe(data.action.label,80)}; consumption not yet confirmed.`,`self-care:${data.id}`);
  if(kind==='self-care-outcome')add('record',actor,'observer',data.id,`eat: ${data.status}. Consumed ${Number(data.delivered??0)} units.`,`self-care-outcome:${data.id}:${data.status}`);
  if(kind==='action-outcome'){

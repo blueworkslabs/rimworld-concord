@@ -13,9 +13,10 @@ export function laterOfferEligible(domain:Domain,pawn:string):boolean {
 }
 export function workSummary(domain:Domain){
  const proposals=Object.values(domain.proposals),outcomes=Object.values(domain.outcomes);
+ const workOutcomes=outcomes.filter(r=>r.kind!=='eat'&&!domain.selfCare?.[r.id]);
  return {decisions:proposals.filter(p=>p.decision).map(p=>({pawn:p.pawn,id:p.id,parentId:p.parentId,decision:p.decision,action:p.action})),
-  outcomes,deliveredUnits:outcomes.reduce((n,r)=>n+(r.delivered??0),0),
-  completedTrips:outcomes.filter(r=>r.status==='completed').length,
+  outcomes,selfCare:outcomes.filter(r=>r.kind==='eat'||domain.selfCare?.[r.id]),deliveredUnits:workOutcomes.reduce((n,r)=>n+(r.delivered??0),0),
+  completedTrips:workOutcomes.filter(r=>r.status==='completed').length,
   stopped:proposals.filter(p=>p.standing?.status==='stopped').map(p=>({pawn:p.pawn,reason:p.standing?.reason})),
   intentions:proposals.filter(p=>p.standing).map(p=>({pawn:p.pawn,action:p.action,standing:p.standing})),
   reflections:Object.values(domain.characters).map(c=>({pawn:c.id,reflections:c.reflections??[],attention:c.attention}))};
@@ -49,6 +50,9 @@ export async function stopTrialWork(c:import('./coordinator.js').Coordinator){
  await attempt(()=>c.reconcile());
  for(const ch of Object.values(c.inspect().characters))if(ch.intention){
   operatorStops.push(ch.id);await attempt(()=>c.pawn(ch.id).withdraw('Operator trial ended; not a pawn-originated choice'));
+ }
+ for(const ch of Object.values(c.inspect().characters))if(ch.commitment&&c.inspect().selfCare?.[ch.commitment]?.pawn===ch.id){
+  operatorStops.push(ch.id);await attempt(()=>c.pawn(ch.id).stopEating('Operator trial ended; not a pawn-originated withdrawal'));
  }
  for(const p of Object.values(c.inspect().proposals))if(p.status==='pending')
   await attempt(()=>c.core().withdrawOffer(p.id,'Operator trial ended; offer retired without acceptance'));
