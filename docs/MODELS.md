@@ -16,11 +16,12 @@ Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decisi
 | Core planner | `claude-sonnet-4-6` | same, own system prompt and ledger | live trials |
 | Fast appraisal | `typesafe/jev-1.13` | OpenRouter System One (`POST /api/v1/systemone`), protected credential | bounded live trials; not in recent runs |
 | Cheaper-model contract checks | `gpt-5.6-luna` | Native Codex app-server, ChatGPT login | offline only, not a game backend |
+| Recorded-session feedback | `google/gemini-3.8-flash` | Protected OpenRouter, MP4 `video_url` | two offline responses on one scripted clip; not a character backend |
 | Diary drafts | `moonshotai/kimi-k2` | OpenRouter via OpenClaw `llm-task` | editorial only |
 
 Claude and Luna use no bare API mode, Agent SDK or extracted OAuth tokens. Their subscription logins are
 used through their native clients. For native subscription routes, usage figures are API-equivalent estimates, not
-per-call cash charges. Jev uses the paid OpenRouter API: its reported usage cost
+per-call cash charges. Jev and the Gemini video reviewer use the paid OpenRouter API: their reported usage cost
 is monetary accounting, not a subscription estimate. Billing routes are never
 switched silently.
 

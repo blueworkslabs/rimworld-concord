@@ -40,7 +40,7 @@ baseline/capture pair ran at 59.04/59.57 game ticks per second; the silent 15 fp
 was 1.89 MB with no reported duplicated/dropped frames. This is a small performance
 sample and author inspection, not human usability or live-model evidence. See
 [the evidence](evidence/observer-recording-pilot.json) and [controls/protocol](CREW_LOG.md).
-Video feedback is the next step; Luna and ongoing scheduling remain unimplemented.
+The first two-pass video review is complete (below); Luna and ongoing scheduling remain unimplemented.
 
 - The colony stays the main view. The full-screen text window becomes a compact strip
   or sidebar showing: who is speaking to whom; intentions (topics and who raised them)
@@ -56,7 +56,18 @@ Video feedback is the next step; Luna and ongoing scheduling remain unimplemente
   to calibrate the review pipeline below; this does not establish human usability
   or an engaging live scene.
 
-**2. Feedback from recordings**
+**2. Feedback from recordings — first calibration completed**
+
+Gemini 3.8 Flash received the uncut MP4 through protected OpenRouter. Two successful
+responses cost a provider-reported $0.01662606 and took 11.7/14.9 seconds. The video-only
+pass recovered the eating/refusal sequence and correct food-item count, but invented
+an extra message and misread quotes/ticks. The receipt check caught those, then added
+an unsupported explanation for the invented message. The operator's informal feedback
+was positive; no general usability claim follows. [Full evidence](evidence/video-feedback-pilot.json).
+Keep this as a timestamped navigation aid with checked receipts, not an authority.
+No UI change is justified solely by the model's contrast/font opinions; assess denser,
+longer footage next. The gateway's expired local certificate was renewed after an
+initial retained TLS failure; no unprotected route was used.
 
 - **People**: a playable recording with scrubbing and speed control, plus quick
   timestamped notes ("lost me here", "why did they stop?", "interesting"). Occasional,
