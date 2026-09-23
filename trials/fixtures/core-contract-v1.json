@@ -1,0 +1,267 @@
+{
+  "world": "206cb3ca2a4d48cf936572765e87c5b3",
+  "epoch": "79c3f204051948b2b29dacd45e48e6c7",
+  "branch": "94f29200-7116-4e8f-9d4a-39ca782c7cc3",
+  "revision": 1,
+  "tick": 77,
+  "brief": {
+    "id": "brief",
+    "text": "Consider the crew\u2019s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan."
+  },
+  "questions": [],
+  "topicClosures": [],
+  "reoffers": [],
+  "sharedStatus": [
+    {
+      "pawn": "Thing_Human405",
+      "name": "Alvin",
+      "source": "shared-link-telemetry",
+      "epoch": "79c3f204051948b2b29dacd45e48e6c7",
+      "tick": 77,
+      "fresh": true,
+      "food": "low",
+      "rest": "satisfied"
+    },
+    {
+      "pawn": "Thing_Human408",
+      "name": "Beatrice",
+      "source": "shared-link-telemetry",
+      "epoch": "79c3f204051948b2b29dacd45e48e6c7",
+      "tick": 77,
+      "fresh": true,
+      "food": "satisfied",
+      "rest": "satisfied"
+    },
+    {
+      "pawn": "Thing_Human411",
+      "name": "Pedro",
+      "source": "shared-link-telemetry",
+      "epoch": "79c3f204051948b2b29dacd45e48e6c7",
+      "tick": 77,
+      "fresh": true,
+      "food": "satisfied",
+      "rest": "satisfied"
+    }
+  ],
+  "crew": [
+    {
+      "id": "Thing_Human405",
+      "name": "Alvin"
+    },
+    {
+      "id": "Thing_Human408",
+      "name": "Beatrice"
+    },
+    {
+      "id": "Thing_Human411",
+      "name": "Pedro"
+    }
+  ],
+  "messages": [],
+  "agreements": [],
+  "counters": [],
+  "requests": [],
+  "topics": [],
+  "opportunities": [
+    {
+      "id": "op:204ba86e29fabd243b9c4848",
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "build",
+        "thing": "Thing_WoodLog1892",
+        "x": 83,
+        "z": 79,
+        "maxTicks": 3600
+      },
+      "observedTick": 77
+    },
+    {
+      "id": "op:c7601618e687f9f5d6d12017",
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "build",
+        "thing": "Thing_WoodLog1892",
+        "x": 84,
+        "z": 80,
+        "maxTicks": 3600
+      },
+      "observedTick": 77
+    },
+    {
+      "id": "op:ea8c4765649e6234e6de03ed",
+      "pawn": "Thing_Human405",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_WoodLog1892",
+        "x": 80,
+        "z": 80,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 1800
+      },
+      "observedTick": 77,
+      "supply": {
+        "sourceThingId": "Thing_WoodLog1892",
+        "label": "wood",
+        "sourceCount": 30,
+        "destinationFree": 75
+      }
+    },
+    {
+      "id": "op:08a5e04af2f4779ef3f93b4a",
+      "pawn": "Thing_Human408",
+      "action": {
+        "kind": "build",
+        "thing": "Thing_WoodLog1893",
+        "x": 75,
+        "z": 79,
+        "maxTicks": 3600
+      },
+      "observedTick": 77
+    },
+    {
+      "id": "op:b2f4927d6cf041f45db3f729",
+      "pawn": "Thing_Human408",
+      "action": {
+        "kind": "build",
+        "thing": "Thing_WoodLog1893",
+        "x": 75,
+        "z": 81,
+        "maxTicks": 3600
+      },
+      "observedTick": 77
+    },
+    {
+      "id": "op:117185bf255cec6314c75940",
+      "pawn": "Thing_Human408",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_WoodLog1893",
+        "x": 72,
+        "z": 79,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 1800
+      },
+      "observedTick": 77,
+      "supply": {
+        "sourceThingId": "Thing_WoodLog1893",
+        "label": "wood",
+        "sourceCount": 30,
+        "destinationFree": 75
+      }
+    },
+    {
+      "id": "op:ec42e20ff48c657190f2c2c7",
+      "pawn": "Thing_Human408",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_WoodLog1893",
+        "x": 80,
+        "z": 80,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 1800
+      },
+      "observedTick": 77,
+      "supply": {
+        "sourceThingId": "Thing_WoodLog1893",
+        "label": "wood",
+        "sourceCount": 30,
+        "destinationFree": 75
+      }
+    },
+    {
+      "id": "op:906bb7ff17dd0b189d0a863f",
+      "pawn": "Thing_Human411",
+      "action": {
+        "kind": "build",
+        "thing": "Thing_WoodLog1892",
+        "x": 82,
+        "z": 84,
+        "maxTicks": 3600
+      },
+      "observedTick": 77
+    },
+    {
+      "id": "op:616dc4e1e555368a6c4e23e9",
+      "pawn": "Thing_Human411",
+      "action": {
+        "kind": "build",
+        "thing": "Thing_WoodLog1892",
+        "x": 82,
+        "z": 86,
+        "maxTicks": 3600
+      },
+      "observedTick": 77
+    },
+    {
+      "id": "op:a56ba1e6287fd2acc3afdd2a",
+      "pawn": "Thing_Human411",
+      "action": {
+        "kind": "haul",
+        "thing": "Thing_WoodLog1892",
+        "x": 80,
+        "z": 80,
+        "count": 10,
+        "trips": 3,
+        "maxTicks": 1800
+      },
+      "observedTick": 77,
+      "supply": {
+        "sourceThingId": "Thing_WoodLog1892",
+        "label": "wood",
+        "sourceCount": 30,
+        "destinationFree": 75
+      }
+    }
+  ],
+  "availability": [
+    {
+      "pawn": "Thing_Human405",
+      "status": "Grounded options listed; availability is not consent or guaranteed success."
+    },
+    {
+      "pawn": "Thing_Human408",
+      "status": "Grounded options listed; availability is not consent or guaranteed success."
+    },
+    {
+      "pawn": "Thing_Human411",
+      "status": "Grounded options listed; availability is not consent or guaranteed success."
+    }
+  ],
+  "questionRecipients": [
+    "Thing_Human405",
+    "Thing_Human408",
+    "Thing_Human411"
+  ],
+  "capabilities": [
+    "propose listed hauling/rescue/campfire construction/simple meals",
+    "adopt counter with fresh consent",
+    "one optional addressed question per pawn, at most three total",
+    "wait"
+  ],
+  "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause.",
+  "wakeReasons": [
+    {
+      "sourceId": "brief",
+      "kind": "start",
+      "value": "initial"
+    },
+    {
+      "sourceId": "Thing_Human405",
+      "kind": "telemetry",
+      "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+    },
+    {
+      "sourceId": "Thing_Human408",
+      "kind": "telemetry",
+      "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+    },
+    {
+      "sourceId": "Thing_Human411",
+      "kind": "telemetry",
+      "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+    }
+  ]
+}
