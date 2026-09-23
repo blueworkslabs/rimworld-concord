@@ -269,3 +269,33 @@ test('naming another pawn in a core reply never changes delivery or forwards to 
  const answer=await c.answerCoreQuestion(q.questionId!,{name:'reply',async answerCore(v){envelope=coreAnswerPrompt(v).delivery;return {choice:'say',text:'B, the food is south.'};}});
  assert.equal(answer.status,'delivered');assert.deepEqual(envelope,{from:'A',to:'core',forwarding:'none'});assert.equal(c.inspect().characters.B!.messages?.length??0,0);assert.equal(c.inspect().coreState!.questions[0]!.messages.at(-1)!.to,'core');assert.equal(g.moves,0);s.close();
 });
+
+test('ongoing schedule survives more than sixteen turns, does not poll unchanged state, and preserves admission on restore',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ const update=(i:number)=>{g.data.ticks+=60;g.data.pawns[0]!.linkStatus={source:'shared-link-telemetry',epoch:g.data.epoch,tick:g.data.ticks,food:i%2?'low':'satisfied',rest:'satisfied'};};
+ for(let i=0;i<20;i++){update(i);assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');assert.equal((await c.planCoreWhenDue(planner(()=>{throw Error('no duplicate');}))).status,'idle');}
+ assert.equal(c.inspect().coreState!.schedule!.attempts,20);await c.checkpoint('lab-concord-ongoing');const saved=c.inspect().coreState;await c.restore('lab-concord-ongoing');assert.deepEqual(c.inspect().coreState,saved);
+ g.data.ticks+=60;g.data.pawns[0]!.linkStatus!.epoch=g.data.epoch;g.data.pawns[0]!.linkStatus!.tick=g.data.ticks;
+ assert.equal((await c.planCoreWhenDue(planner(()=>{throw Error('restore must not replenish');}))).status,'idle');s.close();
+});
+test('ongoing questions require changed public context, not reply text, elapsed time or private need values',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ const ask=planner(()=>({topic:null,action:{kind:'ask',pawn:'A',text:'What would help?',reason:'Ask'}}));
+ const r=await c.planCoreWhenDue(ask);if(r.status!=='applied')throw Error();assert(!(await c.corePerspective()).questionRecipients.includes('A'));
+ await c.answerCoreQuestion(r.questionId!,{name:'silent',async answerCore(){return {choice:'stay_silent'};}});g.data.ticks+=600;
+ g.data.pawns[0]!.facts=[{key:'need',value:'Food',level:.1}];assert(!(await c.corePerspective()).questionRecipients.includes('A'));
+ g.data.pawns[0]!.linkStatus={source:'shared-link-telemetry',epoch:g.data.epoch,tick:g.data.ticks,food:'low',rest:'satisfied'};
+ assert((await c.corePerspective()).questionRecipients.includes('A'));assert.equal((await c.planCoreWhenDue(ask)).status,'applied');s.close();
+});
+test('ongoing repeated failures block visibly, while successful waiting is never a failure',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ for(let i=0;i<3;i++){g.data.ticks+=60;g.data.pawns[0]!.linkStatus={source:'shared-link-telemetry',epoch:g.data.epoch,tick:g.data.ticks,food:i%2?'low':'satisfied',rest:'satisfied'};assert.equal((await c.planCoreWhenDue(planner(()=>{throw Error('invalid');}))).status,'failed');}
+ g.data.ticks+=600;const result=await c.planCoreWhenDue(planner(()=>wait));assert.equal(result.status,'idle');assert.match(c.inspect().coreState!.schedule!.blocked!,/diagnosis/);s.close();
+});
+test('ongoing prompt bounds answered history and archives closed topics without weakening closure evidence',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});const d=c.inspect();
+ for(let i=0;i<30;i++){d.coreState!.questions.push({id:'q'+i,pawn:'A',text:'old',status:'answered',messages:[{id:'m'+i,exchangeId:'q'+i,tick:i,from:'A',to:'core',text:'old'}]});d.coreState!.topics.push({sourceId:'m'+i,text:'old',status:'resolved',proposalIds:[]});}
+ const v=coreView(d,await g.state());assert.equal(v.questions.length,12);assert.equal(v.messages.length,12);assert.equal(v.topics.length,8);assert.equal(d.coreState!.topics.length,30);
+ validateCoreChoice({topics:[{sourceId:'brief',text:'Still open',status:'open'}],actionTopicId:null,action:wait.action},v);
+ assert.throws(()=>validateCoreChoice({topics:[{sourceId:'brief',text:'done',status:'resolved'}],actionTopicId:null,action:wait.action},v),/closure/);s.close();
+});

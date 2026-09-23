@@ -4,7 +4,7 @@ import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
 import {deferredOffers} from './reoffers.js';
 import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
-import {coreView,validateCoreChoice,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
+import {questionContext,coreView,validateCoreChoice,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
@@ -419,7 +419,7 @@ export class Coordinator {
     if(!state)throw Error('Core not initialized');
     if(state.schedule){if(JSON.stringify(state.schedule.config)!==JSON.stringify(config))throw Error('Core schedule immutable');return;}
     if(state.turns.length)throw Error('Schedule must precede first core turn');
-    state.schedule={config,startTick:game.ticks,endTick:game.ticks+config.windowTicks,attempts:0,consumed:{}};
+    state.schedule={config,startTick:game.ticks,endTick:config.windowTicks===null?null:game.ticks+config.windowTicks,attempts:0,consumed:{}};
     this.commit('core-scheduled','operator',{config});
   });}
   async planCoreWhenDue(backend:CoreBackend,timeoutMs=45000,signal=new AbortController().signal){
@@ -434,7 +434,7 @@ export class Coordinator {
       signal.throwIfAborted();const game=await this.current();signal.throwIfAborted();
       const state=this.domain.coreState;if(!state)throw Error('Core not initialized');
       if(!!state.schedule!==scheduled)throw Error('Core scheduling mode mismatch');
-      if(state.turns.length>=16||this.pending.has('core'))return {idle:'unavailable'} as const;
+      if(state.schedule?.config.maxAttempts!==null&&state.turns.length>=16||this.pending.has('core'))return {idle:'unavailable'} as const;
       let causes:import('./core-scheduler.js').CoreWake[]=[];
       if(scheduled){
         const admission=coreAdmission(state.schedule!,coreView(this.domain,game));
@@ -455,7 +455,7 @@ export class Coordinator {
         combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale core turn');
         const g=await this.current();combined.throwIfAborted();
         const state=this.domain.coreState!;
-        if(state.schedule&&g.ticks>=state.schedule.endTick)throw Error('Core schedule expired during inference');
+        if(state.schedule&&state.schedule.endTick!==null&&g.ticks>=state.schedule.endTick)throw Error('Core schedule expired during inference');
         if(state.revision!==prepared.view.revision)throw Error('Core perspective superseded');
         validateCoreChoice(choice,coreView(this.domain,g)); // physical/consent availability can change during thought
         const turn=state.turns.find(t=>t.id===prepared.id)!;if(turn.status!=='running')throw Error('Core attempt retired');
@@ -469,7 +469,7 @@ export class Coordinator {
           proposalId=this.propose(g,parent.pawn,parent.decision.action,a.reason,randomUUID(),parent).id;
         }else if(a.kind==='ask'){
           questionId=randomUUID();const m:SocialMessage={id:randomUUID(),exchangeId:questionId,tick:g.ticks,from:'core',to:a.pawn,fromName:'Core',toName:this.domain.characters[a.pawn]!.name,text:a.text};
-          state.questions.push({id:questionId,pawn:a.pawn,text:a.text,status:'pending',messages:[m]});
+          state.questions.push({id:questionId,pawn:a.pawn,text:a.text,status:'pending',messages:[m],...(state.schedule?.config.maxAttempts===null?{context:questionContext(this.domain,g,a.pawn)}:{})});
           const ch=this.domain.characters[a.pawn]!;ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
           this.commit('core-question','core',m);
         }
@@ -482,7 +482,7 @@ export class Coordinator {
         return {status:'applied' as const,proposalId,questionId,choice};
       });
     }catch(error){
-      await this.serial(async()=>{if(this.generation===prepared.generation){const state=this.domain.coreState!,turn=state.turns.find(t=>t.id===prepared.id)!;turn.status='failed';state.revision++;this.commit('core-failed','core',{id:prepared.id,error:String(error)});}});
+      await this.serial(async()=>{if(this.generation===prepared.generation){const state=this.domain.coreState!,turn=state.turns.find(t=>t.id===prepared.id)!;turn.status='failed';if(state.schedule?.config.maxAttempts===null&&state.turns.slice(-3).length===3&&state.turns.slice(-3).every(t=>t.status==='failed'))state.schedule.blocked='Repeated core failures; operator diagnosis required';state.revision++;this.commit('core-failed','core',{id:prepared.id,error:String(error)});}});
       return {status:combined.aborted?'interrupted' as const:'failed' as const};
     }finally{clearTimeout(timer);if(this.pending.get('core')===prepared.controller)this.pending.delete('core');await this.serial(async()=>{});}
   }

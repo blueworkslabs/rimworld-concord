@@ -8,10 +8,9 @@ import { Reflection,type AttentionView } from './attention.js';
 
 /** Trusted operator SSH relay; no action/admin handles or credentials cross it. */
 export class DecisionChannel {
- readonly name='claude-sonnet-4-6';
  private pending?:{id:string;mode:'decision'|'reflection'|'social'|'core'|'core-answer';resolve:(v:unknown)=>void;reject:(e:Error)=>void;cleanup:()=>void};
  private closed=false;
- constructor(private send:(value:unknown)=>void){}
+ constructor(private send:(value:unknown)=>void,readonly name='claude-sonnet-4-6'){}
  plan(view:CoreView,signal:AbortSignal){return this.request('core',view,signal);}
  answerCore(view:CoreQuestionView,signal:AbortSignal){return this.request('core-answer',view,signal);}
  decide(view:Perspective,signal:AbortSignal){return this.request('decision',view,signal);}
