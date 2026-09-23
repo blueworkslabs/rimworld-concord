@@ -5,6 +5,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {parseTrialMessage} from '../dist/src/trial-wire.js';
 import {InferenceLane} from '../dist/src/inference-lane.js';
+import {integrationHostAllowance} from '../dist/trials/integration-policy.js';
 import {retentionDeadline} from '../dist/trials/retention-policy.js';
 import {ClaudeDecisionBackend} from '../dist/src/claude-decision.js';
 
@@ -60,9 +61,12 @@ async function handle(line){
  else throw Error('No appraisal requests allowed');
  seen.add(m.id);const deadline=retentionDeadline(),controller=deadline.controller;active.set(m.id,controller);const start=Date.now();
  try{
-  await lane.run(controller.signal,async()=>{
+  const remaining=integrationHostAllowance(m.notAfter);
+  const cutoffTimer=setTimeout(()=>controller.abort(),remaining);
+  try {await lane.run(controller.signal,async()=>{
   try {if(isDecision){
-   await writeFile(config.receipt+'.request-'+m.id+'.json',JSON.stringify({runId,mode:m.mode,view:m.view}),{flag:'wx',mode:0o600});
+   await writeFile(config.receipt+'.request-'+m.id+'.json',JSON.stringify({runId,mode:m.mode,view:m.view,notAfter:m.notAfter}),{flag:'wx',mode:0o600});
+   integrationHostAllowance(m.notAfter);controller.signal.throwIfAborted();
    const output=await (m.mode==='reflection'?backend.reflect(m.view,controller.signal):m.mode==='social'?backend.speak(m.view,controller.signal):backend.decide(m.view,controller.signal));
    responses.push({id:m.id,mode:m.mode,pawn:m.view.pawn.id,receivedAt:new Date().toISOString(),elapsedMs:Date.now()-start,output});
    // Preserve returned answers even if the coordinator subsequently rejects them as stale.
@@ -70,7 +74,7 @@ async function handle(line){
    send({type:'decision-result',id:m.id,output});}
 
   }finally{await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,decisions:backend.receipts,rawResponses:backend.rawResponses,failures:backend.failures},null,2),{mode:0o600});}
-  });
+  });}finally{clearTimeout(cutoffTimer);}
  }catch{
   // Failures and cancellation retain their reservations; never reroll a response.
   send({type:'decision-result',id:m.id,error:'Decision unavailable'});

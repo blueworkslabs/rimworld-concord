@@ -23,3 +23,15 @@ test('later integration offers cannot reinterpret refusal or an unadopted counte
  domain.proposals.p={id:'p',pawn:'A',status:'accepted',standing:{status:'running'}};assert(!laterOfferEligible(domain,'A'));
  domain.proposals.p.standing.status='completed';assert(laterOfferEligible(domain,'A'));
 });
+import {integrationHostAllowance,preservePartial} from '../trials/integration-policy.js';
+test('delayed midpoint requests cannot renew their host cutoff or start on deadline',()=>{
+ assert.equal(integrationHostAllowance(null,100),45000);
+ assert.equal(integrationHostAllowance(500,100),400);
+ assert.throws(()=>integrationHostAllowance(500,500));assert.throws(()=>integrationHostAllowance(500,700));
+ assert.throws(()=>integrationHostAllowance(undefined,100));assert.throws(()=>integrationHostAllowance('500',100));
+});
+test('recoverable failure preserves partial paired state, without labelling the trial successful',async()=>{
+ let saves=0;assert(await preservePartial(false,[],async()=>{saves++;}));assert.equal(saves,1);
+ assert(!await preservePartial(true,[],async()=>{saves++;}));assert(!await preservePartial(false,['unresolved work'],async()=>{saves++;}));assert.equal(saves,1);
+ await assert.rejects(preservePartial(false,[],async()=>{throw Error('unavailable bridge');}));
+});

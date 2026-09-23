@@ -15,19 +15,20 @@ import {stopTrialWork,retireUndecided,workSummary,laterOfferEligible} from '../s
 import {NeedsRunGuard,needsOutput,smallerHaul} from './needs-policy.js';
 import {socialCleanup} from './social-cleanup.js';
 import {retainedDomain,noReflectionEffects} from './retention-policy.js';
-import {IntegrationWindow} from './integration-policy.js';
+import {IntegrationWindow,preservePartial} from './integration-policy.js';
 if(process.env.CONCORD_INTEGRATION_LOCKED!=='1')throw Error('Use scripts/run-integration-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
 const runId=process.env.CONCORD_TRIAL_ID,policy=process.env.CONCORD_TRIAL_POLICY;
 if(!runId||!/^[0-9a-f-]{36}$/.test(runId)||policy!=='integration-v1')throw Error('Trial identity required');
 const receipt:any={passed:false,runId,policy,mode:scripted?'scripted':'live',views:[],samples:[],frames:[],screenshots:[],offers:[],reflections:[]};
-let c:Coordinator|undefined,s:Store|undefined,attempts=0,connected=true,exchangeId:string|undefined;
+let c:Coordinator|undefined,s:Store|undefined,attempts=0,connected=true,exchangeId:string|undefined,db:string|undefined;
 let window:IntegrationWindow|undefined,windowTimer:ReturnType<typeof setTimeout>|undefined;
 const guard=new NeedsRunGuard();
 const send=needsOutput(process.stdout,()=>{connected=false;guard.stop();channel.close();});
 const channel=new DecisionChannel(raw=>{const m=raw as any;guard.check();if(m.type==='decision-request'){
  if(cold||++attempts>12||window?.ended())throw Error('Integration admission closed');
  receipt.views.push({mode:m.mode,view:m.view,at:Date.now()});
+ m.notAfter=window?.deadline()??null;
  }send(m);});
 let drained:(()=>void)|undefined;
 const input=createInterface({input:process.stdin,crlfDelay:Infinity});
@@ -67,17 +68,19 @@ async function capture(label:string,screenshot=false){
 }
 try{
  if(cold){
-  const saved=JSON.parse(await readFile(root+'/.runtime/integration-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,receipt.mode);assert.equal(saved.policy,policy);
+  const saved=JSON.parse(await readFile(root+'/.runtime/integration-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,receipt.mode);assert.equal(saved.policy,policy);receipt.verifiesFailedRun=saved.failed??false;
   guard.check();s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().exchanges,saved.domain.exchanges);
   receipt.coldRestore=true;receipt.report=(await b.state()).crewLog;
  }else{
   const f=JSON.parse(await readFile(root+'/.runtime/needs-fixture.json','utf8'));
   guard.check();await b.load(f.name);guard.check();await b.admin('pause');guard.check();
-  const db=root+'/.runtime/integration-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();guard.check();
+  db=root+'/.runtime/integration-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();guard.check();
   const [initiator,recipient]=f.actors.map((a:any)=>a.id) as [string,string];
   receipt.initial=await b.state();socialContact(receipt.initial,initiator,recipient);assert(receipt.initial.pawns.every((p:any)=>!p.downed));
   // Capture real native experience; no fabricated reflection stimulus or authored live speech.
-  guard.check();await b.admin('run');guard.check();await delay(500);await c.observe();await b.admin('pause');guard.check();await c.observe();
+  guard.check();await b.admin('run');guard.check();const captureEnd=Date.now()+10000;
+  while(Date.now()<captureEnd){guard.check();await c.observe();if(c.inspect().characters[initiator]?.experiences?.some(e=>e.route!=='native'))break;await delay(100);}
+  await b.admin('pause');guard.check();await c.observe();
   const beforeTalk=c.inspect(),worldBefore=await b.state();
   exchangeId=randomUUID();await c.openSocial(exchangeId,initiator,recipient);
   receipt.opening=await c.socialTurn(initiator,exchangeId,channel,45000);guard.check();
@@ -99,7 +102,7 @@ try{
   windowTimer=setTimeout(()=>channel.close(),window.durationMs);
   await delay(200);let laterDone=false,nextCapture=0,mid=false;
   while(!window.ended()){
-   guard.check();await c.reconcile();if(window.ended())break;await c.advanceIntentions();if(window.ended())break;await c.observe();
+   guard.check();await c.reconcile();guard.check();if(window.ended())break;await c.advanceIntentions();guard.check();if(window.ended())break;await c.observe();guard.check();
    const state=await b.state();guard.sample(state.paused,state.ticks,initialTick);
    receipt.samples.push({elapsedMs:window.elapsed(),ticks:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,facts:p.facts}))});
    if(!laterDone&&window.laterDue()){
@@ -123,5 +126,9 @@ finally{
  clearTimeout(timer);clearTimeout(windowTimer);if(!receipt.hostDrained)try{await finish();}catch(e){receipt.passed=false;receipt.drainError=String(e);process.exitCode=1;}
  receipt.finalCleanup=await socialCleanup(()=>b.admin('pause'),async()=>{if(c&&!cold&&exchangeId)await c.closeSocial(exchangeId);},async()=>c&&!cold?stopTrialWork(c):{errors:[]});
  if(receipt.finalCleanup.errors.length){receipt.passed=false;process.exitCode=1;}
+ if(!cold&&c&&db)try{receipt.partialSaved=await preservePartial(receipt.passed,receipt.finalCleanup.errors,async()=>{
+  const checkpoint='lab-concord-int-part-'+Date.now();await c!.checkpoint(checkpoint);
+  await writeFile(root+'/.runtime/integration-latest.json',JSON.stringify({runId,policy,mode:receipt.mode,db,checkpoint,domain:c!.inspect(),failed:true}));
+ });}catch(e){receipt.partialSaveError=String(e);receipt.passed=false;process.exitCode=1;}
  receipt.attempts=attempts;input.close();s?.close();await writeFile(root+'/.runtime/integration-'+(cold?'cold':'game')+'.json',JSON.stringify(receipt,null,2));send({type:'receipt',receipt});
 }

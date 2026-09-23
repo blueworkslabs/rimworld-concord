@@ -12,7 +12,8 @@ third remains a native bystander. This does not yet test four protagonists.
 Native work priorities are disabled to isolate accepted jobs; native eating,
 resting and ordinary social routines remain available.
 
-After briefly capturing native events, pause for one optional two-turn encounter
+After allowing up to ten seconds to capture a native nonroutine event for the
+initiator (without injecting one), pause for one optional two-turn encounter
 between the workers. No authored words are injected in the live encounter. Each
 worker gets at most one ordinary attention admission after speech; missing
 eligible events can leave it idle. A scripted appraisal admits eligible events
