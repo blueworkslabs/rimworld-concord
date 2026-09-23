@@ -443,7 +443,7 @@ export class Coordinator {
   async answerCoreQuestion(id:string,backend:CoreAnswerBackend,timeoutMs=45000,signal=new AbortController().signal){
     if(!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>115000)throw Error('Invalid question timeout');
     const prepared=await this.serial(async()=>{
-      signal.throwIfAborted();const g=await this.current();signal.throwIfAborted();
+      signal.throwIfAborted();const g=await this.current();this.ingest(g);signal.throwIfAborted();
       const q=this.domain.coreState?.questions.find(q=>q.id===id);
       if(!q||q.status!=='pending'||this.pending.has(q.pawn))throw Error('Question unavailable');
       const own=g.pawns.find(p=>p.id===q.pawn);if(!own||own.downed){q.status='failed';this.commit('core-answer-unavailable',q.pawn,{id});throw Error('Pawn unavailable');}
@@ -456,7 +456,7 @@ export class Coordinator {
       const choice=SocialChoice.parse(await bounded(combined,()=>backend.answerCore(prepared.view,combined)));
       return await this.serial(async()=>{
         combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale answer');
-        const g=await this.current();combined.throwIfAborted();const q=this.domain.coreState!.questions.find(q=>q.id===id)!;
+        const g=await this.current();this.ingest(g);combined.throwIfAborted();const q=this.domain.coreState!.questions.find(q=>q.id===id)!;
         if(q.status!=='running'||!g.pawns.some(p=>p.id===q.pawn&&!p.downed))throw Error('Question no longer answerable');
         if(choice.choice==='stay_silent'){q.status='silent';this.domain.coreState!.revision++;this.commit('core-answer-silent',q.pawn,{id});return {status:'silent' as const};}
         const ch=this.domain.characters[q.pawn]!;

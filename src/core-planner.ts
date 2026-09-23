@@ -33,7 +33,7 @@ export function coreView(d:Domain,g:GameState){
  for(const own of g.pawns.filter(p=>d.characters[p.id])){
   if(!available(own.id)){availability.push({pawn:own.id,status:'Existing offer, counter or active agreement; no new ordinary offer.'});continue;}
   const haul=haulingView(d,g,own),rescue=rescueView(d,g,own);
-  const options=[...(haul?.options??[]),...(rescue?.options??[])].filter(a=>!proposals.some(p=>p.pawn===own.id&&(p.status==='refused'||p.status==='withdrawn')&&sameWork(a,p.action))).slice(0,6);
+  const options=[...(haul?.options??[]),...(rescue?.options??[])].filter(a=>!proposals.some(p=>p.pawn===own.id&&(p.status==='refused'||p.status==='withdrawn'||p.standing?.status==='stopped')&&sameWork(a,p.action))).slice(0,6);
   for(const a of options)opportunities.push({id:'op:'+signature(own.id,a),pawn:own.id,action:structuredClone(a),observedTick:g.ticks,...(a.kind==='haul'&&haul?.supplies?.find(s=>s.thing===a.thing&&s.x===a.x&&s.z===a.z)?{supply:(()=>{const s=haul!.supplies!.find(s=>s.thing===a.thing&&s.x===a.x&&s.z===a.z)!;return {label:s.label,sourceCount:s.sourceCount,destinationFree:s.destinationFree};})()}: {})});
   availability.push({pawn:own.id,status:options.length?'Grounded options listed; availability is not consent or guaranteed success.':'No currently eligible grounded option; unknown is not refusal.'});
  }

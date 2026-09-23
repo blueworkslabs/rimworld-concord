@@ -10,6 +10,7 @@ import {DecisionChannel} from '../src/decision-channel.js';
 import {stopTrialWork,retireUndecided,workSummary} from '../src/work-trial.js';
 import {NeedsRunGuard,needsOutput} from './needs-policy.js';
 import {socialCleanup} from './social-cleanup.js';
+import {coreInferencePassed,coreNativeWindow} from './core-policy.js';
 import {retainedDomain} from './retention-policy.js';
 if(process.env.CONCORD_CORE_LOCKED!=='1')throw Error('Use scripts/run-core-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,b=new LabBridge(),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
@@ -45,13 +46,14 @@ try{
    const result=await c.planCore(channel,45000,controller.signal);guard.check();const round:any={index:i,result};receipt.rounds.push(round);
    if(result.status==='applied'&&result.questionId){round.answer=await c.answerCoreQuestion(result.questionId,channel,45000,controller.signal);guard.check();}
    if(result.status==='applied'&&result.proposalId){const p=c.inspect().proposals[result.proposalId]!;try{await c.pawn(p.pawn).decide(p.id,channel,45000);}catch(e){round.pawnError=String(e);await retireUndecided(c,p.id,'Decision unavailable; no retry');}guard.check();round.proposal=c.inspect().proposals[p.id];}
-   const startTick=(await b.state()).ticks;await b.admin('run');guard.check();const nativeEnd=Date.now()+30000;
-   await delay(200);
+   const startTick=(await b.state()).ticks;await b.admin('run');guard.check();const nativeMs=coreNativeWindow(scripted,i);round.nativeMs=nativeMs;const nativeEnd=Date.now()+nativeMs;
+   if(nativeMs)await delay(200);
    while(Date.now()<nativeEnd){guard.check();await c.reconcile();guard.check();await c.advanceIntentions(()=>!guard.stopped&&Date.now()<nativeEnd);guard.check();const state=await b.state();guard.sample(state.paused,state.ticks,startTick);receipt.samples.push({round:i,tick:state.ticks,paused:state.paused});await delay(400);}
    await b.admin('pause');guard.check();await c.reconcile();guard.check();round.after=await c.corePerspective();
   }
   await finish();guard.check();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();receipt.cleanup=await stopTrialWork(c);assert.equal(receipt.cleanup.errors.length,0);guard.check();receipt.summary=workSummary(c.inspect());
   if(scripted){assert.equal(receipt.rounds[0].answer.status,'delivered');assert(receipt.rounds.every((r:any)=>r.result.status==='applied'));assert.equal(receipt.rounds[1].proposal.status,'countered');assert.equal(receipt.rounds[2].proposal.decision.kind,'accept');assert(receipt.summary.completedTrips>=1);}
+  receipt.inferencePassed=coreInferencePassed(receipt.rounds);assert(receipt.inferencePassed,'Inference failure preserved; not a passing live trial');
   const saved=await save();await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);receipt.pairedRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
  }
  guard.check();receipt.passed=true;

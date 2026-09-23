@@ -15,7 +15,7 @@ const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.arg
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','scratchRoot','receipt'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
 const policy='core-v1';
-const protocol={policy,coreCalls:4,pawnCalls:5,rounds:4,nativeMsPerRound:30000,pausedInference:true,jevCalls:0};
+const protocol={policy,coreCalls:4,pawnCalls:5,rounds:4,nativeMsPerRound:scripted?[0,0,30000,1000]:[30000,30000,30000,30000],pausedInference:true,jevCalls:0};
 let scriptedTurn=0;
 const mock={receipts:[],summary:()=>({attempts:0,reservedEquivalentUSD:0}),close(){},async plan(v){
  const turn=scriptedTurn++;const topic={sourceId:'brief',text:'Optional hauling, subject to fresh consent',status:'open'};

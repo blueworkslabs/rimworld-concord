@@ -64,3 +64,20 @@ test('addressed question reply persists privately to its participants across pai
  assert.equal((await c.answerCoreQuestion(q.questionId!,{name:'answer',async answerCore(){return {choice:'say',text:'A short haul would suit me.'};}})).status,'delivered');
  await c.checkpoint('lab-concord-core-answer');const before=c.inspect();await c.restore('lab-concord-core-answer');assert.deepEqual(c.inspect().coreState,before.coreState);assert.deepEqual(c.inspect().characters.A!.messages,before.characters.A!.messages);assert.equal(c.inspect().characters.B!.messages,undefined);assert.equal((await c.corePerspective()).messages[1]!.text,'A short haul would suit me.');s.close();
 });
+test('pawn withdrawal excludes the same work even though proposal remains accepted',async()=>{
+ const {c,s,g}=await setup();g.move=async r=>{g.moves++;const out={id:r.id,actor:r.actor,status:'started' as const,reason:'Running',x:r.action.x,z:r.action.z};g.data.actions.push(out);return out;};
+ g.cancel=async r=>{const out={id:r.id,actor:r.actor,status:'interrupted' as const,reason:'Stopped',x:0,z:0};g.data.actions=g.data.actions.filter(a=>a.id!==r.id);g.data.actions.push(out);return out;};
+ const r=await c.planCore(planner(offer));if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;await c.pawn(p.pawn).decide(p.id,{name:'accept',async decide(){return {kind:'accept',reason:'Yes'};}});await c.pawn(p.pawn).withdraw('I no longer agree');assert.equal(c.inspect().proposals[p.id]!.status,'accepted');assert.equal(c.inspect().proposals[p.id]!.standing!.status,'stopped');assert(!(await c.corePerspective()).opportunities.some(o=>o.pawn===p.pawn));s.close();
+});
+test('core-directed speech ingests existing experience and rejects an interrupting injury arriving during thought',async()=>{
+ const {c,s,g}=await setup();g.data.events=[{seq:1,tick:90,pawn:'A',kind:'need-band',subject:'Food',detail:'Food changed'}];g.data.eventSeq=1;
+ const q=await c.planCore(planner(()=>({topic:null,action:{kind:'ask',pawn:'A',text:'How are you?',reason:'One question'}})));if(q.status!=='applied')throw Error();let seen=0;
+ const result=await c.answerCoreQuestion(q.questionId!,{name:'injury',async answerCore(v){seen=v.character.experiences?.length??0;g.data.events!.push({seq:2,tick:101,pawn:'A',kind:'health',subject:'injury',detail:'New injury'});g.data.eventSeq=2;g.data.ticks=101;return {choice:'say',text:'I am uninjured.'};}});
+ assert.equal(seen,1);assert.equal(result.status,'interrupted');assert.equal((await c.corePerspective()).messages.length,1);assert.equal(c.inspect().eventCursor,2);s.close();
+});
+test('finite core trial treats inference failure differently from refusal, waiting and silence',async()=>{
+ const {coreInferencePassed,coreNativeWindow}=await import('../trials/core-policy.js');
+ const valid=[{result:{status:'applied'},answer:{status:'silent'}},{result:{status:'applied'},proposal:{decision:{kind:'refuse'}}},{result:{status:'applied'},proposal:{decision:{kind:'counter'}}},{result:{status:'applied'}}];assert(coreInferencePassed(valid));
+ assert(!coreInferencePassed(valid.map(()=>({result:{status:'failed'}}))));assert(!coreInferencePassed([...valid.slice(0,3),{result:{status:'applied'},answer:{status:'interrupted'}}]));assert(!coreInferencePassed([...valid.slice(0,3),{result:{status:'applied'},pawnError:'Invalid provider answer'}]));assert(!coreInferencePassed(valid.slice(0,3)));
+ assert.deepEqual([0,1,2,3].map(i=>coreNativeWindow(false,i)),[30000,30000,30000,30000]);
+});

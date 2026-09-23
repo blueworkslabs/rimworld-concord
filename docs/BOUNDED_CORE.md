@@ -20,7 +20,7 @@ No cooking, construction, work-priority changes, ship systems or arbitrary tools
 - One question maximum; voluntary reply or silence. Every offered job gets a separate pawn decision. A counter waits for a later planner turn; it is not adopted by the runner.
 - All three existing fixture pawns are eligible, unlike the previous deliberate-bystander test. The fixture has existing meals and ordinary work priorities disabled. It is not an unrestricted colony.
 - Per-call timeout, fifteen-minute runner ceiling, host deadline admission, exclusive staging lock, no rerolls. Failures keep their attempt reservation and partial evidence. Cold restore never calls a model.
-- Scripted rehearsal: question, grounded proposal, smaller counter, fresh acceptance, later wait/review. Live choices are unconstrained by that script.
+- Scripted rehearsal: question, grounded proposal, smaller counter, fresh acceptance, later wait/review. Its pre-offer gaps are zero, followed by 30 seconds of work and a 1-second final window, to keep the prescribed offer locally available; the live four-by-30-second schedule is unchanged. Live choices are unconstrained by that script.
 
 Use `scripts/run-core-game.mjs` with an operator-private configuration matching the existing integration runner (`sshTarget`, absolute `labRoot`, `remoteRepo`, `ledger`, `scratchRoot`, `receipt`). It suffixes the ledger with `.core` and `.pawns`. `--scripted` uses no provider; `--cold` verifies the same saved run without inference. The remote `scripts/run-core-lab.sh` owns the lab lock throughout.
 
