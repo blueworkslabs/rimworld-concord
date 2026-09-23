@@ -45,7 +45,7 @@ try{
    guard.check();await b.admin('pause');guard.check();await c.reconcile();guard.check();
    const result=await c.planCore(channel,45000,controller.signal);guard.check();const round:any={index:i,result};receipt.rounds.push(round);
    if(result.status==='applied'&&result.questionId){round.answer=await c.answerCoreQuestion(result.questionId,channel,45000,controller.signal);guard.check();}
-   if(result.status==='applied'&&result.proposalId){const p=c.inspect().proposals[result.proposalId]!;try{await c.pawn(p.pawn).decide(p.id,channel,45000);}catch(e){round.pawnError=String(e);await retireUndecided(c,p.id,'Decision unavailable; no retry');}guard.check();round.proposal=c.inspect().proposals[p.id];}
+   if(result.status==='applied'&&result.proposalId){const p=c.inspect().proposals[result.proposalId]!;try{await c.pawn(p.pawn).decide(p.id,channel,45000,controller.signal);}catch(e){round.pawnError=String(e);await retireUndecided(c,p.id,'Decision unavailable; no retry');}guard.check();round.proposal=c.inspect().proposals[p.id];}
    const startTick=(await b.state()).ticks;await b.admin('run');guard.check();const nativeMs=coreNativeWindow(scripted,i);round.nativeMs=nativeMs;const nativeEnd=Date.now()+nativeMs;
    if(nativeMs)await delay(200);
    while(Date.now()<nativeEnd){guard.check();await c.reconcile();guard.check();await c.advanceIntentions(()=>!guard.stopped&&Date.now()<nativeEnd);guard.check();const state=await b.state();guard.sample(state.paused,state.ticks,startTick);receipt.samples.push({round:i,tick:state.ticks,paused:state.paused});await delay(400);}

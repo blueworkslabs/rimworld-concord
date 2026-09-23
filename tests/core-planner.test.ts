@@ -81,3 +81,8 @@ test('finite core trial treats inference failure differently from refusal, waiti
  assert(!coreInferencePassed(valid.map(()=>({result:{status:'failed'}}))));assert(!coreInferencePassed([...valid.slice(0,3),{result:{status:'applied'},answer:{status:'interrupted'}}]));assert(!coreInferencePassed([...valid.slice(0,3),{result:{status:'applied'},pawnError:'Invalid provider answer'}]));assert(!coreInferencePassed(valid.slice(0,3)));
  assert.deepEqual([0,1,2,3].map(i=>coreNativeWindow(false,i)),[30000,30000,30000,30000]);
 });
+test('runner cancellation after a pawn response but during the final state read cannot dispatch',async()=>{
+ const {c,s,g}=await setup();const r=await c.planCore(planner(offer));if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!,controller=new AbortController(),state=g.state.bind(g);let called=0;
+ await assert.rejects(c.pawn(p.pawn).decide(p.id,{name:'late-disconnect',async decide(){called++;g.state=async()=>{const result=await state();controller.abort();return result;};return {kind:'accept',reason:'I agree'};}},1000,controller.signal));
+ assert.equal(called,1);assert.equal(g.moves,0);assert.equal(c.inspect().proposals[p.id]!.status,'pending');s.close();
+});

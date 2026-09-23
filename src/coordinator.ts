@@ -575,12 +575,12 @@ export class Coordinator {
   }
   pawn(pawn:string) {
     if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
-    return {withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000)=>this.decide(pawn,id,backend,timeoutMs)};
+    return {withdraw:(reason:string)=>this.serial(async()=>{await this.current();await this.withdraw(pawn,reason);}),decide:(id:string,backend:DecisionBackend,timeoutMs=5000,signal=new AbortController().signal)=>this.decide(pawn,id,backend,timeoutMs,signal)};
   }
-  private async decide(pawn:string,id:string,backend:DecisionBackend,timeoutMs:number) {
+  private async decide(pawn:string,id:string,backend:DecisionBackend,timeoutMs:number,signal:AbortSignal) {
     const prepared=await this.serial(async()=>{
-      const game=await this.current();
-      this.ingest(game);
+      signal.throwIfAborted();const game=await this.current();
+      this.ingest(game);signal.throwIfAborted();
       const p=this.domain.proposals[id];
       if(!p || p.pawn!==pawn) throw Error('Proposal does not belong to pawn');
       if(p.status!=='pending') throw Error('Proposal already decided');
@@ -601,22 +601,23 @@ export class Coordinator {
       const progressId=p.replacesAgreementId??(p.requestId?this.domain.requests?.[p.requestId]?.agreementId:undefined)??this.domain.characters[pawn]!.intention;
       return {generation:this.generation,controller,activity,view:structuredClone({pawn:groundedPawn(this.domain,game,own),character:this.domain.characters[pawn]!,proposal:p,...(progressId?{agreementProgress:agreementProgress(this.domain,this.domain.proposals[progressId]!,game.ticks,game.actions)}:{}),...(p.parentId?{history:this.history(p)}:{})})};
     });
+    const combined=AbortSignal.any([signal,prepared.controller.signal]);
     let timer:ReturnType<typeof setTimeout>|undefined;
     try {
       timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
-      const result=Decision.parse(await bounded(prepared.controller.signal,async()=>{
+      const result=Decision.parse(await bounded(combined,async()=>{
         await this.decisionPause(prepared.activity);
-        prepared.controller.signal.throwIfAborted();
-        return backend.decide(prepared.view,prepared.controller.signal);
+        combined.throwIfAborted();
+        return backend.decide(prepared.view,combined);
       }));
       return await this.serial(async()=>{
-        if(prepared.generation!==this.generation || prepared.controller.signal.aborted) throw Error('Stale decision');
+        if(prepared.generation!==this.generation || combined.aborted) throw Error('Stale decision');
         const fresh=await this.current();this.ingest(fresh);
-        prepared.controller.signal.throwIfAborted();
+        combined.throwIfAborted();
         const p=this.domain.proposals[id]!;
         if(p.status!=='pending') throw Error('Proposal already decided');
         if(this.questions.get(pawn)?.controller===prepared.controller)this.questions.delete(pawn);
-        await this.applyDecision(p,result,fresh,prepared.controller.signal);
+        await this.applyDecision(p,result,fresh,combined);
         return structuredClone(p);
       });
     } catch(error) {
