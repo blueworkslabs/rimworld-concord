@@ -1,0 +1,50 @@
+{
+  "slug": "a-choice-to-eat",
+  "title": "A Choice to Eat",
+  "date": "2026-09-23",
+  "summary": "A separate, pawn-owned eating choice turns a deliberate decision—not ordinary speech—into bounded self-care.",
+  "sections": [
+    {
+      "heading": "From urgency to option",
+      "paragraphs": [
+        "In the earlier berry fixture, native self-care waited until urgent hunger. Saying that a pawn would eat did not dispatch a job. Now, a pawn answering a core question has a separate eating choice when eligible food is available. Saying something and staying silent remain valid, non-executable alternatives. The eat choice names one supplied nearby food stack—berries or simple meals for now. The core cannot order or propose consumption directly.",
+        "The game computes a portion capped at 25 units, with no extra stacks collected. Diet, forbidden status, reachability, reservations, availability and a deadline still constrain execution. A deliberate choice can select berries before native self-care would, without changing the native hunger thresholds or diet. Existing commitments and pending work offers block this first eating path."
+      ]
+    },
+    {
+      "heading": "Three different outcomes",
+      "paragraphs": [
+        "Scripted tests began at 20% Food with 225 berries. Speech alone left all berries untouched and Food at 18.4%. The explicit eat choice consumed 16 berries, leaving 209 and raising Food to about 97.8%. Withdrawal before consumption recorded an interruption, consumed zero berries and left all 225 intact. Each case received twenty seconds of native gameplay; no character model chose these responses.",
+        "The consumption receipt comes from the native ingestion step, not from a promise or a job disappearing. The crew log distinguishes choosing, starting and consuming. Review also caught a relay that rejected the new response and an old answered counter that kept options hidden. Both are corrected, alongside shared trial cleanup; consumed food is not counted as hauled supplies.",
+        "The release build also stopped eating cleanly through shared operator shutdown, with that intervention labelled separately from pawn withdrawal. All four cases survived paired restore and a full restart. The final review is clean; 324 Node and eleven Python checks pass. Earlier trials and allowances remain unchanged."
+      ]
+    },
+    {
+      "heading": "What remains open",
+      "paragraphs": [
+        "This proves mechanics with scripted choices, not live model-driven eating or campfire-to-meal planning. Simple meals are implemented, but these native consumption checks use berries. The entry point is answering a core question, not autonomous reflection. Paired checkpoints still require active eating to finish or stop. Whether a live pawn chooses this action appropriately remains the next question."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Pawn-owned eating contract",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PAWN_EATING.md"
+    },
+    {
+      "label": "Native test evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/pawn-eating.json"
+    }
+  ],
+  "author": {
+    "model": "moonshotai/kimi-k2",
+    "reviewer": "Astra"
+  },
+  "images": [
+    {
+      "src": "images/2026-09-23-pawn-eating.png",
+      "alt": "Actual Concord crew log distinguishing Alvin choosing a 16-berry portion, starting eating, and confirmed consumption of 16 units.",
+      "caption": "Scripted native eating test, restored and paused. These are prescribed test choices, not live model decisions. The saved report distinguishes speech, chosen action and confirmed consumption; unknown link bands are not private need readings."
+    }
+  ]
+}

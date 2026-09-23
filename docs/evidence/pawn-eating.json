@@ -1,0 +1,2557 @@
+{
+  "date": "2026-09-23",
+  "purpose": "explicit pawn-owned eat choice, separate from ordinary speech and core work orders",
+  "game": "RimWorld 1.6.4871",
+  "modelCalls": 0,
+  "jevCalls": 0,
+  "scope": [
+    "RawBerries",
+    "MealSimple"
+  ],
+  "nativeConsumptionCoverage": [
+    "RawBerries"
+  ],
+  "operatorDiagnosticsNotCharacterKnowledge": true,
+  "entryPoint": "core-question answer only; no reflection eat choice",
+  "checks": {
+    "node": 324,
+    "python": 11,
+    "independentReview": "complete; relay, resolved-counter and cleanup findings fixed; final revision109bbde clean",
+    "historicalDatabaseFilesUnchanged": 228
+  },
+  "runs": [
+    {
+      "run": "ab05a72e-663a-4d6c-97bd-fd1036ebf252",
+      "revision": "7f0a30026dcf0860054b612ca4212c9a02f06c6b",
+      "passed": true,
+      "mode": "scripted-native, no character models",
+      "cases": [
+        {
+          "variant": "speech",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.18399997055530548,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "replyStatus": "delivered",
+          "receipts": [],
+          "selfCare": [],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "ddc15938-e136-4513-a119-cf574a9e8fb5",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:0c210cfe-0b29-401d-8aa2-c749219beb40"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "fcde7175-1075-4270-ac02-907c834f4240",
+              "text": "Optional self-care question",
+              "key": "core-plan:fcde7175-1075-4270-ac02-907c834f4240"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "ddc15938-e136-4513-a119-cf574a9e8fb5",
+              "text": "I will eat some berries.",
+              "key": "core-talk:a075481f-a9df-458d-b101-c526e9dfab06"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 24,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 58,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 90,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 121,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 153,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 187,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 218,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 256,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 288,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 320,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 351,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 382,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 413,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 446,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 477,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 510,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 541,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 572,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 603,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 635,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 667,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 698,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 732,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 764,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 796,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 828,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 861,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 894,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 926,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 957,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 990,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1021,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1053,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1084,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1115,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1153,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1186,
+              "job": "Wait_Wander"
+            }
+          ],
+          "pairedRestore": true
+        },
+        {
+          "variant": "eat",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.9779999852180481,
+            "category": "Fed",
+            "berries": 209
+          },
+          "replyStatus": "delivered",
+          "receipts": [
+            {
+              "id": "1c14a2d4-7995-4755-8f5a-dc1a00bcc775",
+              "actor": "Thing_Human405",
+              "status": "completed",
+              "reason": "Native ingestion consumed 16 units from the chosen portion",
+              "kind": "eat",
+              "thing": "Thing_RawBerries1879",
+              "target": "",
+              "bed": "",
+              "project": "",
+              "stage": "",
+              "x": 73,
+              "z": 78,
+              "jobId": 3,
+              "count": 16,
+              "delivered": 16,
+              "untilTick": 1802
+            }
+          ],
+          "selfCare": [
+            {
+              "id": "1c14a2d4-7995-4755-8f5a-dc1a00bcc775",
+              "pawn": "Thing_Human405",
+              "questionId": "b6eb64da-df3e-423d-99cf-63a148aeabdb",
+              "action": {
+                "thing": "Thing_RawBerries1879",
+                "label": "berries",
+                "x": 73,
+                "z": 78,
+                "count": 16,
+                "maxTicks": 1800
+              },
+              "mapId": 0,
+              "untilTick": 1802
+            }
+          ],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "b6eb64da-df3e-423d-99cf-63a148aeabdb",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:deba255a-31ac-4330-8400-01d40f65f7c1"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "de326a88-330f-4517-b339-bc9f0a2d7ad1",
+              "text": "Optional self-care question",
+              "key": "core-plan:de326a88-330f-4517-b339-bc9f0a2d7ad1"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "b6eb64da-df3e-423d-99cf-63a148aeabdb",
+              "text": "I choose this portion of berries now.",
+              "key": "core-talk:e52d10d3-9b9a-44e6-a3bc-3836e4a2312a"
+            },
+            {
+              "seq": 4,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "1c14a2d4-7995-4755-8f5a-dc1a00bcc775",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:1c14a2d4-7995-4755-8f5a-dc1a00bcc775"
+            },
+            {
+              "seq": 5,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "1c14a2d4-7995-4755-8f5a-dc1a00bcc775",
+              "text": "eat: started. Consumed 0 units.",
+              "key": "self-care-outcome:1c14a2d4-7995-4755-8f5a-dc1a00bcc775:started"
+            },
+            {
+              "seq": 6,
+              "tick": 807,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "1c14a2d4-7995-4755-8f5a-dc1a00bcc775",
+              "text": "eat: completed. Consumed 16 units.",
+              "key": "self-care-outcome:1c14a2d4-7995-4755-8f5a-dc1a00bcc775:completed"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 25,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 56,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 87,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 118,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 149,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 180,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 210,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 242,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 280,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 312,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 343,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 375,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 406,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 438,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 469,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 501,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 532,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 564,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 597,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 630,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 661,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 693,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 725,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 755,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 788,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 826,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 856,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 887,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 917,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 948,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 979,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1012,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1044,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1076,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1112,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1142,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1174,
+              "job": "Wait_Wander"
+            }
+          ],
+          "pairedRestore": true
+        },
+        {
+          "variant": "stop",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.18399997055530548,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "replyStatus": "delivered",
+          "receipts": [
+            {
+              "id": "daea8519-866e-4a66-a808-141a768eefde",
+              "actor": "Thing_Human405",
+              "status": "interrupted",
+              "reason": "Pawn withdrew work commitment",
+              "kind": "eat",
+              "thing": "Thing_RawBerries1879",
+              "target": "",
+              "bed": "",
+              "project": "",
+              "stage": "",
+              "x": 73,
+              "z": 78,
+              "jobId": 3,
+              "count": 16,
+              "delivered": 0,
+              "untilTick": 1802
+            }
+          ],
+          "selfCare": [
+            {
+              "id": "daea8519-866e-4a66-a808-141a768eefde",
+              "pawn": "Thing_Human405",
+              "questionId": "346dea88-82ac-41eb-9fe2-0fc57effcb89",
+              "action": {
+                "thing": "Thing_RawBerries1879",
+                "label": "berries",
+                "x": 73,
+                "z": 78,
+                "count": 16,
+                "maxTicks": 1800
+              },
+              "mapId": 0,
+              "untilTick": 1802,
+              "stopped": true
+            }
+          ],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "346dea88-82ac-41eb-9fe2-0fc57effcb89",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:b59e5dd7-8560-4f57-a74a-e567e05419fd"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "af08c342-8f51-421a-b4ab-2b9856eb15e1",
+              "text": "Optional self-care question",
+              "key": "core-plan:af08c342-8f51-421a-b4ab-2b9856eb15e1"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "346dea88-82ac-41eb-9fe2-0fc57effcb89",
+              "text": "I choose this portion of berries now.",
+              "key": "core-talk:d66d2e73-f217-48b4-b600-d34651228d06"
+            },
+            {
+              "seq": 4,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "daea8519-866e-4a66-a808-141a768eefde",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:daea8519-866e-4a66-a808-141a768eefde"
+            },
+            {
+              "seq": 5,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "daea8519-866e-4a66-a808-141a768eefde",
+              "text": "eat: started. Consumed 0 units.",
+              "key": "self-care-outcome:daea8519-866e-4a66-a808-141a768eefde:started"
+            },
+            {
+              "seq": 6,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "daea8519-866e-4a66-a808-141a768eefde",
+              "text": "eat: interrupted. Consumed 0 units.",
+              "key": "self-care-outcome:daea8519-866e-4a66-a808-141a768eefde:interrupted"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 21,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 54,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 86,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 124,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 157,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 188,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 220,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 251,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 283,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 315,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 346,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 382,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 414,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 446,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 477,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 508,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 540,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 577,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 610,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 641,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 673,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 706,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 737,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 769,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 801,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 832,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 863,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 894,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 926,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 959,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 990,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1022,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1065,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1097,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1131,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1162,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1192,
+              "job": "GotoWander"
+            }
+          ],
+          "pairedRestore": true
+        }
+      ]
+    },
+    {
+      "run": "b3a1c606-6c55-4fc9-a71e-d112e131d199",
+      "revision": "a7a6813fefd094ff17a805deedcf404a8b9c7a68",
+      "passed": true,
+      "mode": "scripted-native, no character models",
+      "cases": [
+        {
+          "variant": "speech",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.18399997055530548,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "replyStatus": "delivered",
+          "receipts": [],
+          "selfCare": [],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "04433d05-5cf6-4afa-ab1d-287ec907afab",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:f203faab-f07d-4228-b10b-e329075ce153"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "65d7fb22-0943-4308-b02d-e6dbb1bbba43",
+              "text": "Optional self-care question",
+              "key": "core-plan:65d7fb22-0943-4308-b02d-e6dbb1bbba43"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "04433d05-5cf6-4afa-ab1d-287ec907afab",
+              "text": "I will eat some berries.",
+              "key": "core-talk:9ecd814f-f6ac-4513-ae26-e6506ee0ca22"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 17,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 51,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 83,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 114,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 147,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 179,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 210,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 240,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 277,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 310,
+              "job": "Wait_MaintainPosture"
+            },
+            {
+              "tick": 340,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 369,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 402,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 432,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 463,
+              "job": "Wait_MaintainPosture"
+            },
+            {
+              "tick": 494,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 526,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 559,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 591,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 623,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 655,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 686,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 717,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 749,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 780,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 813,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 844,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 874,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 905,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 936,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 965,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 995,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1029,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1061,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1094,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1127,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1160,
+              "job": "Wait_Wander"
+            }
+          ],
+          "pairedRestore": true
+        },
+        {
+          "variant": "eat",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.9779999852180481,
+            "category": "Fed",
+            "berries": 209
+          },
+          "replyStatus": "delivered",
+          "receipts": [
+            {
+              "id": "fadbd5fc-c275-42a4-a09c-31053079a22d",
+              "actor": "Thing_Human405",
+              "status": "completed",
+              "reason": "Native ingestion consumed 16 units from the chosen portion",
+              "kind": "eat",
+              "thing": "Thing_RawBerries1879",
+              "target": "",
+              "bed": "",
+              "project": "",
+              "stage": "",
+              "x": 73,
+              "z": 78,
+              "jobId": 3,
+              "count": 16,
+              "delivered": 16,
+              "untilTick": 1802
+            }
+          ],
+          "selfCare": [
+            {
+              "id": "fadbd5fc-c275-42a4-a09c-31053079a22d",
+              "pawn": "Thing_Human405",
+              "questionId": "05a767be-a35f-4c5d-8086-be765d29354d",
+              "action": {
+                "thing": "Thing_RawBerries1879",
+                "label": "berries",
+                "x": 73,
+                "z": 78,
+                "count": 16,
+                "maxTicks": 1800
+              },
+              "mapId": 0,
+              "untilTick": 1802
+            }
+          ],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "05a767be-a35f-4c5d-8086-be765d29354d",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:5121fce5-f103-4184-b993-4a6bc4b34eb6"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "5e0dc589-0821-4df5-a553-ca1587245e90",
+              "text": "Optional self-care question",
+              "key": "core-plan:5e0dc589-0821-4df5-a553-ca1587245e90"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "05a767be-a35f-4c5d-8086-be765d29354d",
+              "text": "I choose this portion of berries now.",
+              "key": "core-talk:620cc20d-ce5f-420b-aafe-0a6b5b5771dc"
+            },
+            {
+              "seq": 4,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "fadbd5fc-c275-42a4-a09c-31053079a22d",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:fadbd5fc-c275-42a4-a09c-31053079a22d"
+            },
+            {
+              "seq": 5,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "fadbd5fc-c275-42a4-a09c-31053079a22d",
+              "text": "eat: started. Consumed 0 units.",
+              "key": "self-care-outcome:fadbd5fc-c275-42a4-a09c-31053079a22d:started"
+            },
+            {
+              "seq": 6,
+              "tick": 807,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "fadbd5fc-c275-42a4-a09c-31053079a22d",
+              "text": "eat: completed. Consumed 16 units.",
+              "key": "self-care-outcome:fadbd5fc-c275-42a4-a09c-31053079a22d:completed"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 23,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 55,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 87,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 120,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 152,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 184,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 217,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 248,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 281,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 313,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 343,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 376,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 408,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 441,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 473,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 505,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 536,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 568,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 598,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 630,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 663,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 694,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 725,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 757,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 789,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 826,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 856,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 887,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 920,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 952,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 985,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1016,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1048,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1080,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1114,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1147,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1186,
+              "job": "Wait_Wander"
+            }
+          ],
+          "pairedRestore": true
+        },
+        {
+          "variant": "stop",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.18399997055530548,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "replyStatus": "delivered",
+          "receipts": [
+            {
+              "id": "e5f88999-f634-4473-bf18-1d818452696f",
+              "actor": "Thing_Human405",
+              "status": "interrupted",
+              "reason": "Pawn withdrew work commitment",
+              "kind": "eat",
+              "thing": "Thing_RawBerries1879",
+              "target": "",
+              "bed": "",
+              "project": "",
+              "stage": "",
+              "x": 73,
+              "z": 78,
+              "jobId": 3,
+              "count": 16,
+              "delivered": 0,
+              "untilTick": 1802
+            }
+          ],
+          "selfCare": [
+            {
+              "id": "e5f88999-f634-4473-bf18-1d818452696f",
+              "pawn": "Thing_Human405",
+              "questionId": "519eab19-97ce-4dd1-acf8-066ef7a49cf7",
+              "action": {
+                "thing": "Thing_RawBerries1879",
+                "label": "berries",
+                "x": 73,
+                "z": 78,
+                "count": 16,
+                "maxTicks": 1800
+              },
+              "mapId": 0,
+              "untilTick": 1802,
+              "stopped": true
+            }
+          ],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "519eab19-97ce-4dd1-acf8-066ef7a49cf7",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:dcb2ef32-7d85-45cb-9a60-db871f190b44"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "a36bfdbc-42b4-4cd1-96b9-658eb07051f9",
+              "text": "Optional self-care question",
+              "key": "core-plan:a36bfdbc-42b4-4cd1-96b9-658eb07051f9"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "519eab19-97ce-4dd1-acf8-066ef7a49cf7",
+              "text": "I choose this portion of berries now.",
+              "key": "core-talk:3cd75b41-a544-4686-837d-8d409071e7f7"
+            },
+            {
+              "seq": 4,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "e5f88999-f634-4473-bf18-1d818452696f",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:e5f88999-f634-4473-bf18-1d818452696f"
+            },
+            {
+              "seq": 5,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "e5f88999-f634-4473-bf18-1d818452696f",
+              "text": "eat: started. Consumed 0 units.",
+              "key": "self-care-outcome:e5f88999-f634-4473-bf18-1d818452696f:started"
+            },
+            {
+              "seq": 6,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "e5f88999-f634-4473-bf18-1d818452696f",
+              "text": "eat: interrupted. Consumed 0 units.",
+              "key": "self-care-outcome:e5f88999-f634-4473-bf18-1d818452696f:interrupted"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 27,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 60,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 92,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 123,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 161,
+              "job": "Wait_MaintainPosture"
+            },
+            {
+              "tick": 198,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 236,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 266,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 297,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 328,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 360,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 391,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 422,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 453,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 485,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 516,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 548,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 580,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 611,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 641,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 671,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 703,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 735,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 767,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 799,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 832,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 862,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 894,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 925,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 956,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 988,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1019,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1051,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1084,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1120,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1151,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1182,
+              "job": "GotoWander"
+            }
+          ],
+          "pairedRestore": true
+        }
+      ]
+    },
+    {
+      "run": "40c69ff8-46aa-4664-9cb1-fbb87aa4480c",
+      "revision": "109bbde74fbbfc89ef21de33722d51d3f300859d",
+      "passed": true,
+      "mode": "scripted-native, no character models",
+      "cases": [
+        {
+          "variant": "speech",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.18399997055530548,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "replyStatus": "delivered",
+          "receipts": [],
+          "selfCare": [],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "b0274446-ecd8-449f-abd3-bd5194bb6e8a",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:3217bad9-80a1-4a7b-99d7-21ca556f1670"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "04afa7c9-5ae8-45f6-a14e-cf2956b515f7",
+              "text": "Optional self-care question",
+              "key": "core-plan:04afa7c9-5ae8-45f6-a14e-cf2956b515f7"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "b0274446-ecd8-449f-abd3-bd5194bb6e8a",
+              "text": "I will eat some berries.",
+              "key": "core-talk:f4d59255-d4b0-40cd-adbd-53a939b8fa3e"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 17,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 51,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 85,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 117,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 148,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 180,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 210,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 240,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 270,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 301,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 332,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 364,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 395,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 438,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 470,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 502,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 533,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 563,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 595,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 626,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 657,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 695,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 726,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 759,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 790,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 820,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 850,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 883,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 920,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 951,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 983,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1013,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1046,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1078,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1110,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1142,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1173,
+              "job": "GotoWander"
+            }
+          ],
+          "pairedRestore": true
+        },
+        {
+          "variant": "eat",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.9779999852180481,
+            "category": "Fed",
+            "berries": 209
+          },
+          "replyStatus": "delivered",
+          "receipts": [
+            {
+              "id": "83f3be76-0390-449a-8f62-57354d5278e9",
+              "actor": "Thing_Human405",
+              "status": "completed",
+              "reason": "Native ingestion consumed 16 units from the chosen portion",
+              "kind": "eat",
+              "thing": "Thing_RawBerries1879",
+              "target": "",
+              "bed": "",
+              "project": "",
+              "stage": "",
+              "x": 73,
+              "z": 78,
+              "jobId": 3,
+              "count": 16,
+              "delivered": 16,
+              "untilTick": 1802
+            }
+          ],
+          "selfCare": [
+            {
+              "id": "83f3be76-0390-449a-8f62-57354d5278e9",
+              "pawn": "Thing_Human405",
+              "questionId": "22b6ec19-1683-41fd-92ed-596dcd166d71",
+              "action": {
+                "thing": "Thing_RawBerries1879",
+                "label": "berries",
+                "x": 73,
+                "z": 78,
+                "count": 16,
+                "maxTicks": 1800
+              },
+              "mapId": 0,
+              "untilTick": 1802
+            }
+          ],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "22b6ec19-1683-41fd-92ed-596dcd166d71",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:ccf6c5a4-331d-4e78-8ed8-81ca0594a3ec"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "5c069720-9b24-4781-a752-b18de9a23c87",
+              "text": "Optional self-care question",
+              "key": "core-plan:5c069720-9b24-4781-a752-b18de9a23c87"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "22b6ec19-1683-41fd-92ed-596dcd166d71",
+              "text": "I choose this portion of berries now.",
+              "key": "core-talk:8176fd78-e960-4cd4-82e1-4c1fdc341336"
+            },
+            {
+              "seq": 4,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "83f3be76-0390-449a-8f62-57354d5278e9",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:83f3be76-0390-449a-8f62-57354d5278e9"
+            },
+            {
+              "seq": 5,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "83f3be76-0390-449a-8f62-57354d5278e9",
+              "text": "eat: started. Consumed 0 units.",
+              "key": "self-care-outcome:83f3be76-0390-449a-8f62-57354d5278e9:started"
+            },
+            {
+              "seq": 6,
+              "tick": 767,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "83f3be76-0390-449a-8f62-57354d5278e9",
+              "text": "eat: completed. Consumed 16 units.",
+              "key": "self-care-outcome:83f3be76-0390-449a-8f62-57354d5278e9:completed"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 19,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 51,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 83,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 114,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 146,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 177,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 209,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 241,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 273,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 305,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 337,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 369,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 399,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 430,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 467,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 497,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 527,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 559,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 589,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 623,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 655,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 685,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 717,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 748,
+              "job": "Concord_Eat"
+            },
+            {
+              "tick": 785,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 816,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 849,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 881,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 911,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 942,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 973,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1002,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1035,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 1067,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1099,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1130,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1161,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1191,
+              "job": "GotoWander"
+            }
+          ],
+          "pairedRestore": true
+        },
+        {
+          "variant": "stop",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.18399997055530548,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "replyStatus": "delivered",
+          "receipts": [
+            {
+              "id": "a04f93ce-940c-4de7-8254-d02d62474cd8",
+              "actor": "Thing_Human405",
+              "status": "interrupted",
+              "reason": "Eating action cancelled; no further consumption authorized",
+              "kind": "eat",
+              "thing": "Thing_RawBerries1879",
+              "target": "",
+              "bed": "",
+              "project": "",
+              "stage": "",
+              "x": 73,
+              "z": 78,
+              "jobId": 3,
+              "count": 16,
+              "delivered": 0,
+              "untilTick": 1802
+            }
+          ],
+          "selfCare": [
+            {
+              "id": "a04f93ce-940c-4de7-8254-d02d62474cd8",
+              "pawn": "Thing_Human405",
+              "questionId": "085e186f-bc6b-4872-a382-30e87aa2c7bb",
+              "action": {
+                "thing": "Thing_RawBerries1879",
+                "label": "berries",
+                "x": 73,
+                "z": 78,
+                "count": 16,
+                "maxTicks": 1800
+              },
+              "mapId": 0,
+              "untilTick": 1802,
+              "stopped": true
+            }
+          ],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "085e186f-bc6b-4872-a382-30e87aa2c7bb",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:3db6bd99-1329-4d3c-8d9e-ed0ea19d7551"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "e7889284-1245-494a-8e92-e354b6992c85",
+              "text": "Optional self-care question",
+              "key": "core-plan:e7889284-1245-494a-8e92-e354b6992c85"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "085e186f-bc6b-4872-a382-30e87aa2c7bb",
+              "text": "I choose this portion of berries now.",
+              "key": "core-talk:a8089622-beea-4f8c-ae18-a08b3385eb33"
+            },
+            {
+              "seq": 4,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "a04f93ce-940c-4de7-8254-d02d62474cd8",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:a04f93ce-940c-4de7-8254-d02d62474cd8"
+            },
+            {
+              "seq": 5,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "a04f93ce-940c-4de7-8254-d02d62474cd8",
+              "text": "eat: started. Consumed 0 units.",
+              "key": "self-care-outcome:a04f93ce-940c-4de7-8254-d02d62474cd8:started"
+            },
+            {
+              "seq": 6,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "a04f93ce-940c-4de7-8254-d02d62474cd8",
+              "text": "Eating stop requested: Pawn withdrew eating choice",
+              "key": "self-care-stop:a04f93ce-940c-4de7-8254-d02d62474cd8"
+            },
+            {
+              "seq": 7,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "a04f93ce-940c-4de7-8254-d02d62474cd8",
+              "text": "eat: interrupted. Consumed 0 units.",
+              "key": "self-care-outcome:a04f93ce-940c-4de7-8254-d02d62474cd8:interrupted"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 30,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 61,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 93,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 124,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 156,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 187,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 219,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 251,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 282,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 313,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 344,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 375,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 408,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 439,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 471,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 502,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 534,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 568,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 601,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 631,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 664,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 695,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 728,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 759,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 790,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 822,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 854,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 884,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 915,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 946,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 979,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1011,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1044,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1075,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1106,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1136,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1168,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1206,
+              "job": "GotoWander"
+            }
+          ],
+          "pairedRestore": true
+        },
+        {
+          "variant": "cleanup",
+          "actor": "Thing_Human405",
+          "observationSeconds": 20,
+          "before": {
+            "food": 0.20000000298023224,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "after": {
+            "food": 0.18399997055530548,
+            "category": "Hungry",
+            "berries": 225
+          },
+          "replyStatus": "delivered",
+          "receipts": [
+            {
+              "id": "f05cffb3-ceaa-4516-a3c0-fbf028cd0303",
+              "actor": "Thing_Human405",
+              "status": "interrupted",
+              "reason": "Eating action cancelled; no further consumption authorized",
+              "kind": "eat",
+              "thing": "Thing_RawBerries1879",
+              "target": "",
+              "bed": "",
+              "project": "",
+              "stage": "",
+              "x": 73,
+              "z": 78,
+              "jobId": 3,
+              "count": 16,
+              "delivered": 0,
+              "untilTick": 1802
+            }
+          ],
+          "selfCare": [
+            {
+              "id": "f05cffb3-ceaa-4516-a3c0-fbf028cd0303",
+              "pawn": "Thing_Human405",
+              "questionId": "666d7864-5438-4ea1-8497-bb85b89a1e4a",
+              "action": {
+                "thing": "Thing_RawBerries1879",
+                "label": "berries",
+                "x": 73,
+                "z": 78,
+                "count": 16,
+                "maxTicks": 1800
+              },
+              "mapId": 0,
+              "untilTick": 1802,
+              "stopped": true
+            }
+          ],
+          "crewLog": [
+            {
+              "seq": 1,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "Alvin",
+              "subject": "666d7864-5438-4ea1-8497-bb85b89a1e4a",
+              "text": "Would you like something to eat?",
+              "key": "core-talk:d76f052b-97c8-413d-8e22-d5230a57baf5"
+            },
+            {
+              "seq": 2,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Core",
+              "recipient": "crew",
+              "subject": "47bc48a7-c5b5-4d30-9d75-624c9991caaa",
+              "text": "Optional self-care question",
+              "key": "core-plan:47bc48a7-c5b5-4d30-9d75-624c9991caaa"
+            },
+            {
+              "seq": 3,
+              "tick": 2,
+              "kind": "message",
+              "actor": "Alvin",
+              "recipient": "Core",
+              "subject": "666d7864-5438-4ea1-8497-bb85b89a1e4a",
+              "text": "I choose this portion of berries now.",
+              "key": "core-talk:ee04c86b-b4cc-44bc-8dc6-067ee8f329ce"
+            },
+            {
+              "seq": 4,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "f05cffb3-ceaa-4516-a3c0-fbf028cd0303",
+              "text": "Chose to eat up to 16 berries; consumption not yet confirmed.",
+              "key": "self-care:f05cffb3-ceaa-4516-a3c0-fbf028cd0303"
+            },
+            {
+              "seq": 5,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "f05cffb3-ceaa-4516-a3c0-fbf028cd0303",
+              "text": "eat: started. Consumed 0 units.",
+              "key": "self-care-outcome:f05cffb3-ceaa-4516-a3c0-fbf028cd0303:started"
+            },
+            {
+              "seq": 6,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "f05cffb3-ceaa-4516-a3c0-fbf028cd0303",
+              "text": "Eating stop requested: Operator trial ended; not a pawn-originated withdrawal",
+              "key": "self-care-stop:f05cffb3-ceaa-4516-a3c0-fbf028cd0303"
+            },
+            {
+              "seq": 7,
+              "tick": 2,
+              "kind": "record",
+              "actor": "Alvin",
+              "recipient": "observer",
+              "subject": "f05cffb3-ceaa-4516-a3c0-fbf028cd0303",
+              "text": "eat: interrupted. Consumed 0 units.",
+              "key": "self-care-outcome:f05cffb3-ceaa-4516-a3c0-fbf028cd0303:interrupted"
+            }
+          ],
+          "sampledJobs": [
+            {
+              "tick": 24,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 56,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 88,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 120,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 152,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 188,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 219,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 255,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 293,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 323,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 355,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 387,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 418,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 449,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 480,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 518,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 549,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 582,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 614,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 653,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 684,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 714,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 747,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 785,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 818,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 850,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 888,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 921,
+              "job": "Wait_Wander"
+            },
+            {
+              "tick": 953,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 985,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1017,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1047,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1079,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1112,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1144,
+              "job": "GotoWander"
+            },
+            {
+              "tick": 1175,
+              "job": "GotoWander"
+            }
+          ],
+          "pairedRestore": true
+        }
+      ]
+    }
+  ],
+  "coldRestart": {
+    "initial": true,
+    "release": true,
+    "releaseCases": [
+      "speech",
+      "eat",
+      "stop",
+      "cleanup"
+    ]
+  },
+  "limitations": [
+    "scripted mechanics, not live model selection or planning",
+    "simple meals implemented but native consumption cases use berries",
+    "active eating must finish or stop before paired checkpoint",
+    "previous live trials unchanged"
+  ]
+}

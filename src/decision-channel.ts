@@ -1,3 +1,4 @@
+import {CoreAnswerChoice} from './pawn-eating.js';
 import {CoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
 import {SocialChoice,type SocialView} from './social.js';
 import { randomUUID } from 'node:crypto';
@@ -31,7 +32,7 @@ export class DecisionChannel {
    const r=z.object({type:z.literal('decision-result'),id:z.string().uuid(),output:z.unknown().optional(),error:z.literal('Decision unavailable').optional()}).strict().parse(raw);
    const p=this.pending;if(!p||p.id!==r.id)return;
    if(r.error!==undefined&&r.output!==undefined)throw Error('Ambiguous decision result');
-   const value=r.error?undefined:(p.mode==='core'?CoreChoice:p.mode==='social'||p.mode==='core-answer'?SocialChoice:p.mode==='decision'?Decision:Reflection).parse(r.output);
+   const value=r.error?undefined:(p.mode==='core'?CoreChoice:p.mode==='core-answer'?CoreAnswerChoice:p.mode==='social'?SocialChoice:p.mode==='decision'?Decision:Reflection).parse(r.output);
    p.cleanup();this.pending=undefined;if(r.error)p.reject(Error(r.error));else p.resolve(value);
  }
  close(){

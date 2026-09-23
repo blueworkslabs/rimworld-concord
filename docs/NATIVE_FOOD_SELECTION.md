@@ -1,5 +1,7 @@
 # Why visible berries did not become a meal
 
+> Historical diagnosis at PR #52. The subsequent [pawn-owned eating slice](PAWN_EATING.md) adds an explicit choice; the results below remain unchanged.
+
 ## Diagnosis, not a new planning trial
 
 The identity-aware live run accepted six core choices and three pawn replies, but
