@@ -82,7 +82,7 @@ matches a ten-minute scripted beat sheet.
 [Scripted evidence](evidence/campfire-scripted.json): 289 Node and ten Python
 checks, compilation against the installed game assemblies, final independent
 review, native execution and cold restore passed. One campfire used twenty wood;
-two separately consented meals used twenty berries. A smaller counter required
+a separate two-meal cooking agreement used twenty berries. A smaller counter required
 fresh acceptance. Refusal created no job; withdrawal left unfinished work
 incomplete and removed the scoped cooking bill. Save/restore between meals and
 full restart preserved the verified outcomes.
@@ -93,6 +93,30 @@ driver records placement, rejects missing ingredients before finishing, and
 confirms both consumption and product creation. The incorrect early result is
 not counted as successful cooking.
 
-The frozen live protocol is a separate behavioral experiment. Its outcomes and
-explanatory diary are withheld until the preselected player-artifact read.
-Scripted success alone does not establish model planning or character quality.
+The frozen live protocol is a separate behavioral experiment. The preselected
+run-one player-artifact read is complete. The reader recovered the changing need
+bands and described the core as appearing helpless. Native eating explains
+Alvin’s improved Food band, but is not itself shown in the panel. Seven rejected
+core outputs prevented communication; the eighth delivered a question and reply,
+then the allowance was exhausted. No construction or cooking occurred in run one.
+“No outstanding offer or running agreement” is accurate but does not explain why
+coordination stopped. This is one informed reader, not a blind usability study.
+[All three frozen live results](evidence/campfire-live.json) are preserved:
+24 core attempts, one pawn reply, zero Jev calls. Twenty-three core outputs
+attempted to attach a work-offer topic link to a question and were rejected.
+No agent-directed jobs began. Each run completed its ten-minute native window,
+paired restore and cold restart without extra inference. The third ran continuously;
+its simulation advanced 349–445 ticks across each core inference interval.
+Native eating occurred in all three runs. This is not a live production success,
+a branch-variety demonstration or evidence of three active character voices.
+
+After the frozen trials, the provider schema was narrowed to require null
+`actionTopicId` for ask/wait; offers may still link topics. Runtime validation was
+not relaxed. The correction passes 290 Node checks, an independent JSON Schema
+check and focused independent review. It has **no new live-model evidence**.
+No live run was repeated and unused allowances were not refilled.
+
+The available work shortlist is not a complete food inventory. A missing food
+work option cannot establish that no edible food exists. Further planning and
+legibility checks should keep that distinction explicit. The immediate next
+verification is a small corrected-contract check before another long playtest.

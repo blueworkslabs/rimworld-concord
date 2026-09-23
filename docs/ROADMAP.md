@@ -44,9 +44,12 @@ The [shared-link status projection](CORE_VISIBILITY.md) now provides coarse
 Food/Rest bands to the core, linked peers and observer board, without exact meters
 or private thoughts. [Campfire construction and cooking](CAMPFIRE_MILESTONE.md)
 have separate pawn consent, native resource accounting and scripted/cold-restore
-verification. Three finite live runs are a separate behavioral experiment; the
-preselected human reader receives unannotated artifacts before the explanatory
-diary. No unattended inference or additional allowance is enabled by this roadmap.
+verification. Three finite live runs and the preselected human read are complete, with a clear
+failure: 23 of 24 core outputs were rejected, and no agent-directed work began.
+The narrower provider schema has automated and review evidence, not a live rerun.
+Next: a small check of that corrected contract, then reassess planning and the
+unexplained coordination-failure state. No unattended inference or additional
+allowance is enabled by this roadmap.
 
 ## Continuing pawn work
 

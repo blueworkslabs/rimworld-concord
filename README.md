@@ -14,7 +14,7 @@ An experimental vertical slice, not a playable campaign or unattended AI colony:
 - The in-game crew log separates addressed messages, observed events and work records; private outlooks remain private.
 - Optional outlook revisions can retain attributed received speech. Automated persistence/privacy, native retention and paired/cold restore have been verified in bounded trials. This is not proof of long-term personality.
 - Claude has bounded real-game evidence; Luna has offline contract evidence, not a game backend. Sustained character quality remains unproved.
-- Current focus: [a visible campfire/cooking loop](docs/CAMPFIRE_MILESTONE.md), with separately consented work and coarse shared-link Food/Rest telemetry. Scripted native resource-use and restart checks pass; live outcomes are reported separately. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
+- Current focus: [a visible campfire/cooking loop](docs/CAMPFIRE_MILESTONE.md), with separately consented work and coarse shared-link Food/Rest telemetry. Scripted native resource-use and restart checks pass. Three live trials exposed a question/offer-link contract mismatch; the corrected output menu has not been rerun live. See [roadmap](docs/ROADMAP.md), [evidence](docs/ACCEPTANCE.md), [history](docs/HISTORY.md) and [diary](https://rimworld-concord.pages.dev/).
 
 ## Layout
 
