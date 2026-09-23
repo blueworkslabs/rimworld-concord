@@ -1,8 +1,8 @@
 # Roadmap
 
-Current direction, 2026-09-23. The core remains scripted while we learn how to
-make pawn behavior grounded, deliberate and understandable. A live core is a
-future milestone, not the next dependency.
+Current direction, 2026-09-23: the user approved a bounded live core after the
+integration checkpoint and Fable’s reader feedback. Keep the scripted core as
+a regression baseline. UI polish remains deferred.
 
 ## Now: meaning and breadth
 
@@ -19,9 +19,20 @@ future milestone, not the next dependency.
 
 Pause correction micro-tests for the [bounded integration playtest](INTEGRATION_CHECKPOINT.md).
 Astra owns implementation; Fable owns the unbriefed player-panel read and feedback.
-Core stays scripted, and UI polish remains deferred.
+The checkpoint is complete, including recovered-report failure evidence. The
+receipt-size boundary has been repaired without repeating the live run.
 
-## Next: broader embodied pawn behavior
+## Next: bounded live core
+
+Build a separate core perspective from addressed/shared communication, agreement
+outcomes and explicitly grounded opportunities. Never expose pawn outlooks,
+private memories or an omniscient diagnostic snapshot. Let the core propose
+supported work, ask a bounded question or wait, with retained unresolved goals
+and reasons for blocked/deferred work. Pawns still own consent and withdrawal.
+Do not infer construction/cooking capability from conversation. Freeze a finite
+trial before activation; this roadmap alone enables no unattended inference.
+
+## Continuing pawn work
 
 - Keep corrected v2 needs and the matched-outlook bank separate from old evidence.
   Future comparisons must validate full canonical inputs and use fresh finite caps.
@@ -51,10 +62,8 @@ Core stays scripted, and UI polish remains deferred.
   from contradictory state claims and never use the score to veto valid choices.
   See [grounding and matched-outlook limits](GROUNDING_CHECKS.md).
 
-## Later, when the pawns are ready
+## Later
 
-- A bounded live core proposing grounded work and answering requests, with no
-  consent bypass. No live-core allowance is enabled by this plan.
 - Human-to-core suggestions, pawn correspondence and situated comms-console chat;
   see [playable direction](PLAYABLE_DIRECTION.md).
 - Broader actions/campaign content, larger comparative evaluations and unattended

@@ -102,3 +102,11 @@ personality, charm and humor in deliberate speech and readable presentation,
 without inventing outcomes, publishing private thoughts or forcing drama. The
 ledger supplies an evidence trail; it is not the intended final storytelling
 experience.
+
+## Integration checkpoint decision (2026-09-23)
+
+After Fable’s complete-panel read and diagnostic comparison, the user approved
+a bounded live-core milestone. This supersedes the earlier core-later ordering.
+Keep scripted behavior as a regression baseline. The next target is grounded
+follow-through, not more chatter, omniscient planning or forced cooperation.
+No new physical capability follows merely from replacing the script with a model.

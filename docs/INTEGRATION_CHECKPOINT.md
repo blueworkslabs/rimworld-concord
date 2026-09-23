@@ -62,3 +62,23 @@ signals and quiet stretches. A ledger, changed wording or acceptance count alone
 is not personality. This single authored sequence is neither a model comparison
 nor a causal test of isolated outlook influence. A recommendation about a live
 core does not itself authorize one.
+
+## Recorded result and transport repair
+
+The fixed sequence used seven Claude attempts, zero Jev calls and no rerolls.
+Four trips delivered forty wood across three agreements; all 229 activity
+samples were unpaused. Fable read nine complete player-panel captures before
+diagnostics. The read recovered the work sequence but exposed missing follow-up
+and visibility of native eating or unavailable work. This is an unbriefed
+project-familiar reader account, not a blind usability study.
+
+The original host result failed: the 1,373,560-byte final report exceeded the
+1 MiB wire cap. The saved staging report was recovered unchanged and both paired
+and full restart verified without new inference. The failure remains preserved.
+Receipt transport now permits at most 16 MiB, while inference messages retain
+the 32,000-byte limit. Boundary tests and replay of that exact recovered report
+passed; no live run was repeated. This repair does not support unbounded reports.
+
+[Sanitized results and reader corrections](evidence/integration-checkpoint.json).
+After the reader recommendation, the user approved developing a bounded live
+core next. This checkpoint itself still used a scripted core.
