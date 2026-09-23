@@ -1,3 +1,4 @@
+import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
 import {coreView,validateCoreChoice,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
@@ -394,15 +395,40 @@ export class Coordinator {
     this.commit('core-initialized','operator',{brief});
   });}
   async corePerspective(){return this.serial(async()=>{const g=await this.current();return coreView(this.domain,g);});}
+  async configureCoreSchedule(raw:CoreScheduleConfig){return this.serial(async()=>{
+    const config=CoreScheduleConfig.parse(raw),game=await this.current(),state=this.domain.coreState;
+    if(!state)throw Error('Core not initialized');
+    if(state.schedule){if(JSON.stringify(state.schedule.config)!==JSON.stringify(config))throw Error('Core schedule immutable');return;}
+    if(state.turns.length)throw Error('Schedule must precede first core turn');
+    state.schedule={config,startTick:game.ticks,endTick:game.ticks+config.windowTicks,attempts:0,consumed:{}};
+    this.commit('core-scheduled','operator',{config});
+  });}
+  async planCoreWhenDue(backend:CoreBackend,timeoutMs=45000,signal=new AbortController().signal){
+    return this.runCore(backend,timeoutMs,signal,true);
+  }
   async planCore(backend:CoreBackend,timeoutMs=45000,signal=new AbortController().signal){
+    return this.runCore(backend,timeoutMs,signal,false);
+  }
+  private async runCore(backend:CoreBackend,timeoutMs:number,signal:AbortSignal,scheduled:boolean){
     if(!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>115000)throw Error('Invalid core timeout');
     const prepared=await this.serial(async()=>{
       signal.throwIfAborted();const game=await this.current();signal.throwIfAborted();
-      const state=this.domain.coreState;if(!state||state.turns.length>=16||this.pending.has('core'))throw Error('Core turn unavailable');
+      const state=this.domain.coreState;if(!state)throw Error('Core not initialized');
+      if(!!state.schedule!==scheduled)throw Error('Core scheduling mode mismatch');
+      if(state.turns.length>=16||this.pending.has('core'))return {idle:'unavailable'} as const;
+      let causes:import('./core-scheduler.js').CoreWake[]=[];
+      if(scheduled){
+        const admission=coreAdmission(state.schedule!,coreView(this.domain,game));
+        if(!admission.ready)return {idle:admission.reason} as const;
+        causes=admission.causes;
+        // Reserve and consume before inference. Failed calls are not retried.
+        state.schedule!.attempts++;state.schedule!.lastAttemptTick=game.ticks;state.schedule!.consumed=admission.snapshot;
+      }
       const controller=new AbortController(),id=randomUUID();this.pending.set('core',controller);
-      state.turns.push({id,status:'running'});state.revision++;this.commit('core-started','core',{id});
-      return {id,controller,generation:this.generation,view:coreView(this.domain,game)};
+      state.turns.push({id,status:'running'});state.revision++;this.commit('core-started','core',{id,causes});
+      return {id,controller,generation:this.generation,view:{...coreView(this.domain,game),...(scheduled?{wakeReasons:causes}:{})}};
     });
+    if('idle' in prepared)return {status:'idle' as const,reason:prepared.idle};
     const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
     try{
       const choice=validateCoreChoice(await bounded(combined,()=>backend.plan(structuredClone(prepared.view),combined)),prepared.view);
@@ -410,6 +436,7 @@ export class Coordinator {
         combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale core turn');
         const g=await this.current();combined.throwIfAborted();
         const state=this.domain.coreState!;
+        if(state.schedule&&g.ticks>=state.schedule.endTick)throw Error('Core schedule expired during inference');
         if(state.revision!==prepared.view.revision)throw Error('Core perspective superseded');
         validateCoreChoice(choice,coreView(this.domain,g)); // physical/consent availability can change during thought
         const turn=state.turns.find(t=>t.id===prepared.id)!;if(turn.status!=='running')throw Error('Core attempt retired');
@@ -684,7 +711,7 @@ export class Coordinator {
       const invalid=rescueQuestionInvalid(after,{...p,status:'pending'});if(invalid)throw Error(invalid);
     }
     p.decision=result;
-    p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':'countered';
+    p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':result.kind==='defer'?'deferred':'countered';
     if(p.requestId&&result.kind!=='counter')this.domain.requests![p.requestId]!.status='closed';
     this.domain.characters[p.pawn]!.memories.push(`${result.kind}: ${p.reason}; ${result.reason}`);
     if(result.kind==='accept') {

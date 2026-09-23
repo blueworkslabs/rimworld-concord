@@ -25,7 +25,7 @@ export function reflectionChoices(view:AttentionView){
  }
  if(!view.character.intention&&!view.character.commitment){
   const proposalIds=view.proposals.filter(p=>p.pawn===view.pawn.id&&p.status==='pending').map(p=>p.id);
-  if(proposalIds.length)choices.push({choice:'answer_pending_proposal',proposalIds,effect:'Accept, refuse or counter one listed offer. A counter executes nothing.'});
+  if(proposalIds.length)choices.push({choice:'answer_pending_proposal',proposalIds,effect:'Accept, refuse, defer or counter one listed offer. A counter executes nothing.'});
  }
  return choices;
 }

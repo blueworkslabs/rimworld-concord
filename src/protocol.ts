@@ -22,6 +22,7 @@ export type HaulingView = {epoch:string;tick:number;mapId?:number;status:'availa
 export const Decision = z.discriminatedUnion('kind', [
   z.object({kind:z.literal('accept'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('refuse'),reason:z.string().min(1).max(1000)}).strict(),
+  z.object({kind:z.literal('defer'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('counter'),reason:z.string().min(1).max(1000),action:Action}).strict()
 ]);
 export type Decision = z.infer<typeof Decision>;
@@ -61,7 +62,7 @@ export type Character = {messages?:SocialMessage[];outlook?:PrivateOutlook;id:st
   reflections?:{tick:number;throughSeq:number;backend:string;reason:string}[];
 };
 export type AlternativeRequest = {id:string;pawn:string;agreementId:string;target:string;mapId:number;reason:string;status:'pending'|'offered'|'declined'|'closed';replyReason?:string;proposalId?:string};
-export type Proposal = {replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;rescueMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
+export type Proposal = {replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'deferred'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;rescueMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;agreementProgress?:AgreementProgress;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;

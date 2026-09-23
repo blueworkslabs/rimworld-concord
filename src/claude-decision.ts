@@ -18,7 +18,7 @@ export const CLAUDE_MODEL='claude-sonnet-4-6';
 const moveAction={type:'object',additionalProperties:false,required:['kind','x','z'],properties:{kind:{const:'move'},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0}}};
 const rescueAction={type:'object',additionalProperties:false,required:['kind','target','bed','x','z','maxTicks'],properties:{kind:{const:'rescue'},target:{type:'string',minLength:1,maxLength:120},bed:{type:'string',minLength:1,maxLength:120},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},maxTicks:{type:'integer',minimum:60,maximum:3600}}};
 const action={oneOf:[moveAction,rescueAction,{type:'object',additionalProperties:false,required:['kind','thing','x','z','count','trips','maxTicks'],properties:{kind:{const:'haul'},thing:{type:'string',minLength:1,maxLength:120},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},count:{type:'integer',minimum:1,maximum:25},trips:{type:'integer',minimum:1,maximum:3},maxTicks:{type:'integer',minimum:60,maximum:3600}}}]};
-const decision={oneOf:[...['accept','refuse'].map(kind=>({type:'object',additionalProperties:false,required:['kind','reason'],properties:{kind:{const:kind},reason:{type:'string',minLength:1,maxLength:1000}}})),
+const decision={oneOf:[...['accept','refuse','defer'].map(kind=>({type:'object',additionalProperties:false,required:['kind','reason'],properties:{kind:{const:kind},reason:{type:'string',minLength:1,maxLength:1000}}})),
  {type:'object',additionalProperties:false,required:['kind','reason','action'],properties:{kind:{const:'counter'},reason:{type:'string',minLength:1,maxLength:1000},action}}]};
 
 

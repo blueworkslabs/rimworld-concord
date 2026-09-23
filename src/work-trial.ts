@@ -7,7 +7,7 @@ export function laterOfferEligible(domain:Domain,pawn:string):boolean {
  if(!c||c.commitment||c.intention)return false;
  const prior=Object.values(domain.proposals).filter(p=>p.pawn===pawn);
  // Refusal, unfinished negotiation, failure or withdrawal is not permission to ask again.
- if(!prior.length||prior.some(p=>p.status==='pending'||p.status==='refused'||p.status==='withdrawn'||(p.status==='countered'&&!p.replyId)))return false;
+ if(!prior.length||prior.some(p=>p.status==='pending'||p.status==='refused'||p.status==='deferred'||p.status==='withdrawn'||(p.status==='countered'&&!p.replyId)))return false;
  const accepted=prior.filter(p=>p.status==='accepted');
  return accepted.length>0&&accepted.every(p=>p.standing?.status==='completed');
 }
