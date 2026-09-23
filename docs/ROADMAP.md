@@ -55,13 +55,18 @@ provider result (reported three internal turns versus a two-turn adapter bound).
 The [food-observation slice](FOOD_OBSERVATIONS.md) now exposes local supplies
 and campfires independently of executable jobs. Its native checks passed, and
 text-free provider event diagnostics are retained; the historical three-turn
-sequence remains unexplained and the strict guard is unchanged. The
+sequence remained unexplained at that milestone. The
 [new finite follow-through](FOOD_FOLLOWTHROUGH.md) retained two early provider
 errors, three later delivered questions/replies and a final rejected wait choice.
 No work was proposed. Stream counts on the three-turn result show two formatting
-calls and one tool-result error; exact cause remains unknown. Investigate that
-failure before another live allowance, without silently loosening validation. Keep the unexplained
-coordination-failure display gap explicit. No unattended inference or additional
+calls and one tool-result error. The subsequent [four-call diagnostic probe](PROVIDER_FAILURE_PROBE.md)
+reproduced two overlong-topic schema failures followed by valid repairs rejected
+at result counter three. A core-only, complete-trace recovery rule now recognizes
+that bounded two-message sequence; CLI max-turns remains two. The correction has
+automated/offline verification only, with no new colony result. Earlier transport
+errors remain unresolved. Next: one separately bounded native follow-through on
+the corrected adapter, preserving every failure and allowing waiting. Keep the
+unexplained coordination-failure display gap explicit. No unattended inference or additional
 allowance is enabled by this roadmap.
 
 ## Continuing pawn work
@@ -112,4 +117,4 @@ without exposing raw diagnostics to pawns. Keep this roadmap forward-looking;
 
 ## Local food before executable cooking
 
-[Local food sightings](FOOD_OBSERVATIONS.md) now reach the core and Supplies panel independently of cooking jobs. Scripted visibility and paired/cold restore pass. Provider event counters add diagnostics without loosening the two-turn guard; the old failed sequence remains unresolved. Next: a separately bounded live test of informed follow-through, retaining wait/refusal/failure. No new live allowance is enabled by this documentation.
+[Local food sightings](FOOD_OBSERVATIONS.md) now reach the core and Supplies panel independently of cooking jobs. Scripted visibility and paired/cold restore pass. The subsequent [provider investigation](PROVIDER_FAILURE_PROBE.md) adds a narrowly traced core-formatting recovery rule; its correction remains untested in live gameplay. Next: a separately bounded test of informed follow-through, retaining wait/refusal/failure. No new live allowance is enabled by this documentation.
