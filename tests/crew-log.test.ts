@@ -59,3 +59,13 @@ test('native log allowlist preserves observer and observation time without copyi
  recordCrew(d,'native-event','A',{event:{seq:4,pawn:'A',kind:'casualty-recovered',subject:'B',tick:24,detail:'PRIVATE'}},100);assert.equal(d.crew!.entries.length,2);
  recordCrew(d,'native-event','A',{event:{seq:5,pawn:'B',kind:'casualty-recovered',subject:'B',tick:25}},100);assert.equal(d.crew!.entries.length,2);
 });
+
+test('observer reports public scheduling state and core-authored topics, never private extensions',()=>{
+ const {d}=fixture();d.coreState={revision:0,brief:{id:'brief',text:'public'},topics:[{sourceId:'brief',text:'Optional food plan',status:'open',proposalIds:[],...{private:'DO NOT PROJECT'}}],questions:[{id:'q',pawn:'A',text:'Food?',status:'running',messages:[]}],turns:[],schedule:{config:{maxAttempts:2,cooldownTicks:60,windowTicks:600},startTick:0,endTick:600,attempts:2,consumed:{}}};
+ let r=crewReport(d,100,[],['A']);assert.match(r.observerText!,/allowance exhausted/);assert.match(r.observerText!,/Ada: thinking/);assert.match(r.observerText!,/answering/);assert.equal(r.topicText,'[open] Optional food plan');
+ assert.deepEqual(Object.keys(r).sort(),['agreements','branch','entries','epoch','observerText','revision','sharedStatus','tick','topicText','waiting','world']);
+ r=crewReport(d,100,[],['core']);assert.match(r.observerText!,/^Core: thinking/);
+ d.coreState.schedule!.attempts=0;assert.match(crewReport(d,601).observerText!,/window ended/);
+ const wire=JSON.parse(encodeCrewReport(r));assert.equal(wire.observerText,r.observerText);assert.equal(wire.topicText,r.topicText);
+ delete d.coreState;assert.equal(crewReport(d,100).topicText,'');assert.match(crewReport(d,100).observerText!,/not initialized/);
+});

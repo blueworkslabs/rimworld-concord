@@ -45,7 +45,7 @@ export class Coordinator {
   }
   private async publishCrew(){
     if(!this.domain||!this.game.setCrewLog)return;
-    const report=crewReport(this.domain,this.observedTick,this.status.filter(s=>s.epoch===this.domain.epoch&&s.tick<=this.observedTick));report.foodLines=this.food.epoch===this.domain.epoch?this.food.lines:[];const key=JSON.stringify(report);
+    const report=crewReport(this.domain,this.observedTick,this.status.filter(s=>s.epoch===this.domain.epoch&&s.tick<=this.observedTick),[...this.pending.keys()]);report.foodLines=this.food.epoch===this.domain.epoch?this.food.lines:[];const key=JSON.stringify(report);
     if(key===this.crewPublished)return;
     try{await this.game.setCrewLog(report);this.crewPublished=key;this.crewSyncError=undefined;}
     catch(e){this.crewSyncError=String(e); /* Presentation failure grants no gameplay authority. Retry on next operation. */}

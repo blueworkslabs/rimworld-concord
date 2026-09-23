@@ -2,7 +2,7 @@ import type {Domain,Proposal,Receipt} from './protocol.js';
 export type AgreementProgress={id:string;kind:string;status:string;tick:number;agreed:number;completed:number;active:number;unconfirmed:number;unsuccessful:number;notStarted:number;unfulfilled:number;delivered:number;quantityUnknown:number};
 export type CrewEntry={seq:number;tick:number;kind:'message'|'record';actor:string;recipient:string;subject:string;text:string;key:string};
 export type CrewArchive={revision:number;nextSeq:number;entries:CrewEntry[]};
-export type CrewReport={foodLines?:string[];sharedStatus?:import('./shared-status.js').SharedStatus[];waiting?:string;world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
+export type CrewReport={observerText?:string;topicText?:string;foodLines?:string[];sharedStatus?:import('./shared-status.js').SharedStatus[];waiting?:string;world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
 export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt[]):AgreementProgress {
  const agreed=p.action.kind==='haul'?p.action.trips:p.action.kind==='cook'?p.action.meals:1;
  const ids=[...new Set(p.standing?.steps??(p.actionId?[p.actionId]:[]))];
@@ -63,14 +63,20 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
   add('record',r.actor,'observer',p.id,`${p.action.kind}: ${r.status}.${delivered}${rescue}${p.action.kind==='cook'&&r.status==='completed'?` Produced ${r.delivered??0} simple meals; eating is separate.`:''}`,`outcome:${r.id}:${r.status}`);
  }
 }
-export function crewReport(d:Domain,tick:number,status:import('./shared-status.js').SharedStatus[]=[]):CrewReport {
+export function crewReport(d:Domain,tick:number,status:import('./shared-status.js').SharedStatus[]=[],thinking:string[]=[]):CrewReport {
  // Explicit projection remains safe if future domain records gain private fields.
  const entries=(d.crew?.entries??[]).map(e=>({seq:e.seq,tick:e.tick,kind:e.kind,actor:e.actor,recipient:e.recipient,subject:e.subject,text:e.text,key:e.key}));
  const proposals=Object.values(d.proposals).filter(p=>p.status==='accepted');
  const ordered=[...proposals.filter(p=>p.standing?.status==='running'),...proposals.filter(p=>p.standing?.status!=='running').reverse()].slice(0,12);
  const selfCare=Object.values(d.selfCare??{}).filter(a=>d.characters[a.pawn]?.commitment===a.id).map(a=>`${nameForCare(d,a.pawn)}: eating`);
  const waiting=Object.values(d.proposals).filter(p=>p.status==='pending'||p.standing?.status==='running').map(p=>`${safe(d.characters[p.pawn]?.name??p.pawn,80)}: ${p.status==='pending'?'reply to': 'working on'} ${p.action.kind}`).concat(selfCare).join(' · ').slice(0,400);
- return {world:d.world,epoch:d.epoch,branch:d.branch,revision:d.crew?.revision??0,tick,entries,sharedStatus:status,waiting:waiting||'No outstanding offer or running agreement.',
+ const core=d.coreState,schedule=core?.schedule;
+ const coreState=thinking.includes('core')?'Core: thinking':!core?'Core: not initialized':core.turns.length>=16?'Core: legacy lifetime limit reached':schedule&&schedule.attempts>=schedule.config.maxAttempts?'Core: configured allowance exhausted':schedule&&tick>=schedule.endTick?'Core: observation window ended':schedule&&schedule.lastAttemptTick!==undefined&&tick-schedule.lastAttemptTick<schedule.config.cooldownTicks?'Core: cooling down':'Core: no turn running; next call depends on operator/scheduler';
+ const pendingQuestions=(core?.questions??[]).filter(q=>q.status==='pending'||q.status==='running').map(q=>`${nameForCare(d,q.pawn)}: ${q.status==='running'?'answering':'question awaiting reply'}`);
+ const observerText=[coreState,...thinking.filter(id=>id!=='core'&&!!d.characters[id]).map(id=>`${nameForCare(d,id)}: thinking`),...pendingQuestions].join(' · ').slice(0,1600);
+ // The board is explicitly the core's interpretation; no private character state or raw audit data.
+ const topicText=(core?.topics??[]).slice(-8).map(t=>`[${t.status}] ${safe(t.text,240)}`).join('\n').slice(0,2400);
+ return {world:d.world,epoch:d.epoch,branch:d.branch,revision:d.crew?.revision??0,tick,entries,observerText,topicText,sharedStatus:status,waiting:waiting||'No outstanding offer or running agreement.',
   agreements:ordered.map(p=>({pawn:p.pawn,name:safe(d.characters[p.pawn]?.name??p.pawn,80),progress:agreementProgress(d,p,tick)}))};
 }
 
