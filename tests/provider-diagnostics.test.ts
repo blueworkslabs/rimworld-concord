@@ -44,7 +44,7 @@ test('typed API metadata and bounded stream sequence never retain provider text,
  s.observe({type:'user',message:{content:[{type:'tool_result',tool_use_id:secret,is_error:true,content:'Output does not match required schema: '+secret}]}});
  assert.equal(s.counts.structuredOutputCalls,2);assert.equal(s.details.events.filter(x=>x.kind==='format-call').length,1);
  assert.deepEqual(s.details.events[2],{kind:'format-result',ordinal:1,error:true,errorMarker:'schema-mismatch'});
- assert.deepEqual(s.details.events,[{kind:'api-error',metadata:{status:401,kind:'provider_credentials',code:'other'}},{kind:'format-call',ordinal:1,concordInputContract:'unchecked',issues:[]},{kind:'format-result',ordinal:1,error:true,errorMarker:'schema-mismatch'}]);
+ assert.deepEqual(s.details.events,[{kind:'api-error',metadata:{status:401,kind:'provider_credentials',code:'other'}},{kind:'format-call',ordinal:1,messageOrdinal:1,concordInputContract:'unchecked',issues:[]},{kind:'format-result',ordinal:1,error:true,errorMarker:'schema-mismatch'}]);
  assert(!JSON.stringify(s.details).includes(secret));
  for(let i=0;i<60;i++)s.observe({type:'result',num_turns:2,is_error:false,result:secret});
  assert.equal(s.details.events.length,32);assert(s.details.truncated);
