@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, rm, rename } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { requestBody, publicResponse, protectedEnvironment, review } from './review-video.mjs';
@@ -14,7 +14,7 @@ test('true video request pins model, no tools/fallback and checks asset hash', (
  assert.equal(body.tools,undefined); assert.equal(body.provider.allow_fallbacks,false);
  assert.throws(()=>requestBody({...config,videoSha256:'bad'},video));
  assert.equal(protectedEnvironment({...env,OPENROUTER_API_KEY:'unprotected'}),false);
- for (const patch of [{NO_PROXY:'*'},{no_proxy:'openrouter.ai'},{https_proxy:'different'}])
+ for (const patch of [{NO_PROXY:'*'},{no_proxy:'openrouter.ai'},{https_proxy:'different'},{https_proxy:''}])
   assert.equal(protectedEnvironment({...env,...patch}),false);
  assert.equal(protectedEnvironment(env),true);
 });
@@ -38,6 +38,9 @@ test('one attempt retained, replay refuses before transport, no raw error disclo
   assert.equal(incomplete.status,'failed'); assert.equal(JSON.parse(await readFile(root+'/incomplete/response.json','utf8')).text,raw.choices[0].message.content);
   const oversized=await review(cfg,root+'/oversized',{env,transport:async()=>new Response('x'.repeat(262145))}); assert.equal(oversized.status,'failed');
   const rejected=await review(cfg,root+'/http',{env,transport:async()=>new Response('PRIVATE_SECRET',{status:429})}); assert.equal(rejected.httpStatus,429); assert.equal(rejected.status,'failed');
+  let uncertainCalls=0;
+  await assert.rejects(review(cfg,root+'/uncertain',{env,transport:async()=>{uncertainCalls++;await rename(root+'/uncertain',root+'/reserved');return new Response(JSON.stringify(raw));}}));
+  assert.equal(uncertainCalls,1); assert.equal(JSON.parse(await readFile(root+'/reserved/attempt.json','utf8')).status,'reserved');
   await assert.rejects(review(cfg,root+'/unsafe',{env:{},transport}));assert.equal(calls,1);
  } finally { await rm(root,{recursive:true,force:true}); }
 });

@@ -6,7 +6,7 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 export function protectedEnvironment(env) {
   return env.OPENROUTER_API_KEY?.startsWith('oc-sent-v2') && Boolean(env.HTTPS_PROXY) &&
     Boolean(env.NODE_EXTRA_CA_CERTS) && env.NODE_USE_ENV_PROXY === '1' &&
-    !env.NO_PROXY && !env.no_proxy && (!env.https_proxy || env.https_proxy === env.HTTPS_PROXY);
+    !env.NO_PROXY && !env.no_proxy && (env.https_proxy === undefined || env.https_proxy === env.HTTPS_PROXY);
 }
 export function requestBody(config, video) {
   if (config.model !== 'google/gemini-3.8-flash' || !['video-only', 'receipt-check'].includes(config.phase) ||
