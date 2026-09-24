@@ -122,11 +122,11 @@ with reservations keyed by job `loadID`.
   quota at once. `job.count` is limited to what was just picked up, so the pickup toil
   leaves nothing further to collect. Reservations only ever shrink after commit, so
   `credited + reserved ≤ quota` and zero overshoot still hold.
-  **Known trade-off, for Fable:** since a tagged trip reserves at most its source
-  stack, a pawn no longer adds opportunistic duplicate stacks of the same wood to a tagged
-  trip. Ordinary hauling elsewhere is unchanged. The alternative keeps duplicates but
-  lets the reservation grow at each pickup, which can race another pawn's commit into a
-  reported escape.
+  **Trade-off, decided by Fable: keep the strict hold for the spike.** A tagged trip
+  reserves at most its source stack, so a pawn adds no opportunistic duplicate stacks to
+  a tagged trip. Ordinary hauling elsewhere is unchanged. "Credited beyond quota = 0"
+  stays a frozen measure. The growing hold with reported overshoot is an open decision
+  for the hauling migration ([NATIVE_INTENTS](NATIVE_INTENTS.md#open-decisions)).
 - **Already-carried loads** (re-targets in the drop toil): the zone is admitted only if
   the carried stack is at most `remaining` plus the job's own existing reservation.
   Admission is a pure check with no side effects, because storage searches also run
