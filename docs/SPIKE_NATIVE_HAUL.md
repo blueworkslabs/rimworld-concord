@@ -108,9 +108,11 @@ When a pawn refuses, defers or withdraws:
 An in-flight reservation ledger per intent: `remaining = quota − credited − reserved`,
 with reservations keyed by job `loadID`.
 
-- **Fresh jobs:** a job into the zone is admitted only if `remaining ≥ 1`. Its
-  `job.count` is capped to `remaining` and reserved at creation. Pickup and opportunistic
-  duplicates are bounded by `job.count`.
+- **Fresh jobs:** a job into the zone is admitted only if `remaining ≥ 1`, and its
+  `job.count` is capped to `remaining`. Creating a job reserves **nothing**: the game
+  creates candidates it never starts (`CheckForJobOverride` returning a job to the pool,
+  discarded think results, validity checks), so reserving at creation would leak quota.
+  Pickup and opportunistic duplicates are bounded by `job.count`.
 - **Already-carried loads** (re-targets in the drop toil): the zone is admitted only if
   the carried stack is at most `remaining` plus the job's own existing reservation.
   Admission is a pure check with no side effects, because storage searches also run
@@ -121,7 +123,37 @@ with reservations keyed by job `loadID`.
   the job, with no double count. Out of the zone it is released. Into the zone it is
   reserved once, at the commit.
 - **Credit** moves reserved to credited at placement (never more than the job's
-  reservation). A job that ends releases its unused reservation.
+  reservation).
+
+### Reservation ownership
+
+**Only a running job owns a reservation**, meaning the job that is a pawn's `CurJob`.
+Candidates, pooled jobs and queued jobs never hold one, so discarding or dequeuing them
+changes nothing in the ledger.
+
+- **Commit:** a `Pawn_JobTracker.StartJob` postfix, when the started job actually became
+  the pawn's `CurJob`. That covers fresh jobs, jobs started from the queue, and the
+  opportunistic path (which queues the original job and starts another; the postfix only
+  reserves for whichever job is current). It reserves `min(job.count, remaining)` and
+  caps `job.count` to that before any pickup.
+- **Veto before start:** a pure prefix on `JobDriver_HaulToCell.TryMakePreToilReservations`
+  returns false when `remaining` is 0, so the game ends the job through its own failed-
+  reservation path (`Errored` or `QueuedNoLongerValid`) before any toil runs. Nothing is
+  carried, nothing dropped.
+- **Re-target** of a running job: reserved, transferred or released at `Job.SetTarget`,
+  as above.
+
+Every disposal path, explicitly:
+
+| Path | Ledger effect |
+|---|---|
+| Placement credited (participation) | Reserved → credited, up to the job's reservation |
+| Job ends for any reason (`CleanupCurrentJob`: success, interruption, failure, error, not-suspendable replacement) | Unused reservation released |
+| Re-target out of the zone | Released |
+| Intent retires (quota, expiry, operator stop) | All released |
+| Candidate never started, returned to the pool, or discarded | None (never reserved) |
+| Queued job removed (for example on exclusion) | None (never reserved) |
+| Load or paired/cold restore | Reservations whose job isn't some pawn's `CurJob` are dropped; the rest stay with their running jobs |
 - **Result:** `credited + reserved ≤ quota` at all times, so counted deliveries never
   exceed the quota. There is no "one stack" allowance: a carried load too large for
   what's left simply isn't admitted and goes to other storage by the game's normal rules.
@@ -141,10 +173,11 @@ in the code:
 |---|---|---|---|
 | 1 | `StoreUtility.TryFindBestBetterStoreCellForWorker` | prefix | Admission for storage searches: excluded pawns, non-accepted pawns in the exclusive variant, `remaining`, carried-load size |
 | 2 | `Verse.AI.Job.SetTarget` | postfix | Commit point for re-targets of a `HaulToCell` job: reserve, transfer or release atomically. The widest patch (every job of every pawn and animal): an early `HaulToCell` check, and its cost is measured on its own |
-| 3 | `HaulAIUtility.HaulToCellStorageJob` | prefix and postfix | Admission for preselected cells; cap `job.count`; reserve |
+| 3 | `HaulAIUtility.HaulToCellStorageJob` | prefix and postfix | Admission for preselected cells; cap `job.count`. Reserves nothing |
+| 3b | `JobDriver_HaulToCell.TryMakePreToilReservations` | prefix | Pure veto before start when `remaining` is 0 |
 | 4 | `Pawn_CarryTracker.TryDropCarriedThing` (both overloads) | prefix | Wrap `placedAction` (keeping any existing callback): credit participation, record incidental placement, never double-count |
 | 5 | `Zone_Stockpile.Notify_ReceivedThing` | postfix | Audit arrivals into the tagged zone that hook 4 didn't see (incidental, unattributed) |
-| 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
+| 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | Reservation commit for the running job; `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
 | 7 | `Thing.Ingested` | prefix and postfix | `ingested`: eater, def, item count, nutrition |
 | 8 | `Pawn_InteractionsTracker.TryInteractWith` | postfix | `interaction`: initiator, recipient, def; emitted only when both are free colonists |
 
@@ -190,6 +223,11 @@ it matches what pawns actually do.
    - a pre-carried load re-targeted into the zone, larger and smaller than `remaining`;
    - paired and cold restore mid-intent.
    - two pawns reaching the quota together;
+   - a haul candidate created and discarded without starting (lab command): `remaining`
+     unchanged;
+   - an opportunistic haul replacing a queued job, then the queued job starting later;
+   - queued tagged jobs removed on exclusion: no ledger change;
+   - save and load with a haul in progress: reservations reconciled to running jobs;
    - expiry at a partial total: intent *expired*, topic open.
 2. **One frozen live run**, Luna (core and pawns), continuous, recorded, ten minutes
    wall clock, **attribution-only variant** (decided). The exclusive variant is
