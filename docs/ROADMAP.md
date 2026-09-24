@@ -96,11 +96,17 @@ receipts combine several validation predicates, so their exact failure causes re
 unknown. A mock proves portion growth alone can reject an otherwise identical choice,
 not that it caused the old failures. [Protocol and result](ONGOING_GROUNDING.md).
 
-**Next:** distinguish current typed facts from dated planner interpretations and add
-reason-specific availability diagnostics; verify those changes before the longer
-recorded scene. Calibrate any routing thresholds on separate held-out cases, not this
-development sample. Automatic escalation remains unimplemented; no Sol comparison
-has been run. The three-minute check is not the planned recorded scene.
+**Input/diagnostic changes implemented:** current records, testimony, available
+choices and dated planner interpretations are separate in core prompts. Eating
+revalidation and native dispatch retain specific first-failure diagnostics, without
+relaxing checks. Eight scripted native rejections consumed nothing; a valid chosen
+meal consumed 16 food items. The final checkpoint's six failures, completed meal and
+topic dates survived cold restart. [Evidence](evidence/fresh-facts.json).
+
+**Next:** the longer recorded continuous scene, assessing factual explanations as well
+as actual choices and outcomes. Cleaner inputs have not yet demonstrated better model
+grounding. Calibrate any automatic routing on separate held-out cases, not the prior
+development sample; escalation remains unimplemented and no Sol comparison has run.
 
 
 - A native Codex backend for pawn and core calls with the same guarantees the Claude

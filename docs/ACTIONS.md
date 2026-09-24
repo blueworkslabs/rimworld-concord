@@ -186,6 +186,27 @@ until these fixture pawns are urgently hungry; native genes can alter that rule
 (in our diagnosis: no eating at 20 % Food, eating at 10 %). The `eat` choice lets
 a pawn decide earlier; it still respects `WillEat`, forbidden items and reservations.
 
+### Eating rejection diagnostics
+
+Admission checks and their limits are unchanged. A failed eating revalidation records
+an operator-audit `eatingValidation` object on `core-answer-failed`: first failed
+coordinator gate, selected ID, offered/check/observation ticks, map IDs and offered/
+current portion counts. Examples include an existing commitment, stale observation,
+changed map, increased portion or option no longer on the eligible shortlist.
+`option-not-current` does **not** explain why native option generation omitted it.
+Earlier schema failures, cancellations or a question no longer being answerable keep
+their existing errors. This diagnostic is not added to a character's public core perspective.
+
+Native eating dispatch receipts add `failureCode` and `validatedTick`, persisted
+with the action. Codes distinguish unavailable pawn/manipulation, satisfied Food,
+existing carrying/ingestion, missing/unsupported/forbidden/inedible food, diet,
+map/local-view, portion, reservation/reachability, position, deadline and scheduler
+rejection. Only the **first failed check** is reported, not all possible causes.
+`outside-local-view` retains the existing combined radius/fog/line-of-sight test.
+Old receipts remain readable; a missing code is unknown, not success. Later native
+job interruption still uses its existing lifecycle reasons. These additions do not
+retroactively determine the causes of PR61's two historical Alvin failures.
+
 ## Receipts
 
 Receipts report `started`, `completed`, `failed` or `interrupted` with the delivered

@@ -48,6 +48,12 @@ despite valid actions and correct receipt-backed closure. Luna remains the defau
 automatic escalation is not justified by this small selected sample.
 [Diagnosis and comparison](docs/ONGOING_GROUNDING.md).
 
+Core requests now separate current records, attributed speech, available choices
+and dated planner interpretations. Eating failures have specific validation codes.
+Scripted native checks and restart passed; **better model grounding remains untested**.
+[Source contract](docs/CORE.md#source-separation-in-model-requests) ·
+[verification evidence](docs/evidence/fresh-facts.json).
+
 Not yet shown: the live core turning a need into a multi-step plan (build, then cook),
 long-run character consistency, automatic model escalation, the gravship
 campaign, or an installer for players.

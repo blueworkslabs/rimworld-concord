@@ -66,6 +66,28 @@ A question goes to one pawn, whose model answers with `say` (≤240 characters),
 Answers go to the core only: naming another pawn in the text doesn't deliver anything
 to them. Speech starts no work.
 
+## Source separation in model requests
+
+The runtime `CoreView` remains the validation contract. Model prompts project it into
+four explicitly named sections rather than a flat mix of records and summaries:
+
+- `currentRecords`: timestamped shared telemetry, question status, receipt-backed
+  self-care/work progress and eligible topic closures; local sightings retain their
+  own observer, scope and freshness. Unknown/stale telemetry is not current fact.
+- `communication`: attributed messages, requests and offer/reply wording. These
+  record what was said, not a verified cause or authorization to act.
+- `availableChoices`: eligible questions, opportunities and counters, with existing
+  capability/consent limits. Eligibility is not a requirement to act.
+- `plannerHistory`: fallible topic interpretations, not proof of current needs or
+  of a reply's absence. `basedOnTick` records the input snapshot and `updatedTick`
+  the application tick. Reading a topic or taking an unrelated turn does not refresh
+  either date; legacy undated topics expose null, not an invented timestamp.
+
+New topic dates follow paired saves and rewind. Historical text is retained, not
+silently repaired. This organization is implemented and mechanically checked;
+**better model grounding from it has not yet been demonstrated**. No free-text truth
+filter, private-state access, new action or model escalation is added.
+
 ## Topics
 
 The legacy core keeps up to 8 topics, each tied to a source it can see (the brief, a message,
