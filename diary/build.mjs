@@ -256,6 +256,15 @@ async function main() {
   await rm(OUT, {recursive: true, force: true});
   await mkdir(join(OUT, 'entries'), {recursive: true});
   await cp(join(root, 'assets'), join(OUT, 'assets'), {recursive: true});
+  // Byte-identical transport parts keep individual browser downloads small.
+  // The human-download original is retained, not transcoded or edited.
+  const recordingName = 'luna-continuous-2026-09-24.mp4';
+  const recording = await readFile(join(root, 'assets', 'recordings', recordingName));
+  const partBytes = 3 * 1024 * 1024;
+  for (let offset = 0, part = 0; offset < recording.length; offset += partBytes, part++) {
+    await writeFile(join(OUT, 'assets', 'recordings', `${recordingName}.part${part}.bin`), recording.subarray(offset, offset + partBytes));
+  }
+
   try { await cp(join(root, 'images'), join(OUT, 'images'), {recursive: true}); } catch { /* no images yet */ }
   if (args.has('--fixtures')) await cp(join(root, 'fixtures'), join(OUT, 'fixtures'), {recursive: true, filter: p => !p.endsWith('.json')});
   // Project pages (site/) sit at the root; the diary index lives at /log/. Entry URLs are unchanged.
