@@ -223,9 +223,11 @@ try{
       expect(c,v.rejectedStarts>0,'excluded queued start not rejected');expect(c,!v.byPawn.some(p=>p.pawn===B),'excluded pawn credited');
     });
     await scenario('expiry-partial',base,async c=>{
-      const id=randomUUID();await accept(id,A,{maxTicks:900,variant:'exclusive'});await run(done(id),60000);
+      // The 30-wood case closes in its first short trip; use 75 and the minimum expiry to keep a later trip outstanding.
+      const id=randomUUID();await accept(id,A,{quota:75,maxTicks:600,variant:'exclusive'});await run(done(id),60000);
       const v=invariants(c,id);if(!v)return;
-      expect(c,v.status==='expired'&&topicOutcome(v)==='expired',`expected expired, got ${v.status}`);c.data.delivered=v.delivered;
+      expect(c,v.status==='expired'&&topicOutcome(v)==='expired',`expected expired, got ${v.status}`);
+      expect(c,v.delivered>0&&v.delivered<v.quota,'partial-expiry precondition not observed');c.data.delivered=v.delivered;
     });
     await scenario('escape-injection',base,async c=>{
       const id=randomUUID();await op({op:'lab-fault-escape',actor:A});await accept(id,A,{quota:5,variant:'exclusive'});
