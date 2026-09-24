@@ -24,7 +24,8 @@ calls? And does that move us toward a crew a viewer can follow
 3. **Quota is per intent, credit is per pawn.** "Up to 30" counts every
    **participation** (below) while the intent is open, helpers included, credited to the
    actual carrier. Counted deliveries never exceed the quota ([quota
-   guarantee](#quota-guarantee)); anything else that lands in the zone is reported as
+   guarantee](#quota-guarantee)), and if one ever does, it is counted and reported as an
+   escape, never clamped; anything else that lands in the zone is reported as
    incidental, never hidden.
 4. **No 35 % needs stop for native intents.** Needs belong to the pawn and the game (the
    think tree handles hunger between trips). The only Concord stops are withdrawal,
@@ -122,8 +123,12 @@ with reservations keyed by job `loadID`.
 - **Re-target transfers are atomic.** Within the tagged zone the reservation stays with
   the job, with no double count. Out of the zone it is released. Into the zone it is
   reserved once, at the commit.
-- **Credit** moves reserved to credited at placement (never more than the job's
-  reservation).
+- **Credit is honest, never clamped.** Each participation is recorded at its full
+  placed count and credited in full to its carrier. The part covered by the job's
+  reservation moves reserved → credited. Any part beyond it is an **escape**: it is
+  still counted (so `delivered` may exceed the quota), recorded as `overshoot`, and
+  raises a `quota-escape` event with job, pawn, count and path. The guarantee below says
+  escapes don't happen; the assertion is how we find out if they do.
 
 ### Reservation ownership
 
@@ -131,15 +136,23 @@ with reservations keyed by job `loadID`.
 Candidates, pooled jobs and queued jobs never hold one, so discarding or dequeuing them
 changes nothing in the ledger.
 
-- **Commit:** a `Pawn_JobTracker.StartJob` postfix, when the started job actually became
-  the pawn's `CurJob`. That covers fresh jobs, jobs started from the queue, and the
-  opportunistic path (which queues the original job and starts another; the postfix only
-  reserves for whichever job is current). It reserves `min(job.count, remaining)` and
-  caps `job.count` to that before any pickup.
 - **Veto before start:** a pure prefix on `JobDriver_HaulToCell.TryMakePreToilReservations`
-  returns false when `remaining` is 0, so the game ends the job through its own failed-
-  reservation path (`Errored` or `QueuedNoLongerValid`) before any toil runs. Nothing is
-  carried, nothing dropped.
+  returns false when the job targets the zone and `remaining` is 0, so the game ends the
+  job through its own failed-reservation path (`Errored` or `QueuedNoLongerValid`)
+  before any toil runs. Nothing is carried, nothing dropped. For a fresh job this race
+  also logs the game's "returned false right after StartJob" warning; scripted runs
+  count those warnings.
+- **Commit:** a postfix on the same method, when it returned true **and** the job is the
+  pawn's `CurJob`. It reserves `min(job.count, remaining)` and caps `job.count` to that.
+  Not later: on 4871, `StartJob` calls `ReadyForNextToil` before returning, so a pawn
+  already standing at the wood can pick it up inside `StartJob`, before any `StartJob`
+  postfix. The same method also runs for jobs that are only being queued
+  (`TryTakeOrderedJob`); the `CurJob` check keeps those out of the ledger.
+- **Ownership check:** a `Pawn_JobTracker.StartJob` postfix releases any reservation this
+  pawn holds for a job that is not its `CurJob`. That covers the opportunistic path: on
+  4871, `StartJob` makes the reservations, then puts the original job back in the queue
+  (`EnqueueFirst`) and starts the opportunistic one, without `CleanupCurrentJob`. The
+  queued job's reservation is released here and taken again if it starts later.
 - **Re-target** of a running job: reserved, transferred or released at `Job.SetTarget`,
   as above.
 
@@ -147,21 +160,45 @@ Every disposal path, explicitly:
 
 | Path | Ledger effect |
 |---|---|
-| Placement credited (participation) | Reserved → credited, up to the job's reservation |
+| Placement (participation) | Reserved → credited; any excess counted in full as an escape |
+| Opportunistic job replaces the started one (original goes back to the queue) | Released by the ownership check |
 | Job ends for any reason (`CleanupCurrentJob`: success, interruption, failure, error, not-suspendable replacement) | Unused reservation released |
 | Re-target out of the zone | Released |
 | Intent retires (quota, expiry, operator stop) | All released |
+| Vetoed before start (`remaining` was 0) | None (never reserved) |
 | Candidate never started, returned to the pool, or discarded | None (never reserved) |
 | Queued job removed (for example on exclusion) | None (never reserved) |
 | Load or paired/cold restore | Reservations whose job isn't some pawn's `CurJob` are dropped; the rest stay with their running jobs |
+
 - **Result:** `credited + reserved ≤ quota` at all times, so counted deliveries never
-  exceed the quota. There is no "one stack" allowance: a carried load too large for
-  what's left simply isn't admitted and goes to other storage by the game's normal rules.
+  exceed the quota unless an escape is reported. There is no "one stack" allowance: a
+  carried load too large for what's left simply isn't admitted and goes to other storage by the game's normal rules.
   Wood is never split or destroyed to fit the number. (This tightens Fable's bound of
   "at most one carried load" to zero; if Astra's review finds a path that needs it, the
   fallback is exactly that bound, reported.) When `credited == quota` the intent
   retires at once; later placements are ordinary native hauls. On expiry, jobs in flight
   finish as ordinary hauls and aren't credited.
+
+### Arrival coverage and deduplication
+
+Every arrival into the tagged zone is recorded once, by exactly one source:
+
+- **Carry-tracker placements** (participation and incidental, fresh stacks and merges
+  into existing stacks): hook 4. `placedAction` fires for merges as well as new stacks,
+  so this is the complete record for anything a pawn puts down.
+- **Other fresh spawns** (for example direct recipe placement): hook 5.
+  `Zone_Stockpile.Notify_ReceivedThing` is called from `Thing.SpawnSetup`, so it sees new
+  stacks only, **not merges into an existing stack**. While hook 4 is inside a drop
+  (a per-pawn "placing" scope from its prefix to its end), hook 5 ignores the arrival,
+  because hook 4 records it.
+- **Everything else** (merges without the carry tracker, anything no hook saw):
+  reconciliation. Every 250 ticks the mod counts the wood in the zone and compares the
+  change with the arrivals recorded since the last count. A positive difference is an
+  **unattributed arrival**, a negative one a **removal**; both are reported as incidental.
+  A removal and an unseen arrival in the same window can hide each other; the fixture
+  has no removal sources (no blueprints, no fuel users, no other wood storage) and no
+  non-carry sources in the area (no bills, no trees), so any difference there is a
+  finding.
 
 ### Harmony patches
 
@@ -174,10 +211,10 @@ in the code:
 | 1 | `StoreUtility.TryFindBestBetterStoreCellForWorker` | prefix | Admission for storage searches: excluded pawns, non-accepted pawns in the exclusive variant, `remaining`, carried-load size |
 | 2 | `Verse.AI.Job.SetTarget` | postfix | Commit point for re-targets of a `HaulToCell` job: reserve, transfer or release atomically. The widest patch (every job of every pawn and animal): an early `HaulToCell` check, and its cost is measured on its own |
 | 3 | `HaulAIUtility.HaulToCellStorageJob` | prefix and postfix | Admission for preselected cells; cap `job.count`. Reserves nothing |
-| 3b | `JobDriver_HaulToCell.TryMakePreToilReservations` | prefix | Pure veto before start when `remaining` is 0 |
-| 4 | `Pawn_CarryTracker.TryDropCarriedThing` (both overloads) | prefix | Wrap `placedAction` (keeping any existing callback): credit participation, record incidental placement, never double-count |
-| 5 | `Zone_Stockpile.Notify_ReceivedThing` | postfix | Audit arrivals into the tagged zone that hook 4 didn't see (incidental, unattributed) |
-| 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | Reservation commit for the running job; `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
+| 3b | `JobDriver_HaulToCell.TryMakePreToilReservations` | prefix and postfix | Pure veto before start when `remaining` is 0; reservation commit for the `CurJob`, before any toil runs |
+| 4 | `Pawn_CarryTracker.TryDropCarriedThing` (both overloads) | prefix and finalizer | Wrap `placedAction` (keeping any existing callback): record full counts, credit participation, flag escapes, record incidental placement; open and close the "placing" scope |
+| 5 | `Zone_Stockpile.Notify_ReceivedThing` | postfix | Fresh spawns into the tagged zone outside a hook-4 scope (incidental, unattributed); merges are left to reconciliation |
+| 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | Ownership check (release reservations of non-current jobs); `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
 | 7 | `Thing.Ingested` | prefix and postfix | `ingested`: eater, def, item count, nutrition |
 | 8 | `Pawn_InteractionsTracker.TryInteractWith` | postfix | `interaction`: initiator, recipient, def; emitted only when both are free colonists |
 
@@ -191,8 +228,8 @@ agreement work.
   `haul-delivered` is not a wake cause per trip; the core wakes on the intent's
   **first delivery, quota reached, expiry, and stall** (no delivery for a set number of
   ticks while open).
-- **Receipt shape:** aggregate intent progress `{delivered, quota, overshoot, byPawn{}}`
-  from drop receipts. The crew log shows credit per pawn.
+- **Receipt shape:** aggregate intent progress `{delivered, quota, overshoot, byPawn{},
+  incidental}` from drop receipts, where `overshoot` is the sum of escapes. The crew log shows credit per pawn.
 - **Agreement lifecycle:** a shared intent referenced by several offers; a per-pawn
   standing (accepted, excluded or none); the stop rules in decision 4. Topic closure is
   *resolved* only when the quota is met. On **expiry with a partial total** (say 20 of
@@ -228,8 +265,28 @@ it matches what pawns actually do.
    - an opportunistic haul replacing a queued job, then the queued job starting later;
    - queued tagged jobs removed on exclusion: no ledger change;
    - save and load with a haul in progress: reservations reconciled to running jobs;
-   - expiry at a partial total: intent *expired*, topic open.
-2. **One frozen live run**, Luna (core and pawns), continuous, recorded, ten minutes
+   - expiry at a partial total: intent *expired*, topic open;
+   - **escape injection:** a lab-only fault flag lets one job skip admission and carry more
+     than `remaining`. Expected: full count recorded, `quota-escape` raised, `overshoot`
+     reported. This checks the detector, not the mechanism;
+   - **arrival coverage:** a carried drop that creates a new stack in the zone and one that
+     merges into an existing stack are each recorded exactly once; a lab-spawned stack and
+     a lab merge without the carry tracker show up as unattributed arrivals (hook 5 and
+     reconciliation respectively);
+   - **quota counters:** a counter before the first acceptance, adopted (the zone is
+     created with the new quota for everyone), and one after acceptance, recorded with
+     standing *none* while the quota is unchanged and the core's adoption is rejected.
+2. **Meal case, matched pair.** The main fixture can finish 30 wood before anyone is
+   hungry, so meal resumption gets its own scripted pair, `native-haul-v1-meal`: the same
+   map with the 90 wood split into small stacks spaced so each trip carries one stack
+   (Astra confirms the trip count in a dry run), quota 75, Alvin the only accepting pawn
+   in the exclusive variant, and Alvin's Food set just above his want-to-eat threshold.
+   Precondition, asserted: when native hunger triggers, the intent is open with
+   `remaining > 0`; otherwise the case is invalid, not passed. Pass: Alvin eats
+   (`ingested`), then starts another tagged haul, with **zero model calls** in between;
+   we record the ticks from the meal to that job start. The matched run uses the same
+   start state with today's ordered-job haul agreement.
+3. **One frozen live run**, Luna (core and pawns), continuous, recorded, ten minutes
    wall clock, **attribution-only variant** (decided). The exclusive variant is
    exercised in the scripted runs; the live run shows whether helpers appear naturally
    and whether the log stays legible when they do.
@@ -239,11 +296,12 @@ it matches what pawns actually do.
 | Measure | Baseline |
 |---|---|
 | Delivered totals reconstructed from receipts | Integration checkpoint (#38: 40 wood in 4 trips) |
-| Work resuming after a meal without a model call; stale haul rejections | A matched scripted ordered-job run on the same fixture |
+| Work resuming after a meal without a model call | The ordered-job half of the matched meal pair |
+| Stale haul rejections | A matched scripted ordered-job run on the main fixture |
 | Idle or wandering time; simulation speed with patches, `Job.SetTarget` patch cost on its own, and `work-options` cost | Recorded scene (#64), with matched settings before any improvement is claimed |
 | Consent violations: participation by an excluded pawn from a job started after the exclusion | **Must be zero** |
-| Credited deliveries beyond the quota | **Must be zero** |
-| Incidental placements; trips finished after an exclusion; help from non-accepted pawns (attribution variant) | Reported |
+| Quota escapes (participation beyond a reservation) outside the injection case | **Must be zero**; the injected escape must be detected |
+| Incidental placements, unattributed arrivals and removals; trips finished after an exclusion; help from non-accepted pawns (attribution variant) | Reported |
 | Checkpoint mid-intent: tag, counters and receipts after paired and cold restore | Must match |
 
 **Stop and diagnose offline** if unsupported capability or consent could reach
