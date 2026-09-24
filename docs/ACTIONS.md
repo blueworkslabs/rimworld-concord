@@ -5,6 +5,12 @@ pawn's own **answer**, and, if accepted, an **agreement** that native RimWorld j
 carry out and the game's receipts account for. Eating is the one pawn-initiated
 exception and has its own section.
 
+This describes the **current ordered-job model**: each capability is a hand-built
+shortlist, validator and custom job issued as an ordered job. It stays the regression
+baseline while capabilities migrate to native intents (tagged zones, blueprints,
+bills); see [NATIVE_INTENTS](NATIVE_INTENTS.md). The offer, consent and receipt rules
+below carry over.
+
 Code: `src/protocol.ts` (schemas), `src/coordinator.ts` (lifecycle),
 `src/haul-planning.ts`, `src/rescue-planning.ts`, `src/production-planning.ts`,
 `src/pawn-eating.ts`, `src/decision-validity.ts`; native side in `mod/`.

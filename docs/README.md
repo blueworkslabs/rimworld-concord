@@ -10,6 +10,7 @@ code and a contract disagree, one of them is a bug.
 |---|---|
 | [VISION](VISION.md) | What we're building, the principles, and the open questions |
 | [ROADMAP](ROADMAP.md) | What's next and what's deliberately deferred |
+| [NATIVE_INTENTS](NATIVE_INTENTS.md) | The agreed direction for the game side: steer RimWorld's own planner instead of driving pawns |
 | [HISTORY](HISTORY.md) | How we got here, one milestone per line |
 
 ## How it works (current contracts)
