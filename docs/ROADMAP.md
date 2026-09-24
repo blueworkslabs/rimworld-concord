@@ -103,10 +103,17 @@ relaxing checks. Eight scripted native rejections consumed nothing; a valid chos
 meal consumed 16 food items. The final checkpoint's six failures, completed meal and
 topic dates survived cold restart. [Evidence](evidence/fresh-facts.json).
 
-**Next:** the longer recorded continuous scene, assessing factual explanations as well
-as actual choices and outcomes. Cleaner inputs have not yet demonstrated better model
-grounding. Calibrate any automatic routing on separate held-out cases, not the prior
-development sample; escalation remains unimplemented and no Sol comparison has run.
+**Recorded scene completed:** ten minutes of continuous Luna play, three receipt-backed
+eating actions (39 berries), one stale eating rejection, no work/cooking. One core
+answer exceeded active-topic capacity; another was cancelled at the deadline. Native
+self-care and quiet periods continued. Paired/cold restore passed. This is not a
+controlled prompt comparison or proof of general planning. [Video and findings](RECORDED_SCENE.md#result).
+
+**Next decisions:** use the recording to assess whether the crew is understandable;
+consider food-seeking beyond currently local options and handling accumulated open
+communication topics. Do not manufacture cooking or disagreement. Cleaner inputs
+still do not guarantee grounded prose. Calibrate any automatic routing on separate
+held-out cases; escalation remains unimplemented and no Sol comparison has run.
 
 
 - A native Codex backend for pawn and core calls with the same guarantees the Claude

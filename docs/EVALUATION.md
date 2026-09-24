@@ -187,3 +187,10 @@ game restart. The forbidden/far fixtures have retained receipts but are not sepa
 cold-restored checkpoints. Exclusive mode receipts reject reused run identities.
 No model calls. Historical saves/databases are not overwritten. No automatic routing
 or proof of better model judgment follows from this mechanics test.
+
+### Ten-minute recorded mode
+
+Add `--recorded` to the continuous runner for the frozen `luna-recorded-scene-v1`
+protocol. The historical three-minute mode remains unchanged. See the
+[scene protocol and findings](RECORDED_SCENE.md) for recording, cleanup, assessment
+and full-duration video-review copy limits.

@@ -54,6 +54,11 @@ Scripted native checks and restart passed; **better model grounding remains unte
 [Source contract](docs/CORE.md#source-separation-in-model-requests) ·
 [verification evidence](docs/evidence/fresh-facts.json).
 
+A ten-minute continuous Luna scene is now recorded: three chosen eating actions
+consumed 39 berries; one other eating choice was rejected as stale. No work or cooking
+followed. Native self-care also occurred independently. The run preserved a topic-limit
+failure and deadline cancellation. [Recording and checked findings](docs/RECORDED_SCENE.md#result).
+
 Not yet shown: the live core turning a need into a multi-step plan (build, then cook),
 long-run character consistency, automatic model escalation, the gravship
 campaign, or an installer for players.
