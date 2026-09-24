@@ -219,11 +219,14 @@ untouched.
      finish after withdrawal gathers nothing more.
   2. Compute the extra this trip may add:
      `extra = min(job.count, free, AvailableStackSpace(def), destinationSpace)`.
-     - `job.count` is the game's remaining trip budget, after `StartCarryThing`
-       subtracted the first pickup.
+     - `job.count` here mirrors the durable additional-unit trip budget, after the
+       actual acquired count has been subtracted at the guarded pickup boundary.
      - `free = quota − credited − Σ other jobs' holds − carried`.
-     - `destinationSpace` is the free capacity of the target cell's slot group for
-       `def`: the same bound `HaulToCellStorageJob` uses, re-read now.
+     - `destinationSpace` is re-read using native good-cell checks and the destination
+       slot group **or its linked StorageGroup**, as `HaulToCellStorageJob` does.
+       Preserve target-cell fit restrictions and subtract cargo already committed to
+       that remaining destination capacity; do not turn total empty space into extra
+       pickup allowance. Storage can change later: native retarget/failure still applies.
   3. If `extra ≤ 0`, set `job.count = 0` (skip, never the fallback path). Otherwise set
      `job.count = extra` and **set this job's hold to `carried + extra`**, a total and
      not an increment. Remember `(carried, extra, targetA)` on the wrapper frame.
@@ -233,44 +236,89 @@ untouched.
   the chosen stack has grown or shrunk since. The pickup patch (4b) trues the hold down
   to the carried count.
 - **Post**, after the original returns:
-  - no jump happened (target A and carried count unchanged): set the hold back to
-    `carried`;
+  - no jump happened (target A and carried count unchanged): release unused extra,
+    keeping only the current carried amount;
   - jumped with the pickup still pending: keep `carried + extra`;
   - jumped and already picked up synchronously: 4b has already trued the hold down.
-  Afterwards `hold ≥ carried` always holds, and `hold ≤ carried + extra`.
+  These updates are conditional on the saved job identity/load ID still being current,
+  the same intent generation still being open, and that job still owning this hold.
+  Nested pickup, retarget, retirement or job cleanup wins: Post must not recreate a
+  released hold or overwrite a newer nested admission. Capture identity before Original,
+  never read a pooled job's new identity afterward. Use guarded finalization on exceptions.
+  For a surviving open tagged job the hold covers its cargo; a retired/ended job has
+  no hold, so `hold ≥ carried` is not a universal invariant after Original.
 
-This needs changes to three existing parts:
+This needs changes to admission **and a physical guard on every pickup**, not only
+removing 4b's clamp:
 
-- **3b commit:** for (b), the first pickup reserves
-  `min(source stack, MaxStackSpaceEver, free)`, but `job.count` becomes the **trip
-  budget** `min(native job.count, free, MaxStackSpaceEver)`. That leaves a positive
-  remainder after the first pickup for the duplicate check. The first pickup is still at
-  most the source stack, which is at most the reservation.
-- **4b pickup:** no longer clamps `job.count` for (b). It still trues the hold down.
-- **Strict mode:** (a) keeps today's behaviour exactly, selected per intent
-  (`hold: "strict" | "growing"`). Gate C can then compare both on the same fixture.
+- **3b commit:** preserve a separate, durable per-job `tripRemaining` budget from native
+  job creation, bounded by free quota and native carry/storage limits. Reserve only the
+  actual initial admitted pickup **plus any cargo already carried**. For existing
+  cargo C, the remaining quota available for *extra* is quota minus credited, other
+  holds and C; additional carry space is `AvailableStackSpace`, not `MaxStackSpaceEver`.
+  Define `tripRemaining` as additional units, bounded by native remaining count,
+  that extra quota, available carry space and destination capacity minus C. Never
+  count C as new pickup or subtract it twice. A job whose target A
+  is already its carried thing reserves that cargo once and skips pickup, as today.
+- **Pickup guard:** wrap `StartCarryThing`'s `initAction` for current tagged HaulToCell
+  jobs before it calls the native carry method. Recheck job/intent/def/standing and cap
+  this pickup to `min(tripRemaining, ownHold - carried, sourceCount, availableCarrySpace)`.
+  Temporarily give native `job.count` that positive pickup cap, not the larger trip
+  budget. After native subtraction, decrement the durable trip budget by the **actual**
+  acquired count, restoring the remaining budget only for the same surviving job.
+  The duplicate Pre uses this budget, never the temporary pickup count. Persist the
+  budget across travel/save/load; wrapper-local scratch is not the durable budget.
+- A nonpositive or newly forbidden pickup must not call native `StartCarryThing` with
+  zero (its error check changes zero to one). If existing cargo may finish, skip new
+  collection, retain target A as the actual carried thing, release unused extra and
+  continue the carry/drop route; with no cargo, reject/end the job with
+  a receipt. Withdrawal after a duplicate was chosen but before arrival also admits
+  **no** new units. Recheck at pickup, not only when selecting another stack.
+- **4b pickup:** true up from the actual pickup count/cargo; do not use a later shrink
+  as permission to exceed a hold. The pickup guard and budget restoration replace its
+  strict-mode count-zeroing behavior only for growing mode.
+- **Strict mode:** (a) keeps today's behavior exactly, selected per intent
+  (`hold: "strict" | "growing"`). Gate C can compare both on the same fixture.
 
-**No other pickup path.** In `JobDriver_HaulToCell.MakeNewToils` on 4871, a pickup
+**Why the initial guard is required:** a source initially containing 10 can grow to 20
+while the pawn walks. A hold of 10 with `job.count = 30` lets native pickup take 20.
+No after-pickup true-up prevents that escape. The separate physical cap must apply to
+both initial and duplicate pickups; reserving the whole trip budget instead would
+reintroduce quota monopolization and is not this design.
+
+**Pickup-path scope.** In the base `JobDriver_HaulToCell.MakeNewToils` on pinned 4871, a pickup
 happens only at `StartCarryThing`. That step is reached from the initial goto, or from
 the duplicate check's jump back to the reserve toil. The drop toil's failure path jumps
 to the carry toil, not to a pickup. As defence in depth, any pickup beyond the hold
-still surfaces as a reported escape through the existing ledger. That is a detector, not
-the mechanism.
+must emit an immediate pickup-bound violation with job/intent IDs and before/after
+cargo/hold counts. Assert `credited + total holds ≤ quota` at every admission/true-up
+as well as placement. Do not silently enlarge a hold around already-uncovered cargo:
+that would hide a pickup escape before the placement-only detector sees it. Existing
+raw placement escape reporting remains. These are detectors, not the guard itself.
 
-**Disposal and restore are unchanged.** Holds belong to the running job; any job end
-releases them; re-targets transfer them (patch 2). Save and load keep the job's hold and
-its `job.count`, and the post-load reconcile drops holds of non-running jobs. The
-wrapper frame is transient: a load between Pre and Post cannot happen, because it all
-runs inside one `initAction`.
+**Disposal and restore must cover the new budget.** Holds and `tripRemaining` belong
+to the running job; any job end releases both. Retargets transfer the **whole carried
+load** only if the destination intent can admit it; never clamp a hold below cargo and
+then let that cargo enter. Retargeting while an extra pickup is pending must release or
+re-admit that extra under the new destination's quota/def/standing before pickup.
+Save/load preserves job identity, hold and trip budget; post-load reconciliation drops
+all records for non-running jobs. A synchronous wrapper frame is not saved, but the
+state left while walking is durable. Test nested reserve failure, exceptions and a job
+ending/recycling inside Original; no Post may resurrect its hold.
 
 **Scripted checks** (in addition to the spike's):
 - a duplicate within budget;
 - zero extra (no jump, no throw);
 - an adjacent duplicate picked up synchronously inside the jump;
-- the chosen stack growing, and shrinking, before arrival;
-- withdrawal mid-trip, after which nothing more is gathered;
-- two pawns contending for the last units;
-- save and load mid-growth;
+- **both initial and duplicate** source stacks growing/shrinking before arrival,
+  including initial hold 10 / trip budget 30 / source growing to 20;
+- withdrawal mid-trip **after duplicate selection but before pickup**, with original
+  cargo allowed to finish and no newly collected units;
+- two pawns contending for the last units, plus shrinking destination capacity;
+- already-carried target A, and carried cargo plus a distinct source;
+- no duplicate found; nested reserve failure; zero pickup; job end/recycling in Original;
+- full-load retarget with insufficient destination quota and pending-extra retarget;
+- save/load mid-growth with the durable remaining trip budget;
 - (a) and (b) side by side.
 
 Zero escapes is required. The wrapper's cost goes into `patch-cost`.
@@ -315,18 +363,24 @@ Zero escapes is required. The wrapper's cost goes into `patch-cost`.
 - A retired intent keeps an archive per (map, zone, def, generation):
   `ordinaryByPawn` and `ordinaryUnattributed`.
 - Carry-tracker placements of `def` into that zone add to `ordinaryByPawn`. Spawns and
-  reconciliation deltas add to `ordinaryUnattributed`.
+  positive unexplained reconciliation deltas add to `ordinaryUnattributed`; negative
+  deltas are recorded separately as removals, never negative arrivals or a reduction
+  of lifetime delivered totals. No-hook changes cannot recover a carrier or gross
+  arrivals/removals that cancel between samples. Retain existing callback deduplication
+  and load-notification suppression.
 - The archive closes when the zone is deleted, or when the same (zone, def) is tagged
   again.
 - Credited totals never change after retirement.
 - A single drop whose placement callbacks straddle the retirement moment is split at
-  that moment. Each unit is counted exactly once.
+  that moment. Each unit is counted exactly once. An oversized callback while the
+  intent is open remains a full credited placement plus an escape; never cap it at
+  quota and relabel its excess ordinary. Only callbacks after retirement are ordinary.
 
 ### B5. Several intents
 
 - Coordinator configuration becomes a list. Its entries are candidate sites and
   existing stockpiles the operator allows; each opens at most one intent per def.
-- The core view lists open and offerable intents sorted by label, then def, and every
+- The core view lists open and offerable intents sorted by label, def, then stable map/zone-or-site/intent IDs for ties, and every
   offer names its stockpile label.
 - Topics link one intent each.
 - The singleton `nativeHaul` becomes `nativeHauls` with a one-entry migration for the
@@ -360,19 +414,27 @@ Zero escapes is required. The wrapper's cost goes into `patch-cost`.
 
 ### B7. Rescue replacement for a native agreement
 
-A durable handover in four steps. Each step is recorded before the next:
+A durable handover in four steps. Each step is recorded before the next. Existing
+`Rescue.Options`/`Valid` require empty cargo, so a carried-haul replacement is not
+currently offerable. Add a handover-specific read-only offerability projection using
+observed patient/bed facts; allow the pending trip only at the offer stage, never at
+rescue execution. No unobserved patient/bed or unsupported capability is invented.
 
 1. The rescue is accepted as a replacement: the pawn consents, and a
    `handover-pending` record is written with a deadline.
 2. An `intent-exclude` is sent and **confirmed by the game's state**, not by the reply.
-3. **Wait for a receipt that no tagged trip is still carrying.** That is a `job-end`
-   for the carried job, or `carrying` becoming empty. Exclusion acknowledgment alone is
-   not enough.
+3. **Wait for the captured job/cargo to drain.** A matching job-end receipt triggers
+   a fresh state check; it does not prove empty hands by itself. Require confirmed
+   `carrying` empty and the captured trip no longer active before proceeding. Unknown
+   state is not empty. Exclusion acknowledgment alone is not enough.
 4. Revalidate everything fresh (patient, bed, consent, expiry, `CarriedThing == null`),
    then dispatch.
 
 Lost replies and restarts resume from the recorded step via `reconcile`. If the handover
 deadline passes, the replacement is `stopped` ("handover timed out"), never auto-retried.
+Persist one dispatch ID **before** sending; an uncertain dispatch reply is reconciled
+under that same ID, not sent as a fresh rescue. Test closure/withdrawal during handover,
+patient/bed changes, lost exclusion and dispatch replies, and restart at every step.
 
 ### B8. Matched pair and measures
 
@@ -381,7 +443,14 @@ The same fixture runs twice:
 - the ordered model: native Hauling off, as in the spike's ordered halves.
 
 The fixture is two capable pawns, several stacks within duplicate range of each other,
-two defs in one mixed zone, and a quota above one trip. The measures are listed below.
+two defs in one mixed zone, and enough work to observe more than one trip. Freeze
+exact defs, compatible partial stack quantities/positions, quotas and observation
+budgets in the fixture manifest before running. Quota remains ≤75: do not assume it
+exceeds one trip for wood, since a growing native trip may carry all 75. Use the
+small-stack-def case to establish multiple trips, and a separate wood duplicate case.
+The ordered baseline must explicitly support both chosen defs with the same physical
+fixture and consent roles; if it cannot, label the unmatched portion instead of claiming
+parity. Retain invalid fixture attempts; no frozen live rerolls. The measures are below.
 
 ## Gate C will measure
 
