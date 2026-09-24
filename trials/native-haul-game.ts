@@ -7,7 +7,11 @@ import {randomUUID} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {LabBridge} from '../src/lab-bridge.js';
 import type {GameState,NativeEvent} from '../src/protocol.js';
-import {IntentView,invariantFindings,topicOutcome} from '../src/native-intents.js';
+import {IntentView,invariantFindings,topicOutcome,intentAction} from '../src/native-intents.js';
+import {Coordinator} from '../src/coordinator.js';
+import {Store} from '../src/store.js';
+import {scripted} from '../src/backends.js';
+import {crewReport} from '../src/crew-log.js';
 import {startNative} from './native-run.js';
 if(process.env.CONCORD_NATIVE_HAUL_LOCKED!=='1')throw Error('Exclusive lab lock required');
 const root=new URL('../..',import.meta.url).pathname;
@@ -18,7 +22,7 @@ let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
 const runId=randomUUID();
 const receipt:{runId:string;unimplemented:string[];mode:string;fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
-  {runId,unimplemented:['core offer/counter standing transitions and visible not-offered reason','matched ordered-job halves','paired coordinator/cold restore','forced opportunistic replacement','forced partial merge','work-options and patch cost measurements'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
+  {runId,unimplemented:['cold coordinator restore mid-intent','forced opportunistic replacement','forced partial merge','work-options and patch cost measurements'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 
 async function poll(){
@@ -35,6 +39,17 @@ async function run(until:()=>boolean,ms:number){
   const end=Math.min(deadline,Date.now()+ms);await startNative(b);
   try{while(Date.now()<end){await poll();if(until())return true;await delay(150);}return false;}
   finally{await b.admin('pause');await poll();}
+}
+/** Like run(), with the coordinator reconciling (and, for ordered work, the scripted core
+ * offering) on every poll. No model is involved: every answer is authored. */
+async function runWith(tick:()=>Promise<void>,until:()=>boolean,ms:number){
+  const end=Math.min(deadline,Date.now()+ms);await startNative(b);
+  try{while(Date.now()<end){await tick();await poll();if(until())return true;await delay(250);}return false;}
+  finally{await b.admin('pause');await poll();}
+}
+async function coordinator(name:string){
+  const s=new Store(root+`/.runtime/native-haul-${name}-${runId}.db`),co=new Coordinator(s,b);
+  await co.open();await co.initializeCore('Scripted core for the native-haul spike; every answer is authored.');return {s,co};
 }
 const since=(from:number,kind:string,who?:string)=>events.filter(e=>e.seq>from&&e.kind===kind&&(!who||e.pawn===who));
 
@@ -69,6 +84,33 @@ try{
   const accept=(intentId:string,actor:string,o:Record<string,unknown>={})=>op({op:'intent-accept',intentId,actor,thing:'WoodLog',...cfg.area,quota:30,maxTicks:30000,variant:'attribution',...o});
   const exclude=(intentId:string,actor:string,reason:string)=>op({op:'intent-exclude',intentId,actor,reason});
   const done=(id:string)=>()=>view(id)?.status!=='open';
+  /** Ordered-job model on the same save: every offer here stands for a core turn in live play. */
+  async function orderedHalf(c:Case,ms:number){
+    const {s,co}=await coordinator('ordered');
+    try{
+      c.data.zone=await op({op:'lab-plain-zone',actor:A,...cfg.area});
+      for(const p of state.pawns)await op({op:'lab-work-priority',actor:p.id,count:0});
+      let offers=0,noOption=0,offersAfterMeal=0;const from=lastSeq;
+      const ate=()=>since(from,'ingested',A).length>0;
+      await runWith(async()=>{
+        await co.reconcile();await co.advanceIntentions();
+        const d=co.inspect();
+        if(Object.values(d.proposals).some(p=>p.pawn===A&&(p.status==='pending'||p.standing?.status==='running'))||d.characters[A]?.commitment)return;
+        const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===A&&o.action.kind==='haul');
+        if(!o){noOption++;return;}
+        const p=await co.core().propose(A,o.action,'Scripted ordered offer');offers++;if(ate())offersAfterMeal++;
+        await co.pawn(A).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+      },()=>false,ms);
+      await co.reconcile();
+      const d=co.inspect(),mine=Object.values(d.proposals).filter(p=>p.pawn===A&&p.action.kind==='haul');
+      const receipts=Object.values(d.outcomes).filter(r=>r.actor===A&&r.kind==='haul');
+      return {offers,offersAfterMeal,pollsWithoutGroundedOption:noOption,ate:ate(),
+        delivered:receipts.reduce((n,r)=>n+(r.status==='completed'?r.delivered??0:0),0),
+        staleRejections:receipts.filter(r=>r.status==='failed').map(r=>r.reason),
+        stops:mine.filter(p=>p.standing?.status==='stopped').map(p=>p.standing!.reason),
+        modelCallsIfLive:offers};
+    }finally{s.close();}
+  }
 
   if(mode==='main'){
     await scenario('stale-lab-command',base,async c=>{
@@ -187,6 +229,52 @@ try{
       expect(c,v.drops.some(d=>d.kind==='unattributed'&&d.source==='reconcile'&&d.count===2),'merge not caught by reconciliation');
       expect(c,!v.drops.some(d=>d.kind==='unattributed'&&d.source==='reconcile'&&d.count!==2),'reconciliation reported an unexpected difference');
     });
+    await scenario('core-offers',base,async c=>{
+      // The scripted core offers the frozen intent; Alvin is never offered (native capability).
+      const {s,co}=await coordinator('core');
+      try{
+        const setup={intentId:randomUUID(),area:cfg.area,quota:30,maxTicks:30000,variant:'exclusive' as const},alvin=pawn('Alvin').id;
+        await co.configureNativeHaul(setup);
+        const v=await co.corePerspective();
+        expect(c,!v.opportunities.some(o=>o.pawn===alvin),'Alvin was offered hauling');
+        expect(c,v.availability.some(a=>a.pawn===alvin&&/cannot do hauling/.test(a.status)),'no visible not-offered reason for the core');
+        let refused=false;try{await co.core().propose(alvin,intentAction(setup),'Scripted offer');}catch(e){refused=/Not offered: cannot do hauling/.test(String(e));}
+        expect(c,refused,'direct offer to Alvin was not refused');
+        // Beatrice refuses; Pedro counters 20 before anyone accepts; the core adopts it; Pedro accepts.
+        const ob=await co.core().propose(B,intentAction(setup),'Scripted: stock wood in the new stockpile');
+        await co.pawn(B).decide(ob.id,scripted({kind:'refuse',reason:'Authored refusal'}));
+        const first=await co.core().propose(A,intentAction(setup),'Scripted: stock wood in the new stockpile');
+        await co.pawn(A).decide(first.id,scripted({kind:'counter',reason:'Twenty is enough',action:intentAction(setup,20)}));
+        const adopted=await co.core().revise(first.id,'Scripted: adopt twenty');
+        await co.pawn(A).decide(adopted.id,scripted({kind:'accept',reason:'Authored acceptance'}));await poll();
+        expect(c,view(setup.intentId)?.quota===20,'adopted pre-acceptance counter did not set the quota');
+        expect(c,!!view(setup.intentId)?.excluded.includes(B),'refusal not binding in the game');
+        // Paired checkpoint while the intent is open (no Concord job exists to block it).
+        const mid=await runWith(()=>co.reconcile(),()=>(view(setup.intentId)?.delivered??0)>0,120000);
+        if(mid){
+          const before=view(setup.intentId)!,name='lab-concord-nh-core-'+Date.now();await co.checkpoint(name);await co.restore(name);await poll();
+          const after=view(setup.intentId);
+          expect(c,!!after&&after.quota===before.quota&&after.delivered===before.delivered&&after.status===before.status,'intent changed across paired restore');
+          expect(c,co.inspect().proposals[adopted.id]?.standing?.status==='running','standing lost across paired restore');
+          c.data.pairedRestore={name,before:{delivered:before.delivered,reserved:before.reserved},afterReserved:after?.reserved};
+        }else c.findings.push('no delivery before the paired checkpoint window closed');
+        await runWith(()=>co.reconcile(),()=>co.inspect().proposals[adopted.id]?.standing?.status!=='running',240000);
+        await co.reconcile();
+        const iv=invariants(c,setup.intentId);if(!iv)return;
+        expect(c,iv.status==='met'&&iv.delivered===20,`expected 20 met, got ${iv.delivered} ${iv.status}`);
+        expect(c,!iv.byPawn.some(p=>p.pawn!==A),'credit outside the accepting pawn in the exclusive variant');
+        expect(c,co.inspect().proposals[adopted.id]?.standing?.status==='completed','accepting standing not completed');
+        const crew=crewReport(co.inspect(),state.ticks).entries.map(e=>e.text);c.data.crew=crew;
+        expect(c,crew.includes('Alvin: not offered: cannot do hauling.'),'crew log lacks the not-offered line');
+        expect(c,crew.some(t=>t.startsWith('Stockpile haul quota met: 20/20 wood')),'crew log lacks the quota line');
+      }finally{s.close();}
+    });
+    await scenario('ordered-main',base,async c=>{
+      // Matched ordered-job half for stale rejections: the same area as an ordinary stockpile,
+      // native Hauling off for everyone so only ordered jobs haul, the scripted core offering
+      // Pedro every grounded haul it sees. Same wall-clock budget as the native variants.
+      c.data.result=await orderedHalf(c,240000);
+    });
     await scenario('quota-immutability-only',base,async c=>{
       // Only native quota immutability; model counter/adoption transitions are deferred.
       const id=randomUUID();await accept(id,A,{quota:20});
@@ -207,6 +295,11 @@ try{
       expect(c,await run(next,300000),'Pedro did not start another tagged haul after eating');
       const resumed=events.find(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
       c.data.ticksMealToResume=resumed?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
+    });
+    await scenario('ordered-meal',base,async c=>{
+      // Matched ordered-job half: same start state (Pedro's Food 0.33). The ordered model stops
+      // work below 0.35 and never resumes an agreement; every restart needs a new offer.
+      c.data.result=await orderedHalf(c,600000);
     });
   }
   receipt.passed=receipt.eventGaps===0&&receipt.cases.length>0&&receipt.cases.every(c=>c.passed);

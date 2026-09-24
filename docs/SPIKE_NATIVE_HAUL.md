@@ -346,30 +346,43 @@ Gate C approval: [smoke results](trials/NATIVE_HAUL_SMOKE.md). The frozen sole-A
 exclusive run was blocked because his unchanged Rancher backstory disables native
 hauling. Fable selected Pedro for revised scripted/meal roles; the builder and runner
 now use role sheet v2, not yet game-tested. No capability bypass or character rewrite
-has been made. The core/crew-log visible not-offered path remains Clawd’s follow-up.
+has been made.
 
 - **Mod:** `mod/NativeIntents.cs` (intent tag, ledger, reconciliation, bridge and lab
   operations) and `mod/IntentPatches.cs` (patches 1–8). Build with
   `scripts/build-mod.sh <Managed> <0Harmony.dll>`. All eleven patched methods apply
-  offline under Mono with Harmony 2.4.2.
+  offline under Mono with Harmony 2.4.2. Pawns report `haulingCapable` (the game's own
+  Hauling work-type check).
 - **Fixture:** `scripts/native-haul-fixture.py` (`--meal` for the meal case). Wood
   positions and the candidate area come from the running game.
 - **Coordinator:** routing entries, `src/native-intents.ts` (wakes, aggregate receipts,
-  topic outcome, invariants), `LabBridge.intent`.
+  topic outcome, invariants), `LabBridge.intent`. `haul-zone` is an ordinary offer:
+  - `Coordinator.configureNativeHaul` freezes the one intent;
+  - the core view lists it only for pawns the game lets haul; the others get a visible
+    "not offered: cannot do hauling" line;
+  - accept joins or opens the intent, while refuse, defer and withdraw exclude the pawn
+    in the game, even before the zone exists;
+  - counters can be adopted only before the first acceptance;
+  - the standing follows the intent (met, expired, stopped), with no needs stop;
+  - the crew log shows first delivery, quota and expiry, and "finished a trip started
+    before withdrawing".
 - **Scripted runs:** `scripts/run-native-haul-lab.sh main|meal [--case=<name>]`, which
   writes a unique `.runtime/native-haul-<mode>-<runId>.json`, including raw events and final
   state per case. Event gaps fail the run. These private runtime files are not published.
+  - `core-offers` covers the coordinator path end to end: not offered, refusal, a
+    pre-acceptance counter adopted, acceptance, and a paired checkpoint mid-intent.
+  - The matched ordered-job halves are `ordered-main` (stale rejections) and
+    `ordered-meal`. Each uses the same save and area as an ordinary stockpile, with
+    native Hauling off so only ordered jobs haul, as the ordered model always ran.
+    They record every offer as a core turn it would have cost live.
 - **Not yet built:**
-  - the core offering a `haul-zone` intent and the pawns answering it (needed for the
-    live run), including Alvin’s visible not-offered reason;
-  - the matched ordered-job halves and actual counteroffer/standing transitions;
-  - paired coordinator/cold restore (the runner currently tests game save/reload only);
-  - forced opportunistic replacement and failed partial merge, and `work-options` /
-    isolated patch-cost measurements. All are listed as unimplemented in run receipts.
+  - cold coordinator restore mid-intent;
+  - forced opportunistic replacement and failed partial merge;
+  - the `work-options` and isolated patch-cost measurements.
 
-  The opportunistic-replacement and failed-partial-merge cases are observed from
-  events rather than forced; a run without such an event is not evidence for either case.
-  The quota-immutability check is not a counteroffer test.
+  All are listed as unimplemented in run receipts. The opportunistic-replacement and
+  failed-partial-merge cases are observed from events rather than forced; a run without
+  such an event is not evidence for either case.
 
 ## Out of scope
 

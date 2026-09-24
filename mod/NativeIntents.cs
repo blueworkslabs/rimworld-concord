@@ -305,6 +305,24 @@ namespace Concord {
         public string Lab(Request r) {
             var p=WorldState.FindActor(r.actor);
             if(r.op=="lab-fault-escape"){if(p==null)throw new Exception("Unknown pawn");faultSkipNext=true;faultPawn=r.actor;return "{\"fault\":\"armed\"}";}
+            if(r.op=="lab-plain-zone") {
+                // Matched ordered-job half: the same area as an ordinary, untagged wood stockpile.
+                if(p==null) throw new Exception("Unknown pawn");
+                var pmap=p.Map;var wood=DefDatabase<ThingDef>.GetNamed("WoodLog");
+                var plain=new Zone_Stockpile(StorageSettingsPreset.DefaultStockpile,pmap.zoneManager);
+                pmap.zoneManager.RegisterZone(plain);
+                for(int dx=0;dx<r.w;dx++)for(int dz=0;dz<r.h;dz++){var c=new IntVec3(r.x+dx,0,r.z+dz);if(c.InBounds(pmap)&&pmap.zoneManager.ZoneAt(c)==null&&c.Standable(pmap)&&!c.Fogged(pmap))plain.AddCell(c);}
+                if(plain.cells.Count==0){plain.Delete();throw new Exception("Candidate area has no usable cells");}
+                plain.settings.filter.SetDisallowAll();plain.settings.filter.SetAllow(wood,true);plain.settings.Priority=StoragePriority.Important;
+                return "{\"zone\":"+plain.ID+",\"cells\":"+plain.cells.Count+"}";
+            }
+            if(r.op=="lab-work-priority") {
+                // Matched ordered-job half: ordered jobs only, as the ordered model always ran.
+                if(p==null) throw new Exception("Unknown pawn");
+                if(r.count<0||r.count>4) throw new Exception("Priority must be 0-4");
+                p.workSettings.SetPriority(WorkTypeDefOf.Hauling,r.count);
+                return "{\"hauling\":"+p.workSettings.GetPriority(WorkTypeDefOf.Hauling)+"}";
+            }
             if(r.op=="lab-interrupt") {
                 // Forced cancellation of the pawn's current job (cleanup drops are incidental).
                 if(p==null) throw new Exception("Unknown pawn");

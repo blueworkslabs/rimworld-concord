@@ -137,7 +137,7 @@ namespace Concord
     }
     [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing,target,bed,cancelKind,crewJson,intentId,variant,reason; public int x,z,w,h,quota,ttlMs,count,meals,maxTicks,untilTick; public int mapId=-1; }
     [Serializable] public class Response { public string id,error; public bool ok; }
-    [Serializable] public class PawnView { public string id,name,job,currentBed,carrying; public int x,z; public float health; public bool workReady,rescueReady,buildReady,cookReady,downed; }
+    [Serializable] public class PawnView { public string id,name,job,currentBed,carrying; public int x,z; public float health; public bool workReady,rescueReady,buildReady,cookReady,downed,haulingCapable; }
     [Serializable] public class Snapshot { public string world,epoch; public int ticks,decisionPauses; public bool loaded,paused,manualPaused; }
 
     [StaticConstructorOnStartup]
@@ -171,7 +171,7 @@ namespace Concord
             var snapshot=new Snapshot {world=w.world,epoch=w.epoch,ticks=Find.TickManager.TicksGame,loaded=true,paused=Find.TickManager.Paused,manualPaused=Find.TickManager.CurTimeSpeed==TimeSpeed.Paused,decisionPauses=DecisionPauses.Count};
             var pawns=Find.CurrentMap.mapPawns.FreeColonistsSpawned.Select(p=>JsonUtility.ToJson(new PawnView {
                 id=p.GetUniqueLoadID(),name=p.LabelShort,job=p.CurJobDef==null?"":p.CurJobDef.defName,
-                x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent,workReady=Hauling.Ready(p),buildReady=Production.Ready(p,"build"),cookReady=Production.Ready(p,"cook"),rescueReady=Rescue.Ready(p),downed=p.Downed,currentBed=p.CurrentBed()==null?"":p.CurrentBed().GetUniqueLoadID(),carrying=p.carryTracker.CarriedThing==null?"":p.carryTracker.CarriedThing.GetUniqueLoadID()
+                x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent,workReady=Hauling.Ready(p),haulingCapable=!p.WorkTypeIsDisabled(WorkTypeDefOf.Hauling),buildReady=Production.Ready(p,"build"),cookReady=Production.Ready(p,"cook"),rescueReady=Rescue.Ready(p),downed=p.Downed,currentBed=p.CurrentBed()==null?"":p.CurrentBed().GetUniqueLoadID(),carrying=p.carryTracker.CarriedThing==null?"":p.carryTracker.CarriedThing.GetUniqueLoadID()
             }).TrimEnd('}')+",\"eating\":"+Eating.Options(p,w.epoch)+",\"foodObservation\":"+FoodObservation.Json(p,w.epoch)+",\"production\":"+Production.Options(p,w.epoch)+",\"linkStatus\":"+LinkTelemetry.Json(p,w.epoch)+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
