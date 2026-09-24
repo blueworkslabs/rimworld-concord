@@ -311,12 +311,17 @@ it matches what pawns actually do.
    hungry, so meal resumption gets its own scripted pair, `native-haul-v1-meal`: the same
    map with the 90 wood split into small stacks spaced so each trip carries one stack
    (Astra confirms the trip count in a dry run), quota 75, Pedro the only accepting pawn
-   in the exclusive variant, and Pedro's Food set just above his want-to-eat threshold.
-   Precondition, asserted: when native hunger triggers, the intent is open with
-   `remaining > 0`; otherwise the case is invalid, not passed. Pass: Pedro eats
+   in the exclusive variant. Calibrated on 4871 with the fixture's raw berries:
+   Pedro starts at Food **0.13**, just above the native berry-selection threshold of
+   **0.12** (ordinary want-to-eat is 0.30, but berries are not yet eligible then).
+   Stacks are at least ten cells apart to avoid the native eight-cell duplicate pickup.
+   Precondition, asserted: at the meal event the intent is open with unfinished quota
+   (`quota - intentional deliveries at that tick > 0`); otherwise the case is invalid, not passed. Pass: Pedro eats
    (`ingested`), then starts another tagged haul, with **zero model calls** in between;
    we record the ticks from the meal to that job start. The matched run uses the same
-   start state with today's ordered-job haul agreement.
+   start state with today's ordered-job haul agreement. Record time to first work
+   separately from meal-to-resumption. A post-meal reservation can consume all free
+   ledger capacity while the work is still unfinished; do not confuse those quantities.
 3. **One frozen live run**, Luna (core and pawns), continuous, recorded, ten minutes
    wall clock, **attribution-only variant** (decided). The exclusive variant is
    exercised in the scripted runs; the live run shows whether helpers appear naturally
@@ -374,7 +379,10 @@ has been made.
   - The matched ordered-job halves are `ordered-main` (stale rejections) and
     `ordered-meal`. Each uses the same save and area as an ordinary stockpile, with
     native Hauling off so only ordered jobs haul, as the ordered model always ran.
-    They record every offer as a core turn it would have cost live.
+    They record authored offers as estimated core offer-turns, not actual model calls.
+    Validity requires actual scoped wood delivery (and eating/post-meal work for the
+    meal half); quantity shortfalls remain measured outcomes, with `quotaMet` explicit.
+    Initial work after eating is not reported as resumption of pre-meal work.
 - **Not yet built:**
   - cold coordinator restore mid-intent;
   - forced opportunistic replacement and failed partial merge;

@@ -115,9 +115,10 @@ try{
       const starts=since(from,'job-start',A).filter(e=>e.detail.startsWith('ConcordHaul;')),meal=since(from,'ingested',A)[0],first=starts[0],afterMeal=meal&&starts.find(e=>e.seq>meal.seq),beforeMeal=meal&&starts.some(e=>e.seq<meal.seq);
       c.data.receipts=receipts;c.data.observedOutcomes=samples;
       expect(c,offers>0&&delivered()>0,'ordered baseline did not execute and deliver scoped wood');
-      expect(c,delivered()===quota,`ordered baseline delivered ${delivered()}/${quota}`);
+      expect(c,delivered()<=quota,`ordered baseline exceeded quota: ${delivered()}/${quota}`);
+      // A valid baseline may fall short; measure that outcome rather than requiring the old model to succeed.
       if(mode==='meal'){expect(c,!!meal,'ordered meal baseline never ate');expect(c,!!afterMeal,'ordered meal baseline has no post-meal haul start');}
-      return {startTick,firstWorkTick:first?.tick??null,mealTick:meal?.tick??null,postMealWorkTick:afterMeal?.tick??null,
+      return {quota,quotaMet:delivered()===quota,observation:'baseline measurement, not a claim of goal completion',startTick,firstWorkTick:first?.tick??null,mealTick:meal?.tick??null,postMealWorkTick:afterMeal?.tick??null,
         ticksToFirstWork:first?first.tick-startTick:null,ticksMealToFirstWork:meal&&afterMeal?afterMeal.tick-meal.tick:null,
         resumedEarlierWork:!!beforeMeal&&!!afterMeal,ticksMealToResume:beforeMeal&&meal&&afterMeal?afterMeal.tick-meal.tick:null,offers,offersAfterMeal,pollsWithoutGroundedOption:noOption,ate:ate(),
         delivered:delivered(),
@@ -306,8 +307,10 @@ try{
       await run(()=>ate()||done(id)(),600000);
       const meal=since(0,'ingested',A)[0];
       if(!meal){c.findings.push('invalid: Pedro never ate before the intent closed');return;}
-      const at=view(id)!;c.data.atMeal={tick:meal.tick,delivered:at.delivered,status:at.status,remaining:at.remaining};
-      if(at.status!=='open'||at.remaining<=0){c.findings.push('invalid: intent not open with work left when hunger triggered');return;}
+      const at=view(id)!,deliveredAtMeal=at.drops.filter(d=>d.kind==='participation'&&d.tick<=meal.tick).reduce((n,d)=>n+d.count,0);
+      c.data.atMeal={tick:meal.tick,delivered:deliveredAtMeal,statusAtPoll:at.status,unfinishedQuota:at.quota-deliveredAtMeal,freeToReserveAtPoll:at.remaining};
+      // Polling can observe the post-meal job's reservation already acquired. It is still unfinished work.
+      if(at.status!=='open'||at.quota-deliveredAtMeal<=0){c.findings.push('invalid: intent not open with work left when hunger triggered');return;}
       const next=()=>events.some(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
       expect(c,await run(next,300000),'Pedro did not start another tagged haul after eating');
       const resumed=events.find(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
@@ -318,7 +321,7 @@ try{
       c.data.ticksMealToResume=resumed&&first&&first.seq<meal.seq?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
     });
     await scenario('ordered-meal',base,async c=>{
-      // Matched ordered-job half: same start state (Pedro's Food 0.33). The ordered model stops
+      // Matched ordered-job half: same calibrated start state (Pedro's Food 0.13). The ordered model stops
       // work below 0.35 and never resumes an agreement; every restart needs a new offer.
       c.data.result=await orderedHalf(c,600000);
     });

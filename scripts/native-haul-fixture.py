@@ -6,7 +6,8 @@ priorities (for example lab-baseline), an output path that must not exist, and J
 with wood positions and the candidate area:
   {"wood":[{"x":..,"z":..},...],"area":{"x":..,"z":..,"w":..,"h":..}}
 Main fixture: three stacks of 30. With --meal: 18 stacks of 5 (one per trip), and
-Pedro's Food at a provisional 0.33; calibrate hunger timing in a dry run.
+Pedro's Food at 0.13, just above native raw-berry eligibility (0.12 on 4871).
+Meal stacks must be spaced more than 8 cells apart; validate actual trips in a dry run.
 Removes every stockpile whose filter could accept WoodLog, so nobody hauls wood
 before an agreement exists. The candidate area is data for the coordinator, not a zone.
 """
@@ -21,6 +22,8 @@ HAULING=WORK.index('Hauling')
 count,stacks=(5,18) if meal else (30,3)
 assert len(layout['wood'])==stacks,f'need {stacks} wood positions'
 area=layout['area'];assert 1<=area['w']*area['h']<=64
+if meal:
+    assert all((a['x']-b['x'])**2+(a['z']-b['z'])**2>=100 for j,a in enumerate(layout['wood']) for b in layout['wood'][j+1:]),'meal stacks need at least 10-cell spacing to avoid native duplicate pickup'
 
 r=E.parse(src);m=r.find('.//maps/li');assert m is not None
 things=m.find('things');pawns=[p for p in things if p.findtext('def')=='Human'];assert len(pawns)==3

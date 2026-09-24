@@ -44,7 +44,7 @@
   },
   "meal": {
     "pawn": "Pedro",
-    "initialFood": 0.33,
-    "calibration": "provisional; dry-run hunger timing and trip count required"
+    "initialFood": 0.13,
+    "calibration": "Pinned4871 raw berries become native food candidates below Food0.12; matched halves start0.13; use wood stacks more than8 cells apart and validate trip counts"
   }
 }
