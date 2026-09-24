@@ -76,7 +76,7 @@ export type Character = {messages?:SocialMessage[];outlook?:PrivateOutlook;id:st
 };
 export type AlternativeRequest = {id:string;pawn:string;agreementId:string;target:string;mapId:number;reason:string;status:'pending'|'offered'|'declined'|'closed';replyReason?:string;proposalId?:string};
 export type ReofferRequest = {id:string;pawn:string;deferredId:string;action:Action;mapId?:number;tick:number;reason:string;status:'pending'|'offered';proposalId?:string};
-export type Proposal = {reofferRequestId?:string;reoffersProposalId?:string;reofferReplyId?:string;replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'deferred'|'countered'|'withdrawn';withdrawalReason?:string;haulMap?:number;rescueMap?:number;productionMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
+export type Proposal = {reofferRequestId?:string;reoffersProposalId?:string;reofferReplyId?:string;replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'deferred'|'countered'|'withdrawn'|'lapsed';lapsed?:{intentStatus:string;answered:boolean};withdrawalReason?:string;haulMap?:number;rescueMap?:number;productionMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;agreementProgress?:AgreementProgress;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;
@@ -90,6 +90,7 @@ export type Domain = {
   eventCursor?:number;crew?:CrewArchive;
   pendingIntentAcceptances?:string[];
   pendingIntentExclusions?:Record<string,{intentId:string;actor:string;reason:string}>;
+  diagnostics?:{attentionGaps:number;attentionGapKinds:Record<string,number>};
   nativeHaul?:import('./native-intents.js').NativeHaulConfig;intentViews?:Record<string,NativeIntentView>;
   schema:1;world:string;epoch:string;branch:string;
   characters:Record<string,Character>;proposals:Record<string,Proposal>;

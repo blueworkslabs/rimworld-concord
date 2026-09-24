@@ -45,7 +45,7 @@ const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quot
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
 const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],responses=[];
-let receipt,draining=false,failed=false,coreCount=0,pawnCount=0;
+let receipt,draining=false,failed=false,coreCount=0,pawnCount=0;const laneFailures=[];
 const send=m=>{if(!child.stdin.destroyed)child.stdin.write(JSON.stringify(m)+'\n');};
 const stopHost=()=>{failed=true;for(const c of active.values())c.abort();child.stdin.end();};process.once('SIGTERM',stopHost);process.once('SIGINT',stopHost);
 child.stderr.on('data',()=>{});child.stdin.on('error',()=>{failed=true;});
@@ -75,9 +75,12 @@ async function handle(line){
 
   }finally{await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,diagnostics:diagnostics()},null,2),{mode:0o600});}
   });}finally{clearTimeout(cutoffTimer);}
- }catch{
-  // Failures and cancellation retain their reservations; never reroll a response.
-  send({type:'decision-result',id:m.id,error:'Decision unavailable'});
+ }catch(error){
+  // Failures and cancellation retain their reservations; never reroll a response. The cause
+  // is content-free and travels with the result, so no lane failure hides as "unavailable".
+  const cause=error?.failureCause??(String(error?.message).startsWith('Decision deadline')?'deadline':'backend');
+  laneFailures.push({mode:m.mode,cause,at:new Date().toISOString()});
+  send({type:'decision-result',id:m.id,error:'Decision unavailable',cause});
  }finally{deadline.dispose();active.delete(m.id);}
 }
 input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill();})));
@@ -85,6 +88,6 @@ const timer=setTimeout(()=>{failed=true;child.kill();},protocol.wallMs+60000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
 const result={at:new Date().toISOString(),hostProcessId:process.pid,policy,protocol,kind:(nativeHaul?'native-haul-':'')+(cold?'ongoing-cold':scripted?'ongoing-scripted':'ongoing-live'),runId,passed:!failed&&code===0&&receipt?.passed===true,
- before,after:{...summary(),jevCalls:0},diagnostics:diagnostics(),responses,game:receipt,
+ before,after:{...summary(),jevCalls:0},diagnostics:diagnostics(),laneFailures,responses,game:receipt,
  accounting:'Native Codex subscription token usage, not API cash charges. No Jev calls. No turn ceiling or automatic rerolls.'};
 coreBackend.close();pawnBackend.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify({passed:result.passed,runId,after:result.after,rounds:receipt?.rounds?.length,error:receipt?.error}));if(!result.passed)process.exitCode=1;

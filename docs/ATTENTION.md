@@ -87,6 +87,12 @@ histories. The allowed replies are listed in [MODELS](MODELS.md#reflection-choic
 each is rechecked against a fresh ingest before it applies. A pawn keeps its last 16
 reflections.
 
+**Lost experiences are failures.** When the 64-entry experience buffer evicts an
+unprocessed, non-native experience, the coordinator counts it in
+`diagnostics.attentionGaps` (by kind) as well as the `attention-gap` audit record. The
+ongoing runner reports the count, so a harness pass is never mistaken for clean
+cognition.
+
 ## Reflection pacing
 
 `ReflectionPacer` spreads a fixed allowance of model reflections over an observation

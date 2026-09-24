@@ -59,6 +59,13 @@ shown, because those are addressed to the core.
 Seeing a message in the log doesn't make it common knowledge: the log is not part of
 any pawn's or the core's perspective.
 
+**Lapsed offers.** An offer on a shared intent that closes before the pawn's answer
+lapses. If the answer arrives afterwards, it is kept as said and the log reads "Pedro
+answered accept after the stockpile haul was already complete; no agreement started".
+If no answer came, the log reads "Offer to Pedro lapsed unanswered". A lapsed offer is
+never counted as agreed or unfulfilled and never labelled withdrawn. A helper's credit
+stays with the intent's progress lines, not an agreement.
+
 ## Board
 
 Above the log, the report carries:
