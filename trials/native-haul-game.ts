@@ -180,6 +180,8 @@ try{
       await op({op:'lab-draft-when',actor:A});
       if(!await run(()=>events.some(e=>e.kind==='lab-drafted'&&e.pawn===A),120000))throw Error('precondition: Pedro never stood in the zone while carrying');
       const drafted=events.find(e=>e.kind==='lab-drafted'&&e.pawn===A)!;
+      const interruptedJob=/^job=(\d+);/.exec(drafted.detail)?.[1];
+      expect(c,!!interruptedJob&&events.some(e=>e.pawn===A&&e.kind==='job-end'&&e.tick===drafted.tick&&e.detail==='HaulToCell;job='+interruptedJob+';condition=InterruptForced'),'draft marker did not identify the interrupted haul');
       await run(()=>false,3000);
       const v=invariants(c,id);if(!v)return;
       const after=v.drops.filter(d=>d.tick>=drafted.tick&&d.pawn===A);c.data.drafted=drafted;c.data.dropsAfterDraft=after;

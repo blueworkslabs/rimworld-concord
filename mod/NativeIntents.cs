@@ -226,8 +226,8 @@ namespace Concord {
             if(draftWhen!=null) {
                 var dp=WorldState.FindActor(draftWhen);
                 if(dp!=null&&dp.IsCarrying()&&IntentHooks.TaggedHaul(dp.CurJob)&&ForCell(dp.Map,dp.Position)!=null&&dp.drafter!=null) {
-                    draftWhen=null;var job=dp.CurJob;dp.drafter.Drafted=true;
-                    Emit(dp,"lab-drafted","job="+job.loadID+";x="+dp.Position.x+";z="+dp.Position.z);
+                    draftWhen=null;int jobId=dp.CurJob.loadID;dp.drafter.Drafted=true;
+                    Emit(dp,"lab-drafted","job="+jobId+";x="+dp.Position.x+";z="+dp.Position.z);
                 }
             }
             if(intents.Count==0) return;
