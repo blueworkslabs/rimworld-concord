@@ -56,9 +56,10 @@ agreement ID. Pawns carry it out through their normal work givers.
 
 **2. Options from the game's own work scan.** Instead of per-capability scanners, the
 menu of real options comes from the same work-giver pipeline the game uses for its
-right-click menu (`WorkGiver_Scanner` and friends). Colony infrastructure (stockpiles,
-existing designations, bills) is colony knowledge; local sightings stay for
-discoveries.
+right-click menu (`WorkGiver_Scanner` and friends). The "attentive crewmate" rule
+extends to **what the colony has already built**: stockpiles, blueprints, bills and
+designations are colony-public, because someone placed them on the map. Loose things
+stay sightings.
 
 **3. Perception from the game's events.** Harmony patches on job start and end (with
 the game's own end reason), ingestion, construction completed, recipe finished, social
@@ -76,11 +77,15 @@ consequences.
 
 This is the part to get right; the rest is plumbing.
 
-- **Per-agreement consent must stay per agreement.** Native intents are colony-wide:
-  any capable pawn with the right priority would pick up a new blueprint. Concord-tagged
-  work therefore needs an eligibility filter (a Harmony patch on work-giver eligibility)
-  so only pawns who accepted that agreement take it. Bills already support a native
-  pawn restriction, which cooking uses today.
+- **Refusal binds; non-involvement doesn't exclude.** Native intents are colony-wide:
+  any capable pawn with the right priority would pick up a new blueprint. A pawn that
+  **refused or deferred** an agreement must never do its tagged work; that is a consent
+  violation. A pawn that was never asked and pitches in, as colonists do, is not. Whether
+  tagged work should be **exclusive** to the pawns who accepted it, or only
+  **attributed**, is measured in the spike rather than assumed. Enforcement is a narrow
+  Harmony filter on work-giver eligibility, the hottest path in the game and one many
+  mods touch, so it must stay small and its cost on simulation speed is measured. Bills
+  already support a native pawn restriction, which cooking uses today.
 - **Work priorities belong to the pawn.** Re-enabling priorities means colonists do
   ordinary colony work on their own, which is how RimWorld works and fits the premise:
   priorities are a colonist's own standing habits. The core never sets them. A pawn may
@@ -92,8 +97,8 @@ This is the part to get right; the rest is plumbing.
 - **Untagged native work needs no consent.** Consent applies to what the core proposes,
   not to every action a colonist takes on their own.
 
-Which work counts as colony knowledge for the core, and whether the core may create
-untagged colony designations at all, are open decisions (below).
+Whether the core may create untagged colony designations at all is an open decision
+(below).
 
 ## Trade-offs
 
@@ -106,8 +111,7 @@ untagged colony designations at all, are open decisions (below).
 - **A Harmony dependency.** Standard for RimWorld mods; it becomes a declared mod
   dependency and a provenance note.
 - **Knowledge widens.** Work-giver options are colony-scoped, beyond the current
-  12-tile sightings. The "attentive crewmate" rule needs restating for colony
-  infrastructure.
+  12-tile sightings: colony-built infrastructure becomes colony-public knowledge.
 - **Simpler persistence, probably.** Intents live in the save, so checkpoints during
   running agreements may become possible. This needs verifying, together with
   restore-time reconciliation between agreements and tagged map objects.
@@ -125,6 +129,14 @@ internals note:
 - `DesignationManager`, zones and storage settings, bills and pawn restrictions.
 - `ReservationManager`.
 - `InteractionWorker` and `Thought_Memory`.
+- What the constant think tree can take over mid-agreement (fleeing, mental breaks,
+  drafting), so receipts can classify those interruptions.
+
+The note is done when it also gives a **routing entry for every new event kind**
+before any of them reach the event stream. Today anything unlisted goes to
+deliberation and interrupts the current thought; with priorities on, job ends alone
+would be dozens a minute. Starting point: job start and end → native; ingestion →
+native; social interaction → queued; downed → interrupting.
 
 Mods worth reading for patterns: Achtung!, Pick Up And Haul, Colony Manager, and
 Hospitality or Psychology for think-tree injection.
@@ -133,15 +145,29 @@ Hospitality or Psychology for think-tree injection.
 
 One bounded experiment, no coordinator changes, the same campfire fixture:
 
-1. Harmony job, ingestion and social event hooks feeding the existing event stream.
+1. Harmony job, ingestion and social event hooks, routed per the internals note, then
+   fed into the existing event stream.
 2. A generic option list from work givers for the three pawns.
 3. One intent-based agreement: "haul wood to the stockpile, up to 30", as a tagged zone
    plus the eligibility filter, with receipts from the native haul jobs.
 
-**Measure against the recorded scene (#64):** stale rejections, idle or wandering time,
-whether agreed work resumes after a meal without a new model call, whether receipts
-reconstruct delivered totals, simulation speed, and consent violations (must be zero:
-no untagged pawn takes tagged work).
+Run both consent variants, exclusive and attribution-only, and count who did what.
+
+**Measure against the right baselines:**
+
+| Metric | Baseline |
+|---|---|
+| Stale haul rejections, delivered totals from receipts, work surviving a meal | the integration checkpoint (#38: 40 wood in 4 trips) |
+| Idle or wandering time, simulation speed | the ten-minute recorded scene (#64) |
+| Consent violations (a pawn doing tagged work it refused or deferred) | must be zero |
+
+The spike's live run follows the usual stop rule: if unsupported capability or consent
+could reach execution, or invalid output or non-progress stalls the run, stop and
+diagnose offline.
+
+**Success is not parity with the old model.** The destination is still the recorded
+scene from [VISION](VISION.md#what-watching-should-feel-like): a crew a viewer can follow,
+where plans form between them. The spike wins if it moves us toward that.
 
 **If it wins,** migrate capabilities one at a time: hauling, then construction and
 cooking through blueprints and bills, then rescue through the native rescue job. The
@@ -151,10 +177,9 @@ with a tag is part of the migration.
 
 ## Open decisions
 
-- Eligibility filter per agreement (recommended) versus consent expressed only through
-  work priorities.
-- What colony infrastructure the core may see, and whether it may propose untagged
-  colony designations or only tagged agreements.
+- Exclusive versus attribution-only tagged work (decided from the spike's
+  measurements; refusal binds either way).
+- Whether the core may propose untagged colony designations or only tagged agreements.
 - How topic closure works on aggregate receipts.
 - Whether checkpoints during running agreements become allowed.
 - When refusals and broken promises become native thought memories.

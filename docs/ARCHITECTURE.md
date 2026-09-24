@@ -140,7 +140,8 @@ issuing ordered jobs from hand-built shortlists, the mod will turn accepted agre
 into tagged native intents (zones, blueprints, bills, designations) that pawns fulfil
 through RimWorld's own work givers, restricted to the pawns who consented. Options will
 come from the game's work scan, and perception from Harmony hooks on the game's own
-events instead of 30-tick diffs. Receipts stay game-authored but become aggregate.
+events instead of 30-tick diffs. Receipts stay game-authored but become aggregate, and Harmony becomes a declared mod
+dependency.
 Rationale, consent mapping, trade-offs and the spike: [NATIVE_INTENTS](NATIVE_INTENTS.md).
 Until then, everything above describes the current ordered-job model.
 

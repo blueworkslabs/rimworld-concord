@@ -31,9 +31,14 @@ direction: **steer the game's own planner instead of driving pawns.**
 - **The coordinator stays.** Consent, receipts as truth, projections, the core,
   attention, checkpoints and model isolation are unchanged. The change is on the game
   side.
-- **Consent stays per agreement.** Native intents are tagged with their agreement, and
-  only pawns who accepted it take it on. Work priorities belong to each pawn; the core
-  never sets them, and a refusal never silently turns off a work type.
+- **Consent stays per agreement.** Native intents are tagged with their agreement. A
+  pawn that refused or deferred it never does its tagged work; pawns who were never
+  asked may still pitch in (whether tagged work is exclusive is measured in the spike).
+  Work priorities belong to each pawn; the core never sets them, and a refusal never
+  silently turns off a work type.
+- **The destination is unchanged.** The goal is still the recorded scene from
+  [VISION](VISION.md#what-watching-should-feel-like). The new game side is a means,
+  and success is measured against that goal, not parity with the old model.
 - **No new hand-built capabilities** on the ordered-job model. Fixes only; it remains
   the regression baseline until each native replacement matches it.
 - Continue from the last phase: continuous play, Luna first with logged escalation,
@@ -49,8 +54,11 @@ a short internals note confirming the job tracker, the humanlike think tree, wor
 and work settings, designations, zones and bills, reservations, and interactions and
 thought memories. Details are in
 [NATIVE_INTENTS](NATIVE_INTENTS.md#learning-the-internals). Done when the note answers
-where to hook events, how to build options from work givers, and how to restrict tagged
-work to consenting pawns.
+where to hook events, how to build options from work givers, how to keep refusing pawns
+off tagged work, what the constant think tree can take over mid-agreement (fleeing,
+mental breaks, drafting), and **how every new event kind is routed** (job start and end
+→ native, ingestion → native, social interaction → queued, downed → interrupting), so
+the first live run isn't a wake storm.
 
 **2. Spike: one native-intent agreement**
 
@@ -58,15 +66,19 @@ No coordinator changes; the same campfire fixture with ordinary work priorities
 switched back on.
 
 - Harmony hooks for job start and end (with end reasons), ingestion and social
-  interactions, feeding the existing event stream.
+  interactions, routed per the internals note before they reach the event stream.
 - A generic option list from work givers for the three pawns.
-- One agreement, "haul wood to the stockpile, up to 30", as a tagged zone with an
-  eligibility filter, receipts from the native haul jobs.
+- One agreement, "haul wood to the stockpile, up to 30", as a tagged zone, run in two
+  variants (exclusive to accepting pawns, and attribution-only), with receipts from the
+  native haul jobs.
 
-Measured against the recorded scene: stale rejections, idle or wandering time, whether
-agreed work resumes after a meal without a new model call, whether receipts reconstruct
-delivered totals, simulation speed, and **consent violations, which must be zero**.
-Scripted first, then one recorded live run.
+Measured against the right baselines: stale haul rejections, delivered totals and work
+surviving a meal against the integration checkpoint (#38: 40 wood in 4 trips); idle or
+wandering time and simulation speed against the recorded scene (#64). **Consent
+violations (a pawn doing tagged work it refused or deferred) must be zero.** Scripted
+first, then one recorded live run. The usual rule applies: if unsupported capability or
+consent could reach execution, or invalid output or non-progress stalls the run, stop
+and diagnose offline.
 
 **3. Decide, then migrate one capability at a time**
 
@@ -77,9 +89,11 @@ verified against the ordered-job baseline before that baseline is retired. If it
 we record why and revisit the direction before building anything else.
 
 **4. Decisions to make during the spike** (see
-[open decisions](NATIVE_INTENTS.md#open-decisions)): the per-agreement eligibility filter,
-what colony infrastructure the core may see, topic closure on aggregate receipts, and
-whether checkpoints during running agreements become allowed.
+[open decisions](NATIVE_INTENTS.md#open-decisions)): exclusive versus attribution-only
+tagged work, whether the core may propose untagged designations, topic closure on
+aggregate receipts, and whether checkpoints during running agreements become allowed.
+Already decided: colony-built infrastructure (stockpiles, blueprints, bills,
+designations) is colony-public knowledge; loose things stay sightings.
 
 ### In parallel: Jev, offline
 
