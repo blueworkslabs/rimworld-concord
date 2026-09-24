@@ -84,7 +84,12 @@ for key,value in [('ID',str(zoneSpec['id'])),('label',zoneSpec['label']),('baseL
 cells=E.SubElement(z,'cells')
 for (x,zz) in sorted(zoneCells):E.SubElement(cells,'li').text=f"({x}, 0, {zz})"
 settings=E.SubElement(z,'settings');E.SubElement(settings,'priority').text='Normal'
-filt=E.SubElement(settings,'filter');E.SubElement(filt,'disallowedSpecialFilters');allow=E.SubElement(filt,'allowedDefs')
+filt=E.SubElement(settings,'filter')
+# Scribe_Values.Look uses the zero-valued struct when these saved ranges are
+# absent; constructor defaults alone do not survive load on pinned 4871.
+E.SubElement(filt,'allowedHitPointsPercents').text='0~1'
+E.SubElement(filt,'allowedQualityLevels').text='Awful~Legendary'
+E.SubElement(filt,'disallowedSpecialFilters');allow=E.SubElement(filt,'allowedDefs')
 for d in zoneSpec['allow']:E.SubElement(allow,'li').text=d
 
 # Duplicate-pickup geometry: partial same-def stacks within the native 8-cell radius.

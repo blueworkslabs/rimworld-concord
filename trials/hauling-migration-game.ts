@@ -132,7 +132,7 @@ try{
     // Exclude while carrying: the carried trip may finish, but nothing more is collected.
     const id=randomUUID();await accept(id,P,{quota:30});
     // The duplicate guard's receipt is the selection proof: the game jumped to a second stack.
-    const selected=()=>kinds('intent-duplicate-admitted',P)[0];
+    const selected=()=>kinds('intent-duplicate-admitted',P).find(e=>field(e,'pickedNow')==='False' && Number(field(e,'job'))===pawn('Pedro').jobId && (jobOf(id,Number(field(e,'job')))?.hold??0)>(pawn('Pedro').carryingCount??0));
     if(!await run(()=>!!selected(),120000)){c.findings.push('precondition: no duplicate selection receipt (geometry)');return;}
     const job=Number(field(selected(),'job'));c.data.selection=selected()!.detail;
     const exclusionTick=state.ticks;
@@ -207,13 +207,16 @@ try{
       return !!e&&pawn('Beatrice').job==='HaulToCell'&&(pawn('Beatrice').carryingCount??0)>0?Number(field(e,'job')):undefined;};
     if(!await run(()=>onWay()!==undefined,120000)){c.findings.push('precondition: no ordinary wood trip under way before tagging');return;}
     const job=onWay()!,carried=pawn('Beatrice').carryingCount??0,id=randomUUID();
-    await accept(id,P,{quota:10});
+    await accept(id,P,{quota:10});await poll();
     const marked=kinds('intent-pretag-marked',B).find(e=>Number(field(e,'job'))===job);c.data.marked=marked?.detail;
     if(!marked){c.findings.push(`precondition: Beatrice's trip ${job} was not heading into the pile at tag time`);return;}
-    await run(()=>done(id)()&&!(view(id)?.jobs??[]).some(j=>j.preTag),240000);
+    const drained=await run(()=>done(id)()&&pawn('Beatrice').jobId!==job&&!(view(id)?.jobs??[]).some(j=>j.preTag),240000);
+    expect(c,drained,'pre-tag trip did not finish within the observation window');
     const v=invariants(c,id);if(!v)return;
     const before=(v.preTagByPawn??[]).find(p=>p.pawn===B)?.count??0;c.data.before=before;c.data.carriedAtTag=carried;
-    expect(c,before===carried,`pre-tag placement ${before} differs from the ${carried} carried at tag time (trimmed or lost)`);
+    const placed=v.drops.filter(d=>d.job===job&&d.kind==='pretag').reduce((n,d)=>n+d.count,0);
+    const allBefore=v.drops.filter(d=>d.pawn===B&&d.kind==='pretag').reduce((n,d)=>n+d.count,0);
+    expect(c,placed>=carried&&before===allBefore,`pre-tag job placed ${placed}, carried ${carried}, before bucket ${before}, raw total ${allBefore} (trimmed, lost or miscounted)`);
     expect(c,!v.byPawn.some(p=>p.pawn===B)&&v.drops.every(d=>d.job!==job||d.kind==='pretag'),'pre-tag work was credited');
     expect(c,v.status==='met'&&v.delivered===10&&v.overshoot===0,`quota after pre-tag work: ${v.delivered} ${v.status}, overshoot ${v.overshoot}`);
     expect(c,(v.preTagAtStart??[]).some(j=>j.job===job&&j.pawn===B),'pre-tag job not reported at acceptance');
@@ -291,7 +294,7 @@ try{
           for(const p of Object.values(co.inspect().proposals))if(p.action.kind==='haul'&&new RegExp(def).test(p.action.thing))for(const step of p.standing?.steps??[])ours.add(step);
         });
         const units=delivered(),trips=hauls().length;
-        expect(c,offers>0&&units>=quota,`ordered baseline delivered ${units} of ${quota} ${def} from ${offers} offers; not a passing comparison`);
+        expect(c,offers>0&&units===quota,`ordered baseline delivered ${units} of ${quota} ${def} from ${offers} offers; not a passing comparison`);
         // Exact quantities: a whole-stack ordered trip may carry past the quota; that part is labelled, not matched.
         c.data.matched={model:'ordered',def,quota,delivered:units,unmatchedUnits:Math.max(0,units-quota),trips,offers,ticks:state.ticks-start,ticksPerUnit:units?(state.ticks-start)/units:null,estimatedCoreTurnsIfLive:offers};
       }finally{s.close();}
