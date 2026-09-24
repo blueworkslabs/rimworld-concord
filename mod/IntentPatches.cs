@@ -10,9 +10,9 @@ namespace Concord {
     // Applied only in the staging lab (see Bootstrap). Each reads cached state only.
     // Per-patch call counts always; wall-clock cost only while a lab measurement enables it.
     public static class PatchCost {
-        public static readonly string[] Names={"","1 StoreSearch","2 Job.SetTarget","3 HaulToCellStorageJob","3b TryMakePreToilReservations","4 TryDropCarriedThing","4 TryDropCarriedThing(count)","5 Notify_ReceivedThing","6 StartJob","6 CleanupCurrentJob","7 Ingested","8 TryInteractWith","4 placement accounting callback"};
+        public static readonly string[] Names={"","1 StoreSearch","2 Job.SetTarget","3 HaulToCellStorageJob","3b TryMakePreToilReservations","4 TryDropCarriedThing","4 TryDropCarriedThing(count)","5 Notify_ReceivedThing","6 StartJob","6 CleanupCurrentJob","7 Ingested","8 TryInteractWith","4 placement accounting callback","4b TryStartCarry"};
         public static bool timing;
-        public static readonly long[] calls=new long[13],ticks=new long[13];
+        public static readonly long[] calls=new long[14],ticks=new long[14];
         public static long Start(){return timing?System.Diagnostics.Stopwatch.GetTimestamp():0;}
         public static void Stop(int i,long t0){calls[i]++;if(timing)ticks[i]+=System.Diagnostics.Stopwatch.GetTimestamp()-t0;}
         public static void Reset(){Array.Clear(calls,0,calls.Length);Array.Clear(ticks,0,ticks.Length);}
@@ -61,8 +61,9 @@ namespace Concord {
             if(old==next) return; // within the zone the reservation stays with the job
             if(old!=null){old.reserved.Remove(__instance.loadID);old.reservedBy.Remove(__instance.loadID);}
             if(next!=null) {
-                var carried=p.carryTracker.CarriedThing;
-                int want=carried!=null?carried.stackCount:__instance.count;
+                var carried=p.carryTracker.CarriedThing;var source=__instance.targetA.Thing;
+                int want=carried!=null?carried.stackCount:HaulBudget.Deliverable(__instance.count,int.MaxValue,
+                    source==null?int.MaxValue:source.stackCount,source==null?int.MaxValue:p.carryTracker.MaxStackSpaceEver(source.def));
                 s.Reserve(next,p,__instance,Math.Min(want,Math.Max(0,next.Remaining)));
             }
         }finally{PatchCost.Stop(2,cost);}}
@@ -117,14 +118,20 @@ namespace Concord {
                 return;
             }
             int carried=IntentState.CarriedFor(p,job.targetA.Thing);
+            var source=job.targetA.Thing;
             if(carried>0) {
-                // Reserve the whole carried load plus any admitted additional pickup.
+                // Reserve the whole carried load plus any admitted additional pickup, bounded by
+                // what the source stack actually holds.
                 int pickup=HaulBudget.AdditionalPickup(carried,job.count,avail,
-                    p.carryTracker.AvailableStackSpace(job.targetA.Thing.def));
+                    p.carryTracker.AvailableStackSpace(source.def));
+                if(source!=p.carryTracker.CarriedThing)pickup=Math.Min(pickup,source.stackCount);
                 s.Reserve(i,p,job,carried+pickup);
                 job.count=pickup;
             } else {
-                int alloc=Math.Min(job.count,avail);
+                // Reserve what this trip can deliver, not the destination space the game put in
+                // job.count: the source stack and the pawn's own carry limit bound one trip.
+                int alloc=HaulBudget.Deliverable(job.count,avail,source==null?int.MaxValue:source.stackCount,
+                    source==null?int.MaxValue:p.carryTracker.MaxStackSpaceEver(source.def));
                 s.Reserve(i,p,job,alloc);
                 job.count=alloc;
             }
@@ -165,6 +172,27 @@ namespace Concord {
             DropWrap.Wrap(__instance,dropLoc,mode,ref placedAction,out __state);
         }finally{PatchCost.Stop(6,cost);}}
         static Exception Finalizer(Exception __exception,Pawn __state){long cost=PatchCost.Start();try{IntentHooks.placing=__state;return __exception;}finally{PatchCost.Stop(6,cost);}}
+    }
+
+    // 4b. True up at pickup: the running job's reservation shrinks to what is actually carried,
+    // and the rest returns to the quota at once. Reservations only ever shrink after commit.
+    [HarmonyPatch(typeof(Pawn_CarryTracker),nameof(Pawn_CarryTracker.TryStartCarry),new[]{typeof(Thing),typeof(int),typeof(bool)})]
+    static class Patch4b_Pickup {
+        static void Postfix(Pawn_CarryTracker __instance,int __result){long cost=PatchCost.Start();try{
+            if(__result<=0) return;
+            var s=IntentState.Get();
+            if(s==null||s.intents.Count==0) return;
+            var p=__instance.pawn;var job=p.CurJob;
+            var i=s.Holding(job);
+            if(i==null||!IntentHooks.TaggedHaul(job)) return;
+            int carried=__instance.CarriedThing==null?0:__instance.CarriedThing.stackCount,own=i.Own(job);
+            // StartCarryThing subtracts the picked count from job.count after this returns; leave
+            // nothing further to collect beyond what is now reserved.
+            job.count=Math.Min(job.count,__result);
+            if(carried>=own) return;
+            s.Reserve(i,p,job,carried);
+            s.Emit(p,"intent-trued-up","intent="+i.intentId+";job="+job.loadID+";reserved="+own+";carried="+carried);
+        }finally{PatchCost.Stop(13,cost);}}
     }
 
     // 5. Fresh spawns into the tagged zone outside a hook-4 scope. Merges go to reconciliation.

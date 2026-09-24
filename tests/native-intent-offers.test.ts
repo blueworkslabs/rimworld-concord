@@ -36,7 +36,7 @@ class IntentGame implements GameBridge {
   }
   async save(){return {sha256:'hash'};}async load(){}async verify(){}
 }
-async function setup(){const game=new IntentGame(),store=new Store(':memory:'),c=new Coordinator(store,game);await c.open();await c.initializeCore('Wood needs a home.');await c.configureNativeHaul(cfg);return {game,c,store};}
+async function setup(configure=true){const game=new IntentGame(),store=new Store(':memory:'),c=new Coordinator(store,game);await c.open();await c.initializeCore('Wood needs a home.');if(configure)await c.configureNativeHaul(cfg);return {game,c,store};}
 const say=(kind:'accept'|'refuse'|'defer',reason='because')=>scripted({kind,reason});
 
 test('a pawn the game says cannot haul is not offered, with the reason visible',async()=>{
@@ -144,8 +144,10 @@ test('another pawn meeting quota does not complete a withdrawn obligation',async
 
 
 test('an existing ordered offer cannot dispatch across an unconfirmed native withdrawal',async()=>{
-  const {c,game}=await setup();
+  // The ordered offer predates native mode, which now admits only the stockpile haul.
+  const {c,game}=await setup(false);
   const move=await c.core().propose('P',{kind:'move',x:4,z:4},'Move later');
+  await c.configureNativeHaul(cfg);
   const native=await c.core().propose('P',intentAction(cfg),'Stock wood');
   await c.pawn('P').decide(native.id,say('accept'));
   const actual=game.intent.bind(game);let fail=true,moved=0;
@@ -163,5 +165,7 @@ test('native mode never exposes or directly admits legacy ordered hauling',async
   const haul={kind:'haul' as const,thing:'Thing_WoodLog1',x:4,z:4,count:10,trips:1,maxTicks:1800};
   game.data.pawns[0]!.hauling={epoch:'e',tick:0,mapId:0,status:'available',options:[haul],supplies:[{thing:haul.thing,label:'wood',x:4,z:4,sourceCount:30,destinationFree:75}]};
   assert.ok(!(await c.corePerspective()).opportunities.some(o=>o.action.kind==='haul'));
-  await assert.rejects(c.core().propose('A',haul,'Old haul'),/Ordered hauling is unavailable/);
+  await assert.rejects(c.core().propose('A',haul,'Old haul'),/the stockpile haul is the only proposable work/);
+  await assert.rejects(c.core().propose('P',{kind:'move',x:4,z:4},'Walk over'),/the stockpile haul is the only proposable work/);
+  assert.ok((await c.corePerspective()).opportunities.every(o=>o.action.kind==='haul-zone'));
 });

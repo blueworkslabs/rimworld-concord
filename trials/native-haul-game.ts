@@ -397,13 +397,15 @@ try{
       const id=randomUUID();await accept(id,A,{quota:75,variant:'attribution'});
       await run(done(id),420000);const v=invariants(c,id);if(!v)return;
       const helper=v.byPawn.find(p=>p.pawn===B)?.count??0;
-      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,helperObserved:helper>0,helperCredit:helper,peakHolders:v.peakHolders};
+      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,helperObserved:helper>0,helperCredit:helper,peakHolders:v.peakHolders,
+        truedUp:since(0,'intent-trued-up').map(e=>e.detail),admitted:since(0,'intent-admitted-start').map(e=>e.pawn+':'+e.detail)};
     });
     await scenario('overlap-geometry',base,async c=>{
       const id=randomUUID();await accept(id,A,{quota:75});await accept(id,B,{quota:75});
       await run(done(id),420000);const v=invariants(c,id);if(!v)return;
       expect(c,v.overshoot===0,'overshoot with two accepting pawns');
-      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,overlapObserved:v.peakHolders>=2,peakHolders:v.peakHolders,rejectedStarts:v.rejectedStarts};
+      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,overlapObserved:v.peakHolders>=2,peakHolders:v.peakHolders,rejectedStarts:v.rejectedStarts,
+        truedUp:since(0,'intent-trued-up').map(e=>e.detail),admitted:since(0,'intent-admitted-start').map(e=>e.pawn+':'+e.detail)};
     });
   }else{
     await scenario('meal-resumption',base,async c=>{

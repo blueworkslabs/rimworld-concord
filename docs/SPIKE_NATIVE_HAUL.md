@@ -115,7 +115,18 @@ with reservations keyed by job `loadID`.
   `job.count` is capped to `remaining`. Creating a job reserves **nothing**: the game
   creates candidates it never starts (`CheckForJobOverride` returning a job to the pool,
   discarded think results, validity checks), so reserving at creation would leak quota.
-  Pickup and opportunistic duplicates are bounded by `job.count`.
+  Pickup and opportunistic duplicates are bounded by `job.count`, which the commit caps
+  to the trip's deliverable amount (see below).
+- **True-up at pickup:** when the carry actually starts (`Pawn_CarryTracker.TryStartCarry`),
+  the running job's reservation shrinks to the carried count and the rest returns to the
+  quota at once. `job.count` is limited to what was just picked up, so the pickup toil
+  leaves nothing further to collect. Reservations only ever shrink after commit, so
+  `credited + reserved ≤ quota` and zero overshoot still hold.
+  **Known trade-off, for Fable:** since a tagged trip reserves at most its source
+  stack, a pawn no longer adds opportunistic duplicate stacks of the same wood to a tagged
+  trip. Ordinary hauling elsewhere is unchanged. The alternative keeps duplicates but
+  lets the reservation grow at each pickup, which can race another pawn's commit into a
+  reported escape.
 - **Already-carried loads** (re-targets in the drop toil): the zone is admitted only if
   the carried stack is at most `remaining` plus the job's own existing reservation.
   Admission is a pure check with no side effects, because storage searches also run
@@ -153,8 +164,12 @@ changes nothing in the ledger.
   also logs the game's "returned false right after StartJob" warning; scripted runs
   count those warnings.
 - **Commit:** a postfix on the same method, when it returned true **and** the job is the
-  pawn's `CurJob`. For an empty-handed pickup it reserves `min(job.count, remaining)`
-  and caps `job.count` to that. A resumed/new job already carrying its target, or a full
+  pawn's `CurJob`. For an empty-handed pickup it reserves what this trip can deliver,
+  `min(job.count, remaining, source stack count, MaxStackSpaceEver(def))`, and caps
+  `job.count` to that. The game sets `job.count` from the destination's free space (75
+  for wood), not from what the pawn will carry, so reserving `job.count` let one
+  pawn's first trip hold the whole quota and made contention impossible (Astra's
+  staging finding; Fable's disposition). A resumed/new job already carrying its target, or a full
   compatible load, can skip pickup on 4871: admission must check and reserve the whole
   carried load, not cap `job.count` and assume that shrinks it. Reject an oversized
   carried load before toils; never trim it. For a partial compatible load that will
@@ -233,6 +248,7 @@ in the code:
 | 2 | `Verse.AI.Job.SetTarget` | postfix | Commit point for re-targets of a `HaulToCell` job: reserve, transfer or release atomically. The widest patch (every job of every pawn and animal): an early `HaulToCell` check, and its cost is measured on its own |
 | 3 | `HaulAIUtility.HaulToCellStorageJob` | prefix and postfix | Admission for preselected cells; cap `job.count`. Reserves nothing |
 | 3b | `JobDriver_HaulToCell.TryMakePreToilReservations` | prefix and postfix | Recheck standing and quota, reconcile obsolete ownership before current-job admission, reserve full pre-carried loads or cap fresh pickups; commit only for `CurJob`, before toils |
+| 4b | `Pawn_CarryTracker.TryStartCarry(Thing,int,bool)` | postfix | True up at pickup: shrink the running job's reservation to the carried count; leave no further pickup beyond it |
 | 4 | `Pawn_CarryTracker.TryDropCarriedThing` (both overloads) | prefix and finalizer | Wrap `placedAction` (keeping any existing callback): record full counts, credit participation, flag escapes, record incidental placement; open and close the "placing" scope |
 | 5 | `Zone_Stockpile.Notify_ReceivedThing` | postfix | Fresh spawns into the tagged zone outside a hook-4 scope (incidental, unattributed); merges are left to reconciliation |
 | 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | Ownership check (release reservations of non-current jobs); `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
@@ -360,7 +376,7 @@ or character rewrite has been made.
 
 - **Mod:** `mod/NativeIntents.cs` (intent tag, ledger, reconciliation, bridge and lab
   operations) and `mod/IntentPatches.cs` (patches 1–8). Build with
-  `scripts/build-mod.sh <Managed> <0Harmony.dll>`. All eleven patched methods apply
+  `scripts/build-mod.sh <Managed> <0Harmony.dll>`. All twelve patched methods apply
   offline under Mono with Harmony 2.4.2. Pawns report `haulingCapable` (the game's own
   Hauling work-type check).
 - **Fixture:** `scripts/native-haul-fixture.py` (`--meal` for the meal case, `--helper`
