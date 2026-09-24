@@ -90,4 +90,44 @@ Run `node --test scripts/run-ongoing-grounding.test.mjs` and
 The live TypeScript adapter remains pinned to Luna; the helper's explicit model
 option enables this supervised offline comparison, **not automatic live routing**.
 
-Results will be appended after the frozen suite; no routing threshold is implemented.
+## Result: six returned answers, no automatic routing recommendation
+
+[Retained requests, verbatim outputs and field-linked assessment](evidence/ongoing-grounding-comparison.json).
+All six answers passed schema and contextual action validation. Every mock preflight
+reported zero tools. No failure was rerolled, and nothing was applied to a game.
+
+| Case | Luna | Terra |
+|---|---|---|
+| Eligible recipients | Wait; did not repeat the old no-eligible-question claim | Wait; also did not deny recipient eligibility; unfinished mixed-language topic clause |
+| Newer testimony | Updated Pedro to low; ambiguous “deferred wandering” and unfinished topic | Incorrectly called Pedro satisfied and only Alvin low, despite fresh telemetry; unfinished quotation |
+| Completed self-care | Closed all three Beatrice follow-ups; asked about optional construction; incorrectly called Pedro satisfied and unanswered | Closed all three follow-ups; waited; correctly called Pedro low but still incorrectly labelled his question unanswered |
+
+Both kept the broad brief open. Luna's construction question is a legal offline
+choice, **not** a work offer, actual consent, gameplay or evidence of superior
+planning. Terra's last wait reason says no eligible recipient is food-low, which
+matches the snapshot: only satisfied Beatrice is eligible. It must not be scored as
+“no recipients exist.” The old Pedro reply is testimony; newer berry sightings can
+differ without proving he lied. These distinctions are included in the assessment.
+
+Native turn durations were Luna **9.232 / 9.079 / 16.511 seconds**, Terra
+**7.238 / 11.240 / 12.919 seconds**. These exclude mock preflight and are not a speed
+benchmark. Reported subscription usage was **16,516** and **16,563** tokens
+respectively; no cash price is inferred.
+
+**Keep Luna as default.** This deliberately difficult, small sample does not show
+that routing to Terra repairs stale summaries. Both models carried the same obsolete
+“no answer” text forward despite an explicit answered question and delivered reply.
+The source-ordering problem is more concrete than a model ranking: clearly separate
+current typed facts from dated planner interpretations, and evaluate that change on
+separate retained cases before adding automatic routing. Presentation defects also
+remain: JSON validity does not ensure complete, readable sentences.
+
+For availability, improve reason-specific diagnostics first. The next recorded
+scene should not silently relax the eating checks or reserve a stack on a pawn's
+behalf while it thinks. Portion growth and range drift deserve explicit tests, but
+the two historical failures remain unattributed to any single predicate.
+
+Verification: 349 coordinator tests, six Python transport checks, four offline-runner
+checks, and independent read-only review. All 81 older evidence JSON files and 321
+private historical database-related files are unchanged. No mod changes, native
+trial, new restore claim, automatic routing, Sol/Jev call or separate diary entry.
