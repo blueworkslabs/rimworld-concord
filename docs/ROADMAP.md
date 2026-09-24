@@ -38,7 +38,7 @@ quota. The [live harness and setup hash](trials/NATIVE_HAUL_FREEZE.md) now have 
 zero-model rehearsal and real coordinator-process cold restore. Two earlier coverage
 failures exposed missing native core wake integration and remain retained. Fable signed the
 75-unit helper-layout setup and the [single frozen live recording](trials/NATIVE_HAUL_LIVE.md)
-is complete. Fable’s recording-first verdict and rare boundary checks remain. The options-menu measurement is a WoodLog-only subset.
+is complete. The recording-only read is complete; [receipt-backed findings](trials/NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read) expose offer bookkeeping, stale narration and attention failures. Fable’s verdict and rare boundary checks remain. The options-menu measurement is a WoodLog-only subset.
 
 ## Next phase: work with RimWorld's planner
 

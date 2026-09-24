@@ -1,0 +1,787 @@
+{
+  "schemaVersion": 1,
+  "runId": "46f6ecca-9074-4028-a765-e5e46a84d733",
+  "classification": "receipt-backed technical findings after Fable recording-only read; no new game/model calls",
+  "names": {
+    "Thing_Human405": "Alvin",
+    "Thing_Human408": "Beatrice",
+    "Thing_Human411": "Pedro"
+  },
+  "rawReceiptSha256": "4dbf7cddc7cd9aebe81fbd51da8c08ba7935f419a0963accc8c2b6f491b54f58",
+  "nativeLedger": {
+    "intentId": "0b20f659-20b8-4259-ad55-0ea5b91382cc",
+    "thingDef": "WoodLog",
+    "variant": "attribution",
+    "status": "met",
+    "zoneId": 0,
+    "quota": 75,
+    "delivered": 75,
+    "reserved": 0,
+    "remaining": 0,
+    "overshoot": 0,
+    "incidental": 0,
+    "unattributed": 0,
+    "removed": 0,
+    "violations": 0,
+    "rejectedStarts": 0,
+    "finishedAfterExclusion": 0,
+    "createdTick": 1122,
+    "untilTick": 31122,
+    "lastDeliveryTick": 2510,
+    "peakHolders": 2,
+    "accepted": [
+      "Thing_Human408"
+    ],
+    "excluded": [],
+    "byPawn": [
+      {
+        "pawn": "Thing_Human411",
+        "count": 40
+      },
+      {
+        "pawn": "Thing_Human408",
+        "count": 35
+      }
+    ],
+    "drops": [
+      {
+        "seq": 1,
+        "tick": 1486,
+        "count": 20,
+        "escape": 0,
+        "job": 72,
+        "kind": "participation",
+        "pawn": "Thing_Human411",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 2,
+        "tick": 1856,
+        "count": 20,
+        "escape": 0,
+        "job": 81,
+        "kind": "participation",
+        "pawn": "Thing_Human408",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 3,
+        "tick": 1999,
+        "count": 20,
+        "escape": 0,
+        "job": 93,
+        "kind": "participation",
+        "pawn": "Thing_Human411",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 4,
+        "tick": 2510,
+        "count": 15,
+        "escape": 0,
+        "job": 112,
+        "kind": "participation",
+        "pawn": "Thing_Human408",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      }
+    ]
+  },
+  "returnedDecisions": [
+    {
+      "pawn": "Thing_Human408",
+      "kind": "accept",
+      "receivedAt": "2026-09-24T18:46:34.420Z"
+    },
+    {
+      "pawn": "Thing_Human411",
+      "kind": "accept",
+      "receivedAt": "2026-09-24T18:46:59.887Z"
+    }
+  ],
+  "proposals": [
+    {
+      "pawn": "Thing_Human408",
+      "kind": "haul-zone",
+      "status": "accepted",
+      "standing": "completed"
+    },
+    {
+      "pawn": "Thing_Human411",
+      "kind": "haul-zone",
+      "status": "withdrawn"
+    }
+  ],
+  "decisionErrors": [
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "decision-error",
+      "actor": "Thing_Human411",
+      "data": {
+        "proposal": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+        "error": "Error: Intent already closed: met",
+        "fallback": "continue-native"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "offer-withdrawn",
+      "actor": "core",
+      "data": {
+        "id": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+        "reason": "Decision unavailable; no retry"
+      }
+    }
+  ],
+  "snapshotComparisons": [
+    {
+      "coreTurnIndex": 8,
+      "inputTick": 20100,
+      "selfCare": [
+        {
+          "id": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+          "pawn": "Thing_Human408",
+          "kind": "eat",
+          "questionId": "9218a20b-a3d1-46ce-aaea-fc053096be2c",
+          "sourceIds": [
+            "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+            "14cdf3aa-8d83-47d9-a9c0-73f5eb550331",
+            "74d04037-4d39-41b0-8444-98ad31f67a3d"
+          ],
+          "food": {
+            "thing": "Thing_RawBerries1878",
+            "label": "berries"
+          },
+          "portionCount": 16,
+          "status": "started",
+          "consumed": 0,
+          "consumedUnit": "food-items",
+          "completed": false
+        }
+      ],
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "2faadbb02b2a4a5f8d25721ef6e48b43",
+          "tick": 20100,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "2faadbb02b2a4a5f8d25721ef6e48b43",
+          "tick": 20100,
+          "fresh": true,
+          "food": "urgent",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "2faadbb02b2a4a5f8d25721ef6e48b43",
+          "tick": 20100,
+          "fresh": true,
+          "food": "urgent",
+          "rest": "satisfied"
+        }
+      ],
+      "publishedAction": {
+        "kind": "wait",
+        "reason": "No eligible work offer or counter is available. Beatrice's eating follow-up remains open because its receipt records no consumed food-items; no new question is needed."
+      }
+    },
+    {
+      "coreTurnIndex": 9,
+      "inputTick": 21242,
+      "selfCare": [
+        {
+          "id": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+          "pawn": "Thing_Human408",
+          "kind": "eat",
+          "questionId": "9218a20b-a3d1-46ce-aaea-fc053096be2c",
+          "sourceIds": [
+            "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+            "14cdf3aa-8d83-47d9-a9c0-73f5eb550331",
+            "74d04037-4d39-41b0-8444-98ad31f67a3d"
+          ],
+          "food": {
+            "thing": "Thing_RawBerries1878",
+            "label": "berries"
+          },
+          "portionCount": 16,
+          "status": "completed",
+          "consumed": 16,
+          "consumedUnit": "food-items",
+          "completed": true
+        }
+      ],
+      "sharedStatus": [
+        {
+          "pawn": "Thing_Human405",
+          "name": "Alvin",
+          "source": "shared-link-telemetry",
+          "epoch": "2faadbb02b2a4a5f8d25721ef6e48b43",
+          "tick": 21242,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human408",
+          "name": "Beatrice",
+          "source": "shared-link-telemetry",
+          "epoch": "2faadbb02b2a4a5f8d25721ef6e48b43",
+          "tick": 21242,
+          "fresh": true,
+          "food": "satisfied",
+          "rest": "satisfied"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "name": "Pedro",
+          "source": "shared-link-telemetry",
+          "epoch": "2faadbb02b2a4a5f8d25721ef6e48b43",
+          "tick": 21242,
+          "fresh": true,
+          "food": "urgent",
+          "rest": "satisfied"
+        }
+      ],
+      "publishedAction": {
+        "kind": "ask",
+        "pawn": "Thing_Human411",
+        "text": "Pedro, what would you like the core to know about your current food situation?",
+        "reason": "Pedro's fresh shared telemetry reports food urgent; this is telemetry, not a diagnosis or proof of cause."
+      }
+    }
+  ],
+  "selectedPublicEntries": [
+    {
+      "tick": 2661,
+      "kind": "record",
+      "actor": "Core",
+      "recipient": "observer",
+      "subject": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+      "text": "Pending offer withdrawn; no work authorized."
+    },
+    {
+      "tick": 21034,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "crew",
+      "subject": "9a5b322f-99ee-4019-9b41-e4df3c628e68",
+      "text": "No eligible work offer or counter is available. Beatrice's eating follow-up remains open because its receipt records no consumed food-items; no new question is needed."
+    },
+    {
+      "tick": 22166,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "Pedro",
+      "subject": "72f54a36-437a-467c-bcea-df4e30b806ab",
+      "text": "Pedro, what would you like the core to know about your current food situation?"
+    },
+    {
+      "tick": 22166,
+      "kind": "message",
+      "actor": "Core",
+      "recipient": "crew",
+      "subject": "438d8058-1c6d-4234-8b85-731b8b0a05d8",
+      "text": "Pedro's fresh shared telemetry reports food urgent; this is telemetry, not a diagnosis or proof of cause."
+    }
+  ],
+  "ingestionEvents": [
+    {
+      "seq": 841,
+      "tick": 16264,
+      "pawn": "Thing_Human405",
+      "kind": "ingested",
+      "detail": "RawBerries;count=18;nutrition=0.9",
+      "subject": "Thing_RawBerries5684"
+    },
+    {
+      "seq": 989,
+      "tick": 20205,
+      "pawn": "Thing_Human408",
+      "kind": "ingested",
+      "detail": "RawBerries;count=16;nutrition=0.8",
+      "subject": "Thing_RawBerries5690"
+    },
+    {
+      "seq": 1030,
+      "tick": 21513,
+      "pawn": "Thing_Human411",
+      "kind": "ingested",
+      "detail": "RawBerries;count=18;nutrition=0.9",
+      "subject": "Thing_RawBerries5692"
+    }
+  ],
+  "finalEatingTopics": [
+    {
+      "sourceId": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+      "text": "Beatrice's self-care receipt records completed consumption of 16 food-items.",
+      "status": "resolved",
+      "basedOnTick": 25943,
+      "updatedTick": 26999,
+      "proposalIds": []
+    },
+    {
+      "sourceId": "14cdf3aa-8d83-47d9-a9c0-73f5eb550331",
+      "text": "Beatrice's linked eating follow-up is resolved by the completed self-care receipt.",
+      "status": "resolved",
+      "basedOnTick": 24247,
+      "updatedTick": 25248,
+      "proposalIds": []
+    },
+    {
+      "sourceId": "74d04037-4d39-41b0-8444-98ad31f67a3d",
+      "text": "Beatrice reported urgent food and eating berries; the linked receipt verifies consumption of 16 food-items.",
+      "status": "resolved",
+      "basedOnTick": 24247,
+      "updatedTick": 25248,
+      "proposalIds": []
+    }
+  ],
+  "postQuotaHaulEvents": [
+    {
+      "seq": 127,
+      "tick": 2513,
+      "pawn": "Thing_Human408",
+      "kind": "job-start",
+      "detail": "HaulToCell;job=143",
+      "subject": ""
+    },
+    {
+      "seq": 137,
+      "tick": 2719,
+      "pawn": "Thing_Human411",
+      "kind": "job-start",
+      "detail": "HaulToCell;job=161",
+      "subject": ""
+    },
+    {
+      "seq": 138,
+      "tick": 2719,
+      "pawn": "Thing_Human411",
+      "kind": "job",
+      "detail": "HaulToCell",
+      "subject": ""
+    },
+    {
+      "seq": 150,
+      "tick": 3158,
+      "pawn": "Thing_Human408",
+      "kind": "job-end",
+      "detail": "HaulToCell;job=143;condition=Succeeded",
+      "subject": ""
+    },
+    {
+      "seq": 153,
+      "tick": 3161,
+      "pawn": "Thing_Human408",
+      "kind": "job-start",
+      "detail": "HaulToCell;job=182",
+      "subject": ""
+    },
+    {
+      "seq": 159,
+      "tick": 3505,
+      "pawn": "Thing_Human411",
+      "kind": "job-end",
+      "detail": "HaulToCell;job=161;condition=Succeeded",
+      "subject": ""
+    },
+    {
+      "seq": 175,
+      "tick": 3917,
+      "pawn": "Thing_Human408",
+      "kind": "job-end",
+      "detail": "HaulToCell;job=182;condition=Succeeded",
+      "subject": ""
+    },
+    {
+      "seq": 179,
+      "tick": 3920,
+      "pawn": "Thing_Human408",
+      "kind": "job-start",
+      "detail": "HaulToCell;job=227",
+      "subject": ""
+    },
+    {
+      "seq": 180,
+      "tick": 3923,
+      "pawn": "Thing_Human408",
+      "kind": "job",
+      "detail": "HaulToCell",
+      "subject": ""
+    },
+    {
+      "seq": 181,
+      "tick": 3980,
+      "pawn": "Thing_Human408",
+      "kind": "job-end",
+      "detail": "HaulToCell;job=227;condition=Succeeded",
+      "subject": ""
+    }
+  ],
+  "postQuotaAttributionLimit": "Job start/end events do not record placed counts or destination cells. Both pawns hauled after retirement; the exact 45-unit split is not established.",
+  "attentionFailures": [
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-error",
+      "actor": "Thing_Human408",
+      "data": {
+        "throughSeq": 1005,
+        "status": "failed",
+        "error": "Error: Decision unavailable",
+        "fallback": "continue-native"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-error",
+      "actor": "Thing_Human411",
+      "data": {
+        "throughSeq": 1091,
+        "status": "failed",
+        "error": "Error: Decision unavailable",
+        "fallback": "continue-native"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-error",
+      "actor": "Thing_Human405",
+      "data": {
+        "throughSeq": 1175,
+        "status": "failed",
+        "error": "Error: Decision unavailable",
+        "fallback": "continue-native"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-error",
+      "actor": "Thing_Human408",
+      "data": {
+        "throughSeq": 1259,
+        "status": "failed",
+        "error": "Error: Decision unavailable",
+        "fallback": "continue-native"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-error",
+      "actor": "Thing_Human408",
+      "data": {
+        "throughSeq": 1498,
+        "status": "failed",
+        "error": "Error: Decision unavailable",
+        "fallback": "continue-native"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-error",
+      "actor": "Thing_Human405",
+      "data": {
+        "throughSeq": 1527,
+        "status": "failed",
+        "error": "Error: Decision unavailable",
+        "fallback": "continue-native"
+      }
+    }
+  ],
+  "offlinePreflightReproduction": [
+    {
+      "id": "0669e74b-b1c2-40bc-80f9-3f32b41618f8",
+      "mode": "reflection",
+      "pawn": "Thing_Human411",
+      "preflight": {
+        "ok": false,
+        "error": "Error: Context too large"
+      },
+      "promptBytes": 24130,
+      "limitBytes": 24000,
+      "eventCount": 4,
+      "ownershipValid": true,
+      "sourceRequestSha256": "222f03e81a6329cce3e63ee32fda7cc45558e27dc3d374fa0bae5ba832ce3c32"
+    },
+    {
+      "id": "5b918b95-0560-4f92-88b2-71a8ae27ee5a",
+      "mode": "reflection",
+      "pawn": "Thing_Human408",
+      "preflight": {
+        "ok": false,
+        "error": "Error: Context too large"
+      },
+      "promptBytes": 24763,
+      "limitBytes": 24000,
+      "eventCount": 2,
+      "ownershipValid": true,
+      "sourceRequestSha256": "ecefca6a211bf4ad0270bb0fd31f81a0c7ba61b9fb02acd981c7d9d5e63914a0"
+    },
+    {
+      "id": "638e1a46-679f-4cd2-b9dc-fc481745490f",
+      "mode": "reflection",
+      "pawn": "Thing_Human405",
+      "preflight": {
+        "ok": false,
+        "error": "Error: Context too large"
+      },
+      "promptBytes": 24325,
+      "limitBytes": 24000,
+      "eventCount": 3,
+      "ownershipValid": true,
+      "sourceRequestSha256": "fa09f1c7f43e9322b13169d1f8ef98df6633b8dfd3c3d9703427121213ceef00"
+    },
+    {
+      "id": "7cd00d6b-997d-4d86-900d-04c99241ef20",
+      "mode": "reflection",
+      "pawn": "Thing_Human408",
+      "preflight": {
+        "ok": false,
+        "error": "Error: Context too large"
+      },
+      "promptBytes": 24281,
+      "limitBytes": 24000,
+      "eventCount": 1,
+      "ownershipValid": true,
+      "sourceRequestSha256": "90e1e0a22ec38978428f4d37d18d454f70b28aa0350c5ba18447e3218b83d427"
+    },
+    {
+      "id": "82ffb792-9083-44a1-900b-c0d39890a81e",
+      "mode": "reflection",
+      "pawn": "Thing_Human405",
+      "preflight": {
+        "ok": false,
+        "error": "Error: Context too large"
+      },
+      "promptBytes": 24413,
+      "limitBytes": 24000,
+      "eventCount": 1,
+      "ownershipValid": true,
+      "sourceRequestSha256": "a25ac068ae02a3b92821fdd34bea824ceba9240a5f84aceb99dc36bbb54e9060"
+    },
+    {
+      "id": "e21c1970-edff-4226-ad7d-d27748058469",
+      "mode": "reflection",
+      "pawn": "Thing_Human408",
+      "preflight": {
+        "ok": false,
+        "error": "Error: Context too large"
+      },
+      "promptBytes": 24190,
+      "limitBytes": 24000,
+      "eventCount": 4,
+      "ownershipValid": true,
+      "sourceRequestSha256": "213079fda7c41e8e2173bcc10c60f2d82c4b6e04af0237e04e3f6b6f6d2b6ecd"
+    }
+  ],
+  "attentionBufferEvictions": [
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human405",
+      "data": {
+        "seq": 5,
+        "kind": "food"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human408",
+      "data": {
+        "seq": 92,
+        "kind": "food"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human408",
+      "data": {
+        "seq": 98,
+        "kind": "mood"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human405",
+      "data": {
+        "seq": 111,
+        "kind": "mood"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human411",
+      "data": {
+        "seq": 105,
+        "kind": "mood"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human405",
+      "data": {
+        "seq": 298,
+        "kind": "rest"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human411",
+      "data": {
+        "seq": 269,
+        "kind": "food"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human408",
+      "data": {
+        "seq": 296,
+        "kind": "rest"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human411",
+      "data": {
+        "seq": 297,
+        "kind": "rest"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human405",
+      "data": {
+        "seq": 354,
+        "kind": "mood"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human411",
+      "data": {
+        "seq": 738,
+        "kind": "mood"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human411",
+      "data": {
+        "seq": 770,
+        "kind": "food"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human405",
+      "data": {
+        "seq": 954,
+        "kind": "rest"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human411",
+      "data": {
+        "seq": 1448,
+        "kind": "food"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human411",
+      "data": {
+        "seq": 1561,
+        "kind": "rest"
+      }
+    },
+    {
+      "branch": "378ffb13-dada-4f02-bd43-5d3ffface291",
+      "kind": "attention-gap",
+      "actor": "Thing_Human405",
+      "data": {
+        "seq": 1528,
+        "kind": "food"
+      }
+    }
+  ],
+  "nativeTransportGapEvents": [],
+  "modelAccounting": {
+    "wireRequests": {
+      "core": 14,
+      "pawns": 19
+    },
+    "backendAttempts": {
+      "core": 14,
+      "pawns": 13
+    },
+    "returnedChoices": 26,
+    "returnedByMode": {
+      "core": 13,
+      "decision": 2,
+      "reflection": 7,
+      "core-answer": 4
+    },
+    "knownSubscriptionTokens": 164347,
+    "unknownCancelledUsage": true
+  },
+  "limits": [
+    "Medical-alert trigger and affected pawn set were not captured; initial/final health summaries are not a diagnosis.",
+    "Fable retains the original recording-only read and owns Gate C verdict.",
+    "No runtime corrections, replay, second video review or merge performed for this report."
+  ],
+  "firstEatingClosure": {
+    "coreTurnIndex": 9,
+    "inputTick": 21242,
+    "publicationTick": 22166,
+    "topicUpdates": [
+      {
+        "sourceId": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+        "text": "Beatrice's self-care receipt records completed consumption of 16 food-items.",
+        "status": "resolved"
+      },
+      {
+        "sourceId": "14cdf3aa-8d83-47d9-a9c0-73f5eb550331",
+        "text": "Beatrice's linked eating follow-up is resolved by the completed self-care receipt.",
+        "status": "resolved"
+      },
+      {
+        "sourceId": "74d04037-4d39-41b0-8444-98ad31f67a3d",
+        "text": "Beatrice reported urgent food and eating berries; the linked receipt now verifies consumption of 16 food-items.",
+        "status": "resolved"
+      }
+    ]
+  }
+}
