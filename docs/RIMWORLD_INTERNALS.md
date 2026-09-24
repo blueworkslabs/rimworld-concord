@@ -113,9 +113,8 @@ Other intents need other filters, to be chosen at migration:
 - **Bills** already have a native pawn restriction (cooking uses it today).
 - **Blueprints and frames** are probably best filtered where their work givers check
   reservations. `ReservationManager` is the generic chokepoint, but also the hottest.
-- **Player "prioritize" work** (`Pawn_MindState.priorityWork`, taken by the emergency
-  `JobGiver_Work` and marked `playerForced`) is a native way to ask one pawn to do one
-  thing next. It is worth considering as a per-pawn intent after consent.
+- **Player "prioritize" work** is a native way to ask one pawn to do one thing next; see
+  [Prioritized work](#prioritized-work-evaluate-dont-build).
 
 ## 4. What can take a pawn over
 
@@ -201,6 +200,40 @@ Only `haul-delivered`, `ingested`, `downed` and linked job ends should wake the 
 - **Options:** built on request from the work-giver predicates, bounded, measured.
 - **Fixture:** work priorities on, one tagged stockpile for wood, the campfire fixture
   otherwise unchanged.
+
+### Prioritized work: evaluate, don't build
+
+RimWorld's right-click "prioritize" is a native, per-pawn "do this next" that could carry
+a **standing commitment** after consent, possibly making the later `ThinkNode`
+unnecessary. What it is, on 4871 rev600:
+
+- **State:** `Pawn_MindState.priorityWork` (`Verse.PriorityWork`) stores one cell, one
+  work-giver def and a start tick, and is saved with the pawn.
+- **Set:** only through `Pawn_JobTracker.TryTakeOrderedJobPrioritizedWork`, and only if
+  the work giver has `prioritizeSustains`. Construction (deliver to blueprints and frames,
+  finish frames) and campfire cooking sustain; **general hauling does not**.
+- **Used:** by the emergency `JobGiver_Work`, which runs in the colonist block **before
+  both normal and starving `GetFood`**. It retries related work givers at that one cell,
+  and the resulting jobs are `playerForced`.
+- **Cleared:** when no related job is left at the cell, after 30,000 ticks (about half an
+  in-game day), when drafted, when the pawn's mind is reset (for example going down),
+  or by the player's "clear prioritized work" button.
+
+Questions for Gate B (evaluation only, nothing built in the spike):
+
+- **Does it survive a meal?** Worse: it **outranks** the meal. A prioritized pawn keeps
+  doing that work before eating, even when starving, until the work at the cell runs out
+  or times out. Using it for commitments would need a Concord release rule for needs,
+  which is the seam we're leaving, so it only suits short, bounded tasks.
+- **What clears it:** see above. Refusal or withdrawal would have to clear it
+  explicitly.
+- **Does it respect the eligibility filter?** It goes through the work giver's own
+  `HasJobOnThing` and `JobOnThing`, so for hauling it would pass the store filter. But
+  hauling can't use it (no `prioritizeSustains`), and construction and cooking filters
+  are chosen at their migration.
+
+Verdict for now: a candidate for **short, explicit "do this next" commitments** such as
+one campfire build, not for open-ended standing work. The spike doesn't use it.
 
 ## Not verified here
 
