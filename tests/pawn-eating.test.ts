@@ -13,14 +13,19 @@ import {coreWakeSnapshot} from '../src/core-scheduler.js';
 import {SocialChoice} from '../src/social.js';
 class Game implements GameBridge{
  data:GameState={world:'eat',epoch:'one',ticks:100,paused:true,loaded:true,pawns:[{id:'A',name:'Alvin',x:1,z:1,job:'Wait',health:1}],actions:[]};
- saved=new Map<string,GameState>();calls=0;available=true;lost=false;
- async state(){const g=structuredClone(this.data);g.pawns[0]!.eating={epoch:g.epoch,tick:g.ticks,mapId:1,options:this.available?[{thing:'berry',label:'berries',count:16,x:2,z:1,maxTicks:1800}]:[]};return g;}
+ saved=new Map<string,GameState>();calls=0;available=true;lost=false;portion=16;
+ async state(){const g=structuredClone(this.data);g.pawns[0]!.eating={epoch:g.epoch,tick:g.ticks,mapId:1,options:this.available?[{thing:'berry',label:'berries',count:this.portion,x:2,z:1,maxTicks:1800}]:[]};return g;}
  async move():Promise<Receipt>{throw Error('Core work dispatch must not happen');}
  async eat(r:EatRequest){this.calls++;let out=this.data.actions.find(a=>a.id===r.id);if(!out){out={id:r.id,actor:r.actor,kind:'eat',status:'started',reason:'Chosen',x:2,z:1,thing:r.action.thing,count:r.action.count,delivered:0};this.data.actions.push(out);}if(this.lost){this.lost=false;throw Error('Lost delivery');}return out;}
  async cancel(r:{id:string;actor:string}):Promise<Receipt>{const a=this.data.actions.find(a=>a.id===r.id)!;assert.equal(a.actor,r.actor);a.status='interrupted';return a;}
  async save(n:string){this.saved.set(n,structuredClone(this.data));return {sha256:'hash'};}async verify(){}async load(n:string){this.data=structuredClone(this.saved.get(n)!);this.data.epoch=randomUUID();}
 }
 const eat={choice:'eat',thing:'berry',text:'I choose these berries.'};
+test('diagnostic: a growing suggested portion rejects an otherwise identical delayed choice',async()=>{
+ const {g,s,c}=await setup();g.portion=12;const q=await ask(c);let calls=0,offered=0;
+ const result=await c.answerCoreQuestion(q,{name:'diagnostic',async answerCore(v){calls++;offered=v.pawn.eating!.options[0]!.count;g.portion=13;return eat;}});
+ assert.equal(calls,1);assert.equal(offered,12);assert.equal(result.status,'failed');assert.equal(g.calls,0);s.close();
+});
 async function setup(){const g=new Game(),s=new Store(':memory:'),c=new Coordinator(s,g);await c.open();await c.initializeCore('Ask; no orders.');return {g,s,c};}
 async function ask(c:Coordinator){const r=await c.planCore({name:'scripted',async plan(){return {topic:null,action:{kind:'ask',pawn:'A',text:'What would help?',reason:'Ask'}};}});assert.equal(r.status,'applied');if(r.status!=='applied')throw Error();return r.questionId!;}
 test('eat is pawn-only, absent from core offers and ordinary social speech; plain promise starts nothing',async()=>{

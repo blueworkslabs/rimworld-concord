@@ -1,6 +1,19 @@
 import importlib.util,pathlib,unittest,queue,time,json,tempfile
 spec=importlib.util.spec_from_file_location('helper',pathlib.Path(__file__).with_name('run-codex-decision.py'));m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 class Transport(unittest.TestCase):
+ def test_explicit_model_pins_catalog_and_wire_checks(self):
+  old=m.MODEL
+  try:
+   with tempfile.TemporaryDirectory() as d:
+    p=pathlib.Path(d)/'catalog.json'
+    for model in m.MODELS:
+     m.MODEL=model
+     p.write_text(json.dumps({'models':[{'slug':model,'tool_mode':'direct','multi_agent_version':'disabled','supports_search_tool':False}]}))
+     self.assertTrue(m.validate_catalog(p));self.assertEqual(m.config(p)['model'],model);m.assert_no_tools({'model':model})
+     with self.assertRaises(AssertionError):m.assert_no_tools({'model':'wrong'})
+     p.write_text(json.dumps({'models':[{'slug':'wrong'}]}))
+     with self.assertRaises(AssertionError):m.validate_catalog(p)
+  finally:m.MODEL=old
  def client(self,events):
   c=object.__new__(m.Client);c.q=queue.Queue()
   for e in events:c.q.put(e)

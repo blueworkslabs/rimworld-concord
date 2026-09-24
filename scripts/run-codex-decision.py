@@ -5,6 +5,7 @@ its process group; cancellation terminates this helper and app-server together.
 import argparse,hashlib,http.server,json,os,pathlib,queue,signal,subprocess,threading,time,re
 if not __debug__:raise RuntimeError('Runtime validation requires normal Python mode')
 MODEL='gpt-5.6-luna'
+MODELS=('gpt-5.6-luna','gpt-5.6-terra')
 NATIVE_PROVIDER='concord_native'
 NATIVE_URL='https://chatgpt.com/backend-api/codex'
 EXTRA_INSTRUCTIONS='Return only the requested structured response. No tools or external context.'
@@ -135,7 +136,8 @@ def preflight(root,catalog,cases):
  finally:client.close();server.shutdown();server.server_close()
 
 def main():
- parser=argparse.ArgumentParser();parser.add_argument('request',type=pathlib.Path);parser.add_argument('catalog',type=pathlib.Path);parser.add_argument('output',type=pathlib.Path);parser.add_argument('--preflight-only',action='store_true');args=parser.parse_args()
+ global MODEL
+ parser=argparse.ArgumentParser();parser.add_argument('request',type=pathlib.Path);parser.add_argument('catalog',type=pathlib.Path);parser.add_argument('output',type=pathlib.Path);parser.add_argument('--preflight-only',action='store_true');parser.add_argument('--model',choices=MODELS,default='gpt-5.6-luna');args=parser.parse_args();MODEL=args.model
  os.umask(0o077);root=args.output.resolve();root.mkdir() # exclusive attempt, no replay
  receipt={'status':'started','stage':'setup','model':MODEL,'usage':None,'rawText':None};client=None
  def save():

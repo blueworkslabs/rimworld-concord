@@ -14,6 +14,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: python3 scripts/test-codex-decision.py
+      - run: node --test scripts/run-ongoing-grounding.test.mjs
       - run: node --check scripts/run-ongoing.mjs
       - run: bash -n scripts/run-ongoing-lab.sh
       - run: node --test scripts/review-video.test.mjs
