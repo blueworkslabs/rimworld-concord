@@ -12,7 +12,7 @@ import type { GameBridge, GameState, ActionRequest, Receipt } from '../src/proto
 const cfg={intentId:randomUUID(),area:{x:76,z:84,w:4,h:4},quota:30,maxTicks:30000,variant:'exclusive' as const};
 const view=(o:Partial<IntentView>):IntentView=>({intentId:cfg.intentId,thingDef:'WoodLog',variant:cfg.variant,status:'open',zoneId:9,quota:30,delivered:0,reserved:0,remaining:30,
   overshoot:0,incidental:0,unattributed:0,removed:0,violations:0,rejectedStarts:0,finishedAfterExclusion:0,createdTick:0,untilTick:30000,lastDeliveryTick:-1,
-  accepted:[],excluded:[],byPawn:[],drops:[],...o});
+  peakHolders:0,accepted:[],excluded:[],byPawn:[],drops:[],...o});
 /** Mirrors the mod's intent ops closely enough for coordinator lifecycle checks. */
 class IntentGame implements GameBridge {
   data:GameState={world:'w',epoch:'e',loaded:true,ticks:0,paused:false,actions:[],intents:[],pawns:[

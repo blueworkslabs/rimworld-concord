@@ -13,6 +13,8 @@ export const IntentView = z.object({
   overshoot:z.number().int(),incidental:z.number().int(),unattributed:z.number().int(),removed:z.number().int(),
   violations:z.number().int(),rejectedStarts:z.number().int(),finishedAfterExclusion:z.number().int(),
   createdTick:z.number().int(),untilTick:z.number().int(),lastDeliveryTick:z.number().int(),
+  /** Most pawns holding in-flight quota at once (overlap evidence); absent from older mods. */
+  peakHolders:z.number().int().optional().default(0),
   accepted:z.array(z.string()),excluded:z.array(z.string()),
   byPawn:z.array(z.object({pawn:z.string(),count:z.number().int()})),drops:z.array(Drop)});
 export type IntentView = z.infer<typeof IntentView>;

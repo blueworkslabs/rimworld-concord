@@ -13,7 +13,7 @@ namespace Concord {
         public string intentId,thingDef,variant="attribution",status="open";
         public int mapId=-1,zoneId=-1,quota,credited,overshoot,incidental,unattributed,removed;
         public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick=-1;
-        public int zoneCount=-1,arrivalsSinceCount;
+        public int zoneCount=-1,arrivalsSinceCount,peakHolders;
         public List<string> accepted=new List<string>(),excluded=new List<string>();
         public List<int> excludedTicks=new List<int>();
         public Dictionary<int,int> reserved=new Dictionary<int,int>();
@@ -42,7 +42,7 @@ namespace Concord {
             Scribe_Values.Look(ref finishedAfterExclusion,"finishedAfterExclusion");
             Scribe_Values.Look(ref createdTick,"createdTick");Scribe_Values.Look(ref untilTick,"untilTick");
             Scribe_Values.Look(ref lastDeliveryTick,"lastDeliveryTick",-1);
-            Scribe_Values.Look(ref zoneCount,"zoneCount",-1);Scribe_Values.Look(ref arrivalsSinceCount,"arrivalsSinceCount");
+            Scribe_Values.Look(ref zoneCount,"zoneCount",-1);Scribe_Values.Look(ref arrivalsSinceCount,"arrivalsSinceCount");Scribe_Values.Look(ref peakHolders,"peakHolders");
             Scribe_Collections.Look(ref accepted,"accepted",LookMode.Value);
             Scribe_Collections.Look(ref excluded,"excluded",LookMode.Value);
             Scribe_Collections.Look(ref excludedTicks,"excludedTicks",LookMode.Value);
@@ -77,7 +77,7 @@ namespace Concord {
     [Serializable] public class IntentView {
         public string intentId,thingDef,variant,status;
         public int zoneId,quota,delivered,reserved,remaining,overshoot,incidental,unattributed,removed;
-        public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick;
+        public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick,peakHolders;
         public string[] accepted,excluded;
     }
 
@@ -136,6 +136,8 @@ namespace Concord {
         public void Reserve(HaulIntent i,Pawn p,Job job,int count) {
             i.reserved[job.loadID]=Math.Max(0,count);
             i.reservedBy[job.loadID]=p.GetUniqueLoadID();
+            // Overlap evidence: how many pawns held in-flight quota at the same time.
+            i.peakHolders=Math.Max(i.peakHolders,i.reservedBy.Where(kv=>i.reserved.ContainsKey(kv.Key)&&i.reserved[kv.Key]>0).Select(kv=>kv.Value).Distinct().Count());
         }
         public void Release(Job job) {
             if(job==null) return;
@@ -217,7 +219,17 @@ namespace Concord {
             i.status=status;i.reserved.Clear();i.reservedBy.Clear();
             Emit(null,"intent-retired","intent="+i.intentId+";status="+status+";delivered="+i.credited+";quota="+i.quota);
         }
+        // Lab-only: draft this pawn the moment it stands in a tagged zone carrying on a tagged
+        // haul. Drafting is the game's own interruption; only its timing is chosen here.
+        public string draftWhen;
         public override void GameComponentTick() {
+            if(draftWhen!=null) {
+                var dp=WorldState.FindActor(draftWhen);
+                if(dp!=null&&dp.IsCarrying()&&IntentHooks.TaggedHaul(dp.CurJob)&&ForCell(dp.Map,dp.Position)!=null&&dp.drafter!=null) {
+                    draftWhen=null;var job=dp.CurJob;dp.drafter.Drafted=true;
+                    Emit(dp,"lab-drafted","job="+job.loadID+";x="+dp.Position.x+";z="+dp.Position.z);
+                }
+            }
             if(intents.Count==0) return;
             int now=Find.TickManager.TicksGame;
             if(reconcileAfterLoad) {
@@ -294,7 +306,7 @@ namespace Concord {
                 intentId=i.intentId,thingDef=i.thingDef,variant=i.variant,status=i.status,zoneId=i.zoneId,quota=i.quota,
                 delivered=i.credited,reserved=i.Reserved,remaining=i.Remaining,overshoot=i.overshoot,incidental=i.incidental,
                 unattributed=i.unattributed,removed=i.removed,violations=i.violations,rejectedStarts=i.rejectedStarts,
-                finishedAfterExclusion=i.finishedAfterExclusion,createdTick=i.createdTick,untilTick=i.untilTick,lastDeliveryTick=i.lastDeliveryTick,
+                finishedAfterExclusion=i.finishedAfterExclusion,createdTick=i.createdTick,untilTick=i.untilTick,lastDeliveryTick=i.lastDeliveryTick,peakHolders=i.peakHolders,
                 accepted=i.accepted.ToArray(),excluded=i.excluded.ToArray()
             }).TrimEnd('}')+",\"byPawn\":["+
                 String.Join(",",i.byPawn.Select(kv=>JsonUtility.ToJson(new PawnCredit {pawn=kv.Key,count=kv.Value})).ToArray())+
@@ -304,6 +316,23 @@ namespace Concord {
         // Lab-only commands for the scripted sub-runs.
         public string Lab(Request r) {
             var p=WorldState.FindActor(r.actor);
+            if(r.op=="lab-draft-when"){if(p==null||p.drafter==null)throw new Exception("Unknown or undraftable pawn");draftWhen=r.actor;return "{\"armed\":true}";}
+            if(r.op=="lab-undraft"){if(p==null||p.drafter==null)throw new Exception("Unknown or undraftable pawn");draftWhen=null;p.drafter.Drafted=false;return "{\"drafted\":false}";}
+            if(r.op=="lab-speed"){if(r.count<0||r.count>4)throw new Exception("Speed must be 0-4");Find.TickManager.CurTimeSpeed=(TimeSpeed)r.count;return "{\"speed\":"+(int)Find.TickManager.CurTimeSpeed+",\"tick\":"+Find.TickManager.TicksGame+"}";}
+            if(r.op=="lab-patch-cost"){
+                // 0 reset and stop timing, 1 reset and time every patch call, 2 read.
+                if(r.count==0||r.count==1){PatchCost.Reset();PatchCost.timing=r.count==1;}
+                return PatchCost.Json();
+            }
+            if(r.op=="lab-patches"){
+                // 0 all patches off (vanilla), 1 all on, 2 all on except Job.SetTarget. Measurement only.
+                var h=Bootstrap.harmony;if(h==null)throw new Exception("Harmony unavailable");
+                h.UnpatchAll(h.Id);
+                if(r.count>=1)h.PatchAll(typeof(Bootstrap).Assembly);
+                if(r.count==2)h.Unpatch(HarmonyLib.AccessTools.Method(typeof(Job),nameof(Job.SetTarget)),HarmonyLib.HarmonyPatchType.All,h.Id);
+                return "{\"mode\":"+r.count+",\"patchedMethods\":"+h.GetPatchedMethods().Count()+"}";
+            }
+            if(r.op=="work-options") return WorkOptions.Measure(Math.Max(1,Math.Min(r.count,10)));
             if(r.op=="lab-fault-escape"){if(p==null)throw new Exception("Unknown pawn");faultSkipNext=true;faultPawn=r.actor;return "{\"fault\":\"armed\"}";}
             if(r.op=="lab-plain-zone") {
                 // Matched ordered-job half: the same area as an ordinary, untagged wood stockpile.
@@ -382,6 +411,32 @@ namespace Concord {
                 return "{\"merged\":"+add+"}";
             }
             throw new Exception("Unsupported lab operation");
+        }
+    }
+}
+namespace Concord {
+    // Measurement only (docs/SPIKE_NATIVE_HAUL.md, Options menu): per pawn and per work giver,
+    // up to N candidates that pass the game's own predicate. HasJobOnThing/HasJobOnCell check
+    // reservations without taking them; no job is created, so the map is left unchanged.
+    public static class WorkOptions {
+        public static string Measure(int top) {
+            var sw=System.Diagnostics.Stopwatch.StartNew();var pawnParts=new List<string>();
+            foreach(var p in Find.CurrentMap.mapPawns.FreeColonistsSpawned) {
+                var givers=new List<string>();var pw=System.Diagnostics.Stopwatch.StartNew();
+                foreach(var wg in p.workSettings.WorkGiversInOrderNormal) {
+                    var scanner=wg as WorkGiver_Scanner;
+                    if(scanner==null||scanner.ShouldSkip(p,false)) continue;
+                    int found=0;
+                    try {
+                        var things=scanner.PotentialWorkThingsGlobal(p)??p.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
+                        foreach(var t in things){if(found>=top)break;if(!t.IsForbidden(p)&&scanner.HasJobOnThing(p,t,false))found++;}
+                        if(found<top){var cells=scanner.PotentialWorkCellsGlobal(p);if(cells!=null)foreach(var c in cells){if(found>=top)break;if(scanner.HasJobOnCell(p,c,false))found++;}}
+                    } catch(Exception e) {givers.Add("{\"def\":\""+wg.def.defName+"\",\"error\":\""+e.GetType().Name+"\"}");continue;}
+                    if(found>0)givers.Add("{\"def\":\""+wg.def.defName+"\",\"candidates\":"+found+"}");
+                }
+                pawnParts.Add("{\"pawn\":\""+p.GetUniqueLoadID()+"\",\"micros\":"+(pw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+",\"givers\":["+String.Join(",",givers.ToArray())+"]}");
+            }
+            return "{\"top\":"+top+",\"totalMicros\":"+(sw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+",\"pawns\":["+String.Join(",",pawnParts.ToArray())+"]}";
         }
     }
 }

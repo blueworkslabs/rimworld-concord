@@ -8,18 +8,24 @@ with wood positions and the candidate area:
 Main fixture: three stacks of 30. With --meal: 18 stacks of 5 (one per trip), and
 Pedro's Food at 0.13, just above native raw-berry eligibility (0.12 on 4871).
 Meal stacks must be spaced more than 8 cells apart; validate actual trips in a dry run.
+With --helper: the layout also gives "each" (units per stack) for any number of stacks, so
+helping comes from geometry alone: more wood than one pawn moves in one trip, a quota
+larger than one load, and a second cluster placed near Beatrice's observed position.
+No pawn is moved or changed.
 Removes every stockpile whose filter could accept WoodLog, so nobody hauls wood
 before an agreement exists. The candidate area is data for the coordinator, not a zone.
 """
 import json,sys,xml.etree.ElementTree as E
 from pathlib import Path
 roles=json.loads(Path(__file__).with_name("native-haul-roles.json").read_text())
-args=[a for a in sys.argv[1:] if a!='--meal'];meal='--meal' in sys.argv
+args=[a for a in sys.argv[1:] if a not in ('--meal','--helper')];meal='--meal' in sys.argv;helper='--helper' in sys.argv
+assert not (meal and helper),'one fixture variant at a time'
 src,ref,dst,layout=args;layout=json.loads(layout)
 # DefDatabase order on 4871 with Biotech and Odyssey: Core, then Childcare, then Fishing.
 WORK=['Firefighter','Patient','Doctor','PatientBedRest','BasicWorker','Warden','Handling','Cooking','Hunting','Construction','Growing','Mining','PlantCutting','Smithing','Tailoring','Art','Crafting','Hauling','Cleaning','Research','Childcare','Fishing']
 HAULING=WORK.index('Hauling')
-count,stacks=(5,18) if meal else (30,3)
+count,stacks=(5,18) if meal else (int(layout['each']),len(layout['wood'])) if helper else (30,3)
+if helper:assert 1<=count<=75 and count*stacks>75,'helper geometry needs more wood than the largest quota'
 assert len(layout['wood'])==stacks,f'need {stacks} wood positions'
 area=layout['area'];assert 1<=area['w']*area['h']<=64
 if meal:
@@ -78,6 +84,6 @@ for pos in layout['wood']:
     things.append(t);occupied.add(cell);made.append(t.find('id').text)
 
 with open(dst,'xb') as out:r.write(out,encoding='utf-8',xml_declaration=True)
-print(json.dumps({'fixture':'native-haul-v1-meal' if meal else 'native-haul-v1','wood':{'stacks':stacks,'each':count,'total':stacks*count,'ids':made},
+print(json.dumps({'fixture':'native-haul-v1-meal' if meal else 'native-haul-v1-helper' if helper else 'native-haul-v1','wood':{'stacks':stacks,'each':count,'total':stacks*count,'ids':made},
     'area':area,'removedStockpiles':removedZones,'priorities':priorities,'roleSheet':roles,'mealSetup':roles['meal'] if meal else None,
     'nativeSelfCare':True,'note':'Astra confirms the zone list and, for the meal case, the trip count in a dry run'}))

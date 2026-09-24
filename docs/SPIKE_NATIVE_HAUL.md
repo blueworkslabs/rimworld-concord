@@ -360,7 +360,8 @@ unproven. No capability bypass or character rewrite has been made.
   `scripts/build-mod.sh <Managed> <0Harmony.dll>`. All eleven patched methods apply
   offline under Mono with Harmony 2.4.2. Pawns report `haulingCapable` (the game's own
   Hauling work-type check).
-- **Fixture:** `scripts/native-haul-fixture.py` (`--meal` for the meal case). Wood
+- **Fixture:** `scripts/native-haul-fixture.py` (`--meal` for the meal case, `--helper`
+  for the geometry-only helper case). Wood
   positions and the candidate area come from the running game.
 - **Coordinator:** routing entries, `src/native-intents.ts` (wakes, aggregate receipts,
   topic outcome, invariants), `LabBridge.intent`. `haul-zone` is an ordinary offer:
@@ -373,7 +374,7 @@ unproven. No capability bypass or character rewrite has been made.
   - the standing follows the intent (met, expired, stopped), with no needs stop;
   - the crew log shows first delivery, quota and expiry, and "finished a trip started
     before withdrawing".
-- **Scripted runs:** `scripts/run-native-haul-lab.sh main|meal [--case=<name>]`, which
+- **Scripted runs:** `scripts/run-native-haul-lab.sh main|meal|helper [--case=<name>]`, which
   writes a unique `.runtime/native-haul-<mode>-<runId>.json`, including raw events and final
   state per case. Event gaps fail the run. These private runtime files are not published.
   - `core-offers` covers the coordinator path end to end: not offered, refusal, a
@@ -385,14 +386,31 @@ unproven. No capability bypass or character rewrite has been made.
     Validity requires actual scoped wood delivery (and eating/post-meal work for the
     meal half); quantity shortfalls remain measured outcomes, with `quotaMet` explicit.
     Initial work after eating is not reported as resumption of pre-meal work.
-- **Not yet built:**
-  - cold coordinator restore mid-intent;
-  - forced opportunistic replacement and failed partial merge;
-  - the `work-options` and isolated patch-cost measurements.
-
-  All are listed as unimplemented in run receipts. The opportunistic-replacement and
-  failed-partial-merge cases are observed from events rather than forced; a run without
-  such an event is not evidence for either case.
+  - `cold-restore-mid-intent` checkpoints an open, in-flight intent and restores it
+    into a new coordinator on the same store. The standing, credit and intent must
+    survive, and the quota must then be met.
+  - `draft-mid-carry` replaces the lab-forced cancellation. Pedro is drafted, which is
+    the game's own interruption, the moment he stands in the tagged zone carrying on a
+    tagged haul. The drop must be incidental and never credited. Whether he resumes
+    after undrafting is recorded, not required.
+  - `patch-cost` measures simulation speed at Ultrafast in three modes: all patches, all
+    except `Job.SetTarget`, and none (vanilla). The modes are interleaved three times on
+    the same save and workload. It then times every patch call with all patches on and
+    reports microseconds per 1000 ticks per patch. The `Job.SetTarget` number is the
+    isolated cost, because a mode that hits the speed cap can't show its cost in ticks
+    per second. The measurement uses the lab-only `lab-patches`, `lab-patch-cost` and
+    `lab-speed` operations.
+  - `work-options` runs the options-menu measurement five times: for each pawn and work
+    giver, the game's own `HasJobOnThing`/`HasJobOnCell` checks, with no jobs created.
+  - `helper` mode (`--helper`) runs `helper-geometry` (attribution; Pedro accepts,
+    Beatrice is unasked) and `overlap-geometry` (both accept) on a fixture where helping
+    can only come from geometry: more wood than one trip moves, a quota of 75, and a
+    second cluster placed near Beatrice. Helping and overlap (`peakHolders`, the most
+    pawns holding in-flight quota at once) are recorded as results, not required. The
+    invariants must hold either way.
+- **Not yet built:** forced opportunistic replacement and failed partial merge. Both are
+  listed as unimplemented in run receipts and observed from events rather than forced;
+  a run without such an event is not evidence for either case.
 
 ## Out of scope
 

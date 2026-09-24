@@ -15,7 +15,7 @@ import {crewReport} from '../src/crew-log.js';
 import {startNative} from './native-run.js';
 if(process.env.CONCORD_NATIVE_HAUL_LOCKED!=='1')throw Error('Exclusive lab lock required');
 const root=new URL('../..',import.meta.url).pathname;
-const mode=process.argv.includes('--meal')?'meal':'main';
+const mode=process.argv.includes('--meal')?'meal':process.argv.includes('--helper')?'helper':'main';
 const only=process.argv.find(a=>a.startsWith('--case='))?.slice(7);
 // Two full ten-minute meal windows plus setup/capture when running the pair together.
 const deadline=Date.now()+(mode==='meal'?(only?900000:1500000):1800000);
@@ -23,7 +23,7 @@ let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
 const runId=randomUUID();
 const receipt:{runId:string;unimplemented:string[];mode:string;fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
-  {runId,unimplemented:['cold coordinator restore mid-intent','forced opportunistic replacement','forced partial merge','work-options and patch cost measurements'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
+  {runId,unimplemented:['forced opportunistic replacement','forced partial merge'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 
 async function poll(){
@@ -74,7 +74,8 @@ function invariants(c:Case,id:string,opts={}){const v=view(id);if(!v){c.findings
 
 try{
   const f=JSON.parse(await readFile(root+'/.runtime/native-haul-fixture.json','utf8'));receipt.fixture=f;
-  const cfg=mode==='meal'?f.meal:f.main;
+  const cfg=mode==='meal'?f.meal:mode==='helper'?f.helper:f.main;
+  if(!cfg)throw Error('fixture config missing for mode '+mode);
   await b.load(cfg.save);await b.admin('pause');await poll();
   const base='lab-concord-nh-base-'+Date.now();await b.save(base);
   const roles=JSON.parse(await readFile(root+'/scripts/native-haul-roles.json','utf8'));
@@ -172,17 +173,21 @@ try{
       expect(c,v.finishedAfterExclusion>=1,'carried trip not finished and flagged');
       expect(c,v.drops.filter(d=>d.pawn===A&&d.kind==='participation').every(d=>d.startedBeforeExclusion),'unflagged participation after withdrawal');
     });
-    await scenario('forced-cancel-in-zone',base,async c=>{
-      const id=randomUUID();await accept(id,A,{variant:'exclusive'});const a=cfg.area;
-      const inZone=()=>{const p=pawn(primary);return !!p.carrying&&p.x>=a.x&&p.x<a.x+a.w&&p.z>=a.z&&p.z<a.z+a.h;};
-      const reached=await run(inZone,90000);
-      if(!reached){c.findings.push('Pedro never stood in the zone while carrying (retry with a larger area)');return;}
-      const before=view(id)!;const deliveredBefore=before.delivered, incidentalBefore=before.incidental;
-      const interruption=await op({op:'lab-interrupt',actor:A});c.data.interrupt=interruption;await poll();
+    await scenario('draft-mid-carry',base,async c=>{
+      // The game's own interruption: Pedro is drafted the moment he stands in the tagged zone
+      // carrying on a tagged haul. The lab chooses only the timing.
+      const id=randomUUID();await accept(id,A,{quota:75,variant:'exclusive'});
+      await op({op:'lab-draft-when',actor:A});
+      if(!await run(()=>events.some(e=>e.kind==='lab-drafted'&&e.pawn===A),120000))throw Error('precondition: Pedro never stood in the zone while carrying');
+      const drafted=events.find(e=>e.kind==='lab-drafted'&&e.pawn===A)!;
+      await run(()=>false,3000);
       const v=invariants(c,id);if(!v)return;
-      expect(c,interruption.ended==='HaulToCell','precondition: tagged haul ended before interruption');
-      expect(c,v.incidental>incidentalBefore,'precondition: no incidental cleanup placement observed');
-      expect(c,v.delivered===deliveredBefore,'cleanup drop credited');c.data.drops=v.drops.slice(-3);
+      const after=v.drops.filter(d=>d.tick>=drafted.tick&&d.pawn===A);c.data.drafted=drafted;c.data.dropsAfterDraft=after;
+      expect(c,after.some(d=>d.kind==='incidental'),'no incidental drop recorded when drafted mid-carry');
+      expect(c,!after.some(d=>d.kind==='participation'),'drop on drafting was credited as participation');
+      c.data.undraft=await op({op:'lab-undraft',actor:A});
+      // Native behaviour after undrafting is recorded, not required.
+      await run(()=>false,15000);c.data.resumedAfterUndraft=events.some(e=>e.seq>drafted.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
     });
     for(const [quota,carry] of [[5,20],[30,10]] as const)await scenario('pre-carried-'+carry+'-quota-'+quota,base,async c=>{
       const id=randomUUID();await accept(id,A,{quota,variant:'exclusive'});
@@ -293,6 +298,59 @@ try{
         expect(c,crew.some(t=>t.startsWith('Stockpile haul quota met: 20/20 wood')),'crew log lacks the quota line');
       }finally{s.close();}
     });
+    await scenario('cold-restore-mid-intent',base,async c=>{
+      // Checkpoint with an open, in-flight intent; restore into a NEW coordinator on the same store.
+      const setup={intentId:randomUUID(),area:cfg.area,quota:75,maxTicks:30000,variant:'attribution' as const};
+      const db=root+`/.runtime/native-haul-cold-${runId}.db`;let s=new Store(db),co=new Coordinator(s,b);
+      await co.open();await co.initializeCore('Scripted core for the cold-restore check; every answer is authored.');await co.configureNativeHaul(setup);
+      const offer=await co.core().propose(A,intentAction(setup),'Scripted: stock wood');
+      await co.pawn(A).decide(offer.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+      if(!await runWith(()=>co.reconcile(),()=>{const v=view(setup.intentId);return v?.status==='open'&&v.delivered>0&&v.reserved>0;},180000))throw Error('precondition: no in-flight haul after a first delivery');
+      await co.reconcile();const before=view(setup.intentId)!,domainBefore=co.inspect();
+      const name='lab-concord-nh-cold-'+Date.now();await co.checkpoint(name);s.close();
+      s=new Store(db);co=new Coordinator(s,b);
+      try{
+        c.data.eventsBeforeLoad=[...events];events=[];lastSeq=0;await co.restore(name);await poll();
+        const after=view(setup.intentId);
+        expect(c,!!after&&after.status==='open'&&after.quota===before.quota&&after.delivered===before.delivered,'intent changed across cold restore');
+        expect(c,co.inspect().proposals[offer.id]?.standing?.status==='running','standing lost across cold restore');
+        expect(c,JSON.stringify(co.inspect().intentViews?.[setup.intentId]?.byPawn)===JSON.stringify(domainBefore.intentViews?.[setup.intentId]?.byPawn),'coordinator credit changed across cold restore');
+        await runWith(()=>co.reconcile(),()=>co.inspect().proposals[offer.id]?.standing?.status!=='running',300000);await co.reconcile();
+        const v=invariants(c,setup.intentId);if(!v)return;
+        expect(c,v.status==='met'&&co.inspect().proposals[offer.id]?.standing?.status==='completed','intent did not complete after cold restore');
+        c.data.coldRestore={name,before:{delivered:before.delivered,reserved:before.reserved},afterReserved:after?.reserved,final:v.delivered};
+      }finally{s.close();}
+    });
+    await scenario('patch-cost',base,async c=>{
+      // Sim speed with all patches, all but Job.SetTarget, and none (vanilla), interleaved
+      // three times on the same save and workload; then per-patch timing with every patch on.
+      const segment=async(mode:number,ms:number)=>{
+        await b.load(base);await b.admin('pause');events=[];lastSeq=0;await poll();
+        const id=randomUUID();await accept(id,A,{quota:75});await op({op:'lab-patches',count:mode});
+        await startNative(b);await op({op:'lab-speed',count:4});await delay(2000);await poll();
+        const t0=state.ticks,w0=Date.now();await delay(ms);await poll();const tps=(state.ticks-t0)/((Date.now()-w0)/1000);
+        await b.admin('pause');return {mode,tps:Math.round(tps)};
+      };
+      const samples:{mode:number;tps:number}[]=[];
+      try{
+        for(let rep=0;rep<3;rep++)for(const m of [1,2,0])samples.push(await segment(m,20000));
+        await b.load(base);await b.admin('pause');await poll();const id=randomUUID();await accept(id,A,{quota:75});
+        await op({op:'lab-patches',count:1});await op({op:'lab-patch-cost',count:1});
+        await startNative(b);await op({op:'lab-speed',count:4});await poll();const t0=state.ticks;await delay(20000);await poll();const ticks=state.ticks-t0;
+        await b.admin('pause');const cost=await op({op:'lab-patch-cost',count:2});await op({op:'lab-patch-cost',count:0});
+        const med=(m:number)=>{const x=samples.filter(s=>s.mode===m).map(s=>s.tps).sort((a,b)=>a-b);return x[1]??x[0]??0;};
+        c.data.patchCost={samples,medianTps:{all:med(1),allButSetTarget:med(2),none:med(0)},
+          setTargetTpsDelta:med(2)-med(1),allPatchesTpsDelta:med(0)-med(1),
+          timedTicks:ticks,perPatch:cost.patches.map((p:any)=>({...p,microsPer1000Ticks:ticks?Math.round(p.micros*1000/ticks*10)/10:null})),
+          note:'Ultrafast target is 15x; a mode reaching the cap cannot show its cost in TPS, so the per-patch timing is the isolated number.'};
+      }finally{await op({op:'lab-patches',count:1});}
+    });
+    await scenario('work-options',base,async c=>{
+      // Measurement only: the options menu is never given to the core in this spike.
+      const runs=[];for(let i=0;i<5;i++)runs.push(await op({op:'work-options',count:5}));
+      c.data.workOptions={runs,totalMicros:runs.map((r:any)=>r.totalMicros)};
+      expect(c,runs.every((r:any)=>r.pawns.length===3),'work-options did not cover all three pawns');
+    });
     await scenario('ordered-main',base,async c=>{
       // Matched ordered-job half for stale rejections: the same area as an ordinary stockpile,
       // native Hauling off for everyone so only ordered jobs haul, the scripted core offering
@@ -305,6 +363,21 @@ try{
       expect(c,view(id)?.quota===20,'pre-acceptance quota not adopted');
       // A second acceptance cannot change the quota. This is not a counteroffer test.
       await accept(id,B,{quota:10});expect(c,view(id)?.quota===20,'quota changed after acceptance');
+    });
+  }else if(mode==='helper'){
+    // Helping and overlap from geometry only (Fable): nothing nudges Beatrice. If she does
+    // not help, that is recorded as the result; invariants must hold either way.
+    await scenario('helper-geometry',base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota:75,variant:'attribution'});
+      await run(done(id),420000);const v=invariants(c,id);if(!v)return;
+      const helper=v.byPawn.find(p=>p.pawn===B)?.count??0;
+      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,helperObserved:helper>0,helperCredit:helper,peakHolders:v.peakHolders};
+    });
+    await scenario('overlap-geometry',base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota:75});await accept(id,B,{quota:75});
+      await run(done(id),420000);const v=invariants(c,id);if(!v)return;
+      expect(c,v.overshoot===0,'overshoot with two accepting pawns');
+      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,overlapObserved:v.peakHolders>=2,peakHolders:v.peakHolders,rejectedStarts:v.rejectedStarts};
     });
   }else{
     await scenario('meal-resumption',base,async c=>{

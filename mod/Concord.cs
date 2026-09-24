@@ -143,12 +143,13 @@ namespace Concord
     [StaticConstructorOnStartup]
     public static class Bootstrap
     {
+        public static HarmonyLib.Harmony harmony;
         static Bootstrap() {
             if(!GenCommandLine.CommandLineArgPassed("rimworld-lab") ||
                String.IsNullOrEmpty(Environment.GetEnvironmentVariable("RIMWORLD_LAB_ROOT")) ||
                GenFilePaths.SaveDataFolderPath!=Path.Combine(Environment.GetEnvironmentVariable("RIMWORLD_LAB_ROOT"),"profile")) return;
             // Native-intent patches (docs/SPIKE_NATIVE_HAUL.md); Harmony comes from brrainz.harmony, never bundled.
-            new HarmonyLib.Harmony("blueworkslabs.concord").PatchAll(typeof(Bootstrap).Assembly);
+            harmony=new HarmonyLib.Harmony("blueworkslabs.concord");harmony.PatchAll(typeof(Bootstrap).Assembly);
             var o=new GameObject("ConcordBridge"); UnityEngine.Object.DontDestroyOnLoad(o); o.AddComponent<Pump>();
         }
     }
