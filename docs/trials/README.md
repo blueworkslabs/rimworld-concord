@@ -75,3 +75,4 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.
 | 09-24 | [#69](https://github.com/blueworkslabs/rimworld-concord/pull/69) | L | Single signed native-haul scene | Uncut recording retained; receipt findings identify late acceptance, stale narration and attention failures. Gate C verdict pending | [recording metadata](../evidence/native-haul-live-recording.json), [findings](../evidence/native-haul-live-findings.json) | [NATIVE_HAUL_LIVE](NATIVE_HAUL_LIVE.md) |
+| 09-24 | [#70](https://github.com/blueworkslabs/rimworld-concord/pull/70) | — | Gate C verdict on the native-haul spike | Migrate; three fixes block the next live run; attribution-only default; silent wait | [findings](../evidence/native-haul-live-findings.json) | [NATIVE_HAUL_GATE_C](NATIVE_HAUL_GATE_C.md) |

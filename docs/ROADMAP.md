@@ -107,6 +107,10 @@ and successful raw-food alternatives are valid, not stop conditions.
 
 **3. Decide, then migrate one capability at a time**
 
+**Decided 2026-09-24: the spike wins on the game side; migrate.** Verdict, blocking
+fixes before the next live run, and closed decisions:
+[NATIVE_HAUL_GATE_C](trials/NATIVE_HAUL_GATE_C.md).
+
 If the spike wins: hauling, then campfire construction and cooking through blueprints
 and bills, then rescue through the native rescue job. Each migration keeps the
 coordinator contract, adapts receipts and topic closure to aggregate progress, and is
