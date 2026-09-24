@@ -67,9 +67,14 @@ direct recipe placement), and that a haul can place items even when
 `TryDropCarriedThing` returns false. So the spike defines:
 
 - **Participation:** items placed through the carry tracker's `placedAction` callback
-  during a job with `haulMode == ToCellStorage` whose storage target is a cell of the
-  tagged zone, while the intent is open. Only participation is credited, counts toward
-  the quota, and can be a consent violation.
+  by the storage-placement toil: a `ThingPlaceMode.Direct` drop at the job's current
+  target B, in a job with `haulMode == ToCellStorage`, where that cell belongs to the
+  tagged zone, while the intent is open, and **not** during job cleanup. Only
+  participation is credited, counts toward the quota, and can be a consent violation.
+- **Cleanup is classified explicitly.** During cancellation the old haul job and its
+  target can still be visible, so a prefix on `Pawn_JobTracker.CleanupCurrentJob` marks
+  the pawn as "in cleanup" until its postfix runs. Any placement while that mark is set,
+  and any `Near` placement, is incidental, whatever the job says.
 - **Incidental placement:** anything else that lands in the zone (haul-aside,
   cleanup or cancellation drops, direct placement, arrivals no hook attributes). It is
   recorded with count, source and carrier if known, never credited, never counted, and
@@ -100,13 +105,23 @@ with reservations keyed by job `loadID`.
 - **Fresh jobs:** a job into the zone is admitted only if `remaining ≥ 1`. Its
   `job.count` is capped to `remaining` and reserved at creation. Pickup and opportunistic
   duplicates are bounded by `job.count`.
-- **Already-carried loads** (opportunistic or re-targeted): the zone is admitted only if
-  the carried stack is at most `remaining`, and that amount is reserved when the search
-  selects the zone.
+- **Already-carried loads** (re-targets in the drop toil): the zone is admitted only if
+  the carried stack is at most `remaining` plus the job's own existing reservation.
+  Admission is a pure check with no side effects, because storage searches also run
+  speculatively (validity checks, UI). The reservation is taken at the **commit point**:
+  when the job's target B is actually set to a cell of the zone (`Job.SetTarget` on a
+  `HaulToCell` job).
+- **Re-target transfers are atomic.** Within the tagged zone the reservation stays with
+  the job, with no double count. Out of the zone it is released. Into the zone it is
+  reserved once, at the commit.
 - **Credit** moves reserved to credited at placement (never more than the job's
   reservation). A job that ends releases its unused reservation.
 - **Result:** `credited + reserved ≤ quota` at all times, so counted deliveries never
-  exceed the quota. There is no "one stack" allowance. When `credited == quota` the intent
+  exceed the quota. There is no "one stack" allowance: a carried load too large for
+  what's left simply isn't admitted and goes to other storage by the game's normal rules.
+  Wood is never split or destroyed to fit the number. (This tightens Fable's bound of
+  "at most one carried load" to zero; if Astra's review finds a path that needs it, the
+  fallback is exactly that bound, reported.) When `credited == quota` the intent
   retires at once; later placements are ordinary native hauls. On expiry, jobs in flight
   finish as ordinary hauls and aren't credited.
 
@@ -119,11 +134,11 @@ in the code:
 | # | Target | Kind | Reason |
 |---|---|---|---|
 | 1 | `StoreUtility.TryFindBestBetterStoreCellForWorker` | prefix | Admission for storage searches: excluded pawns, non-accepted pawns in the exclusive variant, `remaining`, carried-load size |
-| 2 | `StoreUtility.TryFindBestBetterStoreCellFor` | postfix | Reserve an already-carried load when the search selects the tagged zone |
+| 2 | `Verse.AI.Job.SetTarget` | postfix | Commit point for re-targets of a `HaulToCell` job: reserve, transfer or release atomically |
 | 3 | `HaulAIUtility.HaulToCellStorageJob` | prefix and postfix | Admission for preselected cells; cap `job.count`; reserve |
 | 4 | `Pawn_CarryTracker.TryDropCarriedThing` (both overloads) | prefix | Wrap `placedAction` (keeping any existing callback): credit participation, record incidental placement, never double-count |
 | 5 | `Zone_Stockpile.Notify_ReceivedThing` | postfix | Audit arrivals into the tagged zone that hook 4 didn't see (incidental, unattributed) |
-| 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix | `job-start` and `job-end` with condition and seen cause; release reservations |
+| 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
 | 7 | `Thing.Ingested` | prefix and postfix | `ingested`: eater, def, item count, nutrition |
 | 8 | `Pawn_InteractionsTracker.TryInteractWith` | postfix | `interaction`: initiator, recipient, def |
 
