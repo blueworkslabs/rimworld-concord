@@ -89,11 +89,18 @@ a new question, but its native eating action also failed availability checks. No
 or cooking followed. Initial schema failures, offline diagnosis and the corrected run
 are all retained. Paired/cold restore passed. [Evidence](evidence/luna-ongoing-integration.json).
 
-**Still to assess:** stale availability during thought, inaccurate planner explanations
-(including claims of no eligible question when recipients existed), and escalation on
-retained harder snapshots. These observations do not yet establish a need for a more
-capable model; no Terra/Sol comparison has been run. Automatic escalation remains
-unimplemented. The three-minute check is not the planned recorded scene.
+**Retained-case assessment completed:** a six-answer offline Luna/Terra comparison
+found stale explanations in both, despite correct receipt-backed closures. It does
+not justify automatic escalation; Luna remains default. The historical eating
+receipts combine several validation predicates, so their exact failure causes remain
+unknown. A mock proves portion growth alone can reject an otherwise identical choice,
+not that it caused the old failures. [Protocol and result](ONGOING_GROUNDING.md).
+
+**Next:** distinguish current typed facts from dated planner interpretations and add
+reason-specific availability diagnostics; verify those changes before the longer
+recorded scene. Calibrate any routing thresholds on separate held-out cases, not this
+development sample. Automatic escalation remains unimplemented; no Sol comparison
+has been run. The three-minute check is not the planned recorded scene.
 
 
 - A native Codex backend for pawn and core calls with the same guarantees the Claude

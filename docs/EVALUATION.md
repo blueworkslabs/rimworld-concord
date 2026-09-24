@@ -83,6 +83,13 @@ is not a truth score:
 
 ## Legibility
 
+The [continuous-play grounding comparison](ONGOING_GROUNDING.md) reuses three exact
+public core snapshots with identical Luna/Terra requests and no game execution.
+Its six answers are manually assessed separately from contract validity. It is a
+development-case diagnosis, not a held-out benchmark or automatic escalation policy.
+All requests, outputs, factual references and limits are retained in the
+[comparison evidence](evidence/ongoing-grounding-comparison.json).
+
 Two early reads (one model reading an exported log, one reader working from
 screenshots) found real gaps but did not scale: screenshot packs can't carry a
 ten-minute scene. Future legibility checks need a recording of the scene (watched by

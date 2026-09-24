@@ -43,6 +43,11 @@ ate 9 berries and the core closed her three linked topics; two Alvin choices fai
 fresh availability checks. The last core turn was cancelled at the observation deadline.
 Initial schema failures are preserved. [Integration evidence](docs/evidence/luna-ongoing-integration.json).
 
+A six-answer offline Luna/Terra comparison found stale explanation errors in both,
+despite valid actions and correct receipt-backed closure. Luna remains the default;
+automatic escalation is not justified by this small selected sample.
+[Diagnosis and comparison](docs/ONGOING_GROUNDING.md).
+
 Not yet shown: the live core turning a need into a multi-step plan (build, then cook),
 long-run character consistency, automatic model escalation, the gravship
 campaign, or an installer for players.
