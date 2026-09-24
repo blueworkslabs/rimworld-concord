@@ -812,7 +812,6 @@ export class Coordinator {
   private async applyIntentDecision(p:Proposal,result:Decision,fresh:GameState){
     if(p.action.kind!=='haul-zone')throw Error('Not a native intent');
     const a=p.action;
-    if(result.kind==='accept'){await this.flushIntentExclusions();await this.flushIntentAcceptances();fresh=await this.current();}
     const live=this.liveIntent(fresh,a.intentId);
     if(result.kind==='accept')planIntentOffer(this.domain.nativeHaul,fresh.pawns.find(x=>x.id===p.pawn),a,live);
     if(result.kind==='counter'&&(result.action.kind!=='haul-zone'||result.action.intentId!==a.intentId))throw Error('Counter must address the same shared intent');
@@ -825,7 +824,7 @@ export class Coordinator {
     this.commit('decided',p.pawn,p);
     if(result.kind==='counter')return;
     if(result.kind!=='accept'){await this.flushIntentExclusions();return;}
-    try{await this.flushIntentAcceptances();}
+    try{await this.flushIntentExclusions();await this.flushIntentAcceptances();}
     catch(error){this.commit('intent-admission-uncertain',p.pawn,{proposal:p.id,error:String(error).slice(0,200)});}
   }
   /** The game may have accepted a timed-out request. Keep the agreement held until
@@ -890,6 +889,7 @@ export class Coordinator {
     this.recordEating(care,await this.game.cancel({epoch:this.domain.epoch,actor:pawn,id:care.id,kind:'eat'}));
   });}
   private async dispatch(p:Proposal) {
+    if(Object.values(this.domain.pendingIntentExclusions??{}).some(x=>x.actor===p.pawn))throw Error('Native exclusion unconfirmed; ordered dispatch held for reconciliation');
     if(p.status!=='accepted' || !p.actionId) throw Error('Action requires pawn acceptance');
     const receipt=await this.game.move({id:p.actionId,epoch:this.domain.epoch,actor:p.pawn,action:p.action,untilTick:p.standing?.deadline,mapId:workMap(p)});
     this.domain.outcomes[receipt.id]=receipt;

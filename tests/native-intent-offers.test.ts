@@ -109,11 +109,15 @@ test('lost exclusion calls remain durable and reconcile without replaying consen
     assert.equal(Object.keys(c.inspect().pendingIntentExclusions??{}).length,1);
     // A different pawn's acceptance must not overtake the lost exclusion.
     const b=await c.core().propose('B',intentAction(cfg),'Stock wood');
-    await assert.rejects(c.pawn('B').decide(b.id,say('accept')),/Mailbox unavailable/);
+    await c.pawn('B').decide(b.id,say('accept'));
+    assert.equal(c.inspect().proposals[b.id]!.status,'accepted');
+    assert.ok(c.inspect().pendingIntentAcceptances?.includes(b.id));
     assert.ok(!game.ops.some(o=>o.op==='intent-accept'&&o.actor==='B'));
     fail=false;const reopened=new Coordinator(store,game);await reopened.open();await reopened.reconcile();
     assert.ok(game.data.intents![0]!.excluded.includes('P'));
     assert.equal(Object.keys(reopened.inspect().pendingIntentExclusions??{}).length,0);
+    assert.ok(game.data.intents![0]!.accepted.includes('B'));
+    assert.deepEqual(reopened.inspect().pendingIntentAcceptances,[]);
   }
 });
 
@@ -136,4 +140,19 @@ test('another pawn meeting quota does not complete a withdrawn obligation',async
   Object.assign(game.data.intents![0]!,{status:'met',delivered:30,byPawn:[{pawn:'B',count:30}]});await c.reconcile();
   const report=crewReport(c.inspect(),0),v=report.agreements.find(a=>a.pawn==='P')!.progress;
   assert.equal(v.completed,0);assert.equal(v.unfulfilled,1);assert.equal(v.status,'stopped');
+});
+
+
+test('an existing ordered offer cannot dispatch across an unconfirmed native withdrawal',async()=>{
+  const {c,game}=await setup();
+  const move=await c.core().propose('P',{kind:'move',x:4,z:4},'Move later');
+  const native=await c.core().propose('P',intentAction(cfg),'Stock wood');
+  await c.pawn('P').decide(native.id,say('accept'));
+  const actual=game.intent.bind(game);let fail=true,moved=0;
+  game.intent=async p=>{if(p.op==='intent-exclude'&&fail)throw Error('Mailbox unavailable');return actual(p);};
+  game.move=async r=>{moved++;return {id:r.id,actor:r.actor,status:'completed',reason:'arrived',x:4,z:4};};
+  await assert.rejects(c.pawn('P').withdraw('Stop'),/Mailbox unavailable/);
+  await assert.rejects(c.pawn('P').decide(move.id,say('accept')),/Native exclusion unconfirmed/);
+  assert.equal(c.inspect().proposals[move.id]!.status,'accepted');assert.equal(moved,0);
+  fail=false;await c.reconcile();assert.equal(moved,1);
 });
