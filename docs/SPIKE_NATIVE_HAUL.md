@@ -442,6 +442,12 @@ or character rewrite has been made.
 
 ## Live run: freeze record (draft for Fable's sign-off)
 
+Astra's [reviewed setup fingerprint and rehearsal](trials/NATIVE_HAUL_FREEZE.md) are
+ready for sign-off. The proposed live fixture is **helper geometry / quota 75**, a
+change from the original quota-30 main fixture; it remains unapproved until Fable
+signs the setup hash. Two failed coverage rehearsals are retained. All character
+state, strict holds and the zero-escape success measure remain unchanged.
+
 The live run executes through the ongoing runner in native-haul mode:
 `node scripts/run-ongoing.mjs <config> --recorded --native-haul`. A zero-model
 rehearsal adds `--scripted`, and the post-run cold restore adds `--cold`. The policy is
@@ -460,14 +466,17 @@ pawns.
 - **Neutral brief:** loose wood and room for a stockpile; offer, ask or wait; equal
   standing; respect refusal and deferral; no requirement to keep anyone busy.
 - **Stop rule:** as in Gate B. The runner fails the run on any consent violation or
-  quota escape in the final ledger (`invariantFindings`). At the end the intent closes
+  quota escape observed during polling or in the final ledger (`invariantFindings`).
+  Both capable pawns must actually receive offers for protocol coverage, without
+  requiring live acceptance or forcing offers. At the end the intent closes
   as an **operator stop**, never as invented pawn withdrawals.
 - **Two-capable-pawn scene:** Pedro and Beatrice are offered. Alvin is ineligible by his
   own backstory (Rancher, no hauling) and visibly not offered.
 - **Cold restore after the run is a real process restart of the coordinator:** a new
   host and runner process (`--cold`) restores the paired checkpoint from the store and
-  asserts the frozen intent and its ledger view. This closes the fresh-process restore
-  gap for Gate C. The game process itself continues and loads the checkpoint save.
+  compares the actual restored game intent/ledger with the paired checkpoint, preserving
+  the original baseline on failure. This must be demonstrated for the live run before
+  Gate C. The game process itself continues and loads the checkpoint save.
 
 ## Out of scope
 

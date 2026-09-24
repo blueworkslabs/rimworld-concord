@@ -34,9 +34,11 @@ observed 15/75, with an explicitly retained measurement failure and offline resc
 drafting cleanup drop, fresh-coordinator restore and scoped patch timings. [Reservation-policy reruns](trials/NATIVE_HAUL_CONTENTION.md) now show unaccepted
 Beatrice contributing 20 of 75 wood and two overlapping holders, without changing pawn
 behaviour. Earlier contention interpretations are void because one job monopolized
-quota. Intent-only core support is implemented; wiring and hashing the frozen live
-harness remain. Full process restart and rare boundary checks remain Gate C coverage
-gaps; the options-menu measurement is explicitly a WoodLog-only subset.
+quota. The [live harness and setup hash](trials/NATIVE_HAUL_FREEZE.md) now have a recorded
+zero-model rehearsal and real coordinator-process cold restore. Two earlier coverage
+failures exposed missing native core wake integration and remain retained. The proposed
+75-unit helper-layout live setup awaits Fable's approval; the ten-minute Luna scene and
+rare boundary checks remain. The options-menu measurement is a WoodLog-only subset.
 
 ## Next phase: work with RimWorld's planner
 
