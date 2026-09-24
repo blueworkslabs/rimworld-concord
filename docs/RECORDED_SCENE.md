@@ -54,3 +54,15 @@ Run using `node scripts/run-ongoing.mjs /absolute/operator-config.json --recorde
 locked launcher is mandatory. Each game/cold receipt is exclusive to the run ID.
 All private model perspectives and raw operator diagnostics stay off the public video
 and out of published evidence; publish public speech/core input and actual outcomes.
+
+## Video review
+
+After capture, use the existing two-pass Gemini 3.8 Flash method: video only, then
+unchanged first answer plus sanitized public receipts. No expected events in pass one.
+If the original exceeds the helper's 10 MB input bound, use a full-duration 5 fps,
+1280×800 H.264 review copy at CRF 24; preserve both hashes and label the derivative.
+It is not a highlights edit. This can miss brief text and does not establish the
+readability of every frame in the 15 fps original. If that copy still exceeds the
+bound, defer automated review rather than trim events or relax the transport guard.
+No model rerolls; failures and unverifiable claims stay in the report. The original
+uncut clip remains the human feedback artifact.
