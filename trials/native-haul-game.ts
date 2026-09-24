@@ -240,6 +240,16 @@ try{
       expect(c,v.status==='expired'&&topicOutcome(v)==='expired',`expected expired, got ${v.status}`);
       expect(c,v.delivered>0&&v.delivered<v.quota,'partial-expiry precondition not observed');c.data.delivered=v.delivered;
     });
+    await scenario('pre-carried-own-target',base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota:30,variant:'exclusive'});
+      const carry=await op({op:'lab-carry',intentId:id,actor:A,count:10});
+      expect(c,carry.carried===10,'wrong pre-carried count');
+      const queued=await op({op:'lab-queue-haul',intentId:id,actor:A,reason:'carried'});
+      await run(()=>events.some(e=>e.kind==='intent-admitted-start'&&e.detail.includes('job='+queued.queuedJob+';')),60000);
+      const admitted=events.find(e=>e.kind==='intent-admitted-start'&&e.detail.includes('job='+queued.queuedJob+';'));
+      expect(c,!!admitted&&admitted.detail.endsWith(';carried=10;reserved=10'),'own carried target reserved more than its actual load');
+      c.data.admitted=admitted;invariants(c,id);
+    });
     await scenario('escape-injection',base,async c=>{
       const id=randomUUID();await op({op:'lab-fault-escape',actor:A});await accept(id,A,{quota:5,variant:'exclusive'});
       await run(()=>since(0,'quota-escape').length>0||done(id)(),90000);
@@ -399,6 +409,14 @@ try{
       const helper=v.byPawn.find(p=>p.pawn===B)?.count??0;
       c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,helperObserved:helper>0,helperCredit:helper,peakHolders:v.peakHolders,
         truedUp:since(0,'intent-trued-up').map(e=>e.detail),admitted:since(0,'intent-admitted-start').map(e=>e.pawn+':'+e.detail)};
+    });
+    await scenario('quota-contention-geometry',base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota:30});await accept(id,B,{quota:30});
+      await run(done(id),240000);const v=invariants(c,id);if(!v)return;
+      expect(c,v.status==='met'&&v.delivered===30&&v.overshoot===0,'30-unit contention quota not met exactly');
+      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,peakHolders:v.peakHolders,overlapObserved:v.peakHolders>=2,
+        admitted:since(0,'intent-admitted-start').map(e=>e.pawn+':'+e.detail),truedUp:since(0,'intent-trued-up').map(e=>e.detail),
+        capableActors:[A,B],note:'Two capable pawns only; Alvin is not offered, never a third hauler.'};
     });
     await scenario('overlap-geometry',base,async c=>{
       const id=randomUUID();await accept(id,A,{quota:75});await accept(id,B,{quota:75});

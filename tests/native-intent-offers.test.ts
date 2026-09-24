@@ -7,7 +7,7 @@ import { scripted } from '../src/backends.js';
 import { coreView } from '../src/core-planner.js';
 import { crewReport } from '../src/crew-log.js';
 import { intentAction, type IntentView } from '../src/native-intents.js';
-import type { GameBridge, GameState, ActionRequest, Receipt } from '../src/protocol.js';
+import type { GameBridge, GameState, ActionRequest, Receipt, Action } from '../src/protocol.js';
 
 const cfg={intentId:randomUUID(),area:{x:76,z:84,w:4,h:4},quota:30,maxTicks:30000,variant:'exclusive' as const};
 const view=(o:Partial<IntentView>):IntentView=>({intentId:cfg.intentId,thingDef:'WoodLog',variant:cfg.variant,status:'open',zoneId:9,quota:30,delivered:0,reserved:0,remaining:30,
@@ -167,5 +167,10 @@ test('native mode never exposes or directly admits legacy ordered hauling',async
   assert.ok(!(await c.corePerspective()).opportunities.some(o=>o.action.kind==='haul'));
   await assert.rejects(c.core().propose('A',haul,'Old haul'),/the stockpile haul is the only proposable work/);
   await assert.rejects(c.core().propose('P',{kind:'move',x:4,z:4},'Walk over'),/the stockpile haul is the only proposable work/);
-  assert.ok((await c.corePerspective()).opportunities.every(o=>o.action.kind==='haul-zone'));
+  const perspective=await c.corePerspective();
+  assert.ok(perspective.opportunities.every(o=>o.action.kind==='haul-zone'));
+  assert.match(perspective.limits,/Only the listed shared stockpile haul may be proposed/);
+  assert.ok(!perspective.limits.includes('Only listed campfire'));
+  for(const action of [{kind:'rescue',target:'X',bed:'Y',x:4,z:4,maxTicks:900},{kind:'build',thing:'X',x:4,z:4,maxTicks:900},{kind:'cook',thing:'X',target:'Y',x:4,z:4,count:1,meals:1,maxTicks:900}] as Action[])
+    await assert.rejects(c.core().propose('P',action,'Unlisted work'),/the stockpile haul is the only proposable work/);
 });

@@ -95,7 +95,7 @@ namespace Concord {
             int carried=IntentState.CarriedFor(p,job.targetA.Thing);
             bool standing=i.Standing(p);
             int avail=i.Remaining+i.Own(job);
-            bool needsPickup=carried>0&&p.carryTracker.CarriedThing!=job.targetA.Thing&&
+            bool needsPickup=carried>0&&job.targetA.Thing!=null&&p.carryTracker.CarriedThing!=job.targetA.Thing&&
                 p.carryTracker.AvailableStackSpace(job.targetA.Thing.def)>0;
             if(standing&&(carried>0?carried<=avail&&(!needsPickup||avail>carried):avail>=1)) return true;
             i.rejectedStarts++;
@@ -122,9 +122,10 @@ namespace Concord {
             if(carried>0) {
                 // Reserve the whole carried load plus any admitted additional pickup, bounded by
                 // what the source stack actually holds.
-                int pickup=HaulBudget.AdditionalPickup(carried,job.count,avail,
-                    p.carryTracker.AvailableStackSpace(source.def));
-                if(source!=p.carryTracker.CarriedThing)pickup=Math.Min(pickup,source.stackCount);
+                // Native HaulToCell skips pickup when already carrying target A.
+                int pickup=source==null||source==p.carryTracker.CarriedThing?0:
+                    Math.Min(HaulBudget.AdditionalPickup(carried,job.count,avail,
+                        p.carryTracker.AvailableStackSpace(source.def)),source.stackCount);
                 s.Reserve(i,p,job,carried+pickup);
                 job.count=pickup;
             } else {

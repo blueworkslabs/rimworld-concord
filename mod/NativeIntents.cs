@@ -384,7 +384,8 @@ namespace Concord {
                 if(p==null) throw new Exception("Unknown pawn");
                 var loose=map.listerThings.ThingsOfDef(def).Where(t=>t.Spawned&&map.zoneManager.ZoneAt(t.Position)!=zone)
                     .OrderBy(t=>(t.Position-p.Position).LengthHorizontalSquared).FirstOrDefault();
-                if(loose==null) throw new Exception("No loose stack");
+                if(r.op=="lab-queue-haul"&&r.reason=="carried")loose=p.carryTracker.CarriedThing;
+                if(loose==null) throw new Exception("No haul source");
                 if(r.op=="lab-carry") {
                     // Pre-carried load for re-target cases: picked up outside any job.
                     int n=p.carryTracker.TryStartCarry(loose,Math.Max(1,Math.Min(r.count,loose.stackCount)),false);
