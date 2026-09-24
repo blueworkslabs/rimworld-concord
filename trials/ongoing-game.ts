@@ -1,4 +1,6 @@
 /** Explicit operator observation window; no model turn ceiling and no inference pauses. */
+import {ongoingProtocol} from './ongoing-protocol.js';
+import {startSceneRecording} from './scene-recording.js';
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -19,13 +21,17 @@ import {coreAdmission} from '../src/core-scheduler.js';
 import {retainedDomain} from './retention-policy.js';
 if(process.env.CONCORD_ONGOING_LOCKED!=='1')throw Error('Use scripts/run-ongoing-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,cold=process.argv.includes('--cold');
-const scripted=process.argv.includes('--scripted');
-const policy='luna-ongoing-v1',P={wallMs:600000,nativeMs:180000,scriptedNativeMs:45000,cooldownTicks:300};
+const scripted=process.argv.includes('--scripted'),recorded=process.argv.includes('--recorded');
+const P=ongoingProtocol(recorded,scripted),policy=P.policy;
+if(process.env.CONCORD_TRIAL_POLICY!==policy)throw Error('Protocol mismatch');
 const pausedInference=false;let operationDeadline=Date.now()+P.wallMs;const b=new LabBridge(undefined,()=>operationDeadline);
 const runId=process.env.CONCORD_TRIAL_ID;
 if(!runId||!/^[0-9a-f-]{36}$/.test(runId))throw Error('Trial identity required');
 const run=runId;
-const receipt:any={passed:false,runId,policy,mode:scripted?'scripted-continuous':'live-continuous',run,views:[],rounds:[],samples:[]};
+const receiptPath=root+'/.runtime/ongoing-'+run+'-'+(cold?'cold':'game')+'.json';
+await writeFile(receiptPath,JSON.stringify({runId,policy,scripted,recorded,status:'started'}),{flag:'wx'});
+let recorder:Awaited<ReturnType<typeof startSceneRecording>>|undefined;
+const receipt:any={passed:false,runId,policy,mode:scripted?'scripted-continuous':'live-continuous',run,recorded,protocol:P,views:[],rounds:[],samples:[]};
 let active:Promise<void>|undefined;
 const guard=new NeedsRunGuard(),controller=new AbortController(),end=operationDeadline;
 let c:Coordinator|undefined,s:Store|undefined,db:string|undefined,connected=true,coreAttempts=0,pawnAttempts=0,inferenceDeadline=end;
@@ -43,36 +49,38 @@ input.on('close',stop);process.once('SIGTERM',stop);process.once('SIGINT',stop);
 async function capture(label:string,openPanel=false){
  try{
   const exec=promisify(execFile),options={timeout:Math.max(1,Math.min(10000,operationDeadline-Date.now()))};
-  if(openPanel)await exec('python3',[b.root+'/bin/lab.py','click','1150','783'],options);
+  if(openPanel){await exec('python3',[b.root+'/bin/lab.py','click','1150','783'],options);if(recorded)await exec('xdotool',['mousemove','1000','120'],{...options,env:{...process.env,DISPLAY:':91',XAUTHORITY:'/run/rimworld-lab-display/Xauthority'}});}
   const name='ongoing-'+run+'-'+label+'.png';await exec('python3',[b.root+'/bin/lab.py','screenshot',name],options);(receipt.captures??=[]).push(name);
  }catch(e){(receipt.captureErrors??=[]).push(String(e));}
 }
 async function finish(){channel.close();if(!connected)throw Error('Host disconnected');await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Drain timeout')),15000);drained=()=>{clearTimeout(t);resolve();};send({type:'drain',id:runId});});receipt.hostDrained=true;}
-async function save(failed=false){const checkpoint='lab-concord-followup-'+Date.now();await c!.checkpoint(checkpoint);const domain=c!.inspect();await writeFile(root+'/.runtime/ongoing-'+run+'-latest.json',JSON.stringify({runId,mode:receipt.mode,db,checkpoint,domain,failed}));return {checkpoint,domain};}
+async function save(failed=false){const checkpoint='lab-concord-followup-'+Date.now();await c!.checkpoint(checkpoint);const domain=c!.inspect();await writeFile(root+'/.runtime/ongoing-'+run+'-latest.json',JSON.stringify({runId,policy,mode:receipt.mode,db,checkpoint,domain,failed}));return {checkpoint,domain};}
 try{
  if(cold){
-  const saved=JSON.parse(await readFile(root+'/.runtime/ongoing-'+run+'-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,receipt.mode);receipt.verifiesFailedRun=saved.failed;
+  const saved=JSON.parse(await readFile(root+'/.runtime/ongoing-'+run+'-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,receipt.mode);assert.equal(saved.policy??'luna-ongoing-v1',policy);receipt.verifiesFailedRun=saved.failed;
   s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);receipt.coldRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
  }else{
   const f=JSON.parse(await readFile(root+'/.runtime/campfire-fixture.json','utf8'));await b.load(f.name);guard.check();await b.admin('pause');guard.check();
   db=root+'/.runtime/ongoing-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();
   await c.initializeCore('Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan.');
   receipt.initial=await b.state();assert(receipt.initial.pawns.every((p:any)=>!p.downed));receipt.initialPerspective=await c.corePerspective();
+  if(recorded){const exec=promisify(execFile);await exec('xdotool',['mousemove','700','460','click','--repeat','2','--delay','100','4'],{env:{...process.env,DISPLAY:':91',XAUTHORITY:'/run/rimworld-lab-display/Xauthority'},timeout:5000});}
   await capture('initial',true);
+  if(recorded){assert(!receipt.captureErrors?.length,'Scene UI setup failed');recorder=await startSceneRecording(root+'/.runtime/scene-'+run,P.nativeMs,scripted,()=>guard.check());receipt.recordingStart={startedUnixMs:recorder.startedUnixMs,readyUnixMs:recorder.readyUnixMs};}
   await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:P.cooldownTicks,windowTicks:null});
-  const nativeLimit=scripted?P.scriptedNativeMs:P.nativeMs;let nativeElapsed=0,midpointCaptured=false;
+  const nativeLimit=P.nativeMs;let nativeElapsed=0,midpointCaptured=false;
   const startTick=(await b.state()).ticks;
-  guard.check();(receipt.resumes??=[]).push(await startNative(b));guard.check();let nativeStarted:number|undefined=Date.now();
+  guard.check();(receipt.resumes??=[]).push(await startNative(b));guard.check();let nativeStarted:number|undefined=Date.now();receipt.nativeStartedUnixMs=nativeStarted;
   const nativeRemaining=()=>nativeLimit-nativeElapsed-(nativeStarted===undefined?0:Date.now()-nativeStarted);
   let taskError:unknown,lastRole='pawn',failureStreak=0;
   const note=(status:string)=>{failureStreak=['failed','interrupted'].includes(status)?failureStreak+1:0;if(failureStreak>=3)throw Error('Repeated inference failures; stopped for diagnosis');};receipt.attention=[];
   const launch=(task:()=>Promise<void>)=>{active=task().catch(e=>{taskError=e;}).finally(()=>{active=undefined;});};
   while(nativeRemaining()>0){
    if(taskError)throw taskError;
-   guard.check();await c.reconcile();guard.check();
+   recorder?.check();guard.check();await c.reconcile();guard.check();
    await c.advanceIntentions(()=>!guard.stopped&&nativeRemaining()>0);guard.check();
    const state=await b.state();guard.sample(state.paused,state.ticks,startTick);
-   receipt.samples.push({tick:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,food:p.facts?.find(f=>f.key==='need'&&f.value==='Food')?.level}))});
+   receipt.samples.push({unixMs:Date.now(),tick:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,food:p.facts?.find(f=>f.key==='need'&&f.value==='Food')?.level}))});
    if(!midpointCaptured&&nativeRemaining()<=nativeLimit/2){midpointCaptured=true;await capture('midpoint');}
    const view=await c.corePerspective();guard.check();
    if(nativeRemaining()<=0)break;
@@ -99,6 +107,7 @@ try{
   if(taskError)throw taskError;
   await b.admin('pause');guard.check();await c.reconcile();guard.check();
   receipt.nativeElapsedMs=nativeElapsed+(nativeStarted===undefined?0:Math.max(0,Date.now()-nativeStarted));
+  if(recorder){recorder.check();await delay(1000);receipt.recording=await recorder.finalize(receipt.nativeElapsedMs);recorder=undefined;}
   await capture('final');
   await finish();guard.check();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();receipt.cleanup=await stopTrialWork(c);assert.equal(receipt.cleanup.errors.length,0);guard.check();receipt.summary=workSummary(c.inspect());receipt.production={campfires:Object.values(c.inspect().outcomes).filter(r=>r.kind==='build'&&r.status==='completed').length,meals:Object.values(c.inspect().outcomes).filter(r=>r.kind==='cook'&&r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0)};
   receipt.inferencePassed=receipt.rounds.some((r:any)=>r.result.status==='applied');
@@ -112,8 +121,9 @@ try{
 }catch(e){receipt.error=String(e);process.exitCode=1;}
 finally{
  clearTimeout(timer);controller.abort();channel.close();await active;if(!receipt.hostDrained)try{await finish();}catch(e){receipt.passed=false;receipt.drainError=String(e);process.exitCode=1;}
+ if(recorder)try{await recorder.stop();receipt.recordingIncomplete=true;}catch(e){receipt.recordingCleanupError=String(e);receipt.passed=false;process.exitCode=1;}
  receipt.finalCleanup=await socialCleanup(async()=>{operationDeadline=Date.now()+10000;await b.admin('pause');},async()=>{},async()=>{operationDeadline=Date.now()+20000;return c&&!cold?stopTrialWork(c):{errors:[]};});
  if(receipt.finalCleanup.errors.length){receipt.passed=false;process.exitCode=1;}
  if(!cold&&c&&db&&!receipt.passed&&!receipt.pairedRestore&&!receipt.finalCleanup.errors.length)try{operationDeadline=Date.now()+130000;await save(true);receipt.partialSaved=true;}catch(e){receipt.partialSaveError=String(e);}
- receipt.coreAttempts=coreAttempts;receipt.pawnAttempts=pawnAttempts;input.close();s?.close();await writeFile(root+'/.runtime/ongoing-'+run+'-'+(cold?'cold':'game')+'.json',JSON.stringify(receipt,null,2));send({type:'receipt',receipt});
+ receipt.coreAttempts=coreAttempts;receipt.pawnAttempts=pawnAttempts;input.close();s?.close();await writeFile(receiptPath,JSON.stringify(receipt,null,2));send({type:'receipt',receipt});
 }

@@ -5,21 +5,20 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {parseTrialMessage} from '../dist/src/trial-wire.js';
 import {InferenceLane} from '../dist/src/inference-lane.js';
-import {integrationHostAllowance} from '../dist/trials/integration-policy.js';
+import {ongoingProtocol} from '../dist/trials/ongoing-protocol.js';
 import {retentionDeadline} from '../dist/trials/retention-policy.js';
 
 import {CodexDecisionBackend} from '../dist/src/codex-decision.js';
 
 
-const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted');
+const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted'),recorded=process.argv.includes('--recorded');
 
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','scratchRoot','receipt','catalogPath'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
 
-const policy='luna-ongoing-v1';
-const protocol={policy,turnCap:null,cooldownTicks:300,nativeMs:scripted?45000:180000,pausedInference:false,wallMs:600000,jevCalls:0,model:'gpt-5.6-luna'};
+const protocol=ongoingProtocol(recorded,scripted),policy=protocol.policy;
 let scriptedTurn=0;
-const mock={receipts:[],rawResponses:[],failures:[],summary:()=>({attempts:0,reservedEquivalentUSD:0}),close(){},async plan(v){if(scriptedTurn>0){const care=v.selfCare.find(a=>a.completed);return {topics:care?[{sourceId:care.id,text:'This bounded eating action completed.',status:'resolved'}]:[],actionTopicId:null,action:{kind:'wait',reason:'Wait for the receipt; close only confirmed self-care.'}};}return {topics:[{sourceId:'brief',text:'Check voluntary communication without ordering work.',status:'open'}],actionTopicId:null,action:scriptedTurn++===0?{kind:'ask',pawn:v.crew[0].id,text:'Would you like to discuss food before any optional work?',reason:'Ask a voluntary question.'}:{kind:'wait',reason:'Reply received. No work authorized or requested in this scripted rehearsal.'}};},async answerCore(v){if(true){const food=v.pawn.eating?.options[0];if(!food)throw Error('No scripted eating option');return {choice:'eat',thing:food.thing,text:'I choose this nearby portion now.'};}return {choice:'say',text:'I prefer to eat first. Please leave work for now.'};},async decide(){throw Error('Unexpected scripted work offer');}};
+const mock={receipts:[],rawResponses:[],failures:[],summary:()=>({attempts:0,reservedEquivalentUSD:0}),close(){},async plan(v){if(scriptedTurn>0){const care=v.selfCare.find(a=>a.completed);return {topics:care?[{sourceId:care.id,text:'This bounded eating action completed.',status:'resolved'}]:[],actionTopicId:null,action:{kind:'wait',reason:'Wait for the receipt; close only confirmed self-care.'}};}return {topics:[{sourceId:'brief',text:'Check voluntary communication without ordering work.',status:'open'}],actionTopicId:null,action:scriptedTurn++===0?{kind:'ask',pawn:v.crew[0].id,text:'Would you like to discuss food before any optional work?',reason:'Ask a voluntary question.'}:{kind:'wait',reason:'Reply received. No work authorized or requested in this scripted rehearsal.'}};},async answerCore(v){if(true){const options=v.pawn.eating?.options??[];const food=recorded?[...options].sort((a,b)=>Math.hypot(a.x-v.pawn.x,a.z-v.pawn.z)-Math.hypot(b.x-v.pawn.x,b.z-v.pawn.z))[0]:options[0];if(!food)throw Error('No scripted eating option');return {choice:'eat',thing:food.thing,text:'I choose this nearby portion now.'};}return {choice:'say',text:'I prefer to eat first. Please leave work for now.'};},async decide(){throw Error('Unexpected scripted work offer');}};
 const coreBackend=scripted?mock:new CodexDecisionBackend({ledgerPath:config.ledger+'.core',scratchRoot:config.scratchRoot+'/core',catalogPath:config.catalogPath});
 const pawnBackend=scripted?mock:new CodexDecisionBackend({ledgerPath:config.ledger+'.pawns',scratchRoot:config.scratchRoot+'/pawns',catalogPath:config.catalogPath});
 const summary=()=>({core:coreBackend.summary(),pawns:pawnBackend.summary()});
@@ -38,7 +37,7 @@ const runId=cold?JSON.parse(await readFile(marker,'utf8')).runId:randomUUID();
 if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,policy,protocol,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
 if(cold&&JSON.stringify(JSON.parse(await readFile(marker,'utf8')).protocol)!==JSON.stringify(protocol))throw Error('Cold protocol mismatch');
 if(cold&&(JSON.parse(await readFile(marker,'utf8')).policy!==policy||JSON.parse(await readFile(marker,'utf8')).scripted!==scripted))throw Error('Cold policy mismatch');
-const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-ongoing-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}`;
+const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-ongoing-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}${recorded?' --recorded':''}`;
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
 const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],responses=[];
@@ -78,7 +77,7 @@ async function handle(line){
  }finally{deadline.dispose();active.delete(m.id);}
 }
 input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill();})));
-const timer=setTimeout(()=>{failed=true;child.kill();},660000);
+const timer=setTimeout(()=>{failed=true;child.kill();},protocol.wallMs+60000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
 const result={at:new Date().toISOString(),policy,protocol,kind:cold?'ongoing-cold':scripted?'ongoing-scripted':'ongoing-live',runId,passed:!failed&&code===0&&receipt?.passed===true,
