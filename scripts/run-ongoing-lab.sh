@@ -6,6 +6,6 @@ concord_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 case "${1:-}" in game) concord_args=();; cold) concord_args=(--cold);; *) exit 2;; esac
 shift
 for concord_flag in "$@"; do
- case "$concord_flag" in --scripted|--recorded) concord_args+=("$concord_flag");; *) exit 2;; esac
+ case "$concord_flag" in --scripted|--recorded|--native-haul) concord_args+=("$concord_flag");; *) exit 2;; esac
 done
 exec flock -n -F "$RIMWORLD_LAB_ROOT/concord/coordinator.lock" env CONCORD_ONGOING_LOCKED=1 node "$concord_root/dist/trials/ongoing-game.js" "${concord_args[@]}"

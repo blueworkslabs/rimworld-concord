@@ -540,6 +540,16 @@ export class Coordinator {
     }
     return structuredClone(c);
   });}
+  /** Operator end of the native intent (trial end, not a pawn's withdrawal): the game retires
+   * the tag and standings follow as 'stopped by the operator'. Idempotent once retired. */
+  stopNativeHaul(){return this.serial(async()=>{
+    const game=await this.current(),c=this.domain.nativeHaul;
+    if(!c)return undefined;
+    const live=this.liveIntent(game,c.intentId);
+    if(live?.status==='open'){const r=await this.game.intent!({op:'intent-stop',epoch:this.domain.epoch,intentId:c.intentId});this.ingestIntents(r.state);}
+    else this.ingestIntents(game);
+    return structuredClone(this.domain.intentViews?.[c.intentId]);
+  });}
   /** Physical movement opportunities and communicated replies only; no private character state. */
   core() {
     return {

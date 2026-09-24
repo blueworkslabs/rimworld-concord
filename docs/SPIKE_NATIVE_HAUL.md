@@ -440,6 +440,35 @@ or character rewrite has been made.
   listed as unimplemented in run receipts and observed from events rather than forced;
   a run without such an event is not evidence for either case.
 
+## Live run: freeze record (draft for Fable's sign-off)
+
+The live run executes through the ongoing runner in native-haul mode:
+`node scripts/run-ongoing.mjs <config> --recorded --native-haul`. A zero-model
+rehearsal adds `--scripted`, and the post-run cold restore adds `--cold`. The policy is
+`luna-native-haul-v1`: the recorded-scene timing (ten minutes of continuous play, the
+#64 recording protocol, no turn cap, no inference pause) and Luna for the core and
+pawns.
+
+- **Setup:** the frozen `live` entry in `.runtime/native-haul-fixture.json` (save,
+  candidate area, quota, `maxTicks`, `variant: "attribution"`). The runner refuses any
+  other variant. Astra hashes this entry together with the runner digest that
+  `run-ongoing.mjs` already checks between hosts.
+- **Intent-only:** `configureNativeHaul` freezes the one intent, and the core can list
+  and propose nothing else. The runner asserts this at the start and again over every
+  proposal at the end. Pawns may accept, refuse, defer or counter the quota; a counter
+  is adoptable only before the first acceptance.
+- **Neutral brief:** loose wood and room for a stockpile; offer, ask or wait; equal
+  standing; respect refusal and deferral; no requirement to keep anyone busy.
+- **Stop rule:** as in Gate B. The runner fails the run on any consent violation or
+  quota escape in the final ledger (`invariantFindings`). At the end the intent closes
+  as an **operator stop**, never as invented pawn withdrawals.
+- **Two-capable-pawn scene:** Pedro and Beatrice are offered. Alvin is ineligible by his
+  own backstory (Rancher, no hauling) and visibly not offered.
+- **Cold restore after the run is a real process restart of the coordinator:** a new
+  host and runner process (`--cold`) restores the paired checkpoint from the store and
+  asserts the frozen intent and its ledger view. This closes the fresh-process restore
+  gap for Gate C. The game process itself continues and loads the checkpoint save.
+
 ## Out of scope
 
 Construction, cooking and rescue migration; prioritized work; the standing-commitment

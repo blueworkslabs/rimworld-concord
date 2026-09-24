@@ -7,3 +7,9 @@ test('historical observation stays frozen; recording extends time without a turn
  assert.equal(live.nativeMs,600000);assert.equal(dry.nativeMs,45000);assert.equal(live.policy,dry.policy);
  assert(live.wallMs-live.nativeMs>=300000);assert.equal(live.turnCap,null);assert.equal(live.pausedInference,false);
 });
+test('native-haul live run keeps the recorded scene timing under its own policy',()=>{
+ const live=ongoingProtocol(true,false,true),dry=ongoingProtocol(true,true,true),scene=ongoingProtocol(true,false);
+ assert.equal(live.policy,'luna-native-haul-v1');assert.equal(dry.policy,live.policy);
+ assert.deepEqual({...live,policy:scene.policy},scene);assert.equal(dry.nativeMs,45000);
+ assert.throws(()=>ongoingProtocol(false,false,true),/recorded/);
+});
