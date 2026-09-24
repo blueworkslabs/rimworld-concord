@@ -6,13 +6,20 @@ the lab and signed off by Fable.
 
 **Build studied: the staging build, which is the source of truth for this note.**
 
-- RimWorld **1.6.4871 rev598** with Biotech and Odyssey
-- `Assembly-CSharp` 1.6.9676.18020, SHA-256 prefix **`082db1dd4f7f`**
+- RimWorld **1.6.4871 rev600** with Biotech and Odyssey (the runtime version from
+  `Player.log`; the install's `Version.txt` still says rev598)
+- `Assembly-CSharp` SHA-256 prefix **`082db1dd4f7f`**, byte-identical to Astra's
+  preflight copy
 - the Core `ThinkTreeDefs`, `WorkGiverDefs` and `JobDefs` from the same install
 
-Every claim below was verified on this build. An older local copy (`Assembly-CSharp`
-1.6.9438) exists on the inference host but was **not** used; if a later check finds a
+Every claim below was verified on this build. An older local copy (game 1.6.4633
+rev1273) exists on the inference host and was **not** used. If a later check finds a
 difference between builds, it is recorded here rather than resolved silently.
+
+**Version trap:** the assembly's metadata version (for example `1.6.9676.18020` here,
+`1.6.9438` for the older copy) is **not** the game version. The real version comes from
+the game's version-conversion code, `Player.log` and save headers. The pinned build for
+this phase is 4871 rev600.
 
 **Decompile recipe** (output stays private, never committed): .NET 8 SDK installed per
 user, `ilspycmd` 8.2.0.7535 as a global tool, run with
