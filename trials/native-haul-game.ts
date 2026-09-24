@@ -250,8 +250,8 @@ try{
       try{
         const setup={intentId:randomUUID(),area:cfg.area,quota:30,maxTicks:30000,variant:'exclusive' as const},alvin=pawn('Alvin').id;
         await co.configureNativeHaul(setup);
-        const v=await co.corePerspective();
-        expect(c,!v.opportunities.some(o=>o.pawn===alvin),'Alvin was offered hauling');
+        const v=await co.corePerspective();c.data.initialOpportunities=v.opportunities;
+        expect(c,!v.opportunities.some(o=>o.pawn===alvin&&(o.action.kind==='haul-zone'||o.action.kind==='haul')),'Alvin was offered hauling');
         expect(c,v.availability.some(a=>a.pawn===alvin&&/cannot do hauling/.test(a.status)),'no visible not-offered reason for the core');
         let refused=false;try{await co.core().propose(alvin,intentAction(setup),'Scripted offer');}catch(e){refused=/Not offered: cannot do hauling/.test(String(e));}
         expect(c,refused,'direct offer to Alvin was not refused');

@@ -61,7 +61,7 @@ export function coreView(d:Domain,g:GameState){
   if(!available(own.id)){availability.push({pawn:own.id,status:'Existing offer, counter or active agreement; no new ordinary offer.'});continue;}
   const haul=haulingView(d,g,own),rescue=rescueView(d,g,own),production=productionView(d,g,own);
   const invitation=(a:Action)=>invitations.find(r=>JSON.stringify(r.action)===JSON.stringify(a)&&r.mapId===(a.kind==='haul'?haul?.mapId:a.kind==='rescue'?rescue?.mapId:production?.mapId));
-  const options:Action[]=[...(production?.options??[]),...(rescue?.options??[]),...(haul?.options??[])].filter(a=>(!deferred||!!invitation(a))&&!proposals.some(p=>p.pawn===own.id&&(p.status==='refused'||p.status==='withdrawn'||p.standing?.status==='stopped')&&sameWork(a,p.action))).slice(0,6);
+  const options:Action[]=[...(production?.options??[]),...(rescue?.options??[]),...(d.nativeHaul?[]:haul?.options??[])].filter(a=>(!deferred||!!invitation(a))&&!proposals.some(p=>p.pawn===own.id&&(p.status==='refused'||p.status==='withdrawn'||p.standing?.status==='stopped')&&sameWork(a,p.action))).slice(0,6);
   // The one frozen native intent: offered only where the game says the pawn can haul.
   const c=d.nativeHaul,live=c&&(g.intents??[]).find(i=>i.intentId===c.intentId),notOffered=c?notOfferedReason(own):undefined;
   if(c&&!notOffered&&!deferred&&(!live||live.status==='pending'||live.status==='open')&&!proposals.some(p=>p.pawn===own.id&&p.action.kind==='haul-zone'&&p.action.intentId===c.intentId))

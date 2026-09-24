@@ -634,6 +634,7 @@ export class Coordinator {
     }
     const reinvite=reofferRequestId?this.domain.reoffers?.[reofferRequestId]:undefined;
     if(reofferRequestId&&(!reinvite||reinvite.status!=='pending'||reinvite.pawn!==pawn||this.domain.proposals[reinvite.deferredId]?.status!=='deferred'||JSON.stringify(reinvite.action)!==JSON.stringify(action)))throw Error('Re-invitation unavailable');
+    if(this.domain.nativeHaul&&action.kind==='haul')throw Error('Ordered hauling is unavailable in native intent mode');
     if(action.kind==='haul-zone')planIntentOffer(this.domain.nativeHaul,game.pawns.find(x=>x.id===pawn),action,this.liveIntent(game,action.intentId));
     const productionMap=action.kind==='build'||action.kind==='cook'?planProduction(this.domain,game,pawn,action):undefined;
     const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;

@@ -156,3 +156,12 @@ test('an existing ordered offer cannot dispatch across an unconfirmed native wit
   assert.equal(c.inspect().proposals[move.id]!.status,'accepted');assert.equal(moved,0);
   fail=false;await c.reconcile();assert.equal(moved,1);
 });
+
+
+test('native mode never exposes or directly admits legacy ordered hauling',async()=>{
+  const {c,game}=await setup();
+  const haul={kind:'haul' as const,thing:'Thing_WoodLog1',x:4,z:4,count:10,trips:1,maxTicks:1800};
+  game.data.pawns[0]!.hauling={epoch:'e',tick:0,mapId:0,status:'available',options:[haul],supplies:[{thing:haul.thing,label:'wood',x:4,z:4,sourceCount:30,destinationFree:75}]};
+  assert.ok(!(await c.corePerspective()).opportunities.some(o=>o.action.kind==='haul'));
+  await assert.rejects(c.core().propose('A',haul,'Old haul'),/Ordered hauling is unavailable/);
+});
