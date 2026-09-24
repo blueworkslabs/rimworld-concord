@@ -53,6 +53,10 @@ time were false by publication.
 
 One action per turn, each with a public reason (≤600 characters):
 
+**Hauling-migration guidance (signed; implement with the migration):** give a concrete
+reason in the world's voice; eligibility/consent contract boilerplate belongs in the
+structured offer record, not in the core's public sentence.
+
 | Action | Effect |
 |---|---|
 | `propose {opportunityId}` | Creates an offer for that opportunity; the pawn still decides |
