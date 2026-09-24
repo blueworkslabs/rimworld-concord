@@ -4,7 +4,31 @@
 Author revision `0f7e10f`; base `61817af`. This is a **source/offline review**, not a
 scripted-game result. The [signed freeze](../MIGRATION_HAULING.md) is unchanged.
 
-## Disposition
+## Re-review and scripted staging, 2026-09-24
+
+The original findings below are retained as history. Fable's later B2 disposition
+supersedes the proposed deferral: a job predating an intent's tag is ordinary
+pre-agreement work relative to that intent, including across retargets; it is not
+credited, counted against quota, or trimmed. The comparison is the durable job start
+tick against tag creation tick. Same-tick attachment is rejected before mutation and
+may be retried on the next tick, rather than misclassifying an unadmitted load.
+
+Re-review fixes at `a372804` include immutable cleanup job IDs (native pooling clears
+IDs), release of old bounds on a pre-agreement retarget, atomic rescue ownership and
+restart recovery, captured-trip draining, immutable crew-entry map provenance and
+receipt event times. Focused independent reviews completed; 406 tests pass and the
+mod compiles against pinned 4871. These are not live-model results.
+
+Initial recorded scripted round 0 failed with no haul starts and no delivery. The
+fixture omitted the serialized health and quality filter ranges; pinned `ThingFilter`
+loads zero-valued ranges when absent. The untouched recording and receipt are retained.
+Correction `c5028b4` restores normal full ranges in a new fixture with the **same**
+item counts, positions, quotas and pawn settings. It also requires a genuinely pending
+duplicate selection, exact pre-agreement bucket reconciliation and exact matched totals.
+This fixture correction counts as **B1 fix/recheck round 1 of 2**, not a free reroll.
+Round 1 is complete but not clean: see the [recorded staging results](HAULING_MIGRATION_STAGING.md). No live run authorized.
+
+## Original pre-staging disposition (superseded by the re-review above)
 
 **Not cleared for deployment or staging.** Independent mod and coordinator reviews
 completed. The initial 395 tests passed despite the issues below. Review corrections
