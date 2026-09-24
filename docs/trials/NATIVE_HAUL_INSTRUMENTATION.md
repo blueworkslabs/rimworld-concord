@@ -6,6 +6,12 @@ assembly `082db1dd4f7f`, Harmony 2.4.2. Raw recordings, saves and reviews remain
 The [sanitized evidence](../evidence/native-haul-instrumentation.json) contains all
 eight run IDs, raw receipt hashes, exact revisions and measurement samples.
 
+> **Superseded contention interpretation:** Fable classified the helper/overlap and
+> concurrent-quota observations below as invalid evidence of contention because the
+> old reservation policy monopolized quota. Raw measurements remain unchanged.
+> See [reservation-policy reruns](NATIVE_HAUL_CONTENTION.md) for the corrected policy
+> and new observations; the timing and other functional results retain their stated scope.
+
 ## Review and measurement corrections
 
 Independent read-only Codex review found and corrected an unreachable options command,

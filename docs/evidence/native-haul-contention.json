@@ -1,0 +1,578 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-24",
+  "classification": "scripted corrected-policy reruns, not live freeze or Gate C",
+  "game": "1.6.4871 rev600",
+  "assemblySha256": "082db1dd4f7f1d0b72960d7e1beead8fbfe6957200e8627f65bda0dbbe1dd8f8",
+  "harmony": "2.4.2",
+  "reviewedBehaviorHead": "6d3ccbbabfa984da3b2219af447c4fe801c23635",
+  "concordDllSha256": "19724f14093941930e85f0f3d404ae8b3ffd3a8f1981c7f734158917453a830b",
+  "independentReview": "author delta and substantive own-carried/prompt fixes separately reviewed read-only; no actionable findings",
+  "coordinatorTests": 374,
+  "capableHaulers": [
+    "Pedro",
+    "Beatrice"
+  ],
+  "incapableNotOffered": [
+    "Alvin"
+  ],
+  "helperFixtureSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+  "geometry": "same six20 stacks and pawn state as previous helper case; no behaviour/capability override",
+  "supersedes": "historical helper/overlap/concurrent-quota interpretations under whole-quota reservations; raw receipts retained",
+  "runs": [
+    {
+      "runId": "cd547aca-ba75-4ffe-b653-18862fc482f1",
+      "case": "helper-geometry",
+      "at": "2026-09-24T17:50:10.987Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "63dd7a0d1562337e8c92a0e7a5b0114a24ae45fb617bfb2c5711ef7188390fad",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "met",
+        "quota": 75,
+        "delivered": 75,
+        "reserved": 0,
+        "remaining": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 2
+      },
+      "credits": {
+        "Pedro": 55,
+        "Beatrice": 20
+      },
+      "accepted": [
+        "Pedro"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 5,
+          "carried": 0,
+          "reserved": 20
+        },
+        {
+          "tick": 244,
+          "pawn": "Pedro",
+          "job": 21,
+          "carried": 0,
+          "reserved": 20
+        },
+        {
+          "tick": 356,
+          "pawn": "Beatrice",
+          "job": 32,
+          "carried": 0,
+          "reserved": 20
+        },
+        {
+          "tick": 508,
+          "pawn": "Pedro",
+          "job": 46,
+          "carried": 0,
+          "reserved": 15
+        }
+      ],
+      "pickupShrinks": []
+    },
+    {
+      "runId": "cc64224b-38b0-4990-9f67-e44fddc85ea2",
+      "case": "overlap-geometry",
+      "at": "2026-09-24T17:51:05.979Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "35e9ecf07038c24de365d1c071c2910a9e7c7fa34dea7f6119bfacb8f2e63d93",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "met",
+        "quota": 75,
+        "delivered": 75,
+        "reserved": 0,
+        "remaining": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 2
+      },
+      "credits": {
+        "Pedro": 55,
+        "Beatrice": 20
+      },
+      "accepted": [
+        "Pedro",
+        "Beatrice"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 5,
+          "carried": 0,
+          "reserved": 20
+        },
+        {
+          "tick": 244,
+          "pawn": "Pedro",
+          "job": 19,
+          "carried": 0,
+          "reserved": 20
+        },
+        {
+          "tick": 263,
+          "pawn": "Beatrice",
+          "job": 24,
+          "carried": 0,
+          "reserved": 20
+        },
+        {
+          "tick": 508,
+          "pawn": "Pedro",
+          "job": 44,
+          "carried": 0,
+          "reserved": 15
+        }
+      ],
+      "pickupShrinks": []
+    },
+    {
+      "runId": "10481332-b697-4dca-b47e-d418ff0de7ff",
+      "case": "quota-contention-geometry",
+      "at": "2026-09-24T17:51:39.023Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "19b7daa78721dbdecacbd5fa46fe98e85686afbc955afcf25809c7a26e215823",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "met",
+        "quota": 30,
+        "delivered": 30,
+        "reserved": 0,
+        "remaining": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 1
+      },
+      "credits": {
+        "Pedro": 30
+      },
+      "accepted": [
+        "Pedro",
+        "Beatrice"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 5,
+          "carried": 0,
+          "reserved": 20
+        },
+        {
+          "tick": 244,
+          "pawn": "Pedro",
+          "job": 25,
+          "carried": 0,
+          "reserved": 10
+        }
+      ],
+      "pickupShrinks": []
+    },
+    {
+      "runId": "deab0675-a0fd-4611-b5aa-0ee57cad5962",
+      "case": "concurrent-quota",
+      "at": "2026-09-24T17:52:01.619Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "1b8f728c1287af452146f2e27da5d0cdd44d71e8c1341907fbc8c464f473d412",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "met",
+        "quota": 30,
+        "delivered": 30,
+        "reserved": 0,
+        "remaining": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 1
+      },
+      "credits": {
+        "Pedro": 30
+      },
+      "accepted": [
+        "Pedro",
+        "Beatrice"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 5,
+          "carried": 0,
+          "reserved": 30
+        }
+      ],
+      "pickupShrinks": []
+    },
+    {
+      "runId": "d0933d8e-ae2d-4541-b979-366510c59889",
+      "case": "pre-carried-own-target",
+      "at": "2026-09-24T17:52:18.130Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "cf8f391801f07c312b50e283e63d21676a2e74282907ed16dfc86209acc6be2e",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "open",
+        "quota": 30,
+        "delivered": 0,
+        "reserved": 10,
+        "remaining": 20,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 1
+      },
+      "credits": {},
+      "accepted": [
+        "Pedro"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 4,
+          "carried": 10,
+          "reserved": 10
+        }
+      ],
+      "pickupShrinks": []
+    },
+    {
+      "runId": "04e2eb0e-73c0-40ad-b885-f801509db635",
+      "case": "pre-carried-10-quota-30",
+      "at": "2026-09-24T17:52:32.588Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "b9af46972ae8c1c1668d6afa286d68497a7687d5c85937de8c91083ce17029d1",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "met",
+        "quota": 30,
+        "delivered": 30,
+        "reserved": 0,
+        "remaining": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 1
+      },
+      "credits": {
+        "Pedro": 30
+      },
+      "accepted": [
+        "Pedro"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 4,
+          "carried": 10,
+          "reserved": 30
+        },
+        {
+          "tick": 187,
+          "pawn": "Pedro",
+          "job": 20,
+          "carried": 0,
+          "reserved": 10
+        }
+      ],
+      "pickupShrinks": [
+        {
+          "tick": 78,
+          "pawn": "Pedro",
+          "detail": "job=4;reserved=30;carried=20"
+        }
+      ]
+    },
+    {
+      "runId": "ed0bb88a-bc0d-44a8-b801-f4175466b6e4",
+      "case": "pre-carried-20-quota-5",
+      "at": "2026-09-24T17:52:54.253Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "4fe5dd2c7768d8c94d3a4c6df5a728e0a32bd26a9989b2fddb4f6020b5761c0f",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "open",
+        "quota": 5,
+        "delivered": 0,
+        "reserved": 5,
+        "remaining": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 1
+      },
+      "credits": {},
+      "accepted": [
+        "Pedro"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 7,
+          "carried": 0,
+          "reserved": 5
+        }
+      ],
+      "pickupShrinks": []
+    },
+    {
+      "runId": "67eb4258-6324-4916-b165-a968e19ba62a",
+      "case": "core-offers",
+      "at": "2026-09-24T17:53:08.318Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "6e113fe1f1f7ad1ff6467ff9dc6629f4b5452ccd61953ecd74e5ec603c8a9c7e",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "met",
+        "quota": 20,
+        "delivered": 20,
+        "reserved": 0,
+        "remaining": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 1
+      },
+      "credits": {
+        "Pedro": 20
+      },
+      "accepted": [
+        "Pedro"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 5,
+          "carried": 0,
+          "reserved": 20
+        }
+      ],
+      "pickupShrinks": [],
+      "pairedRestore": {
+        "name": "lab-concord-nh-core-1790272404205",
+        "before": {
+          "delivered": 0,
+          "reserved": 20
+        },
+        "afterReserved": 20
+      }
+    },
+    {
+      "runId": "b8cbd7db-52fb-41f9-9dd9-ed8145c52c9c",
+      "case": "meal-resumption",
+      "at": "2026-09-24T17:53:36.969Z",
+      "runnerPassed": true,
+      "findings": [],
+      "rawReceiptSha256": "1657c955fbaccb74f895d9e71e41e30bf66a50664f25a6ff4412d07a9dc83442",
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "ledger": {
+        "status": "met",
+        "quota": 75,
+        "delivered": 75,
+        "reserved": 0,
+        "remaining": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "incidental": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "peakHolders": 1
+      },
+      "credits": {
+        "Pedro": 75
+      },
+      "accepted": [
+        "Pedro"
+      ],
+      "admissions": [
+        {
+          "tick": 4,
+          "pawn": "Pedro",
+          "job": 5,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 244,
+          "pawn": "Pedro",
+          "job": 19,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 610,
+          "pawn": "Pedro",
+          "job": 41,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 1702,
+          "pawn": "Pedro",
+          "job": 108,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 2140,
+          "pawn": "Pedro",
+          "job": 131,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 2620,
+          "pawn": "Pedro",
+          "job": 159,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 3139,
+          "pawn": "Pedro",
+          "job": 195,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 3670,
+          "pawn": "Pedro",
+          "job": 222,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 4303,
+          "pawn": "Pedro",
+          "job": 252,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 5044,
+          "pawn": "Pedro",
+          "job": 292,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 5746,
+          "pawn": "Pedro",
+          "job": 331,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 6553,
+          "pawn": "Pedro",
+          "job": 377,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 7384,
+          "pawn": "Pedro",
+          "job": 422,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 8221,
+          "pawn": "Pedro",
+          "job": 461,
+          "carried": 0,
+          "reserved": 5
+        },
+        {
+          "tick": 9187,
+          "pawn": "Pedro",
+          "job": 504,
+          "carried": 0,
+          "reserved": 5
+        }
+      ],
+      "pickupShrinks": [],
+      "atMeal": {
+        "tick": 1699,
+        "delivered": 15,
+        "statusAtPoll": "open",
+        "unfinishedQuota": 60,
+        "freeToReserveAtPoll": 55
+      },
+      "ticksToFirstWork": 1,
+      "ticksMealToResume": 3,
+      "workStartedBeforeMeal": true,
+      "completion": {
+        "observedMs": 171548,
+        "endTick": 10143,
+        "quotaMet": true,
+        "delivered": 75,
+        "quota": 75
+      }
+    }
+  ],
+  "limits": [
+    "Two capable haulers, not three",
+    "30-unit cases did not establish overlap; 75-unit cases did",
+    "No pickup-shrink event observed unless explicitly listed per run",
+    "Tagged jobs now omit opportunistic duplicate-stack collection under shrink-only policy",
+    "Full OS-process restore and rare failed partial merges/replacement remain Gate C coverage",
+    "Live harness wiring/setup hash/Fable freeze approval remain pending"
+  ],
+  "originalSaves": {
+    "count": 285,
+    "unchanged": true
+  },
+  "shutdown": {
+    "game": "inactive",
+    "display": "inactive",
+    "newHandoffSave": true
+  }
+}

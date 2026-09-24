@@ -31,11 +31,12 @@ Pedro-based exclusive work, offers/counter/paired restore, and native meal resum
 pass (75/75 delivered, resumed three ticks after eating). The matched ordered meal
 observed 15/75, with an explicitly retained measurement failure and offline rescore.
 [Follow-up instrumentation](trials/NATIVE_HAUL_INSTRUMENTATION.md) observed a real
-drafting cleanup drop, fresh-coordinator restore and scoped patch timings. Geometry
-still produced no helper or overlapping reservations; one job reserved all remaining
-quota. Full process restart, rare boundary cases, full work-menu coverage and the
-intent-only frozen live harness/verdict remain unverified or unimplemented. The
-reservation policy needs an explicit disposition before interpreting helper behavior.
+drafting cleanup drop, fresh-coordinator restore and scoped patch timings. [Reservation-policy reruns](trials/NATIVE_HAUL_CONTENTION.md) now show unaccepted
+Beatrice contributing 20 of 75 wood and two overlapping holders, without changing pawn
+behaviour. Earlier contention interpretations are void because one job monopolized
+quota. Intent-only core support is implemented; wiring and hashing the frozen live
+harness remain. Full process restart and rare boundary checks remain Gate C coverage
+gaps; the options-menu measurement is explicitly a WoodLog-only subset.
 
 ## Next phase: work with RimWorld's planner
 

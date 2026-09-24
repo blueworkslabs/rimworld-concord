@@ -6,6 +6,10 @@
 The [sanitized evidence](../evidence/native-haul-offers.json) links run IDs and raw
 receipt hashes. These are individual scripted observations, not a complete matrix.
 
+> Historical helper/overlap and concurrent-quota cases do not establish contention:
+> the old policy reserved all remaining quota. See the corrected-policy
+> [contention reruns](NATIVE_HAUL_CONTENTION.md). Other observations retain their scope.
+
 ## Review corrections
 
 Independent read-only Codex review preceded deployment and covered subsequent
