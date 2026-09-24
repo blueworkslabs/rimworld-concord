@@ -8,7 +8,7 @@ const base=(o:Partial<IntentView>={}):IntentView=>IntentView.parse({intentId:'i1
   finishedAfterExclusion:0,createdTick:1000,untilTick:31000,lastDeliveryTick:-1,accepted:['A'],excluded:[],byPawn:[],drops:[],...o});
 
 test('new native kinds route without waking or interrupting per event',()=>{
-  for(const kind of ['job-start','job-end','ingested','haul-delivered','quota-escape','intent-retired','intent-incidental'])
+  for(const kind of ['job-start','job-end','ingested','haul-delivered','quota-escape','intent-admitted-start','intent-retired','intent-incidental'])
     assert.deepEqual(nativeAttention({kind,detail:''}),{next:'native',interrupt:false},kind);
   assert.deepEqual(nativeAttention({kind:'interaction',detail:'Chitchat'}),{next:'deliberation',interrupt:false});
   assert.deepEqual(nativeAttention({kind:'interaction',detail:'Insult'}),{next:'deliberation',interrupt:true});

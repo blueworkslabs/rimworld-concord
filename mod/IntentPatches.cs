@@ -114,6 +114,7 @@ namespace Concord {
                 s.Reserve(i,p,job,alloc);
                 job.count=alloc;
             }
+            s.Emit(p,"intent-admitted-start","intent="+i.intentId+";job="+job.loadID+";carried="+carried+";reserved="+i.Own(job));
         }
     }
 
@@ -156,7 +157,7 @@ namespace Concord {
     [HarmonyPatch(typeof(Zone_Stockpile),nameof(Zone_Stockpile.Notify_ReceivedThing))]
     static class Patch5_Received {
         static void Postfix(Zone_Stockpile __instance,Thing newItem) {
-            if(IntentHooks.placing!=null) return;
+            if(IntentHooks.placing!=null||Scribe.mode!=LoadSaveMode.Inactive||Current.ProgramState!=ProgramState.Playing) return;
             var s=IntentState.Get();
             if(s==null||s.intents.Count==0) return;
             s.Spawned(__instance,newItem);

@@ -119,10 +119,16 @@ try{
     });
     for(const [quota,carry] of [[5,20],[30,10]] as const)await scenario('pre-carried-'+carry+'-quota-'+quota,base,async c=>{
       const id=randomUUID();await accept(id,A,{quota,variant:'exclusive'});
-      c.data.carry=await op({op:'lab-carry',intentId:id,actor:A,count:carry});
+      const injected=await op({op:'lab-carry',intentId:id,actor:A,count:carry});c.data.carry=injected;
+      if(injected.carried!==carry)throw Error('precondition: wrong pre-carried count');
       // Queue a fresh job while already carrying; its target A is another loose stack.
-      c.data.queued=await op({op:'lab-queue-haul',intentId:id,actor:A});
-      await run(()=>!pawn('Alvin').carrying,60000);
+      const queued=await op({op:'lab-queue-haul',intentId:id,actor:A});c.data.queued=queued;
+      const kind=carry>quota?'intent-rejected-start':'intent-admitted-start';
+      const admitted=()=>events.some(e=>e.kind===kind&&e.pawn===A&&e.detail.includes(';job='+queued.queuedJob+';')&&e.detail.includes(';carried='+carry+';'));
+      // Rejection detail ends at carried; match the field at either separator or end.
+      const observed=()=>admitted()||events.some(e=>e.kind===kind&&e.pawn===A&&e.detail.includes(';job='+queued.queuedJob+';')&&e.detail.endsWith(';carried='+carry));
+      if(!await run(observed,60000))throw Error('precondition: queued job did not reach admission with injected load');
+      if(carry<=quota&&!await run(()=>view(id)?.status==='met',60000))throw Error('admitted load did not finish');
       const v=invariants(c,id);if(!v)return;
       if(carry>quota)expect(c,v.delivered===0,`oversized carried load credited (${v.delivered})`);
       else expect(c,v.delivered>=carry,`admitted carried load not credited (${v.delivered})`);
@@ -132,8 +138,9 @@ try{
       if(!await run(()=>{const v=view(id);return !!v&&v.delivered>0&&v.reserved>0&&v.status==='open';},120000))throw Error('precondition: no in-flight haul after a first delivery');
       const before=view(id)!;const name='lab-concord-nh-mid-'+Date.now();await b.save(name);c.data.eventsBeforeLoad=[...events];lastSeq=0;events=[];await b.load(name);await b.admin('pause');await poll();
       const after=view(id);if(!after){c.findings.push('intent lost on load');return;}
-      for(const k of ['status','quota','delivered','overshoot','incidental','violations'] as const)expect(c,after[k]===before[k],`${k} changed on load`);
+      for(const k of ['status','quota','delivered','overshoot','incidental','unattributed','removed','violations'] as const)expect(c,after[k]===before[k],`${k} changed on load`);
       expect(c,JSON.stringify(after.byPawn)===JSON.stringify(before.byPawn),'credit changed on load');
+      expect(c,JSON.stringify(after.drops)===JSON.stringify(before.drops),'drop history changed on load');
       await run(done(id),240000);invariants(c,id);c.data.before=before;c.data.afterLoadReserved=after.reserved;
     });
     await scenario('candidate-discarded',base,async c=>{

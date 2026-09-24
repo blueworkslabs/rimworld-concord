@@ -340,7 +340,7 @@ namespace Concord {
                 if(loose==null) throw new Exception("No loose stack");
                 if(r.op=="lab-carry") {
                     // Pre-carried load for re-target cases: picked up outside any job.
-                    int n=p.carryTracker.TryStartCarry(loose,Math.Max(1,Math.Min(r.count,loose.stackCount)));
+                    int n=p.carryTracker.TryStartCarry(loose,Math.Max(1,Math.Min(r.count,loose.stackCount)),false);
                     return "{\"carried\":"+n+"}";
                 }
                 // A tagged haul queued (not started): bypasses the factory's admission on purpose.
