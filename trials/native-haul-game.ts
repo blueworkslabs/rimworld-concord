@@ -177,9 +177,12 @@ try{
       const inZone=()=>{const p=pawn(primary);return !!p.carrying&&p.x>=a.x&&p.x<a.x+a.w&&p.z>=a.z&&p.z<a.z+a.h;};
       const reached=await run(inZone,90000);
       if(!reached){c.findings.push('Pedro never stood in the zone while carrying (retry with a larger area)');return;}
-      const before=view(id)!.delivered;c.data.interrupt=await op({op:'lab-interrupt',actor:A});await poll();
+      const before=view(id)!;const deliveredBefore=before.delivered, incidentalBefore=before.incidental;
+      const interruption=await op({op:'lab-interrupt',actor:A});c.data.interrupt=interruption;await poll();
       const v=invariants(c,id);if(!v)return;
-      expect(c,v.delivered===before,'cleanup drop credited');c.data.drops=v.drops.slice(-3);
+      expect(c,interruption.ended==='HaulToCell','precondition: tagged haul ended before interruption');
+      expect(c,v.incidental>incidentalBefore,'precondition: no incidental cleanup placement observed');
+      expect(c,v.delivered===deliveredBefore,'cleanup drop credited');c.data.drops=v.drops.slice(-3);
     });
     for(const [quota,carry] of [[5,20],[30,10]] as const)await scenario('pre-carried-'+carry+'-quota-'+quota,base,async c=>{
       const id=randomUUID();await accept(id,A,{quota,variant:'exclusive'});
