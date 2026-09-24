@@ -1,8 +1,9 @@
 # Hauling migration: native intents by default (Gates A–C)
 
-**Status: Gate A draft.** Written by Clawd. Astra checks the internals claims against the
-pinned build; Fable signs off the architecture, then the Gate B freeze. Nothing is built
-before Gate B. The pinned build is RimWorld 1.6.4871 rev600, `Assembly-CSharp` prefix
+**Status: Gate A findings reviewed; conditional architecture sign-off.** Written by
+Clawd, assembly-checked by Astra. Fable selected the directions below conditional on
+Q1–Q7 verification; Q2 needs a revised commit boundary before option (b) can be frozen.
+Nothing is built before Gate B. The pinned build is RimWorld 1.6.4871 rev600, `Assembly-CSharp` prefix
 `082db1dd4f7f`. The spike and its verdict are in [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md)
 and [Gate C](trials/NATIVE_HAUL_GATE_C.md).
 
@@ -28,37 +29,35 @@ viewer follow it".
 - **Capability comes from the game.** A pawn whose work type is disabled is never
   offered that work, and the reason is visible.
 
-## Open decisions (recommendation first)
+## Direction (Fable, 2026-09-24; implementation still gated)
 
 ### 1. Strict hold, or a hold that grows
 
-Gate A finding (below, Q2): a growing hold does **not** have to give up the zero-overshoot
-guarantee. The game decides whether to grab a nearby duplicate stack in one toil
-(`Toils_Haul.CheckForGetOpportunityDuplicate`), before the pawn walks to it. A
-wrapper around that toil can cap the extra pickup to the free quota and reserve it at
-that moment, with no race window. That gives three options:
+**Selected conditionally: (b), growing hold within the quota.** Fable requires a
+verified admission boundary before additional pickup, no alternate pickup escape, and
+measurement of the new wrapper's cost. **Fallback: (a), strict hold**, not reported
+overshoot, if that boundary cannot be established. Q2's original after-action wrapper
+does not establish it: jumping to the next toil is synchronous.
 
-- **(a) Strict hold (spike):** at most the source stack per trip, with no duplicate
-  pickups into a tagged zone. Zero overshoot.
-- **(b) Growing hold within quota (recommended):** the game's own duplicate pickups come
-  back. Each extra stack is reserved when the game chooses it, bounded by what's left of
-  the quota. Zero overshoot. The pawn may take part of a nearby stack to finish exactly
-  on the number.
-- **(c) Growing hold with reported overshoot (Fable's leaning):** the pawn brings the
-  whole adjacent stack, and the log says "delivered 35 of 30". "Up to 30" becomes a
-  target, not a limit.
+- **(a) Strict hold (spike):** source-bounded trips, no duplicate pickups into a tagged
+  zone; retain the scripted zero-escape checks.
+- **(b) Growing hold within quota:** proposed restoration of native compatible duplicate
+  pickups, with the *whole carried load plus admitted extra* reserved before further
+  execution. Zero overshoot is the required invariant, not yet runtime evidence.
+- **(c) Growing hold with reported overshoot:** not selected. It would require "about"
+  rather than "up to" wording and explicit excess-delivery accounting.
 
-(b) removes the spike's efficiency cost and keeps the measure. (c) is truer to "the game
-being the game", but it turns "up to" into "about". Either can ship; **(b) is my
-recommendation, and Fable decides.** If (c) is chosen, the offer text must say "about 30"
-and the crew log must report the overshoot as an ordinary outcome, not an escape.
+Option (b) can recover some duplicate-pickup efficiency; it does not promise identical
+native throughput. Gate B must resolve the count budget, synchronous transition,
+withdrawal and pickup-time bounds listed in Q2. Until then (a) is the verified baseline.
 
 ### 2. Where stockpiles come from
 
-- **(a) Recommended:** the core may tag an **existing colony stockpile** (colony-public
+- **(a) Selected:** the core may tag an **existing colony stockpile** (colony-public
   knowledge, per the internals note) for one thing def, or one of the operator-declared
-  **candidate sites** that the fixture or scene setup lists. The mod creates the zone on
-  first acceptance, as in the spike.
+  **candidate sites** that the fixture or scene setup lists. Existing zones retain
+  their settings and existing stock; only candidate sites create a new zone on first acceptance. Existing-zone attachment and validation are
+  new work: today `Accept` always creates a zone.
 - **(b) Deferred:** the core proposes new zone rectangles itself. That needs
   placement validation and a view of the map that the core doesn't have. It stays with
   the open decision on untagged designations.
@@ -68,9 +67,11 @@ def (Q1). Other items keep flowing into a shared zone as before.
 
 ### 3. Several intents at once
 
-**Recommended:** yes, at most one open intent per (zone, def). Each has its own quota,
-standing and topic. The core view lists them separately. The spike's single frozen
-intent generalizes without changes to the ledger.
+**Selected:** yes, at most one open intent per (map, zone, def). Each has its own
+quota, standing and topic. List them in a fixed order within the core's topic-capacity
+limit; each offer names its stockpile. Per-intent arithmetic can be reused, but zone-only
+lookup, durable indexing, the singleton coordinator configuration and lifecycle routing
+must change. Different defs in one zone must never share reservations or counters.
 
 ## Scope
 
@@ -91,8 +92,9 @@ intent generalizes without changes to the ledger.
 
 ## Legibility (ships with the migration, from Gate C)
 
-- **The offer says what is offered:** "Haul up to 30 wood into the stockpile at the
-  north wall (76, 84); others may help". It is not an eligibility notice.
+- **The offer says what is offered:** "Haul up to 30 wood to the shared wood pile by the
+  north wall; others may help". Coordinates belong in the record, not speech. It is
+  not an eligibility notice.
 - **Helpers are labelled** in the crew log: "Pedro is helping (not asked)" on a
   helper's first credited placement.
 - **Retirement writes one record:** "Agreement complete: 75 of 75 (Pedro 40, Beatrice
@@ -113,48 +115,85 @@ intent generalizes without changes to the ledger.
 2. Once that passes, the core no longer lists ordered haul options in any mode.
    `Concord_Haul`, `Hauling.cs` and haul planning stay only for the baseline runner.
 3. They are deleted in a follow-up after the verdict, together with the 35 % needs stop
-   for hauling, which then has no remaining user.
+   for hauling and `Hauling.Ready` (including its wrong-tag capability check). Audit
+   remaining callers; do not retain it as a safety fallback for native work.
 
 ## Gate A: internals questions
 
-Answered on the pinned build, from decompiled names only. Astra checks each one.
+Checked against the pinned assembly hash above and repository `117dd87`; API
+availability is source evidence, not runtime proof. Private decompile: ILSpy 8.2 with
+`DOTNET_ROOT=/home/clawd/.dotnet DOTNET_ROLL_FORWARD=Major`. Proprietary output remains
+outside the repository.
 
-- **Q1. Can a tag cover one def inside an existing, mixed stockpile?** Yes, if admission
-  checks the def. Today's admission (patch 1) and pre-toil veto (3b) key on the zone
-  alone. They must also require `t.def == intent def`, or a tagged mixed zone would
-  block excluded pawns from storing *other* items there. `Placed` already counts only
-  the intent's def toward the quota, and reconciliation already counts by def.
-- **Q2. Can duplicate pickups respect the quota without a race?** Yes.
-  `CheckForGetOpportunityDuplicate` chooses a same-def stack within 8 cells in its
-  `initAction`, and only while `curJob.count > 0`. It then retargets A and jumps back to
-  reserve and walk. The spike's strict hold works because it leaves `job.count` at 0
-  after pickup. For option (b), a postfix on the toil factory wraps that `initAction`:
-  - before it runs, cap `job.count` to the free quota;
-  - after it runs, if the target changed, reserve `min(stack, job.count, available
-    stack space)` for this job at once, before any walking;
-  - the pickup true-up then shrinks to the carried count as today.
-  The pickup patch (4b) stops clamping `job.count` to what was picked up.
-- **Q3. Can placements after retirement be counted?** Yes. Patch 4 already sees every
-  carry-tracker placement. A retired intent keeps its zone id and records later
-  placements of its def as `ordinary` per pawn, without changing credit or quota. This
-  continues until the zone is deleted or re-tagged. Fresh spawns and merges follow the
-  existing hook 5 and reconciliation rules.
-- **Q4. Can the zone be found on the map?** `Zone.label` and `Zone.color` are plain
-  fields, and stockpile overlays draw with the zone colour.
-  `CameraJumper.TryJump(IntVec3, Map)` and `TryJumpAndSelect(GlobalTargetInfo)` exist
-  for a crew-log "show" button. The label and colour are restored at retirement.
-- **Q5. Can ticks become a clock?** `GenDate.TickGameToAbs(int)` plus
-  `GenDate.DateFullStringWithHourAt(long, Vector2)` and `HourOfDay(long, float)` take the
-  map tile's longitude. The crew-log tab renders in the mod, so it can format times
-  there. The state JSON also carries the clock for the current tick, so the core sees
-  the same hour a viewer does.
-- **Q6. Rescue replacement:** the replacement check (`replacementActive`) and the
-  withdraw-and-replace path accept only an ordered `haul` as the agreement being
-  replaced. A native agreement needs the same path: withdrawal is an `intent-exclude`
-  where a carried trip finishes and is flagged, then the rescue offer follows. This is a
-  coordinator change only; the game side is unchanged.
-- **Q7. Are there def limits?** `EverHaulable` defs only. The quota stays 1–75 per intent
-  for now. A larger quota is an open question for items whose stack limit is under 75.
+- **Q1. One def in an existing mixed stockpile?** Feasible, but broader than patches
+  1/3b. `ForZone`/`ForCell` currently return the first open intent by map/zone, ignoring
+  def. Search admission, factory count caps, pre-toil admission/reservation, retarget
+  transfer and placement lookup must consistently select (map, zone, def). `Placed`
+  credits only the matching def, but currently counts other defs as incidental;
+  `Spawned` also counts them as unattributed. Both must exclude unrelated items, not
+  merely keep them out of credited totals. `Count` already filters by def. Gate B needs
+  two tagged defs in one mixed zone, a refusing pawn storing a third def, and transfers
+  between tagged zones, with independent balances. Tag existing stock non-retroactively;
+  preserve filters/priorities and define behavior for zone edits, deletion and re-tagging.
+- **Q2. Can duplicate pickups respect the quota without a race?** A bounded growth
+  design is plausible; the original wrapper does **not** prove it. On 4871,
+  `CheckForGetOpportunityDuplicate` selects a compatible partial same-def stack within
+  8 cells while `curJob.count > 0`, retargets A and calls `JumpToToil`. That jump starts
+  downstream reserve/goto toils synchronously; an after-original callback may run only
+  after their initialization or failure. Gate B must commit at a verified boundary
+  **before** the jump/downstream execution, with rollback on rejection/disposal.
+  - Initial 3b admission already caps `job.count` to the source quantity; native pickup
+    subtracts the acquired count. Removing the 4b clamp alone still leaves zero after
+    a complete first pickup. Define a remaining trip budget that also respects native
+    destination space and carry capacity, not quota alone.
+  - `Reserve` replaces a job's total hold. Grow to **carried + admitted extra**, using
+    quota minus credited units and other jobs' holds; do not overwrite it with extra
+    alone or double-count this job's existing reservation.
+  - Bind the actual next pickup to that admitted extra. A selected stack can grow or
+    shrink before arrival; later true-up cannot repair an already oversized pickup.
+    Zero admitted extra must skip pickup, not reach the native count-to-one fallback.
+  - Recheck open intent, matching zone/def and standing before each growth; a carried
+    trip allowed to finish after withdrawal is not permission to gather more stacks.
+    Cover unavailable/reserved sources, retargets, failures and save/reload mid-growth.
+  Native duplicate selection is not permission to take any whole adjacent stack, and
+  single-threaded execution alone does not prove correct reservation ordering.
+- **Q3. Post-retirement placements?** The carry callbacks can provide per-pawn counts,
+  but `Placed` currently exits when its open-only `ForCell` lookup finds no intent;
+  retirement clears reservations, and periodic reconciliation skips retired intents.
+  Add separate archived (map, zone, def, tagging-generation) accounting and an explicit
+  re-tag/deletion boundary. Credited totals remain immutable. Fresh spawns and net
+  reconciliation remain unattributed; they cannot manufacture a carrier or recover
+  gross arrivals/removals that cancel out between samples. Audit partial merges and
+  multiple placement callbacks crossing retirement, with no double counting.
+- **Q4. Findable zone?** `Verse.Zone.label`/`color` are public and serialized. Colour
+  also feeds a cached `Material`, so changing the field alone is insufficient once
+  rendered: refresh the material and dirty the zone mesh. `CameraJumper.TryJump(cell,
+  map)` exists. `TryJumpAndSelect(GlobalTargetInfo)` selects things/world objects, not
+  a zone from a bare cell; explicit zone selection/highlighting is separate. Persist
+  original presentation, handle player edits, and restore it only when the last tag
+  sharing that zone retires. Test drawing, reload and stale "show" targets.
+- **Q5. Clock conversion?** Confirmed APIs in `RimWorld.GenDate`: `TickGameToAbs(int)`,
+  `DateFullStringWithHourAt(long, Vector2)` and `HourOfDay(long, float)`. Convert the
+  recorded game tick using that world's absolute-start offset and the relevant map's
+  longitude/latitude, not the viewer's current map. The current snapshot JSON has ticks,
+  **no clock field**; exporting the clock is migration work. Keep observation time
+  distinct from receipt event time and preserve branch/world identity. Add colony-public
+  clock data to SOCIAL's "who knows what" contract when implemented.
+- **Q6. Rescue replacement?** The coordinator's request generation, reflection choices,
+  `replacementActive`, completed-request fallback and handover currently require ordered
+  `haul`. Native withdrawal confirms `intent-exclude`, but permits existing cargo to
+  finish. Rescue admission requires `CarriedThing == null`: exclusion acknowledgment
+  is **not** completion of the carried trip. Gate B must define a durable, receipt/game-
+  confirmed handoff and fresh patient/bed/consent/expiry validation before dispatch,
+  including lost replies and restart. Reusing the game rescue path may be possible;
+  "coordinator-only" is conditional on that proof, not an immediate dispatch guarantee.
+- **Q7. Def limits?** `EverHaulable` means `alwaysHaulable || designateHaulable`, not
+  "haulable here now". Native capability, designation, reachability, reservation,
+  storage acceptance, stack compatibility and carrying limits still apply. The mod's
+  first acceptance checks EverHaulable and quota 1–75, but the coordinator's `HaulZone`
+  schema and `intentAction` still hard-code WoodLog. Generalizing them is required.
+  Quota is cumulative across trips: a stack limit below 75 does not itself require a
+  larger quota. Keep 1–75 for now and test a small-stack def; broader quotas are separate.
 
 ## Gate B will freeze
 
@@ -170,7 +209,8 @@ Answered on the pinned build, from decompiled names only. Astra checks each one.
 ## Gate C will measure
 
 - **Consent violations:** must stay at zero.
-- **Credit beyond the quota:** zero under (a) or (b); under (c), reported as an outcome.
+- **Credit beyond the quota:** zero under selected (b) or fallback (a); reported
+  overshoot (c) is not selected.
 - **Legibility:** a cold read from the recording alone must name who was asked, who
   helped unasked, when the agreement ended and what happened afterwards. Fable's
   four-sentence test.

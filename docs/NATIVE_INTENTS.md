@@ -221,10 +221,16 @@ with a tag is part of the migration.
 - How topic closure works on aggregate receipts.
 - Whether checkpoints during running agreements become allowed.
 - When refusals and broken promises become native thought memories.
-- **Strict hold or growing hold for tagged hauls** (decide with the hauling migration).
-  The spike keeps the strict hold: a tagged trip reserves at most its source stack, so
-  "credited beyond quota = 0" stays a frozen measure, at the cost of no extra-stack
-  pickups into a tagged zone. Fable's leaning for migration is the growing hold with
-  reported overshoot: "up to 30" is a promise between characters, not a physics
-  constraint, and "delivered 35 of 30" on the crew log is truer than leaving five on the
-  ground. That trades a guarantee for legibility.
+- **Hold direction decided conditionally, 2026-09-24:** growing hold **within the quota**
+  for the [hauling migration](MIGRATION_HAULING.md#1-strict-hold-or-a-hold-that-grows),
+  not growing hold with reported overshoot. Fable requires a verified pre-pickup
+  reservation boundary with no alternate pickup escape, and measured patch cost.
+  Astra's assembly review found that the proposed after-action wrapper does not prove
+  that boundary. Strict source-bounded hold remains the verified baseline and Fable's
+  fallback if bounded growth cannot be established. "Up to" remains a limit; Gate B
+  must settle the implementation and Gate C must test the zero-escape invariant.
+- **Stockpile source decided, 2026-09-24:** existing colony stockpiles or operator-listed
+  candidate sites. Core-created rectangles remain deferred. Tags are def-specific.
+- **Concurrent intents decided, 2026-09-24:** one open intent per (map, zone, def),
+  with deterministic core-view ordering within topic capacity and stockpile-labelled
+  offers. Implementation and lifecycle tests belong to the migration gates.
