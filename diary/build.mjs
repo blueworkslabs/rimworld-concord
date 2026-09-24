@@ -267,7 +267,7 @@ async function main() {
   await writeFile(join(OUT, 'log', 'index.html'), indexPage(entries, epoch));
   await writeFile(join(OUT, 'feed.xml'), feed(entries));
   await writeFile(join(OUT, 'entries.json'), JSON.stringify(entries.map(({slug, title, date, summary}) => ({slug, title, date, summary})), null, 2) + '\n');
-  await writeFile(join(OUT, '_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  Content-Security-Policy: default-src \'none\'; img-src \'self\'; media-src \'self\'; script-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'none\'; form-action \'none\'\n');
+  await writeFile(join(OUT, '_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  Content-Security-Policy: default-src \'none\'; img-src \'self\'; media-src \'self\' blob:; connect-src \'self\'; script-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'none\'; form-action \'none\'\n');
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
     const dir = join(OUT, 'entries', e.slug);

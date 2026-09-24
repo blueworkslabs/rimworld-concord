@@ -69,9 +69,9 @@ uncut clip remains the human feedback artifact.
 
 ## Result
 
-[Watch/download the uncut 15 fps recording](https://rimworld-concord.pages.dev/assets/recordings/luna-continuous-2026-09-24.mp4).
+[Watch the uncut 15 fps recording](https://rimworld-concord.pages.dev/watch/luna-continuous/).
 It is silent, 10:04 including paused setup/end padding, 13.9 MB. Browser video controls
-allow scrubbing; no edited highlights or required viewer questionnaire.
+allow scrubbing after the player loads the complete original. The static host ignored range requests in delivery checks, so the watch page buffers the unchanged file once. The original MP4 remains downloadable; no edited highlights or required viewer questionnaire.
 
 **Actual outcomes:** Alvin chose and consumed 12 berries, Pedro 11, then Alvin another
 16: **39 food items** across three actions. Six topics linked to the first two meals
