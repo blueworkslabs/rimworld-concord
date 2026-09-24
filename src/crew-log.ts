@@ -1,14 +1,19 @@
 import type {Domain,Proposal,Receipt} from './protocol.js';
-export type AgreementProgress={id:string;kind:string;status:string;tick:number;agreed:number;completed:number;active:number;unconfirmed:number;unsuccessful:number;notStarted:number;unfulfilled:number;delivered:number;quantityUnknown:number};
+import {staleNote} from './observation-age.js';
+export type AgreementProgress={completedTick?:number|null;id:string;kind:string;status:string;tick:number;agreed:number;completed:number;active:number;unconfirmed:number;unsuccessful:number;notStarted:number;unfulfilled:number;delivered:number;quantityUnknown:number};
 export type CrewEntry={seq:number;tick:number;kind:'message'|'record';actor:string;recipient:string;subject:string;text:string;key:string};
 export type CrewArchive={revision:number;nextSeq:number;entries:CrewEntry[]};
 export type CrewReport={observerText?:string;topicText?:string;foodLines?:string[];sharedStatus?:import('./shared-status.js').SharedStatus[];waiting?:string;world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
 export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt[]):AgreementProgress {
  if(p.action.kind==='haul-zone'){
   // Shared intent: the quota is the colony's; delivered is this pawn's own credit.
-  const v=d.intentViews?.[p.action.intentId],mine=v?.byPawn.find(x=>x.pawn===p.pawn)?.count??0,met=p.standing?.status==='completed'&&v?.status==='met'?1:0;
-  return {id:p.id,kind:p.action.kind,status:p.standing?.status??p.status,tick,agreed:1,completed:met,active:p.standing?.status==='running'?1:0,
-   unconfirmed:!v||d.pendingIntentAcceptances?.includes(p.id)?1:0,unsuccessful:p.standing?.status==='stopped'||v&&(v.status==='expired'||v.status==='stopped')?1:0,notStarted:0,unfulfilled:1-met,delivered:mine,quantityUnknown:0};
+  // Only an accepted offer is an agreement: a lapsed, withdrawn or unanswered offer is never
+  // "agreed" or "unfulfilled", and a helper's credit is not agreement work.
+  const v=d.intentViews?.[p.action.intentId],agreed=p.status==='accepted'?1:0,mine=agreed?v?.byPawn.find(x=>x.pawn===p.pawn)?.count??0:0,met=agreed&&p.standing?.status==='completed'&&v?.status==='met'?1:0;
+  return {id:p.id,kind:p.action.kind,status:p.standing?.status??p.status,tick,agreed,completed:met,active:p.standing?.status==='running'?1:0,
+   unconfirmed:agreed&&(!v||d.pendingIntentAcceptances?.includes(p.id))?1:0,unsuccessful:agreed&&(p.standing?.status==='stopped'||v&&(v.status==='expired'||v.status==='stopped'))?1:0,notStarted:0,unfulfilled:agreed-met,delivered:mine,quantityUnknown:0,
+   // Completion time comes from the receipt (last credited placement), never the observation tick.
+   completedTick:met?v!.lastDeliveryTick:null};
  }
  const agreed=p.action.kind==='haul'?p.action.trips:p.action.kind==='cook'?p.action.meals:1;
  const ids=[...new Set(p.standing?.steps??(p.actionId?[p.actionId]:[]))];
@@ -63,8 +68,9 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  }
  if(kind==='reoffer-requested')add('message',actor,'core',data.deferredId,`Request one fresh offer: ${data.reason}`,`reoffer:${data.id}`);
  if(kind==='alternative-requested')add('message',actor,'core',data.id,data.reason,`request:${data.id}`);
- if(kind==='core-question'||kind==='core-answer')add('message',data.from,data.to,data.exchangeId,data.text,`core-talk:${data.id}`);
- if(kind==='core-planned')add('message','core','crew',data.id,data.reason,`core-plan:${data.id}`);
+ if(kind==='core-question'||kind==='core-answer')add('message',data.from,data.to,data.exchangeId,staleNote(data)+data.text,`core-talk:${data.id}`);
+ if(kind==='core-planned')add('message','core','crew',data.id,staleNote(data)+data.reason,`core-plan:${data.id}`);
+ if(kind==='intent-offer-lapsed')add('record','Game','observer',data.proposal,data.answer?`${name(data.pawn)} answered ${safe(data.answer,20)} after the stockpile haul was already ${data.intentStatus==='met'?'complete':safe(data.intentStatus,20)}; no agreement started.`:`Offer to ${name(data.pawn)} lapsed unanswered: the stockpile haul was already ${data.intentStatus==='met'?'complete':safe(data.intentStatus,20)}.`,`lapsed:${data.proposal}`);
  if(kind==='social-delivered')add('message',data.from,data.to,data.exchangeId,data.text,`social:${data.id}`);
  if(kind==='alternative-declined')add('message','core',data.pawn,data.id,data.replyReason,`decline:${data.id}`);
  if(kind==='offer-withdrawn')add('record','core','observer',data.id,'Pending offer withdrawn; no work authorized.',`retired:${data.id}`);

@@ -9,6 +9,7 @@ import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
 import {recordCrew,crewReport,agreementProgress} from './crew-log.js';
+import {newestReceiptTick} from './observation-age.js';
 import {NativeHaulConfig,IntentView,planIntentOffer,counterAdoptable,notOfferedReason,progress as intentProgress} from './native-intents.js';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
@@ -109,8 +110,11 @@ export class Coordinator {
       experiences.push({event,route:next,interrupt});
       if(experiences.length>64) {
         const evicted=experiences.shift()!;
-        if(evicted.event.seq>(character.attention?.cursor??0)&&evicted.route!=='native')
+        if(evicted.event.seq>(character.attention?.cursor??0)&&evicted.route!=='native'){
+          // Counted as a failure with its cause: an unprocessed experience was lost.
+          const d=this.domain.diagnostics??={attentionGaps:0,attentionGapKinds:{}};d.attentionGaps++;d.attentionGapKinds[evicted.event.kind]=(d.attentionGapKinds[evicted.event.kind]??0)+1;
           this.commit('attention-gap',event.pawn,{seq:evicted.event.seq,kind:evicted.event.kind});
+        }
       }
       const pending=this.pending.get(event.pawn);
       if(pending&&!pending.signal.aborted) {
@@ -472,14 +476,14 @@ export class Coordinator {
           questionId=randomUUID();const m:SocialMessage={id:randomUUID(),exchangeId:questionId,tick:g.ticks,from:'core',to:a.pawn,fromName:'Core',toName:this.domain.characters[a.pawn]!.name,text:a.text};
           state.questions.push({id:questionId,pawn:a.pawn,text:a.text,status:'pending',messages:[m],...(state.schedule?.config.maxAttempts===null?{context:questionContext(this.domain,g,a.pawn)}:{})});
           const ch=this.domain.characters[a.pawn]!;ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
-          this.commit('core-question','core',m);
+          this.commit('core-question','core',{...m,...this.asOf(prepared.view.tick,g)});
         }
         for(const change of choice.topics){const update={...change,basedOnTick:prepared.view.tick,updatedTick:g.ticks};let topic=state.topics.find(t=>t.sourceId===update.sourceId);
           if(!topic){topic={...update,proposalIds:this.domain.proposals[update.sourceId]?[update.sourceId]:[]};state.topics.push(topic);}else Object.assign(topic,update);
         }
         if(proposalId&&choice.actionTopicId){const topic=state.topics.find(t=>t.sourceId===choice.actionTopicId)!;if(!topic.proposalIds.includes(proposalId))topic.proposalIds.push(proposalId);}
         Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{})});state.revision++;
-        this.commit('core-planned','core',{id:prepared.id,reason:a.reason});
+        this.commit('core-planned','core',{id:prepared.id,reason:a.reason,...this.asOf(prepared.view.tick,g)});
         return {status:'applied' as const,proposalId,questionId,choice};
       });
     }catch(error){
@@ -495,7 +499,7 @@ export class Coordinator {
       if(!q||q.status!=='pending'||this.pending.has(q.pawn))throw Error('Question unavailable');
       const own=g.pawns.find(p=>p.id===q.pawn);if(!own||own.downed){q.status='failed';this.commit('core-answer-unavailable',q.pawn,{id});throw Error('Pawn unavailable');}
       const controller=new AbortController();this.pending.set(q.pawn,controller);q.status='running';this.commit('core-answer-started',q.pawn,{id});
-      const view:CoreQuestionView={pawn:groundedPawn(this.domain,g,own),character:structuredClone(this.domain.characters[q.pawn]!),question:{id,text:q.text,from:'core'}};
+      const view:CoreQuestionView={observedTick:g.ticks,pawn:groundedPawn(this.domain,g,own),character:structuredClone(this.domain.characters[q.pawn]!),question:{id,text:q.text,from:'core'}};
       view.pawn.eating=own.eating?{...structuredClone(own.eating),options:this.game.eat?eatingOptions(this.domain,g,own):[]}:undefined;
       return {pawn:q.pawn,controller,generation:this.generation,view};
     });
@@ -520,7 +524,7 @@ export class Coordinator {
         }
         const m:SocialMessage={id:randomUUID(),exchangeId:id,tick:g.ticks,from:q.pawn,to:'core',fromName:ch.name,toName:'Core',text:choice.text};
         q.messages.push(m);q.status='answered';ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
-        this.domain.coreState!.revision++;this.commit('core-answer',q.pawn,m);
+        this.domain.coreState!.revision++;this.commit('core-answer',q.pawn,{...m,...this.asOf(prepared.view.observedTick,g)});
         if(care){this.commit('self-care-chosen',q.pawn,care);await this.dispatchEating(care);}
         return {status:'delivered' as const};
       });
@@ -803,6 +807,12 @@ export class Coordinator {
     this.commit('decided',p.pawn,p);
     if(result.kind==='accept') await this.dispatch(p);
   }
+  /** Observation age for published narration: a snapshot older than the newest receipt is
+   * flagged before it reaches the crew log. Receipts are game events, never the current tick. */
+  private asOf(viewTick:number,game:GameState){
+    const newest=newestReceiptTick(this.domain,game);
+    return {asOfTick:viewTick,...(newest>viewTick?{newerReceiptTick:newest}:{})};
+  }
   private liveIntent(game:GameState,intentId:string):IntentView|undefined{
     const raw=(game.intents??[]).find(i=>i.intentId===intentId);return raw?IntentView.parse(raw):undefined;
   }
@@ -826,6 +836,15 @@ export class Coordinator {
     if(p.action.kind!=='haul-zone')throw Error('Not a native intent');
     const a=p.action;
     const live=this.liveIntent(fresh,a.intentId);
+    if(live&&live.status!=='open'&&live.status!=='pending'){
+      // Answered after the shared work had already closed: the answer is kept as said,
+      // no agreement starts, and nothing is projected as agreed, unfulfilled or withdrawn.
+      p.decision=result;p.status='lapsed';p.lapsed={intentStatus:live.status,answered:true};
+      this.domain.characters[p.pawn]!.memories.push(`${result.kind} after the stockpile haul was already ${live.status}: ${result.reason}`);
+      this.commit('decided',p.pawn,p);
+      this.commit('intent-offer-lapsed',p.pawn,{proposal:p.id,pawn:p.pawn,answer:result.kind,intentStatus:live.status});
+      return;
+    }
     if(result.kind==='accept')planIntentOffer(this.domain.nativeHaul,fresh.pawns.find(x=>x.id===p.pawn),a,live);
     if(result.kind==='counter'&&(result.action.kind!=='haul-zone'||result.action.intentId!==a.intentId))throw Error('Counter must address the same shared intent');
     p.decision=result;
@@ -866,11 +885,19 @@ export class Coordinator {
   private ingestIntents(game:GameState){
     for(const raw of game.intents??[]){
       const v=IntentView.parse(raw),old=this.domain.intentViews?.[v.intentId];
-      if(JSON.stringify(old)===JSON.stringify(v))continue;
+      if(JSON.stringify(old)!==JSON.stringify(v)){
       (this.domain.intentViews??={})[v.intentId]=v;
       this.commit('intent-progress','Game',{intentId:v.intentId,status:v.status,previousStatus:old?.status,previousDelivered:old?.delivered??0,
         previousFinishedAfterExclusion:old?.finishedAfterExclusion??0,finishedAfterExclusion:v.finishedAfterExclusion,...intentProgress(v)});
+      }
       if(v.status==='open'||v.status==='pending')continue;
+      // Unanswered offers of a closed intent lapse; an answer already being thought over is
+      // recorded as a lapsed answer when it arrives.
+      for(const p of Object.values(this.domain.proposals)){
+        if(p.action.kind!=='haul-zone'||p.action.intentId!==v.intentId||p.status!=='pending'||this.pending.has(p.pawn))continue;
+        p.status='lapsed';p.lapsed={intentStatus:v.status,answered:false};
+        this.commit('intent-offer-lapsed',p.pawn,{proposal:p.id,pawn:p.pawn,answer:null,intentStatus:v.status});
+      }
       for(const p of Object.values(this.domain.proposals)){
         if(p.action.kind!=='haul-zone'||p.action.intentId!==v.intentId||p.standing?.status!=='running')continue;
         p.standing.status=v.status==='met'?'completed':'stopped';

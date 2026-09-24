@@ -16,10 +16,36 @@ import {OngoingUsage} from './ongoing-usage.js';
 export const LUNA_MODEL='gpt-5.6-luna';
 type Mode='decision'|'reflection'|'social'|'core'|'core-answer';
 /** Same game contract as Claude, independent native transport. */
+export type FailureCause='context-too-large'|'request-too-large'|'cancelled'|'invalid-output'|'backend';
+/** Safe, content-free failure classification for receipts and the wire. */
+export function failureCause(error:unknown,aborted:boolean,reachedModel:boolean):FailureCause{
+ const m=error instanceof Error?error.message:'';
+ if(m==='Context too large')return 'context-too-large';
+ if(m==='Complete request too large')return 'request-too-large';
+ if(aborted)return 'cancelled';
+ return reachedModel&&!(error instanceof Error&&m==='Native decision unavailable')?'invalid-output':'backend';
+}
+export const PROMPT_LIMIT=24000;
+/** Reflection perspectives are trimmed to fit, oldest first, never by raising the limit: older
+ * retained experiences, memories and messages go before anything recent. The trim is recorded
+ * in the view the model sees. Mutates the (already cloned) view so validation uses the same one. */
+export function fitReflection(view:any,size:()=>number,limit=PROMPT_LIMIT){
+ const trimmed={experiences:0,memories:0,messages:0};
+ const lists:[keyof typeof trimmed,()=>unknown[]|undefined,number][]=[
+  ['experiences',()=>view.character?.experiences,8],['memories',()=>view.character?.memories,8],['messages',()=>view.character?.messages,6]];
+ while(size()>limit){
+  const next=lists.find(([,get,keep])=>(get()?.length??0)>keep);
+  if(!next)break;
+  next[1]()!.shift();trimmed[next[0]]++;view.trimmed={...trimmed,note:'Older items were left out to fit; they still happened.'};
+ }
+ return trimmed;
+}
 export function codexRequest(mode:Mode,view:any){
+ const build=()=>JSON.stringify(mode==='core'?corePrompt(view):mode==='core-answer'?coreAnswerPrompt(view):mode==='social'?socialPrompt(view):modelPrompt(mode,view));
+ if(mode==='reflection')fitReflection(view,()=>Buffer.byteLength(build()));
+ const prompt=build();
+ if(Buffer.byteLength(prompt)>PROMPT_LIMIT)throw Error('Context too large');
  const args=claudeArgs(mode,view),instructions=args[args.indexOf('--system-prompt')+1]!,schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);
- const prompt=JSON.stringify(mode==='core'?corePrompt(view):mode==='core-answer'?coreAnswerPrompt(view):mode==='social'?socialPrompt(view):modelPrompt(mode,view));
- if(Buffer.byteLength(prompt)>24000)throw Error('Context too large');
  // JSON Schema references preserve the same topic constraints without repeating
  // every source/status branch in each possible action's schema.
  if(mode==='core'){
@@ -42,6 +68,8 @@ const Usage=z.object({inputTokens:z.number().int().nonnegative(),cachedInputToke
 export class CodexDecisionBackend {
  readonly name=LUNA_MODEL;
  readonly receipts:any[]=[];
+ /** Every failed request with its cause, including failures before any model call. */
+ readonly failures:{mode:string;cause:FailureCause;at:string}[]=[];
  private pending=false;
  private ledger:OngoingUsage;
  constructor(private options:{ledgerPath:string;scratchRoot:string;catalogPath:string;helperPath?:string}){
@@ -71,9 +99,11 @@ export class CodexDecisionBackend {
    this.receipts.push({id,mode,model:LUNA_MODEL,elapsedMs:Date.now()-start,stage:raw?.stage??'transport',status:raw?.status??'unknown',diagnostic:raw?.diagnostic??null,usage,rawText:typeof raw?.rawText==='string'?raw.rawText:null,preflight:raw?.preflight??null,authoredSize:promptAccounting(request.instructions,request.prompt,request.schema)});
    if(!outcome||signal.aborted||raw?.status!=='completed'||raw.model!==LUNA_MODEL||raw.preflight?.toolsExposed!==0||raw.preflight?.requests!==1||typeof raw.rawText!=='string')throw Error('Native decision unavailable');
    const choice=parseCodexChoice(mode,raw.rawText,view);signal.throwIfAborted();this.ledger.settle(id,'ok',Date.now()-start,usage);id=undefined;return choice;
-  }catch{
+  }catch(error){
    if(id)this.ledger.settle(id,signal.aborted?'cancelled':'failed',Date.now()-start,usage);
-   throw Error('Native decision failed; attempt retained; no automatic retry');
+   // Surface why, per lane: a failure before any model call is still a failure.
+   const cause=failureCause(error,signal.aborted,!!id);this.failures.push({mode,cause,at:new Date().toISOString()});
+   throw Object.assign(Error('Native decision failed; attempt retained; no automatic retry'),{failureCause:cause});
   }finally{this.pending=false;}
  }
  private invoke(root:string,signal:AbortSignal):Promise<boolean>{

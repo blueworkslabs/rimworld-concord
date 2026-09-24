@@ -25,6 +25,8 @@ export function workSummary(domain:Domain){
 /** Failed inference must not leave an offer available for a later automatic retry.
  * Preserve accepted/countered/refused decisions if transport failed afterward. */
 export async function retireUndecided(c:import('./coordinator.js').Coordinator,id:string,reason:string){
+ // Reconcile terminal intent offers after the failed thought releases its pawn.
+ if(c.inspect().proposals[id]?.action.kind==='haul-zone')await c.reconcile();
  if(c.inspect().proposals[id]?.status==='pending')await c.core().withdrawOffer(id,reason);
 }
 /** One shutdown path for deadline, normal completion and exceptions. */

@@ -132,6 +132,24 @@ a fixed OpenRouter destination, no redirects, a bounded response size, and error
 without raw transport details. The lab host never receives the credential. Each call
 asks one `reflect` question, and the serialized perspective is at most 16,000 bytes.
 
+**Failures carry their cause.** A failed request records one content-free cause
+(`context-too-large`, `request-too-large`, `cancelled`, `invalid-output`, `backend`,
+`deadline`) in the backend's `failures`, the host receipt's `laneFailures` and the
+decision-result wire message. This includes failures before any model call. Reflection
+perspectives that exceed the 24,000-byte prompt limit are trimmed oldest-first (older
+retained experiences, then memories, then messages) and marked `trimmed` in the view.
+The limit itself is never raised. The ongoing runner counts failures per lane (core,
+decision, core-answer, reflection); a success in one lane never resets another lane's
+stop streak. Native/idle/busy/cooldown results do not reset it either; only an actual
+successful inference in that lane does. Reflection schemas are built from the final
+trimmed perspective, so omitted evidence cannot remain an advertised citation.
+
+**Gate C fix verification (2026-09-24):** coordinator lifecycle, concurrent stale
+publication and failure-guard regressions are mock-tested (388 tests pass). All six
+retained oversized reflection inputs were replayed offline: final prompts are
+23,829–23,934 bytes, with schemas matching the trimmed evidence. No model calls,
+staging deployment or new gameplay were used; live/UI verification remains pending.
+
 ## Ledgers
 
 Finite Claude trials have policies in `src/decision-trials.ts`; Jev uses its own

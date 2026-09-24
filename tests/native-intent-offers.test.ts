@@ -7,7 +7,7 @@ import { scripted } from '../src/backends.js';
 import {coreAdmission,NATIVE_INTENT_STALL_TICKS} from '../src/core-scheduler.js';
 import {corePrompt} from '../src/core-planner.js';
 import { coreView } from '../src/core-planner.js';
-import {stopTrialWork} from '../src/work-trial.js';
+import {stopTrialWork,retireUndecided} from '../src/work-trial.js';
 import {nativeSceneCrew,nativeOfferCoverage,assertNativeLedger,assertNativeRestore} from '../trials/native-haul-live.js';
 import { crewReport } from '../src/crew-log.js';
 import { intentAction, type IntentView } from '../src/native-intents.js';
@@ -232,4 +232,58 @@ test('ongoing core wakes on first native delivery and each quiet period, not eve
  game.data.ticks+=NATIVE_INTENT_STALL_TICKS;assert.equal((await c.planCoreWhenDue(choose)).status,'applied');
  game.data.ticks+=400;Object.assign(i,{status:'met',delivered:30,remaining:0,byPawn:[{pawn:'P',count:30}]});await c.reconcile();assert.equal((await c.planCoreWhenDue(choose)).status,'applied');
  const admission=coreAdmission(c.inspect().coreState!.schedule!,await c.corePerspective());assert.equal(admission.ready,false);
+});
+
+test('a yes after the shared work closed is kept as said, starts nothing and is never agreed or withdrawn',async()=>{
+  const {c,game}=await setup();
+  const b=await c.core().propose('B',intentAction(cfg),'Stock wood');await c.pawn('B').decide(b.id,say('accept'));
+  const p=await c.core().propose('P',intentAction(cfg),'Stock wood');
+  // The quota is met while Pedro is still thinking; his answer then arrives.
+  Object.assign(game.data.intents![0]!,{status:'met',delivered:30,byPawn:[{pawn:'P',count:20},{pawn:'B',count:10}],lastDeliveryTick:2510});
+  const opsBefore=game.ops.length;
+  const decided=await c.pawn('P').decide(p.id,say('accept','Happy to help'));
+  assert.equal(decided.status,'lapsed');assert.deepEqual(decided.lapsed,{intentStatus:'met',answered:true});assert.equal(decided.decision?.kind,'accept');
+  assert.equal(game.ops.length,opsBefore,'no intent operation for a lapsed answer');
+  const d=c.inspect(),progress=crewReport(d,3000).agreements.find(a=>a.pawn==='P');
+  assert.equal(progress,undefined,'a lapsed offer is not listed as an agreement');
+  const core=coreView(d,game.data).agreements.find(a=>a.id===p.id)!;
+  assert.equal(core.progress.agreed,0);assert.equal(core.progress.unfulfilled,0);assert.equal(core.progress.delivered,0);assert.equal(core.status,'lapsed');
+  const text=crewReport(d,3000).entries.map(e=>e.text);
+  assert.ok(text.includes('Pedro answered accept after the stockpile haul was already complete; no agreement started.'));
+  assert.ok(!text.some(t=>/withdrawn/i.test(t)));
+});
+
+test('an unanswered offer lapses when the shared work closes; completion time comes from the receipt',async()=>{
+  const {c,game}=await setup();
+  const b=await c.core().propose('B',intentAction(cfg),'Stock wood');await c.pawn('B').decide(b.id,say('accept'));
+  const p=await c.core().propose('P',intentAction(cfg),'Stock wood');
+  Object.assign(game.data.intents![0]!,{status:'met',delivered:30,byPawn:[{pawn:'B',count:30}],lastDeliveryTick:2510});game.data.ticks=9000;await c.reconcile();
+  const d=c.inspect();assert.equal(d.proposals[p.id]!.status,'lapsed');assert.deepEqual(d.proposals[p.id]!.lapsed,{intentStatus:'met',answered:false});
+  assert.ok(crewReport(d,9000).entries.some(e=>e.text==='Offer to Pedro lapsed unanswered: the stockpile haul was already complete.'));
+  const v=coreView(d,game.data),mine=v.agreements.find(a=>a.id===b.id)!;
+  assert.equal(mine.progress.completedTick,2510);assert.equal(mine.progress.observedTick,9000);assert.ok(!('tick' in mine.progress));
+  // A topic linking the completed agreement and the lapsed offer can still resolve.
+  const closures=v.topicClosures.filter(t=>t.sourceId===b.id||t.sourceId===p.id);
+  assert.deepEqual(closures.find(t=>t.sourceId===b.id)?.statuses,['resolved']);assert.deepEqual(closures.find(t=>t.sourceId===p.id)?.statuses,[]);
+});
+
+
+test('terminal offer survives active inference, then lapses after failure without withdrawal',async()=>{
+ const {c,game,store}=await setup();
+ const b=await c.core().propose('B',intentAction(cfg),'Stock wood');await c.pawn('B').decide(b.id,say('accept'));
+ const p=await c.core().propose('P',intentAction(cfg),'Help');
+ let started!:()=>void,reject!: (e:Error)=>void;
+ const ready=new Promise<void>(r=>started=r);
+ const deciding=c.pawn('P').decide(p.id,{name:'blocked',decide:async()=>{started();return await new Promise((_r,j)=>reject=j);}});
+ const failed=assert.rejects(deciding,/offline/);await ready;
+ Object.assign(game.data.intents![0]!,{status:'met',delivered:30,remaining:0,lastDeliveryTick:42});
+ await c.reconcile();assert.equal(c.inspect().proposals[p.id]!.status,'pending');
+ reject(Error('offline'));await failed;
+ await retireUndecided(c,p.id,'Decision unavailable; no retry');
+ assert.equal(c.inspect().proposals[p.id]!.status,'lapsed');
+ assert.deepEqual(c.inspect().proposals[p.id]!.lapsed,{intentStatus:'met',answered:false});
+ assert.equal(game.ops.filter(o=>o.actor==='P').length,0);
+ const again=new Coordinator(store,game);await again.open();await again.reconcile();
+ assert.equal(again.inspect().proposals[p.id]!.status,'lapsed');
+ assert.ok(!crewReport(c.inspect(),100).entries.some(e=>e.text.includes('Pending offer withdrawn')));
 });

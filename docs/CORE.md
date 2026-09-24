@@ -39,6 +39,16 @@ An explicit projection (`coreView`); nothing is spread in from internal state.
 It never sees private memories, reflections, outlooks, exact need meters, pawn-to-pawn
 speech it wasn't part of, or the operator's diagnostics.
 
+**Observation age (as-of rule).** Every tick in the core view is an observation time:
+the view's `tick`, agreement progress `observedTick` and topic `basedOnTick` say when
+something was *seen*. Only receipts date events. Agreement progress carries
+`completedTick`, the receipt time of the last credited placement, and has no bare
+`tick`. When a core message or question, or a pawn's answer, is published after a
+receipt newer than its snapshot (an ingestion, a haul delivery, an intent opening or
+retiring, a casualty), the crew log prefixes it with `[as of tN; newer receipts since
+tM]`. The native-haul live run showed why: two statements that were true at snapshot
+time were false by publication.
+
 ## What the core may do
 
 One action per turn, each with a public reason (≤600 characters):

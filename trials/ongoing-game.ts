@@ -1,3 +1,4 @@
+import {LaneFailures} from '../src/lane-failures.js';
 /** Explicit operator observation window; no model turn ceiling and no inference pauses. */
 import {ongoingProtocol} from './ongoing-protocol.js';
 import {startSceneRecording} from './scene-recording.js';
@@ -90,8 +91,10 @@ try{
   const startTick=(await b.state()).ticks;
   guard.check();(receipt.resumes??=[]).push(await startNative(b));guard.check();let nativeStarted:number|undefined=Date.now();receipt.nativeStartedUnixMs=nativeStarted;
   const nativeRemaining=()=>nativeLimit-nativeElapsed-(nativeStarted===undefined?0:Date.now()-nativeStarted);
-  let taskError:unknown,lastRole='pawn',failureStreak=0;
-  const note=(status:string)=>{failureStreak=['failed','interrupted'].includes(status)?failureStreak+1:0;if(failureStreak>=3)throw Error('Repeated inference failures; stopped for diagnosis');};receipt.attention=[];
+  let taskError:unknown,lastRole='pawn';
+  // Failures are counted per lane: a success in one lane never resets another lane's streak.
+  const lanes=new LaneFailures();receipt.laneFailures=lanes.totals;
+  const note=(status:string,lane:string)=>lanes.note(status,lane);receipt.attention=[];
   const launch=(task:()=>Promise<void>)=>{active=task().catch(e=>{taskError=e;}).finally(()=>{active=undefined;});};
   while(nativeRemaining()>0){
    if(taskError)throw taskError;
@@ -107,7 +110,7 @@ try{
    const candidates=scripted?[]:c.attentionCandidates({cooldownTicks:300,timeoutMs:110000},false);
    if(!active&&(candidates.length&&lastRole==='core'||candidates.length&&!coreAdmission(schedule,view).ready)){
     lastRole='pawn';inferenceDeadline=Math.min(end,Date.now()+Math.min(110000,nativeRemaining()));
-    launch(async()=>{const result=await c!.attend(candidates[0]!,channel,undefined,{cooldownTicks:300,timeoutMs:Math.max(1,Math.min(110000,Math.floor(nativeRemaining())))},controller.signal);receipt.attention.push(result);note(result.status);});
+    launch(async()=>{const result=await c!.attend(candidates[0]!,channel,undefined,{cooldownTicks:300,timeoutMs:Math.max(1,Math.min(110000,Math.floor(nativeRemaining())))},controller.signal);receipt.attention.push(result);note(result.status,'reflection');});
    }else if(!active&&coreAdmission(schedule,view).ready){
     lastRole='core';inferenceDeadline=Math.min(end,Date.now()+Math.min(110000,nativeRemaining()));
     launch(async()=>{
@@ -116,7 +119,7 @@ try{
      const round:any={index:receipt.rounds.length,result};if(result.status!=='idle')receipt.rounds.push(round);
      if(nativeRemaining()>0&&result.status==='applied'&&result.questionId){inferenceDeadline=Math.min(end,Date.now()+Math.min(110000,nativeRemaining()));round.answer=await c!.answerCoreQuestion(result.questionId,channel,decisionMs(),controller.signal);guard.check();}
      if(nativeRemaining()>0&&result.status==='applied'&&result.proposalId){inferenceDeadline=Math.min(end,Date.now()+Math.min(110000,nativeRemaining()));const p=c!.inspect().proposals[result.proposalId]!;try{await c!.pawn(p.pawn).decide(p.id,channel,decisionMs(),controller.signal);}catch(e){round.pawnError=String(e);await retireUndecided(c!,p.id,'Decision unavailable; no retry');}guard.check();round.proposal=c!.inspect().proposals[p.id];}
-     if(result.status!=='idle'){round.after=await c!.corePerspective();note(round.pawnError?'failed':round.answer?.status??result.status);}
+     if(result.status!=='idle'){round.after=await c!.corePerspective();note(result.status,'core');if(round.answer)note(round.answer.status,'core-answer');if(round.proposal||round.pawnError)note(round.pawnError?'failed':'applied','decision');}
     });
    }
    await delay(300);
@@ -129,6 +132,8 @@ try{
   await capture('final');
   await finish();guard.check();receipt.beforeCleanup=c.inspect();receipt.final=await b.state();receipt.cleanup=await stopTrialWork(c);assert.equal(receipt.cleanup.errors.length,0);guard.check();receipt.summary=workSummary(c.inspect());receipt.production={campfires:Object.values(c.inspect().outcomes).filter(r=>r.kind==='build'&&r.status==='completed').length,meals:Object.values(c.inspect().outcomes).filter(r=>r.kind==='cook'&&r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0)};
   receipt.inferencePassed=receipt.rounds.some((r:any)=>r.result.status==='applied');
+  // Harness pass is not clean cognition: lost experiences and per-lane failures are reported.
+  receipt.attentionGaps=c.inspect().diagnostics??{attentionGaps:0,attentionGapKinds:{}};
   receipt.failures=receipt.rounds.filter((r:any)=>!['applied','idle'].includes(r.result.status)||r.pawnError||r.answer&&!['delivered','silent'].includes(r.answer.status));
   if(scripted&&!nativeHaul){assert.equal(receipt.rounds[0]?.answer?.status,'delivered');assert.equal(receipt.rounds[1]?.result?.status,'applied');assert.equal(c.inspect().coreState?.turns[1]?.choice?.action.kind,'wait');assert.equal(Object.keys(c.inspect().proposals).length,0);}
   if(scripted&&!nativeHaul){const care=Object.values(c.inspect().selfCare??{});assert.equal(care.length,1);const result=c.inspect().outcomes[care[0]!.id];assert.equal(result?.status,'completed');assert((result?.delivered??0)>0,'scripted choice must consume food before cleanup');assert.equal(receipt.beforeCleanup.outcomes[care[0]!.id]?.status,'completed');}
@@ -153,5 +158,6 @@ finally{
  receipt.finalCleanup=await socialCleanup(async()=>{operationDeadline=Date.now()+10000;await b.admin('pause');},async()=>{},async()=>{operationDeadline=Date.now()+20000;return c&&!cold?stopTrialWork(c):{errors:[]};});
  if(receipt.finalCleanup.errors.length){receipt.passed=false;process.exitCode=1;}
  if(!cold&&c&&db&&!receipt.passed&&!checkpointRecorded&&!receipt.finalCleanup.errors.length)try{operationDeadline=Date.now()+130000;await save(true);receipt.partialSaved=true;}catch(e){receipt.partialSaveError=String(e);}
+ receipt.attentionGaps=c?.inspect()?.diagnostics??{attentionGaps:0,attentionGapKinds:{}};
  receipt.coreAttempts=coreAttempts;receipt.pawnAttempts=pawnAttempts;input.close();s?.close();await writeFile(receiptPath,JSON.stringify(receipt,null,2));send({type:'receipt',receipt});
 }
