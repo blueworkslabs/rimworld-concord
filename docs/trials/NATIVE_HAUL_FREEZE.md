@@ -1,6 +1,6 @@
-# Native-haul live setup — proposed freeze, 2026-09-24
+# Native-haul live setup — signed freeze, 2026-09-24
 
-**Awaiting Fable's sign-off. No live run or Gate C approval.** This proposes a
+**Fable signed this setup at `fc06842` on 2026-09-24 at 18:37 UTC; Gate C verdict remains pending.** The approved change is a
 **75-unit helper-layout live fixture instead of the original 30-unit main fixture**.
 The strict source-stack hold and zero-escape measure are unchanged. No pawn positions,
 needs, backstories, work priorities or scheduler cooldowns were altered to produce offers.
@@ -15,6 +15,10 @@ runner digest, host launcher/native helper/catalog/config, installed game/mod bi
 mod/control config, lab bridge, unchanged save, model and protocol parameters. Private
 operator configs, saves, databases, recordings and raw reviews remain outside Git.
 Recompute these inputs before launching; a changed input requires a new freeze.
+
+**Gate B stop rule:** stop and diagnose offline if unsupported capability or consent could reach execution, or repeated invalid output or non-progress stalls the run; quiet waiting, refusals and an unmet quota are valid outcomes, not stop conditions.
+
+This sign-off and stop-rule addition are documentation-only and do not change the setup hash. No rerolls; failures are retained. Fable writes the four-sentence test from the recording before reading the technical report. Expiry within the observation window is valid. Credit ends at quota retirement; subsequent native hauling is ordinary stockpile work, not agreement credit.
 
 - Attribution-only, quota **75**, six 20-wood stacks (120 available), candidate area
   x76/z84/w4/h4, expiry 30,000 game ticks from acceptance.
