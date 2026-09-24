@@ -11,9 +11,10 @@ namespace Concord
 {
     [Serializable] public class ActionRecord : IExposable
     {
-        public string id, actor, status, reason, kind, thing, target, bed, project, stage;
-        public int x, z, jobId, count, delivered, untilTick;
+        public string id, actor, status, reason, kind, thing, target, bed, project, stage, failureCode;
+        public int x, z, jobId, count, delivered, untilTick, validatedTick;
         public void ExposeData() {
+            Scribe_Values.Look(ref failureCode,"failureCode");Scribe_Values.Look(ref validatedTick,"validatedTick");
             Scribe_Values.Look(ref project,"project");Scribe_Values.Look(ref stage,"stage");
             Scribe_Values.Look(ref target,"target"); Scribe_Values.Look(ref bed,"bed");
             Scribe_Values.Look(ref kind,"kind"); Scribe_Values.Look(ref thing,"thing");
@@ -190,7 +191,7 @@ namespace Concord
             var aNew=new ActionRecord {id=r.actionId,actor=r.actor,x=r.x,z=r.z,status="failed",reason="",kind=r.op,thing=r.thing,count=r.count,target=r.target,bed=r.bed};
             w.actions.Add(aNew);
             var cell=new IntVec3(r.x,0,r.z);
-            if(pawn==null) { aNew.reason="Pawn is no longer available on this map"; return aNew; }
+            if(pawn==null) { aNew.reason="Pawn is no longer available on this map"; if(r.op=="eat"){aNew.failureCode="pawn-not-on-map";aNew.validatedTick=Find.TickManager.TicksGame;} return aNew; }
             if(r.op=="eat"){Eating.Start(pawn,r,aNew);return aNew;}
             if(r.op=="build"||r.op=="cook"){Production.Start(pawn,r,aNew);return aNew;}
             if(r.op=="rescue") {

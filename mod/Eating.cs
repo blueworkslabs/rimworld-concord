@@ -9,9 +9,37 @@ namespace Concord {
  [Serializable] public class EatOption {public string thing,label;public int x,z,count,maxTicks=1800;}
  public static class Eating {
   public static bool Ready(Pawn p){return Movement.Available(p)&&p.needs.food!=null&&p.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation);}
-  public static bool Food(Pawn p,Thing t){return t!=null&&!t.Destroyed&&(t.def.defName=="RawBerries"||t.def==ThingDefOf.MealSimple)&&t.IngestibleNow&&!t.IsForbidden(p)&&p.WillEat(t,p)&&!t.def.IsDrug;}
+  public static string FoodFailure(Pawn p,Thing t){
+   if(t==null||t.Destroyed)return "food-missing";
+   if(t.def.defName!="RawBerries"&&t.def!=ThingDefOf.MealSimple)return "food-type";
+   if(!t.IngestibleNow)return "not-ingestible";
+   if(t.IsForbidden(p))return "food-forbidden";
+   if(!p.WillEat(t,p))return "diet-refuses";
+   if(t.def.IsDrug)return "drug-excluded";
+   return null;
+  }
+  public static bool Food(Pawn p,Thing t){return FoodFailure(p,t)==null;}
   public static int Portion(Pawn p,Thing t){return Math.Min(25,Math.Min(t.stackCount,FoodUtility.WillIngestStackCountOf(p,t.def,FoodUtility.NutritionForEater(p,t))));}
-  public static bool Valid(Pawn p,Thing t,int n){return Ready(p)&&p.needs.food.CurLevelPercentage<.9f&&p.carryTracker.CarriedThing==null&&!(p.jobs.curDriver is JobDriver_Ingest)&&Food(p,t)&&t.Spawned&&t.Map==p.Map&&Production.Visible(p,t.Position)&&n>=1&&n<=25&&n<=Portion(p,t)&&p.CanReserve(t,1,n)&&p.CanReach(t,PathEndMode.ClosestTouch,Danger.None);}
+  // Same predicates as Valid; first failed check only, not an exhaustive diagnosis.
+  public static string ValidationFailure(Pawn p,Thing t,int n){
+   if(!Movement.Available(p))return "pawn-unavailable";
+   if(p.needs.food==null)return "food-need-missing";
+   if(!p.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))return "manipulation-unavailable";
+   if(!(p.needs.food.CurLevelPercentage<.9f))return "food-need-satisfied";
+   if(p.carryTracker.CarriedThing!=null)return "already-carrying";
+   if(p.jobs.curDriver is JobDriver_Ingest)return "already-ingesting";
+   var food=FoodFailure(p,t);if(food!=null)return food;
+   if(!t.Spawned)return "food-unspawned";
+   if(t.Map!=p.Map)return "food-map-changed";
+   if(!Production.Visible(p,t.Position))return "outside-local-view";
+   if(n<1||n>25)return "portion-out-of-bounds";
+   if(n>Portion(p,t))return "portion-unavailable";
+   if(!p.CanReserve(t,1,n))return "reservation-unavailable";
+   if(!p.CanReach(t,PathEndMode.ClosestTouch,Danger.None))return "unreachable";
+   return null;
+  }
+  public static bool Valid(Pawn p,Thing t,int n){return ValidationFailure(p,t,n)==null;}
+  static void Reject(ActionRecord a,string code){a.failureCode=code;a.reason="Eating rejected: "+code;}
   public static string Options(Pawn p,string epoch){
    var list=new List<EatOption>();
    if(Ready(p))for(int dx=-12;dx<=12;dx++)for(int dz=-12;dz<=12;dz++){
@@ -21,13 +49,17 @@ namespace Concord {
    return "{\"epoch\":\""+epoch+"\",\"tick\":"+Find.TickManager.TicksGame+",\"mapId\":"+p.Map.uniqueID+",\"options\":["+String.Join(",",list.Select(o=>JsonUtility.ToJson(o)).ToArray())+"]}";
   }
   public static void Start(Pawn p,Request r,ActionRecord a){
-   var t=Production.FindThing(p.Map,r.thing);
-   if(r.mapId!=p.Map.uniqueID||r.maxTicks!=1800||!Valid(p,t,r.count)||t.Position!=new IntVec3(r.x,0,r.z)){a.reason="Food, portion, diet, availability, map or reservation changed";return;}
-   a.untilTick=Math.Min(r.untilTick,Find.TickManager.TicksGame+1800);if(a.untilTick<=Find.TickManager.TicksGame){a.reason="Eating deadline expired";return;}
+   a.validatedTick=Find.TickManager.TicksGame;
+   if(r.mapId!=p.Map.uniqueID){Reject(a,"request-map-changed");return;}
+   if(r.maxTicks!=1800){Reject(a,"invalid-duration");return;}
+   var t=Production.FindThing(p.Map,r.thing);var failure=ValidationFailure(p,t,r.count);
+   if(failure!=null){Reject(a,failure);return;}
+   if(t.Position!=new IntVec3(r.x,0,r.z)){Reject(a,"food-position-changed");return;}
+   a.untilTick=Math.Min(r.untilTick,Find.TickManager.TicksGame+1800);if(a.untilTick<=Find.TickManager.TicksGame){Reject(a,"deadline-expired");return;}
    var job=JobMaker.MakeJob(DefDatabase<JobDef>.GetNamed("Concord_Eat"),t);job.count=r.count;job.takeExtraIngestibles=0;
    a.jobId=job.loadID;a.status="started";a.reason="Pawn chose a bounded portion; not yet consumed";
    p.jobs.TryTakeOrderedJob(job,JobTag.Misc);
-   if(p.CurJob!=job&&a.status=="started"){a.status="failed";a.reason="Native scheduler rejected eating";p.jobs.jobQueue.RemoveAll(p,q=>q.loadID==job.loadID);}
+   if(p.CurJob!=job&&a.status=="started"){a.status="failed";Reject(a,"scheduler-rejected");p.jobs.jobQueue.RemoveAll(p,q=>q.loadID==job.loadID);}
   }
  }
  public class JobDriver_ConcordEat:JobDriver_Ingest {

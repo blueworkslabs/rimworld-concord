@@ -81,6 +81,9 @@ Build with `npm run build`, then export with
 Supply a private JSON object mapping the two pinned model names to absolute isolated
 catalog paths. Each catalog contains only that exact installed model, with direct
 tool mode, multi-agent disabled and search disabled; these are metadata, not secrets.
+The exporter now reads the exact archived v1 requests; later production prompt
+changes do not regenerate this historical bank.
+
 Run `node scripts/run-ongoing-grounding.mjs /private/bank.json /private/catalogs.json
 /private/new-run-directory`. The last argument must not exist. Native login is owned
 by Codex; no token extraction, API fallback or billing change is supported.

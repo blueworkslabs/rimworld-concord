@@ -1,0 +1,1109 @@
+{
+  "version": "fresh-facts-v1",
+  "date": "2026-09-24",
+  "reviewedBehavior": "4468697",
+  "claim": "Separated current core records from dated interpretations; first-failing eating validation diagnostics without relaxing admission. Model-grounding improvement untested.",
+  "checks": {
+    "coordinator": 354,
+    "pythonTransport": 6,
+    "historicalComparisonRunner": 5,
+    "compiledAgainstInstalledGame": true,
+    "independentReview": "clean; source reads and actual tempfile denial verified; private report retained",
+    "historicalEvidenceFilesUnchanged": 82,
+    "historicalStagingDatabaseFilesUnchanged": 150
+  },
+  "native": {
+    "run": "66655c11-4c53-4116-83f1-95f26821342c",
+    "scripted": true,
+    "characterModelCalls": 0,
+    "negativeRequests": [
+      {
+        "variant": "forbidden",
+        "request": {
+          "id": "e1a13525-d162-48c4-b58c-9bd66d7c3045",
+          "epoch": "b5bd50f279d8422698ce1fb625217274",
+          "actor": "Thing_Human405",
+          "action": {
+            "thing": "Thing_RawBerries1878",
+            "label": "berries",
+            "x": 82,
+            "z": 80,
+            "count": 1,
+            "maxTicks": 1800
+          },
+          "mapId": 0,
+          "untilTick": 1802
+        },
+        "receipt": {
+          "id": "e1a13525-d162-48c4-b58c-9bd66d7c3045",
+          "actor": "Thing_Human405",
+          "status": "failed",
+          "reason": "Eating rejected: food-forbidden",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1878",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "failureCode": "food-forbidden",
+          "x": 82,
+          "z": 80,
+          "jobId": 0,
+          "count": 1,
+          "delivered": 0,
+          "untilTick": 0,
+          "validatedTick": 2
+        }
+      },
+      {
+        "variant": "far",
+        "request": {
+          "id": "f6cf9710-4060-447d-b323-aa236f5a93be",
+          "epoch": "82d0cbc2e5a44449b3bc88fc8c4bb957",
+          "actor": "Thing_Human405",
+          "action": {
+            "thing": "Thing_RawBerries1878",
+            "label": "berries",
+            "x": 95,
+            "z": 80,
+            "count": 1,
+            "maxTicks": 1800
+          },
+          "mapId": 0,
+          "untilTick": 1802
+        },
+        "receipt": {
+          "id": "f6cf9710-4060-447d-b323-aa236f5a93be",
+          "actor": "Thing_Human405",
+          "status": "failed",
+          "reason": "Eating rejected: outside-local-view",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1878",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "failureCode": "outside-local-view",
+          "x": 95,
+          "z": 80,
+          "jobId": 0,
+          "count": 1,
+          "delivered": 0,
+          "untilTick": 0,
+          "validatedTick": 2
+        }
+      },
+      {
+        "variant": "request-map-changed",
+        "request": {
+          "id": "28c3526e-4ea8-478e-9a6d-dcd7af700a1d",
+          "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+          "actor": "Thing_Human405",
+          "action": {
+            "thing": "Thing_RawBerries1879",
+            "label": "berries",
+            "x": 73,
+            "z": 78,
+            "count": 16,
+            "maxTicks": 1800
+          },
+          "mapId": -1,
+          "untilTick": 1802
+        },
+        "receipt": {
+          "id": "28c3526e-4ea8-478e-9a6d-dcd7af700a1d",
+          "actor": "Thing_Human405",
+          "status": "failed",
+          "reason": "Eating rejected: request-map-changed",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1879",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "failureCode": "request-map-changed",
+          "x": 73,
+          "z": 78,
+          "jobId": 0,
+          "count": 16,
+          "delivered": 0,
+          "untilTick": 0,
+          "validatedTick": 2
+        }
+      },
+      {
+        "variant": "invalid-duration",
+        "request": {
+          "id": "f77da8bc-85c1-41f0-bd43-ace86d538c12",
+          "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+          "actor": "Thing_Human405",
+          "action": {
+            "thing": "Thing_RawBerries1879",
+            "label": "berries",
+            "x": 73,
+            "z": 78,
+            "count": 16,
+            "maxTicks": 1799
+          },
+          "mapId": 0,
+          "untilTick": 1802
+        },
+        "receipt": {
+          "id": "f77da8bc-85c1-41f0-bd43-ace86d538c12",
+          "actor": "Thing_Human405",
+          "status": "failed",
+          "reason": "Eating rejected: invalid-duration",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1879",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "failureCode": "invalid-duration",
+          "x": 73,
+          "z": 78,
+          "jobId": 0,
+          "count": 16,
+          "delivered": 0,
+          "untilTick": 0,
+          "validatedTick": 2
+        }
+      },
+      {
+        "variant": "food-missing",
+        "request": {
+          "id": "e1db7d3d-25a6-4c97-b855-5319e4eb66ea",
+          "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+          "actor": "Thing_Human405",
+          "action": {
+            "thing": "Thing_Missing",
+            "label": "berries",
+            "x": 73,
+            "z": 78,
+            "count": 16,
+            "maxTicks": 1800
+          },
+          "mapId": 0,
+          "untilTick": 1802
+        },
+        "receipt": {
+          "id": "e1db7d3d-25a6-4c97-b855-5319e4eb66ea",
+          "actor": "Thing_Human405",
+          "status": "failed",
+          "reason": "Eating rejected: food-missing",
+          "kind": "eat",
+          "thing": "Thing_Missing",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "failureCode": "food-missing",
+          "x": 73,
+          "z": 78,
+          "jobId": 0,
+          "count": 16,
+          "delivered": 0,
+          "untilTick": 0,
+          "validatedTick": 2
+        }
+      },
+      {
+        "variant": "portion-out-of-bounds",
+        "request": {
+          "id": "068e7e85-9965-4bf6-a12b-31495ec6ada1",
+          "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+          "actor": "Thing_Human405",
+          "action": {
+            "thing": "Thing_RawBerries1879",
+            "label": "berries",
+            "x": 73,
+            "z": 78,
+            "count": 26,
+            "maxTicks": 1800
+          },
+          "mapId": 0,
+          "untilTick": 1802
+        },
+        "receipt": {
+          "id": "068e7e85-9965-4bf6-a12b-31495ec6ada1",
+          "actor": "Thing_Human405",
+          "status": "failed",
+          "reason": "Eating rejected: portion-out-of-bounds",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1879",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "failureCode": "portion-out-of-bounds",
+          "x": 73,
+          "z": 78,
+          "jobId": 0,
+          "count": 26,
+          "delivered": 0,
+          "untilTick": 0,
+          "validatedTick": 2
+        }
+      },
+      {
+        "variant": "food-position-changed",
+        "request": {
+          "id": "c4f80c1c-191c-45eb-a85a-1b90ea4756fa",
+          "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+          "actor": "Thing_Human405",
+          "action": {
+            "thing": "Thing_RawBerries1879",
+            "label": "berries",
+            "x": 74,
+            "z": 78,
+            "count": 16,
+            "maxTicks": 1800
+          },
+          "mapId": 0,
+          "untilTick": 1802
+        },
+        "receipt": {
+          "id": "c4f80c1c-191c-45eb-a85a-1b90ea4756fa",
+          "actor": "Thing_Human405",
+          "status": "failed",
+          "reason": "Eating rejected: food-position-changed",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1879",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "failureCode": "food-position-changed",
+          "x": 74,
+          "z": 78,
+          "jobId": 0,
+          "count": 16,
+          "delivered": 0,
+          "untilTick": 0,
+          "validatedTick": 2
+        }
+      },
+      {
+        "variant": "deadline-expired",
+        "request": {
+          "id": "ff7f88e0-352a-49fb-8ae5-5dca0288d658",
+          "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+          "actor": "Thing_Human405",
+          "action": {
+            "thing": "Thing_RawBerries1879",
+            "label": "berries",
+            "x": 73,
+            "z": 78,
+            "count": 16,
+            "maxTicks": 1800
+          },
+          "mapId": 0,
+          "untilTick": 2
+        },
+        "receipt": {
+          "id": "ff7f88e0-352a-49fb-8ae5-5dca0288d658",
+          "actor": "Thing_Human405",
+          "status": "failed",
+          "reason": "Eating rejected: deadline-expired",
+          "kind": "eat",
+          "thing": "Thing_RawBerries1879",
+          "target": "",
+          "bed": "",
+          "project": "",
+          "stage": "",
+          "failureCode": "deadline-expired",
+          "x": 73,
+          "z": 78,
+          "jobId": 0,
+          "count": 16,
+          "delivered": 0,
+          "untilTick": 2,
+          "validatedTick": 2
+        }
+      }
+    ],
+    "completedEating": {
+      "id": "ea17dc92-89a9-4694-934c-9081a4cc993b",
+      "actor": "Thing_Human405",
+      "status": "completed",
+      "reason": "Native ingestion consumed 16 units from the chosen portion",
+      "kind": "eat",
+      "thing": "Thing_RawBerries1879",
+      "target": "",
+      "bed": "",
+      "project": "",
+      "stage": "",
+      "failureCode": "",
+      "x": 73,
+      "z": 78,
+      "jobId": 3,
+      "count": 16,
+      "delivered": 16,
+      "untilTick": 1802,
+      "validatedTick": 2
+    },
+    "publicPromptAfter": {
+      "task": "core-plan",
+      "sourceContract": "currentRecords are authoritative only within their stated scope and timestamp. Shared telemetry can be unknown or stale. communication is attributed testimony, not verified physical truth. plannerHistory contains fallible older interpretations, never current need readings or proof a reply is absent. Reconcile summaries against currentRecords before carrying them forward; keep uncertainty explicit. availableChoices lists eligibility, not consent or a preferred action.",
+      "perspective": {
+        "world": "5dd1654039d0473eb68b8dd131cc223b",
+        "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+        "branch": "abcfc72c-18b5-453d-90da-0dc8b5f595fa",
+        "revision": 5,
+        "tick": 827,
+        "brief": {
+          "id": "brief",
+          "text": "One optional meal; this is not the whole food plan."
+        },
+        "crew": [
+          {
+            "id": "Thing_Human405",
+            "name": "Alvin"
+          },
+          {
+            "id": "Thing_Human408",
+            "name": "Beatrice"
+          },
+          {
+            "id": "Thing_Human411",
+            "name": "Pedro"
+          }
+        ],
+        "currentRecords": {
+          "asOfTick": 827,
+          "sharedStatus": [
+            {
+              "pawn": "Thing_Human405",
+              "name": "Alvin",
+              "source": "shared-link-telemetry",
+              "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+              "tick": 827,
+              "fresh": true,
+              "food": "satisfied",
+              "rest": "satisfied"
+            },
+            {
+              "pawn": "Thing_Human408",
+              "name": "Beatrice",
+              "source": "shared-link-telemetry",
+              "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+              "tick": 827,
+              "fresh": true,
+              "food": "satisfied",
+              "rest": "satisfied"
+            },
+            {
+              "pawn": "Thing_Human411",
+              "name": "Pedro",
+              "source": "shared-link-telemetry",
+              "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+              "tick": 827,
+              "fresh": true,
+              "food": "satisfied",
+              "rest": "satisfied"
+            }
+          ],
+          "questions": [
+            {
+              "id": "bbeb81da-1b2b-4b0d-9fa3-ebcadd1c870e",
+              "pawn": "Thing_Human405",
+              "status": "answered"
+            }
+          ],
+          "selfCare": [
+            {
+              "id": "ea17dc92-89a9-4694-934c-9081a4cc993b",
+              "pawn": "Thing_Human405",
+              "kind": "eat",
+              "questionId": "bbeb81da-1b2b-4b0d-9fa3-ebcadd1c870e",
+              "sourceIds": [
+                "ea17dc92-89a9-4694-934c-9081a4cc993b",
+                "f264e7e4-27cd-432a-a271-b466e0660cc7",
+                "3097b698-c041-4680-9024-072613c92f06"
+              ],
+              "food": {
+                "thing": "Thing_RawBerries1879",
+                "label": "berries"
+              },
+              "portionCount": 16,
+              "status": "completed",
+              "consumed": 16,
+              "consumedUnit": "food-items",
+              "completed": true
+            }
+          ],
+          "topicClosures": [
+            {
+              "sourceId": "brief",
+              "selfCareIds": [],
+              "statuses": []
+            },
+            {
+              "sourceId": "ea17dc92-89a9-4694-934c-9081a4cc993b",
+              "selfCareIds": [
+                "ea17dc92-89a9-4694-934c-9081a4cc993b"
+              ],
+              "statuses": [
+                "resolved"
+              ]
+            },
+            {
+              "sourceId": "f264e7e4-27cd-432a-a271-b466e0660cc7",
+              "selfCareIds": [
+                "ea17dc92-89a9-4694-934c-9081a4cc993b"
+              ],
+              "statuses": [
+                "resolved"
+              ]
+            },
+            {
+              "sourceId": "3097b698-c041-4680-9024-072613c92f06",
+              "selfCareIds": [
+                "ea17dc92-89a9-4694-934c-9081a4cc993b"
+              ],
+              "statuses": [
+                "resolved"
+              ]
+            }
+          ],
+          "agreements": [],
+          "foodSightings": [
+            {
+              "observer": "Thing_Human405",
+              "name": "Alvin",
+              "status": "observed",
+              "source": "shared-local-sighting",
+              "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+              "tick": 827,
+              "mapId": 0,
+              "radius": 12,
+              "truncated": false,
+              "items": [
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "x": 74,
+                  "z": 80,
+                  "forbidden": false,
+                  "label": "berries",
+                  "count": 75,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "x": 73,
+                  "z": 78,
+                  "forbidden": false,
+                  "label": "berries",
+                  "count": 59,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                },
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "x": 81,
+                  "z": 79,
+                  "forbidden": false,
+                  "label": "berries",
+                  "count": 75,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                },
+                {
+                  "thing": "Thing_RawFungus1876",
+                  "x": 83,
+                  "z": 81,
+                  "forbidden": true,
+                  "label": "raw fungus",
+                  "count": 46,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                }
+              ],
+              "campfires": []
+            },
+            {
+              "observer": "Thing_Human408",
+              "name": "Beatrice",
+              "status": "observed",
+              "source": "shared-local-sighting",
+              "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+              "tick": 827,
+              "mapId": 0,
+              "radius": 12,
+              "truncated": false,
+              "items": [
+                {
+                  "thing": "Thing_RawFungus1876",
+                  "x": 83,
+                  "z": 81,
+                  "forbidden": true,
+                  "label": "raw fungus",
+                  "count": 46,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                },
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "x": 81,
+                  "z": 79,
+                  "forbidden": false,
+                  "label": "berries",
+                  "count": 75,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "x": 74,
+                  "z": 80,
+                  "forbidden": false,
+                  "label": "berries",
+                  "count": 75,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                }
+              ],
+              "campfires": []
+            },
+            {
+              "observer": "Thing_Human411",
+              "name": "Pedro",
+              "status": "observed",
+              "source": "shared-local-sighting",
+              "epoch": "b9a9ee73d3fd4ea49ddbe42c1f82fad9",
+              "tick": 827,
+              "mapId": 0,
+              "radius": 12,
+              "truncated": false,
+              "items": [
+                {
+                  "thing": "Thing_RawFungus1876",
+                  "x": 83,
+                  "z": 81,
+                  "forbidden": true,
+                  "label": "raw fungus",
+                  "count": 46,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                },
+                {
+                  "thing": "Thing_RawBerries1878",
+                  "x": 81,
+                  "z": 79,
+                  "forbidden": false,
+                  "label": "berries",
+                  "count": 75,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                },
+                {
+                  "thing": "Thing_RawBerries1880",
+                  "x": 74,
+                  "z": 80,
+                  "forbidden": false,
+                  "label": "berries",
+                  "count": 75,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                },
+                {
+                  "thing": "Thing_RawBerries1879",
+                  "x": 73,
+                  "z": 78,
+                  "forbidden": false,
+                  "label": "berries",
+                  "count": 59,
+                  "nutritionGiving": true,
+                  "simpleMealIngredientCount": 10
+                }
+              ],
+              "campfires": []
+            }
+          ],
+          "foodKnowledge": "Shared local sightings within 12 cells, line of sight and no fog; not colony inventory. Read observer, epoch, map, tick and truncation. Repeated thing IDs on the same map are overlapping sightings, not extra stock. Missing/out-of-sight food is unknown, not absent globally. Nutrition-giving is a native item property, not a guarantee that this pawn can or should eat it. Counts, forbidden flags and usable campfires are observations, not reservations, consent or guaranteed jobs. A simple meal needs the listed ingredient count plus a usable campfire, eligible willing pawn and fresh native execution checks. Building one campfire needs 20 wood and a legal site; building and cooking require separate consent. Saying a pawn will eat does not start a job. A pawn answering a core question may instead select an explicitly supplied eat option for itself; the core cannot order eating. Native self-care selects food using its own hunger and preference rules and may postpone raw food. Shared-link low/urgent bands are not native hunger categories."
+        },
+        "communication": {
+          "messages": [
+            {
+              "id": "f264e7e4-27cd-432a-a271-b466e0660cc7",
+              "tick": 2,
+              "from": "core",
+              "to": "Thing_Human405",
+              "text": "Would you like to eat?",
+              "evidence": "attributed-speech"
+            },
+            {
+              "id": "3097b698-c041-4680-9024-072613c92f06",
+              "tick": 2,
+              "from": "Thing_Human405",
+              "to": "core",
+              "text": "I choose this portion.",
+              "evidence": "attributed-speech"
+            }
+          ],
+          "requests": [],
+          "reoffers": [],
+          "agreementSpeech": []
+        },
+        "availableChoices": {
+          "opportunities": [
+            {
+              "id": "op:2807cd82bf656ab25c96ff78",
+              "pawn": "Thing_Human405",
+              "action": {
+                "kind": "build",
+                "thing": "Thing_WoodLog1893",
+                "x": 76,
+                "z": 80,
+                "maxTicks": 3600
+              },
+              "observedTick": 827
+            },
+            {
+              "id": "op:b1edc82071f2485d41fa84c4",
+              "pawn": "Thing_Human405",
+              "action": {
+                "kind": "build",
+                "thing": "Thing_WoodLog1893",
+                "x": 76,
+                "z": 79,
+                "maxTicks": 3600
+              },
+              "observedTick": 827
+            },
+            {
+              "id": "op:d8c38cadde4d657dfc614488",
+              "pawn": "Thing_Human405",
+              "action": {
+                "kind": "haul",
+                "thing": "Thing_WoodLog1893",
+                "x": 72,
+                "z": 79,
+                "count": 10,
+                "trips": 3,
+                "maxTicks": 1800
+              },
+              "observedTick": 827,
+              "supply": {
+                "sourceThingId": "Thing_WoodLog1893",
+                "label": "wood",
+                "sourceCount": 30,
+                "destinationFree": 75
+              }
+            },
+            {
+              "id": "op:2e145cc1dfaa34342dbba969",
+              "pawn": "Thing_Human408",
+              "action": {
+                "kind": "build",
+                "thing": "Thing_WoodLog1893",
+                "x": 85,
+                "z": 80,
+                "maxTicks": 3600
+              },
+              "observedTick": 827
+            },
+            {
+              "id": "op:2fba26a4a892d90840257df5",
+              "pawn": "Thing_Human408",
+              "action": {
+                "kind": "build",
+                "thing": "Thing_WoodLog1893",
+                "x": 84,
+                "z": 80,
+                "maxTicks": 3600
+              },
+              "observedTick": 827
+            },
+            {
+              "id": "op:0e64587fa3822210ad34ec64",
+              "pawn": "Thing_Human411",
+              "action": {
+                "kind": "build",
+                "thing": "Thing_WoodLog1892",
+                "x": 83,
+                "z": 82,
+                "maxTicks": 3600
+              },
+              "observedTick": 827
+            },
+            {
+              "id": "op:f02805d59346f241ce486960",
+              "pawn": "Thing_Human411",
+              "action": {
+                "kind": "build",
+                "thing": "Thing_WoodLog1892",
+                "x": 84,
+                "z": 81,
+                "maxTicks": 3600
+              },
+              "observedTick": 827
+            }
+          ],
+          "counters": [],
+          "questionRecipients": [
+            "Thing_Human408",
+            "Thing_Human411"
+          ],
+          "availability": [
+            {
+              "pawn": "Thing_Human405",
+              "status": "Grounded options listed; availability is not consent or guaranteed success."
+            },
+            {
+              "pawn": "Thing_Human408",
+              "status": "Grounded options listed; availability is not consent or guaranteed success."
+            },
+            {
+              "pawn": "Thing_Human411",
+              "status": "Grounded options listed; availability is not consent or guaranteed success."
+            }
+          ],
+          "capabilities": [
+            "propose listed hauling/rescue/campfire construction/simple meals",
+            "adopt counter with fresh consent",
+            "one optional addressed question per pawn, at most three total",
+            "wait"
+          ],
+          "limits": "Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Self-care consumedUnit food-items counts individual food items, never nutrition points. A self-care receipt or its exact question/reply may resolve only its own completed eating follow-up, not the broader food goal or other pawns. Questions and replies use their actual recipients: pawn replies go to Core only, even if their text names another pawn; no automatic forwarding or movement follows. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause."
+        },
+        "plannerHistory": {
+          "authority": "interpretation-only; unknown dates stay unknown",
+          "topics": [
+            {
+              "sourceId": "brief",
+              "interpretation": "Discuss food; this is an interpretation.",
+              "status": "open",
+              "basedOnTick": 2,
+              "updatedTick": 2,
+              "proposalIds": [],
+              "selfCareIds": [],
+              "outcomes": []
+            },
+            {
+              "sourceId": "ea17dc92-89a9-4694-934c-9081a4cc993b",
+              "interpretation": "Confirmed own food consumption.",
+              "status": "resolved",
+              "basedOnTick": 827,
+              "updatedTick": 827,
+              "proposalIds": [],
+              "selfCareIds": [
+                "ea17dc92-89a9-4694-934c-9081a4cc993b"
+              ],
+              "outcomes": []
+            }
+          ]
+        }
+      },
+      "effects": "Propose and adopt_counter create offers only. The pawn must independently answer. Ask delivers one question, never a job; a reply can be silent. topics may update several earlier topics at once. actionTopicId must be null for ask and wait. For propose/adopt_counter it links only the new offer to one open/blocked/deferred topic (or null). Only topicClosures listed statuses may close a topic. A declined offer is not completed work. Topic prose remains interpretation. Wait preserves native activity."
+    },
+    "pairedRestore": true,
+    "coldRestore": true,
+    "coldNativeActions": [
+      {
+        "id": "28c3526e-4ea8-478e-9a6d-dcd7af700a1d",
+        "actor": "Thing_Human405",
+        "status": "failed",
+        "reason": "Eating rejected: request-map-changed",
+        "kind": "eat",
+        "thing": "Thing_RawBerries1879",
+        "target": "",
+        "bed": "",
+        "project": "",
+        "stage": "",
+        "failureCode": "request-map-changed",
+        "x": 73,
+        "z": 78,
+        "jobId": 0,
+        "count": 16,
+        "delivered": 0,
+        "untilTick": 0,
+        "validatedTick": 2
+      },
+      {
+        "id": "f77da8bc-85c1-41f0-bd43-ace86d538c12",
+        "actor": "Thing_Human405",
+        "status": "failed",
+        "reason": "Eating rejected: invalid-duration",
+        "kind": "eat",
+        "thing": "Thing_RawBerries1879",
+        "target": "",
+        "bed": "",
+        "project": "",
+        "stage": "",
+        "failureCode": "invalid-duration",
+        "x": 73,
+        "z": 78,
+        "jobId": 0,
+        "count": 16,
+        "delivered": 0,
+        "untilTick": 0,
+        "validatedTick": 2
+      },
+      {
+        "id": "e1db7d3d-25a6-4c97-b855-5319e4eb66ea",
+        "actor": "Thing_Human405",
+        "status": "failed",
+        "reason": "Eating rejected: food-missing",
+        "kind": "eat",
+        "thing": "Thing_Missing",
+        "target": "",
+        "bed": "",
+        "project": "",
+        "stage": "",
+        "failureCode": "food-missing",
+        "x": 73,
+        "z": 78,
+        "jobId": 0,
+        "count": 16,
+        "delivered": 0,
+        "untilTick": 0,
+        "validatedTick": 2
+      },
+      {
+        "id": "068e7e85-9965-4bf6-a12b-31495ec6ada1",
+        "actor": "Thing_Human405",
+        "status": "failed",
+        "reason": "Eating rejected: portion-out-of-bounds",
+        "kind": "eat",
+        "thing": "Thing_RawBerries1879",
+        "target": "",
+        "bed": "",
+        "project": "",
+        "stage": "",
+        "failureCode": "portion-out-of-bounds",
+        "x": 73,
+        "z": 78,
+        "jobId": 0,
+        "count": 26,
+        "delivered": 0,
+        "untilTick": 0,
+        "validatedTick": 2
+      },
+      {
+        "id": "c4f80c1c-191c-45eb-a85a-1b90ea4756fa",
+        "actor": "Thing_Human405",
+        "status": "failed",
+        "reason": "Eating rejected: food-position-changed",
+        "kind": "eat",
+        "thing": "Thing_RawBerries1879",
+        "target": "",
+        "bed": "",
+        "project": "",
+        "stage": "",
+        "failureCode": "food-position-changed",
+        "x": 74,
+        "z": 78,
+        "jobId": 0,
+        "count": 16,
+        "delivered": 0,
+        "untilTick": 0,
+        "validatedTick": 2
+      },
+      {
+        "id": "ff7f88e0-352a-49fb-8ae5-5dca0288d658",
+        "actor": "Thing_Human405",
+        "status": "failed",
+        "reason": "Eating rejected: deadline-expired",
+        "kind": "eat",
+        "thing": "Thing_RawBerries1879",
+        "target": "",
+        "bed": "",
+        "project": "",
+        "stage": "",
+        "failureCode": "deadline-expired",
+        "x": 73,
+        "z": 78,
+        "jobId": 0,
+        "count": 16,
+        "delivered": 0,
+        "untilTick": 2,
+        "validatedTick": 2
+      },
+      {
+        "id": "ea17dc92-89a9-4694-934c-9081a4cc993b",
+        "actor": "Thing_Human405",
+        "status": "completed",
+        "reason": "Native ingestion consumed 16 units from the chosen portion",
+        "kind": "eat",
+        "thing": "Thing_RawBerries1879",
+        "target": "",
+        "bed": "",
+        "project": "",
+        "stage": "",
+        "failureCode": "",
+        "x": 73,
+        "z": 78,
+        "jobId": 3,
+        "count": 16,
+        "delivered": 16,
+        "untilTick": 1802,
+        "validatedTick": 2
+      }
+    ],
+    "coldTopicHistory": {
+      "authority": "interpretation-only; unknown dates stay unknown",
+      "topics": [
+        {
+          "sourceId": "brief",
+          "interpretation": "Discuss food; this is an interpretation.",
+          "status": "open",
+          "basedOnTick": 2,
+          "updatedTick": 2,
+          "proposalIds": [],
+          "selfCareIds": [],
+          "outcomes": []
+        },
+        {
+          "sourceId": "ea17dc92-89a9-4694-934c-9081a4cc993b",
+          "interpretation": "Confirmed own food consumption.",
+          "status": "resolved",
+          "basedOnTick": 827,
+          "updatedTick": 827,
+          "proposalIds": [],
+          "selfCareIds": [
+            "ea17dc92-89a9-4694-934c-9081a4cc993b"
+          ],
+          "outcomes": []
+        }
+      ]
+    },
+    "samples": [
+      {
+        "tick": 32,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 64,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 95,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 127,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 159,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 196,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 228,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 260,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 293,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 331,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 363,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 394,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 427,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 459,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 491,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 524,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 555,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 588,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 618,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 650,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 680,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 711,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 748,
+        "paused": false,
+        "job": "Concord_Eat"
+      },
+      {
+        "tick": 780,
+        "paused": false,
+        "job": "Wait_Wander"
+      },
+      {
+        "tick": 814,
+        "paused": false,
+        "job": "Wait_Wander"
+      }
+    ]
+  },
+  "boundaries": [
+    "Eight negative dispatch checks consumed zero; six are in the final checkpoint and verified across cold restart. Forbidden/far cases used separate disposable fixtures and were not individually cold-restored.",
+    "The successful scripted action consumed 16 food items; only its receipt topic resolved. The broad brief remained open.",
+    "No live model turn used the new prompt. Source separation does not guarantee factual prose; historical inaccuracies stay unchanged.",
+    "The coordinator reports first failed revalidation gate plus observation ticks/counts/maps. An option missing from its shortlist still does not identify the native reason it was omitted.",
+    "Native outside-local-view remains combined radius/fog/line-of-sight. Later native job interruption remains under existing lifecycle reasons.",
+    "New topic dates persist and rewind. Legacy dates stay unknown. No automatic escalation, larger portion, new reservation, consent override or native food-policy change.",
+    "Historical Luna/Terra v1 exporter returns exact archived requests even when production prompts change; original evidence untouched."
+  ]
+}

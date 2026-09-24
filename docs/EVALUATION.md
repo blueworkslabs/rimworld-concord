@@ -172,3 +172,18 @@ This is a finite integration observation of an uncapped scheduler, not an unatte
 service or the planned ten-minute recorded colony scene. Three successful waits are
 not three failures. An accepted provider answer may still be rejected as stale by the
 coordinator; report those outcomes separately.
+
+## Scripted source/diagnostic acceptance
+
+`bash scripts/run-fresh-facts-lab.sh game <uuid>` runs with the configured absolute
+`RIMWORLD_LAB_ROOT` and exclusive coordinator lock. It uses disposable derivatives of
+the existing campfire-v2 fixture: forbidden and out-of-view food plus malformed
+map/duration/identity/portion/position/deadline requests. These are operator-authored
+negative probes, not pawn consent. Every request must fail before consumption.
+A separate scripted core question and pawn eat choice prove the positive path,
+receipt-linked closure and dated topics. Paired restore preserves the final six
+negative records and positive outcome; `cold <same-uuid>` checks them after a full
+game restart. The forbidden/far fixtures have retained receipts but are not separate
+cold-restored checkpoints. Exclusive mode receipts reject reused run identities.
+No model calls. Historical saves/databases are not overwritten. No automatic routing
+or proof of better model judgment follows from this mechanics test.

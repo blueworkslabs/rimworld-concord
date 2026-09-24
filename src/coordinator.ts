@@ -1,4 +1,4 @@
-import {CoreAnswerChoice,eatingOptions} from './pawn-eating.js';
+import {CoreAnswerChoice,EatingRevalidationError,revalidateEating,eatingOptions} from './pawn-eating.js';
 import {planProduction,workMap,workSteps,workReady,workKind} from './production-planning.js';
 import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
@@ -473,7 +473,7 @@ export class Coordinator {
           const ch=this.domain.characters[a.pawn]!;ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
           this.commit('core-question','core',m);
         }
-        for(const update of choice.topics){let topic=state.topics.find(t=>t.sourceId===update.sourceId);
+        for(const change of choice.topics){const update={...change,basedOnTick:prepared.view.tick,updatedTick:g.ticks};let topic=state.topics.find(t=>t.sourceId===update.sourceId);
           if(!topic){topic={...update,proposalIds:this.domain.proposals[update.sourceId]?[update.sourceId]:[]};state.topics.push(topic);}else Object.assign(topic,update);
         }
         if(proposalId&&choice.actionTopicId){const topic=state.topics.find(t=>t.sourceId===choice.actionTopicId)!;if(!topic.proposalIds.includes(proposalId))topic.proposalIds.push(proposalId);}
@@ -511,8 +511,9 @@ export class Coordinator {
         let care:import('./protocol.js').SelfCare|undefined;
         if(choice.choice==='eat'){
           const own=g.pawns.find(p=>p.id===q.pawn)!;const action=eatingOptions(this.domain,g,own).find(o=>o.thing===choice.thing);
-          const original=prepared.view.pawn.eating!.options.find(o=>o.thing===choice.thing)!;
-          if(!this.game.eat||!action||action.count>original.count||own.eating!.mapId!==prepared.view.pawn.eating!.mapId)throw Error('Eating option changed or pawn committed');
+          const validation=revalidateEating(this.domain,g,own,prepared.view.pawn,choice.thing,!!this.game.eat);
+          if(validation.code)throw new EatingRevalidationError(validation);
+          if(!action)throw Error('Validated eating option missing');
           care={id:randomUUID(),pawn:q.pawn,questionId:id,action:structuredClone(action),mapId:own.eating!.mapId,untilTick:g.ticks+action.maxTicks};
           (this.domain.selfCare??={})[care.id]=care;ch.commitment=care.id;
         }
@@ -522,7 +523,7 @@ export class Coordinator {
         if(care){this.commit('self-care-chosen',q.pawn,care);await this.dispatchEating(care);}
         return {status:'delivered' as const};
       });
-    }catch(error){await this.serial(async()=>{if(this.generation===prepared.generation){const q=this.domain.coreState!.questions.find(q=>q.id===id)!;q.status='failed';this.domain.coreState!.revision++;this.commit('core-answer-failed',q.pawn,{id,error:String(error)});}});return {status:combined.aborted?'interrupted' as const:'failed' as const};}
+    }catch(error){await this.serial(async()=>{if(this.generation===prepared.generation){const q=this.domain.coreState!.questions.find(q=>q.id===id)!;q.status='failed';this.domain.coreState!.revision++;this.commit('core-answer-failed',q.pawn,{id,error:String(error),...(error instanceof EatingRevalidationError?{eatingValidation:error.validation}:{})});}});return {status:combined.aborted?'interrupted' as const:'failed' as const};}
     finally{clearTimeout(timer);if(this.pending.get(prepared.pawn)===prepared.controller)this.pending.delete(prepared.pawn);await this.serial(async()=>{});}
   }
   /** Physical movement opportunities and communicated replies only; no private character state. */
