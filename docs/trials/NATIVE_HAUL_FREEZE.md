@@ -1,6 +1,6 @@
 # Native-haul live setup — signed freeze, 2026-09-24
 
-**Fable signed this setup at `fc06842` on 2026-09-24 at 18:37 UTC; Gate C verdict remains pending.** The approved change is a
+**Fable signed this setup at `fc06842` on 2026-09-24 at 18:37 UTC; [Gate C later approved game-side migration](NATIVE_HAUL_GATE_C.md), with next-live blockers.** The approved change is a
 **75-unit helper-layout live fixture instead of the original 30-unit main fixture**.
 The strict source-stack hold and zero-escape measure are unchanged. No pawn positions,
 needs, backstories, work priorities or scheduler cooldowns were altered to produce offers.
@@ -69,4 +69,4 @@ Corrected run `1ed4e354-aeea-4277-93a0-8299449aedcc` on `9e9486a`:
   recording lead/trail. Initial/final observer frames inspected: Alvin's not-offered
   line and final per-pawn credit are legible.
 
-The rehearsal above remains a 45-second authored test, not model evidence. After Fable signed the setup, the [single ten-minute live recording](NATIVE_HAUL_LIVE.md) completed unchanged. Game/display are stopped; all 285 original saves are unchanged. Prior failures and known fixture/audio warnings remain retained. Fable’s recording-first verdict is pending.
+The rehearsal above remains a 45-second authored test, not model evidence. After Fable signed the setup, the [single ten-minute live recording](NATIVE_HAUL_LIVE.md) completed unchanged. Game/display are stopped; all 285 original saves are unchanged. Prior failures and known fixture/audio warnings remain retained. Fable’s subsequent [Gate C decision](NATIVE_HAUL_GATE_C.md) approves game-side migration with next-live blockers.

@@ -212,8 +212,11 @@ with a tag is part of the migration.
 
 ## Open decisions
 
-- Exclusive versus attribution-only tagged work (decided from the spike's
-  measurements; refusal binds either way).
+- ~~Exclusive versus attribution-only tagged work~~ **Decided 2026-09-24
+  ([Gate C](trials/NATIVE_HAUL_GATE_C.md)): attribution-only is the default.** Refusal,
+  defer and withdrawal bind; helpers are credited as helpers. Exclusive stays scripted-only.
+- **Decided 2026-09-24: the wait action is silent.** A core turn with nothing new yields a
+  "waiting on…" status line, never a crew-log entry.
 - Whether the core may propose untagged colony designations or only tagged agreements.
 - How topic closure works on aggregate receipts.
 - Whether checkpoints during running agreements become allowed.

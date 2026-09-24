@@ -1,6 +1,6 @@
 # Frozen native-haul live recording — 2026-09-24
 
-The single approved Luna run is complete. **Fable delivered the recording-only four-sentence test at 19:09 UTC; Gate C verdict remains pending.** No rerolls or runtime changes were made.
+The single approved Luna run is complete. **Fable delivered the recording-only four-sentence test at 19:09 UTC; [Gate C approves game-side migration](NATIVE_HAUL_GATE_C.md), with three fixes required before the next live run.** No rerolls or runtime changes were made.
 
 [Download/watch the uncut original MP4](../../diary/assets/recordings/native-haul-live-2026-09-24.mp4) · [Recording and preservation evidence](../evidence/native-haul-live-recording.json) · [Signed freeze](NATIVE_HAUL_FREEZE.md)
 
