@@ -41,11 +41,11 @@ export function fitReflection(view:any,size:()=>number,limit=PROMPT_LIMIT){
  return trimmed;
 }
 export function codexRequest(mode:Mode,view:any){
- const args=claudeArgs(mode,view),instructions=args[args.indexOf('--system-prompt')+1]!,schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);
  const build=()=>JSON.stringify(mode==='core'?corePrompt(view):mode==='core-answer'?coreAnswerPrompt(view):mode==='social'?socialPrompt(view):modelPrompt(mode,view));
  if(mode==='reflection')fitReflection(view,()=>Buffer.byteLength(build()));
  const prompt=build();
  if(Buffer.byteLength(prompt)>PROMPT_LIMIT)throw Error('Context too large');
+ const args=claudeArgs(mode,view),instructions=args[args.indexOf('--system-prompt')+1]!,schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);
  // JSON Schema references preserve the same topic constraints without repeating
  // every source/status branch in each possible action's schema.
  if(mode==='core'){

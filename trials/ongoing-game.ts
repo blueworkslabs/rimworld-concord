@@ -1,3 +1,4 @@
+import {LaneFailures} from '../src/lane-failures.js';
 /** Explicit operator observation window; no model turn ceiling and no inference pauses. */
 import {ongoingProtocol} from './ongoing-protocol.js';
 import {startSceneRecording} from './scene-recording.js';
@@ -92,11 +93,8 @@ try{
   const nativeRemaining=()=>nativeLimit-nativeElapsed-(nativeStarted===undefined?0:Date.now()-nativeStarted);
   let taskError:unknown,lastRole='pawn';
   // Failures are counted per lane: a success in one lane never resets another lane's streak.
-  const streak:Record<string,number>={};receipt.laneFailures={};
-  const note=(status:string,lane:string)=>{
-   const failed=['failed','interrupted'].includes(status);streak[lane]=failed?(streak[lane]??0)+1:0;
-   if(failed)receipt.laneFailures[lane]=(receipt.laneFailures[lane]??0)+1;
-   if(streak[lane]!>=3)throw Error(`Repeated ${lane} failures; stopped for diagnosis`);};receipt.attention=[];
+  const lanes=new LaneFailures();receipt.laneFailures=lanes.totals;
+  const note=(status:string,lane:string)=>lanes.note(status,lane);receipt.attention=[];
   const launch=(task:()=>Promise<void>)=>{active=task().catch(e=>{taskError=e;}).finally(()=>{active=undefined;});};
   while(nativeRemaining()>0){
    if(taskError)throw taskError;
@@ -160,5 +158,6 @@ finally{
  receipt.finalCleanup=await socialCleanup(async()=>{operationDeadline=Date.now()+10000;await b.admin('pause');},async()=>{},async()=>{operationDeadline=Date.now()+20000;return c&&!cold?stopTrialWork(c):{errors:[]};});
  if(receipt.finalCleanup.errors.length){receipt.passed=false;process.exitCode=1;}
  if(!cold&&c&&db&&!receipt.passed&&!checkpointRecorded&&!receipt.finalCleanup.errors.length)try{operationDeadline=Date.now()+130000;await save(true);receipt.partialSaved=true;}catch(e){receipt.partialSaveError=String(e);}
+ receipt.attentionGaps=c?.inspect()?.diagnostics??{attentionGaps:0,attentionGapKinds:{}};
  receipt.coreAttempts=coreAttempts;receipt.pawnAttempts=pawnAttempts;input.close();s?.close();await writeFile(receiptPath,JSON.stringify(receipt,null,2));send({type:'receipt',receipt});
 }

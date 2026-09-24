@@ -885,10 +885,11 @@ export class Coordinator {
   private ingestIntents(game:GameState){
     for(const raw of game.intents??[]){
       const v=IntentView.parse(raw),old=this.domain.intentViews?.[v.intentId];
-      if(JSON.stringify(old)===JSON.stringify(v))continue;
+      if(JSON.stringify(old)!==JSON.stringify(v)){
       (this.domain.intentViews??={})[v.intentId]=v;
       this.commit('intent-progress','Game',{intentId:v.intentId,status:v.status,previousStatus:old?.status,previousDelivered:old?.delivered??0,
         previousFinishedAfterExclusion:old?.finishedAfterExclusion??0,finishedAfterExclusion:v.finishedAfterExclusion,...intentProgress(v)});
+      }
       if(v.status==='open'||v.status==='pending')continue;
       // Unanswered offers of a closed intent lapse; an answer already being thought over is
       // recorded as a lapsed answer when it arrives.

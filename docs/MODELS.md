@@ -140,7 +140,15 @@ perspectives that exceed the 24,000-byte prompt limit are trimmed oldest-first (
 retained experiences, then memories, then messages) and marked `trimmed` in the view.
 The limit itself is never raised. The ongoing runner counts failures per lane (core,
 decision, core-answer, reflection); a success in one lane never resets another lane's
-stop streak.
+stop streak. Native/idle/busy/cooldown results do not reset it either; only an actual
+successful inference in that lane does. Reflection schemas are built from the final
+trimmed perspective, so omitted evidence cannot remain an advertised citation.
+
+**Gate C fix verification (2026-09-24):** coordinator lifecycle, concurrent stale
+publication and failure-guard regressions are mock-tested (388 tests pass). All six
+retained oversized reflection inputs were replayed offline: final prompts are
+23,829–23,934 bytes, with schemas matching the trimmed evidence. No model calls,
+staging deployment or new gameplay were used; live/UI verification remains pending.
 
 ## Ledgers
 

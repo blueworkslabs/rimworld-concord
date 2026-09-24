@@ -7,7 +7,7 @@ import { scripted } from '../src/backends.js';
 import {coreAdmission,NATIVE_INTENT_STALL_TICKS} from '../src/core-scheduler.js';
 import {corePrompt} from '../src/core-planner.js';
 import { coreView } from '../src/core-planner.js';
-import {stopTrialWork} from '../src/work-trial.js';
+import {stopTrialWork,retireUndecided} from '../src/work-trial.js';
 import {nativeSceneCrew,nativeOfferCoverage,assertNativeLedger,assertNativeRestore} from '../trials/native-haul-live.js';
 import { crewReport } from '../src/crew-log.js';
 import { intentAction, type IntentView } from '../src/native-intents.js';
@@ -265,4 +265,25 @@ test('an unanswered offer lapses when the shared work closes; completion time co
   // A topic linking the completed agreement and the lapsed offer can still resolve.
   const closures=v.topicClosures.filter(t=>t.sourceId===b.id||t.sourceId===p.id);
   assert.deepEqual(closures.find(t=>t.sourceId===b.id)?.statuses,['resolved']);assert.deepEqual(closures.find(t=>t.sourceId===p.id)?.statuses,[]);
+});
+
+
+test('terminal offer survives active inference, then lapses after failure without withdrawal',async()=>{
+ const {c,game,store}=await setup();
+ const b=await c.core().propose('B',intentAction(cfg),'Stock wood');await c.pawn('B').decide(b.id,say('accept'));
+ const p=await c.core().propose('P',intentAction(cfg),'Help');
+ let started!:()=>void,reject!: (e:Error)=>void;
+ const ready=new Promise<void>(r=>started=r);
+ const deciding=c.pawn('P').decide(p.id,{name:'blocked',decide:async()=>{started();return await new Promise((_r,j)=>reject=j);}});
+ const failed=assert.rejects(deciding,/offline/);await ready;
+ Object.assign(game.data.intents![0]!,{status:'met',delivered:30,remaining:0,lastDeliveryTick:42});
+ await c.reconcile();assert.equal(c.inspect().proposals[p.id]!.status,'pending');
+ reject(Error('offline'));await failed;
+ await retireUndecided(c,p.id,'Decision unavailable; no retry');
+ assert.equal(c.inspect().proposals[p.id]!.status,'lapsed');
+ assert.deepEqual(c.inspect().proposals[p.id]!.lapsed,{intentStatus:'met',answered:false});
+ assert.equal(game.ops.filter(o=>o.actor==='P').length,0);
+ const again=new Coordinator(store,game);await again.open();await again.reconcile();
+ assert.equal(again.inspect().proposals[p.id]!.status,'lapsed');
+ assert.ok(!crewReport(c.inspect(),100).entries.some(e=>e.text.includes('Pending offer withdrawn')));
 });

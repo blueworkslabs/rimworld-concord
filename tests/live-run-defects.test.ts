@@ -1,3 +1,6 @@
+import {LaneFailures} from '../src/lane-failures.js';
+import {claudeArgs} from '../src/claude-decision.js';
+import {codexSchema} from '../src/contract-cases.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DecisionChannel } from '../src/decision-channel.js';
@@ -29,6 +32,9 @@ test('reflection perspectives are trimmed oldest-first to fit, never by raising 
   const request=codexRequest('reflection',view);
   assert.ok(Buffer.byteLength(request.prompt)<=PROMPT_LIMIT);
   assert.ok(view.trimmed.experiences+view.trimmed.memories>0);
+  assert.deepEqual(JSON.parse(request.prompt).perspective.trimmed,view.trimmed);
+  const args=claudeArgs('reflection',view);
+  assert.deepEqual(request.schema,codexSchema(JSON.parse(args[args.indexOf('--json-schema')+1]!)),'schema cites only the final supplied evidence');
   assert.equal(view.character.memories.at(-1),`memory 29 ${big}`,'newest memory kept');
   // Nothing left to trim: the failure is reported, the limit is unchanged.
   const tiny:any={size:0};let n=PROMPT_LIMIT+1;const trimmed=fitReflection(tiny,()=>n);assert.deepEqual(trimmed,{experiences:0,memories:0,messages:0});
@@ -43,4 +49,16 @@ test('narration built on a snapshot older than the newest receipt is flagged bef
   const domain={characters:{core:{id:'core',name:'Core',memories:[]}},proposals:{}} as unknown as Domain;
   recordCrew(domain,'core-planned','core',{id:'t1',reason:'Her receipt shows none consumed.',asOfTick:20100,newerReceiptTick:20205},21034);
   assert.equal(domain.crew!.entries[0]!.text,'[as of t20100; newer receipts since t20205] Her receipt shows none consumed.');
+});
+
+
+test('lane guard survives native batches and other-lane success; actual reflection clears it',()=>{
+ const lanes=new LaneFailures();
+ lanes.note('failed','reflection');lanes.note('applied','core');lanes.note('native','reflection');
+ lanes.note('failed','reflection');
+ for(const status of ['idle','busy','cooldown','paced','unavailable'])lanes.note(status,'reflection');
+ assert.throws(()=>lanes.note('failed','reflection'),/Repeated reflection failures/);
+ assert.equal(lanes.totals.reflection,3);
+ const recovered=new LaneFailures();recovered.note('failed','reflection');recovered.note('continued','reflection');
+ recovered.note('failed','reflection');assert.equal(recovered.streaks.reflection,1);assert.equal(recovered.totals.reflection,2);
 });

@@ -324,3 +324,17 @@ test('topic dates are based on the supplied snapshot, not refreshed by reading o
  const d=c.inspect();delete d.coreState!.topics[0]!.basedOnTick;delete d.coreState!.topics[0]!.updatedTick;
  const v=corePrompt(coreView(d,await g.state()));assert.equal(v.perspective.plannerHistory.topics[0]!.basedOnTick,null);assert.equal(v.perspective.plannerHistory.topics[0]!.updatedTick,null);s.close();
 });
+
+test('core narration and questions retain snapshot age when ingestion arrives during inference',async()=>{
+ for(const kind of ['wait','ask'] as const){
+  const {g,s,c}=await setup();g.data.ticks=20100;
+  let enter!:()=>void,release!:(v:unknown)=>void;const ready=new Promise<void>(r=>enter=r);
+  const pending=c.planCore({name:'held',async plan(v){assert.equal(v.tick,20100);enter();return new Promise(r=>release=r);}});
+  await ready;g.data.ticks=21034;g.data.eventSeq=1;g.data.events=[{seq:1,tick:20205,pawn:'A',kind:'ingested',detail:'RawBerries;count=16'}];
+  release({topic:null,action:kind==='wait'?{kind,reason:'No consumption observed'}:{kind,pawn:'A',text:'Food still urgent?',reason:'Ask about hunger'}});
+  assert.equal((await pending).status,'applied');
+  const texts=crewReport(c.inspect(),g.data.ticks).entries.map(e=>e.text);
+  assert.ok(texts.some(t=>t==='[as of t20100; newer receipts since t20205] '+(kind==='wait'?'No consumption observed':'Food still urgent?')));
+  s.close();
+ }
+});
