@@ -1,10 +1,10 @@
 # Hauling migration: native intents by default (Gates A–C)
 
-**Status: Gate A reviewed; corrected Gate B design testability confirmed by Astra.**
-Written by Clawd, assembly-checked by Astra, with a separate review of B1. The corrected
-pre-transition reservation and per-pickup guard address Q2 at the design level. Fable's
-full Gate B freeze sign-off is pending; implementation and runtime evidence follow it.
-Nothing is built before Gate B. The pinned build is RimWorld 1.6.4871 rev600, `Assembly-CSharp` prefix
+**Status: Gate B signed by Fable on 2026-09-24 at `5942961`, with the three
+conditions recorded below.** Gate A is assembly-reviewed; Astra confirmed corrected
+Gate B testability with a separate B1 review. This authorizes implementation after the
+documentation merge, not a live run or a claim that the runtime measures have passed.
+The pinned build is RimWorld 1.6.4871 rev600, `Assembly-CSharp` prefix
 `082db1dd4f7f`. The spike and its verdict are in [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md)
 and [Gate C](trials/NATIVE_HAUL_GATE_C.md).
 
@@ -196,7 +196,7 @@ outside the repository.
   Quota is cumulative across trips: a stack limit below 75 does not itself require a
   larger quota. Keep 1–75 for now and test a small-stack def; broader quotas are separate.
 
-## Gate B freeze (draft for Fable's sign-off and Astra's testability check)
+## Gate B freeze (signed, with bounded effort and live-verification conditions)
 
 ### B1. Growing hold within quota: the pre-transition boundary (answers Q2)
 
@@ -324,6 +324,17 @@ ending/recycling inside Original; no Post may resurrect its hold.
 
 Zero escapes is required. The wrapper's cost goes into `patch-cost`.
 
+**Signed condition: bounded effort.** Growing hold is an efficiency improvement, not
+necessary for migration correctness. After the initial scripted B1 run, allow at most
+**two rounds of fixes and scripted rechecks**. If the required checks are still not
+clean after round two, ship strict (a) for this migration and park growing (b) as an
+open follow-up with all evidence. Do not relax an invariant, reset the count on a new
+branch, or delay the rest of the migration for more attempts. Clawd implements; Astra
+keeps the round ledger (revision, changed defects, checks/results, retained failures).
+The design reviews before implementation do not count as scripted fix rounds; the
+starting implementation ledger is round 0. Strict still must pass its migration checks.
+
+
 ### B2. Stockpile source
 
 - `intent-accept` takes exactly one of:
@@ -392,6 +403,11 @@ Zero escapes is required. The wrapper's cost goes into `patch-cost`.
 - **Offer (crew-log record, next to the core's own sentence):**
   "Offer to Beatrice: haul up to 30 wood to the shared wood pile by the north wall;
   others may help."
+- **The core's own sentence:** the public reason is a concrete reason in the world's
+  voice, not an eligibility/consent disclaimer. Contract boilerplate belongs in the
+  adjacent structured record; do not repeat "listed as eligible; eligibility is not
+  consent" as the spoken reason. This is an implementation requirement of the same
+  legibility item, reflected in [CORE](CORE.md#what-the-core-may-do).
 - **Helper's first credited placement:**
   "Pedro is helping with the shared wood pile (not asked)."
 - **Retirement:**
@@ -455,6 +471,23 @@ parity. Retain invalid fixture attempts; no frozen live rerolls. The measures ar
 
 ## Gate C will measure
 
+**Signed condition: #71's fixes must be measured live in this migration.** Their
+current verification is mock/offline only. Correlate saved input snapshot ticks,
+intervening receipts and publication entries, alongside request/failure diagnostics:
+
+- Every narration published stale against a newer receipt carries its as-of prefix:
+  **zero unflagged stale narrations**.
+- Every failure has a content-free cause and visible per-lane counts, including
+  pre-model rejection. Unrelated lane successes or native-only batches cannot hide it.
+- Any late answer retains the answer and is **lapsed**, never agreed, unfulfilled or
+  withdrawn. Frozen meaning: "Answered yes after completion; no agreement started."
+  Retain the applicable answer/end reason for other late choices or expiry/stopping.
+
+If any of those fail, the run is **diagnosis, not a scene**; retain it without rerolling.
+For a branch that never occurs, report "not exercised live", not a live pass; retain
+its scripted/mock evidence separately rather than manufacturing a late answer or a
+failure to satisfy a count.
+
 - **Consent violations:** must stay at zero.
 - **Credit beyond the quota:** zero under selected (b) or fallback (a); reported
   overshoot (c) is not selected.
@@ -463,3 +496,15 @@ parity. Retain invalid fixture attempts; no frozen live rerolls. The measures ar
   four-sentence test.
 - **Matched pair:** trips and ticks per delivered unit, compared with the ordered model.
 - **Simulation cost:** measured with any new patch included.
+
+### Implementation handoff and complexity record
+
+After this signed documentation is merged, Clawd proceeds in order: mod, lab,
+coordinator, scripted runs, then Astra's review/staging handoff. No frozen live run
+starts merely because the design is signed.
+
+Record what each migration adds and deletes. The spike grew from eight patches to
+eleven methods; B1 proposes three wrappers plus a durable job budget. This is Fable's
+complexity observation, not permission to add more rounds or weaken bounds. Retiring
+`Hauling.cs`, `Hauling.Ready` and the hauling needs stop is this migration's deletion;
+construction and cooking should each identify their corresponding retired code.

@@ -110,7 +110,9 @@ and successful raw-food alternatives are valid, not stop conditions.
 **Decided 2026-09-24: the spike wins on the game side; migrate.** Verdict, blocking
 fixes before the next live run, and closed decisions:
 [NATIVE_HAUL_GATE_C](trials/NATIVE_HAUL_GATE_C.md). The hauling migration goes through
-the same three gates: [MIGRATION_HAULING](MIGRATION_HAULING.md).
+the same three gates: [MIGRATION_HAULING](MIGRATION_HAULING.md). **Gate B signed
+2026-09-24**; implementation is next. Growing hold has a two-fix-round bound with strict
+fallback, and the migration's live run must measure the #71 corrections.
 
 If the spike wins: hauling, then campfire construction and cooking through blueprints
 and bills, then rescue through the native rescue job. Each migration keeps the

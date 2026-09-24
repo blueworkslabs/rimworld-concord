@@ -225,10 +225,11 @@ with a tag is part of the migration.
   for the [hauling migration](MIGRATION_HAULING.md#1-strict-hold-or-a-hold-that-grows),
   not growing hold with reported overshoot. Fable requires a verified pre-pickup
   reservation boundary with no alternate pickup escape, and measured patch cost.
-  Astra's assembly review found that the proposed after-action wrapper does not prove
-  that boundary. Strict source-bounded hold remains the verified baseline and Fable's
-  fallback if bounded growth cannot be established. "Up to" remains a limit; Gate B
-  must settle the implementation and Gate C must test the zero-escape invariant.
+  The original after-action wrapper was rejected; the corrected pre-reservation and
+  per-pickup guard are in the Gate B design signed by Fable at `5942961`. Strict
+  source-bounded hold remains the runtime-verified baseline and required fallback if
+  B1's scripted checks are not clean after two fix-and-recheck rounds (Astra counts).
+  "Up to" remains a limit; implementation and Gate C must prove the invariant.
 - **Stockpile source decided, 2026-09-24:** existing colony stockpiles or operator-listed
   candidate sites. Core-created rectangles remain deferred. Tags are def-specific.
 - **Concurrent intents decided, 2026-09-24:** one open intent per (map, zone, def),
