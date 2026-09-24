@@ -136,6 +136,8 @@ Whether the core may create untagged colony designations at all is an open decis
 
 ## Learning the internals
 
+Findings: [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md) (Gate A).
+
 About a week, not a month. Decompile the owned RimWorld 1.6 `Assembly-CSharp` (ILSpy)
 on the lab host; decompiled code is never committed. Confirm, and write down in a short
 internals note:
