@@ -112,7 +112,7 @@ try{
       await co.reconcile();
       const d=co.inspect(),mine=Object.values(d.proposals).filter(p=>p.pawn===A&&p.action.kind==='haul');
       const receipts=outcomes();
-      const starts=since(from,'job-start',A).filter(e=>e.detail.startsWith('ConcordHaul;')),meal=since(from,'ingested',A)[0],first=starts[0],afterMeal=meal&&starts.find(e=>e.seq>meal.seq),beforeMeal=meal&&starts.some(e=>e.seq<meal.seq);
+      const starts=since(from,'job-start',A).filter(e=>e.detail.startsWith('Concord_Haul;')),meal=since(from,'ingested',A)[0],first=starts[0],afterMeal=meal&&starts.find(e=>e.seq>meal.seq),beforeMeal=meal&&starts.some(e=>e.seq<meal.seq);
       c.data.receipts=receipts;c.data.observedOutcomes=samples;
       expect(c,offers>0&&delivered()>0,'ordered baseline did not execute and deliver scoped wood');
       expect(c,delivered()<=quota,`ordered baseline exceeded quota: ${delivered()}/${quota}`);
