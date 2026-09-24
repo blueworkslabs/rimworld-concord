@@ -1,8 +1,9 @@
 # Spike design: one native-intent haul (Gate B)
 
-**Status: architecture sign-off given by Fable at `4eba938`, with the decisions and fixes
-below folded in; waiting for Astra's testability confirmation.** Written by Clawd.
-Nothing is compiled before Astra confirms.
+**Status: architecture sign-off given by Fable at `4eba938`; Astra's assembly-backed
+testability review confirmed after the start-boundary corrections below.** Written by
+Clawd, reviewed by Astra. This approves implementation, not a gameplay verdict; all
+scripted and live checks below remain to be run.
 Builds on [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md) (pinned: RimWorld 1.6.4871 rev600)
 and [NATIVE_INTENTS](NATIVE_INTENTS.md).
 
@@ -38,8 +39,9 @@ calls? And does that move us toward a crew a viewer can follow
 
 Derived from the campfire fixture, frozen before any run:
 
-- Three unchanged characters with campfire-v2 needs (Food 0.40 / 0.65 / 0.55), so Alvin
-  gets hungry during the agreement.
+- Three unchanged characters with campfire-v2 needs (Food 0.40 / 0.65 / 0.55).
+  Hunger during this short agreement is not guaranteed; the separate meal case below
+  establishes that precondition.
 - **Work priorities on:** Hauling at 3 for all three; other work types at their vanilla
   defaults where the pawn is capable.
 - **Wood: three stacks of 30 (90 in total) and no storage that accepts wood.** The
@@ -136,14 +138,30 @@ with reservations keyed by job `loadID`.
 Candidates, pooled jobs and queued jobs never hold one, so discarding or dequeuing them
 changes nothing in the ledger.
 
-- **Veto before start:** a pure prefix on `JobDriver_HaulToCell.TryMakePreToilReservations`
-  returns false when the job targets the zone and `remaining` is 0, so the game ends the
+- **Veto before start:** a prefix on `JobDriver_HaulToCell.TryMakePreToilReservations`
+  rechecks the pawn's standing and quota for every tagged storage job, including
+  forced jobs and jobs created or queued before standing changed. Before checking a
+  current job, release this pawn's ledger entries whose jobs are no longer `CurJob`;
+  an opportunistic replacement can reach this hook before any `StartJob` postfix.
+  Candidate/queue validation never acquires a reservation. Reject excluded pawns,
+  non-accepted pawns in the exclusive variant, or a job with no available quota
+  (include its own reservation when rechecking the same job). Return false, so the game ends the
   job through its own failed-reservation path (`Errored` or `QueuedNoLongerValid`)
-  before any toil runs. Nothing is carried, nothing dropped. For a fresh job this race
+  before any toil runs. A fresh empty-handed job picks up nothing. A pawn already
+  carrying can still drop that load through native cleanup; record it as incidental,
+  never claim that veto implies zero physical placement. For a fresh job this race
   also logs the game's "returned false right after StartJob" warning; scripted runs
   count those warnings.
 - **Commit:** a postfix on the same method, when it returned true **and** the job is the
-  pawn's `CurJob`. It reserves `min(job.count, remaining)` and caps `job.count` to that.
+  pawn's `CurJob`. For an empty-handed pickup it reserves `min(job.count, remaining)`
+  and caps `job.count` to that. A resumed/new job already carrying its target, or a full
+  compatible load, can skip pickup on 4871: admission must check and reserve the whole
+  carried load, not cap `job.count` and assume that shrinks it. Reject an oversized
+  carried load before toils; never trim it. For a partial compatible load that will
+  pick up more, reserve the existing load plus the admitted pickup and cap only the
+  additional pickup to the remaining allowance; do not run a pickup toil with count 0.
+  Repeated checks replace the same job's
+  reservation idempotently, accounting for its existing reservation.
   Not later: on 4871, `StartJob` calls `ReadyForNextToil` before returning, so a pawn
   already standing at the wood can pick it up inside `StartJob`, before any `StartJob`
   postfix. The same method also runs for jobs that are only being queued
@@ -152,9 +170,11 @@ changes nothing in the ledger.
   pawn holds for a job that is not its `CurJob`. That covers the opportunistic path: on
   4871, `StartJob` makes the reservations, then puts the original job back in the queue
   (`EnqueueFirst`) and starts the opportunistic one, without `CleanupCurrentJob`. The
-  queued job's reservation is released here and taken again if it starts later.
+  queued job's reservation is released before the replacement's admission as above,
+  or here as a backstop, and taken again if it starts later.
 - **Re-target** of a running job: reserved, transferred or released at `Job.SetTarget`,
-  as above.
+  as above. Only changes to target B affect destination ownership; pickup changes to
+  target A must not release or reacquire the quota reservation.
 
 Every disposal path, explicitly:
 
@@ -165,7 +185,7 @@ Every disposal path, explicitly:
 | Job ends for any reason (`CleanupCurrentJob`: success, interruption, failure, error, not-suspendable replacement) | Unused reservation released |
 | Re-target out of the zone | Released |
 | Intent retires (quota, expiry, operator stop) | All released |
-| Vetoed before start (`remaining` was 0) | None (never reserved) |
+| Vetoed before start (standing or quota) | No new reservation; native cleanup may still place an existing load incidentally |
 | Candidate never started, returned to the pool, or discarded | None (never reserved) |
 | Queued job removed (for example on exclusion) | None (never reserved) |
 | Load or paired/cold restore | Reservations whose job isn't some pawn's `CurJob` are dropped; the rest stay with their running jobs |
@@ -175,13 +195,14 @@ Every disposal path, explicitly:
   carried load too large for what's left simply isn't admitted and goes to other storage by the game's normal rules.
   Wood is never split or destroyed to fit the number. (This tightens Fable's bound of
   "at most one carried load" to zero; if Astra's review finds a path that needs it, the
-  fallback is exactly that bound, reported.) When `credited == quota` the intent
+  fallback is exactly that bound, reported.) When `credited >= quota` the intent
   retires at once; later placements are ordinary native hauls. On expiry, jobs in flight
   finish as ordinary hauls and aren't credited.
 
 ### Arrival coverage and deduplication
 
-Every arrival into the tagged zone is recorded once, by exactly one source:
+Hook-observed arrivals are recorded once. Reconciliation covers the remaining net
+change, with the cancellation limit stated below; it is not an exact event audit:
 
 - **Carry-tracker placements** (participation and incidental, fresh stacks and merges
   into existing stacks): hook 4. `placedAction` fires for merges as well as new stacks,
@@ -202,7 +223,7 @@ Every arrival into the tagged zone is recorded once, by exactly one source:
 
 ### Harmony patches
 
-Harmony is installed in the lab and declared as `brrainz.harmony` in `About.xml`
+Harmony is installed in the lab; the implementation must declare `brrainz.harmony` in `About.xml`
 (loaded before Concord, referenced, never bundled). Each patch carries a one-line reason
 in the code:
 
@@ -211,7 +232,7 @@ in the code:
 | 1 | `StoreUtility.TryFindBestBetterStoreCellForWorker` | prefix | Admission for storage searches: excluded pawns, non-accepted pawns in the exclusive variant, `remaining`, carried-load size |
 | 2 | `Verse.AI.Job.SetTarget` | postfix | Commit point for re-targets of a `HaulToCell` job: reserve, transfer or release atomically. The widest patch (every job of every pawn and animal): an early `HaulToCell` check, and its cost is measured on its own |
 | 3 | `HaulAIUtility.HaulToCellStorageJob` | prefix and postfix | Admission for preselected cells; cap `job.count`. Reserves nothing |
-| 3b | `JobDriver_HaulToCell.TryMakePreToilReservations` | prefix and postfix | Pure veto before start when `remaining` is 0; reservation commit for the `CurJob`, before any toil runs |
+| 3b | `JobDriver_HaulToCell.TryMakePreToilReservations` | prefix and postfix | Recheck standing and quota, reconcile obsolete ownership before current-job admission, reserve full pre-carried loads or cap fresh pickups; commit only for `CurJob`, before toils |
 | 4 | `Pawn_CarryTracker.TryDropCarriedThing` (both overloads) | prefix and finalizer | Wrap `placedAction` (keeping any existing callback): record full counts, credit participation, flag escapes, record incidental placement; open and close the "placing" scope |
 | 5 | `Zone_Stockpile.Notify_ReceivedThing` | postfix | Fresh spawns into the tagged zone outside a hook-4 scope (incidental, unattributed); merges are left to reconciliation |
 | 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | Ownership check (release reservations of non-current jobs); `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
@@ -263,7 +284,14 @@ it matches what pawns actually do.
    - a haul candidate created and discarded without starting (lab command): `remaining`
      unchanged;
    - an opportunistic haul replacing a queued job, then the queued job starting later;
+     assert that the replacement's admission sees no reservation owned by the queued job;
    - queued tagged jobs removed on exclusion: no ledger change;
+   - excluded/non-accepted forced and queued starts: no tagged storage toil or new
+     reservation, even if the job bypasses the factory; count rejected starts separately
+     from delivery-based consent violations;
+   - a pawn starting at the pickup, repeated pre-toil validation, and a resumed job
+     already carrying more than remaining: reserve before pickup, never double reserve,
+     and reject the oversized load without trimming; audit any cleanup placement;
    - save and load with a haul in progress: reservations reconciled to running jobs;
    - expiry at a partial total: intent *expired*, topic open;
    - **escape injection:** a lab-only fault flag lets one job skip admission and carry more
@@ -273,6 +301,8 @@ it matches what pawns actually do.
      merges into an existing stack are each recorded exactly once; a lab-spawned stack and
      a lab merge without the carry tracker show up as unattributed arrivals (hook 5 and
      reconciliation respectively);
+   - a partial merge whose drop returns false, followed by re-targeting: count every
+     placement once and transfer only the remaining load's reservation;
    - **quota counters:** a counter before the first acceptance, adopted (the zone is
      created with the new quota for everyone), and one after acceptance, recorded with
      standing *none* while the quota is unchanged and the core's adoption is rejected.
