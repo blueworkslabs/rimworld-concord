@@ -1,6 +1,6 @@
 # Hauling migration: native intents by default (Gates A–C)
 
-**Status: Gate A findings reviewed; conditional architecture sign-off.** Written by
+**Status: Gate A findings reviewed; conditional architecture sign-off. Gate B freeze drafted below (B1 answers Q2's boundary).** Written by
 Clawd, assembly-checked by Astra. Fable selected the directions below conditional on
 Q1–Q7 verification; Q2 needs a revised commit boundary before option (b) can be frozen.
 Nothing is built before Gate B. The pinned build is RimWorld 1.6.4871 rev600, `Assembly-CSharp` prefix
@@ -195,16 +195,193 @@ outside the repository.
   Quota is cumulative across trips: a stack limit below 75 does not itself require a
   larger quota. Keep 1–75 for now and test a small-stack def; broader quotas are separate.
 
-## Gate B will freeze
+## Gate B freeze (draft for Fable's sign-off and Astra's testability check)
 
-- the hold option;
-- the stockpile source;
-- the admission-by-def change;
-- the duplicate-pickup patch (if option (b));
-- post-retirement counting;
-- the legibility items and their exact texts;
-- the rescue replacement path;
-- the matched-pair fixture and its measures.
+### B1. Growing hold within quota: the pre-transition boundary (answers Q2)
+
+`JobDriver.JumpToToil` is `SetNextToil` followed by `ReadyForNextToil`, so everything
+downstream of a duplicate jump can run inside the jumping `initAction`, including
+reserve, goto and, for an adjacent stack, `StartCarryThing`. The admission therefore has
+to happen **before** the game's duplicate check, and the pickup has to be bounded by
+what was admitted, not repaired afterwards.
+
+The hook is a postfix on the `Toils_Haul.CheckForGetOpportunityDuplicate` factory. It
+replaces the returned toil's `initAction` with `Pre(); original(); Post();`. It applies
+only when the pawn's `CurJob` is a `HaulToCell` whose target B lies in an open tagged
+(map, zone, def), with `def` the carried thing's def. Otherwise the original runs
+untouched.
+
+- **Pre**, before any jump or downstream toil:
+  1. Recheck the intent is open, the zone and def match, and the pawn's standing holds
+     (not excluded; accepted in the exclusive variant; the job not flagged
+     `startedBeforeExclusion`). If any check fails, set `job.count = 0`: the game's
+     check requires `count > 0`, so no duplicate is chosen. A carried trip allowed to
+     finish after withdrawal gathers nothing more.
+  2. Compute the extra this trip may add:
+     `extra = min(job.count, free, AvailableStackSpace(def), destinationSpace)`.
+     - `job.count` is the game's remaining trip budget, after `StartCarryThing`
+       subtracted the first pickup.
+     - `free = quota − credited − Σ other jobs' holds − carried`.
+     - `destinationSpace` is the free capacity of the target cell's slot group for
+       `def`: the same bound `HaulToCellStorageJob` uses, re-read now.
+  3. If `extra ≤ 0`, set `job.count = 0` (skip, never the fallback path). Otherwise set
+     `job.count = extra` and **set this job's hold to `carried + extra`**, a total and
+     not an increment. Remember `(carried, extra, targetA)` on the wrapper frame.
+- **Original:** the game's own check. If it jumps, the downstream toils can reserve and
+  walk, and can pick up synchronously. `StartCarryThing` takes
+  `min(job.count, AvailableStackSpace, stackCount)`, which is at most `extra`, however
+  the chosen stack has grown or shrunk since. The pickup patch (4b) trues the hold down
+  to the carried count.
+- **Post**, after the original returns:
+  - no jump happened (target A and carried count unchanged): set the hold back to
+    `carried`;
+  - jumped with the pickup still pending: keep `carried + extra`;
+  - jumped and already picked up synchronously: 4b has already trued the hold down.
+  Afterwards `hold ≥ carried` always holds, and `hold ≤ carried + extra`.
+
+This needs changes to three existing parts:
+
+- **3b commit:** for (b), the first pickup reserves
+  `min(source stack, MaxStackSpaceEver, free)`, but `job.count` becomes the **trip
+  budget** `min(native job.count, free, MaxStackSpaceEver)`. That leaves a positive
+  remainder after the first pickup for the duplicate check. The first pickup is still at
+  most the source stack, which is at most the reservation.
+- **4b pickup:** no longer clamps `job.count` for (b). It still trues the hold down.
+- **Strict mode:** (a) keeps today's behaviour exactly, selected per intent
+  (`hold: "strict" | "growing"`). Gate C can then compare both on the same fixture.
+
+**No other pickup path.** In `JobDriver_HaulToCell.MakeNewToils` on 4871, a pickup
+happens only at `StartCarryThing`. That step is reached from the initial goto, or from
+the duplicate check's jump back to the reserve toil. The drop toil's failure path jumps
+to the carry toil, not to a pickup. As defence in depth, any pickup beyond the hold
+still surfaces as a reported escape through the existing ledger. That is a detector, not
+the mechanism.
+
+**Disposal and restore are unchanged.** Holds belong to the running job; any job end
+releases them; re-targets transfer them (patch 2). Save and load keep the job's hold and
+its `job.count`, and the post-load reconcile drops holds of non-running jobs. The
+wrapper frame is transient: a load between Pre and Post cannot happen, because it all
+runs inside one `initAction`.
+
+**Scripted checks** (in addition to the spike's):
+- a duplicate within budget;
+- zero extra (no jump, no throw);
+- an adjacent duplicate picked up synchronously inside the jump;
+- the chosen stack growing, and shrinking, before arrival;
+- withdrawal mid-trip, after which nothing more is gathered;
+- two pawns contending for the last units;
+- save and load mid-growth;
+- (a) and (b) side by side.
+
+Zero escapes is required. The wrapper's cost goes into `patch-cost`.
+
+### B2. Stockpile source
+
+- `intent-accept` takes exactly one of:
+  - `zoneId`, an existing colony `Zone_Stockpile` whose filter already allows `def`;
+  - `siteId`, an operator-declared candidate site `{id, label, x, z, w, h}`.
+- An existing zone keeps its filter, priority and stock. The tag does not modify
+  them.
+- The zone's `def` count at tag time is the baseline: tagging is non-retroactive, and
+  only participation counts.
+- Refuse the tag if an open intent already exists for the same (map, zone, def).
+- A candidate site creates a zone on first acceptance that allows only `def`, with the
+  site label.
+- **Zone edits:** if the zone is deleted, or its filter stops allowing `def`, the intent
+  becomes `stopped`, with the reason `zone removed` or `zone no longer accepts <def>`.
+  The crew log says so; nobody is blamed.
+- **Re-tagging** the same (zone, def) starts a new generation: a new intent id, with
+  counters and archive separate.
+
+### B3. Admission and accounting by (map, zone, def)
+
+- `ForZone` and `ForCell` take the def. Every call site passes the thing's def:
+  - storage search (1);
+  - the factory cap (3);
+  - pre-toil admission and commit (3b);
+  - retarget (2);
+  - placement (4) and spawn (5);
+  - pickup (4b);
+  - the duplicate wrapper (B1).
+- Items of other defs are ignored entirely: not incidental, not unattributed, not
+  counted.
+- **Scripted checks:**
+  - two tagged defs in one mixed zone with independent balances;
+  - a refusing pawn storing a third def freely;
+  - a re-target between two tagged zones.
+
+### B4. Placements after retirement
+
+- A retired intent keeps an archive per (map, zone, def, generation):
+  `ordinaryByPawn` and `ordinaryUnattributed`.
+- Carry-tracker placements of `def` into that zone add to `ordinaryByPawn`. Spawns and
+  reconciliation deltas add to `ordinaryUnattributed`.
+- The archive closes when the zone is deleted, or when the same (zone, def) is tagged
+  again.
+- Credited totals never change after retirement.
+- A single drop whose placement callbacks straddle the retirement moment is split at
+  that moment. Each unit is counted exactly once.
+
+### B5. Several intents
+
+- Coordinator configuration becomes a list. Its entries are candidate sites and
+  existing stockpiles the operator allows; each opens at most one intent per def.
+- The core view lists open and offerable intents sorted by label, then def, and every
+  offer names its stockpile label.
+- Topics link one intent each.
+- The singleton `nativeHaul` becomes `nativeHauls` with a one-entry migration for the
+  spike's stores.
+
+### B6. Legibility texts (frozen wording)
+
+- **Offer (crew-log record, next to the core's own sentence):**
+  "Offer to Beatrice: haul up to 30 wood to the shared wood pile by the north wall;
+  others may help."
+- **Helper's first credited placement:**
+  "Pedro is helping with the shared wood pile (not asked)."
+- **Retirement:**
+  "Agreement complete: 75 of 75 wood (Pedro 40, Beatrice 35). Further hauling here is
+  ordinary work."
+- **Expiry:**
+  "Agreement expired at 20 of 30 wood (…); the topic stays open."
+- **Archive line, updated in place:**
+  "Since then: 45 wood as ordinary work (Pedro 25, Beatrice 20)."
+- **Zone label while open:** "Shared: <site or zone label> (<def>)", in a distinct
+  colour. After retirement the original label and colour come back, with the material
+  refreshed and the mesh dirtied (Q4). If several defs share the zone, the original
+  returns only when the last tag retires.
+- **Show button:** jumps the camera to the zone's centre cell with
+  `CameraJumper.TryJump(cell, map)`. A stale target (the zone was deleted) shows "no
+  longer on the map".
+- **Clock:** "Day 3, 14h (t2552)", from the map's longitude. The state JSON carries
+  `clock` for the current tick. SOCIAL's "who knows what" table lists the clock as
+  colony-public.
+- **Wait:** silent. The status line reads "Core: waiting on <first open topic>".
+
+### B7. Rescue replacement for a native agreement
+
+A durable handover in four steps. Each step is recorded before the next:
+
+1. The rescue is accepted as a replacement: the pawn consents, and a
+   `handover-pending` record is written with a deadline.
+2. An `intent-exclude` is sent and **confirmed by the game's state**, not by the reply.
+3. **Wait for a receipt that no tagged trip is still carrying.** That is a `job-end`
+   for the carried job, or `carrying` becoming empty. Exclusion acknowledgment alone is
+   not enough.
+4. Revalidate everything fresh (patient, bed, consent, expiry, `CarriedThing == null`),
+   then dispatch.
+
+Lost replies and restarts resume from the recorded step via `reconcile`. If the handover
+deadline passes, the replacement is `stopped` ("handover timed out"), never auto-retried.
+
+### B8. Matched pair and measures
+
+The same fixture runs twice:
+- native (b), falling back to (a) if B1 fails its checks;
+- the ordered model: native Hauling off, as in the spike's ordered halves.
+
+The fixture is two capable pawns, several stacks within duplicate range of each other,
+two defs in one mixed zone, and a quota above one trip. The measures are listed below.
 
 ## Gate C will measure
 
