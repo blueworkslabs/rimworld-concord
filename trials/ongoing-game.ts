@@ -49,7 +49,7 @@ input.on('close',stop);process.once('SIGTERM',stop);process.once('SIGINT',stop);
 async function capture(label:string,openPanel=false){
  try{
   const exec=promisify(execFile),options={timeout:Math.max(1,Math.min(10000,operationDeadline-Date.now()))};
-  if(openPanel)await exec('python3',[b.root+'/bin/lab.py','click','1150','783'],options);
+  if(openPanel){await exec('python3',[b.root+'/bin/lab.py','click','1150','783'],options);if(recorded)await exec('xdotool',['mousemove','1000','120'],{...options,env:{...process.env,DISPLAY:':91',XAUTHORITY:'/run/rimworld-lab-display/Xauthority'}});}
   const name='ongoing-'+run+'-'+label+'.png';await exec('python3',[b.root+'/bin/lab.py','screenshot',name],options);(receipt.captures??=[]).push(name);
  }catch(e){(receipt.captureErrors??=[]).push(String(e));}
 }

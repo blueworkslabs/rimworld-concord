@@ -45,7 +45,8 @@ This is an integrated observation, not a controlled comparison with the older pr
    and non-rewindable usage. Stop staging and copy media off afterward.
 
 A scripted 45-second recorded rehearsal uses the same capture/cleanup path but no
-model calls. Its actions are not part of the live scene. Historical three-minute
+model calls. Its scripted eat choice selects the nearest listed stack (still subject
+to all execution checks). Its actions are not part of the live scene. Historical three-minute
 operation remains `luna-ongoing-v1`.
 
 Run using `node scripts/run-ongoing.mjs /absolute/operator-config.json --recorded`
