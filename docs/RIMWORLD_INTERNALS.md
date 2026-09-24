@@ -1,8 +1,10 @@
 # RimWorld internals for native intents
 
 Gate A of the [native-intents phase](NATIVE_INTENTS.md): the six questions whose answers
-shape the spike design. Written by Clawd on 2026-09-24; to be checked by Astra against
-the lab and signed off by Fable.
+shape the spike design. Written by Clawd on 2026-09-24; checked by Astra against
+the pinned assembly and Core defs. **Architecture disposition pending:** the review
+found bypasses of the proposed eligibility filter and an unsupported one-stack
+overshoot bound. Gate B must resolve these before implementation; see below.
 
 **Build studied: the staging build, which is the source of truth for this note.**
 
@@ -30,16 +32,17 @@ to decompile single types. Only type, method and field names are cited here.
 
 | Question | Short answer | Consequence for the spike |
 |---|---|---|
-| 1. Does hunger pre-empt a running haul? | No. The main think tree only runs between jobs. Each haul trip is its own job; hunger wins at the next boundary. | "Work survives a meal" means: after eating, the pawn picks the tagged haul again by itself. Test it at trip boundaries. |
-| 2. Where does a native haul choose its destination, and can we see it at drop time? | At job creation (`StoreUtility.TryFindBestBetterStorageFor`), but the drop toil can re-target. The actual drop goes through `Pawn_CarryTracker.TryDropCarriedThing`. | Count receipts at the drop, from the actual cell's zone, not from the job or job end. |
-| 3. The narrowest place to keep a refusing pawn off tagged work | For hauling: the per-slot-group store search, `StoreUtility.TryFindBestBetterStoreCellForWorker`. It covers ordinary, opportunistic and re-targeted hauls. | One prefix, called once per stockpile per search, not per cell. Jobs created before a refusal need an explicit cancel. |
+| 1. Does hunger pre-empt a running haul? | Hunger alone does not interrupt an ordinary haul. At the next main-tree decision, food outranks normal work when eligible; queued and prioritized work are exceptions. | "Work survives a meal" means: after eating, the pawn picks the tagged haul again by itself. Test it at trip boundaries. |
+| 2. Where does a native haul choose its destination, and can we see it at drop time? | At job creation (`StoreUtility.TryFindBestBetterStorageFor`), but the drop toil can re-target. Ordinary carried haul placement goes through `Pawn_CarryTracker.TryDropCarriedThing`, with per-placement callbacks. | Count callback quantities at each actual destination, including partial placement before a failed return; not from job end. |
+| 3. The narrowest place to keep a refusing pawn off tagged work | For hauling: the per-slot-group store search, `StoreUtility.TryFindBestBetterStoreCellForWorker`. It covers ordinary, opportunistic and re-targeted storage searches, not all ways an item can reach a zone. | Useful search filter, not complete consent enforcement. Existing jobs, haul-aside fallback and cleanup drops need an explicit policy. |
 | 4. What can take a pawn over mid-agreement? | The constant think tree every 30 ticks, mental breaks, drafting, going down, damage, job expiry. | Receipt vocabulary: `InterruptForced` versus `InterruptOptional`, plus a cause captured from the hook. |
 | 5. "What could this pawn do now", in one call? | Not natively. `JobGiver_Work` returns the single best job. A menu has to reuse its predicates per work giver. | Build options on request, bounded per work giver, never on the tick path. Cost is measured in the spike. |
 | 6. Where do social interactions and ingestion fire? | `Pawn_InteractionsTracker.TryInteractWith` and `Thing.Ingested`, both with full identity. | Two narrow postfixes give exact events for routing. |
 
-Prerequisite found on the way: **Harmony is not installed in the lab** (mods are Core,
-Biotech, Odyssey, StagingLab and Concord). The spike needs the Harmony mod or a bundled
-Harmony library; see [Gate B inputs](#inputs-for-gate-b).
+Prerequisite resolved by Astra on 2026-09-24: official **Harmony mod v2.4.2.0**
+installed before Core and main-menu boot verified on 4871 rev600. No colony was loaded.
+Declare `brrainz.harmony` in the spike's `About.xml`; do **not** bundle a duplicate
+library. See [Gate B inputs](#inputs-for-gate-b).
 
 ## 1. Hunger and a running haul
 
@@ -50,27 +53,31 @@ Harmony library; see [Gate B inputs](#inputs-for-gate-b).
 - In `MainColonistBehaviorCore`, a `ThinkNode_PrioritySorter` chooses between
   `JobGiver_GetFood` and `JobGiver_Work` (among others). `GetFood` returns priority 9.5
   when Food is below the race's `FoodLevelPercentageWantEat`. `Work` returns 9 during
-  scheduled work time, 5.5 in "anything" time and less otherwise. So once a pawn wants
-  to eat, eating wins at the next decision.
+  scheduled work time, 5.5 in "anything" time and less otherwise. Thus eligible food
+  beats **normal work** in this sorter, not every higher main-tree branch or queued job. Prioritized work is an explicit exception below.
 - Starving pawns also have `ThinkNode_ConditionalStarving` → `GetFood` in the emergency
   block, but that too is evaluated only at a decision.
 - A native haul is `JobDefOf.HaulToCell` driven by `JobDriver_HaulToCell`: one stack (plus
   opportunistic duplicates of the same kind) per job. `HaulToCellStorageJob` sets no
-  expiry. So hunger never cuts a trip short; it only takes the next decision.
+  expiry. Hunger alone does not cut this ordinary trip short. An independent override
+  (such as damage) can evaluate the main tree mid-trip and select food.
 - The job def is not `suspendable`, but allows an opportunistic prefix (question 3).
 
-**Meaning for the spike:** a meal happens between trips. The agreement survives if the
+**Meaning for the spike:** test ordinary hunger-driven meals between trips. The agreement survives if the
 tagged haul is still eligible when `JobGiver_Work` next runs. Our current ordered-job
-model stops work below 35 % Food; native work has no such rule, so the pawn keeps
-hauling until the think tree prefers food.
+model stops work below 35 % Food. Gate B removes that Concord needs-stop for tagged
+intents; native needs belong to the pawn/game. Withdrawal, refusal, expiry and quota
+remain Concord lifecycle boundaries, distinct from native job interruptions.
 
 ## 2. Haul destination and the drop
 
 - `WorkGiver_HaulGeneral` (work type Hauling, `priorityInType` 15) scans
   `listerHaulables` and calls `HaulAIUtility.HaulToStorageJob`. That picks the
   destination with `StoreUtility.TryFindBestBetterStorageFor`: slot groups in priority
-  order, the closest good cell in the best group. The cell becomes the job's target B;
-  `job.count` is limited by space and carrying capacity.
+  order, selecting a suitable cell with a bounded randomized search (not a
+  guaranteed globally closest cell). The cell becomes the job's target B;
+  `job.count` accounts for storage space; actual pickup is also bounded by carrying
+  capacity. It is not an agreement-wide quota.
 - The drop happens in `Toils_Haul.PlaceHauledThingInCell`, via
   `Pawn_CarryTracker.TryDropCarriedThing(cell, …)`. If it fails, the toil **re-targets**
   to another store cell, possibly in a different stockpile. Failing that, it hauls
@@ -79,34 +86,60 @@ hauling until the think tree prefers food.
   it doesn't know who brought it.
 - Zones have a stable `Zone.ID`.
 
-**Meaning for the spike:** count delivered quantities with a prefix and postfix on
-`Pawn_CarryTracker.TryDropCarriedThing`. Before the drop, record the carrier, thing
-definition and stack count; after it, record the cell's zone ID and the count actually
-placed. That credits the actual carrier and the actual zone, including partial drops and
-re-targets. Job start and end remain useful for timing and interruption causes, but not
-for quantities.
+**Meaning for the spike:** wrap/preserve `placedAction(Thing, int)` on both
+`Pawn_CarryTracker.TryDropCarriedThing` overloads. Capture the carrier and agreement
+context before the call; record each callback's added count and the placed thing's
+actual map/cell/zone. `GenPlace.TryPlaceDirect` invokes it for whole/partial stack
+merges and spawned stacks. A **false** overall return can follow a successful partial
+merge; `Near` placement can touch multiple cells. Neither the requested cell, the
+last resulting stack's total, nor success alone is a delivery receipt. Preserve any
+existing callback and prevent duplicate credit; never infer placement from destruction.
+
+This is a choke point for the inspected **carry-tracker haul placement**, including
+re-targets, not every arrival in a zone. For example,
+`Toils_Recipe.FinishRecipeAndStartStoringProduct` can place products directly through
+`GenPlace.TryPlaceThing`, without the carry tracker. Gate B must define its supported
+arrival sources and test the promised counting scope; a zone-arrival notification
+alone still cannot identify a carrier. Job start/end measure timing, not quantities.
 
 ## 3. Keeping a refusing pawn off tagged work
 
-For hauling into a tagged stockpile, every route to a destination cell passes through
-the private `StoreUtility.TryFindBestBetterStoreCellForWorker(thing, carrier, map,
+The inspected **stockpile-search routes** pass through the private
+`StoreUtility.TryFindBestBetterStoreCellForWorker(thing, carrier, map,
 faction, slotGroup, …)`, called once per slot group:
 
 - ordinary hauls (`HaulToStorageJob` → `TryFindBestBetterStoreCellFor`);
 - **opportunistic hauls**, which the job tracker adds as a prefix to other jobs
   (`Pawn_JobTracker.TryOpportunisticJob`);
 - the drop toil's re-target;
-- bill products stored "in the best stockpile" (`TryFindBestBetterStoreCellForIn`).
+- bill products stored in the best stockpile (`TryFindBestBetterStoreCellFor`) or
+  a specified stockpile (`TryFindBestBetterStoreCellForIn`).
 
 A prefix there that skips a tagged group for a pawn who refused, deferred or withdrew
 (or, in the exclusive variant, for any pawn who didn't accept) covers all of these at
 the cost of one dictionary lookup per group. It is narrower and cheaper than the
 per-cell `IsGoodStoreCell`.
 
-It does **not** cover jobs created before the refusal: their target is already fixed,
+**It is not a universal placement/eligibility choke point.** The drop toil's
+`CanHaulAside` fallback uses `TryFindSpotToPlaceHaulableCloseTo` /
+`HaulablePlaceValidator`, not the store-search worker; that validator does not exclude
+stockpile zones. Cleanup/cancellation also drops carried items with `ThingPlaceMode.Near`
+without a storage search. Thus even cancelling a refused haul can physically place
+its carried wood in the tagged zone. `HaulToCellStorageJob` also accepts an already
+chosen cell; it does not itself re-run the worker.
+
+Gate B must choose and verify the missing admission/execution/placement safeguards,
+or explicitly distinguish incidental/emergency drops from participating in tagged
+work. A receipt after placement cannot enforce a refusal retroactively. Do not block
+emergency cleanup blindly or discard carried items. The tag constrains the destination
+zone, not the wood: hauling the same wood to another stockpile is not a violation.
+
+The search prefix also does **not** cover jobs created before the refusal: their
+target is already fixed,
 and opportunistic hauls may sit in the job queue. On refusal or withdrawal, the mod must
 end the pawn's current job if it targets the tagged zone and drop matching queued jobs.
-The existing scoped cancel already does the first half.
+The existing scoped cancel is a starting point, not proof that native tagged-job
+matching or its cleanup-placement policy is implemented.
 
 Other intents need other filters, to be chosen at migration:
 
@@ -163,8 +196,9 @@ path. **Not measured yet**; the spike measures it for three pawns.
 - **Ingestion:** `Toils_Ingest.FinalizeIngest` calls `Thing.Ingested(ingester,
   nutritionWanted)`, which returns the nutrition eaten and gives the food thoughts
   (`FoodUtility.ThoughtsFromIngesting`, for example eating raw food). Identity: the
-  eater, the food thing and its definition, and the nutrition. The item count comes from
-  the stack count before and after.
+  eater, the food thing and its definition, and the nutrition. For ordinary stackable
+  food, item count comes from the stack count before and after (full destruction
+  clears that stack on this build). Corpse/body-part ingestion needs separate checks.
 
 ## Routing for new event kinds
 
@@ -186,16 +220,27 @@ Only `haul-delivered`, `ingested`, `downed` and linked job ends should wake the 
 
 ## Inputs for Gate B
 
-- **Harmony:** install the Harmony mod in the lab (preferred, and standard for players) or
-  bundle the library. Declare the dependency in `About.xml` and note it in PROVENANCE.
+- **Harmony:** installed and menu-boot checked. Reference the mod's
+  `Current/Assemblies/0Harmony.dll`, declare `brrainz.harmony` in `About.xml` with
+  load order before Concord, and record provenance. Never bundle a second copy.
 - **Tag:** our saved `WorldState` maps `Zone.ID` to agreement ID. No agreement lives in a
   job driver.
-- **Filter:** one prefix on `TryFindBestBetterStoreCellForWorker`, plus cancelling
-  in-flight and queued tagged hauls on refusal or withdrawal.
-- **Quota ("up to 30"):** a stockpile can't enforce a count. Count at the drop hook. When
-  the remaining amount is used up, the same prefix skips the zone for everyone. Also cap
-  `job.count` for new hauls into a tagged zone so in-flight jobs can't overshoot by more
-  than one stack.
+- **Filter:** the search prefix plus current/queued cancellation is insufficient
+  alone. Resolve the fallback, cleanup and preselected-cell boundaries in section 3.
+  The zone is tagged, not the wood.
+- **Quota ("up to 30"):** count per agreement across all carriers, helpers included,
+  in both consent variants; credit each actual carrier. Cap new `job.count`, but that
+  alone does **not establish** the claimed one-stack bound: three pawns can each
+  obtain a 30-item job before the first delivery, yielding 90 against 30 (two extra
+  capped loads). Define whether "one stack" means a capped load or the item's native
+  stack limit; also cover older, larger loads re-targeted into the zone. Gate B must
+  supply an in-flight accounting/admission or placement rule that proves the agreed
+  bound, and test re-targeted/pre-carried jobs as well. Do not hide excess deliveries.
+  The filter skips everyone only while an exhausted agreement is still open; retiring
+  the agreement retires its tag and restores an ordinary stockpile. Define the cutoff
+  and treatment of outstanding deliveries explicitly.
+- **Needs:** remove the 35 % Concord needs-stop for native intents; native hunger and
+  rest remain game-owned, with matched meal-resumption tests.
 - **Receipts:** from the drop and ingestion hooks; job end only for timing and cause.
 - **Options:** built on request from the work-giver predicates, bounded, measured.
 - **Fixture:** work priorities on, one tagged stockpile for wood, the campfire fixture
@@ -209,7 +254,7 @@ unnecessary. What it is, on 4871 rev600:
 
 - **State:** `Pawn_MindState.priorityWork` (`Verse.PriorityWork`) stores one cell, one
   work-giver def and a start tick, and is saved with the pawn.
-- **Set:** only through `Pawn_JobTracker.TryTakeOrderedJobPrioritizedWork`, and only if
+- **Normal player entry point:** `Pawn_JobTracker.TryTakeOrderedJobPrioritizedWork`, if
   the work giver has `prioritizeSustains`. Construction (deliver to blueprints and frames,
   finish frames) and campfire cooking sustain; **general hauling does not**.
 - **Used:** by the emergency `JobGiver_Work`, which runs in the colonist block **before
@@ -228,7 +273,8 @@ Questions for Gate B (evaluation only, nothing built in the spike):
 - **What clears it:** see above. Refusal or withdrawal would have to clear it
   explicitly.
 - **Does it respect the eligibility filter?** It goes through the work giver's own
-  `HasJobOnThing` and `JobOnThing`, so for hauling it would pass the store filter. But
+  `HasJobOnThing` and `JobOnThing`; this is not proof that every giver/destination
+  respects one store filter (see section 3). Also,
   hauling can't use it (no `prioritizeSustains`), and construction and cooking filters
   are chosen at their migration.
 
@@ -238,6 +284,9 @@ one campfire build, not for open-ended standing work. The spike doesn't use it.
 ## Not verified here
 
 - Tick cost of the filter and of option enumeration: measured in the spike.
-- Interaction with other mods; the lab runs none besides ours.
+- Interaction with other gameplay mods; the lab now includes Harmony plus our mods.
+- Runtime behavior of the proposed hooks: this review is static assembly/defs analysis,
+  not a gameplay acceptance run. Callback preservation, refusal fallback, concurrent
+  quota, partial merges and re-targets require scripted Gate C coverage.
 - The exact reservation checks used by construction work givers: confirmed when
   construction migrates.
