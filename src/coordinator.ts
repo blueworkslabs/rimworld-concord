@@ -66,6 +66,7 @@ export class Coordinator {
         this.domain=previous;
         if(previous.epoch!==game.epoch || previous.world!==game.world) throw Error('Timeline changed: restore a paired checkpoint');
         this.migrateNativeScope();
+        this.recoverHandovers();
         this.recoverAttention('Coordinator restarted during attention; no automatic retry');
       } else {
         this.domain={schema:1,world:game.world,epoch:game.epoch,branch:randomUUID(),characters:{},proposals:{},outcomes:{}};
@@ -827,7 +828,8 @@ export class Coordinator {
       p.decision=result;p.status='accepted';
       p.standing={status:'running',deadline:this.observedTick+(p.action.kind==='move'?0:p.action.maxTicks),steps:[],reason:'Replacement handover pending'};
       if(p.requestId)this.domain.requests![p.requestId]!.status='closed';
-      (this.domain.handovers??={})[p.id]={proposalId:p.id,oldId:replacedNative.id,pawn:p.pawn,intentId:replacedNative.action.intentId,step:'excluding',deadline:p.standing.deadline,dispatchId:randomUUID()};
+      (this.domain.handovers??={})[p.id]={proposalId:p.id,oldId:replacedNative.id,pawn:p.pawn,intentId:replacedNative.action.intentId,step:'excluding',deadline:p.standing.deadline,dispatchId:randomUUID(),capturedJobId:fresh.pawns.find(x=>x.id===p.pawn)?.job==='HaulToCell'?fresh.pawns.find(x=>x.id===p.pawn)?.jobId:-1};
+      this.claimHandover(this.domain.handovers[p.id]!,p,this.domain.characters[p.pawn]!);
       this.commit('replacement-consented',p.pawn,p);this.commit('handover-started',p.pawn,this.domain.handovers[p.id]);
       await this.advanceHandovers(await this.current());
       return;
@@ -896,7 +898,7 @@ export class Coordinator {
       if(h.step==='draining'){
         // A job-end is only a trigger to look; empty hands and no tagged trip are required.
         const own=game.pawns.find(x=>x.id===h.pawn);
-        if(!own||own.carrying===undefined||own.carrying!==''||own.job==='HaulToCell')continue;
+        if(!own||own.carrying===undefined||own.carrying!==''||(h.capturedJobId===undefined?own.job==='HaulToCell':h.capturedJobId>=0&&(own.jobId===undefined||own.jobId===h.capturedJobId)))continue;
         const invalid=rescueQuestionInvalid(game,{...p,status:'pending'});
         if(invalid){stop(invalid);continue;}
         // Ownership is revalidated after every await above, immediately before dispatch.
@@ -918,10 +920,16 @@ export class Coordinator {
       old.standing.status='stopped';old.standing.reason=reason;if(c.intention===old.id)delete c.intention;
       c.memories.push(`Stopped ${old.action.kind}: ${reason}`);
       this.queueIntentExclusion(old.action.intentId,h.pawn,'withdraw');queued=true;
-      this.commit('intention-stopped',h.pawn,{proposal:old.id,reason});
+
     }
-    if(p.standing?.status==='running'&&c.intention===undefined){c.intention=p.id;this.commit('handover-owned',h.pawn,{proposal:p.id});}
+    const claim=p.standing?.status==='running'&&c.intention===undefined;
+    if(claim)c.intention=p.id;
+    if(queued||claim)this.commit('handover-owned',h.pawn,{proposal:p.id,oldId:h.oldId});
     return queued;
+  }
+  private recoverHandovers(){
+    for(const h of Object.values(this.domain.handovers??{}))if(h.step!=='dispatched'&&h.step!=='stopped')
+      this.claimHandover(h,this.domain.proposals[h.proposalId]!,this.domain.characters[h.pawn]!);
   }
   /** Deadline processing independent of the game's transport: used when exclusion flushing fails. */
   private expireHandovers(ticks:number){
@@ -1222,6 +1230,7 @@ export class Coordinator {
       this.domain={...saved.state,epoch:game.epoch,branch:randomUUID()};
       this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);this.food={epoch:game.epoch,lines:foodLines(sharedFood(this.domain,game))};
       this.migrateNativeScope();
+      this.recoverHandovers();
       this.recoverAttention('Restored an unfinished attention attempt; no automatic retry');
       this.commit('restored','operator',{name,from:saved.state.branch});
     });

@@ -15,6 +15,7 @@ namespace Concord {
         public static readonly long[] calls=new long[16],ticks=new long[16];
         public static long Start(){return timing?System.Diagnostics.Stopwatch.GetTimestamp():0;}
         public static void Stop(int i,long t0){calls[i]++;if(timing)ticks[i]+=System.Diagnostics.Stopwatch.GetTimestamp()-t0;}
+        public static void Post(int i,long t0){if(timing)ticks[i]+=System.Diagnostics.Stopwatch.GetTimestamp()-t0;}
         public static void Reset(){Array.Clear(calls,0,calls.Length);Array.Clear(ticks,0,ticks.Length);}
         public static string Json(){
             var f=1e6/System.Diagnostics.Stopwatch.Frequency;var parts=new System.Collections.Generic.List<string>();
@@ -65,7 +66,11 @@ namespace Concord {
             if(p==null) return;
             var old=s.Holding(__instance);
             var next=IntentState.ForCell(p.Map,pack.Cell,IntentHooks.HaulDef(p,__instance));
-            if(next!=null&&next.PreTag(__instance)) return;   // retargets inherit the pre-tag mark
+            if(next!=null&&next.PreTag(__instance)) {
+                // This job can be post-tag for the old intent but pre-tag for the new one.
+                // Release every old bound before allowing untrimmed native collection there.
+                s.ReleaseId(__instance.loadID);return;
+            }
             if(old==next) return; // within the zone the reservation stays with the job
             if(old!=null){old.reserved.Remove(__instance.loadID);old.reservedBy.Remove(__instance.loadID);old.tripBudget.Remove(__instance.loadID);}
             if(next!=null) {
@@ -266,14 +271,14 @@ namespace Concord {
                 job.count=cap;
                 PatchCost.Stop(14,cost);timed=false;
                 try{original();}
-                finally{
+                finally{long postCost=PatchCost.Start();try{
                     // Only the same surviving job, still holding this intent, gets its budget back.
                     if(p.CurJob==job&&job.loadID==loadId&&i.Open&&i.reserved.ContainsKey(loadId)){
                         var after=p.carryTracker.CarriedThing;int acquired=Math.Max(0,(after==null?0:after.stackCount)-carried);
                         int left=Math.Max(0,trip-acquired);i.tripBudget[loadId]=left;job.count=left;
                         s.Emit(p,"intent-pickup","intent="+i.intentId+";job="+loadId+";cap="+cap+";acquired="+acquired+";hold="+i.Own(job)+";trip="+left+";source="+(source==null?"":source.GetUniqueLoadID()));
                     }
-                }
+                }finally{PatchCost.Post(14,postCost);}}
             }finally{if(timed)PatchCost.Stop(14,cost);}};
         }
     }
@@ -298,14 +303,14 @@ namespace Concord {
                 else{job.count=extra;s.Reserve(i,p,job,carried+extra);s.AssertLedger(i,p,"duplicate");}
                 PatchCost.Stop(15,cost);timed=false;
                 try{original();}
-                finally{
+                finally{long postCost=PatchCost.Start();try{
                     // Post: guarded by identity; a nested pickup, retarget, retirement or cleanup wins.
                     if(p.CurJob==job&&job.loadID==loadId&&i.Open&&i.reserved.ContainsKey(loadId)){
                         var now=p.carryTracker.CarriedThing;int nowCarried=now==null?0:now.stackCount;
                         if(job.targetA.Thing==before&&nowCarried==carried){s.Reserve(i,p,job,carried);job.count=i.Trip(job);}
                         else if(extra>0)s.Emit(p,"intent-duplicate-admitted","intent="+i.intentId+";job="+loadId+";extra="+extra+";carried="+carried+";target="+(job.targetA.Thing==null?"":job.targetA.Thing.GetUniqueLoadID())+";pickedNow="+(nowCarried>carried));
                     }
-                }
+                }finally{PatchCost.Post(15,postCost);}}
             }finally{if(timed)PatchCost.Stop(15,cost);}};
         }
     }
@@ -336,19 +341,19 @@ namespace Concord {
     }
     [HarmonyPatch(typeof(Pawn_JobTracker),"CleanupCurrentJob")]
     static class Patch6_Cleanup {
-        static void Prefix(Pawn_JobTracker __instance,JobCondition condition,Pawn ___pawn,out Job __state){long cost=PatchCost.Start();try{
-            __state=__instance.curJob;
-            if(__state==null) return;
+        static void Prefix(Pawn_JobTracker __instance,JobCondition condition,Pawn ___pawn,out int __state){long cost=PatchCost.Start();try{
+            __state=__instance.curJob==null?-1:__instance.curJob.loadID;
+            if(__state<0) return;
             int n;IntentHooks.cleanup.TryGetValue(___pawn,out n);IntentHooks.cleanup[___pawn]=n+1;
             var s=IntentState.Get();
-            if(s!=null&&IntentHooks.Colonist(___pawn))s.Emit(___pawn,"job-end",__state.def.defName+";job="+__state.loadID+";condition="+condition);
+            if(s!=null&&IntentHooks.Colonist(___pawn))s.Emit(___pawn,"job-end",__instance.curJob.def.defName+";job="+__state+";condition="+condition);
         }finally{PatchCost.Stop(9,cost);}}
-        static Exception Finalizer(Exception __exception,Pawn ___pawn,Job __state){long cost=PatchCost.Start();try{
-            if(__state!=null) {
+        static Exception Finalizer(Exception __exception,Pawn ___pawn,int __state){long cost=PatchCost.Start();try{
+            if(__state>=0) {
                 int n;
                 if(IntentHooks.cleanup.TryGetValue(___pawn,out n)){if(n<=1)IntentHooks.cleanup.Remove(___pawn);else IntentHooks.cleanup[___pawn]=n-1;}
                 var s=IntentState.Get();
-                if(s!=null)s.Release(__state);
+                if(s!=null)s.ReleaseId(__state);
             }
             return __exception;
         }finally{PatchCost.Stop(9,cost);}}

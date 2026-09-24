@@ -118,6 +118,7 @@ test('rescue replacing a carrying native haul waits for confirmed exclusion and 
   const offer=await c.core().offerRequestedRescue(r.id,rescue,'Xavi needs a bed.');assert.equal(offer.replacesAgreementId,p.id);
   game.excludeFails=2;await c.pawn('P').decide(offer.id,say('accept'));
   let h=Object.values(c.inspect().handovers!)[0]!;assert.equal(h.step,'excluding');assert.equal(game.moves.length,0,'no dispatch before exclusion is confirmed');
+  await assert.rejects(c.reconcile(),/Mailbox unavailable/);assert.equal(game.moves.length,0);
   await c.reconcile();h=Object.values(c.inspect().handovers!)[0]!;assert.equal(h.step,'draining');
   assert.ok(game.data.intents![0]!.excluded.includes('P'));assert.equal(game.moves.length,0,'still carrying: no dispatch');
   Object.assign(pedro,{job:'Wait',carrying:'',rescue:{epoch:'e',tick:10,mapId:1,status:'available',options:[rescue],observations:[]}});
@@ -218,7 +219,7 @@ test('a restart between consent and withdrawal finishes stopping the old agreeme
   const state=game.state.bind(game);game.state=async()=>{if(failNext){failNext=false;throw Error('process restarted');}return state();};
   await c.pawn('P').decide(offer.id,say('accept')).catch(()=>{});
   (store as any).commit=commit;
-  let d=store.read()!;assert.equal(d.proposals[old.id]!.standing!.status,'running','crashed before the old agreement was stopped');
+  let d=store.read()!;assert.equal(d.proposals[old.id]!.standing!.status,'stopped','consent already durably transferred ownership before the crash');
   const restarted=new Coordinator(store,game);await restarted.open();await restarted.reconcile();
   d=restarted.inspect();
   assert.equal(d.proposals[old.id]!.standing!.status,'stopped');assert.equal(d.characters.P!.intention,offer.id);
@@ -249,4 +250,47 @@ test('a haul already on its way at tag time gets one line and no credit',async()
   assert.equal(r.entries.filter(x=>x.text==='Already on its way when the agreement started: 30 wood (Beatrice).').length,1);
   assert.ok(!r.entries.some(x=>/helping with/.test(x.text)),'pre-agreement work is neither credited nor a helper');
   assert.equal(c.inspect().intentViews![v.intentId]!.delivered,0);
+});
+
+
+test('restart exposes pending rescue ownership before a pawn can withdraw',async()=>{
+  const {game,c,store,old,offer,pedro}=await handoverOffer();await c.pawn('P').decide(offer.id,say('accept'));
+  const legacy=c.inspect();legacy.proposals[old.id]!.standing!.status='running';legacy.characters.P!.intention=old.id;
+  store.commit(legacy,{branch:legacy.branch,kind:'test-old-crash-window',actor:'operator',data:{}});
+  const restarted=new Coordinator(store,game);await restarted.open();
+  assert.equal(restarted.inspect().characters.P!.intention,offer.id);
+  await restarted.pawn('P').withdraw('I cannot do the rescue.');
+  Object.assign(pedro,{job:'Wait',carrying:'',rescue:{epoch:'e',tick:10,mapId:1,status:'available',options:[rescue],observations:[]}});
+  await restarted.reconcile();assert.equal(game.moves.length,0);
+  assert.equal(restarted.inspect().proposals[offer.id]!.standing!.status,'stopped');
+});
+
+test('crew entries retain map provenance and unknown historical entries stay unknown',async()=>{
+  const {c,game}=await setup([wood()]);const d=c.inspect();
+  const id=d.nativeHauls![0]!.intentId;
+  d.intentViews={[id]:view({intentId:id,mapId:7,createdTick:3,lastDeliveryTick:9})};
+  recordCrew(d,'intent-progress','Game',{intentId:id,previousDelivered:0,delivered:10,quota:30,byPawn:{P:10},previousFinishedAfterExclusion:0,finishedAfterExclusion:0,preTagAtStart:[{pawn:'P',planned:5}]},20);
+  recordCrew(d,'core-question','core',{id:'q',exchangeId:'q',from:'core',to:'P',text:'How are you?'},20);
+  d.intentViews[id]!.mapId=99;d.characters.P!.name='Renamed';
+  const entries=crewReport(d,game.data.ticks).entries;
+  assert.equal(entries.find(e=>e.key==='intent-first:'+id)?.tick,9);
+  assert.equal(entries.find(e=>e.key==='intent-pretag:'+id)?.tick,3);
+  assert.equal(entries.find(e=>e.key==='intent-first:'+id)?.mapId,7);
+  assert.equal(entries.find(e=>e.key==='intent-first:'+id)?.hasMap,true);
+  assert.equal(entries.find(e=>e.key==='core-talk:q')?.hasMap,undefined);
+});
+
+
+for(const initiallyHauling of [false,true])test(`handover drains only its captured haul, not unrelated job (${initiallyHauling})`,async()=>{
+  const {game,c,offer,pedro}=await handoverOffer();
+  Object.assign(pedro,{job:initiallyHauling?'HaulToCell':'Wait',jobId:41,carrying:initiallyHauling?'Thing_WoodLog1':'',
+    rescue:{epoch:'e',tick:10,mapId:1,status:'available',options:[rescue],observations:[]}});
+  await c.pawn('P').decide(offer.id,say('accept'));
+  assert.equal(c.inspect().proposals[offer.id]!.status,'accepted');
+  if(initiallyHauling){
+    assert.equal(game.moves.length,0);
+    Object.assign(pedro,{job:'HaulToCell',jobId:42,carrying:''});await c.reconcile();
+  }
+  await c.reconcile();
+  assert.equal(game.moves.length,1,'empty pawn is not held by an unrelated current job');
 });

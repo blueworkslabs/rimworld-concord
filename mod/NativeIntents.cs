@@ -28,7 +28,7 @@ namespace Concord {
         public Dictionary<string,int> preTagByPawn=new Dictionary<string,int>();
         /** Who was already on the way at tag time, and with how much (carried, else the job's count). */
         public Dictionary<int,string> preTagOf=new Dictionary<int,string>();public Dictionary<int,int> preTagPlanned=new Dictionary<int,int>();
-        public bool PreTag(Job job){return job!=null&&preTagJobs.Contains(job.loadID);}
+        public bool PreTag(Job job){return job!=null&&job.def==JobDefOf.HaulToCell&&job.startTick>=0&&job.startTick<createdTick;}
         public ThingDef Def {get{return DefDatabase<ThingDef>.GetNamedSilentFail(thingDef);}}
         public bool Growing {get{return hold=="growing";}}
         public int Trip(Job job){int n;return job!=null&&tripBudget.TryGetValue(job.loadID,out n)?n:0;}
@@ -119,16 +119,9 @@ namespace Concord {
 
     /** B6: in-game clock beside ticks ("Day 3, 14h (t2552)"), from the map's longitude. */
     public static class Clock {
-        /** The map an entry's event happened on: its intent's map, else the named pawn's map.
-         * Unknown provenance is never guessed from the viewed map. */
-        public static Map ForEntry(string subject,string actor,string recipient) {
-            var s=IntentState.Get();var i=s==null||subject==null?null:s.ById(subject);
-            if(i!=null) return Find.Maps.FirstOrDefault(m=>m.uniqueID==i.mapId);
-            foreach(var name in new[]{actor,recipient}) {
-                if(String.IsNullOrEmpty(name)) continue;
-                foreach(var m in Find.Maps){var p=m.mapPawns.FreeColonists.FirstOrDefault(x=>x.LabelShort==name);if(p!=null) return p.MapHeld;}
-            }
-            return null;
+        /** A historical entry only uses its persisted event map, never a live name lookup. */
+        public static Map ForEntry(CrewEntry e) {
+            return e.hasMap?Find.Maps.FirstOrDefault(m=>m.uniqueID==e.mapId):null;
         }
         public static string At(int tick,Map map) {
             if(map==null) return "t"+tick;
@@ -239,8 +232,10 @@ namespace Concord {
             i.peakHolders=Math.Max(i.peakHolders,i.reservedBy.Where(kv=>i.reserved.ContainsKey(kv.Key)&&i.reserved[kv.Key]>0).Select(kv=>kv.Value).Distinct().Count());
         }
         public void Release(Job job) {
-            if(job==null) return;
-            foreach(var i in intents){i.reserved.Remove(job.loadID);i.reservedBy.Remove(job.loadID);i.tripBudget.Remove(job.loadID);i.preTagJobs.Remove(job.loadID);}
+            if(job!=null)ReleaseId(job.loadID);
+        }
+        public void ReleaseId(int id) {
+            foreach(var i in intents){i.reserved.Remove(id);i.reservedBy.Remove(id);i.tripBudget.Remove(id);i.preTagJobs.Remove(id);}
         }
         public void ReleaseObsolete(Pawn p) {
             var id=p.GetUniqueLoadID();var cur=p.CurJob==null?-1:p.CurJob.loadID;
@@ -264,6 +259,11 @@ namespace Concord {
                 var a=ArchiveFor(th.MapHeld,th.PositionHeld,th.def);
                 if(a==null) return;
                 a.arrivalsSinceCount+=n;
+                if(participation!=null&&a.PreTag(participation)){
+                    int priorBefore;a.preTagByPawn.TryGetValue(pid,out priorBefore);a.preTagByPawn[pid]=priorBefore+n;
+                    Record(a,new IntentDrop {kind="pretag",pawn=pid,count=n,job=participation.loadID,source=source});
+                    Emit(p,"intent-pretag","intent="+a.intentId+";job="+participation.loadID+";count="+n);return;
+                }
                 if(p!=null){int o;a.ordinaryByPawn.TryGetValue(pid,out o);a.ordinaryByPawn[pid]=o+n;}else a.ordinaryUnattributed+=n;
                 Record(a,new IntentDrop {kind="ordinary",pawn=pid,count=n,source=source});
                 Emit(p,"intent-ordinary","intent="+a.intentId+";count="+n+";source="+source);
@@ -429,6 +429,12 @@ namespace Concord {
                 if(zone==null) throw new Exception("Unknown stockpile");
                 if(!zone.GetStoreSettings().AllowedToAccept(def)) throw new Exception("Stockpile does not accept "+def.label);
                 if(ForZone(zone,def)!=null) throw new Exception("An open agreement already covers this stockpile and item");
+                // A tick cannot express the ordering of a job start and tag in that same tick.
+                // Leave all state unchanged; a fresh attempt next tick has an unambiguous order.
+                int tagTick=Find.TickManager.TicksGame;
+                if(map.mapPawns.AllPawnsSpawned.Any(q=>IntentHooks.TaggedHaul(q.CurJob)&&q.CurJob.startTick>=tagTick&&
+                    q.CurJob.targetB.Cell.IsValid&&map.zoneManager.ZoneAt(q.CurJob.targetB.Cell)==zone&&IntentHooks.HaulDef(q,q.CurJob)==def))
+                    throw new Exception("Stockpile job started this tick; retry tagging after the next game tick");
             } else {
                 if(r.w<1||r.h<1||r.w*r.h>64) throw new Exception("Area must be 1-64 cells");
                 zone=new Zone_Stockpile(StorageSettingsPreset.DefaultStockpile,map.zoneManager);
@@ -456,7 +462,7 @@ namespace Concord {
             foreach(var other in map.mapPawns.AllPawnsSpawned) {
                 var job=other.CurJob;
                 if(!IntentHooks.TaggedHaul(job)||!job.targetB.Cell.IsValid||map.zoneManager.ZoneAt(job.targetB.Cell)!=zone) continue;
-                if(IntentHooks.HaulDef(other,job)!=def) continue;
+                if(IntentHooks.HaulDef(other,job)!=def||!i.PreTag(job)) continue;
                 if(i.preTagJobs.Contains(job.loadID)) continue;
                 var cargo=other.carryTracker.CarriedThing;var src=job.targetA.Thing;
                 int planned=cargo!=null&&cargo.def==def?cargo.stackCount:Math.Max(0,Math.Min(job.count,src==null?0:src.stackCount));
@@ -480,7 +486,7 @@ namespace Concord {
                 // Queued jobs never hold reservations: removing them changes nothing in the ledger.
                 p.jobs.jobQueue.RemoveAll(p,j=>targets(j));
                 // Not carrying yet: end it (nothing to drop). Carrying: the trip finishes, flagged.
-                if(targets(p.CurJob)&&!p.IsCarrying())p.jobs.EndCurrentJob(JobCondition.InterruptForced);
+                if(targets(p.CurJob)&&!i.PreTag(p.CurJob)&&!p.IsCarrying())p.jobs.EndCurrentJob(JobCondition.InterruptForced);
             }
             Emit(p,"intent-excluded","intent="+i.intentId+";reason="+(r.reason??""));
             return i;

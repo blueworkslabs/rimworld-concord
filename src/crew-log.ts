@@ -1,7 +1,7 @@
 import type {Domain,Proposal,Receipt} from './protocol.js';
 import {staleNote} from './observation-age.js';
 export type AgreementProgress={completedTick?:number|null;id:string;kind:string;status:string;tick:number;agreed:number;completed:number;active:number;unconfirmed:number;unsuccessful:number;notStarted:number;unfulfilled:number;delivered:number;quantityUnknown:number};
-export type CrewEntry={seq:number;tick:number;kind:'message'|'record';actor:string;recipient:string;subject:string;text:string;key:string};
+export type CrewEntry={mapId?:number;hasMap?:boolean;seq:number;tick:number;kind:'message'|'record';actor:string;recipient:string;subject:string;text:string;key:string};
 export type CrewArchive={revision:number;nextSeq:number;entries:CrewEntry[]};
 export type CrewReport={observerText?:string;topicText?:string;foodLines?:string[];sharedStatus?:import('./shared-status.js').SharedStatus[];waiting?:string;world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
 export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt[]):AgreementProgress {
@@ -37,7 +37,15 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  };
  const add=(type:CrewEntry['kind'],from:string,to:string,subject:string,text:string,key:string)=>{
   if(c.entries.some(e=>e.key===key))return;
-  c.entries.push({seq:++c.nextSeq,tick,kind:type,actor:name(from),recipient:name(to),subject:safe(subject,120),text:safe(text),key});
+  const proposal=d.proposals[subject],care=d.selfCare?.[subject];
+  const map=d.intentViews?.[subject]?.mapId??(proposal?.action.kind==='haul-zone'?d.intentViews?.[proposal.action.intentId]?.mapId:undefined)
+    ??proposal?.haulMap??proposal?.rescueMap??proposal?.productionMap??care?.mapId
+    ??(kind==='native-event'?data.event?.mapId:undefined);
+  const iv=kind==='intent-progress'?d.intentViews?.[subject]:undefined;
+  const physicalTick=iv&&(key.startsWith('intent-met:')||key.startsWith('intent-first:'))?iv.lastDeliveryTick:
+    iv&&key.startsWith('intent-pretag:')?iv.createdTick:undefined;
+  const entryTick=physicalTick!==undefined&&physicalTick>=0&&physicalTick<=tick?physicalTick:tick;
+  c.entries.push({...(Number.isInteger(map)&&map>=0?{mapId:map,hasMap:true}:{}),seq:++c.nextSeq,tick:entryTick,kind:type,actor:name(from),recipient:name(to),subject:safe(subject,120),text:safe(text),key});
   c.entries=c.entries.slice(-128);
  };
  if(kind==='native-event'){
@@ -121,7 +129,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
 }
 export function crewReport(d:Domain,tick:number,status:import('./shared-status.js').SharedStatus[]=[],thinking:string[]=[]):CrewReport {
  // Explicit projection remains safe if future domain records gain private fields.
- const entries=(d.crew?.entries??[]).map(e=>({seq:e.seq,tick:e.tick,kind:e.kind,actor:e.actor,recipient:e.recipient,subject:e.subject,text:e.text,key:e.key}));
+ const entries=(d.crew?.entries??[]).map(e=>({...((e.hasMap&&Number.isInteger(e.mapId))?{hasMap:true,mapId:e.mapId}:{}),seq:e.seq,tick:e.tick,kind:e.kind,actor:e.actor,recipient:e.recipient,subject:e.subject,text:e.text,key:e.key}));
  const proposals=Object.values(d.proposals).filter(p=>p.status==='accepted');
  const ordered=[...proposals.filter(p=>p.standing?.status==='running'),...proposals.filter(p=>p.standing?.status!=='running').reverse()].slice(0,12);
  const selfCare=Object.values(d.selfCare??{}).filter(a=>d.characters[a.pawn]?.commitment===a.id).map(a=>`${nameForCare(d,a.pawn)}: eating`);

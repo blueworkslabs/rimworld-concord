@@ -586,3 +586,22 @@ eleven methods; B1 proposes three wrappers plus a durable job budget. This is Fa
 complexity observation, not permission to add more rounds or weaken bounds. Retiring
 `Hauling.cs`, `Hauling.Ready` and the hauling needs stop is this migration's deletion;
 construction and cooking should each identify their corresponding retired code.
+
+
+### Review clarification: pre-agreement ordering (2026-09-24)
+
+Fable's final rule is relative to each intent: `job.startTick < intent.createdTick`.
+It applies across retargets, including into a different tagged stockpile. Such work
+remains native, is not cancelled by exclusion, and lands in the before bucket even
+if the intent has retired. Saved per-job marks are diagnostic, not the authority.
+An existing job that starts in the very tick of an attachment has no expressible
+before/after order in that comparison: attachment leaves state unchanged and returns
+a retry-after-next-game-tick response. The next attempt uses the actual later tag tick;
+no deferred zone or cropped cargo is created. This is a same-tick serialization guard,
+not deferral for the lifetime of a busy stockpile.
+
+Crew entries persist known event-map IDs at creation. Unknown historical map identity
+stays tick-only; names and current pawn positions never reconstruct an old timezone.
+Cleanup releases immutable job IDs captured before native pooling. Pending rescue
+ownership, old-standing stop and queued exclusion are durable together, and legacy
+partial handovers recover before exposing pawn operations.
