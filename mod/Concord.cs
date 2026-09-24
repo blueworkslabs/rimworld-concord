@@ -269,7 +269,7 @@ namespace Concord
                     else {var i=s.ById(r.intentId);if(i==null) throw new Exception("Unknown intent");s.Retire(i,"stopped");}
                     receipt=s.Json();
                 }
-                else if(r.op.StartsWith("lab-")) {World();receipt=IntentState.Get().Lab(r);}
+                else if(r.op.StartsWith("lab-")) {var w=World();if(r.epoch!=w.epoch) throw new Exception("Stale timeline");receipt=IntentState.Get().Lab(r);}
                 else if(r.op=="decision-pause") {World();DecisionPauses.Set(r.epoch,r.actor,r.leaseId,r.ttlMs);}
                 else if(r.op=="activity") {
                     var w=World();

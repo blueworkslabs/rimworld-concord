@@ -62,7 +62,7 @@ namespace Concord {
             var i=IntentState.ForCell(p.Map,storeCell);
             if(i==null) return;
             if(IntentState.CarriedFor(p,t)>0) return; // whole carried loads are checked at start, never trimmed
-            if(IntentState.Admits(i,p,0,null)&&!IntentState.Get().faultSkipNext)__result.count=Math.Min(__result.count,i.Remaining);
+            if(IntentState.Admits(i,p,0,null)&&!IntentState.Get().FaultFor(p))__result.count=Math.Min(__result.count,i.Remaining);
         }
     }
 
@@ -76,11 +76,13 @@ namespace Concord {
             var s=IntentState.Get();
             // An opportunistic replacement can reach this before any StartJob postfix.
             if(p.CurJob==job)s.ReleaseObsolete(p);
-            if(s.faultSkipNext) return true;
+            if(s.FaultFor(p)&&i.Standing(p)) return true;
             int carried=IntentState.CarriedFor(p,job.targetA.Thing);
             bool standing=i.Standing(p);
             int avail=i.Remaining+i.Own(job);
-            if(standing&&(carried>0?carried<=avail:avail>=1)) return true;
+            bool needsPickup=carried>0&&p.carryTracker.CarriedThing!=job.targetA.Thing&&
+                p.carryTracker.AvailableStackSpace(job.targetA.Thing.def)>0;
+            if(standing&&(carried>0?carried<=avail&&(!needsPickup||avail>carried):avail>=1)) return true;
             i.rejectedStarts++;
             s.Emit(p,"intent-rejected-start","intent="+i.intentId+";job="+job.loadID+";reason="+(standing?"quota":"standing")+";carried="+carried);
             __result=false;
@@ -94,8 +96,8 @@ namespace Concord {
             if(i==null) return;
             var s=IntentState.Get();
             int avail=Math.Max(0,i.Remaining+i.Own(job));
-            if(s.faultSkipNext) {
-                s.faultSkipNext=false;
+            if(s.FaultFor(p)) {
+                s.faultSkipNext=false;s.faultPawn=null;
                 s.Reserve(i,p,job,Math.Min(avail,job.count));
                 s.Emit(p,"lab-fault","intent="+i.intentId+";job="+job.loadID+";admission skipped");
                 return;
@@ -103,9 +105,10 @@ namespace Concord {
             int carried=IntentState.CarriedFor(p,job.targetA.Thing);
             if(carried>0) {
                 // Reserve the whole carried load plus any admitted additional pickup.
-                int total=Math.Min(Math.Max(carried,job.count),avail);
-                s.Reserve(i,p,job,total);
-                if(job.count>total)job.count=total;
+                int pickup=HaulBudget.AdditionalPickup(carried,job.count,avail,
+                    p.carryTracker.AvailableStackSpace(job.targetA.Thing.def));
+                s.Reserve(i,p,job,carried+pickup);
+                job.count=pickup;
             } else {
                 int alloc=Math.Min(job.count,avail);
                 s.Reserve(i,p,job,alloc);

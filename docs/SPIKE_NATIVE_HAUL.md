@@ -350,14 +350,19 @@ Built on `feat/native-haul-spike`; nothing has run in the game yet.
 - **Coordinator:** routing entries, `src/native-intents.ts` (wakes, aggregate receipts,
   topic outcome, invariants), `LabBridge.intent`.
 - **Scripted runs:** `scripts/run-native-haul-lab.sh main|meal [--case=<name>]`, which
-  writes `.runtime/native-haul-<mode>.json`.
+  writes a unique `.runtime/native-haul-<mode>-<runId>.json`, including raw events and final
+  state per case. Event gaps fail the run. These private runtime files are not published.
 - **Not yet built:**
   - the core offering a `haul-zone` intent and the pawns answering it (needed for the
     live run);
-  - the matched ordered-job halves.
+  - the matched ordered-job halves and actual counteroffer/standing transitions;
+  - paired coordinator/cold restore (the runner currently tests game save/reload only);
+  - forced opportunistic replacement and failed partial merge, and `work-options` /
+    isolated patch-cost measurements. All are listed as unimplemented in run receipts.
 
   The opportunistic-replacement and failed-partial-merge cases are observed from
-  events rather than forced.
+  events rather than forced; a run without such an event is not evidence for either case.
+  The quota-immutability check is not a counteroffer test.
 
 ## Out of scope
 

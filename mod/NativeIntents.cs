@@ -88,6 +88,8 @@ namespace Concord {
         public int dropSeq;
         // Lab-only fault injection: the next tagged job skips admission (escape detector check).
         public bool faultSkipNext;
+        public string faultPawn;
+        public bool FaultFor(Pawn p) {return faultSkipNext&&p!=null&&p.GetUniqueLoadID()==faultPawn;}
         private bool reconcileAfterLoad;
         public IntentState(Game game) { }
         public static IntentState Get() {return Current.Game==null?null:Current.Game.GetComponent<IntentState>();}
@@ -113,8 +115,8 @@ namespace Concord {
         // Pure admission check: no side effects (storage searches also run speculatively).
         public static bool Admits(HaulIntent i,Pawn p,int carried,Job own) {
             var s=Get();
-            if(s!=null&&s.faultSkipNext) return true;
             if(!i.Standing(p)) return false;
+            if(s!=null&&s.FaultFor(p)) return true;
             int avail=i.Remaining+i.Own(own);
             return carried>0?carried<=avail:avail>=1;
         }
@@ -303,7 +305,7 @@ namespace Concord {
         // Lab-only commands for the scripted sub-runs.
         public string Lab(Request r) {
             var p=WorldState.FindActor(r.actor);
-            if(r.op=="lab-fault-escape"){faultSkipNext=true;return "{\"fault\":\"armed\"}";}
+            if(r.op=="lab-fault-escape"){if(p==null)throw new Exception("Unknown pawn");faultSkipNext=true;faultPawn=r.actor;return "{\"fault\":\"armed\"}";}
             if(r.op=="lab-interrupt") {
                 // Forced cancellation of the pawn's current job (cleanup drops are incidental).
                 if(p==null) throw new Exception("Unknown pawn");
@@ -343,11 +345,13 @@ namespace Concord {
                 }
                 // A tagged haul queued (not started): bypasses the factory's admission on purpose.
                 var queued=HaulAIUtility.HaulToCellStorageJob(p,loose,zone.cells.First(),false);
+                if(queued==null)throw new Exception("No haul job");
+                if(r.count>0)queued.count=Math.Min(queued.count,r.count);
                 p.jobs.jobQueue.EnqueueLast(queued);
                 return "{\"queuedJob\":"+queued.loadID+",\"count\":"+queued.count+"}";
             }
             if(r.op=="lab-zone-spawn") {
-                var cell=zone.cells.FirstOrDefault(c=>c.GetFirstItem(map)==null);
+                var cell=zone.cells.Where(c=>c.GetFirstItem(map)==null).DefaultIfEmpty(IntVec3.Invalid).First();
                 if(!cell.IsValid) throw new Exception("No empty zone cell");
                 var t=ThingMaker.MakeThing(def);t.stackCount=Math.Max(1,Math.Min(r.count,def.stackLimit));
                 GenSpawn.Spawn(t,cell,map);

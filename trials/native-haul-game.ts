@@ -1,6 +1,7 @@
 /** Scripted native-haul sub-runs (docs/SPIKE_NATIVE_HAUL.md, Runs 1 and 2). Zero model
  * calls: the script plays the core and the pawns' answers through the mod's intent ops.
- * Every case starts from the same base save; failures are retained per case. */
+ * Every case starts from the same base save; raw events and failures are retained per case.
+ * Deferred coverage is reported explicitly, never counted as a passed scenario. */
 import {readFile,writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -15,8 +16,9 @@ const only=process.argv.find(a=>a.startsWith('--case='))?.slice(7);
 const deadline=Date.now()+(mode==='meal'?900000:1800000);
 let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
-const receipt:{mode:string;fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
-  {mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
+const runId=randomUUID();
+const receipt:{runId:string;unimplemented:string[];mode:string;fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
+  {runId,unimplemented:['core offer/counter standing transitions','matched ordered-job halves','paired coordinator/cold restore','forced opportunistic replacement','forced partial merge','work-options and patch cost measurements'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 
 async function poll(){
@@ -38,11 +40,17 @@ const since=(from:number,kind:string,who?:string)=>events.filter(e=>e.seq>from&&
 
 async function scenario(name:string,base:string,body:(c:Case)=>Promise<void>){
   if(only&&only!==name)return;
-  const c:Case={name,passed:false,findings:[],data:{}};receipt.cases.push(c);
+  const c:Case={name,passed:false,findings:[],data:{}};receipt.cases.push(c);const gapsBefore=receipt.eventGaps;
   try{
-    opDeadline=deadline;await b.load(base);await b.admin('pause');await poll();events=[];lastSeq=state.eventSeq??0;
-    await body(c);c.passed=c.findings.length===0;
+    opDeadline=deadline;lastSeq=0;events=[];await b.load(base);await b.admin('pause');await poll();events=[];lastSeq=state.eventSeq??0;
+    await body(c);
   }catch(e){c.findings.push('error: '+String(e));}
+  finally{
+    try{await b.admin('pause');await poll();}catch(e){c.findings.push('final capture: '+String(e));}
+    c.data.events=[...events];c.data.finalState=state;
+    if(receipt.eventGaps>gapsBefore)c.findings.push('native event gap: evidence incomplete');
+    c.passed=c.findings.length===0;
+  }
   console.error(`${c.passed?'PASS':'FAIL'} ${name} ${c.findings.join('; ')}`);
 }
 function expect(c:Case,ok:boolean,finding:string){if(!ok)c.findings.push(finding);}
@@ -59,6 +67,13 @@ try{
   const done=(id:string)=>()=>view(id)?.status!=='open';
 
   if(mode==='main'){
+    await scenario('stale-lab-command',base,async c=>{
+      const old=state.epoch;await b.load(base);await b.admin('pause');lastSeq=0;events=[];await poll();
+      expect(c,state.epoch!==old,'load did not advance timeline');
+      let rejected=false;
+      try{await b.intent({op:'lab-fault-escape',epoch:old,actor:A});}catch(e){rejected=String(e).includes('Stale timeline');}
+      expect(c,rejected,'stale lab operation was not rejected');
+    });
     for(const variant of ['exclusive','attribution'] as const)await scenario('variant-'+variant,base,async c=>{
       const id=randomUUID();await exclude(id,B,'refuse');await accept(id,A,{variant});
       await run(done(id),240000);const v=invariants(c,id);if(!v)return;
@@ -76,7 +91,7 @@ try{
     await scenario('withdraw-walking',base,async c=>{
       const id=randomUUID();await accept(id,A,{variant:'exclusive'});
       const walking=()=>{const p=pawn('Alvin');return p.job==='HaulToCell'&&!p.carrying;};
-      expect(c,await run(walking,60000),'Alvin never started a tagged trip');
+      if(!await run(walking,60000))throw Error('precondition: Alvin never started a tagged trip');
       const from=lastSeq;await exclude(id,A,'withdraw');await poll();
       expect(c,pawn('Alvin').job!=='HaulToCell','tagged job not ended on withdrawal');
       await run(()=>false,15000);const v=invariants(c,id);if(!v)return;
@@ -86,7 +101,7 @@ try{
     await scenario('withdraw-carrying',base,async c=>{
       const id=randomUUID();await accept(id,A,{variant:'exclusive'});
       const carrying=()=>{const p=pawn('Alvin');return p.job==='HaulToCell'&&!!p.carrying;};
-      expect(c,await run(carrying,60000),'Alvin never carried on a tagged trip');
+      if(!await run(carrying,60000))throw Error('precondition: Alvin never carried on a tagged trip');
       await exclude(id,A,'withdraw');
       await run(()=>pawn('Alvin').job!=='HaulToCell',30000);await run(()=>false,5000);
       const v=invariants(c,id);if(!v)return;
@@ -102,22 +117,20 @@ try{
       const v=invariants(c,id);if(!v)return;
       expect(c,v.delivered===before,'cleanup drop credited');c.data.drops=v.drops.slice(-3);
     });
-    await scenario('pre-carried-retarget',base,async c=>{
-      // Larger than remaining: rejected whole, never trimmed; smaller: admitted and reserved whole.
-      for(const [quota,carry] of [[5,20],[30,10]] as const){
-        await b.load(base);await b.admin('pause');await poll();
-        const id=randomUUID();c.data['carry'+carry]=await op({op:'lab-carry',actor:A,count:carry});
-        await accept(id,A,{quota,variant:'exclusive'});await run(()=>!pawn('Alvin').carrying,60000);
-        const v=invariants(c,id);if(!v)continue;
-        if(carry>quota)expect(c,v.delivered===0,`oversized carried load credited (${v.delivered})`);
-        else expect(c,v.delivered>=carry,`admitted carried load not credited (${v.delivered})`);
-        c.data['quota'+quota]={delivered:v.delivered,rejectedStarts:v.rejectedStarts,drops:v.drops};
-      }
+    for(const [quota,carry] of [[5,20],[30,10]] as const)await scenario('pre-carried-'+carry+'-quota-'+quota,base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota,variant:'exclusive'});
+      c.data.carry=await op({op:'lab-carry',intentId:id,actor:A,count:carry});
+      // Queue a fresh job while already carrying; its target A is another loose stack.
+      c.data.queued=await op({op:'lab-queue-haul',intentId:id,actor:A});
+      await run(()=>!pawn('Alvin').carrying,60000);
+      const v=invariants(c,id);if(!v)return;
+      if(carry>quota)expect(c,v.delivered===0,`oversized carried load credited (${v.delivered})`);
+      else expect(c,v.delivered>=carry,`admitted carried load not credited (${v.delivered})`);
     });
     await scenario('restore-mid-intent',base,async c=>{
-      const id=randomUUID();await accept(id,A);await accept(id,B);
-      expect(c,await run(()=>{const v=view(id);return !!v&&v.delivered>0&&v.reserved>0&&v.status==='open';},120000),'no in-flight haul after a first delivery');
-      const before=view(id)!;const name='lab-concord-nh-mid-'+Date.now();await b.save(name);await b.load(name);await b.admin('pause');await poll();
+      const id=randomUUID();await accept(id,A,{quota:75});await accept(id,B,{quota:75});
+      if(!await run(()=>{const v=view(id);return !!v&&v.delivered>0&&v.reserved>0&&v.status==='open';},120000))throw Error('precondition: no in-flight haul after a first delivery');
+      const before=view(id)!;const name='lab-concord-nh-mid-'+Date.now();await b.save(name);c.data.eventsBeforeLoad=[...events];lastSeq=0;events=[];await b.load(name);await b.admin('pause');await poll();
       const after=view(id);if(!after){c.findings.push('intent lost on load');return;}
       for(const k of ['status','quota','delivered','overshoot','incidental','violations'] as const)expect(c,after[k]===before[k],`${k} changed on load`);
       expect(c,JSON.stringify(after.byPawn)===JSON.stringify(before.byPawn),'credit changed on load');
@@ -125,7 +138,7 @@ try{
     });
     await scenario('candidate-discarded',base,async c=>{
       const id=randomUUID();await accept(id,A);const r=await op({op:'lab-haul-candidate',intentId:id,actor:B});
-      expect(c,r.remainingBefore===r.remainingAfter,'candidate creation changed remaining');c.data.candidate=r;
+      expect(c,r.made===true,'candidate was not created');expect(c,r.remainingBefore===r.remainingAfter,'candidate creation changed remaining');c.data.candidate=r;
     });
     await scenario('queued-removed-on-exclusion',base,async c=>{
       const id=randomUUID();await accept(id,A);await accept(id,P);
@@ -162,11 +175,11 @@ try{
       expect(c,v.drops.some(d=>d.kind==='unattributed'&&d.source==='reconcile'&&d.count===2),'merge not caught by reconciliation');
       expect(c,!v.drops.some(d=>d.kind==='unattributed'&&d.source==='reconcile'&&d.count!==2),'reconciliation reported an unexpected difference');
     });
-    await scenario('quota-counters',base,async c=>{
-      // Before the first acceptance: the adopted quota is the one the zone is created with.
-      const id=randomUUID();await exclude(id,P,'counter recorded before acceptance');await accept(id,A,{quota:20});
+    await scenario('quota-immutability-only',base,async c=>{
+      // Only native quota immutability; model counter/adoption transitions are deferred.
+      const id=randomUUID();await accept(id,A,{quota:20});
       expect(c,view(id)?.quota===20,'pre-acceptance quota not adopted');
-      // After acceptance: a later accept cannot change the quota.
+      // A second acceptance cannot change the quota. This is not a counteroffer test.
       await accept(id,B,{quota:10});expect(c,view(id)?.quota===20,'quota changed after acceptance');
     });
   }else{
@@ -184,11 +197,11 @@ try{
       c.data.ticksMealToResume=resumed?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
     });
   }
-  receipt.passed=receipt.cases.length>0&&receipt.cases.every(c=>c.passed);
+  receipt.passed=receipt.eventGaps===0&&receipt.cases.length>0&&receipt.cases.every(c=>c.passed);
 }catch(e){receipt.error=String(e);}
 finally{
   try{opDeadline=Date.now()+10000;await b.admin('pause');}catch{}
   if(!receipt.passed)process.exitCode=1;
-  await writeFile(root+`/.runtime/native-haul-${mode}.json`,JSON.stringify(receipt,null,2));
+  await writeFile(root+`/.runtime/native-haul-${mode}-${runId}.json`,JSON.stringify(receipt,null,2));
   console.log(JSON.stringify({mode,passed:receipt.passed,cases:receipt.cases.map(c=>({name:c.name,passed:c.passed,findings:c.findings})),eventGaps:receipt.eventGaps,error:receipt.error}));
 }
