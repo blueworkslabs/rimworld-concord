@@ -79,8 +79,6 @@ namespace Concord {
         public int zoneId,quota,delivered,reserved,remaining,overshoot,incidental,unattributed,removed;
         public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick;
         public string[] accepted,excluded;
-        public PawnCredit[] byPawn;
-        public IntentDrop[] drops;
     }
 
     public class IntentState : GameComponent {
@@ -297,9 +295,10 @@ namespace Concord {
                 delivered=i.credited,reserved=i.Reserved,remaining=i.Remaining,overshoot=i.overshoot,incidental=i.incidental,
                 unattributed=i.unattributed,removed=i.removed,violations=i.violations,rejectedStarts=i.rejectedStarts,
                 finishedAfterExclusion=i.finishedAfterExclusion,createdTick=i.createdTick,untilTick=i.untilTick,lastDeliveryTick=i.lastDeliveryTick,
-                accepted=i.accepted.ToArray(),excluded=i.excluded.ToArray(),
-                byPawn=i.byPawn.Select(kv=>new PawnCredit {pawn=kv.Key,count=kv.Value}).ToArray(),drops=i.drops.ToArray()
-            })).ToArray())+"]";
+                accepted=i.accepted.ToArray(),excluded=i.excluded.ToArray()
+            }).TrimEnd('}')+",\"byPawn\":["+
+                String.Join(",",i.byPawn.Select(kv=>JsonUtility.ToJson(new PawnCredit {pawn=kv.Key,count=kv.Value})).ToArray())+
+                "],\"drops\":["+String.Join(",",i.drops.Select(d=>JsonUtility.ToJson(d)).ToArray())+"]}").ToArray())+"]";
         }
 
         // Lab-only commands for the scripted sub-runs.
