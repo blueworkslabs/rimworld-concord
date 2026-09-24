@@ -90,25 +90,40 @@ try{
     try{
       c.data.zone=await op({op:'lab-plain-zone',actor:A,...cfg.area});
       for(const p of state.pawns)await op({op:'lab-work-priority',actor:p.id,count:0});
-      let offers=0,noOption=0,offersAfterMeal=0;const from=lastSeq;
+      let offers=0,noOption=0,offersAfterMeal=0;const from=lastSeq,startTick=state.ticks,quota=mode==='meal'?75:30;
+      const samples:{tick:number;id:string;status:string;delivered:number}[]=[];
+      const observed=new Set<string>();
+      const outcomes=()=>{const d=co.inspect(),ids=new Set(Object.values(d.proposals).filter(p=>p.pawn===A&&p.action.kind==='haul').flatMap(p=>p.standing?.steps??[]));return Object.values(d.outcomes).filter(r=>r.actor===A&&r.kind==='haul'&&ids.has(r.id));};
+      const delivered=()=>outcomes().reduce((n,r)=>n+(r.delivered??0),0);
       const ate=()=>since(from,'ingested',A).length>0;
       await runWith(async()=>{
         await co.reconcile();await co.advanceIntentions();
+        for(const r of outcomes()){const key=r.id+':'+r.status;if(!observed.has(key)){observed.add(key);samples.push({tick:state.ticks,id:r.id,status:r.status,delivered:r.delivered??0});}}
+        if(delivered()>=quota)return;
         const d=co.inspect();
         if(Object.values(d.proposals).some(p=>p.pawn===A&&(p.status==='pending'||p.standing?.status==='running'))||d.characters[A]?.commitment)return;
-        const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===A&&o.action.kind==='haul');
+        const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===A&&o.action.kind==='haul'&&/^(?:Thing_)?WoodLog\d+$/.test(o.action.thing)&&o.action.x>=cfg.area.x&&o.action.x<cfg.area.x+cfg.area.w&&o.action.z>=cfg.area.z&&o.action.z<cfg.area.z+cfg.area.h);
         if(!o){noOption++;return;}
-        const p=await co.core().propose(A,o.action,'Scripted ordered offer');offers++;if(ate())offersAfterMeal++;
+        if(o.action.kind!=='haul')throw Error('Expected wood hauling');
+        const count=Math.min(o.action.count,quota-delivered()),trips=Math.min(o.action.trips,Math.floor((quota-delivered())/count));
+        const p=await co.core().propose(A,{...o.action,count,trips},'Scripted ordered offer');offers++;if(ate())offersAfterMeal++;
         await co.pawn(A).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
-      },()=>false,ms);
+      },()=>delivered()>=quota,ms);
       await co.reconcile();
       const d=co.inspect(),mine=Object.values(d.proposals).filter(p=>p.pawn===A&&p.action.kind==='haul');
-      const receipts=Object.values(d.outcomes).filter(r=>r.actor===A&&r.kind==='haul');
-      return {offers,offersAfterMeal,pollsWithoutGroundedOption:noOption,ate:ate(),
-        delivered:receipts.reduce((n,r)=>n+(r.status==='completed'?r.delivered??0:0),0),
+      const receipts=outcomes();
+      const starts=since(from,'job-start',A).filter(e=>e.detail.startsWith('ConcordHaul;')),meal=since(from,'ingested',A)[0],first=starts[0],afterMeal=meal&&starts.find(e=>e.seq>meal.seq),beforeMeal=meal&&starts.some(e=>e.seq<meal.seq);
+      c.data.receipts=receipts;c.data.observedOutcomes=samples;
+      expect(c,offers>0&&delivered()>0,'ordered baseline did not execute and deliver scoped wood');
+      expect(c,delivered()===quota,`ordered baseline delivered ${delivered()}/${quota}`);
+      if(mode==='meal'){expect(c,!!meal,'ordered meal baseline never ate');expect(c,!!afterMeal,'ordered meal baseline has no post-meal haul start');}
+      return {startTick,firstWorkTick:first?.tick??null,mealTick:meal?.tick??null,postMealWorkTick:afterMeal?.tick??null,
+        ticksToFirstWork:first?first.tick-startTick:null,ticksMealToFirstWork:meal&&afterMeal?afterMeal.tick-meal.tick:null,
+        resumedEarlierWork:!!beforeMeal&&!!afterMeal,ticksMealToResume:beforeMeal&&meal&&afterMeal?afterMeal.tick-meal.tick:null,offers,offersAfterMeal,pollsWithoutGroundedOption:noOption,ate:ate(),
+        delivered:delivered(),
         staleRejections:receipts.filter(r=>r.status==='failed').map(r=>r.reason),
         stops:mine.filter(p=>p.standing?.status==='stopped').map(p=>p.standing!.reason),
-        modelCallsIfLive:offers};
+        estimatedCoreOfferTurnsIfLive:offers,actualModelCalls:0};
     }finally{s.close();}
   }
 
@@ -250,14 +265,16 @@ try{
         expect(c,view(setup.intentId)?.quota===20,'adopted pre-acceptance counter did not set the quota');
         expect(c,!!view(setup.intentId)?.excluded.includes(B),'refusal not binding in the game');
         // Paired checkpoint while the intent is open (no Concord job exists to block it).
-        const mid=await runWith(()=>co.reconcile(),()=>(view(setup.intentId)?.delivered??0)>0,120000);
+        const mid=await runWith(()=>co.reconcile(),()=>{const v=view(setup.intentId);return v?.status==='open'&&v.reserved>0;},120000);
         if(mid){
-          const before=view(setup.intentId)!,name='lab-concord-nh-core-'+Date.now();await co.checkpoint(name);await co.restore(name);await poll();
+          await co.reconcile();const before=view(setup.intentId)!,name='lab-concord-nh-core-'+Date.now();
+          if(before.status!=='open'||before.reserved<=0)throw Error('paired checkpoint requires an open in-flight intent');
+          await co.checkpoint(name);c.data.eventsBeforeLoad=[...events];events=[];lastSeq=0;await co.restore(name);await poll();
           const after=view(setup.intentId);
           expect(c,!!after&&after.quota===before.quota&&after.delivered===before.delivered&&after.status===before.status,'intent changed across paired restore');
           expect(c,co.inspect().proposals[adopted.id]?.standing?.status==='running','standing lost across paired restore');
           c.data.pairedRestore={name,before:{delivered:before.delivered,reserved:before.reserved},afterReserved:after?.reserved};
-        }else c.findings.push('no delivery before the paired checkpoint window closed');
+        }else c.findings.push('no open in-flight haul before the paired checkpoint window closed');
         await runWith(()=>co.reconcile(),()=>co.inspect().proposals[adopted.id]?.standing?.status!=='running',240000);
         await co.reconcile();
         const iv=invariants(c,setup.intentId);if(!iv)return;
@@ -284,7 +301,7 @@ try{
     });
   }else{
     await scenario('meal-resumption',base,async c=>{
-      const id=randomUUID();await accept(id,A,{quota:75,variant:'exclusive',maxTicks:60000});
+      const id=randomUUID(),startTick=state.ticks,from=lastSeq;await accept(id,A,{quota:75,variant:'exclusive',maxTicks:60000});
       const ate=()=>since(0,'ingested',A).length>0;
       await run(()=>ate()||done(id)(),600000);
       const meal=since(0,'ingested',A)[0];
@@ -294,7 +311,11 @@ try{
       const next=()=>events.some(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
       expect(c,await run(next,300000),'Pedro did not start another tagged haul after eating');
       const resumed=events.find(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
-      c.data.ticksMealToResume=resumed?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
+      const first=since(from,'job-start',A).find(e=>e.detail.includes('intent='+id));
+      c.data.firstWorkTick=first?.tick??null;c.data.ticksToFirstWork=first?first.tick-startTick:null;
+      c.data.workStartedBeforeMeal=!!first&&first.seq<meal.seq;
+      expect(c,!!first&&first.seq<meal.seq,'invalid: no tagged work before the meal; this is initial work, not resumption');
+      c.data.ticksMealToResume=resumed&&first&&first.seq<meal.seq?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
     });
     await scenario('ordered-meal',base,async c=>{
       // Matched ordered-job half: same start state (Pedro's Food 0.33). The ordered model stops

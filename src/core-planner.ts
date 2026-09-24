@@ -51,7 +51,7 @@ export function coreView(d:Domain,g:GameState){
  const proposals=Object.values(d.proposals);
  const allReoffers=Object.values(d.reoffers??{});
  const reoffers=ongoing?allReoffers.filter(r=>r.status==='pending').concat(allReoffers.filter(r=>r.status!=='pending').slice(-8)):allReoffers;
- const available=(pawn:string)=>!d.characters[pawn]?.commitment&&!d.characters[pawn]?.intention&&!proposals.some(p=>p.pawn===pawn&&(p.status==='pending'||(p.status==='countered'&&!p.replyId)||p.standing?.status==='running'));
+ const available=(pawn:string)=>!Object.values(d.pendingIntentExclusions??{}).some(x=>x.actor===pawn)&&!d.characters[pawn]?.commitment&&!d.characters[pawn]?.intention&&!proposals.some(p=>p.pawn===pawn&&(p.status==='pending'||(p.status==='countered'&&!p.replyId)||p.standing?.status==='running'));
  const opportunities:{id:string;pawn:string;action:Action;observedTick:number;reofferRequestId?:string;supply?:{sourceThingId:string;label:string;sourceCount:number;destinationFree:number}}[]=[];
  const availability:{pawn:string;status:string}[]=[];
  for(const own of g.pawns.filter(p=>d.characters[p.id])){

@@ -6,9 +6,9 @@ export type CrewReport={observerText?:string;topicText?:string;foodLines?:string
 export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt[]):AgreementProgress {
  if(p.action.kind==='haul-zone'){
   // Shared intent: the quota is the colony's; delivered is this pawn's own credit.
-  const v=d.intentViews?.[p.action.intentId],mine=v?.byPawn.find(x=>x.pawn===p.pawn)?.count??0,met=v?.status==='met'?1:0;
+  const v=d.intentViews?.[p.action.intentId],mine=v?.byPawn.find(x=>x.pawn===p.pawn)?.count??0,met=p.standing?.status==='completed'&&v?.status==='met'?1:0;
   return {id:p.id,kind:p.action.kind,status:p.standing?.status??p.status,tick,agreed:1,completed:met,active:p.standing?.status==='running'?1:0,
-   unconfirmed:v?0:1,unsuccessful:v&&(v.status==='expired'||v.status==='stopped')?1:0,notStarted:0,unfulfilled:1-met,delivered:mine,quantityUnknown:0};
+   unconfirmed:!v||d.pendingIntentAcceptances?.includes(p.id)?1:0,unsuccessful:p.standing?.status==='stopped'||v&&(v.status==='expired'||v.status==='stopped')?1:0,notStarted:0,unfulfilled:1-met,delivered:mine,quantityUnknown:0};
  }
  const agreed=p.action.kind==='haul'?p.action.trips:p.action.kind==='cook'?p.action.meals:1;
  const ids=[...new Set(p.standing?.steps??(p.actionId?[p.actionId]:[]))];

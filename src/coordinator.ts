@@ -622,6 +622,7 @@ export class Coordinator {
       if(prior.pawn!==pawn||JSON.stringify(prior.action)!==JSON.stringify(action)||prior.reason!==reason||prior.parentId!==parent?.id) throw Error('Proposal ID collision');
       return structuredClone(prior);
     }
+    if(Object.values(this.domain.pendingIntentExclusions??{}).some(x=>x.actor===pawn))throw Error('Native exclusion unconfirmed; reconcile before offering other work');
     const alternative=request??(parent?.requestId?this.domain.requests?.[parent.requestId]:undefined);
     const replaces=alternative?(parent?parent.replacesAgreementId:standalone?undefined:alternative.agreementId):undefined;
     if(alternative){
@@ -756,7 +757,7 @@ export class Coordinator {
     if(p.requestId&&!p.replacesAgreementId&&!this.completedRequestAvailable(p))throw Error('Requested standalone offer no longer valid');
     if(p.requestId&&result.kind==='counter'&&(result.action.kind!=='rescue'||p.action.kind!=='rescue'||result.action.target!==p.action.target))throw Error('Replacement counter outside requested patient');
     if(result.kind==='accept'&&p.action.kind==='rescue'){const invalid=rescueQuestionInvalid(fresh,p);if(invalid)throw Error(invalid);}
-    if(result.kind==='accept'&&p.action.kind!=='move'&&!this.game.cancel)throw Error('Work requires scoped cancellation');
+    if(result.kind==='accept'&&p.action.kind!=='move'&&p.action.kind!=='haul-zone'&&!this.game.cancel)throw Error('Work requires scoped cancellation');
   }
   private async applyDecision(p:Proposal,result:Decision,fresh:GameState,signal?:AbortSignal) {
     if(p.replacesAgreementId)this.refreshReceipt(this.domain.proposals[p.replacesAgreementId]!,fresh);
@@ -792,30 +793,62 @@ export class Coordinator {
   private liveIntent(game:GameState,intentId:string):IntentView|undefined{
     const raw=(game.intents??[]).find(i=>i.intentId===intentId);return raw?IntentView.parse(raw):undefined;
   }
+  private queueIntentExclusion(intentId:string,actor:string,reason:string){
+    (this.domain.pendingIntentExclusions??={})[intentId+':'+actor]={intentId,actor,reason};
+  }
+  /** Idempotent consent stops survive lost replies, process restarts and checkpoints.
+   * New admissions cannot overtake a known, unconfirmed exclusion. */
+  private async flushIntentExclusions(){
+    for(const [key,pending] of Object.entries(this.domain.pendingIntentExclusions??{})){
+      const r=await this.game.intent!({op:'intent-exclude',epoch:this.domain.epoch,...pending});
+      if(r.state.epoch!==this.domain.epoch||r.state.world!==this.domain.world)throw Error('Stale intent exclusion response');
+      if(!this.liveIntent(r.state,pending.intentId)?.excluded.includes(pending.actor))throw Error('Intent exclusion unconfirmed');
+      delete this.domain.pendingIntentExclusions![key];
+      this.commit('intent-exclusion-confirmed',pending.actor,pending);this.ingestIntents(r.state);
+    }
+  }
   /** Native intent: standing only, no job, no commitment. The mod owns the zone and ledger;
    * refusal and deferral bind in the game before any zone exists. */
   private async applyIntentDecision(p:Proposal,result:Decision,fresh:GameState){
     if(p.action.kind!=='haul-zone')throw Error('Not a native intent');
-    const a=p.action,live=this.liveIntent(fresh,a.intentId);
+    const a=p.action;
+    if(result.kind==='accept'){await this.flushIntentExclusions();await this.flushIntentAcceptances();fresh=await this.current();}
+    const live=this.liveIntent(fresh,a.intentId);
     if(result.kind==='accept')planIntentOffer(this.domain.nativeHaul,fresh.pawns.find(x=>x.id===p.pawn),a,live);
     if(result.kind==='counter'&&(result.action.kind!=='haul-zone'||result.action.intentId!==a.intentId))throw Error('Counter must address the same shared intent');
     p.decision=result;
     p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':result.kind==='defer'?'deferred':'countered';
     this.domain.characters[p.pawn]!.memories.push(`${result.kind}: ${p.reason}; ${result.reason}`);
     if(result.kind==='accept'){p.standing={status:'running',deadline:this.observedTick+a.maxTicks,steps:[]};this.domain.characters[p.pawn]!.intention=p.id;}
+    if(result.kind==='refuse'||result.kind==='defer')this.queueIntentExclusion(a.intentId,p.pawn,result.kind);
+    if(result.kind==='accept')(this.domain.pendingIntentAcceptances??=[]).push(p.id);
     this.commit('decided',p.pawn,p);
     if(result.kind==='counter')return;
-    const op=result.kind==='accept'?'intent-accept':'intent-exclude';
-    try{
-      const r=await this.game.intent!({op,epoch:this.domain.epoch,intentId:a.intentId,actor:p.pawn,reason:result.kind,thing:a.thing,x:a.x,z:a.z,w:a.w,h:a.h,quota:a.quota,maxTicks:a.maxTicks,variant:a.variant});
-      this.ingestIntents(r.state);
-    }catch(error){
-      if(result.kind!=='accept')throw error;
-      // Consent stays recorded; the game refused to open or join the intent.
-      p.standing={status:'stopped',deadline:p.standing!.deadline,steps:[],reason:'Intent could not start: '+String(error).slice(0,200)};
-      delete this.domain.characters[p.pawn]!.intention;this.commit('intention-stopped',p.pawn,{proposal:p.id,reason:p.standing.reason});
+    if(result.kind!=='accept'){await this.flushIntentExclusions();return;}
+    try{await this.flushIntentAcceptances();}
+    catch(error){this.commit('intent-admission-uncertain',p.pawn,{proposal:p.id,error:String(error).slice(0,200)});}
+  }
+  /** The game may have accepted a timed-out request. Keep the agreement held until
+   * actual game standing resolves it; retries use the same intent/pawn identity. */
+  private async flushIntentAcceptances(){
+    for(const id of [...(this.domain.pendingIntentAcceptances??[])]){
+      const p=this.domain.proposals[id];if(!p||p.action.kind!=='haul-zone')throw Error('Missing pending native admission');
+      const a=p.action,game=await this.current();let live=this.liveIntent(game,a.intentId);
+      if(live?.excluded.includes(p.pawn)||p.standing?.status==='stopped'||live&&live.status!=='open'&&live.status!=='pending'&&!live.accepted.includes(p.pawn)){
+        p.standing!.status='stopped';p.standing!.reason='Game did not admit this native agreement';
+        if(this.domain.characters[p.pawn]!.intention===id)delete this.domain.characters[p.pawn]!.intention;
+      }else if(!live?.accepted.includes(p.pawn)){
+        planIntentOffer(this.domain.nativeHaul,game.pawns.find(x=>x.id===p.pawn),a,live);
+        const r=await this.game.intent!({op:'intent-accept',epoch:this.domain.epoch,intentId:a.intentId,actor:p.pawn,thing:a.thing,x:a.x,z:a.z,w:a.w,h:a.h,quota:a.quota,maxTicks:a.maxTicks,variant:a.variant});
+        live=this.liveIntent(r.state,a.intentId);
+        if(r.state.epoch!==this.domain.epoch||r.state.world!==this.domain.world||!live?.accepted.includes(p.pawn))throw Error('Intent acceptance unconfirmed');
+      }
+      this.domain.pendingIntentAcceptances=this.domain.pendingIntentAcceptances!.filter(x=>x!==id);
+      this.commit('intent-admission-confirmed',p.pawn,{proposal:id,status:p.standing?.status});
+      this.ingestIntents(await this.current());
     }
   }
+
   /** Aggregate receipts from the mod's ledger. Per-pawn credit is the carrier's; lifecycle
    * follows the intent (met, expired, stopped). There is no needs stop for native intents. */
   private ingestIntents(game:GameState){
@@ -870,7 +903,10 @@ export class Coordinator {
   /** Reconcile before retry; a lost response never creates a new action ID. */
   async reconcile() {
     return this.serial(async()=>{
-      const game=await this.current();
+      let game=await this.current();
+      if(Object.keys(this.domain.pendingIntentExclusions??{}).length)await this.flushIntentExclusions();
+      if(this.domain.pendingIntentAcceptances?.length)await this.flushIntentAcceptances();
+      game=await this.current();
       this.ingest(game);
       for(const care of Object.values(this.domain.selfCare??{})){
         if(care.stopped&&this.domain.characters[care.pawn]?.commitment===care.id){this.recordEating(care,await this.game.cancel!({epoch:this.domain.epoch,actor:care.pawn,id:care.id,kind:'eat'}));continue;}
@@ -921,10 +957,10 @@ export class Coordinator {
     if(p.action.kind==='haul-zone'){
       p.standing.status='stopped';p.standing.reason=reason;delete character.intention;
       character.memories.push(`Stopped ${p.action.kind}: ${reason}`);
+      this.queueIntentExclusion(p.action.intentId,pawn,'withdraw');
       this.commit('intention-stopped',pawn,{proposal:p.id,reason});
       // A trip already carrying finishes and is flagged; the game handles it natively.
-      const r=await this.game.intent!({op:'intent-exclude',epoch:this.domain.epoch,intentId:p.action.intentId,actor:pawn,reason:'withdraw'});
-      this.ingestIntents(r.state);return;
+      await this.flushIntentExclusions();return;
     }
     // Persist the stop BEFORE cancellation. Reconciliation retries uncertain cancellation,
     // never schedules another trip from a stopped intention.

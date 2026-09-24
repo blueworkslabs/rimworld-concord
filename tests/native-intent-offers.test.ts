@@ -36,7 +36,7 @@ class IntentGame implements GameBridge {
   }
   async save(){return {sha256:'hash'};}async load(){}async verify(){}
 }
-async function setup(){const game=new IntentGame(),c=new Coordinator(new Store(':memory:'),game);await c.open();await c.initializeCore('Wood needs a home.');await c.configureNativeHaul(cfg);return {game,c};}
+async function setup(){const game=new IntentGame(),store=new Store(':memory:'),c=new Coordinator(store,game);await c.open();await c.initializeCore('Wood needs a home.');await c.configureNativeHaul(cfg);return {game,c,store};}
 const say=(kind:'accept'|'refuse'|'defer',reason='because')=>scripted({kind,reason});
 
 test('a pawn the game says cannot haul is not offered, with the reason visible',async()=>{
@@ -95,4 +95,45 @@ test('partial expiry stops the standing and keeps the topic open; no needs stop 
   assert.equal(c.inspect().proposals[p.id]!.standing?.status,'running');
   Object.assign(game.data.intents![0]!,{status:'expired',delivered:20,byPawn:[{pawn:'P',count:20}]});await c.reconcile();
   const s=c.inspect().proposals[p.id]!.standing!;assert.equal(s.status,'stopped');assert.match(s.reason!,/expired at 20\/30; topic stays open/);
+});
+
+test('lost exclusion calls remain durable and reconcile without replaying consent',async()=>{
+  for(const kind of ['refuse','defer','withdraw'] as const){
+    const {c,game,store}=await setup();
+    const p=await c.core().propose('P',intentAction(cfg),'Stock wood');
+    if(kind==='withdraw')await c.pawn('P').decide(p.id,say('accept'));
+    const actual=game.intent.bind(game);let fail=true;
+    game.intent=async payload=>{if(payload.op==='intent-exclude'&&fail)throw Error('Mailbox unavailable');return actual(payload);};
+    if(kind==='withdraw')await assert.rejects(c.pawn('P').withdraw('Stop'),/Mailbox unavailable/);
+    else await assert.rejects(c.pawn('P').decide(p.id,say(kind)),/Mailbox unavailable/);
+    assert.equal(Object.keys(c.inspect().pendingIntentExclusions??{}).length,1);
+    // A different pawn's acceptance must not overtake the lost exclusion.
+    const b=await c.core().propose('B',intentAction(cfg),'Stock wood');
+    await assert.rejects(c.pawn('B').decide(b.id,say('accept')),/Mailbox unavailable/);
+    assert.ok(!game.ops.some(o=>o.op==='intent-accept'&&o.actor==='B'));
+    fail=false;const reopened=new Coordinator(store,game);await reopened.open();await reopened.reconcile();
+    assert.ok(game.data.intents![0]!.excluded.includes('P'));
+    assert.equal(Object.keys(reopened.inspect().pendingIntentExclusions??{}).length,0);
+  }
+});
+
+test('an applied acceptance with a lost reply is reconciled without inventing a stop or repeating acceptance',async()=>{
+  const {c,game}=await setup();const actual=game.intent.bind(game);let failed=false;
+  game.intent=async payload=>{const r=await actual(payload);if(payload.op==='intent-accept'&&!failed){failed=true;throw Error('Reply lost');}return r;};
+  const p=await c.core().propose('P',intentAction(cfg),'Stock wood');await c.pawn('P').decide(p.id,say('accept'));
+  assert.equal(c.inspect().proposals[p.id]!.standing?.status,'running');
+  assert.ok(c.inspect().pendingIntentAcceptances?.includes(p.id));
+  assert.ok(game.data.intents![0]!.accepted.includes('P'));
+  await c.reconcile();assert.equal(game.ops.filter(o=>o.op==='intent-accept').length,1);
+  assert.deepEqual(c.inspect().pendingIntentAcceptances,[]);
+  assert.equal(c.inspect().proposals[p.id]!.standing?.status,'running');
+});
+
+
+test('another pawn meeting quota does not complete a withdrawn obligation',async()=>{
+  const {c,game}=await setup();const p=await c.core().propose('P',intentAction(cfg),'Stock wood');
+  await c.pawn('P').decide(p.id,say('accept'));await c.pawn('P').withdraw('No more');
+  Object.assign(game.data.intents![0]!,{status:'met',delivered:30,byPawn:[{pawn:'B',count:30}]});await c.reconcile();
+  const report=crewReport(c.inspect(),0),v=report.agreements.find(a=>a.pawn==='P')!.progress;
+  assert.equal(v.completed,0);assert.equal(v.unfulfilled,1);assert.equal(v.status,'stopped');
 });

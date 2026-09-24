@@ -88,6 +88,8 @@ export type Domain = {
   coreState?:import('./core-planner.js').CoreState;
   exchanges?:Record<string,SocialExchange>;
   eventCursor?:number;crew?:CrewArchive;
+  pendingIntentAcceptances?:string[];
+  pendingIntentExclusions?:Record<string,{intentId:string;actor:string;reason:string}>;
   nativeHaul?:import('./native-intents.js').NativeHaulConfig;intentViews?:Record<string,NativeIntentView>;
   schema:1;world:string;epoch:string;branch:string;
   characters:Record<string,Character>;proposals:Record<string,Proposal>;
