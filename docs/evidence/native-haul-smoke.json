@@ -167,5 +167,11 @@
     "originalSaveFiles": 285,
     "changedOriginalSaveFiles": 0
   },
-  "artifactPolicy": "Raw events, full snapshots, saves, recordings, decompilation and review transcripts retained privately; aggregate projection only."
+  "artifactPolicy": "Raw events, full snapshots, saves, recordings, decompilation and review transcripts retained privately; aggregate projection only.",
+  "fixtureResolution": {
+    "roleSheetVersion": 2,
+    "decision": "Pedro accepts; Beatrice refuses exclusive / not asked attribution; Alvin not offered: cannot do hauling",
+    "gameTested": false,
+    "note": "Original run actors retained. Core/crew-log not-offered path pending."
+  }
 }

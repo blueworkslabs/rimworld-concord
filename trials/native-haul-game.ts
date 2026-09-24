@@ -18,7 +18,7 @@ let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
 const runId=randomUUID();
 const receipt:{runId:string;unimplemented:string[];mode:string;fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
-  {runId,unimplemented:['core offer/counter standing transitions','matched ordered-job halves','paired coordinator/cold restore','forced opportunistic replacement','forced partial merge','work-options and patch cost measurements'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
+  {runId,unimplemented:['core offer/counter standing transitions and visible not-offered reason','matched ordered-job halves','paired coordinator/cold restore','forced opportunistic replacement','forced partial merge','work-options and patch cost measurements'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 
 async function poll(){
@@ -61,7 +61,11 @@ try{
   const cfg=mode==='meal'?f.meal:f.main;
   await b.load(cfg.save);await b.admin('pause');await poll();
   const base='lab-concord-nh-base-'+Date.now();await b.save(base);
-  const A=pawn('Alvin').id,B=pawn('Beatrice').id,P=pawn('Pedro').id;
+  const roles=JSON.parse(await readFile(root+'/scripts/native-haul-roles.json','utf8'));
+  receipt.fixture={...f,roleSheet:roles};
+  const primary=roles.primary as string;
+  const A=pawn(primary).id,B=pawn(roles.secondary).id;
+  if(primary!=='Pedro'||roles.secondary!=='Beatrice')throw Error('unexpected fixture role sheet');
   const accept=(intentId:string,actor:string,o:Record<string,unknown>={})=>op({op:'intent-accept',intentId,actor,thing:'WoodLog',...cfg.area,quota:30,maxTicks:30000,variant:'attribution',...o});
   const exclude=(intentId:string,actor:string,reason:string)=>op({op:'intent-exclude',intentId,actor,reason});
   const done=(id:string)=>()=>view(id)?.status!=='open';
@@ -75,44 +79,45 @@ try{
       expect(c,rejected,'stale lab operation was not rejected');
     });
     for(const variant of ['exclusive','attribution'] as const)await scenario('variant-'+variant,base,async c=>{
-      const id=randomUUID();await exclude(id,B,'refuse');await accept(id,A,{variant});
+      const id=randomUUID();if(variant==='exclusive')await exclude(id,B,'refuse');await accept(id,A,{variant});
+      c.data.roles=roles.scripted[variant];c.data.notOffered=roles.notOffered;
       await run(done(id),240000);const v=invariants(c,id);if(!v)return;
       expect(c,v.status==='met'&&v.delivered===30,`expected 30 met, got ${v.delivered} ${v.status}`);
-      expect(c,!v.byPawn.some(p=>p.pawn===B),'refusing pawn credited');
-      if(variant==='exclusive')expect(c,!v.byPawn.some(p=>p.pawn===P),'non-accepted pawn credited in exclusive variant');
+      if(variant==='exclusive')expect(c,!v.byPawn.some(p=>p.pawn!==A),'non-accepted/refusing pawn credited in exclusive variant');
+      else expect(c,v.byPawn.some(p=>p.pawn===B&&p.count>0),'unasked helper Beatrice did not receive delivery credit');
       c.data.helpers=v.byPawn.filter(p=>p.pawn!==A);c.data.topic=topicOutcome(v);
     });
     await scenario('concurrent-quota',base,async c=>{
-      const id=randomUUID();await accept(id,A);await accept(id,B);await accept(id,P);
+      const id=randomUUID();await accept(id,A);await accept(id,B);
       await run(done(id),240000);const v=invariants(c,id);if(!v)return;
       expect(c,v.delivered===30&&v.overshoot===0,`credited ${v.delivered}, overshoot ${v.overshoot}`);
       c.data.byPawn=v.byPawn;c.data.rejectedStarts=v.rejectedStarts;
     });
     await scenario('withdraw-walking',base,async c=>{
       const id=randomUUID();await accept(id,A,{variant:'exclusive'});
-      const walking=()=>{const p=pawn('Alvin');return p.job==='HaulToCell'&&!p.carrying;};
-      if(!await run(walking,60000))throw Error('precondition: Alvin never started a tagged trip');
+      const walking=()=>{const p=pawn(primary);return p.job==='HaulToCell'&&!p.carrying;};
+      if(!await run(walking,60000))throw Error('precondition: Pedro never started a tagged trip');
       const from=lastSeq;await exclude(id,A,'withdraw');await poll();
-      expect(c,pawn('Alvin').job!=='HaulToCell','tagged job not ended on withdrawal');
+      expect(c,pawn(primary).job!=='HaulToCell','tagged job not ended on withdrawal');
       await run(()=>false,15000);const v=invariants(c,id);if(!v)return;
       expect(c,!v.byPawn.some(p=>p.pawn===A),'withdrawn pawn credited after walking-phase withdrawal');
       c.data.jobEnds=since(from,'job-end',A).map(e=>e.detail);c.data.incidental=v.drops.filter(d=>d.kind!=='participation');
     });
     await scenario('withdraw-carrying',base,async c=>{
       const id=randomUUID();await accept(id,A,{variant:'exclusive'});
-      const carrying=()=>{const p=pawn('Alvin');return p.job==='HaulToCell'&&!!p.carrying;};
-      if(!await run(carrying,60000))throw Error('precondition: Alvin never carried on a tagged trip');
+      const carrying=()=>{const p=pawn(primary);return p.job==='HaulToCell'&&!!p.carrying;};
+      if(!await run(carrying,60000))throw Error('precondition: Pedro never carried on a tagged trip');
       await exclude(id,A,'withdraw');
-      await run(()=>pawn('Alvin').job!=='HaulToCell',30000);await run(()=>false,5000);
+      await run(()=>pawn(primary).job!=='HaulToCell',30000);await run(()=>false,5000);
       const v=invariants(c,id);if(!v)return;
       expect(c,v.finishedAfterExclusion>=1,'carried trip not finished and flagged');
       expect(c,v.drops.filter(d=>d.pawn===A&&d.kind==='participation').every(d=>d.startedBeforeExclusion),'unflagged participation after withdrawal');
     });
     await scenario('forced-cancel-in-zone',base,async c=>{
       const id=randomUUID();await accept(id,A,{variant:'exclusive'});const a=cfg.area;
-      const inZone=()=>{const p=pawn('Alvin');return !!p.carrying&&p.x>=a.x&&p.x<a.x+a.w&&p.z>=a.z&&p.z<a.z+a.h;};
+      const inZone=()=>{const p=pawn(primary);return !!p.carrying&&p.x>=a.x&&p.x<a.x+a.w&&p.z>=a.z&&p.z<a.z+a.h;};
       const reached=await run(inZone,90000);
-      if(!reached){c.findings.push('Alvin never stood in the zone while carrying (retry with a larger area)');return;}
+      if(!reached){c.findings.push('Pedro never stood in the zone while carrying (retry with a larger area)');return;}
       const before=view(id)!.delivered;c.data.interrupt=await op({op:'lab-interrupt',actor:A});await poll();
       const v=invariants(c,id);if(!v)return;
       expect(c,v.delivered===before,'cleanup drop credited');c.data.drops=v.drops.slice(-3);
@@ -148,9 +153,9 @@ try{
       expect(c,r.made===true,'candidate was not created');expect(c,r.remainingBefore===r.remainingAfter,'candidate creation changed remaining');c.data.candidate=r;
     });
     await scenario('queued-removed-on-exclusion',base,async c=>{
-      const id=randomUUID();await accept(id,A);await accept(id,P);
-      c.data.queued=await op({op:'lab-queue-haul',intentId:id,actor:P});const reservedBefore=view(id)!.reserved;
-      await exclude(id,P,'withdraw');const q=await op({op:'lab-queue-count',intentId:id,actor:P});
+      const id=randomUUID();await accept(id,A);await accept(id,B);
+      c.data.queued=await op({op:'lab-queue-haul',intentId:id,actor:B});const reservedBefore=view(id)!.reserved;
+      await exclude(id,B,'withdraw');const q=await op({op:'lab-queue-count',intentId:id,actor:B});
       expect(c,q.tagged===0,'tagged queued job survived exclusion');expect(c,view(id)!.reserved===reservedBefore,'dequeue changed the ledger');
     });
     await scenario('excluded-forced-start',base,async c=>{
@@ -195,11 +200,11 @@ try{
       const ate=()=>since(0,'ingested',A).length>0;
       await run(()=>ate()||done(id)(),600000);
       const meal=since(0,'ingested',A)[0];
-      if(!meal){c.findings.push('invalid: Alvin never ate before the intent closed');return;}
+      if(!meal){c.findings.push('invalid: Pedro never ate before the intent closed');return;}
       const at=view(id)!;c.data.atMeal={tick:meal.tick,delivered:at.delivered,status:at.status,remaining:at.remaining};
       if(at.status!=='open'||at.remaining<=0){c.findings.push('invalid: intent not open with work left when hunger triggered');return;}
       const next=()=>events.some(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
-      expect(c,await run(next,300000),'Alvin did not start another tagged haul after eating');
+      expect(c,await run(next,300000),'Pedro did not start another tagged haul after eating');
       const resumed=events.find(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
       c.data.ticksMealToResume=resumed?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
     });

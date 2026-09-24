@@ -34,7 +34,7 @@ Seven available cases passed, with zero observed event gaps:
 The initial serialization failure, the subsequent exclusive-fixture failure and a
 startup-lock rejection before a case began are separately retained, not counted as passes.
 
-## Fixture blocker and remaining work
+## Fixture correction and remaining work
 
 The unchanged Alvin has the `Rancher43` backstory, which disables `ManualDumb` work.
 RimWorld removes Hauling priority on load. The sole-Alvin exclusive case therefore
@@ -43,12 +43,27 @@ capability was respected; this is not evidence that consent filtering failed.
 An initial suspicion of a work-priority index mismatch was rejected after checking the
 backstory and load behavior. No priority-map change was made.
 
-The design's sole-Alvin exclusive and meal cases need a capable accepting pawn. The
-recommendation, **not yet adopted**, is Pedro accepting, Beatrice refusing, Alvin
-unanswered. No backstory, capability or test role was silently changed. Meal trip count
-and resumption remain unverified. Also pending: live offers/counters, matched ordered
-halves, cold/paired restore, the full concurrent/escape/cleanup matrix, forced partial
-merge/opportunistic replacement, work-options and patch-cost measurements.
+Fable selected capability-preserving role sheet v2 after these runs:
+
+- Exclusive scripted: Pedro accepts; Beatrice refuses.
+- Attribution scripted: Pedro accepts; Beatrice is not asked and may receive helper credit.
+- Meal scripted: Pedro accepts; his initial Food is provisionally 0.33, pending dry-run
+  calibration and trip-count validation.
+- Live attribution: offer Pedro and Beatrice; do not script their answers.
+- In every case Alvin is **not offered**, with the visible reason **“not offered: cannot
+  do hauling”**—not an unanswered offer. No backstory or capability is altered.
+
+The [role sheet](../../scripts/native-haul-roles.json), fixture builder and scripted
+runner now use these roles. This is preparation, **not another gameplay pass**. The
+seven passes above used the original roles and are not relabeled. The runner records
+the role sheet; Clawd's core/crew-log not-offered path is still to be implemented.
+Historical boundary: ordered `Hauling.Ready` checks `WorkTags.Hauling`, whereas Alvin's
+Rancher backstory disables native hauling through `ManualDumb`; ordered-haul results
+therefore cannot establish native hauling capability.
+
+Meal trip count and resumption remain unverified. Also pending: live offers/counters,
+matched ordered halves, cold/paired restore, the full concurrent/escape/cleanup matrix,
+forced partial merge/opportunistic replacement, work-options and patch-cost measurements.
 
 Game and display were stopped at handoff. All 285 pre-existing saves are hash-unchanged.
 Raw events, snapshots, saves, recordings and review transcripts remain private.

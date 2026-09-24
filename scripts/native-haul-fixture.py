@@ -6,11 +6,13 @@ priorities (for example lab-baseline), an output path that must not exist, and J
 with wood positions and the candidate area:
   {"wood":[{"x":..,"z":..},...],"area":{"x":..,"z":..,"w":..,"h":..}}
 Main fixture: three stacks of 30. With --meal: 18 stacks of 5 (one per trip), and
-Alvin's Food just above the human want-to-eat threshold (0.30).
+Pedro's Food at a provisional 0.33; calibrate hunger timing in a dry run.
 Removes every stockpile whose filter could accept WoodLog, so nobody hauls wood
 before an agreement exists. The candidate area is data for the coordinator, not a zone.
 """
 import json,sys,xml.etree.ElementTree as E
+from pathlib import Path
+roles=json.loads(Path(__file__).with_name("native-haul-roles.json").read_text())
 args=[a for a in sys.argv[1:] if a!='--meal'];meal='--meal' in sys.argv
 src,ref,dst,layout=args;layout=json.loads(layout)
 # DefDatabase order on 4871 with Biotech and Odyssey: Core, then Childcare, then Fishing.
@@ -34,10 +36,15 @@ for p in pawns:
     vals[HAULING].text='3'
     priorities[p.findtext('id')]={w:int(v.text) for w,v in zip(WORK,vals) if v.text!='0'}
 
-# Meal case: Alvin (first pawn, campfire-v2 Food 0.40) starts just above want-to-eat.
+# Select by identity, never XML order; preserve every backstory/capability.
+mealPawn=None
 if meal:
-    for n in pawns[0].findall('needs/needs/li'):
-        if n.findtext('def')=='Food':n.find('curLevel').text='0.33'
+    matching=[p for p in pawns if (p.findtext('name/nick') or p.findtext('name/first'))==roles['meal']['pawn']]
+    assert len(matching)==1,'meal pawn missing or ambiguous'
+    mealPawn=matching[0]
+    food=[n for n in mealPawn.findall('needs/needs/li') if n.findtext('def')=='Food']
+    assert len(food)==1 and food[0].find('curLevel') is not None,'meal pawn lacks Food'
+    food[0].find('curLevel').text=str(roles['meal']['initialFood'])
 
 # No storage that accepts wood: drop stockpiles unless their filter lists only other defs.
 zones=m.find('zoneManager/allZones');removedZones=[]
@@ -69,5 +76,5 @@ for pos in layout['wood']:
 
 with open(dst,'xb') as out:r.write(out,encoding='utf-8',xml_declaration=True)
 print(json.dumps({'fixture':'native-haul-v1-meal' if meal else 'native-haul-v1','wood':{'stacks':stacks,'each':count,'total':stacks*count,'ids':made},
-    'area':area,'removedStockpiles':removedZones,'priorities':priorities,'alvinFood':0.33 if meal else 0.40,
+    'area':area,'removedStockpiles':removedZones,'priorities':priorities,'roleSheet':roles,'mealSetup':roles['meal'] if meal else None,
     'nativeSelfCare':True,'note':'Astra confirms the zone list and, for the meal case, the trip count in a dry run'}))

@@ -27,8 +27,8 @@ new game interface will not by itself fix model grounding. [NATIVE_INTENTS](NATI
 direction: **steer the game's own planner instead of driving pawns.**
 
 The native-haul spike now has [partial scripted staging evidence](trials/NATIVE_HAUL_SMOKE.md):
-helper attribution and several ledger/restore checks pass. The sole-Alvin fixture is
-blocked by his native work incapability; meal, full consent matrix and live verdict
+helper attribution and several ledger/restore checks pass. The original sole-Alvin fixture was
+blocked by native work incapability; Pedro-based role sheets are prepared but not game-tested. Meal, full consent matrix and live verdict
 remain unverified. The architectural direction below is unchanged.
 
 ## Next phase: work with RimWorld's planner
