@@ -39,7 +39,8 @@ the quota-75 helper/overlap runs, not mislabelled as three-hauler tests.
 - Main quota-30 fixture: exactly 30 delivered, but only one holder; not overlap evidence.
 - Own-carried target: a queued haul carrying 10 reserved exactly 10 at admission.
 - Other pre-carried admission: 10 into quota 30 completed; 20 into quota 5 was rejected
-  without intentional credit.
+  without intentional credit. The 10-carried case also observed a pickup true-up from
+  30 reserved to 20 actually carried at tick 78, then completed 30 without an escape.
 - Core offers: Alvin not offered, Beatrice refused, Pedro countered to 20 then accepted.
   Paired restore preserved 0 delivered + 20 reserved, then completed 20.
 - Meal regression: **75/75**, first work after one tick, meal at tick 1699 with 15
@@ -49,8 +50,9 @@ the quota-75 helper/overlap runs, not mislabelled as three-hauler tests.
 
 Both 75-unit runs admitted 20, 20, 20 and 15 across their trips. They exposed actual
 simultaneous reservation holders without changing pawn behaviour. No `intent-trued-up`
-shrink event occurred in those runs: actual pickups matched reservations. The shrinking
-branch is reviewed but not empirically exercised by those observations.
+shrink event occurred in those runs: actual pickups matched reservations. The separate
+pre-carried-10 case did exercise the shrinking branch (30 reserved to 20 carried);
+these are distinct observations, not a claim that helper pickups required correction.
 
 All nine recorded cases passed their assertions with zero quota escapes, consent
 violations and event gaps, and zero character-model calls. This is partial scripted
