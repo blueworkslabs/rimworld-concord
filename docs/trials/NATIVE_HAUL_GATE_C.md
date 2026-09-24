@@ -7,8 +7,8 @@ was posted before the findings and is unchanged; this record adds Part D and the
 ## Part D: read versus findings
 
 - **Right:** the sequence, 75/75 as Pedro 40 and Beatrice 35, Pedro helping unasked,
-  his offer arriving late, six repetitive core turns, food questions arriving after
-  everyone had eaten, the 75-to-120 counter with no record, templated voices.
+  his offer arriving late, six repetitive core turns, the later status questions arriving
+  after their recipients had eaten, the 75-to-120 counter with no record, templated voices.
 - **Could not know (artifact):** Pedro answered *accept*; it was correctly rejected
   (`Intent already closed: met`) and then mislabelled *withdrawn*. Both on-screen
   contradictions were true at snapshot time and stale by publication. Beatrice's eating
@@ -23,11 +23,12 @@ was posted before the findings and is unchanged; this record adds Part D and the
 
 **The spike wins on the game side. Migrate.**
 
-Every Gate B measure the run could test, it passed: zero consent violations, zero
+The native-haul game-mechanics measures observed in this run passed: zero consent violations, zero
 credit beyond the quota, exact totals from receipts, two simultaneous reservation
 holders, a helper who appeared because the map made helping sensible, paired and
-new-process cold restore intact. No stale job rejection, no agreement killed by a meal,
-no capability override. Meal resumption is proven in the matched scripted case (three
+new-process cold coordinator restore intact (the game process stayed up). No stale
+job execution or capability override; the late acceptance was rejected because the
+intent was already complete. Meal resumption is proven in the matched scripted case (three
 ticks) and was not reachable live because the work finished first.
 
 **It does not win on the crew side, and was not designed to.** No plan formed between
@@ -49,6 +50,11 @@ else. Those are the next scene's questions.
    and the reflection perspective is trimmed rather than the limit raised.
 
 ## Decisions closed
+
+These are direction decisions, not claims that the current spike already implements
+silent wait or the migration's legibility changes. The documented failures and the full
+[technical findings](NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read)
+remain part of the verdict; game-mechanics success is not a clean cognitive-run claim.
 
 - **Attribution-only is the default for tagged work.** Refusal, defer and withdrawal
   bind; helpers are credited as helpers. The exclusive variant remains scripted-only.
