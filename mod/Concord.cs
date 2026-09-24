@@ -79,7 +79,7 @@ namespace Concord
                 if(a.status!="started")Production.Cleanup(a);
             }
         }
-        private void Emit(string pawn,string kind,string detail,string subject="") {
+        public void Emit(string pawn,string kind,string detail,string subject="") {
             events.Add(new NativeEvent {seq=++eventSeq,tick=Find.TickManager.TicksGame,pawn=pawn,kind=kind,detail=detail,subject=subject});
             if(events.Count>256) events.RemoveAt(0);
         }
@@ -135,7 +135,7 @@ namespace Concord
             }
         }
     }
-    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing,target,bed,cancelKind,crewJson; public int x,z,ttlMs,count,meals,maxTicks,untilTick; public int mapId=-1; }
+    [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing,target,bed,cancelKind,crewJson,intentId,variant,reason; public int x,z,w,h,quota,ttlMs,count,meals,maxTicks,untilTick; public int mapId=-1; }
     [Serializable] public class Response { public string id,error; public bool ok; }
     [Serializable] public class PawnView { public string id,name,job,currentBed,carrying; public int x,z; public float health; public bool workReady,rescueReady,buildReady,cookReady,downed; }
     [Serializable] public class Snapshot { public string world,epoch; public int ticks,decisionPauses; public bool loaded,paused,manualPaused; }
@@ -147,6 +147,8 @@ namespace Concord
             if(!GenCommandLine.CommandLineArgPassed("rimworld-lab") ||
                String.IsNullOrEmpty(Environment.GetEnvironmentVariable("RIMWORLD_LAB_ROOT")) ||
                GenFilePaths.SaveDataFolderPath!=Path.Combine(Environment.GetEnvironmentVariable("RIMWORLD_LAB_ROOT"),"profile")) return;
+            // Native-intent patches (docs/SPIKE_NATIVE_HAUL.md); Harmony comes from brrainz.harmony, never bundled.
+            new HarmonyLib.Harmony("blueworkslabs.concord").PatchAll(typeof(Bootstrap).Assembly);
             var o=new GameObject("ConcordBridge"); UnityEngine.Object.DontDestroyOnLoad(o); o.AddComponent<Pump>();
         }
     }
@@ -173,7 +175,7 @@ namespace Concord
             }).TrimEnd('}')+",\"eating\":"+Eating.Options(p,w.epoch)+",\"foodObservation\":"+FoodObservation.Json(p,w.epoch)+",\"production\":"+Production.Options(p,w.epoch)+",\"linkStatus\":"+LinkTelemetry.Json(p,w.epoch)+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"hauling\":"+Hauling.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
-                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"crewLog\":"+CrewLog.Json(w)+"}";
+                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"intents\":"+IntentState.Get().Json()+",\"crewLog\":"+CrewLog.Json(w)+"}";
         }
         private static ActionRecord Move(Request r) {
             var w=World();
@@ -259,6 +261,15 @@ namespace Concord
                 if(r.op=="move"||r.op=="haul"||r.op=="rescue"||r.op=="build"||r.op=="cook"||r.op=="eat") receipt=JsonUtility.ToJson(Move(r));
                 else if(r.op=="crew-log") {var w=World();CrewLog.Set(w,r.epoch,r.crewJson);}
                 else if(r.op=="cancel") receipt=JsonUtility.ToJson(Cancel(r));
+                else if(r.op=="intent-accept"||r.op=="intent-exclude"||r.op=="intent-stop") {
+                    var w=World();if(r.epoch!=w.epoch) throw new Exception("Stale timeline");
+                    var s=IntentState.Get();
+                    if(r.op=="intent-accept")s.Accept(r);
+                    else if(r.op=="intent-exclude")s.Exclude(r);
+                    else {var i=s.ById(r.intentId);if(i==null) throw new Exception("Unknown intent");s.Retire(i,"stopped");}
+                    receipt=s.Json();
+                }
+                else if(r.op.StartsWith("lab-")) {World();receipt=IntentState.Get().Lab(r);}
                 else if(r.op=="decision-pause") {World();DecisionPauses.Set(r.epoch,r.actor,r.leaseId,r.ttlMs);}
                 else if(r.op=="activity") {
                     var w=World();

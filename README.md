@@ -94,7 +94,7 @@ The mod needs Mono `mcs` and an owned RimWorld 1.6 installation. Reference assem
 are never committed.
 
 ```bash
-bash scripts/build-mod.sh /path/to/RimWorldLinux_Data/Managed   # -> mod/Assemblies/Concord.dll
+bash scripts/build-mod.sh /path/to/RimWorldLinux_Data/Managed /path/to/Mods/HarmonyMod/Current/Assemblies/0Harmony.dll   # -> mod/Assemblies/Concord.dll
 ```
 
 ## Running in the real game
