@@ -332,7 +332,7 @@ namespace Concord {
                 if(r.count==2)h.Unpatch(HarmonyLib.AccessTools.Method(typeof(Job),nameof(Job.SetTarget)),HarmonyLib.HarmonyPatchType.All,h.Id);
                 return "{\"mode\":"+r.count+",\"patchedMethods\":"+h.GetPatchedMethods().Count()+"}";
             }
-            if(r.op=="work-options") return WorkOptions.Measure(Math.Max(1,Math.Min(r.count,10)));
+            if(r.op=="lab-work-options") return WorkOptions.Measure(Math.Max(1,Math.Min(r.count,10)));
             if(r.op=="lab-fault-escape"){if(p==null)throw new Exception("Unknown pawn");faultSkipNext=true;faultPawn=r.actor;return "{\"fault\":\"armed\"}";}
             if(r.op=="lab-plain-zone") {
                 // Matched ordered-job half: the same area as an ordinary, untagged wood stockpile.
@@ -415,28 +415,28 @@ namespace Concord {
     }
 }
 namespace Concord {
-    // Measurement only (docs/SPIKE_NATIVE_HAUL.md, Options menu): per pawn and per work giver,
-    // up to N candidates that pass the game's own predicate. HasJobOnThing/HasJobOnCell check
-    // reservations without taking them; no job is created, so the map is left unchanged.
+    // Measurement-only WoodLog/HaulGeneral subset. Generic HasJobOnThing/Cell can
+    // call JobOnThing/Cell and allocate jobs on 4871; never invoke those here.
     public static class WorkOptions {
         public static string Measure(int top) {
             var sw=System.Diagnostics.Stopwatch.StartNew();var pawnParts=new List<string>();
-            foreach(var p in Find.CurrentMap.mapPawns.FreeColonistsSpawned) {
-                var givers=new List<string>();var pw=System.Diagnostics.Stopwatch.StartNew();
+            Rand.PushState();
+            try {foreach(var p in Find.CurrentMap.mapPawns.FreeColonistsSpawned) {
+                var pw=System.Diagnostics.Stopwatch.StartNew();int found=0;bool eligible=false;
                 foreach(var wg in p.workSettings.WorkGiversInOrderNormal) {
-                    var scanner=wg as WorkGiver_Scanner;
-                    if(scanner==null||scanner.ShouldSkip(p,false)) continue;
-                    int found=0;
-                    try {
-                        var things=scanner.PotentialWorkThingsGlobal(p)??p.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
-                        foreach(var t in things){if(found>=top)break;if(!t.IsForbidden(p)&&scanner.HasJobOnThing(p,t,false))found++;}
-                        if(found<top){var cells=scanner.PotentialWorkCellsGlobal(p);if(cells!=null)foreach(var c in cells){if(found>=top)break;if(scanner.HasJobOnCell(p,c,false))found++;}}
-                    } catch(Exception e) {givers.Add("{\"def\":\""+wg.def.defName+"\",\"error\":\""+e.GetType().Name+"\"}");continue;}
-                    if(found>0)givers.Add("{\"def\":\""+wg.def.defName+"\",\"candidates\":"+found+"}");
+                    if(wg.GetType()!=typeof(WorkGiver_HaulGeneral))continue;
+                    if(p.WorkTagIsDisabled(wg.def.workTags)||p.WorkTypeIsDisabled(wg.def.workType)||wg.MissingRequiredCapacity(p)!=null)continue;
+                    eligible=true;var scanner=(WorkGiver_Scanner)wg;
+                    foreach(var t in scanner.PotentialWorkThingsGlobal(p)) {
+                        if(found>=top)break;
+                        if(t.def.defName!="WoodLog"||t.IsForbidden(p)||!HaulAIUtility.PawnCanAutomaticallyHaulFast(p,t,false))continue;
+                        IntVec3 cell;IHaulDestination dest;
+                        if(StoreUtility.TryFindBestBetterStorageFor(t,p,p.Map,StoreUtility.CurrentStoragePriorityOf(t),p.Faction,out cell,out dest)&&dest is ISlotGroupParent)found++;
+                    }
                 }
-                pawnParts.Add("{\"pawn\":\""+p.GetUniqueLoadID()+"\",\"micros\":"+(pw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+",\"givers\":["+String.Join(",",givers.ToArray())+"]}");
-            }
-            return "{\"top\":"+top+",\"totalMicros\":"+(sw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+",\"pawns\":["+String.Join(",",pawnParts.ToArray())+"]}";
+                pawnParts.Add("{\"pawn\":\""+p.GetUniqueLoadID()+"\",\"eligible\":"+(eligible?"true":"false")+",\"candidates\":"+found+",\"micros\":"+(pw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+"}");
+            }} finally {Rand.PopState();}
+            return "{\"scope\":\"WoodLog HaulGeneral slot-storage predicate subset; not a full work menu\",\"top\":"+top+",\"totalMicros\":"+(sw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+",\"pawns\":["+String.Join(",",pawnParts.ToArray())+"]}";
         }
     }
 }

@@ -393,22 +393,26 @@ unproven. No capability bypass or character rewrite has been made.
     the game's own interruption, the moment he stands in the tagged zone carrying on a
     tagged haul. The drop must be incidental and never credited. Whether he resumes
     after undrafting is recorded, not required.
-  - `patch-cost` measures simulation speed at Ultrafast in three modes: all patches, all
-    except `Job.SetTarget`, and none (vanilla). The modes are interleaved three times on
-    the same save and workload. It then times every patch call with all patches on and
-    reports microseconds per 1000 ticks per patch. The `Job.SetTarget` number is the
-    isolated cost, because a mode that hits the speed cap can't show its cost in ticks
-    per second. The measurement uses the lab-only `lab-patches`, `lab-patch-cost` and
-    `lab-speed` operations.
-  - `work-options` runs the options-menu measurement five times: for each pawn and work
-    giver, the game's own `HasJobOnThing`/`HasJobOnCell` checks, with no jobs created.
+  - `patch-cost` compares Ultrafast throughput with all patches, without `Job.SetTarget`,
+    and with Concord's patches off (not a wholly unmodded game). Three rotated rounds
+    reload the same save and ordinary untagged stockpile, so disabling patches does not
+    remove quota semantics from one arm. Non-advancing/paused samples are invalid.
+    A separate tagged-work profile measures handler bodies and placement accounting;
+    prefix/postfix invocations are counted separately. These timings exclude Harmony
+    dispatch and include timer/nested-work overhead: **not isolated total patch cost**.
+    Capped or noisy TPS differences cannot establish overhead. Cleanup restores timing
+    and patches with an independent deadline, including on failure.
+  - `work-options` safely measures only the WoodLog/HaulGeneral slot-storage predicate
+    subset for all three pawns, five times. It never calls generic `HasJobOnThing` or
+    `HasJobOnCell`: on 4871 those can construct jobs. Other work givers remain outside
+    measured coverage. Random state is preserved; no jobs or reservations are created.
   - `helper` mode (`--helper`) runs `helper-geometry` (attribution; Pedro accepts,
     Beatrice is unasked) and `overlap-geometry` (both accept) on a fixture where helping
     can only come from geometry: more wood than one trip moves, a quota of 75, and a
     second cluster placed near Beatrice. Helping and overlap (`peakHolders`, the most
     pawns holding in-flight quota at once) are recorded as results, not required. The
     invariants must hold either way.
-- **Not yet built:** forced opportunistic replacement and failed partial merge. Both are
+- **Not yet built:** full work-options enumeration, forced opportunistic replacement and failed partial merge. These are
   listed as unimplemented in run receipts and observed from events rather than forced;
   a run without such an event is not evidence for either case.
 

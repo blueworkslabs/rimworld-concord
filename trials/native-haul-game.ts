@@ -23,7 +23,7 @@ let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
 const runId=randomUUID();
 const receipt:{runId:string;unimplemented:string[];mode:string;fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
-  {runId,unimplemented:['forced opportunistic replacement','forced partial merge'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
+  {runId,unimplemented:['forced opportunistic replacement','forced partial merge','full work-options menu (only WoodLog storage-haul subset measured)'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 
 async function poll(){
@@ -322,32 +322,50 @@ try{
       }finally{s.close();}
     });
     await scenario('patch-cost',base,async c=>{
-      // Sim speed with all patches, all but Job.SetTarget, and none (vanilla), interleaved
-      // three times on the same save and workload; then per-patch timing with every patch on.
-      const segment=async(mode:number,ms:number)=>{
-        await b.load(base);await b.admin('pause');events=[];lastSeq=0;await poll();
-        const id=randomUUID();await accept(id,A,{quota:75});await op({op:'lab-patches',count:mode});
-        await startNative(b);await op({op:'lab-speed',count:4});await delay(2000);await poll();
-        const t0=state.ticks,w0=Date.now();await delay(ms);await poll();const tps=(state.ticks-t0)/((Date.now()-w0)/1000);
-        await b.admin('pause');return {mode,tps:Math.round(tps)};
+      // Same ordinary stockpile in every throughput arm: no intent caps to change work.
+      // Tagged-work handler profiling is separate and is NOT total Harmony overhead.
+      const observe=async(ms:number)=>{
+        await poll();const t0=state.ticks,w0=Date.now();
+        while(Date.now()-w0<ms){await delay(150);await poll();if(state.paused)throw Error('measurement interrupted by pause');}
+        const ticks=state.ticks-t0,wallMs=Date.now()-w0;
+        if(ticks<=0)throw Error('measurement did not advance simulation');
+        return {ticks,wallMs,tps:ticks/(wallMs/1000)};
       };
-      const samples:{mode:number;tps:number}[]=[];
+      const fresh=async()=>{
+        await b.admin('pause');await op({op:'lab-patches',count:1});
+        await b.load(base);await b.admin('pause');events=[];lastSeq=0;await poll();
+      };
+      const segment=async(mode:number)=>{
+        await fresh();await op({op:'lab-plain-zone',actor:A,...cfg.area});
+        await op({op:'lab-patches',count:mode});await startNative(b);await op({op:'lab-speed',count:4});
+        const sample=await observe(20000);await b.admin('pause');return {mode,...sample};
+      };
+      const samples:{mode:number;ticks:number;wallMs:number;tps:number}[]=[];
       try{
-        for(let rep=0;rep<3;rep++)for(const m of [1,2,0])samples.push(await segment(m,20000));
-        await b.load(base);await b.admin('pause');await poll();const id=randomUUID();await accept(id,A,{quota:75});
-        await op({op:'lab-patches',count:1});await op({op:'lab-patch-cost',count:1});
-        await startNative(b);await op({op:'lab-speed',count:4});await poll();const t0=state.ticks;await delay(20000);await poll();const ticks=state.ticks-t0;
-        await b.admin('pause');const cost=await op({op:'lab-patch-cost',count:2});await op({op:'lab-patch-cost',count:0});
-        const med=(m:number)=>{const x=samples.filter(s=>s.mode===m).map(s=>s.tps).sort((a,b)=>a-b);return x[1]??x[0]??0;};
+        await op({op:'lab-patch-cost',count:0});
+        for(const order of [[1,2,0],[2,0,1],[0,1,2]])for(const m of order)samples.push(await segment(m));
+        await fresh();const id=randomUUID();await accept(id,A,{quota:75});
+        await op({op:'lab-speed',count:4});await b.admin('pause');await poll();const t0=state.ticks;
+        await op({op:'lab-patch-cost',count:1});await startNative(b);await op({op:'lab-speed',count:4});
+        const observation=await observe(20000);await b.admin('pause');await poll();const ticks=state.ticks-t0;
+        const cost=await op({op:'lab-patch-cost',count:2});
+        if(ticks<=0||!cost.patches.some((p:any)=>p.patch==='2 Job.SetTarget'&&p.calls>0))throw Error('no usable SetTarget profile');
+        const med=(m:number)=>{const x=samples.filter(s=>s.mode===m).map(s=>s.tps).sort((a,b)=>a-b);return x[1]!;};
         c.data.patchCost={samples,medianTps:{all:med(1),allButSetTarget:med(2),none:med(0)},
           setTargetTpsDelta:med(2)-med(1),allPatchesTpsDelta:med(0)-med(1),
-          timedTicks:ticks,perPatch:cost.patches.map((p:any)=>({...p,microsPer1000Ticks:ticks?Math.round(p.micros*1000/ticks*10)/10:null})),
-          note:'Ultrafast target is 15x; a mode reaching the cap cannot show its cost in TPS, so the per-patch timing is the isolated number.'};
-      }finally{await op({op:'lab-patches',count:1});}
+          timedTicks:ticks,observation,profileIntent:view(id),perHandler:cost.patches.map((p:any)=>({...p,microsPer1000Ticks:Math.round(p.micros*1000/ticks*10)/10})),
+          note:'Throughput: matched ordinary stockpile, no active intent. Difference includes dispatch and counters; noisy/capped TPS is not isolated cost. Tagged profile: instrumented handler bodies, callback separate, prefix/postfix counted separately; excludes Harmony dispatch, includes timer overhead and nested work. Do not sum as exclusive CPU time.'};
+      }finally{
+        const failures:string[]=[];
+        for(const clean of [()=>b.admin('pause'),()=>op({op:'lab-patch-cost',count:0}),()=>op({op:'lab-patches',count:1})]){
+          try{opDeadline=Date.now()+10000;await clean();}catch(e){failures.push(String(e));}
+        }
+        if(failures.length)throw Error('patch measurement cleanup failed: '+failures.join('; '));
+      }
     });
     await scenario('work-options',base,async c=>{
       // Measurement only: the options menu is never given to the core in this spike.
-      const runs=[];for(let i=0;i<5;i++)runs.push(await op({op:'work-options',count:5}));
+      const runs=[];for(let i=0;i<5;i++)runs.push(await op({op:'lab-work-options',count:5}));
       c.data.workOptions={runs,totalMicros:runs.map((r:any)=>r.totalMicros)};
       expect(c,runs.every((r:any)=>r.pawns.length===3),'work-options did not cover all three pawns');
     });

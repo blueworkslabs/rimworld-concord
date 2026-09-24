@@ -10,9 +10,9 @@ namespace Concord {
     // Applied only in the staging lab (see Bootstrap). Each reads cached state only.
     // Per-patch call counts always; wall-clock cost only while a lab measurement enables it.
     public static class PatchCost {
-        public static readonly string[] Names={"","1 StoreSearch","2 Job.SetTarget","3 HaulToCellStorageJob","3b TryMakePreToilReservations","4 TryDropCarriedThing","4 TryDropCarriedThing(count)","5 Notify_ReceivedThing","6 StartJob","6 CleanupCurrentJob","7 Ingested","8 TryInteractWith"};
+        public static readonly string[] Names={"","1 StoreSearch","2 Job.SetTarget","3 HaulToCellStorageJob","3b TryMakePreToilReservations","4 TryDropCarriedThing","4 TryDropCarriedThing(count)","5 Notify_ReceivedThing","6 StartJob","6 CleanupCurrentJob","7 Ingested","8 TryInteractWith","4 placement accounting callback"};
         public static bool timing;
-        public static readonly long[] calls=new long[12],ticks=new long[12];
+        public static readonly long[] calls=new long[13],ticks=new long[13];
         public static long Start(){return timing?System.Diagnostics.Stopwatch.GetTimestamp():0;}
         public static void Stop(int i,long t0){calls[i]++;if(timing)ticks[i]+=System.Diagnostics.Stopwatch.GetTimestamp()-t0;}
         public static void Reset(){Array.Clear(calls,0,calls.Length);Array.Clear(ticks,0,ticks.Length);}
@@ -145,7 +145,7 @@ namespace Concord {
                 job.haulMode==HaulMode.ToCellStorage&&job.targetB.Cell==dropLoc?job:null;
             string source=participation!=null?"haul":IntentHooks.InCleanup(p)?"cleanup":mode==ThingPlaceMode.Near?"near":"other";
             var orig=placedAction;
-            placedAction=(th,n)=>{if(orig!=null)orig(th,n);s.Placed(p,th,n,participation,source);};
+            placedAction=(th,n)=>{if(orig!=null)orig(th,n);long cost=PatchCost.Start();try{s.Placed(p,th,n,participation,source);}finally{PatchCost.Stop(12,cost);}};
         }
     }
     [HarmonyPatch(typeof(Pawn_CarryTracker),nameof(Pawn_CarryTracker.TryDropCarriedThing),
