@@ -347,11 +347,13 @@ execution, or invalid output or non-progress stalls the run. Retain all failures
 ## Implementation status
 
 Built on `feat/native-haul-spike`. **Partial scripted staging evidence now exists**, not
-Gate C approval: [smoke results](trials/NATIVE_HAUL_SMOKE.md). The frozen sole-Alvin
+Gate C approval: [smoke results](trials/NATIVE_HAUL_SMOKE.md) and
+[offers/meal staging](trials/NATIVE_HAUL_OFFERS.md). The frozen sole-Alvin
 exclusive run was blocked because his unchanged Rancher backstory disables native
 hauling. Fable selected Pedro for revised scripted/meal roles; the builder and runner
-now use role sheet v2, not yet game-tested. No capability bypass or character rewrite
-has been made.
+now use role sheet v2. Exclusive, offers/paired checkpoint and meal resumption/completion
+have been game-tested; revised helper, overlap and actual cleanup-drop coverage remain
+unproven. No capability bypass or character rewrite has been made.
 
 - **Mod:** `mod/NativeIntents.cs` (intent tag, ledger, reconciliation, bridge and lab
   operations) and `mod/IntentPatches.cs` (patches 1–8). Build with

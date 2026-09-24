@@ -26,10 +26,13 @@ testing; the exact causes of the historical eating rejections remain unknown, an
 new game interface will not by itself fix model grounding. [NATIVE_INTENTS](NATIVE_INTENTS.md) explains the new
 direction: **steer the game's own planner instead of driving pawns.**
 
-The native-haul spike now has [partial scripted staging evidence](trials/NATIVE_HAUL_SMOKE.md):
-helper attribution and several ledger/restore checks pass. The original sole-Alvin fixture was
-blocked by native work incapability; Pedro-based role sheets are prepared but not game-tested. Meal, full consent matrix and live verdict
-remain unverified. The architectural direction below is unchanged.
+The native-haul spike now has [partial scripted staging evidence](trials/NATIVE_HAUL_OFFERS.md):
+Pedro-based exclusive work, offers/counter/paired restore, and native meal resumption
+pass (75/75 delivered, resumed three ticks after eating). The matched ordered meal
+observed 15/75, with an explicitly retained measurement failure and offline rescore.
+Revised helper participation, overlapping reservations, actual cleanup placement,
+cold restore, remaining boundary/performance checks and the frozen live verdict remain
+unverified. The architectural direction below is unchanged.
 
 ## Next phase: work with RimWorld's planner
 
