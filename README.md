@@ -24,7 +24,7 @@ remain unchanged.
 | Build a campfire (20 wood) | yes | scripted game tests only |
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
-| Native tagged-zone haul spike | [partial scripted checks](docs/trials/NATIVE_HAUL_OFFERS.md): offers/paired restore, 75-wood native meal completion and 3-tick resumption; helper/cleanup/concurrency coverage incomplete | not run |
+| Native tagged-zone haul spike | [partial scripted checks](docs/trials/NATIVE_HAUL_INSTRUMENTATION.md): 75-wood meal completion, 3-tick resumption, drafting cleanup, fresh-coordinator restore and scoped timing; helper/overlap not observed | not run |
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not
 now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private

@@ -30,9 +30,12 @@ The native-haul spike now has [partial scripted staging evidence](trials/NATIVE_
 Pedro-based exclusive work, offers/counter/paired restore, and native meal resumption
 pass (75/75 delivered, resumed three ticks after eating). The matched ordered meal
 observed 15/75, with an explicitly retained measurement failure and offline rescore.
-Revised helper participation, overlapping reservations, actual cleanup placement,
-cold restore, remaining boundary/performance checks and the frozen live verdict remain
-unverified. The architectural direction below is unchanged.
+[Follow-up instrumentation](trials/NATIVE_HAUL_INSTRUMENTATION.md) observed a real
+drafting cleanup drop, fresh-coordinator restore and scoped patch timings. Geometry
+still produced no helper or overlapping reservations; one job reserved all remaining
+quota. Full process restart, rare boundary cases, full work-menu coverage and the
+intent-only frozen live harness/verdict remain unverified or unimplemented. The
+reservation policy needs an explicit disposition before interpreting helper behavior.
 
 ## Next phase: work with RimWorld's planner
 

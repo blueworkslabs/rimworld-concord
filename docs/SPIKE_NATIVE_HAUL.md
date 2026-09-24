@@ -352,8 +352,11 @@ Gate C approval: [smoke results](trials/NATIVE_HAUL_SMOKE.md) and
 exclusive run was blocked because his unchanged Rancher backstory disables native
 hauling. Fable selected Pedro for revised scripted/meal roles; the builder and runner
 now use role sheet v2. Exclusive, offers/paired checkpoint and meal resumption/completion
-have been game-tested; revised helper, overlap and actual cleanup-drop coverage remain
-unproven. No capability bypass or character rewrite has been made.
+have been game-tested. [Instrumentation staging](trials/NATIVE_HAUL_INSTRUMENTATION.md)
+also observed a real drafting cleanup drop, fresh-coordinator restore and scoped timing.
+Revised helper and overlap observations were negative with all remaining quota reserved
+by one job; no claim about unconstrained pawn willingness follows. No capability bypass
+or character rewrite has been made.
 
 - **Mod:** `mod/NativeIntents.cs` (intent tag, ledger, reconciliation, bridge and lab
   operations) and `mod/IntentPatches.cs` (patches 1–8). Build with
