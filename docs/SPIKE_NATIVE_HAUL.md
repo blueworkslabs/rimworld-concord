@@ -1,7 +1,8 @@
 # Spike design: one native-intent haul (Gate B)
 
-**Status: draft for design freeze.** Written by Clawd; needs Fable's architecture sign-off
-and Astra's confirmation that it is testable in staging. Nothing is compiled before both.
+**Status: architecture sign-off given by Fable at `4eba938`, with the decisions and fixes
+below folded in; waiting for Astra's testability confirmation.** Written by Clawd.
+Nothing is compiled before Astra confirms.
 Builds on [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md) (pinned: RimWorld 1.6.4871 rev600)
 and [NATIVE_INTENTS](NATIVE_INTENTS.md).
 
@@ -52,8 +53,13 @@ Derived from the campfire fixture, frozen before any run:
 
 **Intent object (coordinator):** `haul-zone {intentId, thingDef: WoodLog, area, quota
 1–75, maxTicks}`. It is offered to each pawn as an ordinary offer that references the
-intent. Answers work as today (accept, refuse, defer, counter with a smaller quota), and
-each pawn's answer sets its standing on the shared intent.
+intent. Answers work as today (accept, refuse, defer, counter), and each pawn's answer sets its
+standing on the shared intent.
+
+**Quota counters.** The intent is shared, so a counter such as "20, not 30" is only
+adoptable **before the first acceptance**; adopting it replaces the intent's quota for
+everyone. Once the zone exists, a counter is recorded, the pawn's standing stays *none*,
+and the core cannot adopt it. The offer text says so.
 
 **On the first acceptance** the mod creates a `Zone_Stockpile` on the area: wood only,
 priority *Important*, tagged in our saved `WorldState` as `Zone.ID → {intentId, quota,
@@ -90,11 +96,11 @@ When a pawn refuses, defers or withdraws:
 - Future admission closes at once: searches and preselected cells skip the tagged zone
   for that pawn.
 - A job that targets the zone and **is not carrying yet** is ended (nothing to drop).
-- A job **already carrying** toward the zone finishes its trip. It is credited, flagged
-  `startedBeforeExclusion`, and is not a violation. Cancelling it would itself drop the
-  wood where the pawn stands, possibly inside the zone, so finishing is both safer and
-  more natural. (Alternative for Fable: re-target the carry to another stockpile, as the
-  drop toil already does on failure. More code, and it still falls back to haul-aside.)
+- A job **already carrying** toward the zone finishes its trip (decided: finish, don't
+  re-target). It is credited, flagged `startedBeforeExclusion`, and is not a violation.
+  Cancelling it would itself drop the wood where the pawn stands, possibly inside the
+  zone. The crew log says so in plain words, for example "finished a trip started before
+  withdrawing", so a viewer doesn't read it as the refusal being ignored.
 - Queued jobs targeting the zone are removed from the pawn's queue.
 
 ### Quota guarantee
@@ -134,13 +140,13 @@ in the code:
 | # | Target | Kind | Reason |
 |---|---|---|---|
 | 1 | `StoreUtility.TryFindBestBetterStoreCellForWorker` | prefix | Admission for storage searches: excluded pawns, non-accepted pawns in the exclusive variant, `remaining`, carried-load size |
-| 2 | `Verse.AI.Job.SetTarget` | postfix | Commit point for re-targets of a `HaulToCell` job: reserve, transfer or release atomically |
+| 2 | `Verse.AI.Job.SetTarget` | postfix | Commit point for re-targets of a `HaulToCell` job: reserve, transfer or release atomically. The widest patch (every job of every pawn and animal): an early `HaulToCell` check, and its cost is measured on its own |
 | 3 | `HaulAIUtility.HaulToCellStorageJob` | prefix and postfix | Admission for preselected cells; cap `job.count`; reserve |
 | 4 | `Pawn_CarryTracker.TryDropCarriedThing` (both overloads) | prefix | Wrap `placedAction` (keeping any existing callback): credit participation, record incidental placement, never double-count |
 | 5 | `Zone_Stockpile.Notify_ReceivedThing` | postfix | Audit arrivals into the tagged zone that hook 4 didn't see (incidental, unattributed) |
 | 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
 | 7 | `Thing.Ingested` | prefix and postfix | `ingested`: eater, def, item count, nutrition |
-| 8 | `Pawn_InteractionsTracker.TryInteractWith` | postfix | `interaction`: initiator, recipient, def |
+| 8 | `Pawn_InteractionsTracker.TryInteractWith` | postfix | `interaction`: initiator, recipient, def; emitted only when both are free colonists |
 
 **Retire** on quota reached, expiry, or the operator's stop: `open = false`, tag
 removed, remaining reservations released. Placements after that are native, not
@@ -155,8 +161,10 @@ agreement work.
 - **Receipt shape:** aggregate intent progress `{delivered, quota, overshoot, byPawn{}}`
   from drop receipts. The crew log shows credit per pawn.
 - **Agreement lifecycle:** a shared intent referenced by several offers; a per-pawn
-  standing (accepted, excluded or none); the stop rules in decision 4; topic closure is
-  *resolved* when the quota is met.
+  standing (accepted, excluded or none); the stop rules in decision 4. Topic closure is
+  *resolved* only when the quota is met. On **expiry with a partial total** (say 20 of
+  30) the intent is *expired*, the topic stays open, and the core decides whether to
+  re-offer or drop it. There is no silent resolve and no silent decline.
 - **Checkpoints** are allowed while an intent is open, because there is no in-flight
   Concord job. This is **tested** in the spike (paired and cold restore mid-intent),
   not assumed.
@@ -181,15 +189,20 @@ it matches what pawns actually do.
      credited;
    - a pre-carried load re-targeted into the zone, larger and smaller than `remaining`;
    - paired and cold restore mid-intent.
+   - two pawns reaching the quota together;
+   - expiry at a partial total: intent *expired*, topic open.
 2. **One frozen live run**, Luna (core and pawns), continuous, recorded, ten minutes
-   wall clock, variant chosen by Fable at freeze time.
+   wall clock, **attribution-only variant** (decided). The exclusive variant is
+   exercised in the scripted runs; the live run shows whether helpers appear naturally
+   and whether the log stays legible when they do.
 
 ## Measures and baselines
 
 | Measure | Baseline |
 |---|---|
-| Stale haul rejections; delivered totals reconstructed from receipts; work resuming after a meal without a model call | Integration checkpoint (#38: 40 wood in 4 trips) |
-| Idle or wandering time; simulation speed with patches (and `work-options` cost) | Recorded scene (#64) |
+| Delivered totals reconstructed from receipts | Integration checkpoint (#38: 40 wood in 4 trips) |
+| Work resuming after a meal without a model call; stale haul rejections | A matched scripted ordered-job run on the same fixture |
+| Idle or wandering time; simulation speed with patches, `Job.SetTarget` patch cost on its own, and `work-options` cost | Recorded scene (#64), with matched settings before any improvement is claimed |
 | Consent violations: participation by an excluded pawn from a job started after the exclusion | **Must be zero** |
 | Credited deliveries beyond the quota | **Must be zero** |
 | Incidental placements; trips finished after an exclusion; help from non-accepted pawns (attribution variant) | Reported |
