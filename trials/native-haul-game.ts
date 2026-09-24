@@ -17,7 +17,8 @@ if(process.env.CONCORD_NATIVE_HAUL_LOCKED!=='1')throw Error('Exclusive lab lock 
 const root=new URL('../..',import.meta.url).pathname;
 const mode=process.argv.includes('--meal')?'meal':'main';
 const only=process.argv.find(a=>a.startsWith('--case='))?.slice(7);
-const deadline=Date.now()+(mode==='meal'?900000:1800000);
+// Two full ten-minute meal windows plus setup/capture when running the pair together.
+const deadline=Date.now()+(mode==='meal'?(only?900000:1500000):1800000);
 let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
 const runId=randomUUID();
