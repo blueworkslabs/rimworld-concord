@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "runId": "46f6ecca-9074-4028-a765-e5e46a84d733",
+  "setupSha256": "d413cfd7fc569ade9c6c6439bd98c3153aed4770ccd3e345d6588cac7862ac2b",
+  "classification": "single frozen live recording; Fable recording-first Gate C verdict pending",
+  "recording": {
+    "path": "diary/assets/recordings/native-haul-live-2026-09-24.mp4",
+    "sha256": "0c39d89d035f2ceebed2b36bf184a590520410c0b71b7d1be8ae97bdb43378dd",
+    "bytes": 14465082,
+    "durationSeconds": 604.6,
+    "width": 1280,
+    "height": 800,
+    "fps": 15,
+    "decodedFrames": 9069,
+    "droppedFrames": 0,
+    "duplicatedFrames": 0,
+    "audio": "silent",
+    "editing": "uncut original, includes setup/end padding"
+  },
+  "nativeElapsedMs": 601494,
+  "sampleCount": 374,
+  "pausedSamples": 0,
+  "pairedRestore": true,
+  "coldRestore": true,
+  "gameProcessRestartedForCold": false,
+  "processes": {
+    "liveHost": 240980,
+    "liveCoordinator": 152909,
+    "coldHost": 251718,
+    "coldCoordinator": 153893
+  },
+  "originalSaves": {
+    "checked": 285,
+    "changed": []
+  },
+  "receiptSha256": "4dbf7cddc7cd9aebe81fbd51da8c08ba7935f419a0963accc8c2b6f491b54f58",
+  "coldReceiptSha256": "12354f56fee81b8d53951ce2ec0210d01933a421b75659db54a9b90261e03e49",
+  "technicalReport": "Retained privately, including negative observations; withheld from this handoff until Fable records the four-sentence test from the video."
+}

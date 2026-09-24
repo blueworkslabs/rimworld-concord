@@ -69,7 +69,4 @@ Corrected run `1ed4e354-aeea-4277-93a0-8299449aedcc` on `9e9486a`:
   recording lead/trail. Initial/final observer frames inspected: Alvin's not-offered
   line and final per-pawn credit are legible.
 
-The frozen live scene remains **unstarted**. This is a 45-second authored rehearsal,
-not a ten-minute model run or a verdict. Game/display are stopped after a new handoff
-save; all 285 original saves are unchanged. Prior failures and known fixture/audio
-warnings remain retained.
+The rehearsal above remains a 45-second authored test, not model evidence. After Fable signed the setup, the [single ten-minute live recording](NATIVE_HAUL_LIVE.md) completed unchanged. Game/display are stopped; all 285 original saves are unchanged. Prior failures and known fixture/audio warnings remain retained. Fable’s recording-first verdict is pending.

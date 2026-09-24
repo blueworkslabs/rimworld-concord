@@ -36,9 +36,9 @@ Beatrice contributing 20 of 75 wood and two overlapping holders, without changin
 behaviour. Earlier contention interpretations are void because one job monopolized
 quota. The [live harness and setup hash](trials/NATIVE_HAUL_FREEZE.md) now have a recorded
 zero-model rehearsal and real coordinator-process cold restore. Two earlier coverage
-failures exposed missing native core wake integration and remain retained. The proposed
-75-unit helper-layout live setup awaits Fable's approval; the ten-minute Luna scene and
-rare boundary checks remain. The options-menu measurement is a WoodLog-only subset.
+failures exposed missing native core wake integration and remain retained. Fable signed the
+75-unit helper-layout setup and the [single frozen live recording](trials/NATIVE_HAUL_LIVE.md)
+is complete. Fable’s recording-first verdict and rare boundary checks remain. The options-menu measurement is a WoodLog-only subset.
 
 ## Next phase: work with RimWorld's planner
 
