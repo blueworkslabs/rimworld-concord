@@ -349,6 +349,8 @@ try{
         await op({op:'lab-patch-cost',count:1});await startNative(b);await op({op:'lab-speed',count:4});
         const observation=await observe(20000);await b.admin('pause');await poll();const ticks=state.ticks-t0;
         const cost=await op({op:'lab-patch-cost',count:2});
+        await op({op:'lab-patch-cost',count:0});
+        c.data.setTargetMicrobenchmark=await op({op:'lab-bench-settarget',count:200000});
         if(ticks<=0||!cost.patches.some((p:any)=>p.patch==='2 Job.SetTarget'&&p.calls>0))throw Error('no usable SetTarget profile');
         const med=(m:number)=>{const x=samples.filter(s=>s.mode===m).map(s=>s.tps).sort((a,b)=>a-b);return x[1]!;};
         c.data.patchCost={samples,medianTps:{all:med(1),allButSetTarget:med(2),none:med(0)},
@@ -362,6 +364,10 @@ try{
         }
         if(failures.length)throw Error('patch measurement cleanup failed: '+failures.join('; '));
       }
+    });
+    await scenario('settarget-cost',base,async c=>{
+      await accept(randomUUID(),A,{quota:75});
+      c.data.setTargetMicrobenchmark=await op({op:'lab-bench-settarget',count:200000});
     });
     await scenario('work-options',base,async c=>{
       // Measurement only: the options menu is never given to the core in this spike.

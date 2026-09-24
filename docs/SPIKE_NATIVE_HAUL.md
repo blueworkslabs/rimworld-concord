@@ -400,6 +400,11 @@ unproven. No capability bypass or character rewrite has been made.
     A separate tagged-work profile measures handler bodies and placement accounting;
     prefix/postfix invocations are counted separately. These timings exclude Harmony
     dispatch and include timer/nested-work overhead: **not isolated total patch cost**.
+    `settarget-cost` separately measures incremental dispatch plus production handler/counter
+    overhead using paired enabled/disabled calls on detached `Wait` and non-current
+    `HaulToCell` jobs while paused. Five rotated pairs, warmup, and exact hook-call
+    checks guard the measurement; incoming patch/timing states are restored. This is
+    not a current-job retarget benchmark or a population-wide CPU estimate.
     Capped or noisy TPS differences cannot establish overhead. Cleanup restores timing
     and patches with an independent deadline, including on failure.
   - `work-options` safely measures only the WoodLog/HaulGeneral slot-storage predicate

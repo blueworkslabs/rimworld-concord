@@ -332,6 +332,7 @@ namespace Concord {
                 if(r.count==2)h.Unpatch(HarmonyLib.AccessTools.Method(typeof(Job),nameof(Job.SetTarget)),HarmonyLib.HarmonyPatchType.All,h.Id);
                 return "{\"mode\":"+r.count+",\"patchedMethods\":"+h.GetPatchedMethods().Count()+"}";
             }
+            if(r.op=="lab-bench-settarget") return SetTargetBenchmark.Measure(Math.Max(1000,Math.Min(r.count,200000)));
             if(r.op=="lab-work-options") return WorkOptions.Measure(Math.Max(1,Math.Min(r.count,10)));
             if(r.op=="lab-fault-escape"){if(p==null)throw new Exception("Unknown pawn");faultSkipNext=true;faultPawn=r.actor;return "{\"fault\":\"armed\"}";}
             if(r.op=="lab-plain-zone") {
@@ -437,6 +438,36 @@ namespace Concord {
                 pawnParts.Add("{\"pawn\":\""+p.GetUniqueLoadID()+"\",\"eligible\":"+(eligible?"true":"false")+",\"candidates\":"+found+",\"micros\":"+(pw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+"}");
             }} finally {Rand.PopState();}
             return "{\"scope\":\"WoodLog HaulGeneral slot-storage predicate subset; not a full work menu\",\"top\":"+top+",\"totalMicros\":"+(sw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+",\"pawns\":["+String.Join(",",pawnParts.ToArray())+"]}";
+        }
+    }
+}
+
+namespace Concord {
+    // Isolated incremental dispatch+handler benchmark for two common, detached job paths.
+    // Paused game only. Never makes a job through JobMaker, starts one, or targets a live job.
+    public static class SetTargetBenchmark {
+        public static string Measure(int iterations) {
+            if(!Find.TickManager.Paused)throw new Exception("Benchmark requires paused game");
+            var h=Bootstrap.harmony;if(h==null)throw new Exception("Harmony unavailable");
+            var method=HarmonyLib.AccessTools.Method(typeof(Job),nameof(Job.SetTarget));
+            var info=HarmonyLib.Harmony.GetPatchInfo(method);bool previousEnabled=info!=null&&info.Owners.Contains(h.Id);
+            var samples=new List<string>();bool previousTiming=PatchCost.timing;PatchCost.timing=false;
+            Action<bool> mode=enabled=>{h.Unpatch(method,HarmonyLib.HarmonyPatchType.All,h.Id);if(enabled)h.CreateClassProcessor(typeof(Patch2_SetTarget)).Patch();};
+            try {
+                foreach(var def in new[]{JobDefOf.Wait,JobDefOf.HaulToCell}) {
+                    var job=new Job{def=def};var target=new LocalTargetInfo(new IntVec3(0,0,0));
+                    for(int rep=0;rep<5;rep++)foreach(bool enabled in rep%2==0?new[]{true,false}:new[]{false,true}) {
+                        mode(enabled);for(int j=0;j<10000;j++)job.SetTarget(TargetIndex.B,target);
+                        long callsBefore=PatchCost.calls[2],t0=System.Diagnostics.Stopwatch.GetTimestamp();
+                        for(int j=0;j<iterations;j++)job.SetTarget(TargetIndex.B,target);
+                        double micros=(System.Diagnostics.Stopwatch.GetTimestamp()-t0)*1e6/System.Diagnostics.Stopwatch.Frequency;
+                        long hookCalls=PatchCost.calls[2]-callsBefore;
+                        if(hookCalls!=(enabled?iterations:0))throw new Exception("SetTarget benchmark dispatch verification failed");
+                        samples.Add("{\"jobDef\":\""+def.defName+"\",\"enabled\":"+(enabled?"true":"false")+",\"round\":"+rep+",\"calls\":"+iterations+",\"verifiedHookCalls\":"+hookCalls+",\"micros\":"+micros.ToString("0.000",System.Globalization.CultureInfo.InvariantCulture)+"}");
+                    }
+                }
+            } finally {try{mode(previousEnabled);}finally{PatchCost.timing=previousTiming;}}
+            return "{\"scope\":\"detached Wait and non-current HaulToCell SetTarget(B); loop included in both arms, dispatch and production counters included, timing hooks off; not current-job retarget or population-wide cost\",\"samples\":["+String.Join(",",samples.ToArray())+"]}";
         }
     }
 }
