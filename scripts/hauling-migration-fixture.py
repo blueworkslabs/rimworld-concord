@@ -11,10 +11,9 @@ layout manifest:
 The zone is the "existing colony stockpile" the core may tag per def (mixed, several
 allowed defs); the site is an operator-declared candidate site (data, not a zone).
 Every stockpile that could accept one of the fixture's defs is removed first, and every
-loose stack of those defs is replaced by exactly the manifest's stacks, so nobody hauls
-them before an agreement exists and quantities are known. Partial same-def stacks within
-8 cells of each other are what the native duplicate pickup chooses; the manifest reports
-them. No pawn is moved or changed; Hauling is set to 3 for all, as in the spike.
+loose stack of those defs is replaced by exactly the manifest's stacks. The mixed zone
+already accepts them: ordinary hauling may start before tagging. The manifest reports
+same-def pairs within 8 cells as candidate geometry, not proof of native duplicate pickup. No pawn is moved or changed; Hauling is set to 3 for all, as in the spike.
 """
 import json,sys,xml.etree.ElementTree as E
 src,ref,dst,layout=sys.argv[1:5];layout=json.loads(layout)

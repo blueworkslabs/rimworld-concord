@@ -65,6 +65,7 @@ export class Coordinator {
       if(previous) {
         this.domain=previous;
         if(previous.epoch!==game.epoch || previous.world!==game.world) throw Error('Timeline changed: restore a paired checkpoint');
+        this.migrateNativeScope();
         this.recoverAttention('Coordinator restarted during attention; no automatic retry');
       } else {
         this.domain={schema:1,world:game.world,epoch:game.epoch,branch:randomUUID(),characters:{},proposals:{},outcomes:{}};
@@ -73,6 +74,14 @@ export class Coordinator {
       }
       this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);this.food={epoch:game.epoch,lines:foodLines(sharedFood(this.domain,game))};
     });
+  }
+  private migrateNativeScope(){
+    // Historical nativeHaul stores and checkpoints were frozen intent-only scenes.
+    // Absence of the new flag is not permission to expose other work on restore.
+    if(this.domain.nativeHaul&&this.domain.nativeIntentOnly===undefined){
+      this.domain.nativeIntentOnly=true;
+      this.commit('native-scope-migrated','operator',{intentOnly:true});
+    }
   }
   private async current():Promise<GameState> {
     if(!this.domain) throw Error('Coordinator not opened');
@@ -1172,6 +1181,7 @@ export class Coordinator {
       if(!game.loaded || game.world!==saved.state.world) throw Error('Restored world mismatch');
       this.domain={...saved.state,epoch:game.epoch,branch:randomUUID()};
       this.observedTick=game.ticks;this.status=sharedStatus(this.domain,game);this.food={epoch:game.epoch,lines:foodLines(sharedFood(this.domain,game))};
+      this.migrateNativeScope();
       this.recoverAttention('Restored an unfinished attention attempt; no automatic retry');
       this.commit('restored','operator',{name,from:saved.state.branch});
     });

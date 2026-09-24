@@ -25,6 +25,8 @@ const receipt:{runId:string;hold:string;unimplemented:string[];fixture?:unknown;
   {runId,hold,unimplemented:['full-load retarget with insufficient destination quota','pending-extra retarget','re-target between two tagged zones','nested reserve failure and job recycling inside the duplicate check (observed only)'],
    passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
+let safetyStopped=false,checking=false;
+const persist=()=>writeFile(root+`/.runtime/hauling-migration-${hold}-${runId}.json`,JSON.stringify(receipt,null,2));
 const DETECTORS=['intent-pickup-bound-violation','intent-ledger-violation','quota-escape','intent-retarget-unadmitted'];
 
 async function poll(){
@@ -32,6 +34,11 @@ async function poll(){
   const fresh=(state.events??[]).filter(e=>e.seq>lastSeq);
   if(fresh.length&&fresh[0]!.seq>lastSeq+1&&lastSeq>0)receipt.eventGaps++;
   events.push(...fresh);if(fresh.length)lastSeq=fresh[fresh.length-1]!.seq;
+  if(checking){
+    const violations=[...fresh.filter(e=>DETECTORS.includes(e.kind)).map(e=>e.kind+': '+e.detail),
+      ...(state.intents??[]).flatMap(i=>invariantFindings(IntentView.parse(i)))];
+    if(violations.length){safetyStopped=true;throw Error('Safety stop: '+violations.join(' | '));}
+  }
   return state;
 }
 const view=(id:string)=>{const v=(state.intents??[]).find(i=>i.intentId===id);return v?IntentView.parse(v):undefined;};
@@ -44,19 +51,20 @@ async function run(until:()=>boolean,ms:number,tick?:()=>Promise<void>){
 }
 const kinds=(k:string,who?:string)=>events.filter(e=>e.kind===k&&(!who||e.pawn===who));
 async function scenario(name:string,base:string,body:(c:Case)=>Promise<void>){
-  if(only&&only!==name)return;
+  if(safetyStopped||(only&&only!==name))return;
   const c:Case={name,passed:false,findings:[],data:{}};receipt.cases.push(c);const gapsBefore=receipt.eventGaps;
   try{
-    opDeadline=deadline;lastSeq=0;events=[];await b.load(base);await b.admin('pause');await poll();events=[];lastSeq=state.eventSeq??0;
+    checking=false;opDeadline=deadline;lastSeq=0;events=[];await b.load(base);await b.admin('pause');await poll();events=[];lastSeq=state.eventSeq??0;checking=true;
     await body(c);
     // Detectors, not mechanisms: any of these is a finding in every case.
     for(const k of DETECTORS)if(kinds(k).length&&!c.data.escapeExpected)c.findings.push(`${k}: ${kinds(k).map(e=>e.detail).join(' | ')}`);
   }catch(e){c.findings.push('error: '+String(e));}
   finally{
-    try{await b.admin('pause');await poll();}catch(e){c.findings.push('final capture: '+String(e));}
+    try{await b.admin('pause');await poll();}catch(e){safetyStopped=true;c.findings.push('final capture: '+String(e));}
     c.data.events=[...events];c.data.finalState=state;
     if(receipt.eventGaps>gapsBefore)c.findings.push('native event gap: evidence incomplete');
-    c.passed=c.findings.length===0;
+    checking=false;c.passed=c.findings.length===0;
+    await persist();
   }
   console.error(`${c.passed?'PASS':'FAIL'} ${name} ${c.findings.join('; ')}`);
 }
@@ -72,7 +80,7 @@ try{
   const stacks=(def:string)=>m.stacks.filter((s:any)=>s.def===def);
   const accept=(intentId:string,actor:string,o:Record<string,unknown>={})=>op({op:'intent-accept',intentId,actor,thing:'WoodLog',zoneId,label:m.zone.label,quota:30,maxTicks:30000,variant:'attribution',hold,...o});
   const exclude=(intentId:string,actor:string,reason:string)=>op({op:'intent-exclude',intentId,actor,reason});
-  const done=(id:string)=>()=>view(id)?.status!=='open';
+  const done=(id:string)=>()=>{const v=view(id);return !!v&&v.status!=='open';};
   const maxStack=(def:string)=>Math.max(...stacks(def).map((s:any)=>s.count));
 
   // --- B1: growing hold (or strict when --strict), zero escapes throughout.
@@ -102,44 +110,54 @@ try{
     const id=randomUUID();await accept(id,P,{quota:30});
     const admitted=()=>kinds('intent-admitted-start',P).find(e=>e.detail.includes(';source=Thing_'+small.id)||e.detail.includes(';source='+small.id));
     if(!await run(()=>!!admitted(),120000)){c.findings.push('precondition: no tagged trip from the prepared 10-stack');return;}
+    if((pawn('Pedro').carryingCount??0)>0){c.findings.push('precondition: pickup occurred before source mutation');return;}
     const hold0=Number(/;reserved=(\d+)/.exec(admitted()!.detail)?.[1]);c.data.initialHold=hold0;
     await op({op:'lab-stack-set',intentId:id,thing:admitted()!.detail.split(';source=')[1],count:to});
     await run(()=>(pawn('Pedro').carryingCount??0)>0||done(id)(),60000);
     const carried=pawn('Pedro').carryingCount??0;c.data.firstPickup=carried;
-    expect(c,carried<=hold0,`first pickup ${carried} exceeded the initial hold ${hold0}`);
+    expect(c,carried>0&&carried<=hold0,`first pickup ${carried} exceeded the initial hold ${hold0}`);
     await run(done(id),240000);invariants(c,id);
   });
   await scenario('withdraw-after-duplicate-selection',base,async c=>{
     // Exclude while carrying: the carried trip may finish, but nothing more is collected.
     const id=randomUUID();await accept(id,P,{quota:30});
     if(!await run(()=>pawn('Pedro').job==='HaulToCell'&&(pawn('Pedro').carryingCount??0)>0,120000)){c.findings.push('precondition: Pedro never carried on a tagged trip');return;}
+    c.findings.push('coverage gap: carrying alone does not prove a duplicate was selected; needs a selection receipt');
+    const exclusionTick=state.ticks;
     const atExclusion=pawn('Pedro').carryingCount??0;await exclude(id,P,'withdraw');
     await run(()=>pawn('Pedro').job!=='HaulToCell',60000);
     const v=invariants(c,id);if(!v)return;
-    const after=v.drops.filter(d=>d.kind==='participation'&&d.pawn===P);
-    expect(c,after.every(d=>d.startedBeforeExclusion),'participation after withdrawal not flagged');
+    const after=v.drops.filter(d=>d.kind==='participation'&&d.pawn===P&&d.tick>exclusionTick);
+    expect(c,after.length>0&&after.every(d=>d.startedBeforeExclusion),'participation after withdrawal not flagged');
     expect(c,after.reduce((n,d)=>n+d.count,0)<=atExclusion,`gathered more after withdrawal: ${after.reduce((n,d)=>n+d.count,0)} > ${atExclusion}`);
     c.data.atExclusion=atExclusion;
   });
   await scenario('two-pawns-last-units',base,async c=>{
     const id=randomUUID();await accept(id,P,{quota:25});await accept(id,B,{quota:25});await run(done(id),300000);
     const v=invariants(c,id);if(!v)return;
-    expect(c,v.delivered===25&&v.overshoot===0,`credited ${v.delivered}, overshoot ${v.overshoot}`);c.data.byPawn=v.byPawn;c.data.peakHolders=v.peakHolders;
+    expect(c,v.peakHolders>=2,'no overlapping reservation holders: contention not exercised');
+    expect(c,v.status==='met'&&v.delivered===25&&v.overshoot===0,`credited ${v.delivered}, overshoot ${v.overshoot}`);c.data.byPawn=v.byPawn;c.data.peakHolders=v.peakHolders;
   });
   await scenario('carried-cargo-plus-source',base,async c=>{
     const id=randomUUID();await accept(id,P,{quota:30});
     c.data.carry=await op({op:'lab-carry',intentId:id,actor:P,count:5});
     c.data.queued=await op({op:'lab-queue-haul',intentId:id,actor:P});
-    await run(done(id),240000);invariants(c,id);
+    const completed=await run(done(id),240000),v=invariants(c,id);
+    const initial=(c.data.carry as {carried?:number}).carried??0,job=(c.data.queued as {queuedJob?:number}).queuedJob;
+    const admitted=kinds('intent-admitted-start',P).find(e=>e.detail.includes(';job='+job+';')&&e.detail.includes(';carried='+initial+';'));
+    expect(c,initial===5&&Number.isInteger(job)&&!!admitted,'positive cargo and linked queued-job admission were not established');
+    expect(c,!!v&&completed&&v.status==='met'&&v.delivered===30,'carried-cargo scenario did not complete 30 units');
+    expect(c,!!v&&v.drops.filter(d=>d.kind==='participation'&&d.job===job&&d.pawn===P).reduce((n,d)=>n+d.count,0)>initial,'queued job did not deliver existing cargo plus additional source');
   });
   await scenario('save-load-mid-growth',base,async c=>{
     const id=randomUUID();await accept(id,P,{quota:30});
+    c.findings.push('coverage gap: aggregate reservations do not prove this job has pending growth; per-job hold and budget evidence required');
     // Mid-growth: the hold covers more than the cargo (an admitted extra is pending).
     const growing=()=>{const v=view(id);return !!v&&v.status==='open'&&v.reserved>(pawn('Pedro').carryingCount??0)&&(pawn('Pedro').carryingCount??0)>0;};
     const reached=await run(growing,120000);c.data.midGrowthReached=reached;
     if(!reached&&hold==='growing')c.findings.push('precondition: no pending extra observed (geometry)');
     const before=view(id)!,name='lab-concord-hm-mid-'+Date.now();await b.save(name);c.data.eventsBeforeLoad=[...events];events=[];lastSeq=0;await b.load(name);await b.admin('pause');await poll();
-    const after=view(id);expect(c,!!after&&after.delivered===before.delivered&&after.quota===before.quota,'intent changed across save/load');
+    const after=view(id);expect(c,!!after&&after.delivered===before.delivered&&after.quota===before.quota&&after.reserved===before.reserved,'intent changed across save/load');
     await run(done(id),240000);invariants(c,id);
   });
 
@@ -149,6 +167,8 @@ try{
     await accept(w,P,{quota:20});await accept(k,B,{thing:'ComponentIndustrial',quota:10});await exclude(w,B,'refuse');
     await run(()=>done(w)()&&done(k)(),360000);
     const vw=invariants(c,w),vk=invariants(c,k);if(!vw||!vk)return;
+    expect(c,vw.status==='met'&&vw.delivered===20&&vk.status==='met'&&vk.delivered===10,'both item quotas must complete');
+    c.findings.push('coverage gap: no actor-specific receipt proves the wood refuser stored an unrelated third def');
     expect(c,vw.byPawn.every(p=>p.pawn!==B),'refusing pawn credited on wood');
     expect(c,vk.drops.every(d=>d.kind!=='incidental'||d.source!=='haul'),'component intent recorded wood or steel');
     const zoneStock=(state.stockpiles??[]).find(z=>z.zoneId===zoneId);c.data.zone=zoneStock;
@@ -157,7 +177,7 @@ try{
   // --- B4: after retirement, placements are ordinary work; credit never changes.
   await scenario('archive-after-retirement',base,async c=>{
     const id=randomUUID();await accept(id,P,{quota:10});await run(done(id),180000);
-    const at=view(id)!;await run(()=>((view(id)?.ordinaryByPawn??[]).reduce((n,p)=>n+p.count,0))>0,180000);
+    const at=view(id)!;expect(c,at.status==='met'&&at.delivered===10,'initial quota did not complete');await run(()=>((view(id)?.ordinaryByPawn??[]).reduce((n,p)=>n+p.count,0))>0,180000);
     const v=view(id);if(!v){c.findings.push('intent missing');return;}
     expect(c,v.delivered===at.delivered,'credit changed after retirement');
     expect(c,(v.ordinaryByPawn??[]).length>0,'no ordinary work counted after retirement');c.data.archive={ordinary:v.ordinaryByPawn,unattributed:v.ordinaryUnattributed};
@@ -216,6 +236,7 @@ try{
           await co.pawn(who).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
         }
       });
+      expect(c,offers>0&&delivered()>=30,`ordered baseline delivered ${delivered()} from ${offers} offers; not a passing comparison`);
       const trips=Object.values(co.inspect().outcomes).filter(r=>r.kind==='haul').length;
       c.data.matched={model:'ordered',delivered:delivered(),trips,offers,ticks:state.ticks-start,ticksPerUnit:delivered()?(state.ticks-start)/delivered():null,estimatedCoreTurnsIfLive:offers};
     }finally{s.close();}
@@ -224,13 +245,14 @@ try{
   await scenario('matched-native',base,async c=>{
     const id=randomUUID(),start=state.ticks;await accept(id,P,{quota:30});await accept(id,B,{quota:30});await run(done(id),300000);
     const v=invariants(c,id);if(!v)return;
+    expect(c,v.status==='met'&&v.delivered===30,'native baseline did not complete 30 units');
     const trips=new Set(v.drops.filter(d=>d.kind==='participation').map(d=>d.job)).size;
     c.data.matched={hold,delivered:v.delivered,trips,ticks:state.ticks-start,ticksPerUnit:v.delivered?(state.ticks-start)/v.delivered:null};
   });
   receipt.passed=receipt.eventGaps===0&&receipt.cases.length>0&&receipt.cases.every(c=>c.passed);
 }catch(e){receipt.error=String(e);}
 finally{
-  try{opDeadline=Date.now()+10000;await b.admin('pause');}catch{}
+  try{opDeadline=Date.now()+10000;await b.admin('pause');}catch(e){receipt.passed=false;receipt.error='Final pause failed: '+String(e);}
   if(!receipt.passed)process.exitCode=1;
   await writeFile(root+`/.runtime/hauling-migration-${hold}-${runId}.json`,JSON.stringify(receipt,null,2));
   console.log(JSON.stringify({hold,passed:receipt.passed,cases:receipt.cases.map(c=>({name:c.name,passed:c.passed,findings:c.findings})),eventGaps:receipt.eventGaps,error:receipt.error}));

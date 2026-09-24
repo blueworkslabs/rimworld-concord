@@ -326,13 +326,14 @@ namespace Concord {
         static void Redraw(Zone z){zoneMaterial.SetValue(z,null);foreach(var c in z.cells)z.Map.mapDrawer.MapMeshDirty(c,MapMeshFlagDefOf.Zone);}
         public void Present(HaulIntent i,Zone_Stockpile z) {
             var holder=intents.FirstOrDefault(x=>x!=i&&x.Open&&x.presenting&&x.zoneId==z.ID&&x.mapId==i.mapId);
-            if(holder==null){i.presenting=true;i.origLabel=z.label;i.origR=z.color.r;i.origG=z.color.g;i.origB=z.color.b;i.origA=z.color.a;}
+            if(holder==null&&!i.presenting){i.presenting=true;i.origLabel=z.label;i.origR=z.color.r;i.origG=z.color.g;i.origB=z.color.b;i.origA=z.color.a;}
             var defs=intents.Where(x=>x.Open&&x.zoneId==z.ID&&x.mapId==i.mapId).Select(x=>x.Def==null?x.thingDef:x.Def.label).Distinct();
             z.label="Shared: "+(i.label??z.label)+" ("+String.Join(", ",defs.ToArray())+")";
             z.color=new Color(0.95f,0.6f,0.15f,holder!=null?holder.origA:i.origA);Redraw(z);
         }
         void Unpresent(HaulIntent i,Zone_Stockpile z) {
-            if(z==null||!i.presenting) return;
+            if(z==null) return;
+            if(!i.presenting){var owner=intents.FirstOrDefault(x=>x.Open&&x.presenting&&x.zoneId==z.ID&&x.mapId==i.mapId);if(owner!=null)Present(owner,z);return;}
             i.presenting=false;
             var next=intents.FirstOrDefault(x=>x!=i&&x.Open&&x.zoneId==z.ID&&x.mapId==i.mapId);
             if(next!=null){next.presenting=true;next.origLabel=i.origLabel;next.origR=i.origR;next.origG=i.origG;next.origB=i.origB;next.origA=i.origA;Present(next,z);return;}
@@ -412,7 +413,7 @@ namespace Concord {
                 if(!String.IsNullOrEmpty(r.label))zone.label=r.label;
             }
             // Re-tagging the same (zone, def) closes the previous archive: a new generation.
-            foreach(var old in intents.Where(x=>!x.Open&&x.archiveOpen&&x.zoneId==zone.ID&&x.mapId==map.uniqueID&&x.thingDef==def.defName))old.archiveOpen=false;
+            foreach(var old in intents.Where(x=>!x.Open&&x.archiveOpen&&x.zoneId==zone.ID&&x.mapId==map.uniqueID&&x.thingDef==def.defName)){ReconcileCounts(old);old.archiveOpen=false;}
             i=pending??new HaulIntent {intentId=r.intentId};
             i.thingDef=def.defName;i.variant=r.variant;i.quota=r.quota;i.mapId=map.uniqueID;i.zoneId=zone.ID;i.status="open";
             i.hold=String.IsNullOrEmpty(r.hold)?"strict":r.hold;i.siteId=r.siteId;i.label=String.IsNullOrEmpty(r.label)?zone.label:r.label;i.createdZone=created;

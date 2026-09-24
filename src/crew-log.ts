@@ -94,7 +94,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  if(kind==='core-question'||kind==='core-answer')add('message',data.from,data.to,data.exchangeId,staleNote(data)+data.text,`core-talk:${data.id}`);
  // The wait action is silent (Gate C): the status line says what the core is waiting on.
  if(kind==='core-planned'&&data.kind!=='wait')add('message','core','crew',data.id,staleNote(data)+data.reason,`core-plan:${data.id}`);
- if(kind==='handover-dispatching')add('record','Game','observer',data.proposalId,`${name(data.pawn)}'s carried trip finished; the rescue now starts.`,`handover-go:${data.proposalId}`);
+ if(kind==='handover-dispatching')add('record','Game','observer',data.proposalId,`${name(data.pawn)}'s carried trip finished; rescue dispatch requested, not yet confirmed.`,`handover-go:${data.proposalId}`);
  if(kind==='handover-stopped')add('record','Game','observer',data.proposalId,`Rescue handover for ${name(data.pawn)} stopped: ${safe(data.reason,120)}. No automatic retry.`,`handover-stop:${data.proposalId}`);
  if(kind==='intent-offer-lapsed')add('record','Game','observer',data.proposal,data.answer?`${name(data.pawn)} answered ${safe(data.answer,20)} after the stockpile haul was already ${data.intentStatus==='met'?'complete':safe(data.intentStatus,20)}; no agreement started.`:`Offer to ${name(data.pawn)} lapsed unanswered: the stockpile haul was already ${data.intentStatus==='met'?'complete':safe(data.intentStatus,20)}.`,`lapsed:${data.proposal}`);
  if(kind==='social-delivered')add('message',data.from,data.to,data.exchangeId,data.text,`social:${data.id}`);
@@ -107,6 +107,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  if(kind==='action-outcome'){
   const r=data as Receipt,p=Object.values(d.proposals).find(p=>p.pawn===r.actor&&(p.actionId===r.id||p.standing?.steps.includes(r.id)));
   if(!p)return;
+  if(r.status==='started'&&d.handovers?.[p.id])add('record','Game','observer',p.id,`${name(p.pawn)}'s carried trip finished; the rescue now starts.`,`handover-started:${p.id}`);
   const delivered=r.status==='completed'&&p.action.kind==='haul'?(r.delivered===undefined?' Delivered quantity not reported.':` Delivered ${r.delivered} units.`):'';
   const rescue=r.status==='completed'&&p.action.kind==='rescue'?' Casualty placed in the agreed bed; treatment not implied.':'';
   add('record',r.actor,'observer',p.id,`${p.action.kind}: ${r.status}.${delivered}${rescue}${p.action.kind==='cook'&&r.status==='completed'?` Produced ${r.delivered??0} simple meals; eating is separate.`:''}`,`outcome:${r.id}:${r.status}`);

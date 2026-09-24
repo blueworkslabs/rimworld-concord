@@ -5,7 +5,7 @@ import { Coordinator } from '../src/coordinator.js';
 import { Store } from '../src/store.js';
 import { scripted } from '../src/backends.js';
 import { coreView } from '../src/core-planner.js';
-import { crewReport } from '../src/crew-log.js';
+import { crewReport, recordCrew } from '../src/crew-log.js';
 import { intentAction, orderedEntries, type IntentView, type NativeHaulEntry } from '../src/native-intents.js';
 import type { GameBridge, GameState, ActionRequest, Receipt } from '../src/protocol.js';
 
@@ -137,4 +137,38 @@ test('a handover that never drains stops at its deadline without retrying',async
   const offer=await c.core().offerRequestedRescue(c.core().requests()[0]!.id,rescue,'Xavi needs a bed.');await c.pawn('P').decide(offer.id,say('accept'));
   game.data.ticks=10+rescue.maxTicks+1;await c.reconcile();
   const h=Object.values(c.inspect().handovers!)[0]!;assert.equal(h.step,'stopped');assert.equal(h.reason,'handover timed out');assert.equal(game.moves.length,0);
+});
+
+
+test('legacy native-only stores preserve their frozen permissions on open and paired restore',async()=>{
+  const {c,game}=await setup([wood()]);
+  const d=c.inspect(),e=d.nativeHauls![0]!;
+  d.nativeHaul={intentId:e.intentId,area:{x:e.x!,z:e.z!,w:e.w!,h:e.h!},quota:e.quota,maxTicks:e.maxTicks,variant:e.variant};
+  delete d.nativeHauls;delete d.nativeIntentOnly;
+  const store=new Store(':memory:');store.commit(d,{branch:d.branch,kind:'legacy',actor:'operator',data:{}});
+  store.checkpoint('lab-concord-legacy',d,'hash');
+  const restored=new Coordinator(store,game);await restored.open();
+  assert.equal(restored.inspect().nativeIntentOnly,true);
+  await assert.rejects(restored.core().propose('P',{kind:'move',x:4,z:4},'Walk over'),/only proposable work/);
+  assert.equal(store.read()!.nativeIntentOnly,true,'migration is durable');
+  await restored.restore('lab-concord-legacy');
+  assert.equal(restored.inspect().nativeIntentOnly,true);
+  await assert.rejects(restored.core().propose('P',{kind:'move',x:4,z:4},'Walk over'),/only proposable work/);
+  store.close();
+});
+
+test('handover dispatch intent is not published as a started rescue without a game receipt',async()=>{
+  const {c}=await setup([wood()]);const d=c.inspect();
+  const id=randomUUID(),actionId=randomUUID();
+  d.proposals[id]={id,pawn:'P',action:rescue,reason:'Help Xavi',status:'accepted',actionId,
+    standing:{status:'running',deadline:600,steps:[actionId]}} as any;
+  d.handovers={[id]:{proposalId:id,oldId:'old',pawn:'P',intentId:'intent',step:'dispatched',deadline:600,dispatchId:actionId}};
+  recordCrew(d,'handover-dispatching','P',d.handovers[id],10);
+  assert.ok(!crewReport(d,10).entries.some(e=>e.text.includes('rescue now starts')));
+  recordCrew(d,'action-outcome','P',{id:actionId,actor:'P',status:'failed',reason:'Unavailable',x:6,z:7},11);
+  assert.ok(!crewReport(d,11).entries.some(e=>e.text.includes('rescue now starts')));
+  // A separate admitted action has direct started evidence; replay is deduplicated.
+  recordCrew(d,'action-outcome','P',{id:actionId,actor:'P',status:'started',reason:'native',x:6,z:7},12);
+  recordCrew(d,'action-outcome','P',{id:actionId,actor:'P',status:'started',reason:'native',x:6,z:7},12);
+  assert.equal(crewReport(d,12).entries.filter(e=>e.text.includes('rescue now starts')).length,1);
 });
