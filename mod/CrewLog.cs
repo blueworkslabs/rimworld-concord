@@ -102,7 +102,7 @@ namespace Concord {
     if(topics){string board="Core-authored topic board\n"+(String.IsNullOrEmpty(r.topicText)?"No topics reported.":r.topicText);float h=Text.CalcHeight(board,width);Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(h,area.height)));Widgets.Label(new Rect(0,0,width,h),board);Widgets.EndScrollView();}
     else{
      var entries=(heldEntries??r.entries).Reverse().ToArray();
-     Func<CrewEntry,string> heading=e=>(e.kind=="message"?e.actor+" → "+e.recipient:e.actor+" · RECORD")+" · t"+e.tick;
+     Func<CrewEntry,string> heading=e=>(e.kind=="message"?e.actor+" → "+e.recipient:e.actor+" · RECORD")+" · "+Clock.At(e.tick);
      float total=entries.Sum(e=>Text.CalcHeight(heading(e),width)+Text.CalcHeight(e.text,width)+14);
      Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(total,area.height)));float ey=0;
      foreach(var e in entries){float hh=Text.CalcHeight(heading(e),width),th=Text.CalcHeight(e.text,width);GUI.color=e.kind=="message"?new Color(1f,.8f,.45f):new Color(.65f,.85f,1f);Widgets.Label(new Rect(0,ey,width,hh),heading(e));GUI.color=Color.white;Widgets.Label(new Rect(0,ey+hh,width,th),e.text);ey+=hh+th+14;}
@@ -145,7 +145,9 @@ namespace Concord {
     y=0;
     foreach(var e in entries){
      GUI.color=e.kind=="message"?new Color(1f,.8f,.45f):new Color(.65f,.85f,1f);
-     Widgets.Label(new Rect(0,y,width,25),(e.kind=="message"?"MESSAGE  ":"RECORD  ")+e.actor+(e.kind=="message"?" → "+e.recipient:"")+"  · tick "+e.tick);GUI.color=Color.white;
+     Widgets.Label(new Rect(0,y,width-90,25),(e.kind=="message"?"MESSAGE  ":"RECORD  ")+e.actor+(e.kind=="message"?" → "+e.recipient:"")+"  · "+Clock.At(e.tick));GUI.color=Color.white;
+     Zone_Stockpile shown;
+     if(ShowZone.Available(e.subject,out shown)){if(shown==null)Widgets.Label(new Rect(width-150,y,150,25),"no longer on the map");else if(Widgets.ButtonText(new Rect(width-80,y,80,24),"Show"))ShowZone.Jump(shown);}
      float h=Text.CalcHeight(e.text,width);Widgets.Label(new Rect(0,y+26,width,h),e.text);y+=36+h;
     }
     Widgets.EndScrollView();

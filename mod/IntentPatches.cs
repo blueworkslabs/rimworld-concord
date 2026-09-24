@@ -10,9 +10,9 @@ namespace Concord {
     // Applied only in the staging lab (see Bootstrap). Each reads cached state only.
     // Per-patch call counts always; wall-clock cost only while a lab measurement enables it.
     public static class PatchCost {
-        public static readonly string[] Names={"","1 StoreSearch","2 Job.SetTarget","3 HaulToCellStorageJob","3b TryMakePreToilReservations","4 TryDropCarriedThing","4 TryDropCarriedThing(count)","5 Notify_ReceivedThing","6 StartJob","6 CleanupCurrentJob","7 Ingested","8 TryInteractWith","4 placement accounting callback","4b TryStartCarry"};
+        public static readonly string[] Names={"","1 StoreSearch","2 Job.SetTarget","3 HaulToCellStorageJob","3b TryMakePreToilReservations","4 TryDropCarriedThing","4 TryDropCarriedThing(count)","5 Notify_ReceivedThing","6 StartJob","6 CleanupCurrentJob","7 Ingested","8 TryInteractWith","4 placement accounting callback","4b TryStartCarry","9 pickup guard","10 duplicate guard"};
         public static bool timing;
-        public static readonly long[] calls=new long[14],ticks=new long[14];
+        public static readonly long[] calls=new long[16],ticks=new long[16];
         public static long Start(){return timing?System.Diagnostics.Stopwatch.GetTimestamp():0;}
         public static void Stop(int i,long t0){calls[i]++;if(timing)ticks[i]+=System.Diagnostics.Stopwatch.GetTimestamp()-t0;}
         public static void Reset(){Array.Clear(calls,0,calls.Length);Array.Clear(ticks,0,ticks.Length);}
@@ -30,6 +30,12 @@ namespace Concord {
         public static bool InCleanup(Pawn p) {int n;return cleanup.TryGetValue(p,out n)&&n>0;}
         public static bool Colonist(Pawn p) {return p!=null&&p.IsFreeColonist&&p.Spawned;}
         public static bool TaggedHaul(Job j) {return j!=null&&j.def==JobDefOf.HaulToCell;}
+        /** The def a haul job moves: its cargo if carrying, else target A. */
+        public static ThingDef HaulDef(Pawn p,Job j) {
+            var c=p==null?null:p.carryTracker.CarriedThing;
+            if(c!=null&&(j==null||j.targetA.Thing==null||j.targetA.Thing==c||j.targetA.Thing.def==c.def))return c.def;
+            return j==null||j.targetA.Thing==null?(c==null?null:c.def):j.targetA.Thing.def;
+        }
     }
 
     // 1. Admission for storage searches.
@@ -39,7 +45,7 @@ namespace Concord {
             var sg=slotGroup as SlotGroup;
             var z=sg==null?null:sg.parent as Zone_Stockpile;
             if(z==null) return true;
-            var i=IntentState.ForZone(z);
+            var i=t==null?null:IntentState.ForZone(z,t.def);
             if(i==null) return true;
             bool carried=carrier!=null&&t!=null&&carrier.carryTracker.CarriedThing==t;
             return IntentState.Admits(i,carrier,carried?t.stackCount:0,carrier==null?null:carrier.CurJob);
@@ -57,14 +63,23 @@ namespace Concord {
             foreach(var m in Find.Maps){p=m.mapPawns.FreeColonistsSpawned.FirstOrDefault(x=>x.CurJob==__instance);if(p!=null)break;}
             if(p==null) return;
             var old=s.Holding(__instance);
-            var next=IntentState.ForCell(p.Map,pack.Cell);
+            var next=IntentState.ForCell(p.Map,pack.Cell,IntentHooks.HaulDef(p,__instance));
             if(old==next) return; // within the zone the reservation stays with the job
-            if(old!=null){old.reserved.Remove(__instance.loadID);old.reservedBy.Remove(__instance.loadID);}
+            if(old!=null){old.reserved.Remove(__instance.loadID);old.reservedBy.Remove(__instance.loadID);old.tripBudget.Remove(__instance.loadID);}
             if(next!=null) {
                 var carried=p.carryTracker.CarriedThing;var source=__instance.targetA.Thing;
-                int want=carried!=null?carried.stackCount:HaulBudget.Deliverable(__instance.count,int.MaxValue,
-                    source==null?int.MaxValue:source.stackCount,source==null?int.MaxValue:p.carryTracker.MaxStackSpaceEver(source.def));
-                s.Reserve(next,p,__instance,Math.Min(want,Math.Max(0,next.Remaining)));
+                if(carried!=null) {
+                    // The whole carried load, or nothing: never a hold below cargo that then enters.
+                    // Any pending extra pickup is released; it was admitted for the old destination.
+                    if(carried.stackCount>next.Remaining){s.Emit(p,"intent-retarget-unadmitted","intent="+next.intentId+";job="+__instance.loadID+";carried="+carried.stackCount+";remaining="+next.Remaining);return;}
+                    s.Reserve(next,p,__instance,carried.stackCount);
+                    if(next.Growing)next.tripBudget[__instance.loadID]=0;
+                } else {
+                    int want=HaulBudget.Deliverable(__instance.count,int.MaxValue,
+                        source==null?int.MaxValue:source.stackCount,source==null?int.MaxValue:p.carryTracker.MaxStackSpaceEver(source.def));
+                    s.Reserve(next,p,__instance,Math.Min(want,Math.Max(0,next.Remaining)));
+                }
+                s.AssertLedger(next,p,"retarget");
             }
         }finally{PatchCost.Stop(2,cost);}}
     }
@@ -74,7 +89,7 @@ namespace Concord {
     static class Patch3_HaulJobFactory {
         static void Postfix(Pawn p,Thing t,IntVec3 storeCell,Job __result){long cost=PatchCost.Start();try{
             if(__result==null) return;
-            var i=IntentState.ForCell(p.Map,storeCell);
+            var i=t==null?null:IntentState.ForCell(p.Map,storeCell,t.def);
             if(i==null) return;
             if(IntentState.CarriedFor(p,t)>0) return; // whole carried loads are checked at start, never trimmed
             if(IntentState.Admits(i,p,0,null)&&!IntentState.Get().FaultFor(p))__result.count=Math.Min(__result.count,i.Remaining);
@@ -86,7 +101,7 @@ namespace Concord {
     static class Patch3b_PreToil {
         static bool Prefix(JobDriver_HaulToCell __instance,ref bool __result){long cost=PatchCost.Start();try{
             var p=__instance.pawn;var job=__instance.job;
-            var i=IntentState.ForCell(p.Map,job.targetB.Cell);
+            var i=IntentState.ForCell(p.Map,job.targetB.Cell,IntentHooks.HaulDef(p,job));
             if(i==null) return true;
             var s=IntentState.Get();
             // An opportunistic replacement can reach this before any StartJob postfix.
@@ -107,7 +122,7 @@ namespace Concord {
             if(!__result) return;
             var p=__instance.pawn;var job=__instance.job;
             if(p.CurJob!=job) return; // queued/ordered validation never acquires a reservation
-            var i=IntentState.ForCell(p.Map,job.targetB.Cell);
+            var i=IntentState.ForCell(p.Map,job.targetB.Cell,IntentHooks.HaulDef(p,job));
             if(i==null) return;
             var s=IntentState.Get();
             int avail=Math.Max(0,i.Remaining+i.Own(job));
@@ -119,6 +134,23 @@ namespace Concord {
             }
             int carried=IntentState.CarriedFor(p,job.targetA.Thing);
             var source=job.targetA.Thing;
+            if(i.Growing) {
+                // B1 commit: hold the cargo plus only the initial admitted pickup; keep a separate,
+                // durable trip budget (additional units) bounded by quota, carry and storage space.
+                int others=i.Reserved-i.Own(job);
+                int extraQuota=Math.Max(0,i.quota-i.credited-others-carried);
+                bool alreadyCarryingTarget=source!=null&&source==p.carryTracker.CarriedThing;
+                int trip=0;
+                if(!alreadyCarryingTarget&&source!=null)
+                    trip=Math.Max(0,Math.Min(Math.Min(job.count,extraQuota),Math.Min(p.carryTracker.AvailableStackSpace(source.def),IntentState.DestinationSpace(p,job.targetB.Cell,source))));
+                int initial=source==null||alreadyCarryingTarget?0:Math.Min(trip,source.stackCount);
+                s.Reserve(i,p,job,carried+initial);
+                i.tripBudget[job.loadID]=trip;
+                job.count=Math.Max(0,trip);
+                s.AssertLedger(i,p,"commit");
+                s.Emit(p,"intent-admitted-start","intent="+i.intentId+";job="+job.loadID+";carried="+carried+";reserved="+i.Own(job)+";trip="+trip);
+                return;
+            }
             if(carried>0) {
                 // Reserve the whole carried load plus any admitted additional pickup, bounded by
                 // what the source stack actually holds.
@@ -187,6 +219,13 @@ namespace Concord {
             var i=s.Holding(job);
             if(i==null||!IntentHooks.TaggedHaul(job)) return;
             int carried=__instance.CarriedThing==null?0:__instance.CarriedThing.stackCount,own=i.Own(job);
+            if(i.Growing) {
+                // Detector, not the mechanism: the pickup guard bounds every pickup beforehand.
+                if(carried>own){s.Emit(p,"intent-pickup-bound-violation","intent="+i.intentId+";job="+job.loadID+";picked="+__result+";carried="+carried+";hold="+own);return;}
+                if(carried<own){s.Reserve(i,p,job,carried);s.Emit(p,"intent-trued-up","intent="+i.intentId+";job="+job.loadID+";reserved="+own+";carried="+carried);}
+                s.AssertLedger(i,p,"pickup");
+                return;
+            }
             // StartCarryThing subtracts the picked count from job.count after this returns; leave
             // nothing further to collect beyond what is now reserved.
             job.count=Math.Min(job.count,__result);
@@ -194,6 +233,77 @@ namespace Concord {
             s.Reserve(i,p,job,carried);
             s.Emit(p,"intent-trued-up","intent="+i.intentId+";job="+job.loadID+";reserved="+own+";carried="+carried);
         }finally{PatchCost.Stop(13,cost);}}
+    }
+
+    // 9. Pickup guard (B1, growing hold): every pickup of a tagged trip is capped *before* the
+    // native carry call to min(trip budget, own hold − cargo, source, carry space). The native
+    // count is lent that cap; the durable budget is decremented by what was actually taken.
+    [HarmonyPatch(typeof(Toils_Haul),nameof(Toils_Haul.StartCarryThing))]
+    static class Patch9_PickupGuard {
+        static void Postfix(Toil __result) {
+            var toil=__result;var original=toil.initAction;
+            toil.initAction=()=>{long cost=PatchCost.Start();bool timed=true;try{
+                var p=toil.actor;var job=p==null?null:p.CurJob;var s=IntentState.Get();
+                var i=s==null||!IntentHooks.TaggedHaul(job)?null:IntentState.ForCell(p.Map,job.targetB.Cell,IntentHooks.HaulDef(p,job));
+                if(i==null||!i.Growing||!i.reserved.ContainsKey(job.loadID)){PatchCost.Stop(14,cost);timed=false;original();return;}
+                var source=job.targetA.Thing;var cargo=p.carryTracker.CarriedThing;
+                int carried=cargo==null?0:cargo.stackCount,own=i.Own(job),trip=i.Trip(job);
+                bool standing=i.Standing(p);
+                int cap=!standing||source==null||source==cargo?0:
+                    Math.Min(Math.Min(trip,own-carried),Math.Min(source.stackCount,p.carryTracker.AvailableStackSpace(source.def)));
+                if(cap<=0) {
+                    // Never hand the native carry a zero count. Cargo continues to the drop; with no
+                    // cargo the trip ends with a receipt.
+                    i.tripBudget[job.loadID]=0;
+                    if(cargo!=null){job.SetTarget(TargetIndex.A,cargo);s.Reserve(i,p,job,carried);job.count=0;
+                        s.Emit(p,"intent-pickup-skipped","intent="+i.intentId+";job="+job.loadID+";carried="+carried+";standing="+standing);return;}
+                    s.Emit(p,"intent-pickup-skipped","intent="+i.intentId+";job="+job.loadID+";carried=0;standing="+standing);
+                    p.jobs.curDriver.EndJobWith(JobCondition.Incompletable);return;
+                }
+                int loadId=job.loadID;
+                job.count=cap;
+                PatchCost.Stop(14,cost);timed=false;
+                try{original();}
+                finally{
+                    // Only the same surviving job, still holding this intent, gets its budget back.
+                    if(p.CurJob==job&&job.loadID==loadId&&i.Open&&i.reserved.ContainsKey(loadId)){
+                        var after=p.carryTracker.CarriedThing;int acquired=Math.Max(0,(after==null?0:after.stackCount)-carried);
+                        int left=Math.Max(0,trip-acquired);i.tripBudget[loadId]=left;job.count=left;
+                    }
+                }
+            }finally{if(timed)PatchCost.Stop(14,cost);}};
+        }
+    }
+
+    // 10. Duplicate guard (B1, growing hold): admit and hold the extra *before* the game's
+    // duplicate check, because JumpToToil runs the reserve/goto/pickup toils synchronously.
+    [HarmonyPatch(typeof(Toils_Haul),nameof(Toils_Haul.CheckForGetOpportunityDuplicate))]
+    static class Patch10_DuplicateGuard {
+        static void Postfix(Toil __result) {
+            var toil=__result;var original=toil.initAction;
+            toil.initAction=()=>{long cost=PatchCost.Start();bool timed=true;try{
+                var p=toil.actor;var job=p==null?null:p.CurJob;var s=IntentState.Get();var cargo=p==null?null:p.carryTracker.CarriedThing;
+                var i=s==null||cargo==null||!IntentHooks.TaggedHaul(job)?null:IntentState.ForCell(p.Map,job.targetB.Cell,cargo.def);
+                if(i==null||!i.Growing||!i.reserved.ContainsKey(job.loadID)){PatchCost.Stop(15,cost);timed=false;original();return;}
+                int loadId=job.loadID,carried=cargo.stackCount,trip=i.Trip(job);var before=job.targetA.Thing;
+                int extra=0;
+                if(i.Standing(p)) {
+                    int free=i.quota-i.credited-(i.Reserved-i.Own(job))-carried;
+                    extra=Math.Min(Math.Min(trip,free),Math.Min(p.carryTracker.AvailableStackSpace(cargo.def),IntentState.DestinationSpace(p,job.targetB.Cell,cargo)));
+                }
+                if(extra<=0){job.count=0;s.Reserve(i,p,job,carried);}   // the game's check needs count > 0
+                else{job.count=extra;s.Reserve(i,p,job,carried+extra);s.AssertLedger(i,p,"duplicate");}
+                PatchCost.Stop(15,cost);timed=false;
+                try{original();}
+                finally{
+                    // Post: guarded by identity; a nested pickup, retarget, retirement or cleanup wins.
+                    if(p.CurJob==job&&job.loadID==loadId&&i.Open&&i.reserved.ContainsKey(loadId)){
+                        var now=p.carryTracker.CarriedThing;int nowCarried=now==null?0:now.stackCount;
+                        if(job.targetA.Thing==before&&nowCarried==carried){s.Reserve(i,p,job,carried);job.count=i.Trip(job);}
+                    }
+                }
+            }finally{if(timed)PatchCost.Stop(15,cost);}};
+        }
     }
 
     // 5. Fresh spawns into the tagged zone outside a hook-4 scope. Merges go to reconciliation.
@@ -215,7 +325,7 @@ namespace Concord {
             if(s==null) return;
             if(s.intents.Count>0)s.ReleaseObsolete(___pawn);
             if(__instance.curJob!=newJob||!IntentHooks.Colonist(___pawn)) return;
-            var i=IntentHooks.TaggedHaul(newJob)?IntentState.ForCell(___pawn.Map,newJob.targetB.Cell):null;
+            var i=IntentHooks.TaggedHaul(newJob)?IntentState.ForCell(___pawn.Map,newJob.targetB.Cell,IntentHooks.HaulDef(___pawn,newJob)):null;
             s.Emit(___pawn,"job-start",newJob.def.defName+";job="+newJob.loadID+(i!=null?";intent="+i.intentId+";count="+newJob.count:""));
         }finally{PatchCost.Stop(8,cost);}}
     }
