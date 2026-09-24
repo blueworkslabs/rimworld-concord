@@ -27,7 +27,8 @@
     status.textContent = 'This browser could not play the recording. Use the original MP4 download below.';
   });
   document.querySelector('#speed').addEventListener('change', event => {
-    video.playbackRate = Number(event.target.value);
+    video.defaultPlaybackRate = Number(event.target.value);
+    video.playbackRate = video.defaultPlaybackRate;
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden) video.pause(); });
   window.addEventListener('pagehide', event => { if (!event.persisted && objectUrl) URL.revokeObjectURL(objectUrl); });
