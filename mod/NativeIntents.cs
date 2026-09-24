@@ -13,7 +13,7 @@ namespace Concord {
         public string intentId,thingDef,variant="attribution",status="open";
         public int mapId=-1,zoneId=-1,quota,credited,overshoot,incidental,unattributed,removed;
         public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick=-1;
-        public int zoneCount=-1,arrivalsSinceCount;
+        public int zoneCount=-1,arrivalsSinceCount,peakHolders;
         public List<string> accepted=new List<string>(),excluded=new List<string>();
         public List<int> excludedTicks=new List<int>();
         public Dictionary<int,int> reserved=new Dictionary<int,int>();
@@ -42,7 +42,7 @@ namespace Concord {
             Scribe_Values.Look(ref finishedAfterExclusion,"finishedAfterExclusion");
             Scribe_Values.Look(ref createdTick,"createdTick");Scribe_Values.Look(ref untilTick,"untilTick");
             Scribe_Values.Look(ref lastDeliveryTick,"lastDeliveryTick",-1);
-            Scribe_Values.Look(ref zoneCount,"zoneCount",-1);Scribe_Values.Look(ref arrivalsSinceCount,"arrivalsSinceCount");
+            Scribe_Values.Look(ref zoneCount,"zoneCount",-1);Scribe_Values.Look(ref arrivalsSinceCount,"arrivalsSinceCount");Scribe_Values.Look(ref peakHolders,"peakHolders");
             Scribe_Collections.Look(ref accepted,"accepted",LookMode.Value);
             Scribe_Collections.Look(ref excluded,"excluded",LookMode.Value);
             Scribe_Collections.Look(ref excludedTicks,"excludedTicks",LookMode.Value);
@@ -77,7 +77,7 @@ namespace Concord {
     [Serializable] public class IntentView {
         public string intentId,thingDef,variant,status;
         public int zoneId,quota,delivered,reserved,remaining,overshoot,incidental,unattributed,removed;
-        public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick;
+        public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick,peakHolders;
         public string[] accepted,excluded;
     }
 
@@ -136,6 +136,8 @@ namespace Concord {
         public void Reserve(HaulIntent i,Pawn p,Job job,int count) {
             i.reserved[job.loadID]=Math.Max(0,count);
             i.reservedBy[job.loadID]=p.GetUniqueLoadID();
+            // Overlap evidence: how many pawns held in-flight quota at the same time.
+            i.peakHolders=Math.Max(i.peakHolders,i.reservedBy.Where(kv=>i.reserved.ContainsKey(kv.Key)&&i.reserved[kv.Key]>0).Select(kv=>kv.Value).Distinct().Count());
         }
         public void Release(Job job) {
             if(job==null) return;
@@ -217,7 +219,17 @@ namespace Concord {
             i.status=status;i.reserved.Clear();i.reservedBy.Clear();
             Emit(null,"intent-retired","intent="+i.intentId+";status="+status+";delivered="+i.credited+";quota="+i.quota);
         }
+        // Lab-only: draft this pawn the moment it stands in a tagged zone carrying on a tagged
+        // haul. Drafting is the game's own interruption; only its timing is chosen here.
+        public string draftWhen;
         public override void GameComponentTick() {
+            if(draftWhen!=null) {
+                var dp=WorldState.FindActor(draftWhen);
+                if(dp!=null&&dp.IsCarrying()&&IntentHooks.TaggedHaul(dp.CurJob)&&ForCell(dp.Map,dp.Position)!=null&&dp.drafter!=null) {
+                    draftWhen=null;int jobId=dp.CurJob.loadID;dp.drafter.Drafted=true;
+                    Emit(dp,"lab-drafted","job="+jobId+";x="+dp.Position.x+";z="+dp.Position.z);
+                }
+            }
             if(intents.Count==0) return;
             int now=Find.TickManager.TicksGame;
             if(reconcileAfterLoad) {
@@ -294,7 +306,7 @@ namespace Concord {
                 intentId=i.intentId,thingDef=i.thingDef,variant=i.variant,status=i.status,zoneId=i.zoneId,quota=i.quota,
                 delivered=i.credited,reserved=i.Reserved,remaining=i.Remaining,overshoot=i.overshoot,incidental=i.incidental,
                 unattributed=i.unattributed,removed=i.removed,violations=i.violations,rejectedStarts=i.rejectedStarts,
-                finishedAfterExclusion=i.finishedAfterExclusion,createdTick=i.createdTick,untilTick=i.untilTick,lastDeliveryTick=i.lastDeliveryTick,
+                finishedAfterExclusion=i.finishedAfterExclusion,createdTick=i.createdTick,untilTick=i.untilTick,lastDeliveryTick=i.lastDeliveryTick,peakHolders=i.peakHolders,
                 accepted=i.accepted.ToArray(),excluded=i.excluded.ToArray()
             }).TrimEnd('}')+",\"byPawn\":["+
                 String.Join(",",i.byPawn.Select(kv=>JsonUtility.ToJson(new PawnCredit {pawn=kv.Key,count=kv.Value})).ToArray())+
@@ -304,7 +316,43 @@ namespace Concord {
         // Lab-only commands for the scripted sub-runs.
         public string Lab(Request r) {
             var p=WorldState.FindActor(r.actor);
+            if(r.op=="lab-draft-when"){if(p==null||p.drafter==null)throw new Exception("Unknown or undraftable pawn");draftWhen=r.actor;return "{\"armed\":true}";}
+            if(r.op=="lab-undraft"){if(p==null||p.drafter==null)throw new Exception("Unknown or undraftable pawn");draftWhen=null;p.drafter.Drafted=false;return "{\"drafted\":false}";}
+            if(r.op=="lab-speed"){if(r.count<0||r.count>4)throw new Exception("Speed must be 0-4");Find.TickManager.CurTimeSpeed=(TimeSpeed)r.count;return "{\"speed\":"+(int)Find.TickManager.CurTimeSpeed+",\"tick\":"+Find.TickManager.TicksGame+"}";}
+            if(r.op=="lab-patch-cost"){
+                // 0 reset and stop timing, 1 reset and time every patch call, 2 read.
+                if(r.count==0||r.count==1){PatchCost.Reset();PatchCost.timing=r.count==1;}
+                return PatchCost.Json();
+            }
+            if(r.op=="lab-patches"){
+                // 0 all patches off (vanilla), 1 all on, 2 all on except Job.SetTarget. Measurement only.
+                var h=Bootstrap.harmony;if(h==null)throw new Exception("Harmony unavailable");
+                h.UnpatchAll(h.Id);
+                if(r.count>=1)h.PatchAll(typeof(Bootstrap).Assembly);
+                if(r.count==2)h.Unpatch(HarmonyLib.AccessTools.Method(typeof(Job),nameof(Job.SetTarget)),HarmonyLib.HarmonyPatchType.All,h.Id);
+                return "{\"mode\":"+r.count+",\"patchedMethods\":"+h.GetPatchedMethods().Count()+"}";
+            }
+            if(r.op=="lab-bench-settarget") return SetTargetBenchmark.Measure(Math.Max(1000,Math.Min(r.count,200000)));
+            if(r.op=="lab-work-options") return WorkOptions.Measure(Math.Max(1,Math.Min(r.count,10)));
             if(r.op=="lab-fault-escape"){if(p==null)throw new Exception("Unknown pawn");faultSkipNext=true;faultPawn=r.actor;return "{\"fault\":\"armed\"}";}
+            if(r.op=="lab-plain-zone") {
+                // Matched ordered-job half: the same area as an ordinary, untagged wood stockpile.
+                if(p==null) throw new Exception("Unknown pawn");
+                var pmap=p.Map;var wood=DefDatabase<ThingDef>.GetNamed("WoodLog");
+                var plain=new Zone_Stockpile(StorageSettingsPreset.DefaultStockpile,pmap.zoneManager);
+                pmap.zoneManager.RegisterZone(plain);
+                for(int dx=0;dx<r.w;dx++)for(int dz=0;dz<r.h;dz++){var c=new IntVec3(r.x+dx,0,r.z+dz);if(c.InBounds(pmap)&&pmap.zoneManager.ZoneAt(c)==null&&c.Standable(pmap)&&!c.Fogged(pmap))plain.AddCell(c);}
+                if(plain.cells.Count==0){plain.Delete();throw new Exception("Candidate area has no usable cells");}
+                plain.settings.filter.SetDisallowAll();plain.settings.filter.SetAllow(wood,true);plain.settings.Priority=StoragePriority.Important;
+                return "{\"zone\":"+plain.ID+",\"cells\":"+plain.cells.Count+"}";
+            }
+            if(r.op=="lab-work-priority") {
+                // Matched ordered-job half: ordered jobs only, as the ordered model always ran.
+                if(p==null) throw new Exception("Unknown pawn");
+                if(r.count<0||r.count>4) throw new Exception("Priority must be 0-4");
+                p.workSettings.SetPriority(WorkTypeDefOf.Hauling,r.count);
+                return "{\"hauling\":"+p.workSettings.GetPriority(WorkTypeDefOf.Hauling)+"}";
+            }
             if(r.op=="lab-interrupt") {
                 // Forced cancellation of the pawn's current job (cleanup drops are incidental).
                 if(p==null) throw new Exception("Unknown pawn");
@@ -336,7 +384,8 @@ namespace Concord {
                 if(p==null) throw new Exception("Unknown pawn");
                 var loose=map.listerThings.ThingsOfDef(def).Where(t=>t.Spawned&&map.zoneManager.ZoneAt(t.Position)!=zone)
                     .OrderBy(t=>(t.Position-p.Position).LengthHorizontalSquared).FirstOrDefault();
-                if(loose==null) throw new Exception("No loose stack");
+                if(r.op=="lab-queue-haul"&&r.reason=="carried")loose=p.carryTracker.CarriedThing;
+                if(loose==null) throw new Exception("No haul source");
                 if(r.op=="lab-carry") {
                     // Pre-carried load for re-target cases: picked up outside any job.
                     int n=p.carryTracker.TryStartCarry(loose,Math.Max(1,Math.Min(r.count,loose.stackCount)),false);
@@ -364,6 +413,62 @@ namespace Concord {
                 return "{\"merged\":"+add+"}";
             }
             throw new Exception("Unsupported lab operation");
+        }
+    }
+}
+namespace Concord {
+    // Measurement-only WoodLog/HaulGeneral subset. Generic HasJobOnThing/Cell can
+    // call JobOnThing/Cell and allocate jobs on 4871; never invoke those here.
+    public static class WorkOptions {
+        public static string Measure(int top) {
+            var sw=System.Diagnostics.Stopwatch.StartNew();var pawnParts=new List<string>();
+            Rand.PushState();
+            try {foreach(var p in Find.CurrentMap.mapPawns.FreeColonistsSpawned) {
+                var pw=System.Diagnostics.Stopwatch.StartNew();int found=0;bool eligible=false;
+                foreach(var wg in p.workSettings.WorkGiversInOrderNormal) {
+                    if(wg.GetType()!=typeof(WorkGiver_HaulGeneral))continue;
+                    if(p.WorkTagIsDisabled(wg.def.workTags)||p.WorkTypeIsDisabled(wg.def.workType)||wg.MissingRequiredCapacity(p)!=null)continue;
+                    eligible=true;var scanner=(WorkGiver_Scanner)wg;
+                    foreach(var t in scanner.PotentialWorkThingsGlobal(p)) {
+                        if(found>=top)break;
+                        if(t.def.defName!="WoodLog"||t.IsForbidden(p)||!HaulAIUtility.PawnCanAutomaticallyHaulFast(p,t,false))continue;
+                        IntVec3 cell;IHaulDestination dest;
+                        if(StoreUtility.TryFindBestBetterStorageFor(t,p,p.Map,StoreUtility.CurrentStoragePriorityOf(t),p.Faction,out cell,out dest)&&dest is ISlotGroupParent)found++;
+                    }
+                }
+                pawnParts.Add("{\"pawn\":\""+p.GetUniqueLoadID()+"\",\"eligible\":"+(eligible?"true":"false")+",\"candidates\":"+found+",\"micros\":"+(pw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+"}");
+            }} finally {Rand.PopState();}
+            return "{\"scope\":\"WoodLog HaulGeneral slot-storage predicate subset; not a full work menu\",\"top\":"+top+",\"totalMicros\":"+(sw.Elapsed.TotalMilliseconds*1000).ToString("0",System.Globalization.CultureInfo.InvariantCulture)+",\"pawns\":["+String.Join(",",pawnParts.ToArray())+"]}";
+        }
+    }
+}
+
+namespace Concord {
+    // Isolated incremental dispatch+handler benchmark for two common, detached job paths.
+    // Paused game only. Never makes a job through JobMaker, starts one, or targets a live job.
+    public static class SetTargetBenchmark {
+        public static string Measure(int iterations) {
+            if(!Find.TickManager.Paused)throw new Exception("Benchmark requires paused game");
+            var h=Bootstrap.harmony;if(h==null)throw new Exception("Harmony unavailable");
+            var method=HarmonyLib.AccessTools.Method(typeof(Job),nameof(Job.SetTarget));
+            var info=HarmonyLib.Harmony.GetPatchInfo(method);bool previousEnabled=info!=null&&info.Owners.Contains(h.Id);
+            var samples=new List<string>();bool previousTiming=PatchCost.timing;PatchCost.timing=false;
+            Action<bool> mode=enabled=>{h.Unpatch(method,HarmonyLib.HarmonyPatchType.All,h.Id);if(enabled)h.CreateClassProcessor(typeof(Patch2_SetTarget)).Patch();};
+            try {
+                foreach(var def in new[]{JobDefOf.Wait,JobDefOf.HaulToCell}) {
+                    var job=new Job{def=def};var target=new LocalTargetInfo(new IntVec3(0,0,0));
+                    for(int rep=0;rep<5;rep++)foreach(bool enabled in rep%2==0?new[]{true,false}:new[]{false,true}) {
+                        mode(enabled);for(int j=0;j<10000;j++)job.SetTarget(TargetIndex.B,target);
+                        long callsBefore=PatchCost.calls[2],t0=System.Diagnostics.Stopwatch.GetTimestamp();
+                        for(int j=0;j<iterations;j++)job.SetTarget(TargetIndex.B,target);
+                        double micros=(System.Diagnostics.Stopwatch.GetTimestamp()-t0)*1e6/System.Diagnostics.Stopwatch.Frequency;
+                        long hookCalls=PatchCost.calls[2]-callsBefore;
+                        if(hookCalls!=(enabled?iterations:0))throw new Exception("SetTarget benchmark dispatch verification failed");
+                        samples.Add("{\"jobDef\":\""+def.defName+"\",\"enabled\":"+(enabled?"true":"false")+",\"round\":"+rep+",\"calls\":"+iterations+",\"verifiedHookCalls\":"+hookCalls+",\"micros\":"+micros.ToString("0.000",System.Globalization.CultureInfo.InvariantCulture)+"}");
+                    }
+                }
+            } finally {try{mode(previousEnabled);}finally{PatchCost.timing=previousTiming;}}
+            return "{\"scope\":\"detached Wait and non-current HaulToCell SetTarget(B); loop included in both arms, dispatch and production counters included, timing hooks off; not current-job retarget or population-wide cost\",\"samples\":["+String.Join(",",samples.ToArray())+"]}";
         }
     }
 }

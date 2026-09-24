@@ -7,18 +7,23 @@ import {randomUUID} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {LabBridge} from '../src/lab-bridge.js';
 import type {GameState,NativeEvent} from '../src/protocol.js';
-import {IntentView,invariantFindings,topicOutcome} from '../src/native-intents.js';
+import {IntentView,invariantFindings,topicOutcome,intentAction} from '../src/native-intents.js';
+import {Coordinator} from '../src/coordinator.js';
+import {Store} from '../src/store.js';
+import {scripted} from '../src/backends.js';
+import {crewReport} from '../src/crew-log.js';
 import {startNative} from './native-run.js';
 if(process.env.CONCORD_NATIVE_HAUL_LOCKED!=='1')throw Error('Exclusive lab lock required');
 const root=new URL('../..',import.meta.url).pathname;
-const mode=process.argv.includes('--meal')?'meal':'main';
+const mode=process.argv.includes('--meal')?'meal':process.argv.includes('--helper')?'helper':'main';
 const only=process.argv.find(a=>a.startsWith('--case='))?.slice(7);
-const deadline=Date.now()+(mode==='meal'?900000:1800000);
+// Two full ten-minute meal windows plus setup/capture when running the pair together.
+const deadline=Date.now()+(mode==='meal'?(only?900000:1500000):1800000);
 let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
 const runId=randomUUID();
 const receipt:{runId:string;unimplemented:string[];mode:string;fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
-  {runId,unimplemented:['core offer/counter standing transitions and visible not-offered reason','matched ordered-job halves','paired coordinator/cold restore','forced opportunistic replacement','forced partial merge','work-options and patch cost measurements'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
+  {runId,unimplemented:['forced opportunistic replacement','forced partial merge','full work-options menu (only WoodLog storage-haul subset measured)'],mode,passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 
 async function poll(){
@@ -35,6 +40,17 @@ async function run(until:()=>boolean,ms:number){
   const end=Math.min(deadline,Date.now()+ms);await startNative(b);
   try{while(Date.now()<end){await poll();if(until())return true;await delay(150);}return false;}
   finally{await b.admin('pause');await poll();}
+}
+/** Like run(), with the coordinator reconciling (and, for ordered work, the scripted core
+ * offering) on every poll. No model is involved: every answer is authored. */
+async function runWith(tick:()=>Promise<void>,until:()=>boolean,ms:number){
+  const end=Math.min(deadline,Date.now()+ms);await startNative(b);
+  try{while(Date.now()<end){await tick();await poll();if(until())return true;await delay(250);}return false;}
+  finally{await b.admin('pause');await poll();}
+}
+async function coordinator(name:string){
+  const s=new Store(root+`/.runtime/native-haul-${name}-${runId}.db`),co=new Coordinator(s,b);
+  await co.open();await co.initializeCore('Scripted core for the native-haul spike; every answer is authored.');return {s,co};
 }
 const since=(from:number,kind:string,who?:string)=>events.filter(e=>e.seq>from&&e.kind===kind&&(!who||e.pawn===who));
 
@@ -58,7 +74,8 @@ function invariants(c:Case,id:string,opts={}){const v=view(id);if(!v){c.findings
 
 try{
   const f=JSON.parse(await readFile(root+'/.runtime/native-haul-fixture.json','utf8'));receipt.fixture=f;
-  const cfg=mode==='meal'?f.meal:f.main;
+  const cfg=mode==='meal'?f.meal:mode==='helper'?f.helper:f.main;
+  if(!cfg)throw Error('fixture config missing for mode '+mode);
   await b.load(cfg.save);await b.admin('pause');await poll();
   const base='lab-concord-nh-base-'+Date.now();await b.save(base);
   const roles=JSON.parse(await readFile(root+'/scripts/native-haul-roles.json','utf8'));
@@ -69,6 +86,49 @@ try{
   const accept=(intentId:string,actor:string,o:Record<string,unknown>={})=>op({op:'intent-accept',intentId,actor,thing:'WoodLog',...cfg.area,quota:30,maxTicks:30000,variant:'attribution',...o});
   const exclude=(intentId:string,actor:string,reason:string)=>op({op:'intent-exclude',intentId,actor,reason});
   const done=(id:string)=>()=>view(id)?.status!=='open';
+  /** Ordered-job model on the same save: every offer here stands for a core turn in live play. */
+  async function orderedHalf(c:Case,ms:number){
+    const {s,co}=await coordinator('ordered');
+    try{
+      c.data.zone=await op({op:'lab-plain-zone',actor:A,...cfg.area});
+      for(const p of state.pawns)await op({op:'lab-work-priority',actor:p.id,count:0});
+      let offers=0,noOption=0,offersAfterMeal=0;const from=lastSeq,startTick=state.ticks,quota=mode==='meal'?75:30;
+      const samples:{tick:number;id:string;status:string;delivered:number}[]=[];
+      const observed=new Set<string>();
+      const outcomes=()=>{const d=co.inspect(),ids=new Set(Object.values(d.proposals).filter(p=>p.pawn===A&&p.action.kind==='haul').flatMap(p=>p.standing?.steps??[]));return Object.values(d.outcomes).filter(r=>r.actor===A&&r.kind==='haul'&&ids.has(r.id));};
+      const delivered=()=>outcomes().reduce((n,r)=>n+(r.delivered??0),0);
+      const ate=()=>since(from,'ingested',A).length>0;
+      await runWith(async()=>{
+        await co.reconcile();await co.advanceIntentions();
+        for(const r of outcomes()){const key=r.id+':'+r.status;if(!observed.has(key)){observed.add(key);samples.push({tick:state.ticks,id:r.id,status:r.status,delivered:r.delivered??0});}}
+        if(delivered()>=quota)return;
+        const d=co.inspect();
+        if(Object.values(d.proposals).some(p=>p.pawn===A&&(p.status==='pending'||p.standing?.status==='running'))||d.characters[A]?.commitment)return;
+        const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===A&&o.action.kind==='haul'&&/^(?:Thing_)?WoodLog\d+$/.test(o.action.thing)&&o.action.x>=cfg.area.x&&o.action.x<cfg.area.x+cfg.area.w&&o.action.z>=cfg.area.z&&o.action.z<cfg.area.z+cfg.area.h);
+        if(!o){noOption++;return;}
+        if(o.action.kind!=='haul')throw Error('Expected wood hauling');
+        const count=Math.min(o.action.count,quota-delivered()),trips=Math.min(o.action.trips,Math.floor((quota-delivered())/count));
+        const p=await co.core().propose(A,{...o.action,count,trips},'Scripted ordered offer');offers++;if(ate())offersAfterMeal++;
+        await co.pawn(A).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+      },()=>delivered()>=quota,ms);
+      await co.reconcile();
+      const d=co.inspect(),mine=Object.values(d.proposals).filter(p=>p.pawn===A&&p.action.kind==='haul');
+      const receipts=outcomes();
+      const starts=since(from,'job-start',A).filter(e=>e.detail.startsWith('Concord_Haul;')),meal=since(from,'ingested',A)[0],first=starts[0],afterMeal=meal&&starts.find(e=>e.seq>meal.seq),beforeMeal=meal&&starts.some(e=>e.seq<meal.seq);
+      c.data.receipts=receipts;c.data.observedOutcomes=samples;
+      expect(c,offers>0&&delivered()>0,'ordered baseline did not execute and deliver scoped wood');
+      expect(c,delivered()<=quota,`ordered baseline exceeded quota: ${delivered()}/${quota}`);
+      // A valid baseline may fall short; measure that outcome rather than requiring the old model to succeed.
+      if(mode==='meal'){expect(c,!!meal,'ordered meal baseline never ate');expect(c,!!afterMeal,'ordered meal baseline has no post-meal haul start');}
+      return {quota,quotaMet:delivered()===quota,observation:'baseline measurement, not a claim of goal completion',startTick,firstWorkTick:first?.tick??null,mealTick:meal?.tick??null,postMealWorkTick:afterMeal?.tick??null,
+        ticksToFirstWork:first?first.tick-startTick:null,ticksMealToFirstWork:meal&&afterMeal?afterMeal.tick-meal.tick:null,
+        resumedEarlierWork:!!beforeMeal&&!!afterMeal,ticksMealToResume:beforeMeal&&meal&&afterMeal?afterMeal.tick-meal.tick:null,offers,offersAfterMeal,pollsWithoutGroundedOption:noOption,ate:ate(),
+        delivered:delivered(),
+        staleRejections:receipts.filter(r=>r.status==='failed').map(r=>r.reason),
+        stops:mine.filter(p=>p.standing?.status==='stopped').map(p=>p.standing!.reason),
+        estimatedCoreOfferTurnsIfLive:offers,actualModelCalls:0};
+    }finally{s.close();}
+  }
 
   if(mode==='main'){
     await scenario('stale-lab-command',base,async c=>{
@@ -113,14 +173,23 @@ try{
       expect(c,v.finishedAfterExclusion>=1,'carried trip not finished and flagged');
       expect(c,v.drops.filter(d=>d.pawn===A&&d.kind==='participation').every(d=>d.startedBeforeExclusion),'unflagged participation after withdrawal');
     });
-    await scenario('forced-cancel-in-zone',base,async c=>{
-      const id=randomUUID();await accept(id,A,{variant:'exclusive'});const a=cfg.area;
-      const inZone=()=>{const p=pawn(primary);return !!p.carrying&&p.x>=a.x&&p.x<a.x+a.w&&p.z>=a.z&&p.z<a.z+a.h;};
-      const reached=await run(inZone,90000);
-      if(!reached){c.findings.push('Pedro never stood in the zone while carrying (retry with a larger area)');return;}
-      const before=view(id)!.delivered;c.data.interrupt=await op({op:'lab-interrupt',actor:A});await poll();
+    await scenario('draft-mid-carry',base,async c=>{
+      // The game's own interruption: Pedro is drafted the moment he stands in the tagged zone
+      // carrying on a tagged haul. The lab chooses only the timing.
+      const id=randomUUID();await accept(id,A,{quota:75,variant:'exclusive'});
+      await op({op:'lab-draft-when',actor:A});
+      if(!await run(()=>events.some(e=>e.kind==='lab-drafted'&&e.pawn===A),120000))throw Error('precondition: Pedro never stood in the zone while carrying');
+      const drafted=events.find(e=>e.kind==='lab-drafted'&&e.pawn===A)!;
+      const interruptedJob=/^job=(\d+);/.exec(drafted.detail)?.[1];
+      expect(c,!!interruptedJob&&events.some(e=>e.pawn===A&&e.kind==='job-end'&&e.tick===drafted.tick&&e.detail==='HaulToCell;job='+interruptedJob+';condition=InterruptForced'),'draft marker did not identify the interrupted haul');
+      await run(()=>false,3000);
       const v=invariants(c,id);if(!v)return;
-      expect(c,v.delivered===before,'cleanup drop credited');c.data.drops=v.drops.slice(-3);
+      const after=v.drops.filter(d=>d.tick>=drafted.tick&&d.pawn===A);c.data.drafted=drafted;c.data.dropsAfterDraft=after;
+      expect(c,after.some(d=>d.kind==='incidental'),'no incidental drop recorded when drafted mid-carry');
+      expect(c,!after.some(d=>d.kind==='participation'),'drop on drafting was credited as participation');
+      c.data.undraft=await op({op:'lab-undraft',actor:A});
+      // Native behaviour after undrafting is recorded, not required.
+      await run(()=>false,15000);c.data.resumedAfterUndraft=events.some(e=>e.seq>drafted.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
     });
     for(const [quota,carry] of [[5,20],[30,10]] as const)await scenario('pre-carried-'+carry+'-quota-'+quota,base,async c=>{
       const id=randomUUID();await accept(id,A,{quota,variant:'exclusive'});
@@ -165,9 +234,21 @@ try{
       expect(c,v.rejectedStarts>0,'excluded queued start not rejected');expect(c,!v.byPawn.some(p=>p.pawn===B),'excluded pawn credited');
     });
     await scenario('expiry-partial',base,async c=>{
-      const id=randomUUID();await accept(id,A,{maxTicks:900,variant:'exclusive'});await run(done(id),60000);
+      // The 30-wood case closes in its first short trip; use 75 and the minimum expiry to keep a later trip outstanding.
+      const id=randomUUID();await accept(id,A,{quota:75,maxTicks:600,variant:'exclusive'});await run(done(id),60000);
       const v=invariants(c,id);if(!v)return;
-      expect(c,v.status==='expired'&&topicOutcome(v)==='expired',`expected expired, got ${v.status}`);c.data.delivered=v.delivered;
+      expect(c,v.status==='expired'&&topicOutcome(v)==='expired',`expected expired, got ${v.status}`);
+      expect(c,v.delivered>0&&v.delivered<v.quota,'partial-expiry precondition not observed');c.data.delivered=v.delivered;
+    });
+    await scenario('pre-carried-own-target',base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota:30,variant:'exclusive'});
+      const carry=await op({op:'lab-carry',intentId:id,actor:A,count:10});
+      expect(c,carry.carried===10,'wrong pre-carried count');
+      const queued=await op({op:'lab-queue-haul',intentId:id,actor:A,reason:'carried'});
+      await run(()=>events.some(e=>e.kind==='intent-admitted-start'&&e.detail.includes('job='+queued.queuedJob+';')),60000);
+      const admitted=events.find(e=>e.kind==='intent-admitted-start'&&e.detail.includes('job='+queued.queuedJob+';'));
+      expect(c,!!admitted&&admitted.detail.endsWith(';carried=10;reserved=10'),'own carried target reserved more than its actual load');
+      c.data.admitted=admitted;invariants(c,id);
     });
     await scenario('escape-injection',base,async c=>{
       const id=randomUUID();await op({op:'lab-fault-escape',actor:A});await accept(id,A,{quota:5,variant:'exclusive'});
@@ -187,6 +268,131 @@ try{
       expect(c,v.drops.some(d=>d.kind==='unattributed'&&d.source==='reconcile'&&d.count===2),'merge not caught by reconciliation');
       expect(c,!v.drops.some(d=>d.kind==='unattributed'&&d.source==='reconcile'&&d.count!==2),'reconciliation reported an unexpected difference');
     });
+    await scenario('core-offers',base,async c=>{
+      // The scripted core offers the frozen intent; Alvin is never offered (native capability).
+      const {s,co}=await coordinator('core');
+      try{
+        const setup={intentId:randomUUID(),area:cfg.area,quota:30,maxTicks:30000,variant:'exclusive' as const},alvin=pawn('Alvin').id;
+        await co.configureNativeHaul(setup);
+        const v=await co.corePerspective();c.data.initialOpportunities=v.opportunities;
+        expect(c,!v.opportunities.some(o=>o.pawn===alvin&&(o.action.kind==='haul-zone'||o.action.kind==='haul')),'Alvin was offered hauling');
+        expect(c,v.availability.some(a=>a.pawn===alvin&&/cannot do hauling/.test(a.status)),'no visible not-offered reason for the core');
+        let refused=false;try{await co.core().propose(alvin,intentAction(setup),'Scripted offer');}catch(e){refused=/Not offered: cannot do hauling/.test(String(e));}
+        expect(c,refused,'direct offer to Alvin was not refused');
+        // Beatrice refuses; Pedro counters 20 before anyone accepts; the core adopts it; Pedro accepts.
+        const ob=await co.core().propose(B,intentAction(setup),'Scripted: stock wood in the new stockpile');
+        await co.pawn(B).decide(ob.id,scripted({kind:'refuse',reason:'Authored refusal'}));
+        const first=await co.core().propose(A,intentAction(setup),'Scripted: stock wood in the new stockpile');
+        await co.pawn(A).decide(first.id,scripted({kind:'counter',reason:'Twenty is enough',action:intentAction(setup,20)}));
+        const adopted=await co.core().revise(first.id,'Scripted: adopt twenty');
+        await co.pawn(A).decide(adopted.id,scripted({kind:'accept',reason:'Authored acceptance'}));await poll();
+        expect(c,view(setup.intentId)?.quota===20,'adopted pre-acceptance counter did not set the quota');
+        expect(c,!!view(setup.intentId)?.excluded.includes(B),'refusal not binding in the game');
+        // Paired checkpoint while the intent is open (no Concord job exists to block it).
+        const mid=await runWith(()=>co.reconcile(),()=>{const v=view(setup.intentId);return v?.status==='open'&&v.reserved>0;},120000);
+        if(mid){
+          await co.reconcile();const before=view(setup.intentId)!,name='lab-concord-nh-core-'+Date.now();
+          if(before.status!=='open'||before.reserved<=0)throw Error('paired checkpoint requires an open in-flight intent');
+          await co.checkpoint(name);c.data.eventsBeforeLoad=[...events];events=[];lastSeq=0;await co.restore(name);await poll();
+          const after=view(setup.intentId);
+          expect(c,!!after&&after.quota===before.quota&&after.delivered===before.delivered&&after.status===before.status,'intent changed across paired restore');
+          expect(c,co.inspect().proposals[adopted.id]?.standing?.status==='running','standing lost across paired restore');
+          c.data.pairedRestore={name,before:{delivered:before.delivered,reserved:before.reserved},afterReserved:after?.reserved};
+        }else c.findings.push('no open in-flight haul before the paired checkpoint window closed');
+        await runWith(()=>co.reconcile(),()=>co.inspect().proposals[adopted.id]?.standing?.status!=='running',240000);
+        await co.reconcile();
+        const iv=invariants(c,setup.intentId);if(!iv)return;
+        expect(c,iv.status==='met'&&iv.delivered===20,`expected 20 met, got ${iv.delivered} ${iv.status}`);
+        expect(c,!iv.byPawn.some(p=>p.pawn!==A),'credit outside the accepting pawn in the exclusive variant');
+        expect(c,co.inspect().proposals[adopted.id]?.standing?.status==='completed','accepting standing not completed');
+        const crew=crewReport(co.inspect(),state.ticks).entries.map(e=>e.text);c.data.crew=crew;
+        expect(c,crew.includes('Alvin: not offered: cannot do hauling.'),'crew log lacks the not-offered line');
+        expect(c,crew.some(t=>t.startsWith('Stockpile haul quota met: 20/20 wood')),'crew log lacks the quota line');
+      }finally{s.close();}
+    });
+    await scenario('cold-restore-mid-intent',base,async c=>{
+      // Checkpoint with an open, in-flight intent; restore into a NEW coordinator on the same store.
+      const setup={intentId:randomUUID(),area:cfg.area,quota:75,maxTicks:30000,variant:'attribution' as const};
+      const db=root+`/.runtime/native-haul-cold-${runId}.db`;let s=new Store(db),co=new Coordinator(s,b);
+      await co.open();await co.initializeCore('Scripted core for the cold-restore check; every answer is authored.');await co.configureNativeHaul(setup);
+      const offer=await co.core().propose(A,intentAction(setup),'Scripted: stock wood');
+      await co.pawn(A).decide(offer.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+      if(!await runWith(()=>co.reconcile(),()=>{const v=view(setup.intentId);return v?.status==='open'&&v.delivered>0&&v.reserved>0;},180000))throw Error('precondition: no in-flight haul after a first delivery');
+      await co.reconcile();const before=view(setup.intentId)!,domainBefore=co.inspect();
+      const name='lab-concord-nh-cold-'+Date.now();await co.checkpoint(name);s.close();
+      s=new Store(db);co=new Coordinator(s,b);
+      try{
+        c.data.eventsBeforeLoad=[...events];events=[];lastSeq=0;await co.restore(name);await poll();
+        const after=view(setup.intentId);
+        expect(c,!!after&&after.status==='open'&&after.quota===before.quota&&after.delivered===before.delivered,'intent changed across cold restore');
+        expect(c,co.inspect().proposals[offer.id]?.standing?.status==='running','standing lost across cold restore');
+        expect(c,JSON.stringify(co.inspect().intentViews?.[setup.intentId]?.byPawn)===JSON.stringify(domainBefore.intentViews?.[setup.intentId]?.byPawn),'coordinator credit changed across cold restore');
+        await runWith(()=>co.reconcile(),()=>co.inspect().proposals[offer.id]?.standing?.status!=='running',300000);await co.reconcile();
+        const v=invariants(c,setup.intentId);if(!v)return;
+        expect(c,v.status==='met'&&co.inspect().proposals[offer.id]?.standing?.status==='completed','intent did not complete after cold restore');
+        c.data.coldRestore={name,before:{delivered:before.delivered,reserved:before.reserved},afterReserved:after?.reserved,final:v.delivered};
+      }finally{s.close();}
+    });
+    await scenario('patch-cost',base,async c=>{
+      // Same ordinary stockpile in every throughput arm: no intent caps to change work.
+      // Tagged-work handler profiling is separate and is NOT total Harmony overhead.
+      const observe=async(ms:number)=>{
+        await poll();const t0=state.ticks,w0=Date.now();
+        while(Date.now()-w0<ms){await delay(150);await poll();if(state.paused)throw Error('measurement interrupted by pause');}
+        const ticks=state.ticks-t0,wallMs=Date.now()-w0;
+        if(ticks<=0)throw Error('measurement did not advance simulation');
+        return {ticks,wallMs,tps:ticks/(wallMs/1000)};
+      };
+      const fresh=async()=>{
+        await b.admin('pause');await op({op:'lab-patches',count:1});
+        await b.load(base);await b.admin('pause');events=[];lastSeq=0;await poll();
+      };
+      const segment=async(mode:number)=>{
+        await fresh();await op({op:'lab-plain-zone',actor:A,...cfg.area});
+        await op({op:'lab-patches',count:mode});await startNative(b);await op({op:'lab-speed',count:4});
+        const sample=await observe(20000);await b.admin('pause');return {mode,...sample};
+      };
+      const samples:{mode:number;ticks:number;wallMs:number;tps:number}[]=[];
+      try{
+        await op({op:'lab-patch-cost',count:0});
+        for(const order of [[1,2,0],[2,0,1],[0,1,2]])for(const m of order)samples.push(await segment(m));
+        await fresh();const id=randomUUID();await accept(id,A,{quota:75});
+        await op({op:'lab-speed',count:4});await b.admin('pause');await poll();const t0=state.ticks;
+        await op({op:'lab-patch-cost',count:1});await startNative(b);await op({op:'lab-speed',count:4});
+        const observation=await observe(20000);await b.admin('pause');await poll();const ticks=state.ticks-t0;
+        const cost=await op({op:'lab-patch-cost',count:2});
+        await op({op:'lab-patch-cost',count:0});
+        c.data.setTargetMicrobenchmark=await op({op:'lab-bench-settarget',count:200000});
+        if(ticks<=0||!cost.patches.some((p:any)=>p.patch==='2 Job.SetTarget'&&p.calls>0))throw Error('no usable SetTarget profile');
+        const med=(m:number)=>{const x=samples.filter(s=>s.mode===m).map(s=>s.tps).sort((a,b)=>a-b);return x[1]!;};
+        c.data.patchCost={samples,medianTps:{all:med(1),allButSetTarget:med(2),none:med(0)},
+          setTargetTpsDelta:med(2)-med(1),allPatchesTpsDelta:med(0)-med(1),
+          timedTicks:ticks,observation,profileIntent:view(id),perHandler:cost.patches.map((p:any)=>({...p,microsPer1000Ticks:Math.round(p.micros*1000/ticks*10)/10})),
+          note:'Throughput: matched ordinary stockpile, no active intent. Difference includes dispatch and counters; noisy/capped TPS is not isolated cost. Tagged profile: instrumented handler bodies, callback separate, prefix/postfix counted separately; excludes Harmony dispatch, includes timer overhead and nested work. Do not sum as exclusive CPU time.'};
+      }finally{
+        const failures:string[]=[];
+        for(const clean of [()=>b.admin('pause'),()=>op({op:'lab-patch-cost',count:0}),()=>op({op:'lab-patches',count:1})]){
+          try{opDeadline=Date.now()+10000;await clean();}catch(e){failures.push(String(e));}
+        }
+        if(failures.length)throw Error('patch measurement cleanup failed: '+failures.join('; '));
+      }
+    });
+    await scenario('settarget-cost',base,async c=>{
+      await accept(randomUUID(),A,{quota:75});
+      c.data.setTargetMicrobenchmark=await op({op:'lab-bench-settarget',count:200000});
+    });
+    await scenario('work-options',base,async c=>{
+      // Measurement only: the options menu is never given to the core in this spike.
+      const runs=[];for(let i=0;i<5;i++)runs.push(await op({op:'lab-work-options',count:5}));
+      c.data.workOptions={runs,totalMicros:runs.map((r:any)=>r.totalMicros)};
+      expect(c,runs.every((r:any)=>r.pawns.length===3),'work-options did not cover all three pawns');
+    });
+    await scenario('ordered-main',base,async c=>{
+      // Matched ordered-job half for stale rejections: the same area as an ordinary stockpile,
+      // native Hauling off for everyone so only ordered jobs haul, the scripted core offering
+      // Pedro every grounded haul it sees. Same wall-clock budget as the native variants.
+      c.data.result=await orderedHalf(c,240000);
+    });
     await scenario('quota-immutability-only',base,async c=>{
       // Only native quota immutability; model counter/adoption transitions are deferred.
       const id=randomUUID();await accept(id,A,{quota:20});
@@ -194,19 +400,58 @@ try{
       // A second acceptance cannot change the quota. This is not a counteroffer test.
       await accept(id,B,{quota:10});expect(c,view(id)?.quota===20,'quota changed after acceptance');
     });
+  }else if(mode==='helper'){
+    // Helping and overlap from geometry only (Fable): nothing nudges Beatrice. If she does
+    // not help, that is recorded as the result; invariants must hold either way.
+    await scenario('helper-geometry',base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota:75,variant:'attribution'});
+      await run(done(id),420000);const v=invariants(c,id);if(!v)return;
+      const helper=v.byPawn.find(p=>p.pawn===B)?.count??0;
+      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,helperObserved:helper>0,helperCredit:helper,peakHolders:v.peakHolders,
+        truedUp:since(0,'intent-trued-up').map(e=>e.detail),admitted:since(0,'intent-admitted-start').map(e=>e.pawn+':'+e.detail)};
+    });
+    await scenario('quota-contention-geometry',base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota:30});await accept(id,B,{quota:30});
+      await run(done(id),240000);const v=invariants(c,id);if(!v)return;
+      expect(c,v.status==='met'&&v.delivered===30&&v.overshoot===0,'30-unit contention quota not met exactly');
+      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,peakHolders:v.peakHolders,overlapObserved:v.peakHolders>=2,
+        admitted:since(0,'intent-admitted-start').map(e=>e.pawn+':'+e.detail),truedUp:since(0,'intent-trued-up').map(e=>e.detail),
+        capableActors:[A,B],note:'Two capable pawns only; Alvin is not offered, never a third hauler.'};
+    });
+    await scenario('overlap-geometry',base,async c=>{
+      const id=randomUUID();await accept(id,A,{quota:75});await accept(id,B,{quota:75});
+      await run(done(id),420000);const v=invariants(c,id);if(!v)return;
+      expect(c,v.overshoot===0,'overshoot with two accepting pawns');
+      c.data.result={status:v.status,delivered:v.delivered,byPawn:v.byPawn,overlapObserved:v.peakHolders>=2,peakHolders:v.peakHolders,rejectedStarts:v.rejectedStarts,
+        truedUp:since(0,'intent-trued-up').map(e=>e.detail),admitted:since(0,'intent-admitted-start').map(e=>e.pawn+':'+e.detail)};
+    });
   }else{
     await scenario('meal-resumption',base,async c=>{
-      const id=randomUUID();await accept(id,A,{quota:75,variant:'exclusive',maxTicks:60000});
+      const id=randomUUID(),startTick=state.ticks,from=lastSeq;await accept(id,A,{quota:75,variant:'exclusive',maxTicks:60000});
       const ate=()=>since(0,'ingested',A).length>0;
-      await run(()=>ate()||done(id)(),600000);
+      const observationStart=Date.now();await run(()=>ate()||done(id)(),600000);
       const meal=since(0,'ingested',A)[0];
       if(!meal){c.findings.push('invalid: Pedro never ate before the intent closed');return;}
-      const at=view(id)!;c.data.atMeal={tick:meal.tick,delivered:at.delivered,status:at.status,remaining:at.remaining};
-      if(at.status!=='open'||at.remaining<=0){c.findings.push('invalid: intent not open with work left when hunger triggered');return;}
+      const at=view(id)!,deliveredAtMeal=at.drops.filter(d=>d.kind==='participation'&&d.tick<=meal.tick).reduce((n,d)=>n+d.count,0);
+      c.data.atMeal={tick:meal.tick,delivered:deliveredAtMeal,statusAtPoll:at.status,unfinishedQuota:at.quota-deliveredAtMeal,freeToReserveAtPoll:at.remaining};
+      // Polling can observe the post-meal job's reservation already acquired. It is still unfinished work.
+      if(at.status!=='open'||at.quota-deliveredAtMeal<=0){c.findings.push('invalid: intent not open with work left when hunger triggered');return;}
       const next=()=>events.some(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
       expect(c,await run(next,300000),'Pedro did not start another tagged haul after eating');
       const resumed=events.find(e=>e.seq>meal.seq&&e.pawn===A&&e.kind==='job-start'&&e.detail.includes('intent='+id));
-      c.data.ticksMealToResume=resumed?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
+      const first=since(from,'job-start',A).find(e=>e.detail.includes('intent='+id));
+      c.data.firstWorkTick=first?.tick??null;c.data.ticksToFirstWork=first?first.tick-startTick:null;
+      c.data.workStartedBeforeMeal=!!first&&first.seq<meal.seq;
+      expect(c,!!first&&first.seq<meal.seq,'invalid: no tagged work before the meal; this is initial work, not resumption');
+      c.data.ticksMealToResume=resumed&&first&&first.seq<meal.seq?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
+      const leftMs=600000-(Date.now()-observationStart);
+      if(leftMs>0&&!done(id)())await run(done(id),leftMs);
+      const end=invariants(c,id);c.data.completion={observedMs:Date.now()-observationStart,endTick:state.ticks,quotaMet:end?.status==='met',delivered:end?.delivered,quota:end?.quota};
+    });
+    await scenario('ordered-meal',base,async c=>{
+      // Matched ordered-job half: same calibrated start state (Pedro's Food 0.13). The ordered model stops
+      // work below 0.35 and never resumes an agreement; every restart needs a new offer.
+      c.data.result=await orderedHalf(c,600000);
     });
   }
   receipt.passed=receipt.eventGaps===0&&receipt.cases.length>0&&receipt.cases.every(c=>c.passed);

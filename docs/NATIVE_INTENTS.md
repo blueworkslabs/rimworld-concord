@@ -218,3 +218,10 @@ with a tag is part of the migration.
 - How topic closure works on aggregate receipts.
 - Whether checkpoints during running agreements become allowed.
 - When refusals and broken promises become native thought memories.
+- **Strict hold or growing hold for tagged hauls** (decide with the hauling migration).
+  The spike keeps the strict hold: a tagged trip reserves at most its source stack, so
+  "credited beyond quota = 0" stays a frozen measure, at the cost of no extra-stack
+  pickups into a tagged zone. Fable's leaning for migration is the growing hold with
+  reported overshoot: "up to 30" is a promise between characters, not a physics
+  constraint, and "delivered 35 of 30" on the crew log is truer than leaving five on the
+  ground. That trades a guarantee for legibility.

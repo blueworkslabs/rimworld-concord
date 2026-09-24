@@ -4,6 +4,12 @@ export type CrewEntry={seq:number;tick:number;kind:'message'|'record';actor:stri
 export type CrewArchive={revision:number;nextSeq:number;entries:CrewEntry[]};
 export type CrewReport={observerText?:string;topicText?:string;foodLines?:string[];sharedStatus?:import('./shared-status.js').SharedStatus[];waiting?:string;world:string;epoch:string;branch:string;revision:number;tick:number;entries:CrewEntry[];agreements:{pawn:string;name:string;progress:AgreementProgress}[]};
 export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt[]):AgreementProgress {
+ if(p.action.kind==='haul-zone'){
+  // Shared intent: the quota is the colony's; delivered is this pawn's own credit.
+  const v=d.intentViews?.[p.action.intentId],mine=v?.byPawn.find(x=>x.pawn===p.pawn)?.count??0,met=p.standing?.status==='completed'&&v?.status==='met'?1:0;
+  return {id:p.id,kind:p.action.kind,status:p.standing?.status??p.status,tick,agreed:1,completed:met,active:p.standing?.status==='running'?1:0,
+   unconfirmed:!v||d.pendingIntentAcceptances?.includes(p.id)?1:0,unsuccessful:p.standing?.status==='stopped'||v&&(v.status==='expired'||v.status==='stopped')?1:0,notStarted:0,unfulfilled:1-met,delivered:mine,quantityUnknown:0};
+ }
  const agreed=p.action.kind==='haul'?p.action.trips:p.action.kind==='cook'?p.action.meals:1;
  const ids=[...new Set(p.standing?.steps??(p.actionId?[p.actionId]:[]))];
  const receipts=ids.map(id=>fresh?.find(r=>r.id===id&&r.actor===p.pawn)??d.outcomes[id]).map(r=>r?.actor===p.pawn?r:undefined);
@@ -37,6 +43,17 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
     add('record',actor,'observer',e.subject,text,`native-observation:${e.seq}`);
     const entry=c.entries.find(x=>x.key===`native-observation:${e.seq}`);if(entry)entry.tick=e.tick;
    }
+  }
+ }
+ if(kind==='intent-not-offered')add('record','core','observer',data.pawn,`${name(data.pawn)}: not offered: ${safe(data.reason,120)}.`,`not-offered:${data.intentId}:${data.pawn}`);
+ if(kind==='intent-progress'){
+  const credit=Object.entries(data.byPawn??{}).map(([p,n])=>`${name(p)} ${Number(n)}`).join(', ');
+  if(data.previousDelivered===0&&data.delivered>0)add('record','Game','observer',data.intentId,`Stockpile haul: first delivery, ${data.delivered}/${data.quota} wood (${credit}).`,`intent-first:${data.intentId}`);
+  for(let n=data.previousFinishedAfterExclusion+1;n<=data.finishedAfterExclusion;n++)
+   add('record','Game','observer',data.intentId,'Finished a trip started before withdrawing; credited to the carrier, not a new agreement.',`intent-finished-before:${data.intentId}:${n}`);
+  if(data.status!==data.previousStatus&&['met','expired','stopped'].includes(data.status)){
+   const what=data.status==='met'?'quota met':data.status==='expired'?'expired; the topic stays open':'stopped by the operator';
+   add('record','Game','observer',data.intentId,`Stockpile haul ${what}: ${data.delivered}/${data.quota} wood (${credit||'no deliveries'})${data.overshoot?`; ${data.overshoot} beyond reservations reported`:''}.`,`intent-${data.status}:${data.intentId}`);
   }
  }
  if(kind==='proposed'||kind==='proposal-revised')add('message','core',data.pawn,data.id,data.reason,`offer:${data.id}`);

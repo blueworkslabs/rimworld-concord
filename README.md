@@ -24,7 +24,7 @@ remain unchanged.
 | Build a campfire (20 wood) | yes | scripted game tests only |
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
-| Native tagged-zone haul spike | [partial scripted checks](docs/trials/NATIVE_HAUL_SMOKE.md); revised exclusive/meal roles awaiting runs | not run |
+| Native tagged-zone haul spike | [partial scripted checks and live rehearsal](docs/trials/NATIVE_HAUL_FREEZE.md): native meal resumption, helper/overlap, scoped timing and coordinator-process cold restore | [single frozen recording complete](docs/trials/NATIVE_HAUL_LIVE.md); [receipt findings](docs/trials/NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read) available; Gate C verdict pending |
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not
 now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private

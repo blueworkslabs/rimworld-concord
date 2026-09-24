@@ -48,7 +48,9 @@ export async function stopTrialWork(c:import('./coordinator.js').Coordinator){
  const attempt=async(fn:()=>Promise<unknown>)=>{try{await fn();}catch(e){errors.push(String(e));}};
  if(!c.inspect())return {operatorStops,errors};
  await attempt(()=>c.reconcile());
- for(const ch of Object.values(c.inspect().characters))if(ch.intention){
+ // A native intent ends as an operator stop, never as invented pawn withdrawals.
+ if(c.inspect().nativeHaul)await attempt(()=>c.stopNativeHaul());
+ for(const ch of Object.values(c.inspect().characters))if(ch.intention&&c.inspect().proposals[ch.intention]?.action.kind!=='haul-zone'){
   operatorStops.push(ch.id);await attempt(()=>c.pawn(ch.id).withdraw('Operator trial ended; not a pawn-originated choice'));
  }
  for(const ch of Object.values(c.inspect().characters))if(ch.commitment&&c.inspect().selfCare?.[ch.commitment]?.pawn===ch.id){
@@ -57,6 +59,9 @@ export async function stopTrialWork(c:import('./coordinator.js').Coordinator){
  for(const p of Object.values(c.inspect().proposals))if(p.status==='pending')
   await attempt(()=>c.core().withdrawOffer(p.id,'Operator trial ended; offer retired without acceptance'));
  await attempt(()=>c.reconcile());
- for(const ch of Object.values(c.inspect().characters))if(ch.commitment)errors.push('Executable commitment still unresolved: '+ch.id);
+ for(const ch of Object.values(c.inspect().characters)){
+  if(ch.commitment)errors.push('Executable commitment still unresolved: '+ch.id);
+  if(ch.intention&&c.inspect().proposals[ch.intention]?.action.kind==='haul-zone')errors.push('Native operator stop still unresolved: '+ch.id);
+ }
  return {operatorStops,errors};
 }

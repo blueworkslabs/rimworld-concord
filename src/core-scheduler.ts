@@ -8,7 +8,10 @@ export const CoreScheduleConfig=z.object({
 }).strict().refine(c=>(c.maxAttempts===null)===(c.windowTicks===null),"Ongoing schedules require both limits null");
 export type CoreScheduleConfig=z.infer<typeof CoreScheduleConfig>;
 export type CoreSchedule={config:CoreScheduleConfig;startTick:number;endTick:number|null;blocked?:string;attempts:number;lastAttemptTick?:number;consumed:Record<string,string>};
-export type CoreWake={sourceId:string;kind:'start'|'agreement'|'request'|'message'|'answer'|'telemetry'|'self-care';value:string};
+export type CoreWake={sourceId:string;kind:'start'|'agreement'|'request'|'message'|'answer'|'telemetry'|'self-care'|'native-intent';value:string};
+
+/** Quiet-period threshold for the native spike; one wake per delivery-separated stall. */
+export const NATIVE_INTENT_STALL_TICKS=2500;
 
 /** Only public/communicated changes qualify. Tick passage, private needs,
  * opportunity churn, telemetry timestamp refreshes and the core's own prose do not wake it. */
@@ -22,6 +25,12 @@ export function coreWakeSnapshot(v:CoreView):CoreWake[]{
    :p.progress.status;
   if(['completed','stopped','refused','deferred','countered','withdrawn'].includes(status))
    wakes.push({sourceId:p.id,kind:'agreement',value:JSON.stringify({status,completed:p.progress.completed,unsuccessful:p.progress.unsuccessful,delivered:p.progress.delivered})});
+ }
+ for(const i of v.nativeIntents??[]){
+  if(i.delivered>0)wakes.push({sourceId:i.intentId+':first-delivery',kind:'native-intent',value:'delivered'});
+  if(['met','expired','stopped'].includes(i.status))wakes.push({sourceId:i.intentId+':lifecycle',kind:'native-intent',value:i.status});
+  const since=Math.max(i.createdTick,i.lastDeliveryTick);
+  if(i.status==='open'&&v.tick-since>=NATIVE_INTENT_STALL_TICKS)wakes.push({sourceId:i.intentId+':stall',kind:'native-intent',value:String(since)});
  }
  for(const r of v.requests)wakes.push({sourceId:r.id,kind:'request',value:r.status});
  for(const m of v.messages)if(m.to==='core'&&m.from!=='core')wakes.push({sourceId:m.id,kind:'message',value:m.text});

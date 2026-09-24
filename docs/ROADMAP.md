@@ -26,10 +26,19 @@ testing; the exact causes of the historical eating rejections remain unknown, an
 new game interface will not by itself fix model grounding. [NATIVE_INTENTS](NATIVE_INTENTS.md) explains the new
 direction: **steer the game's own planner instead of driving pawns.**
 
-The native-haul spike now has [partial scripted staging evidence](trials/NATIVE_HAUL_SMOKE.md):
-helper attribution and several ledger/restore checks pass. The original sole-Alvin fixture was
-blocked by native work incapability; Pedro-based role sheets are prepared but not game-tested. Meal, full consent matrix and live verdict
-remain unverified. The architectural direction below is unchanged.
+The native-haul spike now has [partial scripted staging evidence](trials/NATIVE_HAUL_OFFERS.md):
+Pedro-based exclusive work, offers/counter/paired restore, and native meal resumption
+pass (75/75 delivered, resumed three ticks after eating). The matched ordered meal
+observed 15/75, with an explicitly retained measurement failure and offline rescore.
+[Follow-up instrumentation](trials/NATIVE_HAUL_INSTRUMENTATION.md) observed a real
+drafting cleanup drop, fresh-coordinator restore and scoped patch timings. [Reservation-policy reruns](trials/NATIVE_HAUL_CONTENTION.md) now show unaccepted
+Beatrice contributing 20 of 75 wood and two overlapping holders, without changing pawn
+behaviour. Earlier contention interpretations are void because one job monopolized
+quota. The [live harness and setup hash](trials/NATIVE_HAUL_FREEZE.md) now have a recorded
+zero-model rehearsal and real coordinator-process cold restore. Two earlier coverage
+failures exposed missing native core wake integration and remain retained. Fable signed the
+75-unit helper-layout setup and the [single frozen live recording](trials/NATIVE_HAUL_LIVE.md)
+is complete. The recording-only read is complete; [receipt-backed findings](trials/NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read) expose offer bookkeeping, stale narration and attention failures. Fable’s verdict and rare boundary checks remain. The options-menu measurement is a WoodLog-only subset.
 
 ## Next phase: work with RimWorld's planner
 

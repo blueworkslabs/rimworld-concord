@@ -8,7 +8,7 @@ const base=(o:Partial<IntentView>={}):IntentView=>IntentView.parse({intentId:'i1
   finishedAfterExclusion:0,createdTick:1000,untilTick:31000,lastDeliveryTick:-1,accepted:['A'],excluded:[],byPawn:[],drops:[],...o});
 
 test('new native kinds route without waking or interrupting per event',()=>{
-  for(const kind of ['job-start','job-end','ingested','haul-delivered','quota-escape','intent-admitted-start','intent-retired','intent-incidental'])
+  for(const kind of ['job-start','job-end','ingested','haul-delivered','quota-escape','intent-admitted-start','intent-retired','intent-incidental','intent-trued-up','lab-drafted'])
     assert.deepEqual(nativeAttention({kind,detail:''}),{next:'native',interrupt:false},kind);
   assert.deepEqual(nativeAttention({kind:'interaction',detail:'Chitchat'}),{next:'deliberation',interrupt:false});
   assert.deepEqual(nativeAttention({kind:'interaction',detail:'Insult'}),{next:'deliberation',interrupt:true});
@@ -54,8 +54,8 @@ test('quota counters are adoptable only before the first acceptance',()=>{
 });
 
 test('haul-zone intent is bounded',()=>{
-  const ok={kind:'haul-zone',intentId:'8f14e45f-ceea-467a-9575-0fbc5a3b7a7e',thing:'WoodLog',area:{x:76,z:84,w:4,h:4},quota:30,maxTicks:30000,variant:'attribution'};
+  const ok={kind:'haul-zone',intentId:'8f14e45f-ceea-467a-9575-0fbc5a3b7a7e',thing:'WoodLog',x:76,z:84,w:4,h:4,quota:30,maxTicks:30000,variant:'attribution'};
   assert.ok(HaulZone.safeParse(ok).success);
   assert.ok(!HaulZone.safeParse({...ok,quota:76}).success);
-  assert.ok(!HaulZone.safeParse({...ok,area:{x:0,z:0,w:9,h:8}}).success);
+  assert.ok(!HaulZone.safeParse({...ok,w:9,h:8}).success);
 });

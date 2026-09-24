@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-24",
+  "classification": "zero-model rehearsals; not live verification or freeze approval",
+  "setupSha256": "d413cfd7fc569ade9c6c6439bd98c3153aed4770ccd3e345d6588cac7862ac2b",
+  "coordinatorTests": 379,
+  "independentReview": "author harness, acceptance/cleanup fixes, checkpoint preservation, ongoing wake integration and counter schema independently reviewed read-only; confirmed findings corrected",
+  "runs": [
+    {
+      "runId": "4288b333-8f76-4e0f-b4f1-602230764605",
+      "behaviorHead": "a2eba04",
+      "passed": false,
+      "rawHostReceiptSha256": "d3a11931d30e507075b721f2a244c111842d732a91fc1b60df77c79259835868",
+      "quota": 30,
+      "fixture": "main-3x30",
+      "failure": "AssertionError [ERR_ASSERTION]: Frozen offer coverage missing; preserve this negative observation, do not force offers or reroll\n+ actual - expected\n\n+ [\n+   'Thing_Human411'\n+ ]\n- []\n",
+      "nativeElapsedMs": 45964,
+      "rounds": 3,
+      "coreRequestTicks": [
+        90,
+        538,
+        1931
+      ],
+      "hostProcessId": 230585,
+      "coordinatorProcessId": 150912,
+      "progress": {
+        "delivered": 30,
+        "quota": 30,
+        "overshoot": 0,
+        "incidental": 0,
+        "byPawn": {
+          "Thing_Human408": 30
+        }
+      },
+      "offers": [
+        {
+          "pawn": "Thing_Human408",
+          "kind": "haul-zone",
+          "status": "accepted",
+          "standing": "completed"
+        }
+      ],
+      "pairedRestore": false,
+      "characterModelCalls": 0,
+      "recording": {
+        "durationSeconds": "49.200000",
+        "frames": "738"
+      }
+    },
+    {
+      "runId": "f2164b3b-92a0-48ba-8d59-2b5553a5a614",
+      "behaviorHead": "a2eba04",
+      "passed": false,
+      "rawHostReceiptSha256": "4ec32f9c84478d9ea5f4c0ec2863ad7ece7b495b02f23e17b6cd4d1fc2eec8ea",
+      "quota": 75,
+      "fixture": "helper-6x20",
+      "failure": "AssertionError [ERR_ASSERTION]: Frozen offer coverage missing; preserve this negative observation, do not force offers or reroll\n+ actual - expected\n\n+ [\n+   'Thing_Human411'\n+ ]\n- []\n",
+      "nativeElapsedMs": 46274,
+      "rounds": 3,
+      "coreRequestTicks": [
+        86,
+        1596,
+        1977
+      ],
+      "hostProcessId": 230786,
+      "coordinatorProcessId": 151188,
+      "progress": {
+        "delivered": 75,
+        "quota": 75,
+        "overshoot": 0,
+        "incidental": 0,
+        "byPawn": {
+          "Thing_Human408": 55,
+          "Thing_Human411": 20
+        }
+      },
+      "offers": [
+        {
+          "pawn": "Thing_Human408",
+          "kind": "haul-zone",
+          "status": "accepted",
+          "standing": "completed"
+        }
+      ],
+      "pairedRestore": false,
+      "characterModelCalls": 0,
+      "recording": {
+        "durationSeconds": "49.333333",
+        "frames": "740"
+      }
+    },
+    {
+      "runId": "1ed4e354-aeea-4277-93a0-8299449aedcc",
+      "behaviorHead": "9e9486a",
+      "passed": true,
+      "rawHostReceiptSha256": "d5f9579e85115c82e73339a42aaf173550c8dc66dbbc26853a428d774dd23113",
+      "quota": 75,
+      "fixture": "helper-6x20",
+      "failure": null,
+      "nativeElapsedMs": 45774,
+      "rounds": 5,
+      "coreRequestTicks": [
+        95,
+        554,
+        1284,
+        1618,
+        1997
+      ],
+      "hostProcessId": 238888,
+      "coordinatorProcessId": 151623,
+      "progress": {
+        "delivered": 75,
+        "quota": 75,
+        "overshoot": 0,
+        "incidental": 0,
+        "byPawn": {
+          "Thing_Human411": 60,
+          "Thing_Human408": 15
+        }
+      },
+      "offers": [
+        {
+          "pawn": "Thing_Human408",
+          "kind": "haul-zone",
+          "status": "accepted",
+          "standing": "completed"
+        },
+        {
+          "pawn": "Thing_Human411",
+          "kind": "haul-zone",
+          "status": "accepted",
+          "standing": "completed"
+        }
+      ],
+      "pairedRestore": true,
+      "characterModelCalls": 0,
+      "recording": {
+        "durationSeconds": "48.866667",
+        "frames": "733"
+      },
+      "cold": {
+        "passed": true,
+        "rawHostReceiptSha256": "b030400bb49c61484f5a6a195ba12a05b2d00c1cdf1a16e65836a52ec691b9e4",
+        "hostProcessId": 239096,
+        "coordinatorProcessId": 151908,
+        "savedCoordinatorProcessId": 151623,
+        "actualGameLedgerMatched": true,
+        "characterModelCalls": 0
+      },
+      "samples": {
+        "count": 26,
+        "paused": 0
+      },
+      "firstDeliveryWakeTicks": [
+        554
+      ]
+    }
+  ],
+  "originalSaves": {
+    "count": 285,
+    "unchanged": true
+  },
+  "shutdown": {
+    "game": "inactive",
+    "display": "inactive"
+  },
+  "limits": [
+    "Two retained failed coverage rehearsals, not rerolled model outcomes",
+    "Only the corrected helper75 rehearsal passed; changing the live30 quota/fixture requires Fable sign-off",
+    "Cold restore is a new coordinator OS process with the game process retained; terminal75 ledger, not an open-load cold test",
+    "Scripted45-second rehearsal is not the frozen600-second Luna scene",
+    "Luna may wait/refuse; incomplete actual offer coverage remains a negative protocol result, never forced/retried"
+  ]
+}

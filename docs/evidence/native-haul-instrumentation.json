@@ -1,0 +1,925 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-24",
+  "classification": "scripted measurements; no Gate C approval or frozen live run",
+  "game": "1.6.4871 rev600",
+  "assemblySha256": "082db1dd4f7f1d0b72960d7e1beead8fbfe6957200e8627f65bda0dbbe1dd8f8",
+  "harmony": "2.4.2",
+  "reviewedBehaviorHead": "904d5a8370d4559d74ed6a88aa63a79eae3a7b56",
+  "finalConcordDllSha256": "257849af1acf57864852e9189b9f39575f25f9877df08af40829432ef76ca29c",
+  "independentCodexReview": "completed with confirmed fixes and focused re-reviews; raw reports private",
+  "coordinatorTests": 374,
+  "helperFixture": {
+    "fixtureSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+    "pawnsPositionsStoriesNeedsUnchanged": true,
+    "woodTotal": 120,
+    "perStack": 20,
+    "quota": 75,
+    "note": "work priorities initialized from same baseline as prior native fixtures; no per-case behavioral nudging"
+  },
+  "microbenchmarkSummary": {
+    "runId": "9e9489db-a3b3-4d82-9edd-6879421f7746",
+    "summary": {
+      "Wait": {
+        "pairedIncrementalNsPerCall": [
+          65.8725,
+          65.5875,
+          65.088,
+          85.47800000000002,
+          182.996
+        ],
+        "median": 65.8725
+      },
+      "HaulToCell": {
+        "pairedIncrementalNsPerCall": [
+          2731.0125,
+          2124.4065000000005,
+          2181.6519999999996,
+          2226.2684999999997,
+          2193.1955
+        ],
+        "median": 2193.1955
+      }
+    }
+  },
+  "runs": [
+    {
+      "runId": "87fc3fc9-ab2c-43b9-9549-7dd5d920bb02",
+      "case": "patch-cost",
+      "runnerPassed": true,
+      "findings": [],
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "rawReceiptSha256": "ff40a3a45a99db638307e2123dd8caa43b5867553afecbdb425dff38f1441f7e",
+      "patchCost": {
+        "samples": [
+          {
+            "mode": 1,
+            "ticks": 17805,
+            "wallMs": 20004,
+            "tps": 890.0719856028794
+          },
+          {
+            "mode": 2,
+            "ticks": 17964,
+            "wallMs": 20108,
+            "tps": 893.3757708374776
+          },
+          {
+            "mode": 0,
+            "ticks": 17793,
+            "wallMs": 20169,
+            "tps": 882.1954484605087
+          },
+          {
+            "mode": 2,
+            "ticks": 17834,
+            "wallMs": 20144,
+            "tps": 885.32565528197
+          },
+          {
+            "mode": 0,
+            "ticks": 18071,
+            "wallMs": 20171,
+            "tps": 895.8901393089088
+          },
+          {
+            "mode": 1,
+            "ticks": 17922,
+            "wallMs": 20161,
+            "tps": 888.9440007936114
+          },
+          {
+            "mode": 0,
+            "ticks": 17780,
+            "wallMs": 20024,
+            "tps": 887.9344786256491
+          },
+          {
+            "mode": 1,
+            "ticks": 17491,
+            "wallMs": 20137,
+            "tps": 868.6000893876943
+          },
+          {
+            "mode": 2,
+            "ticks": 18006,
+            "wallMs": 20202,
+            "tps": 891.2978912978912
+          }
+        ],
+        "medianTps": {
+          "all": 888.9440007936114,
+          "allButSetTarget": 891.2978912978912,
+          "none": 887.9344786256491
+        },
+        "setTargetTpsDelta": 2.353890504279775,
+        "allPatchesTpsDelta": -1.0095221679622455,
+        "timedTicks": 17779,
+        "observation": {
+          "ticks": 17475,
+          "wallMs": 20194,
+          "tps": 865.3560463504011
+        },
+        "profileIntent": {
+          "intentId": "f53fe204-9a7c-4477-b3fc-9ab3855490d2",
+          "thingDef": "WoodLog",
+          "variant": "attribution",
+          "status": "met",
+          "zoneId": 0,
+          "quota": 75,
+          "delivered": 75,
+          "reserved": 0,
+          "remaining": 0,
+          "overshoot": 0,
+          "incidental": 0,
+          "unattributed": 0,
+          "removed": 0,
+          "violations": 0,
+          "rejectedStarts": 0,
+          "finishedAfterExclusion": 0,
+          "createdTick": 3,
+          "untilTick": 30003,
+          "lastDeliveryTick": 1030,
+          "peakHolders": 1,
+          "accepted": [
+            "Thing_Human411"
+          ],
+          "excluded": [],
+          "byPawn": [
+            {
+              "pawn": "Thing_Human411",
+              "count": 75
+            }
+          ],
+          "drops": [
+            {
+              "seq": 1,
+              "tick": 349,
+              "count": 60,
+              "escape": 0,
+              "job": 5,
+              "kind": "participation",
+              "pawn": "Thing_Human411",
+              "source": "haul",
+              "startedBeforeExclusion": false,
+              "violation": false
+            },
+            {
+              "seq": 2,
+              "tick": 1030,
+              "count": 15,
+              "escape": 0,
+              "job": 22,
+              "kind": "participation",
+              "pawn": "Thing_Human411",
+              "source": "haul",
+              "startedBeforeExclusion": false,
+              "violation": false
+            }
+          ]
+        },
+        "perHandler": [
+          {
+            "patch": "1 StoreSearch",
+            "calls": 378,
+            "micros": 1408.9,
+            "microsPer1000Ticks": 79.2
+          },
+          {
+            "patch": "2 Job.SetTarget",
+            "calls": 3,
+            "micros": 4,
+            "microsPer1000Ticks": 0.2
+          },
+          {
+            "patch": "3 HaulToCellStorageJob",
+            "calls": 4,
+            "micros": 21.6,
+            "microsPer1000Ticks": 1.2
+          },
+          {
+            "patch": "3b TryMakePreToilReservations",
+            "calls": 4,
+            "micros": 42.4,
+            "microsPer1000Ticks": 2.4
+          },
+          {
+            "patch": "4 TryDropCarriedThing",
+            "calls": 6,
+            "micros": 178.3,
+            "microsPer1000Ticks": 10
+          },
+          {
+            "patch": "4 TryDropCarriedThing(count)",
+            "calls": 0,
+            "micros": 0,
+            "microsPer1000Ticks": 0
+          },
+          {
+            "patch": "5 Notify_ReceivedThing",
+            "calls": 2,
+            "micros": 0.6,
+            "microsPer1000Ticks": 0
+          },
+          {
+            "patch": "6 StartJob",
+            "calls": 976,
+            "micros": 20796.9,
+            "microsPer1000Ticks": 1169.7
+          },
+          {
+            "patch": "6 CleanupCurrentJob",
+            "calls": 1960,
+            "micros": 25506,
+            "microsPer1000Ticks": 1434.6
+          },
+          {
+            "patch": "7 Ingested",
+            "calls": 2,
+            "micros": 38.8,
+            "microsPer1000Ticks": 2.2
+          },
+          {
+            "patch": "8 TryInteractWith",
+            "calls": 8,
+            "micros": 115,
+            "microsPer1000Ticks": 6.5
+          },
+          {
+            "patch": "4 placement accounting callback",
+            "calls": 3,
+            "micros": 1611,
+            "microsPer1000Ticks": 90.6
+          }
+        ],
+        "note": "Throughput: matched ordinary stockpile, no active intent. Difference includes dispatch and counters; noisy/capped TPS is not isolated cost. Tagged profile: instrumented handler bodies, callback separate, prefix/postfix counted separately; excludes Harmony dispatch, includes timer overhead and nested work. Do not sum as exclusive CPU time."
+      },
+      "head": "34f937ce2acb12a8bfd8939c3abc276e24b9e44e"
+    },
+    {
+      "runId": "9e9489db-a3b3-4d82-9edd-6879421f7746",
+      "case": "settarget-cost",
+      "runnerPassed": true,
+      "findings": [],
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "rawReceiptSha256": "0ef6fb81a3cd74f09b06a1c0418ca93e4096931b7a5db342e4f65482e1f54ee0",
+      "setTargetMicrobenchmark": {
+        "scope": "detached Wait and non-current HaulToCell SetTarget(B); loop included in both arms, dispatch and production counters included, timing hooks off; not current-job retarget or population-wide cost",
+        "samples": [
+          {
+            "jobDef": "Wait",
+            "enabled": true,
+            "round": 0,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 16306.7
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": false,
+            "round": 0,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3132.2
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": false,
+            "round": 1,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3029.1
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": true,
+            "round": 1,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 16146.6
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": true,
+            "round": 2,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 16098.2
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": false,
+            "round": 2,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3080.6
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": false,
+            "round": 3,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3010.1
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": true,
+            "round": 3,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 20105.7
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": true,
+            "round": 4,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 39797.2
+          },
+          {
+            "jobDef": "Wait",
+            "enabled": false,
+            "round": 4,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3198
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": true,
+            "round": 0,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 549220.4
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": false,
+            "round": 0,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3017.9
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": false,
+            "round": 1,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3238.1
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": true,
+            "round": 1,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 428119.4
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": true,
+            "round": 2,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 439418.8
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": false,
+            "round": 2,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3088.4
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": false,
+            "round": 3,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3010.4
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": true,
+            "round": 3,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 448264.1
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": true,
+            "round": 4,
+            "calls": 200000,
+            "verifiedHookCalls": 200000,
+            "micros": 441660.8
+          },
+          {
+            "jobDef": "HaulToCell",
+            "enabled": false,
+            "round": 4,
+            "calls": 200000,
+            "verifiedHookCalls": 0,
+            "micros": 3021.7
+          }
+        ]
+      },
+      "head": "5708edd3d0d46c32ba3164fa9e1a9c6429c1fe14"
+    },
+    {
+      "runId": "0734eb0f-f7df-4a7a-bb21-bdadbde3eff7",
+      "case": "draft-mid-carry",
+      "runnerPassed": true,
+      "findings": [],
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "rawReceiptSha256": "fbf9bd4771e192344266fc97e8080d666eea710b9136ebc71fa24b624e479336",
+      "drafted": {
+        "seq": 16,
+        "tick": 348,
+        "pawn": "Thing_Human411",
+        "kind": "lab-drafted",
+        "detail": "job=24;x=76;z=84",
+        "subject": ""
+      },
+      "dropsAfterDraft": [
+        {
+          "seq": 1,
+          "tick": 348,
+          "count": 60,
+          "escape": 0,
+          "job": -1,
+          "kind": "incidental",
+          "pawn": "Thing_Human411",
+          "source": "cleanup",
+          "startedBeforeExclusion": false,
+          "violation": false
+        }
+      ],
+      "resumedAfterUndraft": true,
+      "haulEndEvents": [
+        {
+          "seq": 13,
+          "tick": 348,
+          "pawn": "Thing_Human411",
+          "kind": "job-end",
+          "detail": "HaulToCell;job=5;condition=InterruptForced",
+          "subject": ""
+        }
+      ],
+      "markerCorrected": false,
+      "markerNote": "Original marker ID was pooled/reused; actual interruption and incidental effect independently observed. Corrected rerun separate.",
+      "head": "5708edd3d0d46c32ba3164fa9e1a9c6429c1fe14"
+    },
+    {
+      "runId": "28eb2a5b-0861-4377-bd79-4f8d6797eb25",
+      "case": "cold-restore-mid-intent",
+      "runnerPassed": true,
+      "findings": [],
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "rawReceiptSha256": "03e43bd933ab0ccf571a82cb1a87392ad7b487fa9cfbb56ef2dabf8df57c38b0",
+      "coldRestore": {
+        "name": "lab-concord-nh-cold-1790270215077",
+        "before": {
+          "delivered": 60,
+          "reserved": 15
+        },
+        "afterReserved": 15,
+        "final": 75
+      },
+      "head": "5708edd3d0d46c32ba3164fa9e1a9c6429c1fe14"
+    },
+    {
+      "runId": "64dddf15-48cf-4f8b-8c95-ba68fb66ccaf",
+      "case": "work-options",
+      "runnerPassed": true,
+      "findings": [],
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "rawReceiptSha256": "ab7a8e7ab8b343edac2b2e5699c2ddef33763d2464b87d3bff32be54829a6653",
+      "workOptions": {
+        "runs": [
+          {
+            "scope": "WoodLog HaulGeneral slot-storage predicate subset; not a full work menu",
+            "top": 5,
+            "totalMicros": 389,
+            "pawns": [
+              {
+                "pawn": "Thing_Human405",
+                "eligible": false,
+                "candidates": 0,
+                "micros": 76
+              },
+              {
+                "pawn": "Thing_Human408",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 150
+              },
+              {
+                "pawn": "Thing_Human411",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 56
+              }
+            ]
+          },
+          {
+            "scope": "WoodLog HaulGeneral slot-storage predicate subset; not a full work menu",
+            "top": 5,
+            "totalMicros": 165,
+            "pawns": [
+              {
+                "pawn": "Thing_Human405",
+                "eligible": false,
+                "candidates": 0,
+                "micros": 7
+              },
+              {
+                "pawn": "Thing_Human408",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 68
+              },
+              {
+                "pawn": "Thing_Human411",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 60
+              }
+            ]
+          },
+          {
+            "scope": "WoodLog HaulGeneral slot-storage predicate subset; not a full work menu",
+            "top": 5,
+            "totalMicros": 161,
+            "pawns": [
+              {
+                "pawn": "Thing_Human405",
+                "eligible": false,
+                "candidates": 0,
+                "micros": 9
+              },
+              {
+                "pawn": "Thing_Human408",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 82
+              },
+              {
+                "pawn": "Thing_Human411",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 31
+              }
+            ]
+          },
+          {
+            "scope": "WoodLog HaulGeneral slot-storage predicate subset; not a full work menu",
+            "top": 5,
+            "totalMicros": 191,
+            "pawns": [
+              {
+                "pawn": "Thing_Human405",
+                "eligible": false,
+                "candidates": 0,
+                "micros": 10
+              },
+              {
+                "pawn": "Thing_Human408",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 85
+              },
+              {
+                "pawn": "Thing_Human411",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 54
+              }
+            ]
+          },
+          {
+            "scope": "WoodLog HaulGeneral slot-storage predicate subset; not a full work menu",
+            "top": 5,
+            "totalMicros": 128,
+            "pawns": [
+              {
+                "pawn": "Thing_Human405",
+                "eligible": false,
+                "candidates": 0,
+                "micros": 8
+              },
+              {
+                "pawn": "Thing_Human408",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 67
+              },
+              {
+                "pawn": "Thing_Human411",
+                "eligible": true,
+                "candidates": 0,
+                "micros": 26
+              }
+            ]
+          }
+        ],
+        "totalMicros": [
+          389,
+          165,
+          161,
+          191,
+          128
+        ]
+      },
+      "head": "5708edd3d0d46c32ba3164fa9e1a9c6429c1fe14"
+    },
+    {
+      "runId": "e2becb6b-8e4d-484c-a2f8-0f6514eb9285",
+      "case": "helper-geometry",
+      "runnerPassed": true,
+      "findings": [],
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "rawReceiptSha256": "89b2e8d3c61bf4f5d3301b2e43bbcf6ffec6254459a552aa06bdfb59f814f7ad",
+      "result": {
+        "status": "met",
+        "delivered": 75,
+        "byPawn": [
+          {
+            "pawn": "Thing_Human411",
+            "count": 75
+          }
+        ],
+        "helperObserved": false,
+        "helperCredit": 0,
+        "peakHolders": 1
+      },
+      "admissions": [
+        {
+          "seq": 4,
+          "tick": 4,
+          "pawn": "Thing_Human411",
+          "kind": "intent-admitted-start",
+          "detail": "intent=f8fba2b9-3e6c-4f8c-929c-c75ab839074f;job=5;carried=0;reserved=75",
+          "subject": ""
+        },
+        {
+          "seq": 18,
+          "tick": 244,
+          "pawn": "Thing_Human411",
+          "kind": "intent-admitted-start",
+          "detail": "intent=f8fba2b9-3e6c-4f8c-929c-c75ab839074f;job=19;carried=0;reserved=55",
+          "subject": ""
+        },
+        {
+          "seq": 34,
+          "tick": 508,
+          "pawn": "Thing_Human411",
+          "kind": "intent-admitted-start",
+          "detail": "intent=f8fba2b9-3e6c-4f8c-929c-c75ab839074f;job=45;carried=0;reserved=35",
+          "subject": ""
+        },
+        {
+          "seq": 68,
+          "tick": 1021,
+          "pawn": "Thing_Human411",
+          "kind": "intent-admitted-start",
+          "detail": "intent=f8fba2b9-3e6c-4f8c-929c-c75ab839074f;job=78;carried=0;reserved=15",
+          "subject": ""
+        }
+      ],
+      "participationDrops": [
+        {
+          "seq": 1,
+          "tick": 241,
+          "count": 20,
+          "escape": 0,
+          "job": 5,
+          "kind": "participation",
+          "pawn": "Thing_Human411",
+          "source": "haul",
+          "startedBeforeExclusion": false,
+          "violation": false
+        },
+        {
+          "seq": 2,
+          "tick": 505,
+          "count": 20,
+          "escape": 0,
+          "job": 19,
+          "kind": "participation",
+          "pawn": "Thing_Human411",
+          "source": "haul",
+          "startedBeforeExclusion": false,
+          "violation": false
+        },
+        {
+          "seq": 3,
+          "tick": 1018,
+          "count": 20,
+          "escape": 0,
+          "job": 45,
+          "kind": "participation",
+          "pawn": "Thing_Human411",
+          "source": "haul",
+          "startedBeforeExclusion": false,
+          "violation": false
+        },
+        {
+          "seq": 4,
+          "tick": 1645,
+          "count": 15,
+          "escape": 0,
+          "job": 78,
+          "kind": "participation",
+          "pawn": "Thing_Human411",
+          "source": "haul",
+          "startedBeforeExclusion": false,
+          "violation": false
+        }
+      ],
+      "assessment": "invariants passed; helper/overlap not observed, NOT coverage approval",
+      "head": "5708edd3d0d46c32ba3164fa9e1a9c6429c1fe14"
+    },
+    {
+      "runId": "c5107d18-5c23-4e99-b4e6-62a67ac6146b",
+      "case": "overlap-geometry",
+      "runnerPassed": true,
+      "findings": [],
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "rawReceiptSha256": "8d71a81b0a8c9cc355e661474a6159f54b43d37edd7b18ec8f1d0f7e7c14ab41",
+      "result": {
+        "status": "met",
+        "delivered": 75,
+        "byPawn": [
+          {
+            "pawn": "Thing_Human411",
+            "count": 75
+          }
+        ],
+        "overlapObserved": false,
+        "peakHolders": 1,
+        "rejectedStarts": 0
+      },
+      "admissions": [
+        {
+          "seq": 4,
+          "tick": 4,
+          "pawn": "Thing_Human411",
+          "kind": "intent-admitted-start",
+          "detail": "intent=6cf08cc1-2714-4b46-86f9-8a43e6422f85;job=5;carried=0;reserved=75",
+          "subject": ""
+        },
+        {
+          "seq": 17,
+          "tick": 244,
+          "pawn": "Thing_Human411",
+          "kind": "intent-admitted-start",
+          "detail": "intent=6cf08cc1-2714-4b46-86f9-8a43e6422f85;job=21;carried=0;reserved=55",
+          "subject": ""
+        },
+        {
+          "seq": 33,
+          "tick": 508,
+          "pawn": "Thing_Human411",
+          "kind": "intent-admitted-start",
+          "detail": "intent=6cf08cc1-2714-4b46-86f9-8a43e6422f85;job=38;carried=0;reserved=35",
+          "subject": ""
+        },
+        {
+          "seq": 68,
+          "tick": 1021,
+          "pawn": "Thing_Human411",
+          "kind": "intent-admitted-start",
+          "detail": "intent=6cf08cc1-2714-4b46-86f9-8a43e6422f85;job=72;carried=0;reserved=15",
+          "subject": ""
+        }
+      ],
+      "participationDrops": [
+        {
+          "seq": 1,
+          "tick": 241,
+          "count": 20,
+          "escape": 0,
+          "job": 5,
+          "kind": "participation",
+          "pawn": "Thing_Human411",
+          "source": "haul",
+          "startedBeforeExclusion": false,
+          "violation": false
+        },
+        {
+          "seq": 2,
+          "tick": 505,
+          "count": 20,
+          "escape": 0,
+          "job": 21,
+          "kind": "participation",
+          "pawn": "Thing_Human411",
+          "source": "haul",
+          "startedBeforeExclusion": false,
+          "violation": false
+        },
+        {
+          "seq": 3,
+          "tick": 1018,
+          "count": 20,
+          "escape": 0,
+          "job": 38,
+          "kind": "participation",
+          "pawn": "Thing_Human411",
+          "source": "haul",
+          "startedBeforeExclusion": false,
+          "violation": false
+        },
+        {
+          "seq": 4,
+          "tick": 1645,
+          "count": 15,
+          "escape": 0,
+          "job": 72,
+          "kind": "participation",
+          "pawn": "Thing_Human411",
+          "source": "haul",
+          "startedBeforeExclusion": false,
+          "violation": false
+        }
+      ],
+      "assessment": "invariants passed; helper/overlap not observed, NOT coverage approval",
+      "head": "5708edd3d0d46c32ba3164fa9e1a9c6429c1fe14"
+    },
+    {
+      "runId": "fa554a77-0d21-41ee-9d94-1ea9c3531a05",
+      "case": "draft-mid-carry",
+      "runnerPassed": true,
+      "findings": [],
+      "characterModelCalls": 0,
+      "eventGaps": 0,
+      "rawReceiptSha256": "09aee405d824080282d2c8634155ac7ab9182fc431dd96da83af4da771698b76",
+      "drafted": {
+        "seq": 16,
+        "tick": 348,
+        "pawn": "Thing_Human411",
+        "kind": "lab-drafted",
+        "detail": "job=5;x=76;z=84",
+        "subject": ""
+      },
+      "dropsAfterDraft": [
+        {
+          "seq": 1,
+          "tick": 348,
+          "count": 60,
+          "escape": 0,
+          "job": -1,
+          "kind": "incidental",
+          "pawn": "Thing_Human411",
+          "source": "cleanup",
+          "startedBeforeExclusion": false,
+          "violation": false
+        }
+      ],
+      "resumedAfterUndraft": true,
+      "haulEndEvents": [
+        {
+          "seq": 13,
+          "tick": 348,
+          "pawn": "Thing_Human411",
+          "kind": "job-end",
+          "detail": "HaulToCell;job=5;condition=InterruptForced",
+          "subject": ""
+        }
+      ],
+      "markerCorrected": true,
+      "markerNote": "Marker cross-checked with interrupted haul ID/pawn/tick.",
+      "head": "904d5a8370d4559d74ed6a88aa63a79eae3a7b56"
+    }
+  ],
+  "boundaries": [
+    "Capped/noisy TPS is not a causal slowdown estimate",
+    "Handler timings omit dispatch and include timer/nesting; no exclusive CPU sum",
+    "Isolated microbenchmark covers detached Wait and non-current haul, not active retarget or population cost",
+    "Work-options is only WoodLog storage-haul subset; empty-result cost, not full menu",
+    "One job reserved75/55/35/15 for20/20/20/15 deliveries: no helper/overlap verdict independent of ledger",
+    "Fresh Coordinator/Store is same OS process, not full process restart",
+    "Forced opportunistic replacement/failed partial merge remain unimplemented",
+    "Intent-only live runner/guard and setup-hash sign-off still needed"
+  ],
+  "originalFailuresRetained": true,
+  "privacy": "Aggregate nonproprietary observations. Full events, saves, DBs, recordings, decompiled source and reviews remain private.",
+  "integrity": {
+    "originalSaveCount": 285,
+    "changed": [],
+    "gameService": "inactive",
+    "displayService": "inactive"
+  }
+}

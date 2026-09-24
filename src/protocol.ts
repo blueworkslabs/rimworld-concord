@@ -2,6 +2,7 @@ import type {PrivateOutlook} from './outlook.js';
 import type {SocialMessage,SocialExchange} from './social.js';
 import type {AgreementProgress,CrewArchive,CrewReport} from './crew-log.js';
 import { z } from 'zod';
+import { HaulZone, type IntentView as NativeIntentView } from './native-intents.js';
 
 export const Move = z.object({kind:z.literal('move'), x:z.number().int().nonnegative(), z:z.number().int().nonnegative()}).strict();
 export type Move = z.infer<typeof Move>;
@@ -19,7 +20,7 @@ export const Cook = z.object({kind:z.literal('cook'),thing:z.string().min(1).max
 export type Build=z.infer<typeof Build>;
 export type Cook=z.infer<typeof Cook>;
 export type ProductionView={epoch:string;tick:number;mapId:number;options:(Build|Cook)[];supplies:{thing:string;label:string;count:number}[]};
-export const Action = z.discriminatedUnion('kind',[Move,Haul,Rescue,Build,Cook]);
+export const Action = z.discriminatedUnion('kind',[Move,Haul,Rescue,Build,Cook,HaulZone]);
 export type Action = z.infer<typeof Action>;
 /** Physical quantities are observations, independent of the proposed consent bounds. */
 export type HaulSupply = {thing:string;label:string;x:number;z:number;sourceCount:number;destinationFree:number};
@@ -39,12 +40,12 @@ export type EatOption={thing:string;label:string;x:number;z:number;count:number;
 export type EatingView={epoch:string;tick:number;mapId:number;options:EatOption[]};
 export type EatRequest={id:string;epoch:string;actor:string;action:EatOption;mapId:number;untilTick:number};
 export type SelfCare={id:string;pawn:string;questionId:string;action:EatOption;mapId:number;untilTick:number;stopped?:boolean};
-export type Pawn = {eating?:EatingView;foodObservation?:import('./food-observation.js').FoodObservation;production?:ProductionView;buildReady?:boolean;cookReady?:boolean;linkStatus?:import('./shared-status.js').LinkStatus;sharedStatus?:import('./shared-status.js').SharedStatus[];observedPeople?:{id:string;name:string}[];id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[];visibleSubjects?:{target:string;downed:boolean;inBed:boolean}[];visibleBeds?:{bed:string;x:number;z:number;medical:boolean;occupied:boolean;prisoner:boolean;slave:boolean;colonyOwned:boolean;forbidden:boolean}[]};downed?:boolean;currentBed?:string;carrying?:string;rescue?:RescueView;rescueReady?:boolean;workReady?:boolean};
+export type Pawn = {eating?:EatingView;foodObservation?:import('./food-observation.js').FoodObservation;production?:ProductionView;buildReady?:boolean;cookReady?:boolean;linkStatus?:import('./shared-status.js').LinkStatus;sharedStatus?:import('./shared-status.js').SharedStatus[];observedPeople?:{id:string;name:string}[];id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[];visibleSubjects?:{target:string;downed:boolean;inBed:boolean}[];visibleBeds?:{bed:string;x:number;z:number;medical:boolean;occupied:boolean;prisoner:boolean;slave:boolean;colonyOwned:boolean;forbidden:boolean}[]};downed?:boolean;currentBed?:string;carrying?:string;rescue?:RescueView;rescueReady?:boolean;workReady?:boolean;haulingCapable?:boolean};
 export type Receipt = {id:string;actor:string;status:Outcome;reason:string;failureCode?:string;validatedTick?:number;x:number;z:number;kind?:string;thing?:string;count?:number;delivered?:number;target?:string;bed?:string};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
   pawns:Pawn[];actions:Receipt[];crewLog?:CrewReport;events?:NativeEvent[];eventSeq?:number;
-  intents?:import('./native-intents.js').IntentView[];
+  intents?:NativeIntentView[];
 };
 export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail:string;subject?:string;subjectName?:string};
 export type Attention = {event:NativeEvent;route:'native'|'appraisal'|'deliberation';interrupt?:boolean};
@@ -58,6 +59,7 @@ export interface GameBridge {
   setActivity?(activity:Activity):Promise<void>;
   setDecisionPause?(pause:DecisionPause):Promise<void>;
   cancel?(request:{epoch:string;actor:string;id:string;kind?:'haul'|'rescue'|'build'|'cook'|'eat'}):Promise<Receipt>;
+  intent?(payload:{op:'intent-accept'|'intent-exclude'|'intent-stop'}&Record<string,unknown>):Promise<{state:GameState;receipt:unknown}>;
   eat?(request:EatRequest):Promise<Receipt>;
   move(request:ActionRequest):Promise<Receipt>;
   save(name:string):Promise<{sha256:string}>;
@@ -86,6 +88,9 @@ export type Domain = {
   coreState?:import('./core-planner.js').CoreState;
   exchanges?:Record<string,SocialExchange>;
   eventCursor?:number;crew?:CrewArchive;
+  pendingIntentAcceptances?:string[];
+  pendingIntentExclusions?:Record<string,{intentId:string;actor:string;reason:string}>;
+  nativeHaul?:import('./native-intents.js').NativeHaulConfig;intentViews?:Record<string,NativeIntentView>;
   schema:1;world:string;epoch:string;branch:string;
   characters:Record<string,Character>;proposals:Record<string,Proposal>;
   outcomes:Record<string,Receipt>;requests?:Record<string,AlternativeRequest>;

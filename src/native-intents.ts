@@ -13,13 +13,15 @@ export const IntentView = z.object({
   overshoot:z.number().int(),incidental:z.number().int(),unattributed:z.number().int(),removed:z.number().int(),
   violations:z.number().int(),rejectedStarts:z.number().int(),finishedAfterExclusion:z.number().int(),
   createdTick:z.number().int(),untilTick:z.number().int(),lastDeliveryTick:z.number().int(),
+  /** Most pawns holding in-flight quota at once (overlap evidence); absent from older mods. */
+  peakHolders:z.number().int().optional().default(0),
   accepted:z.array(z.string()),excluded:z.array(z.string()),
   byPawn:z.array(z.object({pawn:z.string(),count:z.number().int()})),drops:z.array(Drop)});
 export type IntentView = z.infer<typeof IntentView>;
 
-export const HaulZone = z.object({kind:z.literal('haul-zone'),intentId:z.string().uuid(),thing:z.literal('WoodLog'),
-  area:z.object({x:z.number().int().nonnegative(),z:z.number().int().nonnegative(),w:z.number().int().min(1),h:z.number().int().min(1)})
-    .refine(a=>a.w*a.h<=64,'Area must be at most 64 cells'),
+/** The candidate area is flat (x, z origin; w, h size), matching the bridge request. */
+const Area = {x:z.number().int().nonnegative(),z:z.number().int().nonnegative(),w:z.number().int().min(1).max(8),h:z.number().int().min(1).max(8)};
+export const HaulZone = z.object({kind:z.literal('haul-zone'),intentId:z.string().uuid(),thing:z.literal('WoodLog'),...Area,
   quota:z.number().int().min(1).max(75),maxTicks:z.number().int().min(600).max(60000),
   variant:z.enum(['exclusive','attribution'])}).strict();
 export type HaulZone = z.infer<typeof HaulZone>;
@@ -72,3 +74,26 @@ export function invariantFindings(v:IntentView,opts:{escapeInjected?:boolean}={}
 /** Counters are adoptable only before the first acceptance; afterwards they are recorded,
  * the pawn's standing stays none, and the core cannot adopt them. */
 export function counterAdoptable(v:IntentView|undefined):boolean{return v===undefined||v.status==='pending';}
+
+/** Operator-frozen setup for the one shared intent the core may offer (fixture data). */
+export const NativeHaulConfig = z.object({intentId:z.string().uuid(),area:z.object(Area).strict(),quota:z.number().int().min(1).max(75),
+  maxTicks:z.number().int().min(600).max(60000),variant:z.enum(['exclusive','attribution'])}).strict();
+export type NativeHaulConfig = z.infer<typeof NativeHaulConfig>;
+
+/** Native capability decides whether the option exists at all: a pawn whose Hauling work
+ * type is disabled is never offered hauling, and the reason is visible. */
+export function notOfferedReason(own:{haulingCapable?:boolean}|undefined):string|undefined{
+  if(!own)return 'unavailable';
+  return own.haulingCapable===false?'cannot do hauling':undefined;
+}
+export function intentAction(c:NativeHaulConfig,quota=c.quota):HaulZone{
+  return {kind:'haul-zone',intentId:c.intentId,thing:'WoodLog',...c.area,quota,maxTicks:c.maxTicks,variant:c.variant};
+}
+/** Validates a haul-zone offer against the frozen setup and the live intent. */
+export function planIntentOffer(c:NativeHaulConfig|undefined,own:{haulingCapable?:boolean}|undefined,a:HaulZone,live?:IntentView){
+  if(!c)throw Error('No native haul setup configured');
+  const reason=notOfferedReason(own);if(reason)throw Error('Not offered: '+reason);
+  if(a.intentId!==c.intentId||a.x!==c.area.x||a.z!==c.area.z||a.w!==c.area.w||a.h!==c.area.h||a.variant!==c.variant||a.maxTicks!==c.maxTicks)throw Error('Offer differs from the frozen intent setup');
+  if(live&&live.status!=='pending'&&live.status!=='open')throw Error('Intent already closed: '+live.status);
+  if(live&&live.status==='open'&&a.quota!==live.quota)throw Error('Quota is fixed after the first acceptance');
+}

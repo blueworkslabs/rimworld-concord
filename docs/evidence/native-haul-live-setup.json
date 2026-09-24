@@ -1,0 +1,78 @@
+{
+  "setupSha256": "d413cfd7fc569ade9c6c6439bd98c3153aed4770ccd3e345d6588cac7862ac2b",
+  "canonicalization": "SHA-256 of UTF-8 inputs serialized with sorted keys, no whitespace, ensure_ascii=false",
+  "inputs": {
+    "schemaVersion": 1,
+    "behaviorHead": "9e9486a8018a42d8519d2400714477ffb83db3f7",
+    "runnerDigest": "a28e42161ff6a1528719a4b956f87d6d938ff900b0b35629151d9fe8e3a14106",
+    "hostFilesSha256": {
+      "scripts/run-ongoing.mjs": "d91694be9ca16f343095378d8b27ca73c2fbf8ae309e5a79100896df6fb129f9",
+      "scripts/run-codex-decision.py": "8aac12c9f0dce1316c33803939041defdfc069874d497a5814a768da247840e8",
+      "package-lock.json": "32e9d2a1846218ee20ceb919c009f383903df2dc48a165ba4144c307494a7d61"
+    },
+    "modelCatalogSha256": "0adc8a0b86766ab7749185e8e64b816e080b48414b32ff05a6586cacb532cea7",
+    "operatorConfigSha256": "f16541daa6316c3c0af7be21b66592917f6870b7ca52db77f5c49e4d8e43d04c",
+    "hostNode": "v22.23.2",
+    "codexCli": "codex-cli 0.153.4",
+    "staging": {
+      "runnerDigest": "a28e42161ff6a1528719a4b956f87d6d938ff900b0b35629151d9fe8e3a14106",
+      "live": {
+        "save": "lab-concord-nh-helper-20260924",
+        "area": {
+          "x": 76,
+          "z": 84,
+          "w": 4,
+          "h": 4
+        },
+        "quota": 75,
+        "maxTicks": 30000,
+        "variant": "attribution"
+      },
+      "saveSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+      "assets": {
+        "game/RimWorldLinux_Data/Managed/Assembly-CSharp.dll": "082db1dd4f7f1d0b72960d7e1beead8fbfe6957200e8627f65bda0dbbe1dd8f8",
+        "game/Mods/Concord/Assemblies/Concord.dll": "19724f14093941930e85f0f3d404ae8b3ffd3a8f1981c7f734158917453a830b",
+        "game/Mods/StagingLab/Assemblies/StagingLab.dll": "b4fc528dfd10a7d020ce0219796660b579cbfcce53ff4a581f68d88ed10b040c",
+        "game/Mods/HarmonyMod/Current/Assemblies/0Harmony.dll": "353daafec180bb8e7bbe4da78f2a7cdc78067392e3a4e79dc8e7af295f2371e6",
+        "game/Mods/HarmonyMod/Current/Assemblies/HarmonyMod.dll": "408c2cd72b45da8c70c0c538b2b346c8dcbb5bded066373f6a3eb8b26615a2e7",
+        "profile/Config/ModsConfig.xml": "5a4d2ca0e621b6a9227e7f2677ca9425c4232b0d859e764823d81e81a616ea24",
+        "profile/Config/KeyPrefs.xml": "f22a77e7f45abc7599c8cdcd64308f432f1fc015ca965743fd65608baf8f7a1d",
+        "bin/lab.py": "af77f985644b4d14a162cbc9ed181b595e97cf544b7788bcbf3673f65633a7a3"
+      },
+      "node": "v22.23.2"
+    },
+    "protocol": {
+      "policy": "luna-native-haul-v1",
+      "nativeMs": 600000,
+      "wallMs": 960000,
+      "cooldownTicks": 300,
+      "nativeIntentStallTicks": 2500,
+      "turnCap": null,
+      "pausedInference": false,
+      "model": "gpt-5.6-luna",
+      "reasoningEffort": "low",
+      "jevCalls": 0
+    },
+    "launchFlags": [
+      "--recorded",
+      "--native-haul"
+    ],
+    "coldFlags": [
+      "--recorded",
+      "--native-haul",
+      "--cold"
+    ],
+    "crew": {
+      "eligible": [
+        "Pedro",
+        "Beatrice"
+      ],
+      "ineligible": "Alvin",
+      "reason": "cannot do hauling; native Rancher backstory"
+    },
+    "reservationPolicy": "strict source-stack/native-carry cap; shrink-only pickup; no duplicate-stack pickup on tagged trip",
+    "coldRestore": "new host and coordinator OS processes; game process stays running and reloads paired save",
+    "coverage": "Core chooses freely; missing actual offers to both eligible pawns is retained as incomplete protocol coverage, never forced or rerolled"
+  },
+  "status": "proposed; awaiting Fable sign-off, including quota/fixture change"
+}

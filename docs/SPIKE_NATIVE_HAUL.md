@@ -115,7 +115,18 @@ with reservations keyed by job `loadID`.
   `job.count` is capped to `remaining`. Creating a job reserves **nothing**: the game
   creates candidates it never starts (`CheckForJobOverride` returning a job to the pool,
   discarded think results, validity checks), so reserving at creation would leak quota.
-  Pickup and opportunistic duplicates are bounded by `job.count`.
+  Pickup and opportunistic duplicates are bounded by `job.count`, which the commit caps
+  to the trip's deliverable amount (see below).
+- **True-up at pickup:** when the carry actually starts (`Pawn_CarryTracker.TryStartCarry`),
+  the running job's reservation shrinks to the carried count and the rest returns to the
+  quota at once. `job.count` is limited to what was just picked up, so the pickup toil
+  leaves nothing further to collect. Reservations only ever shrink after commit, so
+  `credited + reserved ≤ quota` and zero overshoot still hold.
+  **Trade-off, decided by Fable: keep the strict hold for the spike.** A tagged trip
+  reserves at most its source stack, so a pawn adds no opportunistic duplicate stacks to
+  a tagged trip. Ordinary hauling elsewhere is unchanged. "Credited beyond quota = 0"
+  stays a frozen measure. The growing hold with reported overshoot is an open decision
+  for the hauling migration ([NATIVE_INTENTS](NATIVE_INTENTS.md#open-decisions)).
 - **Already-carried loads** (re-targets in the drop toil): the zone is admitted only if
   the carried stack is at most `remaining` plus the job's own existing reservation.
   Admission is a pure check with no side effects, because storage searches also run
@@ -153,8 +164,12 @@ changes nothing in the ledger.
   also logs the game's "returned false right after StartJob" warning; scripted runs
   count those warnings.
 - **Commit:** a postfix on the same method, when it returned true **and** the job is the
-  pawn's `CurJob`. For an empty-handed pickup it reserves `min(job.count, remaining)`
-  and caps `job.count` to that. A resumed/new job already carrying its target, or a full
+  pawn's `CurJob`. For an empty-handed pickup it reserves what this trip can deliver,
+  `min(job.count, remaining, source stack count, MaxStackSpaceEver(def))`, and caps
+  `job.count` to that. The game sets `job.count` from the destination's free space (75
+  for wood), not from what the pawn will carry, so reserving `job.count` let one
+  pawn's first trip hold the whole quota and made contention impossible (Astra's
+  staging finding; Fable's disposition). A resumed/new job already carrying its target, or a full
   compatible load, can skip pickup on 4871: admission must check and reserve the whole
   carried load, not cap `job.count` and assume that shrinks it. Reject an oversized
   carried load before toils; never trim it. For a partial compatible load that will
@@ -233,6 +248,7 @@ in the code:
 | 2 | `Verse.AI.Job.SetTarget` | postfix | Commit point for re-targets of a `HaulToCell` job: reserve, transfer or release atomically. The widest patch (every job of every pawn and animal): an early `HaulToCell` check, and its cost is measured on its own |
 | 3 | `HaulAIUtility.HaulToCellStorageJob` | prefix and postfix | Admission for preselected cells; cap `job.count`. Reserves nothing |
 | 3b | `JobDriver_HaulToCell.TryMakePreToilReservations` | prefix and postfix | Recheck standing and quota, reconcile obsolete ownership before current-job admission, reserve full pre-carried loads or cap fresh pickups; commit only for `CurJob`, before toils |
+| 4b | `Pawn_CarryTracker.TryStartCarry(Thing,int,bool)` | postfix | True up at pickup: shrink the running job's reservation to the carried count; leave no further pickup beyond it |
 | 4 | `Pawn_CarryTracker.TryDropCarriedThing` (both overloads) | prefix and finalizer | Wrap `placedAction` (keeping any existing callback): record full counts, credit participation, flag escapes, record incidental placement; open and close the "placing" scope |
 | 5 | `Zone_Stockpile.Notify_ReceivedThing` | postfix | Fresh spawns into the tagged zone outside a hook-4 scope (incidental, unattributed); merges are left to reconciliation |
 | 6 | `Pawn_JobTracker.StartJob` / `CleanupCurrentJob` | postfix / prefix and postfix | Ownership check (release reservations of non-current jobs); `job-start` and `job-end` with condition and seen cause; mark cleanup for classification; release reservations |
@@ -311,12 +327,17 @@ it matches what pawns actually do.
    hungry, so meal resumption gets its own scripted pair, `native-haul-v1-meal`: the same
    map with the 90 wood split into small stacks spaced so each trip carries one stack
    (Astra confirms the trip count in a dry run), quota 75, Pedro the only accepting pawn
-   in the exclusive variant, and Pedro's Food set just above his want-to-eat threshold.
-   Precondition, asserted: when native hunger triggers, the intent is open with
-   `remaining > 0`; otherwise the case is invalid, not passed. Pass: Pedro eats
+   in the exclusive variant. Calibrated on 4871 with the fixture's raw berries:
+   Pedro starts at Food **0.13**, just above the native berry-selection threshold of
+   **0.12** (ordinary want-to-eat is 0.30, but berries are not yet eligible then).
+   Stacks are at least ten cells apart to avoid the native eight-cell duplicate pickup.
+   Precondition, asserted: at the meal event the intent is open with unfinished quota
+   (`quota - intentional deliveries at that tick > 0`); otherwise the case is invalid, not passed. Pass: Pedro eats
    (`ingested`), then starts another tagged haul, with **zero model calls** in between;
    we record the ticks from the meal to that job start. The matched run uses the same
-   start state with today's ordered-job haul agreement.
+   start state with today's ordered-job haul agreement. Record time to first work
+   separately from meal-to-resumption. A post-meal reservation can consume all free
+   ledger capacity while the work is still unfinished; do not confuse those quantities.
 3. **One frozen live run**, Luna (core and pawns), continuous, recorded, ten minutes
    wall clock, **attribution-only variant** (decided). The exclusive variant is
    exercised in the scripted runs; the live run shows whether helpers appear naturally
@@ -342,34 +363,120 @@ execution, or invalid output or non-progress stalls the run. Retain all failures
 ## Implementation status
 
 Built on `feat/native-haul-spike`. **Partial scripted staging evidence now exists**, not
-Gate C approval: [smoke results](trials/NATIVE_HAUL_SMOKE.md). The frozen sole-Alvin
+Gate C approval: [smoke results](trials/NATIVE_HAUL_SMOKE.md) and
+[offers/meal staging](trials/NATIVE_HAUL_OFFERS.md). The frozen sole-Alvin
 exclusive run was blocked because his unchanged Rancher backstory disables native
 hauling. Fable selected Pedro for revised scripted/meal roles; the builder and runner
-now use role sheet v2, not yet game-tested. No capability bypass or character rewrite
-has been made. The core/crew-log visible not-offered path remains Clawd’s follow-up.
+now use role sheet v2. Exclusive, offers/paired checkpoint and meal resumption/completion
+have been game-tested. [Instrumentation staging](trials/NATIVE_HAUL_INSTRUMENTATION.md)
+also observed a real drafting cleanup drop, fresh-coordinator restore and scoped timing.
+Revised helper and overlap observations were negative with all remaining quota reserved
+by one job; no claim about unconstrained pawn willingness follows. No capability bypass
+or character rewrite has been made.
 
 - **Mod:** `mod/NativeIntents.cs` (intent tag, ledger, reconciliation, bridge and lab
   operations) and `mod/IntentPatches.cs` (patches 1–8). Build with
-  `scripts/build-mod.sh <Managed> <0Harmony.dll>`. All eleven patched methods apply
-  offline under Mono with Harmony 2.4.2.
-- **Fixture:** `scripts/native-haul-fixture.py` (`--meal` for the meal case). Wood
+  `scripts/build-mod.sh <Managed> <0Harmony.dll>`. All twelve patched methods apply
+  offline under Mono with Harmony 2.4.2. Pawns report `haulingCapable` (the game's own
+  Hauling work-type check).
+- **Fixture:** `scripts/native-haul-fixture.py` (`--meal` for the meal case, `--helper`
+  for the geometry-only helper case). Wood
   positions and the candidate area come from the running game.
 - **Coordinator:** routing entries, `src/native-intents.ts` (wakes, aggregate receipts,
-  topic outcome, invariants), `LabBridge.intent`.
-- **Scripted runs:** `scripts/run-native-haul-lab.sh main|meal [--case=<name>]`, which
+  topic outcome, invariants), `LabBridge.intent`. `haul-zone` is an ordinary offer:
+  - `Coordinator.configureNativeHaul` freezes the one intent;
+  - the core view lists it only for pawns the game lets haul; the others get a visible
+    "not offered: cannot do hauling" line;
+  - accept joins or opens the intent, while refuse, defer and withdraw exclude the pawn
+    in the game, even before the zone exists;
+  - counters can be adopted only before the first acceptance;
+  - the standing follows the intent (met, expired, stopped), with no needs stop;
+  - the crew log shows first delivery, quota and expiry, and "finished a trip started
+    before withdrawing".
+- **Scripted runs:** `scripts/run-native-haul-lab.sh main|meal|helper [--case=<name>]`, which
   writes a unique `.runtime/native-haul-<mode>-<runId>.json`, including raw events and final
   state per case. Event gaps fail the run. These private runtime files are not published.
-- **Not yet built:**
-  - the core offering a `haul-zone` intent and the pawns answering it (needed for the
-    live run), including Alvin’s visible not-offered reason;
-  - the matched ordered-job halves and actual counteroffer/standing transitions;
-  - paired coordinator/cold restore (the runner currently tests game save/reload only);
-  - forced opportunistic replacement and failed partial merge, and `work-options` /
-    isolated patch-cost measurements. All are listed as unimplemented in run receipts.
+  - `core-offers` covers the coordinator path end to end: not offered, refusal, a
+    pre-acceptance counter adopted, acceptance, and a paired checkpoint mid-intent.
+  - The matched ordered-job halves are `ordered-main` (stale rejections) and
+    `ordered-meal`. Each uses the same save and area as an ordinary stockpile, with
+    native Hauling off so only ordered jobs haul, as the ordered model always ran.
+    They record authored offers as estimated core offer-turns, not actual model calls.
+    Validity requires actual scoped wood delivery (and eating/post-meal work for the
+    meal half); quantity shortfalls remain measured outcomes, with `quotaMet` explicit.
+    Initial work after eating is not reported as resumption of pre-meal work.
+  - `cold-restore-mid-intent` checkpoints an open, in-flight intent and restores it
+    into a new coordinator on the same store. The standing, credit and intent must
+    survive, and the quota must then be met.
+  - `draft-mid-carry` replaces the lab-forced cancellation. Pedro is drafted, which is
+    the game's own interruption, the moment he stands in the tagged zone carrying on a
+    tagged haul. The drop must be incidental and never credited. Whether he resumes
+    after undrafting is recorded, not required.
+  - `patch-cost` compares Ultrafast throughput with all patches, without `Job.SetTarget`,
+    and with Concord's patches off (not a wholly unmodded game). Three rotated rounds
+    reload the same save and ordinary untagged stockpile, so disabling patches does not
+    remove quota semantics from one arm. Non-advancing/paused samples are invalid.
+    A separate tagged-work profile measures handler bodies and placement accounting;
+    prefix/postfix invocations are counted separately. These timings exclude Harmony
+    dispatch and include timer/nested-work overhead: **not isolated total patch cost**.
+    `settarget-cost` separately measures incremental dispatch plus production handler/counter
+    overhead using paired enabled/disabled calls on detached `Wait` and non-current
+    `HaulToCell` jobs while paused. Five rotated pairs, warmup, and exact hook-call
+    checks guard the measurement; incoming patch/timing states are restored. This is
+    not a current-job retarget benchmark or a population-wide CPU estimate.
+    Capped or noisy TPS differences cannot establish overhead. Cleanup restores timing
+    and patches with an independent deadline, including on failure.
+  - `work-options` safely measures only the WoodLog/HaulGeneral slot-storage predicate
+    subset for all three pawns, five times. It never calls generic `HasJobOnThing` or
+    `HasJobOnCell`: on 4871 those can construct jobs. Other work givers remain outside
+    measured coverage. Random state is preserved; no jobs or reservations are created.
+  - `helper` mode (`--helper`) runs `helper-geometry` (attribution; Pedro accepts,
+    Beatrice is unasked) and `overlap-geometry` (both accept) on a fixture where helping
+    can only come from geometry: more wood than one trip moves, a quota of 75, and a
+    second cluster placed near Beatrice. Helping and overlap (`peakHolders`, the most
+    pawns holding in-flight quota at once) are recorded as results, not required. The
+    invariants must hold either way.
+- **Not yet built:** full work-options enumeration, forced opportunistic replacement and failed partial merge. These are
+  listed as unimplemented in run receipts and observed from events rather than forced;
+  a run without such an event is not evidence for either case.
 
-  The opportunistic-replacement and failed-partial-merge cases are observed from
-  events rather than forced; a run without such an event is not evidence for either case.
-  The quota-immutability check is not a counteroffer test.
+## Live run: freeze record (draft for Fable's sign-off)
+
+Astra's [reviewed setup fingerprint and rehearsal](trials/NATIVE_HAUL_FREEZE.md) are
+ready for sign-off. The proposed live fixture is **helper geometry / quota 75**, a
+change from the original quota-30 main fixture; it remains unapproved until Fable
+signs the setup hash. Two failed coverage rehearsals are retained. All character
+state, strict holds and the zero-escape success measure remain unchanged.
+
+The live run executes through the ongoing runner in native-haul mode:
+`node scripts/run-ongoing.mjs <config> --recorded --native-haul`. A zero-model
+rehearsal adds `--scripted`, and the post-run cold restore adds `--cold`. The policy is
+`luna-native-haul-v1`: the recorded-scene timing (ten minutes of continuous play, the
+#64 recording protocol, no turn cap, no inference pause) and Luna for the core and
+pawns.
+
+- **Setup:** the frozen `live` entry in `.runtime/native-haul-fixture.json` (save,
+  candidate area, quota, `maxTicks`, `variant: "attribution"`). The runner refuses any
+  other variant. Astra hashes this entry together with the runner digest that
+  `run-ongoing.mjs` already checks between hosts.
+- **Intent-only:** `configureNativeHaul` freezes the one intent, and the core can list
+  and propose nothing else. The runner asserts this at the start and again over every
+  proposal at the end. Pawns may accept, refuse, defer or counter the quota; a counter
+  is adoptable only before the first acceptance.
+- **Neutral brief:** loose wood and room for a stockpile; offer, ask or wait; equal
+  standing; respect refusal and deferral; no requirement to keep anyone busy.
+- **Stop rule:** as in Gate B. The runner fails the run on any consent violation or
+  quota escape observed during polling or in the final ledger (`invariantFindings`).
+  Both capable pawns must actually receive offers for protocol coverage, without
+  requiring live acceptance or forcing offers. At the end the intent closes
+  as an **operator stop**, never as invented pawn withdrawals.
+- **Two-capable-pawn scene:** Pedro and Beatrice are offered. Alvin is ineligible by his
+  own backstory (Rancher, no hauling) and visibly not offered.
+- **Cold restore after the run is a real process restart of the coordinator:** a new
+  host and runner process (`--cold`) restores the paired checkpoint from the store and
+  compares the actual restored game intent/ledger with the paired checkpoint, preserving
+  the original baseline on failure. This must be demonstrated for the live run before
+  Gate C. The game process itself continues and loads the checkpoint save.
 
 ## Out of scope
 
