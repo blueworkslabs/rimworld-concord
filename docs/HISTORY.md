@@ -141,3 +141,21 @@ Test suite growth along the way: 33 checks at the foundation, 145 at #20, 263 at
   Alvin's two choices encountered changed availability. One core turn cancelled at the
   fixed observation deadline. No work/cooking; no automatic escalation. Failures and
   misleading planner explanations remain in [the evidence](evidence/luna-ongoing-integration.json).
+
+- **#62, #63** — Luna and Terra compared offline on retained situations: both closed
+  the right topics and both repeated stale facts, so Luna stays the default. Current
+  facts and older planner interpretations are now separate in core prompts, and eating
+  rejections retain the first failed check where available; a missing shortlist option
+  still does not reveal why the native option disappeared.
+- **#64 Ten-minute recorded Luna scene** — continuous play with no inference pauses:
+  39 berries eaten on receipts, one stale rejection, no work or cooking. Continuous
+  interaction works; local food access, stale explanations and topic bookkeeping still
+  limit coordination.
+
+## 12. Changing course on the game side (24 Sep)
+
+- **Architecture review** — Fable's review of `mod/` concluded that the coordinator is
+  right but the game side fights RimWorld: one-off ordered jobs compete with the game's
+  own planner. The team agreed to steer the native planner instead
+  ([NATIVE_INTENTS](NATIVE_INTENTS.md)), starting with an internals study and a bounded
+  spike.

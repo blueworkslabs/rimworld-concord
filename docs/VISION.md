@@ -39,6 +39,10 @@ small desert fixture with three colonists (Alvin, Beatrice, Pedro), not the camp
   about what it doesn't know.
 - **No manufactured drama.** No scripted refusals, no required conflict. Judge
   meaningful choices, not obedience or its opposite.
+- **Work with RimWorld, not around it.** Colonists act through the game's own
+  planner (designations, zones, bills, work priorities), so agreed work survives
+  interruptions and new kinds of work come from the game rather than being rebuilt.
+  See [NATIVE_INTENTS](NATIVE_INTENTS.md).
 - **Smooth play is the target.** Native routines continue while colonists think;
   pausing is an explicit test or planning mode.
 - **Legible to a viewer.** Someone watching should be able to follow a consequential

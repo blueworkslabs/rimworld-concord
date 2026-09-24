@@ -63,6 +63,9 @@ Not yet shown: the live core turning a need into a multi-step plan (build, then 
 long-run character consistency, automatic model escalation, the gravship
 campaign, or an installer for players.
 
+Next: moving the game side from hand-built ordered jobs to RimWorld's own planner
+(tagged zones, blueprints, bills); see [NATIVE_INTENTS](docs/NATIVE_INTENTS.md).
+
 What happened when: [HISTORY](docs/HISTORY.md) · every trial: [trial ledger](docs/trials/README.md) · what's next: [ROADMAP](docs/ROADMAP.md)
 
 ## How it works

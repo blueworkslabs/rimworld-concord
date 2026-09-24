@@ -133,6 +133,21 @@ Play is continuous by default; native routines keep running while a pawn thinks,
 a thinking badge over its head. Pausing the game at decisions is an explicit test
 mode using owner- and epoch-scoped pause claims that expire on wall-clock time.
 
+## Direction: native intents
+
+The coordinator's responsibilities and invariants stay; narrow protocol, routing and
+agreement-lifecycle adaptations will be needed. The game half is changing: instead of
+issuing ordered jobs from hand-built shortlists, the mod will turn accepted agreements
+into tagged native intents (zones, blueprints, bills, designations) that pawns fulfil
+through RimWorld's own work givers. Refusal, deferral and withdrawal bind; exclusive
+versus voluntary-helper execution is compared in the spike, with helpers attributed
+without inventing acceptance. Options will come from knowledge-filtered game work
+scans. Harmony hooks capture job/action transitions alongside necessary sampled
+state; actual outcome receipts stay game-authored and gain aggregate progress.
+Harmony becomes a declared mod dependency when implemented.
+Rationale, consent mapping, trade-offs and the spike: [NATIVE_INTENTS](NATIVE_INTENTS.md).
+Until then, everything above describes the current ordered-job model.
+
 ## Split-host trials
 
 Live trials run the models on a host with the native logins and protected egress, and
