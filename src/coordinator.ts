@@ -546,7 +546,9 @@ export class Coordinator {
     const game=await this.current(),c=this.domain.nativeHaul;
     if(!c)return undefined;
     const live=this.liveIntent(game,c.intentId);
-    if(live?.status==='open'){const r=await this.game.intent!({op:'intent-stop',epoch:this.domain.epoch,intentId:c.intentId});this.ingestIntents(r.state);}
+    if(live?.status==='open'){const r=await this.game.intent!({op:'intent-stop',epoch:this.domain.epoch,intentId:c.intentId});
+      const stopped=this.liveIntent(r.state,c.intentId);if(!stopped||stopped.status==='open'||stopped.status==='pending')throw Error('Native operator stop unconfirmed');
+      this.ingestIntents(r.state);}
     else this.ingestIntents(game);
     return structuredClone(this.domain.intentViews?.[c.intentId]);
   });}

@@ -84,7 +84,7 @@ input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill(
 const timer=setTimeout(()=>{failed=true;child.kill();},protocol.wallMs+60000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
 clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
-const result={at:new Date().toISOString(),policy,protocol,kind:(nativeHaul?'native-haul-':'')+(cold?'ongoing-cold':scripted?'ongoing-scripted':'ongoing-live'),runId,passed:!failed&&code===0&&receipt?.passed===true,
+const result={at:new Date().toISOString(),hostProcessId:process.pid,policy,protocol,kind:(nativeHaul?'native-haul-':'')+(cold?'ongoing-cold':scripted?'ongoing-scripted':'ongoing-live'),runId,passed:!failed&&code===0&&receipt?.passed===true,
  before,after:{...summary(),jevCalls:0},diagnostics:diagnostics(),responses,game:receipt,
  accounting:'Native Codex subscription token usage, not API cash charges. No Jev calls. No turn ceiling or automatic rerolls.'};
 coreBackend.close();pawnBackend.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify({passed:result.passed,runId,after:result.after,rounds:receipt?.rounds?.length,error:receipt?.error}));if(!result.passed)process.exitCode=1;

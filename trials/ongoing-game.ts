@@ -20,6 +20,7 @@ import {coreAdmission} from '../src/core-scheduler.js';
 
 import {retainedDomain} from './retention-policy.js';
 import {randomUUID} from 'node:crypto';
+import {nativeSceneCrew,nativeOfferCoverage,assertNativeLedger,assertNativeRestore} from './native-haul-live.js';
 import {IntentView,invariantFindings,progress as intentProgress,NativeHaulConfig} from '../src/native-intents.js';
 if(process.env.CONCORD_ONGOING_LOCKED!=='1')throw Error('Use scripts/run-ongoing-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,cold=process.argv.includes('--cold');
@@ -33,8 +34,9 @@ const run=runId;
 const receiptPath=root+'/.runtime/ongoing-'+run+'-'+(cold?'cold':'game')+'.json';
 await writeFile(receiptPath,JSON.stringify({runId,policy,scripted,recorded,status:'started'}),{flag:'wx'});
 let recorder:Awaited<ReturnType<typeof startSceneRecording>>|undefined;
-const receipt:any={passed:false,runId,policy,mode:(nativeHaul?'native-haul-':'')+(scripted?'scripted-continuous':'live-continuous'),run,recorded,nativeHaul,protocol:P,views:[],rounds:[],samples:[]};
+const receipt:any={passed:false,processId:process.pid,runId,policy,mode:(nativeHaul?'native-haul-':'')+(scripted?'scripted-continuous':'live-continuous'),run,recorded,nativeHaul,protocol:P,views:[],rounds:[],samples:[]};
 let active:Promise<void>|undefined;
+let checkpointRecorded=false;
 const guard=new NeedsRunGuard(),controller=new AbortController(),end=operationDeadline;
 let c:Coordinator|undefined,s:Store|undefined,db:string|undefined,connected=true,coreAttempts=0,pawnAttempts=0,inferenceDeadline=end;
 const stop=()=>{connected=false;guard.stop();controller.abort();channel.close();};
@@ -56,13 +58,13 @@ async function capture(label:string,openPanel=false){
  }catch(e){(receipt.captureErrors??=[]).push(String(e));}
 }
 async function finish(){channel.close();if(!connected)throw Error('Host disconnected');await new Promise<void>((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Drain timeout')),15000);drained=()=>{clearTimeout(t);resolve();};send({type:'drain',id:runId});});receipt.hostDrained=true;}
-async function save(failed=false){const checkpoint='lab-concord-followup-'+Date.now();await c!.checkpoint(checkpoint);const domain=c!.inspect();await writeFile(root+'/.runtime/ongoing-'+run+'-latest.json',JSON.stringify({runId,policy,mode:receipt.mode,db,checkpoint,domain,failed}));return {checkpoint,domain};}
+async function save(failed=false){const checkpoint='lab-concord-followup-'+Date.now();await c!.checkpoint(checkpoint);const domain=c!.inspect();await writeFile(root+'/.runtime/ongoing-'+run+'-latest.json',JSON.stringify({runId,policy,mode:receipt.mode,db,checkpoint,domain,failed,coordinatorProcessId:process.pid}));checkpointRecorded=true;receipt.checkpoint=checkpoint;return {checkpoint,domain};}
 try{
  if(cold){
   const saved=JSON.parse(await readFile(root+'/.runtime/ongoing-'+run+'-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,receipt.mode);assert.equal(saved.policy??'luna-ongoing-v1',policy);receipt.verifiesFailedRun=saved.failed;
   s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);receipt.coldRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
   // Native-haul cold restore is a new coordinator process: the frozen intent and its ledger view survive.
-  if(nativeHaul){assert.deepEqual(c.inspect().nativeHaul,saved.domain.nativeHaul);assert.deepEqual(c.inspect().intentViews,saved.domain.intentViews);receipt.nativeHaul={coldIntents:(await b.state()).intents};}
+  if(nativeHaul){assert(saved.coordinatorProcessId&&saved.coordinatorProcessId!==process.pid,'Cold restore requires a different coordinator process');receipt.savedCoordinatorProcessId=saved.coordinatorProcessId;assert.deepEqual(c.inspect().nativeHaul,saved.domain.nativeHaul);assert.deepEqual(c.inspect().intentViews,saved.domain.intentViews);receipt.nativeHaul={coldIntents:assertNativeRestore(await b.state(),saved.domain)};}
  }else{
   // Native haul: the frozen live entry (save, candidate area, quota, expiry) is part of the hashed setup.
   const live=nativeHaul?JSON.parse(await readFile(root+'/.runtime/native-haul-fixture.json','utf8')).live:undefined;
@@ -73,9 +75,11 @@ try{
    'Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan.');
   if(nativeHaul){
    // Intent-only: once configured, the core can list and propose nothing but this intent.
-   receipt.nativeHaul={config:await c.configureNativeHaul(NativeHaulConfig.parse({intentId:randomUUID(),area:live.area,quota:live.quota,maxTicks:live.maxTicks,variant:'attribution'}))};
+   receipt.nativeHaul={crew:nativeSceneCrew(await b.state()),config:await c.configureNativeHaul(NativeHaulConfig.parse({intentId:randomUUID(),area:live.area,quota:live.quota,maxTicks:live.maxTicks,variant:'attribution'}))};
    const v=await c.corePerspective();receipt.nativeHaul.initialOpportunities=v.opportunities;receipt.nativeHaul.notOffered=v.availability.filter(a=>/cannot do hauling/.test(a.status));
    assert(v.opportunities.every(o=>o.action.kind==='haul-zone'),'Native live run must list only the stockpile haul');
+   assert.deepEqual(v.opportunities.map(o=>o.pawn).sort(),[...receipt.nativeHaul.crew.eligible].sort(),'Both capable pawns must initially be offerable');
+   assert(receipt.nativeHaul.notOffered.some((a:any)=>a.pawn===receipt.nativeHaul.crew.ineligible),'Alvin incapability must be visible');
   }
   receipt.initial=await b.state();assert(receipt.initial.pawns.every((p:any)=>!p.downed));receipt.initialPerspective=await c.corePerspective();
   if(recorded){const exec=promisify(execFile);await exec('xdotool',['mousemove','700','460','click','--repeat','2','--delay','100','4'],{env:{...process.env,DISPLAY:':91',XAUTHORITY:'/run/rimworld-lab-display/Xauthority'},timeout:5000});}
@@ -93,7 +97,7 @@ try{
    if(taskError)throw taskError;
    recorder?.check();guard.check();await c.reconcile();guard.check();
    await c.advanceIntentions(()=>!guard.stopped&&nativeRemaining()>0);guard.check();
-   const state=await b.state();guard.sample(state.paused,state.ticks,startTick);
+   const state=await b.state();if(nativeHaul)assertNativeLedger(state,receipt.nativeHaul.config.intentId);guard.sample(state.paused,state.ticks,startTick);
    receipt.samples.push({unixMs:Date.now(),tick:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,food:p.facts?.find(f=>f.key==='need'&&f.value==='Food')?.level}))});
    if(!midpointCaptured&&nativeRemaining()<=nativeLimit/2){midpointCaptured=true;await capture('midpoint');}
    const view=await c.corePerspective();guard.check();
@@ -135,10 +139,11 @@ try{
    receipt.nativeHaul.final=mine;receipt.nativeHaul.progress=mine?intentProgress(mine):null;receipt.nativeHaul.findings=mine?invariantFindings(mine):['intent never opened'];
    receipt.nativeHaul.proposals=Object.values(receipt.beforeCleanup.proposals).map((p:any)=>({pawn:p.pawn,kind:p.action.kind,status:p.status,standing:p.standing?.status}));
    assert(receipt.nativeHaul.proposals.every((p:any)=>p.kind==='haul-zone'),'Only the stockpile haul may be proposed');
-   if(scripted)assert(mine&&mine.accepted.length>0,'Scripted rehearsal must open the intent');
+   nativeOfferCoverage(receipt.beforeCleanup,receipt.nativeHaul.crew.eligible);
+   if(scripted)assert.deepEqual([...(mine?.accepted??[])].sort(),[...receipt.nativeHaul.crew.eligible].sort(),'Scripted rehearsal must accept both authored offers');
    if(mine)assert.deepEqual(receipt.nativeHaul.findings,[],'Consent violations or quota escapes: stop and diagnose');
   }
-  const saved=await save(!receipt.inferencePassed);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);receipt.pairedRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
+  const saved=await save(!receipt.inferencePassed);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);if(nativeHaul)receipt.nativeHaul.pairedIntents=assertNativeRestore(await b.state(),saved.domain);receipt.pairedRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
  }
  guard.check();receipt.passed=cold||receipt.inferencePassed===true;if(!receipt.passed)process.exitCode=1;
 }catch(e){receipt.error=String(e);process.exitCode=1;}
@@ -147,6 +152,6 @@ finally{
  if(recorder)try{await recorder.stop();receipt.recordingIncomplete=true;}catch(e){receipt.recordingCleanupError=String(e);receipt.passed=false;process.exitCode=1;}
  receipt.finalCleanup=await socialCleanup(async()=>{operationDeadline=Date.now()+10000;await b.admin('pause');},async()=>{},async()=>{operationDeadline=Date.now()+20000;return c&&!cold?stopTrialWork(c):{errors:[]};});
  if(receipt.finalCleanup.errors.length){receipt.passed=false;process.exitCode=1;}
- if(!cold&&c&&db&&!receipt.passed&&!receipt.pairedRestore&&!receipt.finalCleanup.errors.length)try{operationDeadline=Date.now()+130000;await save(true);receipt.partialSaved=true;}catch(e){receipt.partialSaveError=String(e);}
+ if(!cold&&c&&db&&!receipt.passed&&!checkpointRecorded&&!receipt.finalCleanup.errors.length)try{operationDeadline=Date.now()+130000;await save(true);receipt.partialSaved=true;}catch(e){receipt.partialSaveError=String(e);}
  receipt.coreAttempts=coreAttempts;receipt.pawnAttempts=pawnAttempts;input.close();s?.close();await writeFile(receiptPath,JSON.stringify(receipt,null,2));send({type:'receipt',receipt});
 }

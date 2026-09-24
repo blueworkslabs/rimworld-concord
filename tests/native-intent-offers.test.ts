@@ -5,6 +5,8 @@ import { Coordinator } from '../src/coordinator.js';
 import { Store } from '../src/store.js';
 import { scripted } from '../src/backends.js';
 import { coreView } from '../src/core-planner.js';
+import {stopTrialWork} from '../src/work-trial.js';
+import {nativeSceneCrew,nativeOfferCoverage,assertNativeLedger,assertNativeRestore} from '../trials/native-haul-live.js';
 import { crewReport } from '../src/crew-log.js';
 import { intentAction, type IntentView } from '../src/native-intents.js';
 import type { GameBridge, GameState, ActionRequest, Receipt, Action } from '../src/protocol.js';
@@ -32,6 +34,7 @@ class IntentGame implements GameBridge {
       if(v.status==='pending'){v.status='open';v.quota=payload.quota;v.remaining=payload.quota;}
       if(!v.accepted.includes(payload.actor))v.accepted.push(payload.actor);
     }
+    if(payload.op==='intent-stop'&&v){v.status='stopped';v.reserved=0;v.remaining=v.quota-v.delivered;}
     return {state:structuredClone(this.data),receipt:list};
   }
   async save(){return {sha256:'hash'};}async load(){}async verify(){}
@@ -173,4 +176,38 @@ test('native mode never exposes or directly admits legacy ordered hauling',async
   assert.ok(!perspective.limits.includes('Only listed campfire'));
   for(const action of [{kind:'rescue',target:'X',bed:'Y',x:4,z:4,maxTicks:900},{kind:'build',thing:'X',x:4,z:4,maxTicks:900},{kind:'cook',thing:'X',target:'Y',x:4,z:4,count:1,meals:1,maxTicks:900}] as Action[])
     await assert.rejects(c.core().propose('P',action,'Unlisted work'),/the stockpile haul is the only proposable work/);
+});
+
+
+test('uncertain native operator stop never manufactures a pawn withdrawal',async()=>{
+ for(const applied of [false,true]){
+  const {c,game}=await setup();const p=await c.core().propose('P',intentAction(cfg),'Stock wood');await c.pawn('P').decide(p.id,say('accept'));
+  const original=game.intent.bind(game);let fail=true;
+  game.intent=async payload=>{if(payload.op==='intent-stop'&&fail){if(applied)await original(payload);throw Error('Stop reply lost');}return original(payload);};
+  const first=await stopTrialWork(c);assert(first.errors.some(e=>e.includes('Stop reply lost')));
+  assert.equal(c.inspect().proposals[p.id]!.status,'accepted');
+  assert(!game.ops.some(o=>o.op==='intent-exclude'));
+  fail=false;const second=await stopTrialWork(c);assert.deepEqual(second.errors,[]);
+  assert.equal(c.inspect().proposals[p.id]!.standing?.reason,'Intent stopped by the operator');
+  assert.deepEqual(game.data.intents![0]!.accepted,['P']);assert.deepEqual(game.data.intents![0]!.excluded,[]);
+ }
+});
+
+test('native rehearsal rejects missing crew or offers without requiring live acceptance',async()=>{
+ const {c,game}=await setup();assert.deepEqual(nativeSceneCrew(game.data),{eligible:['P','B'],ineligible:'A'});
+ const wrong=structuredClone(game.data);wrong.pawns[0]!.haulingCapable=true;assert.throws(()=>nativeSceneCrew(wrong),/ineligible/);
+ wrong.pawns=wrong.pawns.filter(p=>p.id!=='B');assert.throws(()=>nativeSceneCrew(wrong),/missing/);
+ assert.throws(()=>nativeOfferCoverage(c.inspect(),['P','B']),/coverage/);
+ const p=await c.core().propose('P',intentAction(cfg),'Offer');await c.pawn('P').decide(p.id,say('refuse'));
+ assert.throws(()=>nativeOfferCoverage(c.inspect(),['P','B']),/coverage/);
+ const b=await c.core().propose('B',intentAction(cfg),'Offer');await c.pawn('B').decide(b.id,say('defer'));
+ assert.doesNotThrow(()=>nativeOfferCoverage(c.inspect(),['P','B']));
+});
+
+test('native restore and polling validate actual game ledger rather than copied database state',async()=>{
+ const {c,game}=await setup();const p=await c.core().propose('P',intentAction(cfg),'Offer');await c.pawn('P').decide(p.id,say('accept'));
+ await c.reconcile();const saved=c.inspect();assert.doesNotThrow(()=>assertNativeRestore(game.data,saved));
+ const lost=structuredClone(game.data);lost.intents=[];assert.throws(()=>assertNativeRestore(lost,saved),/GAME intents/);
+ const changed=structuredClone(game.data);changed.intents![0]!.accepted=[];assert.throws(()=>assertNativeRestore(changed,saved),/GAME intents/);
+ const escaped=structuredClone(game.data);escaped.intents![0]!.overshoot=1;assert.throws(()=>assertNativeLedger(escaped,cfg.intentId),/violation/);
 });
