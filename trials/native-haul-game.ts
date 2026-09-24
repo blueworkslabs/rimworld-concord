@@ -306,7 +306,7 @@ try{
     await scenario('meal-resumption',base,async c=>{
       const id=randomUUID(),startTick=state.ticks,from=lastSeq;await accept(id,A,{quota:75,variant:'exclusive',maxTicks:60000});
       const ate=()=>since(0,'ingested',A).length>0;
-      await run(()=>ate()||done(id)(),600000);
+      const observationStart=Date.now();await run(()=>ate()||done(id)(),600000);
       const meal=since(0,'ingested',A)[0];
       if(!meal){c.findings.push('invalid: Pedro never ate before the intent closed');return;}
       const at=view(id)!,deliveredAtMeal=at.drops.filter(d=>d.kind==='participation'&&d.tick<=meal.tick).reduce((n,d)=>n+d.count,0);
@@ -321,6 +321,9 @@ try{
       c.data.workStartedBeforeMeal=!!first&&first.seq<meal.seq;
       expect(c,!!first&&first.seq<meal.seq,'invalid: no tagged work before the meal; this is initial work, not resumption');
       c.data.ticksMealToResume=resumed&&first&&first.seq<meal.seq?resumed.tick-meal.tick:null;c.data.modelCalls=0;invariants(c,id);
+      const leftMs=600000-(Date.now()-observationStart);
+      if(leftMs>0&&!done(id)())await run(done(id),leftMs);
+      const end=invariants(c,id);c.data.completion={observedMs:Date.now()-observationStart,endTick:state.ticks,quotaMet:end?.status==='met',delivered:end?.delivered,quota:end?.quota};
     });
     await scenario('ordered-meal',base,async c=>{
       // Matched ordered-job half: same calibrated start state (Pedro's Food 0.13). The ordered model stops
