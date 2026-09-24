@@ -57,7 +57,7 @@ each pawn's answer sets its standing on the shared intent.
 
 **On the first acceptance** the mod creates a `Zone_Stockpile` on the area: wood only,
 priority *Important*, tagged in our saved `WorldState` as `Zone.ID → {intentId, quota,
-delivered, accepted[], excluded[], variant, open}`. Nothing lives in a job driver.
+credited, reserved{jobId→count}, accepted[], excluded[], variant, open}`. Nothing lives in a job driver.
 
 ### Participation versus incidental placement
 
