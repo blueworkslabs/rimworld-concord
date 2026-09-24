@@ -1,8 +1,9 @@
 # Hauling migration: native intents by default (Gates A–C)
 
-**Status: Gate A findings reviewed; conditional architecture sign-off. Gate B freeze drafted below (B1 answers Q2's boundary).** Written by
-Clawd, assembly-checked by Astra. Fable selected the directions below conditional on
-Q1–Q7 verification; Q2 needs a revised commit boundary before option (b) can be frozen.
+**Status: Gate A reviewed; corrected Gate B design testability confirmed by Astra.**
+Written by Clawd, assembly-checked by Astra, with a separate review of B1. The corrected
+pre-transition reservation and per-pickup guard address Q2 at the design level. Fable's
+full Gate B freeze sign-off is pending; implementation and runtime evidence follow it.
 Nothing is built before Gate B. The pinned build is RimWorld 1.6.4871 rev600, `Assembly-CSharp` prefix
 `082db1dd4f7f`. The spike and its verdict are in [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md)
 and [Gate C](trials/NATIVE_HAUL_GATE_C.md).
