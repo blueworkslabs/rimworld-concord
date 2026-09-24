@@ -1,0 +1,50 @@
+{
+  "version": 2,
+  "primary": "Pedro",
+  "secondary": "Beatrice",
+  "notOffered": {
+    "Alvin": "cannot do hauling"
+  },
+  "scripted": {
+    "exclusive": {
+      "accept": [
+        "Pedro"
+      ],
+      "refuse": [
+        "Beatrice"
+      ],
+      "notAsked": []
+    },
+    "attribution": {
+      "accept": [
+        "Pedro"
+      ],
+      "refuse": [],
+      "notAsked": [
+        "Beatrice"
+      ]
+    },
+    "meal": {
+      "accept": [
+        "Pedro"
+      ],
+      "refuse": [],
+      "notAsked": [
+        "Beatrice"
+      ]
+    }
+  },
+  "live": {
+    "variant": "attribution",
+    "offer": [
+      "Pedro",
+      "Beatrice"
+    ],
+    "answers": "core/pawns decide; not scripted"
+  },
+  "meal": {
+    "pawn": "Pedro",
+    "initialFood": 0.33,
+    "calibration": "provisional; dry-run hunger timing and trip count required"
+  }
+}

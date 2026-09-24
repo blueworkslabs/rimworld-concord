@@ -44,6 +44,7 @@ export type Receipt = {id:string;actor:string;status:Outcome;reason:string;failu
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
   pawns:Pawn[];actions:Receipt[];crewLog?:CrewReport;events?:NativeEvent[];eventSeq?:number;
+  intents?:import('./native-intents.js').IntentView[];
 };
 export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail:string;subject?:string;subjectName?:string};
 export type Attention = {event:NativeEvent;route:'native'|'appraisal'|'deliberation';interrupt?:boolean};

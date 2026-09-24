@@ -269,12 +269,13 @@ it matches what pawns actually do.
 
 ## Runs (Astra)
 
-1. **Scripted, both variants**, zero model calls, recorded. The scripted core offers
-   the intent to all three. Alvin accepts, Beatrice refuses, Pedro doesn't answer. Plus
-   targeted sub-runs:
-   - three pawns hauling at once against a quota of 30 from 90 wood (attribution
+1. **Scripted, both variants**, zero model calls, recorded. Role sheet v2:
+   Pedro accepts in both; Beatrice refuses in exclusive and is **not asked** in
+   attribution (helper credit). Alvin is **not offered: cannot do hauling**, never
+   silently marked unanswered. See `scripts/native-haul-roles.json`. Plus targeted sub-runs:
+   - the two capable pawns hauling against a quota of 30 from 90 wood (attribution
      variant): credited exactly 30;
-   - Alvin withdraws while walking to pick up (job ended, nothing dropped) and while
+   - Pedro withdraws while walking to pick up (job ended, nothing dropped) and while
      carrying (trip finishes, flagged);
    - a forced cancellation while a pawn stands in the zone: the drop is incidental, not
      credited;
@@ -309,17 +310,18 @@ it matches what pawns actually do.
 2. **Meal case, matched pair.** The main fixture can finish 30 wood before anyone is
    hungry, so meal resumption gets its own scripted pair, `native-haul-v1-meal`: the same
    map with the 90 wood split into small stacks spaced so each trip carries one stack
-   (Astra confirms the trip count in a dry run), quota 75, Alvin the only accepting pawn
-   in the exclusive variant, and Alvin's Food set just above his want-to-eat threshold.
+   (Astra confirms the trip count in a dry run), quota 75, Pedro the only accepting pawn
+   in the exclusive variant, and Pedro's Food set just above his want-to-eat threshold.
    Precondition, asserted: when native hunger triggers, the intent is open with
-   `remaining > 0`; otherwise the case is invalid, not passed. Pass: Alvin eats
+   `remaining > 0`; otherwise the case is invalid, not passed. Pass: Pedro eats
    (`ingested`), then starts another tagged haul, with **zero model calls** in between;
    we record the ticks from the meal to that job start. The matched run uses the same
    start state with today's ordered-job haul agreement.
 3. **One frozen live run**, Luna (core and pawns), continuous, recorded, ten minutes
    wall clock, **attribution-only variant** (decided). The exclusive variant is
    exercised in the scripted runs; the live run shows whether helpers appear naturally
-   and whether the log stays legible when they do.
+   and whether the log stays legible when they do. Offer Pedro and Beatrice; their
+   answers remain live decisions. Alvin is not offered, with the visible incapability reason.
 
 ## Measures and baselines
 
@@ -336,6 +338,38 @@ it matches what pawns actually do.
 
 **Stop and diagnose offline** if unsupported capability or consent could reach
 execution, or invalid output or non-progress stalls the run. Retain all failures.
+
+## Implementation status
+
+Built on `feat/native-haul-spike`. **Partial scripted staging evidence now exists**, not
+Gate C approval: [smoke results](trials/NATIVE_HAUL_SMOKE.md). The frozen sole-Alvin
+exclusive run was blocked because his unchanged Rancher backstory disables native
+hauling. Fable selected Pedro for revised scripted/meal roles; the builder and runner
+now use role sheet v2, not yet game-tested. No capability bypass or character rewrite
+has been made. The core/crew-log visible not-offered path remains Clawd’s follow-up.
+
+- **Mod:** `mod/NativeIntents.cs` (intent tag, ledger, reconciliation, bridge and lab
+  operations) and `mod/IntentPatches.cs` (patches 1–8). Build with
+  `scripts/build-mod.sh <Managed> <0Harmony.dll>`. All eleven patched methods apply
+  offline under Mono with Harmony 2.4.2.
+- **Fixture:** `scripts/native-haul-fixture.py` (`--meal` for the meal case). Wood
+  positions and the candidate area come from the running game.
+- **Coordinator:** routing entries, `src/native-intents.ts` (wakes, aggregate receipts,
+  topic outcome, invariants), `LabBridge.intent`.
+- **Scripted runs:** `scripts/run-native-haul-lab.sh main|meal [--case=<name>]`, which
+  writes a unique `.runtime/native-haul-<mode>-<runId>.json`, including raw events and final
+  state per case. Event gaps fail the run. These private runtime files are not published.
+- **Not yet built:**
+  - the core offering a `haul-zone` intent and the pawns answering it (needed for the
+    live run), including Alvin’s visible not-offered reason;
+  - the matched ordered-job halves and actual counteroffer/standing transitions;
+  - paired coordinator/cold restore (the runner currently tests game save/reload only);
+  - forced opportunistic replacement and failed partial merge, and `work-options` /
+    isolated patch-cost measurements. All are listed as unimplemented in run receipts.
+
+  The opportunistic-replacement and failed-partial-merge cases are observed from
+  events rather than forced; a run without such an event is not evidence for either case.
+  The quota-immutability check is not a counteroffer test.
 
 ## Out of scope
 

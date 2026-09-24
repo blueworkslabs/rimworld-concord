@@ -24,6 +24,7 @@ remain unchanged.
 | Build a campfire (20 wood) | yes | scripted game tests only |
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
+| Native tagged-zone haul spike | [partial scripted checks](docs/trials/NATIVE_HAUL_SMOKE.md); revised exclusive/meal roles awaiting runs | not run |
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not
 now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private
@@ -94,7 +95,7 @@ The mod needs Mono `mcs` and an owned RimWorld 1.6 installation. Reference assem
 are never committed.
 
 ```bash
-bash scripts/build-mod.sh /path/to/RimWorldLinux_Data/Managed   # -> mod/Assemblies/Concord.dll
+bash scripts/build-mod.sh /path/to/RimWorldLinux_Data/Managed /path/to/Mods/HarmonyMod/Current/Assemblies/0Harmony.dll   # -> mod/Assemblies/Concord.dll
 ```
 
 ## Running in the real game
