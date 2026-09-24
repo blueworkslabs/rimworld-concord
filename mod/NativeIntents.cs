@@ -22,6 +22,13 @@ namespace Concord {
         public int ordinaryUnattributed,ordinaryRemoved;
         public Dictionary<string,int> ordinaryByPawn=new Dictionary<string,int>();
         public Dictionary<int,int> tripBudget=new Dictionary<int,int>();
+        // Fable's rule: a haul already running toward the zone when the tag lands is
+        // pre-agreement work. Never credited, never counted against the quota, never trimmed.
+        public List<int> preTagJobs=new List<int>();
+        public Dictionary<string,int> preTagByPawn=new Dictionary<string,int>();
+        /** Who was already on the way at tag time, and with how much (carried, else the job's count). */
+        public Dictionary<int,string> preTagOf=new Dictionary<int,string>();public Dictionary<int,int> preTagPlanned=new Dictionary<int,int>();
+        public bool PreTag(Job job){return job!=null&&preTagJobs.Contains(job.loadID);}
         public ThingDef Def {get{return DefDatabase<ThingDef>.GetNamedSilentFail(thingDef);}}
         public bool Growing {get{return hold=="growing";}}
         public int Trip(Job job){int n;return job!=null&&tripBudget.TryGetValue(job.loadID,out n)?n:0;}
@@ -68,9 +75,17 @@ namespace Concord {
             Scribe_Values.Look(ref ordinaryUnattributed,"ordinaryUnattributed");Scribe_Values.Look(ref ordinaryRemoved,"ordinaryRemoved");
             Scribe_Collections.Look(ref ordinaryByPawn,"ordinaryByPawn",LookMode.Value,LookMode.Value);
             Scribe_Collections.Look(ref tripBudget,"tripBudget",LookMode.Value,LookMode.Value);
+            Scribe_Collections.Look(ref preTagJobs,"preTagJobs",LookMode.Value);
+            Scribe_Collections.Look(ref preTagByPawn,"preTagByPawn",LookMode.Value,LookMode.Value);
+            Scribe_Collections.Look(ref preTagOf,"preTagOf",LookMode.Value,LookMode.Value);
+            Scribe_Collections.Look(ref preTagPlanned,"preTagPlanned",LookMode.Value,LookMode.Value);
             if(Scribe.mode==LoadSaveMode.PostLoadInit) {
                 if(ordinaryByPawn==null)ordinaryByPawn=new Dictionary<string,int>();
                 if(tripBudget==null)tripBudget=new Dictionary<int,int>();
+                if(preTagJobs==null)preTagJobs=new List<int>();
+                if(preTagByPawn==null)preTagByPawn=new Dictionary<string,int>();
+                if(preTagOf==null)preTagOf=new Dictionary<int,string>();
+                if(preTagPlanned==null)preTagPlanned=new Dictionary<int,int>();
                 if(accepted==null)accepted=new List<string>();
                 if(excluded==null)excluded=new List<string>();
                 if(excludedTicks==null)excludedTicks=new List<int>();
@@ -98,14 +113,24 @@ namespace Concord {
         public string intentId,thingDef,variant,status;
         public int zoneId,quota,delivered,reserved,remaining,overshoot,incidental,unattributed,removed;
         public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick,peakHolders;
-        public string hold,label,zoneLabel,siteId,stopReason,thingLabel;public bool archiveOpen;public int ordinaryUnattributed,ordinaryRemoved;
+        public string hold,label,zoneLabel,siteId,stopReason,thingLabel;public bool archiveOpen;public int ordinaryUnattributed,ordinaryRemoved,mapId;
         public string[] accepted,excluded;
     }
 
     /** B6: in-game clock beside ticks ("Day 3, 14h (t2552)"), from the map's longitude. */
     public static class Clock {
-        public static string At(int tick,Map map=null) {
-            map=map??Find.CurrentMap;
+        /** The map an entry's event happened on: its intent's map, else the named pawn's map.
+         * Unknown provenance is never guessed from the viewed map. */
+        public static Map ForEntry(string subject,string actor,string recipient) {
+            var s=IntentState.Get();var i=s==null||subject==null?null:s.ById(subject);
+            if(i!=null) return Find.Maps.FirstOrDefault(m=>m.uniqueID==i.mapId);
+            foreach(var name in new[]{actor,recipient}) {
+                if(String.IsNullOrEmpty(name)) continue;
+                foreach(var m in Find.Maps){var p=m.mapPawns.FreeColonists.FirstOrDefault(x=>x.LabelShort==name);if(p!=null) return p.MapHeld;}
+            }
+            return null;
+        }
+        public static string At(int tick,Map map) {
             if(map==null) return "t"+tick;
             var ll=Find.WorldGrid.LongLatOf(map.Tile);
             int hour=GenDate.HourOfDay(GenDate.TickGameToAbs(tick),ll.x);
@@ -215,7 +240,7 @@ namespace Concord {
         }
         public void Release(Job job) {
             if(job==null) return;
-            foreach(var i in intents){i.reserved.Remove(job.loadID);i.reservedBy.Remove(job.loadID);i.tripBudget.Remove(job.loadID);}
+            foreach(var i in intents){i.reserved.Remove(job.loadID);i.reservedBy.Remove(job.loadID);i.tripBudget.Remove(job.loadID);i.preTagJobs.Remove(job.loadID);}
         }
         public void ReleaseObsolete(Pawn p) {
             var id=p.GetUniqueLoadID();var cur=p.CurJob==null?-1:p.CurJob.loadID;
@@ -245,6 +270,12 @@ namespace Concord {
                 return;
             }
             i.arrivalsSinceCount+=n;
+            if(participation!=null&&i.PreTag(participation)) {
+                int b0;i.preTagByPawn.TryGetValue(pid,out b0);i.preTagByPawn[pid]=b0+n;
+                Record(i,new IntentDrop {kind="pretag",pawn=pid,count=n,job=participation.loadID,source=source});
+                Emit(p,"intent-pretag","intent="+i.intentId+";job="+participation.loadID+";count="+n);
+                return;
+            }
             if(participation==null) {
                 i.incidental+=n;
                 Record(i,new IntentDrop {kind="incidental",pawn=pid,count=n,source=source});
@@ -421,6 +452,17 @@ namespace Concord {
             i.accepted.Add(r.actor);
             if(pending==null)intents.Add(i);
             i.zoneCount=Count(i);
+            // Hauls already running toward this (zone, def) are pre-agreement work, marked now.
+            foreach(var other in map.mapPawns.AllPawnsSpawned) {
+                var job=other.CurJob;
+                if(!IntentHooks.TaggedHaul(job)||!job.targetB.Cell.IsValid||map.zoneManager.ZoneAt(job.targetB.Cell)!=zone) continue;
+                if(IntentHooks.HaulDef(other,job)!=def) continue;
+                if(i.preTagJobs.Contains(job.loadID)) continue;
+                var cargo=other.carryTracker.CarriedThing;var src=job.targetA.Thing;
+                int planned=cargo!=null&&cargo.def==def?cargo.stackCount:Math.Max(0,Math.Min(job.count,src==null?0:src.stackCount));
+                i.preTagJobs.Add(job.loadID);i.preTagOf[job.loadID]=other.GetUniqueLoadID();i.preTagPlanned[job.loadID]=planned;
+                Emit(other,"intent-pretag-marked","intent="+i.intentId+";job="+job.loadID+";carried="+(cargo==null?0:cargo.stackCount)+";planned="+planned);
+            }
             Present(i,zone);
             Emit(p,"intent-opened","intent="+i.intentId+";zone="+zone.ID+";cells="+zone.cells.Count+";quota="+i.quota+";variant="+i.variant+";hold="+i.hold+";def="+i.thingDef);
             return i;
@@ -449,10 +491,17 @@ namespace Concord {
                 delivered=i.credited,reserved=i.Reserved,remaining=i.Remaining,overshoot=i.overshoot,incidental=i.incidental,
                 unattributed=i.unattributed,removed=i.removed,violations=i.violations,rejectedStarts=i.rejectedStarts,
                 finishedAfterExclusion=i.finishedAfterExclusion,createdTick=i.createdTick,untilTick=i.untilTick,lastDeliveryTick=i.lastDeliveryTick,peakHolders=i.peakHolders,
-                thingLabel=i.Def==null?i.thingDef:i.Def.label,hold=i.hold,label=i.label,zoneLabel=ZoneOf(i)==null?null:ZoneOf(i).label,siteId=i.siteId,stopReason=i.stopReason,archiveOpen=i.archiveOpen,
+                mapId=i.mapId,thingLabel=i.Def==null?i.thingDef:i.Def.label,hold=i.hold,label=i.label,zoneLabel=ZoneOf(i)==null?null:ZoneOf(i).label,siteId=i.siteId,stopReason=i.stopReason,archiveOpen=i.archiveOpen,
                 ordinaryUnattributed=i.ordinaryUnattributed,ordinaryRemoved=i.ordinaryRemoved,
                 accepted=i.accepted.ToArray(),excluded=i.excluded.ToArray()
-            }).TrimEnd('}')+",\"ordinaryByPawn\":["+
+            }).TrimEnd('}')+",\"jobs\":["+
+                // Per-job evidence: hold, durable trip budget and pre-tag mark for every job this intent tracks.
+                String.Join(",",i.reserved.Keys.Concat(i.tripBudget.Keys).Concat(i.preTagJobs).Distinct().Select(j=>{int h,t,pl;string by;i.reserved.TryGetValue(j,out h);i.tripBudget.TryGetValue(j,out t);i.preTagPlanned.TryGetValue(j,out pl);
+                    if(!i.reservedBy.TryGetValue(j,out by))i.preTagOf.TryGetValue(j,out by);
+                    return "{\"job\":"+j+",\"pawn\":\""+(by??"")+"\",\"hold\":"+h+",\"trip\":"+t+",\"preTag\":"+(i.preTagJobs.Contains(j)?"true":"false")+",\"planned\":"+pl+"}";}).ToArray())+
+                "],\"preTagAtStart\":["+String.Join(",",i.preTagOf.Select(kv=>{int pl;i.preTagPlanned.TryGetValue(kv.Key,out pl);return "{\"job\":"+kv.Key+",\"pawn\":\""+kv.Value+"\",\"planned\":"+pl+"}";}).ToArray())+
+                "],\"preTagByPawn\":["+String.Join(",",i.preTagByPawn.Select(kv=>JsonUtility.ToJson(new PawnCredit {pawn=kv.Key,count=kv.Value})).ToArray())+
+                "],\"ordinaryByPawn\":["+
                 String.Join(",",i.ordinaryByPawn.Select(kv=>JsonUtility.ToJson(new PawnCredit {pawn=kv.Key,count=kv.Value})).ToArray())+"],\"byPawn\":["+
                 String.Join(",",i.byPawn.Select(kv=>JsonUtility.ToJson(new PawnCredit {pawn=kv.Key,count=kv.Value})).ToArray())+
                 "],\"drops\":["+String.Join(",",i.drops.Select(d=>JsonUtility.ToJson(d)).ToArray())+"]}").ToArray())+"]";
@@ -505,6 +554,14 @@ namespace Concord {
                 if(r.count<0||r.count>4) throw new Exception("Priority must be 0-4");
                 p.workSettings.SetPriority(WorkTypeDefOf.Hauling,r.count);
                 return "{\"hauling\":"+p.workSettings.GetPriority(WorkTypeDefOf.Hauling)+"}";
+            }
+            if(r.op=="lab-zone-count") {
+                // Evidence for untagged items: how many of a def a stockpile holds right now.
+                var zmap=Find.CurrentMap;var zz=zmap.zoneManager.AllZones.FirstOrDefault(z=>z.ID==r.zoneId) as Zone_Stockpile;
+                var zdef=DefDatabase<ThingDef>.GetNamedSilentFail(r.thing);
+                if(zz==null||zdef==null) throw new Exception("Unknown stockpile or def");
+                int zn=0;foreach(var c in zz.cells)foreach(var t in c.GetThingList(zmap))if(t.def==zdef)zn+=t.stackCount;
+                return "{\"count\":"+zn+"}";
             }
             if(r.op=="lab-interrupt") {
                 // Forced cancellation of the pawn's current job (cleanup drops are incidental).

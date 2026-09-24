@@ -822,13 +822,13 @@ export class Coordinator {
     if(p.replacesAgreementId&&result.kind==='accept'&&replacedNative?.action.kind==='haul-zone'){
       // B7: durable four-step handover. Consent first; the dispatch id exists before any send;
       // the rescue goes only after the game confirms exclusion and empty hands.
+      // The pending rescue is a running standing with no step yet: owned by the pawn once the
+      // old agreement is stopped, visible to conflict checks and withdrawable like any other.
       p.decision=result;p.status='accepted';
-      p.standing={status:'stopped',deadline:this.observedTick+(p.action.kind==='move'?0:p.action.maxTicks),steps:[],reason:'Replacement handover pending'};
+      p.standing={status:'running',deadline:this.observedTick+(p.action.kind==='move'?0:p.action.maxTicks),steps:[],reason:'Replacement handover pending'};
       if(p.requestId)this.domain.requests![p.requestId]!.status='closed';
       (this.domain.handovers??={})[p.id]={proposalId:p.id,oldId:replacedNative.id,pawn:p.pawn,intentId:replacedNative.action.intentId,step:'excluding',deadline:p.standing.deadline,dispatchId:randomUUID()};
       this.commit('replacement-consented',p.pawn,p);this.commit('handover-started',p.pawn,this.domain.handovers[p.id]);
-      try{await this.withdraw(p.pawn,('Accepted replacement: '+result.reason).slice(0,1000));}
-      catch(error){this.commit('handover-uncertain',p.pawn,{proposal:p.id,error:String(error).slice(0,200)});}
       await this.advanceHandovers(await this.current());
       return;
     }
@@ -871,8 +871,18 @@ export class Coordinator {
   private async advanceHandovers(game:GameState){
     for(const h of Object.values(this.domain.handovers??{})){
       if(h.step==='dispatched'||h.step==='stopped')continue;
-      const p=this.domain.proposals[h.proposalId]!;
-      const stop=(reason:string)=>{h.step='stopped';h.reason=reason;p.standing={...p.standing!,status:'stopped',reason};this.commit('handover-stopped',h.pawn,h);};
+      const p=this.domain.proposals[h.proposalId]!,c=this.domain.characters[h.pawn]!;
+      const stop=(reason:string)=>{
+        h.step='stopped';h.reason=reason;
+        if(p.standing?.status==='running'){p.standing={...p.standing,status:'stopped',reason};if(c.intention===p.id)delete c.intention;}
+        this.commit('handover-stopped',h.pawn,h);
+      };
+      if(this.claimHandover(h,p,c)){
+        // Also after a restart between consent and withdrawal: the old agreement is stopped here.
+        try{await this.flushIntentExclusions();}catch(error){this.commit('handover-uncertain',h.pawn,{proposal:p.id,error:String(error).slice(0,200)});}
+      }
+      if(p.standing?.status!=='running'){stop(p.standing?.reason??'Replacement withdrawn');continue;}
+      if(c.intention!==p.id){stop('Pawn no longer holds the replacement');continue;}
       if(game.ticks>=h.deadline){stop('handover timed out');continue;}
       if(h.step==='excluding'){
         let live=this.liveIntent(game,h.intentId);
@@ -889,11 +899,38 @@ export class Coordinator {
         if(!own||own.carrying===undefined||own.carrying!==''||own.job==='HaulToCell')continue;
         const invalid=rescueQuestionInvalid(game,{...p,status:'pending'});
         if(invalid){stop(invalid);continue;}
+        // Ownership is revalidated after every await above, immediately before dispatch.
+        if(p.standing?.status!=='running'||c.intention!==p.id||c.commitment){stop('Pawn no longer holds the replacement');continue;}
         p.actionId=h.dispatchId;p.standing={status:'running',deadline:h.deadline,steps:[h.dispatchId]};
         this.domain.characters[p.pawn]!.commitment=p.actionId;this.domain.characters[p.pawn]!.intention=p.id;
         h.step='dispatched';this.commit('handover-dispatching',h.pawn,h);
         try{await this.dispatch(p);}catch(error){this.commit('handover-dispatch-uncertain',h.pawn,{proposal:p.id,error:String(error).slice(0,200)});}
       }
+    }
+  }
+  /** Stops the replaced agreement if it still runs (idempotent; covers a restart between
+   * consent and withdrawal) and gives the pending rescue to the pawn. True when exclusions
+   * were queued by this call. */
+  private claimHandover(h:{oldId:string;pawn:string;proposalId:string},p:Proposal,c:{intention?:string;memories:string[]}){
+    const old=this.domain.proposals[h.oldId];let queued=false;
+    if(old?.standing?.status==='running'&&old.action.kind==='haul-zone'){
+      const reason=('Accepted replacement: '+(p.decision?.reason??'')).slice(0,1000);
+      old.standing.status='stopped';old.standing.reason=reason;if(c.intention===old.id)delete c.intention;
+      c.memories.push(`Stopped ${old.action.kind}: ${reason}`);
+      this.queueIntentExclusion(old.action.intentId,h.pawn,'withdraw');queued=true;
+      this.commit('intention-stopped',h.pawn,{proposal:old.id,reason});
+    }
+    if(p.standing?.status==='running'&&c.intention===undefined){c.intention=p.id;this.commit('handover-owned',h.pawn,{proposal:p.id});}
+    return queued;
+  }
+  /** Deadline processing independent of the game's transport: used when exclusion flushing fails. */
+  private expireHandovers(ticks:number){
+    for(const h of Object.values(this.domain.handovers??{})){
+      if(h.step==='dispatched'||h.step==='stopped'||ticks<h.deadline)continue;
+      const p=this.domain.proposals[h.proposalId]!,c=this.domain.characters[h.pawn]!;
+      h.step='stopped';h.reason='handover timed out';
+      if(p.standing?.status==='running'){p.standing={...p.standing,status:'stopped',reason:h.reason};if(c.intention===p.id)delete c.intention;}
+      this.commit('handover-stopped',h.pawn,h);
     }
   }
   private liveIntent(game:GameState,intentId:string):IntentView|undefined{
@@ -978,7 +1015,8 @@ export class Coordinator {
       this.commit('intent-progress','Game',{intentId:v.intentId,status:v.status,previousStatus:old?.status,previousDelivered:old?.delivered??0,
         previousFinishedAfterExclusion:old?.finishedAfterExclusion??0,finishedAfterExclusion:v.finishedAfterExclusion,...intentProgress(v),
         thingLabel:v.thingLabel??entry?.thingLabel??v.thingDef,label:entry?.label??v.label??'stockpile',asked,stopReason:v.stopReason??null,
-        ordinaryByPawn:Object.fromEntries((v.ordinaryByPawn??[]).map(p=>[p.pawn,p.count])),ordinaryUnattributed:v.ordinaryUnattributed??0});
+        ordinaryByPawn:Object.fromEntries((v.ordinaryByPawn??[]).map(p=>[p.pawn,p.count])),ordinaryUnattributed:v.ordinaryUnattributed??0,
+        preTagAtStart:(v.preTagAtStart??[]).map(j=>({pawn:j.pawn,planned:j.planned})),preTagByPawn:Object.fromEntries((v.preTagByPawn??[]).map(p=>[p.pawn,p.count]))});
       }
       if(v.status==='open'||v.status==='pending')continue;
       // Unanswered offers of a closed intent lapse; an answer already being thought over is
@@ -1034,7 +1072,9 @@ export class Coordinator {
   async reconcile() {
     return this.serial(async()=>{
       let game=await this.current();
-      if(Object.keys(this.domain.pendingIntentExclusions??{}).length)await this.flushIntentExclusions();
+      if(Object.keys(this.domain.pendingIntentExclusions??{}).length){
+        try{await this.flushIntentExclusions();}catch(error){this.expireHandovers(game.ticks);throw error;}
+      }
       if(this.domain.pendingIntentAcceptances?.length)await this.flushIntentAcceptances();
       game=await this.current();
       this.ingest(game);

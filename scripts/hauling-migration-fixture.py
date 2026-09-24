@@ -7,7 +7,10 @@ layout manifest:
   {"stacks":[{"def":"WoodLog","x":..,"z":..,"count":..},...],
    "zone":{"id":950,"label":"north wall pile","x":..,"z":..,"w":..,"h":..,
            "allow":["WoodLog","ComponentIndustrial","Steel"]},
-   "site":{"id":"east-site","label":"east shed","x":..,"z":..,"w":..,"h":..}}
+   "site":{"id":"east-site","label":"east shed","x":..,"z":..,"w":..,"h":..},
+   "matched":[{"def":"WoodLog","quota":30},{"def":"ComponentIndustrial","quota":..}]}
+`matched` freezes the B8 pair: one wood quota and one small-stack-def quota, each ≤75 and
+covered by the manifest's loose stacks of that def; both halves run with exactly these.
 The zone is the "existing colony stockpile" the core may tag per def (mixed, several
 allowed defs); the site is an operator-declared candidate site (data, not a zone).
 Every stockpile that could accept one of the fixture's defs is removed first, and every
@@ -24,6 +27,11 @@ zoneSpec,site,stacks=layout['zone'],layout.get('site'),layout['stacks']
 defs=sorted({s['def'] for s in stacks}|set(zoneSpec['allow']))
 assert 1<=zoneSpec['w']*zoneSpec['h']<=64 and (site is None or 1<=site['w']*site['h']<=64)
 assert all(1<=s['count'] for s in stacks)
+matched=layout.get('matched',[])
+for x in matched:
+    assert x['def'] in zoneSpec['allow'] and 1<=x['quota']<=75,'matched quota outside the frozen bounds'
+    assert x['quota']<=sum(s['count'] for s in stacks if s['def']==x['def']),'matched quota exceeds the loose stock of '+x['def']
+assert not matched or ('WoodLog' in {x['def'] for x in matched} and len({x['def'] for x in matched})>=2),'matched pair needs wood and a small-stack def'
 
 r=E.parse(src);m=r.find('.//maps/li');assert m is not None
 things=m.find('things');pawns=[p for p in things if p.findtext('def')=='Human'];assert len(pawns)==3
@@ -84,5 +92,5 @@ pairs=[(a['id'],b['id']) for i,a in enumerate(made) for b in made[i+1:]
        if a['def']==b['def'] and (a['x']-b['x'])**2+(a['z']-b['z'])**2<=64]
 with open(dst,'xb') as out:r.write(out,encoding='utf-8',xml_declaration=True)
 print(json.dumps({'fixture':'hauling-migration-v1','stacks':made,'zone':zoneSpec,'site':site,'removedStockpiles':removedZones,
-    'duplicatePairs':pairs,'priorities':priorities,'nativeSelfCare':True,
+    'duplicatePairs':pairs,'matched':matched,'priorities':priorities,'nativeSelfCare':True,
     'note':'Freeze defs, quantities, positions, quotas and observation budgets before any run; Astra confirms trip counts in a dry run'}))

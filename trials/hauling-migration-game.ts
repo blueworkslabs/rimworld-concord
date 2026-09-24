@@ -21,8 +21,10 @@ const deadline=Date.now()+2400000;
 let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
 const runId=randomUUID();
-const receipt:{runId:string;hold:string;unimplemented:string[];fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
+const receipt:{runId:string;hold:string;unimplemented:string[];needsRecordedEvidence:string[];fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
   {runId,hold,unimplemented:['full-load retarget with insufficient destination quota','pending-extra retarget','re-target between two tagged zones','nested reserve failure and job recycling inside the duplicate check (observed only)'],
+   // Game cases this runner cannot observe: recorded by the operator, never counted as passed here.
+   needsRecordedEvidence:['rescue handover in the game (consent, exclusion, drained cargo, one dispatch)','crew-log clock per event map and the Show button','zone label/colour on screen while open and after retirement'],
    passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 let safetyStopped=false,checking=false;
@@ -50,6 +52,9 @@ async function run(until:()=>boolean,ms:number,tick?:()=>Promise<void>){
   finally{await b.admin('pause');await poll();}
 }
 const kinds=(k:string,who?:string)=>events.filter(e=>e.kind===k&&(!who||e.pawn===who));
+/** One field of a native event detail (`a=1;b=2`). */
+const field=(e:{detail:string}|undefined,k:string)=>e?new RegExp('(?:^|;)'+k+'=([^;]*)').exec(e.detail)?.[1]:undefined;
+const jobOf=(id:string,job:number)=>view(id)?.jobs?.find(j=>j.job===job);
 async function scenario(name:string,base:string,body:(c:Case)=>Promise<void>){
   if(safetyStopped||(only&&only!==name))return;
   const c:Case={name,passed:false,findings:[],data:{}};receipt.cases.push(c);const gapsBefore=receipt.eventGaps;
@@ -110,23 +115,32 @@ try{
     const id=randomUUID();await accept(id,P,{quota:30});
     const admitted=()=>kinds('intent-admitted-start',P).find(e=>e.detail.includes(';source=Thing_'+small.id)||e.detail.includes(';source='+small.id));
     if(!await run(()=>!!admitted(),120000)){c.findings.push('precondition: no tagged trip from the prepared 10-stack');return;}
-    if((pawn('Pedro').carryingCount??0)>0){c.findings.push('precondition: pickup occurred before source mutation');return;}
-    const hold0=Number(/;reserved=(\d+)/.exec(admitted()!.detail)?.[1]);c.data.initialHold=hold0;
+    const job=Number(field(admitted(),'job'));const pickups=()=>kinds('intent-pickup',P).filter(e=>Number(field(e,'job'))===job);
+    if(pickups().length||(pawn('Pedro').carryingCount??0)>0){c.findings.push('precondition: pickup occurred before source mutation');return;}
+    const hold0=Number(field(admitted(),'reserved'));c.data.initialHold=hold0;c.data.job=job;
     await op({op:'lab-stack-set',intentId:id,thing:admitted()!.detail.split(';source=')[1],count:to});
-    await run(()=>(pawn('Pedro').carryingCount??0)>0||done(id)(),60000);
-    const carried=pawn('Pedro').carryingCount??0;c.data.firstPickup=carried;
-    expect(c,carried>0&&carried<=hold0,`first pickup ${carried} exceeded the initial hold ${hold0}`);
+    await run(()=>pickups().length>0||done(id)(),60000);
+    // The guarded first pickup of this job, from its own receipt (later growth is legitimate).
+    const first=pickups()[0];c.data.firstPickup=first?.detail;
+    const acquired=Number(field(first,'acquired')),cap=Number(field(first,'cap'));
+    expect(c,!!first,'no pickup receipt for the admitted job');
+    expect(c,acquired>0&&acquired<=hold0&&acquired<=cap,`first pickup ${acquired} (cap ${cap}) exceeded the initial hold ${hold0}`);
+    if(to<hold0)expect(c,acquired<=to,`first pickup ${acquired} exceeded the shrunken source ${to}`);
     await run(done(id),240000);invariants(c,id);
   });
   await scenario('withdraw-after-duplicate-selection',base,async c=>{
     // Exclude while carrying: the carried trip may finish, but nothing more is collected.
     const id=randomUUID();await accept(id,P,{quota:30});
-    if(!await run(()=>pawn('Pedro').job==='HaulToCell'&&(pawn('Pedro').carryingCount??0)>0,120000)){c.findings.push('precondition: Pedro never carried on a tagged trip');return;}
-    c.findings.push('coverage gap: carrying alone does not prove a duplicate was selected; needs a selection receipt');
+    // The duplicate guard's receipt is the selection proof: the game jumped to a second stack.
+    const selected=()=>kinds('intent-duplicate-admitted',P)[0];
+    if(!await run(()=>!!selected(),120000)){c.findings.push('precondition: no duplicate selection receipt (geometry)');return;}
+    const job=Number(field(selected(),'job'));c.data.selection=selected()!.detail;
     const exclusionTick=state.ticks;
     const atExclusion=pawn('Pedro').carryingCount??0;await exclude(id,P,'withdraw');
     await run(()=>pawn('Pedro').job!=='HaulToCell',60000);
     const v=invariants(c,id);if(!v)return;
+    const later=kinds('intent-pickup',P).filter(e=>Number(field(e,'job'))===job&&e.tick>=exclusionTick&&Number(field(e,'acquired'))>0);
+    expect(c,later.length===0,`the selected duplicate was still collected after withdrawal: ${later.map(e=>e.detail).join(' | ')}`);
     const after=v.drops.filter(d=>d.kind==='participation'&&d.pawn===P&&d.tick>exclusionTick);
     expect(c,after.length>0&&after.every(d=>d.startedBeforeExclusion),'participation after withdrawal not flagged');
     expect(c,after.reduce((n,d)=>n+d.count,0)<=atExclusion,`gathered more after withdrawal: ${after.reduce((n,d)=>n+d.count,0)} > ${atExclusion}`);
@@ -151,27 +165,58 @@ try{
   });
   await scenario('save-load-mid-growth',base,async c=>{
     const id=randomUUID();await accept(id,P,{quota:30});
-    c.findings.push('coverage gap: aggregate reservations do not prove this job has pending growth; per-job hold and budget evidence required');
-    // Mid-growth: the hold covers more than the cargo (an admitted extra is pending).
-    const growing=()=>{const v=view(id);return !!v&&v.status==='open'&&v.reserved>(pawn('Pedro').carryingCount??0)&&(pawn('Pedro').carryingCount??0)>0;};
+    // Mid-growth, per job: Pedro's own job holds more than he carries (an admitted extra is pending).
+    const mine=()=>view(id)?.jobs?.find(j=>j.pawn===P&&!j.preTag);
+    const growing=()=>{const j=mine(),carried=pawn('Pedro').carryingCount??0;return view(id)?.status==='open'&&!!j&&carried>0&&j.hold>carried;};
     const reached=await run(growing,120000);c.data.midGrowthReached=reached;
-    if(!reached&&hold==='growing')c.findings.push('precondition: no pending extra observed (geometry)');
-    const before=view(id)!,name='lab-concord-hm-mid-'+Date.now();await b.save(name);c.data.eventsBeforeLoad=[...events];events=[];lastSeq=0;await b.load(name);await b.admin('pause');await poll();
-    const after=view(id);expect(c,!!after&&after.delivered===before.delivered&&after.quota===before.quota&&after.reserved===before.reserved,'intent changed across save/load');
+    if(!reached&&hold==='growing'){c.findings.push('precondition: no pending extra observed for this job (geometry)');return;}
+    const before=view(id)!,job=mine(),name='lab-concord-hm-mid-'+Date.now();c.data.jobBefore=job;
+    await b.save(name);c.data.eventsBeforeLoad=[...events];events=[];lastSeq=0;await b.load(name);await b.admin('pause');await poll();
+    const after=view(id),jobAfter=job?jobOf(id,job.job):undefined;c.data.jobAfter=jobAfter;
+    expect(c,!!after&&after.delivered===before.delivered&&after.quota===before.quota&&after.reserved===before.reserved,'intent changed across save/load');
+    if(job)expect(c,!!jobAfter&&jobAfter.hold===job.hold&&jobAfter.trip===job.trip&&jobAfter.pawn===job.pawn,`job ${job.job} hold/budget changed across save/load: ${JSON.stringify(job)} -> ${JSON.stringify(jobAfter)}`);
     await run(done(id),240000);invariants(c,id);
   });
 
   // --- B3: (map, zone, def): independent balances; a refusing pawn stores a third def freely.
   await scenario('mixed-zone-independent',base,async c=>{
     const w=randomUUID(),k=randomUUID();
+    const third=m.zone.allow.find((d:string)=>d!=='WoodLog'&&d!=='ComponentIndustrial');
+    if(!third||!stacks(third).length){c.findings.push('precondition: the manifest needs loose stacks of a third allowed def');return;}
+    const count=async(def:string)=>Number((await op({op:'lab-zone-count',zoneId,thing:def})).count);
+    const thirdBefore=await count(third);
     await accept(w,P,{quota:20});await accept(k,B,{thing:'ComponentIndustrial',quota:10});await exclude(w,B,'refuse');
-    await run(()=>done(w)()&&done(k)(),360000);
+    // Beatrice's own untagged trips of the third def, ended normally.
+    const thirdJobs=()=>kinds('job-start',B).filter(e=>field(e,'def')===third&&!field(e,'intent')).map(e=>Number(field(e,'job')));
+    const thirdDone=()=>thirdJobs().some(j=>kinds('job-end',B).some(e=>Number(field(e,'job'))===j&&/Succeeded/.test(e.detail)));
+    await run(()=>done(w)()&&done(k)()&&thirdDone(),360000);
     const vw=invariants(c,w),vk=invariants(c,k);if(!vw||!vk)return;
     expect(c,vw.status==='met'&&vw.delivered===20&&vk.status==='met'&&vk.delivered===10,'both item quotas must complete');
-    c.findings.push('coverage gap: no actor-specific receipt proves the wood refuser stored an unrelated third def');
+    const thirdAfter=await count(third);c.data.third={def:third,before:thirdBefore,after:thirdAfter,jobs:thirdJobs()};
+    expect(c,thirdDone()&&thirdAfter>thirdBefore,`the wood refuser did not store ${third}: jobs ${thirdJobs().join(',')}, zone ${thirdBefore} -> ${thirdAfter}`);
     expect(c,vw.byPawn.every(p=>p.pawn!==B),'refusing pawn credited on wood');
     expect(c,vk.drops.every(d=>d.kind!=='incidental'||d.source!=='haul'),'component intent recorded wood or steel');
     const zoneStock=(state.stockpiles??[]).find(z=>z.zoneId===zoneId);c.data.zone=zoneStock;
+  });
+
+  // --- Fable's pre-tag rule: a haul already running toward the pile when the tag lands is
+  // pre-agreement work: never credited, never counted against the quota, never trimmed.
+  await scenario('pretag-running-haul',base,async c=>{
+    // Ordinary hauling into the mixed pile runs untagged first; tag when Beatrice carries wood toward it.
+    const onWay=()=>{const e=kinds('job-start',B).filter(e=>field(e,'def')==='WoodLog'&&!field(e,'intent')).pop();
+      return !!e&&pawn('Beatrice').job==='HaulToCell'&&(pawn('Beatrice').carryingCount??0)>0?Number(field(e,'job')):undefined;};
+    if(!await run(()=>onWay()!==undefined,120000)){c.findings.push('precondition: no ordinary wood trip under way before tagging');return;}
+    const job=onWay()!,carried=pawn('Beatrice').carryingCount??0,id=randomUUID();
+    await accept(id,P,{quota:10});
+    const marked=kinds('intent-pretag-marked',B).find(e=>Number(field(e,'job'))===job);c.data.marked=marked?.detail;
+    if(!marked){c.findings.push(`precondition: Beatrice's trip ${job} was not heading into the pile at tag time`);return;}
+    await run(()=>done(id)()&&!(view(id)?.jobs??[]).some(j=>j.preTag),240000);
+    const v=invariants(c,id);if(!v)return;
+    const before=(v.preTagByPawn??[]).find(p=>p.pawn===B)?.count??0;c.data.before=before;c.data.carriedAtTag=carried;
+    expect(c,before===carried,`pre-tag placement ${before} differs from the ${carried} carried at tag time (trimmed or lost)`);
+    expect(c,!v.byPawn.some(p=>p.pawn===B)&&v.drops.every(d=>d.job!==job||d.kind==='pretag'),'pre-tag work was credited');
+    expect(c,v.status==='met'&&v.delivered===10&&v.overshoot===0,`quota after pre-tag work: ${v.delivered} ${v.status}, overshoot ${v.overshoot}`);
+    expect(c,(v.preTagAtStart??[]).some(j=>j.job===job&&j.pawn===B),'pre-tag job not reported at acceptance');
   });
 
   // --- B4: after retirement, placements are ordinary work; credit never changes.
@@ -217,38 +262,49 @@ try{
     }finally{s.close();}
   });
 
-  // --- B8 matched pair: the ordered model on the same save and stockpile, native Hauling off
-  // (as the ordered model always ran), the scripted core offering every grounded wood haul.
-  await scenario('matched-ordered',base,async c=>{
-    const s=new Store(root+`/.runtime/hauling-migration-ordered-${runId}.db`),co=new Coordinator(s,b);
-    try{
-      await co.open();await co.initializeCore('Scripted core for the ordered baseline; every answer is authored.');
-      for(const p of state.pawns)await op({op:'lab-work-priority',actor:p.id,count:0});
-      const z=(state.stockpiles??[]).find(x=>x.zoneId===zoneId)!,start=state.ticks;let offers=0;
-      const inZone=(x:number,zz:number)=>x>=z.x&&x<z.x+z.w&&zz>=z.z&&zz<z.z+z.h;
-      const delivered=()=>Object.values(co.inspect().outcomes).filter(r=>r.kind==='haul'&&r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0);
-      await run(()=>delivered()>=30,300000,async()=>{
-        await co.reconcile();await co.advanceIntentions();const d=co.inspect();
-        for(const who of [P,B]){
-          if(Object.values(d.proposals).some(p=>p.pawn===who&&(p.status==='pending'||p.standing?.status==='running'))||d.characters[who]?.commitment)continue;
-          const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===who&&o.action.kind==='haul'&&/WoodLog/.test(o.action.thing)&&inZone(o.action.x,o.action.z));
-          if(!o)continue;const p=await co.core().propose(who,o.action,'Scripted ordered offer');offers++;
-          await co.pawn(who).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
-        }
-      });
-      expect(c,offers>0&&delivered()>=30,`ordered baseline delivered ${delivered()} from ${offers} offers; not a passing comparison`);
-      const trips=Object.values(co.inspect().outcomes).filter(r=>r.kind==='haul').length;
-      c.data.matched={model:'ordered',delivered:delivered(),trips,offers,ticks:state.ticks-start,ticksPerUnit:delivered()?(state.ticks-start)/delivered():null,estimatedCoreTurnsIfLive:offers};
-    }finally{s.close();}
-  });
-  // --- B8 native half.
-  await scenario('matched-native',base,async c=>{
-    const id=randomUUID(),start=state.ticks;await accept(id,P,{quota:30});await accept(id,B,{quota:30});await run(done(id),300000);
-    const v=invariants(c,id);if(!v)return;
-    expect(c,v.status==='met'&&v.delivered===30,'native baseline did not complete 30 units');
-    const trips=new Set(v.drops.filter(d=>d.kind==='participation').map(d=>d.job)).size;
-    c.data.matched={hold,delivered:v.delivered,trips,ticks:state.ticks-start,ticksPerUnit:v.delivered?(state.ticks-start)/v.delivered:null};
-  });
+  // --- B8 matched pair, per frozen def and quota (manifest `matched`): the ordered model on the
+  // same save and stockpile, native Hauling off (as the ordered model always ran), the scripted
+  // core offering every grounded haul of that def; then the native half with the same quota.
+  const matched:{def:string;quota:number}[]=m.matched??[];
+  if(!matched.some(x=>x.def==='WoodLog')||!matched.some(x=>x.def!=='WoodLog'))
+    await scenario('matched-precondition',base,async c=>{c.findings.push('precondition: the manifest must freeze a wood and a small-stack-def matched quota');});
+  for(const {def,quota} of matched){
+    await scenario('matched-ordered-'+def,base,async c=>{
+      const s=new Store(root+`/.runtime/hauling-migration-ordered-${def}-${runId}.db`),co=new Coordinator(s,b);
+      try{
+        await co.open();await co.initializeCore('Scripted core for the ordered baseline; every answer is authored.');
+        for(const p of state.pawns)await op({op:'lab-work-priority',actor:p.id,count:0});
+        const z=(state.stockpiles??[]).find(x=>x.zoneId===zoneId)!,start=state.ticks,ours=new Set<string>();let offers=0;
+        const inZone=(x:number,zz:number)=>x>=z.x&&x<z.x+z.w&&zz>=z.z&&zz<z.z+z.h;
+        const hauls=()=>Object.values(co.inspect().outcomes).filter(r=>r.kind==='haul'&&ours.has(r.id));
+        const delivered=()=>hauls().filter(r=>r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0);
+        await run(()=>delivered()>=quota,300000,async()=>{
+          await co.reconcile();await co.advanceIntentions();const d=co.inspect();
+          for(const who of [P,B]){
+            if(Object.values(d.proposals).some(p=>p.pawn===who&&(p.status==='pending'||p.standing?.status==='running'))||d.characters[who]?.commitment)continue;
+            const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===who&&o.action.kind==='haul'&&new RegExp(def).test(o.action.thing)&&inZone(o.action.x,o.action.z));
+            if(!o)continue;const p=await co.core().propose(who,o.action,'Scripted ordered offer');offers++;
+            await co.pawn(who).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+            const accepted=co.inspect().proposals[p.id];if(accepted?.actionId)ours.add(accepted.actionId);
+            for(const step of accepted?.standing?.steps??[])ours.add(step);
+          }
+          for(const p of Object.values(co.inspect().proposals))if(p.action.kind==='haul'&&new RegExp(def).test(p.action.thing))for(const step of p.standing?.steps??[])ours.add(step);
+        });
+        const units=delivered(),trips=hauls().length;
+        expect(c,offers>0&&units>=quota,`ordered baseline delivered ${units} of ${quota} ${def} from ${offers} offers; not a passing comparison`);
+        // Exact quantities: a whole-stack ordered trip may carry past the quota; that part is labelled, not matched.
+        c.data.matched={model:'ordered',def,quota,delivered:units,unmatchedUnits:Math.max(0,units-quota),trips,offers,ticks:state.ticks-start,ticksPerUnit:units?(state.ticks-start)/units:null,estimatedCoreTurnsIfLive:offers};
+      }finally{s.close();}
+    });
+    await scenario('matched-native-'+def,base,async c=>{
+      const id=randomUUID(),start=state.ticks;await accept(id,P,{thing:def,quota});await accept(id,B,{thing:def,quota});await run(done(id),300000);
+      const v=invariants(c,id);if(!v)return;
+      expect(c,v.status==='met'&&v.delivered===quota,`native baseline delivered ${v.delivered} of ${quota} ${def}`);
+      const perJob=new Map<number,number>();for(const d of v.drops.filter(d=>d.kind==='participation'))perJob.set(d.job,(perJob.get(d.job)??0)+d.count);
+      c.data.matched={model:'native',hold,def,quota,delivered:v.delivered,trips:perJob.size,unitsPerTrip:[...perJob.values()],ticks:state.ticks-start,ticksPerUnit:v.delivered?(state.ticks-start)/v.delivered:null};
+      if(def!=='WoodLog')expect(c,perJob.size>1,`small-stack def completed in ${perJob.size} trip(s); multiple trips not established`);
+    });
+  }
   receipt.passed=receipt.eventGaps===0&&receipt.cases.length>0&&receipt.cases.every(c=>c.passed);
 }catch(e){receipt.error=String(e);}
 finally{

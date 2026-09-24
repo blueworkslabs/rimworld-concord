@@ -504,6 +504,49 @@ starts here at round 0; Astra keeps it.
   - re-target between two tagged zones;
   - nested reserve failure and job recycling inside the duplicate check.
 
+### Review fixes (after Astra's #73 review; B1 rounds still 0/2)
+
+Fable ruled this a B2 boundary, not a B1 growing-hold fix.
+- **Hauls already on their way when the tag lands** (Fable's rule): when a stockpile is
+  tagged, every running haul whose target is in that zone and whose def matches is
+  marked `pre-tag` (saved with the intent). Those jobs are never credited, never counted
+  against the quota and never trimmed. Patches 1, 2, 9 and 10 leave them native, and a
+  retarget within the tagged zone keeps the mark. Their placements go into a "before"
+  bucket (`preTagByPawn`, drop kind `pretag`). The quota applies only to jobs admitted
+  after the tag, in both holds. Crew log, once, only when it applies: "Already on its way
+  when the agreement started: 30 wood (Pedro)." A new job after an interruption is a job
+  admitted after the tag.
+- **Rescue handover ownership:** the accepted rescue is a running standing with no step.
+  The pawn holds it as their intention once the old agreement is stopped, so it is
+  visible to conflict checks and can be withdrawn. Every handover pass stops the old
+  agreement first if it still runs, which covers a restart between consent and
+  withdrawal. The handover stops if the rescue is withdrawn or the pawn's intention
+  changes, and ownership is checked again right before dispatch. If exclusion flushing
+  fails, the handover deadline is still processed.
+- **Clock provenance:** crew-log entries convert ticks with the map of their intent,
+  otherwise with the map of the named pawn. When the map is unknown, only `tN` is shown,
+  never the viewed map. `IntentView.mapId` is exposed.
+- **Evidence:**
+  - `intent-pickup` receipts per pickup (job, cap, acquired, hold, trip);
+  - `intent-duplicate-admitted` when the duplicate check selected a second stack;
+  - per-job `jobs` (hold, trip budget, pre-tag mark) and `preTagAtStart` in the intent view;
+  - the haul def on `job-start`;
+  - the `lab-zone-count` op.
+
+  The runner uses these for:
+  - withdrawal after duplicate selection;
+  - this job's hold and budget across save/load;
+  - the refuser's third def (their own completed trips plus the zone count);
+  - exact first-pickup receipts under source mutation;
+  - a new `pretag-running-haul` case.
+
+  The matched pair now runs per frozen def and quota from the manifest's `matched`
+  (wood plus a small-stack def, native and ordered), with exact quantities and trip
+  counts. Units an ordered trip carries past the quota are labelled as unmatched. The
+  runner can't observe the in-game rescue handover, the UI clock and Show button, or
+  the on-screen label and colour. The receipt lists them under `needsRecordedEvidence`,
+  and they are never counted as passed.
+
 ## Gate C will measure
 
 **Signed condition: #71's fixes must be measured live in this migration.** Their

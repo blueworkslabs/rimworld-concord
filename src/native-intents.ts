@@ -4,7 +4,7 @@
 import { z } from 'zod';
 
 const Drop = z.object({seq:z.number().int(),tick:z.number().int(),count:z.number().int(),escape:z.number().int(),job:z.number().int(),
-  kind:z.enum(['participation','incidental','unattributed','removed']),pawn:z.string().optional().default(''),source:z.string().optional().default(''),
+  kind:z.enum(['participation','incidental','unattributed','removed','ordinary','pretag']),pawn:z.string().optional().default(''),source:z.string().optional().default(''),
   startedBeforeExclusion:z.boolean(),violation:z.boolean()});
 export const IntentView = z.object({
   intentId:z.string().min(1),thingDef:z.string().optional().default(''),variant:z.string().optional().default(''),
@@ -20,6 +20,13 @@ export const IntentView = z.object({
   siteId:z.string().nullable().optional(),stopReason:z.string().nullable().optional(),archiveOpen:z.boolean().optional(),
   ordinaryUnattributed:z.number().int().optional(),ordinaryRemoved:z.number().int().optional(),
   ordinaryByPawn:z.array(z.object({pawn:z.string(),count:z.number().int()})).optional(),
+  /** Event provenance: the intent's map (clock conversion uses it, never the viewed map). */
+  mapId:z.number().int().optional(),
+  /** Per-job evidence: hold, durable trip budget, and Fable's pre-tag mark. */
+  jobs:z.array(z.object({job:z.number().int(),pawn:z.string(),hold:z.number().int(),trip:z.number().int(),preTag:z.boolean(),planned:z.number().int().optional()})).optional(),
+  /** Hauls already on their way at tag time (never credited, never counted) and what they placed. */
+  preTagAtStart:z.array(z.object({job:z.number().int(),pawn:z.string(),planned:z.number().int()})).optional(),
+  preTagByPawn:z.array(z.object({pawn:z.string(),count:z.number().int()})).optional(),
   accepted:z.array(z.string()),excluded:z.array(z.string()),
   byPawn:z.array(z.object({pawn:z.string(),count:z.number().int()})),drops:z.array(Drop)});
 export type IntentView = z.infer<typeof IntentView>;

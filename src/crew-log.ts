@@ -63,6 +63,12 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
   // B6: a helper's first credited placement, once per pawn and intent.
   for(const [p,n] of Object.entries(data.byPawn??{}))if(Number(n)>0&&!(data.asked??[]).includes(p))
    add('record','Game','observer',data.intentId,`${name(p)} is helping with the ${pile} (not asked).`,`helper:${data.intentId}:${p}`);
+  // Fable: one line at acceptance, only when a haul was already on its way to the pile.
+  const before:{pawn:string,planned:number}[]=Array.isArray(data.preTagAtStart)?data.preTagAtStart:[];
+  if(before.length){
+   const who=[...new Set(before.map(j=>name(j.pawn)))].join(', '),total=before.reduce((a,j)=>a+Math.max(0,Number(j.planned)||0),0);
+   add('record','Game','observer',data.intentId,`Already on its way when the agreement started: ${total} ${item} (${who}).`,`intent-pretag:${data.intentId}`);
+  }
   const ordinary=Object.entries(data.ordinaryByPawn??{}),since=ordinary.reduce((a,[,n])=>a+Number(n),0)+Number(data.ordinaryUnattributed??0);
   if(since>0)upsert('record','Game','observer',data.intentId,`Since then: ${since} ${item} as ordinary work (${[...ordinary.map(([p,n])=>`${name(p)} ${Number(n)}`),...(data.ordinaryUnattributed?[`unattributed ${Number(data.ordinaryUnattributed)}`]:[])].join(', ')}).`,`intent-since:${data.intentId}`);
   for(let n=data.previousFinishedAfterExclusion+1;n<=data.finishedAfterExclusion;n++)

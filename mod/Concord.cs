@@ -169,7 +169,7 @@ namespace Concord
         private static string StateJson() {
             if(Current.Game==null || Find.CurrentMap==null) return "{\"loaded\":false,\"pawns\":[],\"actions\":[]}";
             var w=World(); w.Reconcile(); w.Observe();
-            var snapshot=new Snapshot {world=w.world,epoch=w.epoch,clock=Clock.At(Find.TickManager.TicksGame),ticks=Find.TickManager.TicksGame,loaded=true,paused=Find.TickManager.Paused,manualPaused=Find.TickManager.CurTimeSpeed==TimeSpeed.Paused,decisionPauses=DecisionPauses.Count};
+            var snapshot=new Snapshot {world=w.world,epoch=w.epoch,clock=Clock.At(Find.TickManager.TicksGame,Find.CurrentMap),ticks=Find.TickManager.TicksGame,loaded=true,paused=Find.TickManager.Paused,manualPaused=Find.TickManager.CurTimeSpeed==TimeSpeed.Paused,decisionPauses=DecisionPauses.Count};
             var pawns=Find.CurrentMap.mapPawns.FreeColonistsSpawned.Select(p=>JsonUtility.ToJson(new PawnView {
                 id=p.GetUniqueLoadID(),name=p.LabelShort,job=p.CurJobDef==null?"":p.CurJobDef.defName,
                 x=p.Position.x,z=p.Position.z,health=p.health.summaryHealth.SummaryHealthPercent,workReady=Hauling.Ready(p),haulingCapable=!p.WorkTypeIsDisabled(WorkTypeDefOf.Hauling),buildReady=Production.Ready(p,"build"),cookReady=Production.Ready(p,"cook"),rescueReady=Rescue.Ready(p),downed=p.Downed,currentBed=p.CurrentBed()==null?"":p.CurrentBed().GetUniqueLoadID(),carrying=p.carryTracker.CarriedThing==null?"":p.carryTracker.CarriedThing.GetUniqueLoadID(),carryingCount=p.carryTracker.CarriedThing==null?0:p.carryTracker.CarriedThing.stackCount

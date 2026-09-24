@@ -48,6 +48,7 @@ namespace Concord {
             var i=t==null?null:IntentState.ForZone(z,t.def);
             if(i==null) return true;
             bool carried=carrier!=null&&t!=null&&carrier.carryTracker.CarriedThing==t;
+            if(carrier!=null&&i.PreTag(carrier.CurJob)) return true;   // pre-agreement work: native
             return IntentState.Admits(i,carrier,carried?t.stackCount:0,carrier==null?null:carrier.CurJob);
         }finally{PatchCost.Stop(1,cost);}}
     }
@@ -64,6 +65,7 @@ namespace Concord {
             if(p==null) return;
             var old=s.Holding(__instance);
             var next=IntentState.ForCell(p.Map,pack.Cell,IntentHooks.HaulDef(p,__instance));
+            if(next!=null&&next.PreTag(__instance)) return;   // retargets inherit the pre-tag mark
             if(old==next) return; // within the zone the reservation stays with the job
             if(old!=null){old.reserved.Remove(__instance.loadID);old.reservedBy.Remove(__instance.loadID);old.tripBudget.Remove(__instance.loadID);}
             if(next!=null) {
@@ -245,7 +247,7 @@ namespace Concord {
             toil.initAction=()=>{long cost=PatchCost.Start();bool timed=true;try{
                 var p=toil.actor;var job=p==null?null:p.CurJob;var s=IntentState.Get();
                 var i=s==null||!IntentHooks.TaggedHaul(job)?null:IntentState.ForCell(p.Map,job.targetB.Cell,IntentHooks.HaulDef(p,job));
-                if(i==null||!i.Growing||!i.reserved.ContainsKey(job.loadID)){PatchCost.Stop(14,cost);timed=false;original();return;}
+                if(i==null||!i.Growing||i.PreTag(job)||!i.reserved.ContainsKey(job.loadID)){PatchCost.Stop(14,cost);timed=false;original();return;}
                 var source=job.targetA.Thing;var cargo=p.carryTracker.CarriedThing;
                 int carried=cargo==null?0:cargo.stackCount,own=i.Own(job),trip=i.Trip(job);
                 bool standing=i.Standing(p);
@@ -269,6 +271,7 @@ namespace Concord {
                     if(p.CurJob==job&&job.loadID==loadId&&i.Open&&i.reserved.ContainsKey(loadId)){
                         var after=p.carryTracker.CarriedThing;int acquired=Math.Max(0,(after==null?0:after.stackCount)-carried);
                         int left=Math.Max(0,trip-acquired);i.tripBudget[loadId]=left;job.count=left;
+                        s.Emit(p,"intent-pickup","intent="+i.intentId+";job="+loadId+";cap="+cap+";acquired="+acquired+";hold="+i.Own(job)+";trip="+left+";source="+(source==null?"":source.GetUniqueLoadID()));
                     }
                 }
             }finally{if(timed)PatchCost.Stop(14,cost);}};
@@ -284,7 +287,7 @@ namespace Concord {
             toil.initAction=()=>{long cost=PatchCost.Start();bool timed=true;try{
                 var p=toil.actor;var job=p==null?null:p.CurJob;var s=IntentState.Get();var cargo=p==null?null:p.carryTracker.CarriedThing;
                 var i=s==null||cargo==null||!IntentHooks.TaggedHaul(job)?null:IntentState.ForCell(p.Map,job.targetB.Cell,cargo.def);
-                if(i==null||!i.Growing||!i.reserved.ContainsKey(job.loadID)){PatchCost.Stop(15,cost);timed=false;original();return;}
+                if(i==null||!i.Growing||i.PreTag(job)||!i.reserved.ContainsKey(job.loadID)){PatchCost.Stop(15,cost);timed=false;original();return;}
                 int loadId=job.loadID,carried=cargo.stackCount,trip=i.Trip(job);var before=job.targetA.Thing;
                 int extra=0;
                 if(i.Standing(p)) {
@@ -300,6 +303,7 @@ namespace Concord {
                     if(p.CurJob==job&&job.loadID==loadId&&i.Open&&i.reserved.ContainsKey(loadId)){
                         var now=p.carryTracker.CarriedThing;int nowCarried=now==null?0:now.stackCount;
                         if(job.targetA.Thing==before&&nowCarried==carried){s.Reserve(i,p,job,carried);job.count=i.Trip(job);}
+                        else if(extra>0)s.Emit(p,"intent-duplicate-admitted","intent="+i.intentId+";job="+loadId+";extra="+extra+";carried="+carried+";target="+(job.targetA.Thing==null?"":job.targetA.Thing.GetUniqueLoadID())+";pickedNow="+(nowCarried>carried));
                     }
                 }
             }finally{if(timed)PatchCost.Stop(15,cost);}};
@@ -326,7 +330,8 @@ namespace Concord {
             if(s.intents.Count>0)s.ReleaseObsolete(___pawn);
             if(__instance.curJob!=newJob||!IntentHooks.Colonist(___pawn)) return;
             var i=IntentHooks.TaggedHaul(newJob)?IntentState.ForCell(___pawn.Map,newJob.targetB.Cell,IntentHooks.HaulDef(___pawn,newJob)):null;
-            s.Emit(___pawn,"job-start",newJob.def.defName+";job="+newJob.loadID+(i!=null?";intent="+i.intentId+";count="+newJob.count:""));
+            var hd=IntentHooks.TaggedHaul(newJob)?IntentHooks.HaulDef(___pawn,newJob):null;
+            s.Emit(___pawn,"job-start",newJob.def.defName+";job="+newJob.loadID+(hd!=null?";def="+hd.defName:"")+(i!=null?";intent="+i.intentId+";count="+newJob.count:""));
         }finally{PatchCost.Stop(8,cost);}}
     }
     [HarmonyPatch(typeof(Pawn_JobTracker),"CleanupCurrentJob")]

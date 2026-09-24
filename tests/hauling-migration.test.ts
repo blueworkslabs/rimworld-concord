@@ -172,3 +172,81 @@ test('handover dispatch intent is not published as a started rescue without a ga
   recordCrew(d,'action-outcome','P',{id:actionId,actor:'P',status:'started',reason:'native',x:6,z:7},12);
   assert.equal(crewReport(d,12).entries.filter(e=>e.text.includes('rescue now starts')).length,1);
 });
+
+/** Up to the rescue offer that replaces Pedro's carrying native haul (the B7 setup above). */
+async function handoverOffer(store=new Store(':memory:')){
+  const game=new MigGame(),c=new Coordinator(store,game);await c.open();await c.initializeCore('Keep the colony stocked.');await c.configureNativeHauls([wood()]);
+  const e=c.inspect().nativeHauls![0]!;
+  const p=await c.core().propose('P',intentAction(e),'Stock it.');await c.pawn('P').decide(p.id,say('accept'));
+  const pedro=game.data.pawns[2]!;Object.assign(pedro,{job:'HaulToCell',carrying:'Thing_WoodLog1',rescueHandover:{epoch:'e',tick:10,mapId:1,status:'available',options:[rescue],observations:[]},
+    casualties:{epoch:'e',tick:10,mapId:1,radius:12,observations:[{target:'X',name:'Xavi',x:3,z:3}],visibleSubjects:[{target:'X',downed:true,inBed:false}]}});
+  game.data.eventSeq=1;game.data.events=[{seq:1,pawn:'P',tick:10,kind:'casualty',detail:'Locally down',subject:'X'}];
+  await c.attend('P',{name:'ask',async reflect(){return {kind:'request_rescue',agreementId:p.id,target:'X',reason:'Xavi is down.'};}});
+  const offer=await c.core().offerRequestedRescue(c.core().requests()[0]!.id,rescue,'Xavi needs a bed.');
+  return {game,c,store,old:p,offer,pedro};
+}
+
+test('the pending rescue is owned, conflict-visible and withdrawable while the carried trip drains',async()=>{
+  const {game,c,old,offer,pedro}=await handoverOffer();await c.pawn('P').decide(offer.id,say('accept'));
+  let d=c.inspect();assert.equal(Object.values(d.handovers!)[0]!.step,'draining');
+  assert.equal(d.proposals[old.id]!.standing!.status,'stopped');
+  assert.equal(d.characters.P!.intention,offer.id,'the pawn holds the pending rescue');
+  assert.equal(d.proposals[offer.id]!.standing!.status,'running');assert.deepEqual(d.proposals[offer.id]!.standing!.steps,[]);
+  assert.ok(!coreView(d,game.data).opportunities.some(o=>o.pawn==='P'),'no competing offer while the rescue is pending');
+  await c.pawn('P').withdraw('Someone else is closer.');
+  Object.assign(pedro,{job:'Wait',carrying:'',rescue:{epoch:'e',tick:10,mapId:1,status:'available',options:[rescue],observations:[]}});
+  await c.reconcile();d=c.inspect();
+  const h=Object.values(d.handovers!)[0]!;assert.equal(h.step,'stopped');assert.equal(game.moves.length,0,'a withdrawn rescue is never dispatched');
+  assert.equal(d.characters.P!.intention,undefined);
+});
+
+test('a newer intention taken during draining is never overwritten by the handover dispatch',async()=>{
+  const {game,c,offer,pedro}=await handoverOffer();await c.pawn('P').decide(offer.id,say('accept'));
+  const d=c.inspect();d.characters.P!.intention='someone-else';   // ownership changed out of band
+  Object.assign(pedro,{job:'Wait',carrying:'',rescue:{epoch:'e',tick:10,mapId:1,status:'available',options:[rescue],observations:[]}});
+  // Revalidation reads the live domain; inspect() is a clone, so change it through the store round trip.
+  const store=(c as any).store as Store;store.commit(d,{branch:d.branch,kind:'test-ownership',actor:'operator',data:{}});
+  const again=new Coordinator(store,game);await again.open();await again.reconcile();
+  assert.equal(Object.values(again.inspect().handovers!)[0]!.step,'stopped');assert.equal(game.moves.length,0);
+  assert.equal(again.inspect().characters.P!.intention,'someone-else');
+});
+
+test('a restart between consent and withdrawal finishes stopping the old agreement',async()=>{
+  const store=new Store(':memory:');const {game,c,old,offer,pedro}=await handoverOffer(store);
+  const commit=store.commit.bind(store);let failNext=false;
+  (store as any).commit=(d:any,meta:any)=>{const r=commit(d,meta);if(meta.kind==='handover-started')failNext=true;return r;};
+  const state=game.state.bind(game);game.state=async()=>{if(failNext){failNext=false;throw Error('process restarted');}return state();};
+  await c.pawn('P').decide(offer.id,say('accept')).catch(()=>{});
+  (store as any).commit=commit;
+  let d=store.read()!;assert.equal(d.proposals[old.id]!.standing!.status,'running','crashed before the old agreement was stopped');
+  const restarted=new Coordinator(store,game);await restarted.open();await restarted.reconcile();
+  d=restarted.inspect();
+  assert.equal(d.proposals[old.id]!.standing!.status,'stopped');assert.equal(d.characters.P!.intention,offer.id);
+  assert.ok(game.data.intents![0]!.excluded.includes('P'));assert.equal(Object.values(d.handovers!)[0]!.step,'draining');
+  Object.assign(pedro,{job:'Wait',carrying:'',rescue:{epoch:'e',tick:10,mapId:1,status:'available',options:[rescue],observations:[]}});
+  await restarted.reconcile();assert.equal(game.moves.length,1);
+});
+
+test('persistent exclusion failures do not keep a handover past its deadline',async()=>{
+  const {game,c,offer}=await handoverOffer();game.excludeFails=1000;
+  await c.pawn('P').decide(offer.id,say('accept')).catch(()=>{});
+  game.data.ticks=10+rescue.maxTicks+1;
+  await assert.rejects(c.reconcile(),/Mailbox unavailable/);
+  const d=c.inspect(),h=Object.values(d.handovers!)[0]!;
+  assert.equal(h.step,'stopped');assert.equal(h.reason,'handover timed out');assert.equal(game.moves.length,0);
+  assert.equal(d.characters.P!.intention,undefined);
+});
+
+test('a haul already on its way at tag time gets one line and no credit',async()=>{
+  const {c,game}=await setup([wood()]);const e=c.inspect().nativeHauls![0]!;
+  const p=await c.core().propose('P',intentAction(e),'Stock it.');await c.pawn('P').decide(p.id,say('accept'));
+  const v=game.data.intents![0]!;
+  Object.assign(v,{preTagAtStart:[{job:7,pawn:'B',planned:30}],jobs:[{job:7,pawn:'B',hold:0,trip:0,preTag:true,planned:30}]});
+  await c.reconcile();
+  Object.assign(v,{preTagByPawn:[{pawn:'B',count:30}],drops:[{seq:1,tick:12,count:30,escape:0,job:7,kind:'pretag',pawn:'B',source:'',startedBeforeExclusion:false,violation:false}]});
+  game.data.ticks=12;await c.reconcile();
+  const r=crewReport(c.inspect(),12);
+  assert.equal(r.entries.filter(x=>x.text==='Already on its way when the agreement started: 30 wood (Beatrice).').length,1);
+  assert.ok(!r.entries.some(x=>/helping with/.test(x.text)),'pre-agreement work is neither credited nor a helper');
+  assert.equal(c.inspect().intentViews![v.intentId]!.delivered,0);
+});
