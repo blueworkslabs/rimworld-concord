@@ -4,11 +4,20 @@ Gate A of the [native-intents phase](NATIVE_INTENTS.md): the six questions whose
 shape the spike design. Written by Clawd on 2026-09-24; to be checked by Astra against
 the lab and signed off by Fable.
 
-**Build studied:** the staging lab's install, RimWorld **1.6.4871 rev598** with Biotech
-and Odyssey, `Assembly-CSharp` 1.6.9676.18020 and the Core `ThinkTreeDefs`,
-`WorkGiverDefs` and `JobDefs`. Decompiled privately with ILSpy (`ilspycmd` 8.2); no
-decompiled code enters this repository. Only type, method and field names are cited.
-An older local copy (1.6.9438) was not used.
+**Build studied: the staging build, which is the source of truth for this note.**
+
+- RimWorld **1.6.4871 rev598** with Biotech and Odyssey
+- `Assembly-CSharp` 1.6.9676.18020, SHA-256 prefix **`082db1dd4f7f`**
+- the Core `ThinkTreeDefs`, `WorkGiverDefs` and `JobDefs` from the same install
+
+Every claim below was verified on this build. An older local copy (`Assembly-CSharp`
+1.6.9438) exists on the inference host but was **not** used; if a later check finds a
+difference between builds, it is recorded here rather than resolved silently.
+
+**Decompile recipe** (output stays private, never committed): .NET 8 SDK installed per
+user, `ilspycmd` 8.2.0.7535 as a global tool, run with
+`DOTNET_ROOT=~/.dotnet DOTNET_ROLL_FORWARD=Major ilspycmd -t <Type> Assembly-CSharp.dll -r <Managed dir>`
+to decompile single types. Only type, method and field names are cited here.
 
 ## Summary
 
