@@ -339,7 +339,11 @@ execution, or invalid output or non-progress stalls the run. Retain all failures
 
 ## Implementation status
 
-Built on `feat/native-haul-spike`; nothing has run in the game yet.
+Built on `feat/native-haul-spike`. **Partial scripted staging evidence now exists**, not
+Gate C approval: [smoke results](trials/NATIVE_HAUL_SMOKE.md). The frozen sole-Alvin
+exclusive/meal fixture is blocked because his unchanged Rancher backstory disables
+native hauling. A capable accepting pawn must be selected before those cases continue;
+no capability bypass or character rewrite has been made.
 
 - **Mod:** `mod/NativeIntents.cs` (intent tag, ledger, reconciliation, bridge and lab
   operations) and `mod/IntentPatches.cs` (patches 1–8). Build with

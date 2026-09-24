@@ -26,6 +26,11 @@ testing; the exact causes of the historical eating rejections remain unknown, an
 new game interface will not by itself fix model grounding. [NATIVE_INTENTS](NATIVE_INTENTS.md) explains the new
 direction: **steer the game's own planner instead of driving pawns.**
 
+The native-haul spike now has [partial scripted staging evidence](trials/NATIVE_HAUL_SMOKE.md):
+helper attribution and several ledger/restore checks pass. The sole-Alvin fixture is
+blocked by his native work incapability; meal, full consent matrix and live verdict
+remain unverified. The architectural direction below is unchanged.
+
 ## Next phase: work with RimWorld's planner
 
 ### Ground rules

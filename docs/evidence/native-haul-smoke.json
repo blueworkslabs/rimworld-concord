@@ -1,0 +1,171 @@
+{
+  "date": "2026-09-24",
+  "kind": "scripted real-game checks; no character-model calls",
+  "testedHead": "40589bd",
+  "pinnedBuild": "1.6.4871 rev600",
+  "assemblySha256": "082db1dd4f7f1d0b72960d7e1beead8fbfe6957200e8627f65bda0dbbe1dd8f8",
+  "checks": {
+    "coordinatorTestsPassed": 364,
+    "modCompile": "passed against pinned assemblies",
+    "pickupBudgetCombinationsPassed": 222376,
+    "launcherGuards": "direct invocation and held lock rejected without mailbox access",
+    "independentReview": "confirmed findings corrected; final focused reviews clean"
+  },
+  "runs": [
+    {
+      "runId": "ead7e118-d9bf-4818-b5d8-398926999d74",
+      "case": "variant-exclusive",
+      "passed": false,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "3534bac74ace1b240fd697cf04020744633a2e3003993360980b69673fb28146",
+      "failure": "bridge receipt omitted nested arrays"
+    },
+    {
+      "runId": "1e745641-b715-413e-8e63-4c10c5662a90",
+      "case": "variant-exclusive",
+      "passed": false,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "fff96a826e7c63daa1177543ce671f5a0330bb02d93b5cce2fc7c828275bd002",
+      "failure": "exclusive fixture sole accepting pawn incapable of native hauling; delivered 0, intent open",
+      "intent": {
+        "status": "open",
+        "quota": 30,
+        "delivered": 0,
+        "reserved": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "byPawn": []
+      }
+    },
+    {
+      "runId": "3ecb91fd-0c78-4150-96e4-1bd90b2922a7",
+      "case": "variant-attribution",
+      "passed": true,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "ab0798eb379d7d613cb7d84c597a701002675d3829d708fd2dd26ff52396a940",
+      "intent": {
+        "status": "met",
+        "quota": 30,
+        "delivered": 30,
+        "reserved": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "byPawn": [
+          {
+            "pawn": "Thing_Human411",
+            "count": 30
+          }
+        ]
+      }
+    },
+    {
+      "runId": "7140ece5-c2c1-45d2-bf97-afec86bd59db",
+      "case": "stale-lab-command",
+      "passed": true,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "26a3c0c10839d4831a3a3ea0ca77411679703596a0e419fef4cbc1a034fe0738"
+    },
+    {
+      "runId": "ba29dfb5-82c8-46e2-b533-e97109f3e1dd",
+      "case": "candidate-discarded",
+      "passed": true,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "ade9633f7465a6b40c3de60c9e957c70bd554ccb33d461e5a837b397e910057a"
+    },
+    {
+      "runId": "b425cb09-f398-4457-9a05-4c37727d603f",
+      "case": "queued-removed-on-exclusion",
+      "passed": true,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "d14b9299cb9d5f355e0b1cc566409d1378a626de9b7efc947216e88ce543ef71"
+    },
+    {
+      "runId": "db3bd93c-d028-4103-8384-9430923b0734",
+      "case": "excluded-forced-start",
+      "passed": true,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "32eaa0fb96ec65b7617ced4106137f2683f08af44fa44e063335d4f81c8665c7",
+      "intent": {
+        "status": "open",
+        "quota": 30,
+        "delivered": 0,
+        "reserved": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "byPawn": []
+      }
+    },
+    {
+      "runId": "be51ee0a-73cf-4310-9389-045079a752e0",
+      "case": "quota-immutability-only",
+      "passed": true,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "b857f999ebef3a4d53318605ffe0d630d1c9b68c7618c82834c3b6e874b46600"
+    },
+    {
+      "runId": "883eb588-532b-4ff9-85c1-6a5c689a974d",
+      "case": "restore-mid-intent",
+      "passed": true,
+      "eventGaps": 0,
+      "inferenceCalls": 0,
+      "privateReceiptSha256": "86559456ea6c311131262029dbf0a70f6289684b6902ebff9544094bca71524e",
+      "intent": {
+        "status": "met",
+        "quota": 75,
+        "delivered": 75,
+        "reserved": 0,
+        "overshoot": 0,
+        "violations": 0,
+        "unattributed": 0,
+        "removed": 0,
+        "byPawn": [
+          {
+            "pawn": "Thing_Human411",
+            "count": 75
+          }
+        ]
+      },
+      "beforeReload": {
+        "status": "open",
+        "delivered": 60,
+        "reserved": 15,
+        "unattributed": 0,
+        "removed": 0
+      },
+      "afterReloadReserved": 15
+    }
+  ],
+  "otherRetainedAttempt": "Recorder launched before restart readiness; coordinator lock rejected runner before any domain case. Not a gameplay result.",
+  "fixtureBlocker": "Alvin Rancher43 disables ManualDumb; native load disables Hauling. Sole-Alvin exclusive and meal cases require role revision, not a capability bypass.",
+  "unverified": [
+    "exclusive successful delivery",
+    "meal resumption and trip count",
+    "live core/pawn offer and counter transitions",
+    "matched ordered-job halves",
+    "cold/paired coordinator restore",
+    "forced partial merge and opportunistic replacement",
+    "work-options and isolated patch cost",
+    "full concurrent quota and injection matrix"
+  ],
+  "handoff": {
+    "game": "stopped",
+    "display": "stopped",
+    "originalSaveFiles": 285,
+    "changedOriginalSaveFiles": 0
+  },
+  "artifactPolicy": "Raw events, full snapshots, saves, recordings, decompilation and review transcripts retained privately; aggregate projection only."
+}
