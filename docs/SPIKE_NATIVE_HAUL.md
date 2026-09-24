@@ -337,6 +337,28 @@ it matches what pawns actually do.
 **Stop and diagnose offline** if unsupported capability or consent could reach
 execution, or invalid output or non-progress stalls the run. Retain all failures.
 
+## Implementation status
+
+Built on `feat/native-haul-spike`; nothing has run in the game yet.
+
+- **Mod:** `mod/NativeIntents.cs` (intent tag, ledger, reconciliation, bridge and lab
+  operations) and `mod/IntentPatches.cs` (patches 1–8). Build with
+  `scripts/build-mod.sh <Managed> <0Harmony.dll>`. All eleven patched methods apply
+  offline under Mono with Harmony 2.4.2.
+- **Fixture:** `scripts/native-haul-fixture.py` (`--meal` for the meal case). Wood
+  positions and the candidate area come from the running game.
+- **Coordinator:** routing entries, `src/native-intents.ts` (wakes, aggregate receipts,
+  topic outcome, invariants), `LabBridge.intent`.
+- **Scripted runs:** `scripts/run-native-haul-lab.sh main|meal [--case=<name>]`, which
+  writes `.runtime/native-haul-<mode>.json`.
+- **Not yet built:**
+  - the core offering a `haul-zone` intent and the pawns answering it (needed for the
+    live run);
+  - the matched ordered-job halves.
+
+  The opportunistic-replacement and failed-partial-merge cases are observed from
+  events rather than forced.
+
 ## Out of scope
 
 Construction, cooking and rescue migration; prioritized work; the standing-commitment

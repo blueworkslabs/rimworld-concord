@@ -304,6 +304,18 @@ namespace Concord {
         public string Lab(Request r) {
             var p=WorldState.FindActor(r.actor);
             if(r.op=="lab-fault-escape"){faultSkipNext=true;return "{\"fault\":\"armed\"}";}
+            if(r.op=="lab-interrupt") {
+                // Forced cancellation of the pawn's current job (cleanup drops are incidental).
+                if(p==null) throw new Exception("Unknown pawn");
+                var cur=p.CurJob;
+                if(cur!=null)p.jobs.EndCurrentJob(JobCondition.InterruptForced);
+                return "{\"ended\":"+(cur==null?"null":"\""+cur.def.defName+"\"")+",\"x\":"+p.Position.x+",\"z\":"+p.Position.z+"}";
+            }
+            if(r.op=="lab-queue-count") {
+                if(p==null) throw new Exception("Unknown pawn");
+                var q=p.jobs.jobQueue.Select(j=>j.job).Where(j=>j!=null&&j.def==JobDefOf.HaulToCell).ToList();
+                return "{\"queued\":"+q.Count+",\"tagged\":"+q.Count(j=>ForCell(p.Map,j.targetB.Cell)!=null)+"}";
+            }
             var i=ById(r.intentId);
             if(i==null) throw new Exception("Unknown intent");
             var map=Find.Maps.First(m=>m.uniqueID==i.mapId);
@@ -318,6 +330,21 @@ namespace Concord {
                 bool made=job!=null;
                 if(job!=null)JobMaker.ReturnToPool(job);
                 return "{\"made\":"+(made?"true":"false")+",\"remainingBefore\":"+before+",\"remainingAfter\":"+i.Remaining+"}";
+            }
+            if(r.op=="lab-queue-haul"||r.op=="lab-carry") {
+                if(p==null) throw new Exception("Unknown pawn");
+                var loose=map.listerThings.ThingsOfDef(def).Where(t=>t.Spawned&&map.zoneManager.ZoneAt(t.Position)!=zone)
+                    .OrderBy(t=>(t.Position-p.Position).LengthHorizontalSquared).FirstOrDefault();
+                if(loose==null) throw new Exception("No loose stack");
+                if(r.op=="lab-carry") {
+                    // Pre-carried load for re-target cases: picked up outside any job.
+                    int n=p.carryTracker.TryStartCarry(loose,Math.Max(1,Math.Min(r.count,loose.stackCount)));
+                    return "{\"carried\":"+n+"}";
+                }
+                // A tagged haul queued (not started): bypasses the factory's admission on purpose.
+                var queued=HaulAIUtility.HaulToCellStorageJob(p,loose,zone.cells.First(),false);
+                p.jobs.jobQueue.EnqueueLast(queued);
+                return "{\"queuedJob\":"+queued.loadID+",\"count\":"+queued.count+"}";
             }
             if(r.op=="lab-zone-spawn") {
                 var cell=zone.cells.FirstOrDefault(c=>c.GetFirstItem(map)==null);
