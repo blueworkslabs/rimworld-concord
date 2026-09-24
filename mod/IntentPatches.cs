@@ -148,7 +148,7 @@ namespace Concord {
                 i.tripBudget[job.loadID]=trip;
                 job.count=Math.Max(0,trip);
                 s.AssertLedger(i,p,"commit");
-                s.Emit(p,"intent-admitted-start","intent="+i.intentId+";job="+job.loadID+";carried="+carried+";reserved="+i.Own(job)+";trip="+trip);
+                s.Emit(p,"intent-admitted-start","intent="+i.intentId+";job="+job.loadID+";carried="+carried+";reserved="+i.Own(job)+";trip="+trip+";source="+(source==null?"":source.GetUniqueLoadID()));
                 return;
             }
             if(carried>0) {

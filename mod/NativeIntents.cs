@@ -98,7 +98,7 @@ namespace Concord {
         public string intentId,thingDef,variant,status;
         public int zoneId,quota,delivered,reserved,remaining,overshoot,incidental,unattributed,removed;
         public int violations,rejectedStarts,finishedAfterExclusion,createdTick,untilTick,lastDeliveryTick,peakHolders;
-        public string hold,label,zoneLabel,siteId,stopReason;public bool archiveOpen;public int ordinaryUnattributed,ordinaryRemoved;
+        public string hold,label,zoneLabel,siteId,stopReason,thingLabel;public bool archiveOpen;public int ordinaryUnattributed,ordinaryRemoved;
         public string[] accepted,excluded;
     }
 
@@ -448,7 +448,7 @@ namespace Concord {
                 delivered=i.credited,reserved=i.Reserved,remaining=i.Remaining,overshoot=i.overshoot,incidental=i.incidental,
                 unattributed=i.unattributed,removed=i.removed,violations=i.violations,rejectedStarts=i.rejectedStarts,
                 finishedAfterExclusion=i.finishedAfterExclusion,createdTick=i.createdTick,untilTick=i.untilTick,lastDeliveryTick=i.lastDeliveryTick,peakHolders=i.peakHolders,
-                hold=i.hold,label=i.label,zoneLabel=ZoneOf(i)==null?null:ZoneOf(i).label,siteId=i.siteId,stopReason=i.stopReason,archiveOpen=i.archiveOpen,
+                thingLabel=i.Def==null?i.thingDef:i.Def.label,hold=i.hold,label=i.label,zoneLabel=ZoneOf(i)==null?null:ZoneOf(i).label,siteId=i.siteId,stopReason=i.stopReason,archiveOpen=i.archiveOpen,
                 ordinaryUnattributed=i.ordinaryUnattributed,ordinaryRemoved=i.ordinaryRemoved,
                 accepted=i.accepted.ToArray(),excluded=i.excluded.ToArray()
             }).TrimEnd('}')+",\"ordinaryByPawn\":["+
@@ -457,6 +457,14 @@ namespace Concord {
                 "],\"drops\":["+String.Join(",",i.drops.Select(d=>JsonUtility.ToJson(d)).ToArray())+"]}").ToArray())+"]";
         }
 
+        /** Colony stockpiles on the current map: colony-public, since someone placed them. */
+        public static string StockpilesJson() {
+            var map=Find.CurrentMap;if(map==null) return "[]";
+            return "["+String.Join(",",map.zoneManager.AllZones.OfType<Zone_Stockpile>().Where(z=>z.cells.Count>0).Select(z=>{
+                int x0=z.cells.Min(c=>c.x),z0=z.cells.Min(c=>c.z),x1=z.cells.Max(c=>c.x),z1=z.cells.Max(c=>c.z);
+                return "{\"zoneId\":"+z.ID+",\"label\":\""+(z.label??"").Replace("\\","").Replace("\"","'")+"\",\"x\":"+x0+",\"z\":"+z0+",\"w\":"+(x1-x0+1)+",\"h\":"+(z1-z0+1)+",\"cells\":"+z.cells.Count+"}";
+            }).ToArray())+"]";
+        }
         // Lab-only commands for the scripted sub-runs.
         public string Lab(Request r) {
             var p=WorldState.FindActor(r.actor);

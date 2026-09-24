@@ -469,6 +469,41 @@ The ordered baseline must explicitly support both chosen defs with the same phys
 fixture and consent roles; if it cannot, label the unmatched portion instead of claiming
 parity. Retain invalid fixture attempts; no frozen live rerolls. The measures are below.
 
+## Implementation status (round 0)
+
+Built on `feat/hauling-migration`. **Not run in the game yet.** The B1 round ledger
+starts here at round 0; Astra keeps it.
+
+- **Mod** (`7440ecc`):
+  - (map, zone, def) lookups everywhere (B3);
+  - existing-stockpile or candidate-site tags, plain stops on zone edits, re-tag
+    generations (B2);
+  - the after-retirement archive (B4);
+  - the growing hold per intent (B1): a commit with a durable trip budget, patch 9
+    guarding every pickup, patch 10 holding the extra before the duplicate check,
+    true-up and pickup-bound detectors, whole-cargo-or-nothing retargets;
+  - label and colour while open, the clock, the "Show" button, the stockpile list in
+    state (B6);
+  - the read-only rescue handover projection (B7).
+
+  14 patched methods apply offline.
+- **Lab:** `scripts/hauling-migration-fixture.py` (B8 manifest: a mixed stockpile, a
+  candidate site, exact stacks, duplicate pairs).
+- **Coordinator** (`e60e714`):
+  - `configureNativeHauls` (list, fixed order; ordinary play vs `intentOnly`);
+  - the generalized stockpile haul;
+  - the B6 wording and silent wait;
+  - world-voice reasons;
+  - the durable rescue handover (B7).
+- **Scripted runs:** `scripts/run-hauling-migration-lab.sh [--strict] [--case=<name>]`
+  with the B1 checks, the mixed zone, the archive, zone edits, re-tagging, legibility,
+  and the matched pair (native and ordered). It runs with `--strict` for the fallback.
+  Not forced by the runner, and listed as unimplemented in its receipt:
+  - full-load retarget with insufficient destination quota;
+  - pending-extra retarget;
+  - re-target between two tagged zones;
+  - nested reserve failure and job recycling inside the duplicate check.
+
 ## Gate C will measure
 
 **Signed condition: #71's fixes must be measured live in this migration.** Their
