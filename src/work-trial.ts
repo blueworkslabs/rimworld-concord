@@ -51,7 +51,7 @@ export async function stopTrialWork(c:import('./coordinator.js').Coordinator){
  if(!c.inspect())return {operatorStops,errors};
  await attempt(()=>c.reconcile());
  // A native intent ends as an operator stop, never as invented pawn withdrawals.
- if(c.inspect().nativeHaul)await attempt(()=>c.stopNativeHaul());
+ if(c.inspect().nativeHaul||c.inspect().nativeHauls?.length)await attempt(()=>c.stopNativeHaul());
  for(const ch of Object.values(c.inspect().characters))if(ch.intention&&c.inspect().proposals[ch.intention]?.action.kind!=='haul-zone'){
   operatorStops.push(ch.id);await attempt(()=>c.pawn(ch.id).withdraw('Operator trial ended; not a pawn-originated choice'));
  }

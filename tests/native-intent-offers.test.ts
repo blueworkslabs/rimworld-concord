@@ -90,7 +90,7 @@ test('withdrawal excludes in the game; quota met completes the standing and the 
   const text=crewReport(d,900).entries.map(e=>e.text);
   assert.ok(text.includes('Stockpile haul: first delivery, 10/30 wood (Beatrice 10).'));
   assert.ok(text.includes('Finished a trip started before withdrawing; credited to the carrier, not a new agreement.'));
-  assert.ok(text.includes('Stockpile haul quota met: 30/30 wood (Beatrice 10, Pedro 20).'));
+  assert.ok(text.includes('Agreement complete: 30 of 30 wood (Beatrice 10, Pedro 20). Further hauling here is ordinary work.'));
 });
 
 test('partial expiry stops the standing and keeps the topic open; no needs stop for native intents',async()=>{
@@ -174,7 +174,8 @@ test('native mode never exposes or directly admits legacy ordered hauling',async
   await assert.rejects(c.core().propose('P',{kind:'move',x:4,z:4},'Walk over'),/the stockpile haul is the only proposable work/);
   const perspective=await c.corePerspective();
   assert.ok(perspective.opportunities.every(o=>o.action.kind==='haul-zone'));
-  assert.match(perspective.limits,/Only the listed shared stockpile haul may be proposed/);
+  assert.match(perspective.limits,/Only the listed shared stockpile hauls may be proposed/);
+  assert.match(perspective.limits,/never an eligibility or consent disclaimer/);
   assert.ok(!perspective.limits.includes('Only listed campfire'));
   for(const action of [{kind:'rescue',target:'X',bed:'Y',x:4,z:4,maxTicks:900},{kind:'build',thing:'X',x:4,z:4,maxTicks:900},{kind:'cook',thing:'X',target:'Y',x:4,z:4,count:1,meals:1,maxTicks:900}] as Action[])
     await assert.rejects(c.core().propose('P',action,'Unlisted work'),/the stockpile haul is the only proposable work/);

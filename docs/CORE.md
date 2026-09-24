@@ -53,9 +53,22 @@ time were false by publication.
 
 One action per turn, each with a public reason (≤600 characters):
 
-**Hauling-migration guidance (signed; implement with the migration):** give a concrete
-reason in the world's voice; eligibility/consent contract boilerplate belongs in the
-structured offer record, not in the core's public sentence.
+**Public reasons are in the world's voice.** The core's sentence is a concrete reason
+("the wood by the wall is getting wet"), never an eligibility or consent disclaimer. The
+structured offer record next to it says what is offered ("Offer to Beatrice: haul up to
+30 wood to the shared wood pile by the north wall; others may help"). The core view's
+limits say so in native-haul modes.
+
+**Native hauling modes.** `configureNativeHauls(entries)` freezes the operator's list of
+stockpile hauls: an existing colony stockpile (`zoneId`) or a candidate site, one per
+(stockpile, def). The list is shown in a fixed order: label, then def, then ids.
+- **Ordinary play:** ordered hauling is replaced by these offers; rescue, construction
+  and cooking stay available.
+- **Intent-only scenes** (`{intentOnly: true}`, and the spike's frozen live harness):
+  the stockpile hauls are the only proposable work.
+- The view carries the colony `clock`.
+- A wait produces no crew-log entry; the status line reads "Core: waiting on <first
+  open topic>".
 
 | Action | Effect |
 |---|---|

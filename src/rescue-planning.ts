@@ -17,11 +17,14 @@ export function rescueView(domain:Domain,game:GameState,own:Pawn):RescueView|nul
       .map(o=>({target:o.target,targetName:o.targetName,bed:o.bed,bedLabel:o.bedLabel}))};
 }
 export function planRescue(domain:Domain,game:GameState,pawn:string,action:Rescue,replaces?:string):number {
-  const own=game.pawns.find(p=>p.id===pawn),v=own?.rescue;
+  const own=game.pawns.find(p=>p.id===pawn),oldP=replaces?domain.proposals[replaces]:undefined;
+  // B7: replacing a native haul whose trip is still carrying uses the read-only handover
+  // projection at the offer stage only; execution still requires empty hands.
+  const v=oldP?.action.kind==='haul-zone'&&own?.carrying&&own.rescueHandover?own.rescueHandover:own?.rescue;
   if(!v||v.status!=='available'||v.epoch!==game.epoch||v.tick!==game.ticks||!Number.isInteger(v.mapId)||v.mapId<0)
     throw Error('Fresh mapped rescue observation required');
   const old=replaces?domain.proposals[replaces]:undefined,ch=domain.characters[pawn];
-  const replacing=!!(old&&old.pawn===pawn&&old.action.kind==='haul'&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
+  const replacing=!!(old&&old.pawn===pawn&&(old.action.kind==='haul'||old.action.kind==='haul-zone')&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
   if(replaces&&!replacing)throw Error('Replacement agreement no longer active');
   if(Object.values(domain.proposals).some(p=>p.id!==replaces&&held(domain,p)&&
     (conflict(p,action)||(p.pawn===pawn&&p.action.kind!=='move')))||(!replacing&&(ch?.commitment||ch?.intention)))

@@ -10,7 +10,7 @@ import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
 import {recordCrew,crewReport,agreementProgress} from './crew-log.js';
 import {newestReceiptTick} from './observation-age.js';
-import {NativeHaulConfig,IntentView,planIntentOffer,counterAdoptable,notOfferedReason,progress as intentProgress} from './native-intents.js';
+import {NativeHaulConfig,NativeHaulEntry,nativeEntries,orderedEntries,fromLegacy,IntentView,planIntentOffer,counterAdoptable,notOfferedReason,progress as intentProgress} from './native-intents.js';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal,type AlternativeRequest } from './protocol.js';
@@ -483,7 +483,7 @@ export class Coordinator {
         }
         if(proposalId&&choice.actionTopicId){const topic=state.topics.find(t=>t.sourceId===choice.actionTopicId)!;if(!topic.proposalIds.includes(proposalId))topic.proposalIds.push(proposalId);}
         Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{})});state.revision++;
-        this.commit('core-planned','core',{id:prepared.id,reason:a.reason,...this.asOf(prepared.view.tick,g)});
+        this.commit('core-planned','core',{id:prepared.id,kind:a.kind,reason:a.reason,...this.asOf(prepared.view.tick,g)});
         return {status:'applied' as const,proposalId,questionId,choice};
       });
     }catch(error){
@@ -536,25 +536,54 @@ export class Coordinator {
   configureNativeHaul(raw:NativeHaulConfig){return this.serial(async()=>{
     const game=await this.current(),c=NativeHaulConfig.parse(raw);
     if(this.domain.nativeHaul&&JSON.stringify(this.domain.nativeHaul)!==JSON.stringify(c))throw Error('Native haul setup already frozen');
+    if(this.domain.nativeHauls&&!this.domain.nativeHaul)throw Error('Native haul list already frozen');
     if(!this.game.intent)throw Error('Native intent bridge unavailable');
-    this.domain.nativeHaul=c;this.commit('native-haul-configured','operator',c);
-    for(const own of game.pawns.filter(p=>this.domain.characters[p.id])){
-      const reason=notOfferedReason(own);
-      if(reason&&reason!=='unavailable')this.commit('intent-not-offered','core',{intentId:c.intentId,pawn:own.id,reason});
-    }
+    this.domain.nativeHaul=c;this.domain.nativeHauls=[fromLegacy(c)];this.domain.nativeIntentOnly=true;this.commit('native-haul-configured','operator',c);
+    this.recordNotOffered(game,c.intentId);
     return structuredClone(c);
   });}
+  /** Migration (B2/B5): freeze the operator's list of stockpile hauls. Existing-stockpile
+   * entries take their rectangle from the game's stockpile list; each (zone or site, def) is
+   * at most one entry. */
+  configureNativeHauls(raw:unknown[],options:{intentOnly?:boolean}={}){return this.serial(async()=>{
+    const game=await this.current();
+    if(!this.game.intent)throw Error('Native intent bridge unavailable');
+    const entries=raw.map(r=>{
+      const e=r as Record<string,unknown>,zone=typeof e.zoneId==='number'&&e.zoneId>=0?(game.stockpiles??[]).find(s=>s.zoneId===e.zoneId):undefined;
+      if(typeof e.zoneId==='number'&&e.zoneId>=0&&!zone)throw Error('Unknown stockpile '+e.zoneId);
+      return NativeHaulEntry.parse(zone?{...e,x:zone.x,z:zone.z,w:zone.w,h:zone.h}:e);
+    });
+    const keys=entries.map(e=>`${e.zoneId>=0?'zone:'+e.zoneId:'site:'+e.siteId}:${e.thing}`);
+    if(new Set(keys).size!==keys.length||new Set(entries.map(e=>e.intentId)).size!==entries.length)throw Error('Duplicate stockpile haul entries');
+    const frozen=orderedEntries(entries);
+    if(this.domain.nativeHauls&&JSON.stringify(this.domain.nativeHauls)!==JSON.stringify(frozen))throw Error('Native haul list already frozen');
+    if(this.domain.nativeHauls&&!!this.domain.nativeIntentOnly!==!!options.intentOnly)throw Error('Native haul list already frozen');
+    // Ordinary play keeps rescue, construction and cooking; only ordered hauling is replaced.
+    // intentOnly is for frozen scenes where the stockpile hauls are the only proposable work.
+    this.domain.nativeHauls=frozen;this.domain.nativeIntentOnly=!!options.intentOnly;this.commit('native-hauls-configured','operator',{entries:frozen,intentOnly:!!options.intentOnly});
+    this.recordNotOffered(game,frozen[0]?.intentId);
+    return structuredClone(frozen);
+  });}
+  private recordNotOffered(game:GameState,intentId?:string){
+    for(const own of game.pawns.filter(p=>this.domain.characters[p.id])){
+      const reason=notOfferedReason(own);
+      if(reason&&reason!=='unavailable')this.commit('intent-not-offered','core',{intentId,pawn:own.id,reason});
+    }
+  }
   /** Operator end of the native intent (trial end, not a pawn's withdrawal): the game retires
    * the tag and standings follow as 'stopped by the operator'. Idempotent once retired. */
   stopNativeHaul(){return this.serial(async()=>{
-    const game=await this.current(),c=this.domain.nativeHaul;
-    if(!c)return undefined;
-    const live=this.liveIntent(game,c.intentId);
-    if(live?.status==='open'){const r=await this.game.intent!({op:'intent-stop',epoch:this.domain.epoch,intentId:c.intentId});
+    let game=await this.current();const entries=nativeEntries(this.domain);
+    if(!entries.length)return undefined;
+    for(const c of entries){
+      const live=this.liveIntent(game,c.intentId);
+      if(live?.status!=='open')continue;
+      const r=await this.game.intent!({op:'intent-stop',epoch:this.domain.epoch,intentId:c.intentId});
       const stopped=this.liveIntent(r.state,c.intentId);if(!stopped||stopped.status==='open'||stopped.status==='pending')throw Error('Native operator stop unconfirmed');
-      this.ingestIntents(r.state);}
-    else this.ingestIntents(game);
-    return structuredClone(this.domain.intentViews?.[c.intentId]);
+      game=r.state;
+    }
+    this.ingestIntents(game);
+    return structuredClone(this.domain.intentViews?.[entries[0]!.intentId]);
   });}
   /** Physical movement opportunities and communicated replies only; no private character state. */
   core() {
@@ -650,8 +679,9 @@ export class Coordinator {
     }
     const reinvite=reofferRequestId?this.domain.reoffers?.[reofferRequestId]:undefined;
     if(reofferRequestId&&(!reinvite||reinvite.status!=='pending'||reinvite.pawn!==pawn||this.domain.proposals[reinvite.deferredId]?.status!=='deferred'||JSON.stringify(reinvite.action)!==JSON.stringify(action)))throw Error('Re-invitation unavailable');
-    if(this.domain.nativeHaul&&action.kind!=='haul-zone')throw Error('Native intent mode: the stockpile haul is the only proposable work');
-    if(action.kind==='haul-zone')planIntentOffer(this.domain.nativeHaul,game.pawns.find(x=>x.id===pawn),action,this.liveIntent(game,action.intentId));
+    if(this.domain.nativeIntentOnly&&action.kind!=='haul-zone')throw Error('Native intent mode: the stockpile haul is the only proposable work');
+    if(nativeEntries(this.domain).length&&action.kind==='haul')throw Error('Native hauling replaces ordered hauling: offer a stockpile haul');
+    if(action.kind==='haul-zone')planIntentOffer(nativeEntries(this.domain),game.pawns.find(x=>x.id===pawn),action,this.liveIntent(game,action.intentId));
     const productionMap=action.kind==='build'||action.kind==='cook'?planProduction(this.domain,game,pawn,action):undefined;
     const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;
     const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action,replaces):undefined;
@@ -743,11 +773,11 @@ export class Coordinator {
   }
   private replacementActive(p:Proposal):boolean {
     const old=this.domain.proposals[p.replacesAgreementId??''],r=this.domain.requests?.[p.requestId??''],ch=this.domain.characters[p.pawn];
-    return !!(old&&r&&r.pawn===p.pawn&&r.agreementId===old.id&&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&old.pawn===p.pawn&&old.action.kind==='haul'&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
+    return !!(old&&r&&r.pawn===p.pawn&&r.agreementId===old.id&&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&old.pawn===p.pawn&&(old.action.kind==='haul'||old.action.kind==='haul-zone')&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
   }
   private completedRequestAvailable(p:Proposal):boolean {
     const r=this.domain.requests?.[p.requestId??''],old=this.domain.proposals[r?.agreementId??''],ch=this.domain.characters[p.pawn];
-    return !!(r&&old&&ch&&r.pawn===p.pawn&&old.pawn===p.pawn&&old.action.kind==='haul'&&old.status==='accepted'&&old.standing?.status==='completed'
+    return !!(r&&old&&ch&&r.pawn===p.pawn&&old.pawn===p.pawn&&(old.action.kind==='haul'||old.action.kind==='haul-zone')&&old.status==='accepted'&&old.standing?.status==='completed'
       &&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&!ch.commitment&&!ch.intention);
   }
   private refreshReceipt(p:Proposal,game:GameState) {
@@ -759,7 +789,7 @@ export class Coordinator {
   }
   private requestRescue(view:import('./attention.js').AttentionView,result:Extract<Reflection,{kind:'request_rescue'}>,fresh:GameState) {
     const old=this.domain.proposals[result.agreementId],ch=this.domain.characters[view.pawn.id]!,seen=view.pawn.casualties;
-    if(!old||old.pawn!==view.pawn.id||old.action.kind!=='haul'||old.standing?.status!=='running'||ch.intention!==old.id||view.intention?.id!==old.id)throw Error('Request agreement superseded');
+    if(!old||old.pawn!==view.pawn.id||(old.action.kind!=='haul'&&old.action.kind!=='haul-zone')||old.standing?.status!=='running'||ch.intention!==old.id||view.intention?.id!==old.id)throw Error('Request agreement superseded');
     if(!seen||!seen.observations.some(t=>t.target===result.target)||Object.values(this.domain.requests??{}).some(r=>r.agreementId===old.id))throw Error('Unobserved casualty or duplicate agreement request');
     const current=fresh.pawns.find(p=>p.id===view.pawn.id)?.casualties;
     if(current?.epoch===fresh.epoch&&current.tick===fresh.ticks){
@@ -779,6 +809,20 @@ export class Coordinator {
   private async applyDecision(p:Proposal,result:Decision,fresh:GameState,signal?:AbortSignal) {
     if(p.replacesAgreementId)this.refreshReceipt(this.domain.proposals[p.replacesAgreementId]!,fresh);
     this.validateDecision(p,result,fresh);
+    const replacedNative=p.replacesAgreementId?this.domain.proposals[p.replacesAgreementId]:undefined;
+    if(p.replacesAgreementId&&result.kind==='accept'&&replacedNative?.action.kind==='haul-zone'){
+      // B7: durable four-step handover. Consent first; the dispatch id exists before any send;
+      // the rescue goes only after the game confirms exclusion and empty hands.
+      p.decision=result;p.status='accepted';
+      p.standing={status:'stopped',deadline:this.observedTick+(p.action.kind==='move'?0:p.action.maxTicks),steps:[],reason:'Replacement handover pending'};
+      if(p.requestId)this.domain.requests![p.requestId]!.status='closed';
+      (this.domain.handovers??={})[p.id]={proposalId:p.id,oldId:replacedNative.id,pawn:p.pawn,intentId:replacedNative.action.intentId,step:'excluding',deadline:p.standing.deadline,dispatchId:randomUUID()};
+      this.commit('replacement-consented',p.pawn,p);this.commit('handover-started',p.pawn,this.domain.handovers[p.id]);
+      try{await this.withdraw(p.pawn,('Accepted replacement: '+result.reason).slice(0,1000));}
+      catch(error){this.commit('handover-uncertain',p.pawn,{proposal:p.id,error:String(error).slice(0,200)});}
+      await this.advanceHandovers(await this.current());
+      return;
+    }
     if(p.replacesAgreementId&&result.kind==='accept') {
       // Consent is durable before any cancellation. An interrupted handover never
       // auto-dispatches the replacement: no action ID exists until stop is confirmed.
@@ -813,6 +857,36 @@ export class Coordinator {
     const newest=newestReceiptTick(this.domain,game);
     return {asOfTick:viewTick,...(newest>viewTick?{newerReceiptTick:newest}:{})};
   }
+  /** B7 steps 2–4, re-entrant from reconcile: confirmed exclusion, drained cargo, fresh
+   * validation, then one dispatch under the persisted id. A passed deadline stops it. */
+  private async advanceHandovers(game:GameState){
+    for(const h of Object.values(this.domain.handovers??{})){
+      if(h.step==='dispatched'||h.step==='stopped')continue;
+      const p=this.domain.proposals[h.proposalId]!;
+      const stop=(reason:string)=>{h.step='stopped';h.reason=reason;p.standing={...p.standing!,status:'stopped',reason};this.commit('handover-stopped',h.pawn,h);};
+      if(game.ticks>=h.deadline){stop('handover timed out');continue;}
+      if(h.step==='excluding'){
+        let live=this.liveIntent(game,h.intentId);
+        if(live&&(live.status==='open'||live.status==='pending')&&!live.excluded.includes(h.pawn)){
+          try{const r=await this.game.intent!({op:'intent-exclude',epoch:this.domain.epoch,intentId:h.intentId,actor:h.pawn,reason:'withdraw'});game=r.state;live=this.liveIntent(game,h.intentId);}
+          catch{continue;}   // uncertain: confirmed from the game's state on the next pass
+        }
+        if(live&&(live.status==='open'||live.status==='pending')&&!live.excluded.includes(h.pawn))continue;
+        h.step='draining';this.commit('handover-excluded',h.pawn,h);
+      }
+      if(h.step==='draining'){
+        // A job-end is only a trigger to look; empty hands and no tagged trip are required.
+        const own=game.pawns.find(x=>x.id===h.pawn);
+        if(!own||own.carrying===undefined||own.carrying!==''||own.job==='HaulToCell')continue;
+        const invalid=rescueQuestionInvalid(game,{...p,status:'pending'});
+        if(invalid){stop(invalid);continue;}
+        p.actionId=h.dispatchId;p.standing={status:'running',deadline:h.deadline,steps:[h.dispatchId]};
+        this.domain.characters[p.pawn]!.commitment=p.actionId;this.domain.characters[p.pawn]!.intention=p.id;
+        h.step='dispatched';this.commit('handover-dispatching',h.pawn,h);
+        try{await this.dispatch(p);}catch(error){this.commit('handover-dispatch-uncertain',h.pawn,{proposal:p.id,error:String(error).slice(0,200)});}
+      }
+    }
+  }
   private liveIntent(game:GameState,intentId:string):IntentView|undefined{
     const raw=(game.intents??[]).find(i=>i.intentId===intentId);return raw?IntentView.parse(raw):undefined;
   }
@@ -845,7 +919,7 @@ export class Coordinator {
       this.commit('intent-offer-lapsed',p.pawn,{proposal:p.id,pawn:p.pawn,answer:result.kind,intentStatus:live.status});
       return;
     }
-    if(result.kind==='accept')planIntentOffer(this.domain.nativeHaul,fresh.pawns.find(x=>x.id===p.pawn),a,live);
+    if(result.kind==='accept')planIntentOffer(nativeEntries(this.domain),fresh.pawns.find(x=>x.id===p.pawn),a,live);
     if(result.kind==='counter'&&(result.action.kind!=='haul-zone'||result.action.intentId!==a.intentId))throw Error('Counter must address the same shared intent');
     p.decision=result;
     p.status=result.kind==='accept'?'accepted':result.kind==='refuse'?'refused':result.kind==='defer'?'deferred':'countered';
@@ -869,8 +943,10 @@ export class Coordinator {
         p.standing!.status='stopped';p.standing!.reason='Game did not admit this native agreement';
         if(this.domain.characters[p.pawn]!.intention===id)delete this.domain.characters[p.pawn]!.intention;
       }else if(!live?.accepted.includes(p.pawn)){
-        planIntentOffer(this.domain.nativeHaul,game.pawns.find(x=>x.id===p.pawn),a,live);
-        const r=await this.game.intent!({op:'intent-accept',epoch:this.domain.epoch,intentId:a.intentId,actor:p.pawn,thing:a.thing,x:a.x,z:a.z,w:a.w,h:a.h,quota:a.quota,maxTicks:a.maxTicks,variant:a.variant});
+        planIntentOffer(nativeEntries(this.domain),game.pawns.find(x=>x.id===p.pawn),a,live);
+        const e=nativeEntries(this.domain).find(x=>x.intentId===a.intentId);
+        const r=await this.game.intent!({op:'intent-accept',epoch:this.domain.epoch,intentId:a.intentId,actor:p.pawn,thing:a.thing,x:a.x,z:a.z,w:a.w,h:a.h,quota:a.quota,maxTicks:a.maxTicks,variant:a.variant,
+          zoneId:a.zoneId??-1,label:a.label??e?.label,hold:a.hold??'strict',...(e?.siteId?{siteId:e.siteId}:{})});
         live=this.liveIntent(r.state,a.intentId);
         if(r.state.epoch!==this.domain.epoch||r.state.world!==this.domain.world||!live?.accepted.includes(p.pawn))throw Error('Intent acceptance unconfirmed');
       }
@@ -887,8 +963,13 @@ export class Coordinator {
       const v=IntentView.parse(raw),old=this.domain.intentViews?.[v.intentId];
       if(JSON.stringify(old)!==JSON.stringify(v)){
       (this.domain.intentViews??={})[v.intentId]=v;
+      const entry=nativeEntries(this.domain).find(e=>e.intentId===v.intentId);
+      // Who was asked: only accepted offers are agreements; anyone else credited is helping.
+      const asked=Object.values(this.domain.proposals).filter(p=>p.action.kind==='haul-zone'&&p.action.intentId===v.intentId&&p.status==='accepted').map(p=>p.pawn);
       this.commit('intent-progress','Game',{intentId:v.intentId,status:v.status,previousStatus:old?.status,previousDelivered:old?.delivered??0,
-        previousFinishedAfterExclusion:old?.finishedAfterExclusion??0,finishedAfterExclusion:v.finishedAfterExclusion,...intentProgress(v)});
+        previousFinishedAfterExclusion:old?.finishedAfterExclusion??0,finishedAfterExclusion:v.finishedAfterExclusion,...intentProgress(v),
+        thingLabel:v.thingLabel??entry?.thingLabel??v.thingDef,label:entry?.label??v.label??'stockpile',asked,stopReason:v.stopReason??null,
+        ordinaryByPawn:Object.fromEntries((v.ordinaryByPawn??[]).map(p=>[p.pawn,p.count])),ordinaryUnattributed:v.ordinaryUnattributed??0});
       }
       if(v.status==='open'||v.status==='pending')continue;
       // Unanswered offers of a closed intent lapse; an answer already being thought over is
@@ -974,6 +1055,7 @@ export class Coordinator {
         } else if(!this.domain.outcomes[p.actionId]) await this.dispatch(p);
       }
       this.ingestIntents(game);
+      await this.advanceHandovers(game);
       for(const p of Object.values(this.domain.proposals)) if(p.standing?.status==='running'&&p.action.kind!=='haul-zone') {
         const own=game.pawns.find(x=>x.id===p.pawn);
         if(game.ticks>=p.standing.deadline||!workReady(p,own))

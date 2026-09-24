@@ -40,12 +40,14 @@ export type EatOption={thing:string;label:string;x:number;z:number;count:number;
 export type EatingView={epoch:string;tick:number;mapId:number;options:EatOption[]};
 export type EatRequest={id:string;epoch:string;actor:string;action:EatOption;mapId:number;untilTick:number};
 export type SelfCare={id:string;pawn:string;questionId:string;action:EatOption;mapId:number;untilTick:number;stopped?:boolean};
-export type Pawn = {eating?:EatingView;foodObservation?:import('./food-observation.js').FoodObservation;production?:ProductionView;buildReady?:boolean;cookReady?:boolean;linkStatus?:import('./shared-status.js').LinkStatus;sharedStatus?:import('./shared-status.js').SharedStatus[];observedPeople?:{id:string;name:string}[];id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[];visibleSubjects?:{target:string;downed:boolean;inBed:boolean}[];visibleBeds?:{bed:string;x:number;z:number;medical:boolean;occupied:boolean;prisoner:boolean;slave:boolean;colonyOwned:boolean;forbidden:boolean}[]};downed?:boolean;currentBed?:string;carrying?:string;rescue?:RescueView;rescueReady?:boolean;workReady?:boolean;haulingCapable?:boolean};
+export type Pawn = {eating?:EatingView;foodObservation?:import('./food-observation.js').FoodObservation;production?:ProductionView;buildReady?:boolean;cookReady?:boolean;linkStatus?:import('./shared-status.js').LinkStatus;sharedStatus?:import('./shared-status.js').SharedStatus[];observedPeople?:{id:string;name:string}[];id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[];visibleSubjects?:{target:string;downed:boolean;inBed:boolean}[];visibleBeds?:{bed:string;x:number;z:number;medical:boolean;occupied:boolean;prisoner:boolean;slave:boolean;colonyOwned:boolean;forbidden:boolean}[]};downed?:boolean;currentBed?:string;carrying?:string;rescue?:RescueView;rescueHandover?:RescueView|null;rescueReady?:boolean;workReady?:boolean;haulingCapable?:boolean};
 export type Receipt = {id:string;actor:string;status:Outcome;reason:string;failureCode?:string;validatedTick?:number;x:number;z:number;kind?:string;thing?:string;count?:number;delivered?:number;target?:string;bed?:string};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
   pawns:Pawn[];actions:Receipt[];crewLog?:CrewReport;events?:NativeEvent[];eventSeq?:number;
-  intents?:NativeIntentView[];
+  intents?:NativeIntentView[];clock?:string;
+  /** Colony stockpiles on the current map (colony-public: someone placed them). */
+  stockpiles?:{zoneId:number;label:string;x:number;z:number;w:number;h:number;cells:number}[];
 };
 export type NativeEvent = {seq:number;tick:number;pawn:string;kind:string;detail:string;subject?:string;subjectName?:string};
 export type Attention = {event:NativeEvent;route:'native'|'appraisal'|'deliberation';interrupt?:boolean};
@@ -91,7 +93,9 @@ export type Domain = {
   pendingIntentAcceptances?:string[];
   pendingIntentExclusions?:Record<string,{intentId:string;actor:string;reason:string}>;
   diagnostics?:{attentionGaps:number;attentionGapKinds:Record<string,number>};
-  nativeHaul?:import('./native-intents.js').NativeHaulConfig;intentViews?:Record<string,NativeIntentView>;
+  /** B7: durable rescue handovers replacing a native haul, one per replacement proposal. */
+  handovers?:Record<string,{proposalId:string;oldId:string;pawn:string;intentId:string;step:'excluding'|'draining'|'dispatched'|'stopped';deadline:number;dispatchId:string;reason?:string}>;
+  nativeHaul?:import('./native-intents.js').NativeHaulConfig;nativeHauls?:import('./native-intents.js').NativeHaulEntry[];nativeIntentOnly?:boolean;intentViews?:Record<string,NativeIntentView>;
   schema:1;world:string;epoch:string;branch:string;
   characters:Record<string,Character>;proposals:Record<string,Proposal>;
   outcomes:Record<string,Receipt>;requests?:Record<string,AlternativeRequest>;

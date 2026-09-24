@@ -57,5 +57,7 @@ test('haul-zone intent is bounded',()=>{
   const ok={kind:'haul-zone',intentId:'8f14e45f-ceea-467a-9575-0fbc5a3b7a7e',thing:'WoodLog',x:76,z:84,w:4,h:4,quota:30,maxTicks:30000,variant:'attribution'};
   assert.ok(HaulZone.safeParse(ok).success);
   assert.ok(!HaulZone.safeParse({...ok,quota:76}).success);
-  assert.ok(!HaulZone.safeParse({...ok,w:9,h:8}).success);
+  assert.ok(!HaulZone.safeParse({...ok,w:65,h:8}).success);
+  assert.ok(!HaulZone.safeParse({...ok,thing:'Wood Log'}).success);
+  assert.ok(HaulZone.safeParse({...ok,thing:'ComponentIndustrial',label:'east shed',zoneId:950,hold:'growing'}).success);
 });

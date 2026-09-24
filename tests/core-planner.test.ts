@@ -334,7 +334,9 @@ test('core narration and questions retain snapshot age when ingestion arrives du
   release({topic:null,action:kind==='wait'?{kind,reason:'No consumption observed'}:{kind,pawn:'A',text:'Food still urgent?',reason:'Ask about hunger'}});
   assert.equal((await pending).status,'applied');
   const texts=crewReport(c.inspect(),g.data.ticks).entries.map(e=>e.text);
-  assert.ok(texts.some(t=>t==='[as of t20100; newer receipts since t20205] '+(kind==='wait'?'No consumption observed':'Food still urgent?')));
+  // A wait is silent in the log (Gate C); a question keeps its as-of prefix.
+  if(kind==='wait')assert.ok(!texts.some(t=>t.includes('No consumption observed')));
+  else assert.ok(texts.some(t=>t==='[as of t20100; newer receipts since t20205] Food still urgent?'));
   s.close();
  }
 });
