@@ -1,0 +1,126 @@
+# Spike design: one native-intent haul (Gate B)
+
+**Status: draft for design freeze.** Written by Clawd; needs Fable's architecture sign-off
+and Astra's confirmation that it is testable in staging. Nothing is compiled before both.
+Builds on [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md) (pinned: RimWorld 1.6.4871 rev600)
+and [NATIVE_INTENTS](NATIVE_INTENTS.md).
+
+## Question
+
+Can one agreement ("haul up to 30 wood into a new stockpile") run as a **native intent**
+(a tagged stockpile that pawns fill through their own work givers) with consent intact,
+receipts from game effects, and work that carries on across meals without new model
+calls? And does that move us toward a crew a viewer can follow
+([VISION](VISION.md#what-watching-should-feel-like)), not merely match the old model?
+
+## Decided going in
+
+1. **The tag is on the zone, not on the wood.** A refusing pawn hauling that wood into a
+   *different* stockpile is not a violation. The filter placement follows from this;
+   don't "fix" it later.
+2. **Refusal, defer and withdrawal bind; helping is credited as helping.** Exclusive
+   versus attribution-only is measured (both variants), not assumed.
+3. **Quota is per intent, credit is per pawn.** "Up to 30" counts every drop into the
+   tagged zone while the intent is open, helpers included, credited to the actual carrier.
+   An overshoot of up to one stack from jobs created concurrently is allowed and
+   reported, not hidden.
+4. **No 35 % needs stop for native intents.** Needs belong to the pawn and the game (the
+   think tree handles hunger between trips). The only Concord stops are withdrawal,
+   refusal, expiry and quota.
+5. **After the quota, the tag retires and the zone becomes an ordinary stockpile.**
+   Retiring the intent removes the tag, nothing else.
+6. **No model call on the tick path.** Patches read cached state only.
+
+## Fixture: `native-haul-v1`
+
+Derived from the campfire fixture, frozen before any run:
+
+- Three unchanged characters with campfire-v2 needs (Food 0.40 / 0.65 / 0.55), so Alvin
+  gets hungry during the agreement.
+- **Work priorities on:** Hauling at 3 for all three; other work types at their vanilla
+  defaults where the pawn is capable.
+- **Wood: three stacks of 30 (90 in total) and no storage that accepts wood.** The
+  fixture removes the old one-cell wood stockpiles and any other zone whose filter allows
+  `WoodLog`, so nobody hauls wood before an agreement exists. Astra confirms the zone list
+  when building the fixture.
+- One fixture-authored **candidate area** (a rectangle of cells) for the new stockpile.
+  The area is data, not a zone, until an intent is accepted.
+- Berries and everything else unchanged. No blueprints, bills or campfire.
+
+## Mechanism
+
+**Intent object (coordinator):** `haul-zone {intentId, thingDef: WoodLog, area, quota
+1–75, maxTicks}`. It is offered to each pawn as an ordinary offer that references the
+intent. Answers work as today (accept, refuse, defer, counter with a smaller quota), and
+each pawn's answer sets its standing on the shared intent.
+
+**On the first acceptance** the mod creates a `Zone_Stockpile` on the area: wood only,
+priority *Important*, tagged in our saved `WorldState` as `Zone.ID → {intentId, quota,
+delivered, accepted[], excluded[], variant, open}`. Nothing lives in a job driver.
+
+**Harmony patches** (Harmony mod as a declared dependency, not bundled). Each carries a
+one-line reason in the code:
+
+| # | Target | Kind | Reason |
+|---|---|---|---|
+| 1 | `StoreUtility.TryFindBestBetterStoreCellForWorker` | prefix | Skip a tagged, open zone for excluded pawns (both variants) or non-accepted pawns (exclusive) |
+| 2 | `HaulAIUtility.HaulToCellStorageJob` | postfix | Cap `job.count` for a tagged zone to the remaining quota |
+| 3 | `Pawn_CarryTracker.TryDropCarriedThing` | prefix and postfix | Delivered receipts: carrier, thing def, count placed, the cell's zone |
+| 4 | `Pawn_JobTracker.StartJob` / `EndCurrentJob` | postfix / prefix | `job-start` and `job-end` with condition and seen cause, for timing and interruptions |
+| 5 | `Thing.Ingested` | prefix and postfix | `ingested`: eater, def, item count, nutrition |
+| 6 | `Pawn_InteractionsTracker.TryInteractWith` | postfix | `interaction`: initiator, recipient, def |
+
+**On refusal, defer or withdrawal:** add the pawn to `excluded`, end its current job if
+the job targets the tagged zone, and drop matching queued jobs.
+
+**Retire** on quota reached, expiry, or the operator's stop: `open = false`, tag removed.
+Receipts after that are native, not agreement work.
+
+## Coordinator changes (named, nothing else)
+
+- **Routing** for the new kinds, as in [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md#routing-for-new-event-kinds).
+  `haul-delivered` is not a wake cause per trip; the core wakes on the intent's
+  **first delivery, quota reached, expiry, and stall** (no delivery for a set number of
+  ticks while open).
+- **Receipt shape:** aggregate intent progress `{delivered, quota, overshoot, byPawn{}}`
+  from drop receipts. The crew log shows credit per pawn.
+- **Agreement lifecycle:** a shared intent referenced by several offers; a per-pawn
+  standing (accepted, excluded or none); the stop rules in decision 4; topic closure is
+  *resolved* when the quota is met.
+- **Checkpoints** are allowed while an intent is open, because there is no in-flight
+  Concord job. This is **tested** in the spike (paired and cold restore mid-intent),
+  not assumed.
+
+## Options menu
+
+Not given to the core in this spike (it proposes the one intent). A mod command
+`work-options` enumerates per pawn and per work giver the top N candidates with the
+native predicates, **for measurement only**: cost per call for three pawns, and how often
+it matches what pawns actually do.
+
+## Runs (Astra)
+
+1. **Scripted, both variants**, zero model calls, recorded. The scripted core offers
+   the intent to all three. Alvin accepts, Beatrice refuses, Pedro doesn't answer. Alvin
+   withdraws after about 20 delivered in one sub-run. Paired and cold restore mid-intent.
+2. **One frozen live run**, Luna (core and pawns), continuous, recorded, ten minutes
+   wall clock, variant chosen by Fable at freeze time.
+
+## Measures and baselines
+
+| Measure | Baseline |
+|---|---|
+| Stale haul rejections; delivered totals reconstructed from receipts; work resuming after a meal without a model call | Integration checkpoint (#38: 40 wood in 4 trips) |
+| Idle or wandering time; simulation speed with patches (and `work-options` cost) | Recorded scene (#64) |
+| Consent violations: an excluded pawn delivering into the tagged zone while it's open | **Must be zero** |
+| Overshoot beyond quota; help from non-accepted pawns (attribution variant) | Reported |
+| Checkpoint mid-intent: tag, counters and receipts after paired and cold restore | Must match |
+
+**Stop and diagnose offline** if unsupported capability or consent could reach
+execution, or invalid output or non-progress stalls the run. Retain all failures.
+
+## Out of scope
+
+Construction, cooking and rescue migration; prioritized work; the standing-commitment
+`ThinkNode`; native social consequences; giving the options menu to the core; any other
+coordinator change. If the spike needs one of these, it comes back to Gate B.
