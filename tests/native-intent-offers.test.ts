@@ -4,6 +4,8 @@ import { randomUUID } from 'node:crypto';
 import { Coordinator } from '../src/coordinator.js';
 import { Store } from '../src/store.js';
 import { scripted } from '../src/backends.js';
+import {coreAdmission,NATIVE_INTENT_STALL_TICKS} from '../src/core-scheduler.js';
+import {corePrompt} from '../src/core-planner.js';
 import { coreView } from '../src/core-planner.js';
 import {stopTrialWork} from '../src/work-trial.js';
 import {nativeSceneCrew,nativeOfferCoverage,assertNativeLedger,assertNativeRestore} from '../trials/native-haul-live.js';
@@ -210,4 +212,24 @@ test('native restore and polling validate actual game ledger rather than copied 
  const lost=structuredClone(game.data);lost.intents=[];assert.throws(()=>assertNativeRestore(lost,saved),/GAME intents/);
  const changed=structuredClone(game.data);changed.intents![0]!.accepted=[];assert.throws(()=>assertNativeRestore(changed,saved),/GAME intents/);
  const escaped=structuredClone(game.data);escaped.intents![0]!.overshoot=1;assert.throws(()=>assertNativeLedger(escaped,cfg.intentId),/violation/);
+});
+
+
+test('ongoing core wakes on first native delivery and each quiet period, not every trip',async()=>{
+ const {c,game}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:300,windowTicks:null});
+ const choose={name:'scripted',async plan(){return {topics:[],actionTopicId:null,action:{kind:'wait' as const,reason:'Observe receipts'}};}};
+ assert.equal((await c.planCoreWhenDue(choose)).status,'applied');
+ const p=await c.core().propose('B',intentAction(cfg),'Offer');await c.pawn('B').decide(p.id,say('accept'));
+ const i=game.data.intents![0]!;Object.assign(i,{delivered:5,remaining:25,lastDeliveryTick:400,byPawn:[{pawn:'P',count:5}]});game.data.ticks=400;await c.reconcile();
+ const v=await c.corePerspective(),records=corePrompt(v).perspective.currentRecords;
+ assert.deepEqual(records.nativeIntents![0]!.byPawn,{P:5});assert.equal(records.nativeIntents![0]!.delivered,5);
+ assert.equal((await c.planCoreWhenDue(choose)).status,'applied');
+ Object.assign(i,{delivered:10,remaining:20,lastDeliveryTick:800,byPawn:[{pawn:'P',count:10}]});game.data.ticks=800;await c.reconcile();
+ assert.equal((await c.planCoreWhenDue(choose)).status,'idle');
+ game.data.ticks=800+NATIVE_INTENT_STALL_TICKS;assert.equal((await c.planCoreWhenDue(choose)).status,'applied');
+ game.data.ticks+=400;assert.equal((await c.planCoreWhenDue(choose)).status,'idle');
+ Object.assign(i,{delivered:15,remaining:15,lastDeliveryTick:game.data.ticks,byPawn:[{pawn:'P',count:15}]});await c.reconcile();assert.equal((await c.planCoreWhenDue(choose)).status,'idle');
+ game.data.ticks+=NATIVE_INTENT_STALL_TICKS;assert.equal((await c.planCoreWhenDue(choose)).status,'applied');
+ game.data.ticks+=400;Object.assign(i,{status:'met',delivered:30,remaining:0,byPawn:[{pawn:'P',count:30}]});await c.reconcile();assert.equal((await c.planCoreWhenDue(choose)).status,'applied');
+ const admission=coreAdmission(c.inspect().coreState!.schedule!,await c.corePerspective());assert.equal(admission.ready,false);
 });

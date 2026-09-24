@@ -10,7 +10,7 @@ import {rescueView} from './rescue-planning.js';
 import {agreementProgress} from './crew-log.js';
 import type {SocialMessage} from './social.js';
 import {modelPerspective} from './model-perspective.js';
-import {intentAction,notOfferedReason} from './native-intents.js';
+import {intentAction,notOfferedReason,progress as intentProgress,IntentView} from './native-intents.js';
 const text=z.string().trim().min(1).max(600),id=z.string().min(1).max(160);
 const TopicUpdate=z.object({sourceId:id,text:z.string().trim().min(1).max(240),status:z.enum(['open','blocked','deferred','resolved','declined'])}).strict();
 const CoreAction=z.discriminatedUnion('kind',[
@@ -91,6 +91,7 @@ export function coreView(d:Domain,g:GameState){
  const topics=visibleTopics.map(t=>({sourceId:t.sourceId,text:t.text,status:t.status,proposalIds:[...t.proposalIds],basedOnTick:t.basedOnTick??null,updatedTick:t.updatedTick??null,selfCareIds:linkedCare(t.sourceId).map(a=>a.id),outcomes:t.proposalIds.map(id=>{const p=d.proposals[id];return {id,status:p?agreementProgress(d,p,g.ticks,g.actions).status:'unknown'};})}));
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:core.revision,tick:g.ticks,brief:{...core.brief},
   selfCare:selfCare.slice(-12),
+  ...(d.nativeHaul?{nativeIntents:(g.intents??[]).filter(i=>i.intentId===d.nativeHaul!.intentId).map(raw=>{const i=IntentView.parse(raw);return {intentId:i.intentId,thingDef:i.thingDef,status:i.status,createdTick:i.createdTick,lastDeliveryTick:i.lastDeliveryTick,accepted:[...i.accepted],excluded:[...i.excluded],...intentProgress(i)};})}:{}),
   ...(ongoing?{ongoing:true}:{}),questions:questions.map(q=>({id:q.id,pawn:q.pawn,status:q.status})),
   topicClosures,reoffers:reoffers.map(r=>({id:r.id,pawn:r.pawn,deferredId:r.deferredId,tick:r.tick,status:r.status,reason:r.reason,evidence:'attributed-speech' as const})),
   ...(g.pawns.some(p=>p.foodObservation)?{foodSightings:sharedFood(d,g),foodKnowledge}:{}),sharedStatus:sharedStatus(d,g),crew:Object.values(d.characters).map(c=>({id:c.id,name:c.name})),messages,agreements,counters,requests,topics,opportunities,availability,
@@ -123,7 +124,7 @@ export function validateCoreChoice(raw:unknown,v:CoreView){
 }
 export function corePrompt(v:CoreView){return {task:'core-plan',sourceContract:'currentRecords are authoritative only within their stated scope and timestamp. Shared telemetry can be unknown or stale. communication is attributed testimony, not verified physical truth. plannerHistory contains fallible older interpretations, never current need readings or proof a reply is absent. Reconcile summaries against currentRecords before carrying them forward; keep uncertainty explicit. availableChoices lists eligibility, not consent or a preferred action.',
  perspective:{world:v.world,epoch:v.epoch,branch:v.branch,revision:v.revision,tick:v.tick,brief:v.brief,crew:v.crew,
- currentRecords:{asOfTick:v.tick,sharedStatus:v.sharedStatus,questions:v.questions,selfCare:v.selfCare??[],topicClosures:v.topicClosures,agreements:v.agreements.map(a=>({id:a.id,pawn:a.pawn,action:a.action,status:a.status,progress:a.progress})),...(v.foodSightings?{foodSightings:v.foodSightings,foodKnowledge:v.foodKnowledge}:{})},
+ currentRecords:{asOfTick:v.tick,sharedStatus:v.sharedStatus,...(v.nativeIntents?{nativeIntents:v.nativeIntents}:{}),questions:v.questions,selfCare:v.selfCare??[],topicClosures:v.topicClosures,agreements:v.agreements.map(a=>({id:a.id,pawn:a.pawn,action:a.action,status:a.status,progress:a.progress})),...(v.foodSightings?{foodSightings:v.foodSightings,foodKnowledge:v.foodKnowledge}:{})},
  communication:{messages:v.messages,requests:v.requests,reoffers:v.reoffers,agreementSpeech:v.agreements.map(a=>({id:a.id,reason:a.reason,...(a.reply?{reply:a.reply,evidence:a.replyEvidence}:{})}))},
  availableChoices:{opportunities:v.opportunities,counters:v.counters,questionRecipients:v.questionRecipients,availability:v.availability,capabilities:v.capabilities,limits:v.limits},
  plannerHistory:{authority:'interpretation-only; unknown dates stay unknown',topics:v.topics.map(t=>({sourceId:t.sourceId,interpretation:t.text,status:t.status,basedOnTick:t.basedOnTick??null,updatedTick:t.updatedTick??null,proposalIds:t.proposalIds,selfCareIds:t.selfCareIds,outcomes:t.outcomes}))},
