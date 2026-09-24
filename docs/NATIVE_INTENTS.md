@@ -11,22 +11,25 @@ in the 1.6 assemblies before we build on them.
 Concord currently *drives* pawns. Each capability is a hand-built scanner, validator
 and custom `JobDriver`, issued with `TryTakeOrderedJob` (the same path as a player's
 right-click), plus a 30-tick diff of needs, jobs and memories for perception. There
-are no hooks into the game's own events, and nothing touches work priorities,
-designations, zones, bills or the think tree. Test fixtures switch all work priorities
-off, so pawns idle unless the core orders something.
+are no hooks into the game's own events or think tree. Construction already creates
+blueprints and cooking creates pawn-restricted bills, but these are isolated from
+ordinary work and driven by ordered jobs. Test fixtures switch all work priorities
+off; native self-care, social routines and wandering still run without core orders.
 
 That puts two planners in charge of one pawn, and our own runs show the seams:
 
-- **Competing planners.** Native hunger fed a pawn while its Concord eating choice was
-  in flight, and the choice was rejected as stale. "Food visible, not locally
-  available" failures in #61 and #64 are the same collision.
+- **Competing planners.** Native self-care and asynchronous Concord choices can race.
+  #61 and #64 retained stale or unavailable eating choices, and #64 separately sampled
+  native ingestion. Their exact historical rejection causes remain unknown; these
+  results motivate investigating the seam, not claiming native eating caused them.
 - **One-off orders instead of standing intent.** A haul stops when Food drops below
-  35 %, the pawn eats natively, and the agreement is dead ("after-meal resumption is not
-  automatic"). Native work never has this problem: it lives on the map as designations,
-  haulables and bills, and pawns find it again after any interruption.
+  35 %, the pawn can eat natively, and the agreement is dead ("after-meal resumption is not
+  automatic"). Native work can remain discoverable as designations, haulables and
+  bills after an interruption, although changed needs, resources or eligibility can
+  still prevent resumption.
 - **Exactness at the wrong layer.** Decisions take seconds to a minute; our contract is
   "this exact stack, this cell, this count, valid at this tick" at 60 ticks per second.
-  In continuous play that guarantees stale rejections.
+  In continuous play that makes stale rejections more likely.
 - **It doesn't scale.** Each capability costs a C# scanner, validator, `JobDriver`,
   TypeScript planner, receipts and docs. RimWorld has on the order of a hundred work
   givers; building, mining, growing, treatment and defence won't come from hand-rolling
@@ -43,10 +46,12 @@ done natively.
 
 ### What stays
 
-Everything on the coordinator side: consent, receipts as truth, projections and
+The coordinator's responsibilities and invariants: consent, receipts as truth, projections and
 privacy, the core planner and its topics, attention and timing, paired checkpoints,
 model isolation and the evidence discipline ([ARCHITECTURE](ARCHITECTURE.md)). The
-coordinator should mostly notice that receipts and options have a new shape.
+coordinator needs narrow protocol, routing, lifecycle and receipt adaptations, not a
+planner rewrite. In particular, a resumable job interruption must be distinguished
+from withdrawal, expiry or a terminal agreement failure.
 
 ### What changes
 
@@ -59,13 +64,20 @@ menu of real options comes from the same work-giver pipeline the game uses for i
 right-click menu (`WorkGiver_Scanner` and friends). The "attentive crewmate" rule
 extends to **what the colony has already built**: stockpiles, blueprints, bills and
 designations are colony-public, because someone placed them on the map. Loose things
-stay sightings.
+stay sightings. A native scan's access to the whole map is not permission to expose
+unobserved resources or private facts in a model's option menu. Candidate discovery
+must also leave jobs, reservations and map state unchanged; revalidate at execution.
 
 **3. Perception from the game's events.** Harmony patches on job start and end (with
 the game's own end reason), ingestion, construction completed, recipe finished, social
-interactions, downed, and letters. Exact causal events replace 30-tick diffs, and
+interactions, downed, and letters. Hooks replace inferred job/action transitions, while
+sampled state remains where needed for needs bands and reconciliation. Outcome
 receipts come from native jobs linked to an agreement. This also answers "the crew log
 doesn't say why coordination stopped".
+
+A job-end reason is not itself proof of a quantity delivered or an item consumed.
+Record actual effect deltas, with actor, agreement, tick and deduplication identity;
+aggregate those receipts without counting retries, stack merges or restores twice.
 
 **Later:** a `ThinkNode` in the humanlike think tree that consults cached standing
 commitments (no model call at tick time), so an idle pawn *prefers* the work it agreed
@@ -86,6 +98,12 @@ This is the part to get right; the rest is plumbing.
   Harmony filter on work-giver eligibility, the hottest path in the game and one many
   mods touch, so it must stay small and its cost on simulation speed is measured. Bills
   already support a native pawn restriction, which cooking uses today.
+- **Helping is not acceptance.** Attribute a helper's contribution to that pawn;
+  never invent its consent or report it as the accepting pawn's work. Refusal/defer
+  state must be linked from the offered work to any resulting native intent even
+  though a refused offer creates no agreement. Withdrawal remains binding, and
+  re-offering or recreating an intent must not silently erase a refusal. Define the
+  scope and explicit change-of-mind path in the spike.
 - **Work priorities belong to the pawn.** Re-enabling priorities means colonists do
   ordinary colony work on their own, which is how RimWorld works and fits the premise:
   priorities are a colonist's own standing habits. The core never sets them. A pawn may
@@ -133,17 +151,23 @@ internals note:
   drafting), so receipts can classify those interruptions.
 
 The note is done when it also gives a **routing entry for every new event kind**
-before any of them reach the event stream. Today anything unlisted goes to
-deliberation and interrupts the current thought; with priorities on, job ends alone
-would be dozens a minute. Starting point: job start and end → native; ingestion →
-native; social interaction → queued; downed → interrupting.
+before any of them reach the event stream. Today `src/routing.ts` sends unknown kinds
+to appraisal without interruption; known memory/health/casualty kinds generally go
+to deliberation (quiet social memories do not interrupt). Unknown kinds can therefore
+wait without an appraiser; reusing significant kinds can instead create a wake storm.
+Starting point: job start and end → native, non-interrupting; ingestion → native,
+non-interrupting; routine social interaction → queued deliberation, non-interrupting;
+downed → deliberation, interrupting. Specify public core wake policy separately and
+measure model wakes, cancellations and event-buffer gaps as well as simulation speed.
 
 Mods worth reading for patterns: Achtung!, Pick Up And Haul, Colony Manager, and
 Hospitality or Psychology for think-tree injection.
 
 ## The spike
 
-One bounded experiment, no coordinator changes, the same campfire fixture:
+One bounded experiment, no coordinator planner rewrite, the same campfire fixture
+with work priorities enabled. Include the narrow adapter/routing/lifecycle changes
+needed for a standing agreement and aggregate receipts:
 
 1. Harmony job, ingestion and social event hooks, routed per the internals note, then
    fed into the existing event stream.
@@ -152,18 +176,27 @@ One bounded experiment, no coordinator changes, the same campfire fixture:
    plus the eligibility filter, with receipts from the native haul jobs.
 
 Run both consent variants, exclusive and attribution-only, and count who did what.
+Scripted checks must cover both, including refusal/defer/withdrawal, voluntary helpers,
+meal interruption and resumption, expiry and paired/cold restore. A stockpile zone
+alone does not express a 30-unit quota: define and enforce the agreement's remaining
+quantity across accepting pawns, helpers and in-flight deliveries, then retire only
+its owned intent state. Do not count unrelated stock changes as agreement progress.
+Confirm the eligibility hook covers already queued/running work as well as new scans.
 
 **Measure against the right baselines:**
 
 | Metric | Baseline |
 |---|---|
-| Stale haul rejections, delivered totals from receipts, work surviving a meal | the integration checkpoint (#38: 40 wood in 4 trips) |
-| Idle or wandering time, simulation speed | the ten-minute recorded scene (#64) |
-| Consent violations (a pawn doing tagged work it refused or deferred) | must be zero |
+| Delivered totals from receipts | integration checkpoint (#38: 40 wood in 4 trips), historical reference |
+| Stale haul rejections and work surviving a meal | matched scripted ordered-job/native-intent scenarios; #38 is not a measured meal-resumption baseline |
+| Idle or wandering time, simulation speed | #64 as historical reference; matched fixture/priority settings for causal comparisons |
+| Consent violations (a pawn doing tagged work it refused, deferred or withdrew from) | must be zero |
 
-The spike's live run follows the usual stop rule: if unsupported capability or consent
-could reach execution, or invalid output or non-progress stalls the run, stop and
-diagnose offline.
+Freeze the live variant, setup and duration before inference; the two-variant comparison
+is scripted, followed by one recorded live run, not retries for a preferred result.
+The live run follows the usual stop rule: if unsupported capability or consent could
+reach execution, or repeated invalid output or non-progress stalls the run, stop and
+diagnose offline. Quiet waiting and a successful raw-food alternative are valid.
 
 **Success is not parity with the old model.** The destination is still the recorded
 scene from [VISION](VISION.md#what-watching-should-feel-like): a crew a viewer can follow,

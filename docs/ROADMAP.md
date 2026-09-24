@@ -6,7 +6,8 @@ Forward-looking only; past results are in [HISTORY](HISTORY.md) and the
 
 ## Where we are
 
-The "watchable scene" phase delivered what it set out to test:
+The "watchable scene" phase delivered the tools and a first recorded trial, not yet
+proof of sustained, understandable coordination:
 
 - a compact observer panel and recording pipeline ([pilot](evidence/observer-recording-pilot.json));
 - two-pass video feedback, useful as a navigation aid but not an authority
@@ -18,30 +19,35 @@ The "watchable scene" phase delivered what it set out to test:
 - a [ten-minute recorded Luna scene](RECORDED_SCENE.md#result): continuous interaction
   works, 39 berries eaten on receipts, no work or cooking.
 
-The scene also showed where the limit is. Local food access, stale rejections and
-agreements that die at the first interruption are not model failures: they come from
-the way the mod drives pawns with one-off ordered jobs while RimWorld's own planner is
-also running them. [NATIVE_INTENTS](NATIVE_INTENTS.md) explains this and the new
+The scene exposed local food access and stale choices alongside prose and topic
+bookkeeping failures. The code also stops agreements on interrupted steps. One-off
+ordered jobs alongside RimWorld's own planner are a structural limitation worth
+testing; the exact causes of the historical eating rejections remain unknown, and a
+new game interface will not by itself fix model grounding. [NATIVE_INTENTS](NATIVE_INTENTS.md) explains the new
 direction: **steer the game's own planner instead of driving pawns.**
 
 ## Next phase: work with RimWorld's planner
 
 ### Ground rules
 
-- **The coordinator stays.** Consent, receipts as truth, projections, the core,
-  attention, checkpoints and model isolation are unchanged. The change is on the game
-  side.
+- **The coordinator architecture stays.** Consent, receipts as truth, projections,
+  the core, attention, checkpoints and model isolation retain their responsibilities.
+  Narrow protocol, routing, receipt and lifecycle adaptations support the new game side.
 - **Consent stays per agreement.** Native intents are tagged with their agreement. A
   pawn that refused or deferred it never does its tagged work; pawns who were never
   asked may still pitch in (whether tagged work is exclusive is measured in the spike).
   Work priorities belong to each pawn; the core never sets them, and a refusal never
-  silently turns off a work type.
+  silently turns off a work type. Withdrawal still binds; helpers are credited as
+  helpers, not fabricated acceptances.
 - **The destination is unchanged.** The goal is still the recorded scene from
   [VISION](VISION.md#what-watching-should-feel-like). The new game side is a means,
   and success is measured against that goal, not parity with the old model.
 - **No new hand-built capabilities** on the ordered-job model. Fixes only; it remains
   the regression baseline until each native replacement matches it.
-- Continue from the last phase: continuous play, Luna first with logged escalation,
+- **No prescribed plot.** Cooperation, disagreement and raw-food alternatives all
+  count; cooking and refusals are never manufactured requirements.
+- Continue from the last phase: continuous play, Luna first with escalation only when
+  justified and logged (automatic routing remains unimplemented),
   restraint without arbitrary caps, the setup frozen before live runs, and recordings
   for review.
 
@@ -62,23 +68,28 @@ the first live run isn't a wake storm.
 
 **2. Spike: one native-intent agreement**
 
-No coordinator changes; the same campfire fixture with ordinary work priorities
-switched back on.
+No coordinator planner rewrite; the same campfire fixture with ordinary work priorities
+switched back on, plus necessary adapter, routing and agreement-lifecycle changes.
 
 - Harmony hooks for job start and end (with end reasons), ingestion and social
   interactions, routed per the internals note before they reach the event stream.
 - A generic option list from work givers for the three pawns.
 - One agreement, "haul wood to the stockpile, up to 30", as a tagged zone, run in two
   variants (exclusive to accepting pawns, and attribution-only), with receipts from the
-  native haul jobs.
+  native haul effects, not job-end reasons alone. Enforce the shared 30-unit cap across
+  helpers and in-flight jobs; a stockpile zone alone does not encode it.
 
-Measured against the right baselines: stale haul rejections, delivered totals and work
-surviving a meal against the integration checkpoint (#38: 40 wood in 4 trips); idle or
-wandering time and simulation speed against the recorded scene (#64). **Consent
-violations (a pawn doing tagged work it refused or deferred) must be zero.** Scripted
-first, then one recorded live run. The usual rule applies: if unsupported capability or
-consent could reach execution, or invalid output or non-progress stalls the run, stop
-and diagnose offline.
+Historical references: delivered totals from the integration checkpoint (#38: 40 wood
+in 4 trips), and idle/wandering time and simulation speed from #64. Neither measured
+meal resumption; use matched scripted ordered-job/native-intent scenarios for that and
+stale haul rejections, and matched settings before claiming performance improvement.
+**Consent violations (including refused, deferred or withdrawn tagged work) must be
+zero.** Script both variants, quota/receipt accounting, meal resumption, expiry and
+paired/cold restore; measure event wakes, cancellations and buffer gaps too. Then one
+recorded live run with its variant/setup/duration frozen beforehand. The usual rule
+applies: if unsupported capability or consent could reach execution, or repeated
+invalid output or non-progress stalls the run, stop and diagnose offline. Quiet waiting
+and successful raw-food alternatives are valid, not stop conditions.
 
 **3. Decide, then migrate one capability at a time**
 

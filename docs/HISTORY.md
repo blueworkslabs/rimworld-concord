@@ -145,7 +145,8 @@ Test suite growth along the way: 33 checks at the foundation, 145 at #20, 263 at
 - **#62, #63** — Luna and Terra compared offline on retained situations: both closed
   the right topics and both repeated stale facts, so Luna stays the default. Current
   facts and older planner interpretations are now separate in core prompts, and eating
-  rejections name the exact failed check.
+  rejections retain the first failed check where available; a missing shortlist option
+  still does not reveal why the native option disappeared.
 - **#64 Ten-minute recorded Luna scene** — continuous play with no inference pauses:
   39 berries eaten on receipts, one stale rejection, no work or cooking. Continuous
   interaction works; local food access, stale explanations and topic bookkeeping still
