@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -45,4 +46,10 @@ test('matching provenance and a legal choice are required, not just successful p
  const v=caseBank().cases[0].view,m='gpt-5.6-luna',r={status:'completed',model:m,requestHash:'r',catalogHash:'c',preflight:{requests:1,toolsExposed:0},rawText};
  assert.equal(verifyResult(r,m,'r','c',v).action.kind,'wait');
  for(const delta of [{model:'gpt-5.6-terra'},{requestHash:'wrong'},{catalogHash:'wrong'},{preflight:{requests:1,toolsExposed:1}},{rawText:JSON.stringify({core:{topics:[],actionTopicId:null,action:{kind:'ask',pawn:'invented',text:'Food?',reason:'Ask'}}})}])assert.throws(()=>verifyResult({...r,...delta},m,'r','c',v));
+});
+
+test('historical v1 prompts remain byte-identical after production prompt revisions',()=>{
+ const e=JSON.parse(readFileSync(new URL('../docs/evidence/ongoing-grounding-comparison.json',import.meta.url)));
+ const bank=caseBank();assert.equal(hash(JSON.stringify(bank)),e.bankHash);
+ assert.deepEqual(bank.cases,e.requests);
 });

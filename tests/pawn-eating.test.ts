@@ -1,7 +1,7 @@
 import {coreView,validateCoreChoice,coreChoiceSchema,coreAnswerPrompt} from '../src/core-planner.js';
 import {stopTrialWork,workSummary} from '../src/work-trial.js';
 import {DecisionChannel} from '../src/decision-channel.js';
-import {eatingOptions} from '../src/pawn-eating.js';
+import {eatingOptions,eatingBlock,revalidateEating} from '../src/pawn-eating.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -24,7 +24,10 @@ const eat={choice:'eat',thing:'berry',text:'I choose these berries.'};
 test('diagnostic: a growing suggested portion rejects an otherwise identical delayed choice',async()=>{
  const {g,s,c}=await setup();g.portion=12;const q=await ask(c);let calls=0,offered=0;
  const result=await c.answerCoreQuestion(q,{name:'diagnostic',async answerCore(v){calls++;offered=v.pawn.eating!.options[0]!.count;g.portion=13;return eat;}});
- assert.equal(calls,1);assert.equal(offered,12);assert.equal(result.status,'failed');assert.equal(g.calls,0);s.close();
+ assert.equal(calls,1);assert.equal(offered,12);assert.equal(result.status,'failed');assert.equal(g.calls,0);
+ const event=s.events().find(e=>e.event.kind==='core-answer-failed')!.event.data as any;
+ assert.equal(event.eatingValidation.code,'portion-increased');assert.equal(event.eatingValidation.offeredCount,12);assert.equal(event.eatingValidation.currentCount,13);assert.equal(event.eatingValidation.checkedTick,100);
+ assert.equal((await c.corePerspective() as any).eatingValidation,undefined);s.close();
 });
 async function setup(){const g=new Game(),s=new Store(':memory:'),c=new Coordinator(s,g);await c.open();await c.initializeCore('Ask; no orders.');return {g,s,c};}
 async function ask(c:Coordinator){const r=await c.planCore({name:'scripted',async plan(){return {topic:null,action:{kind:'ask',pawn:'A',text:'What would help?',reason:'Ask'}};}});assert.equal(r.status,'applied');if(r.status!=='applied')throw Error();return r.questionId!;}
@@ -93,4 +96,21 @@ test('resolved self-care topics survive rewind/restore without closing unrelated
  const {g,s,c}=await setup();await c.checkpoint('lab-concord-empty');const q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();const care=Object.values(c.inspect().selfCare!)[0]!;
  const outcome=await c.planCore({name:'close',async plan(){return resolve(care.id);}});assert.equal(outcome.status,'applied');assert.equal(c.inspect().coreState!.topics[0]!.status,'resolved');await c.checkpoint('lab-concord-closed');
  await c.restore('lab-concord-empty');assert.equal(c.inspect().coreState!.topics.length,0);assert.equal(c.inspect().selfCare,undefined);await c.restore('lab-concord-closed');assert.equal(c.inspect().coreState!.topics[0]!.status,'resolved');assert.equal(g.calls,1);s.close();
+});
+
+test('eating revalidation distinguishes policy blocks, stale views, missing option and changed map without changing admission',async()=>{
+ const {c,g,s}=await setup();const d=c.inspect(),state=await g.state(),p=state.pawns[0]!,offered=structuredClone(p);
+ assert.equal(revalidateEating(d,state,p,offered,'berry',true).code,null);
+ for(const [expected,change] of [
+  ['existing-commitment',(d:any,p:any)=>{d.characters.A.commitment='work';}],
+  ['existing-intention',(d:any,p:any)=>{d.characters.A.intention={};}],
+  ['observation-tick',(d:any,p:any)=>{p.eating.tick--;}],
+  ['observation-epoch',(d:any,p:any)=>{p.eating.epoch='old';}],
+  ['option-not-current',(d:any,p:any)=>{p.eating.options=[];}],
+  ['map-changed',(d:any,p:any)=>{p.eating.mapId=2;}],
+  ['portion-increased',(d:any,p:any)=>{p.eating.options[0].count=17;}],
+ ] as const){const dd=structuredClone(d),pp=structuredClone(p);change(dd,pp);assert.equal(revalidateEating(dd,state,pp,offered,'berry',true).code,expected);}
+ const smaller=structuredClone(p);smaller.eating!.options[0]!.count=15;assert.equal(revalidateEating(d,state,smaller,offered,'berry',true).code,null);
+ assert.equal(revalidateEating(d,state,p,offered,'berry',false).code,'bridge-unavailable');
+ assert.equal(revalidateEating(d,state,p,offered,'invented',true).code,'not-offered');s.close();
 });

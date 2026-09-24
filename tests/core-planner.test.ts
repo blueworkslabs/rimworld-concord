@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {Coordinator} from '../src/coordinator.js';
 import {Store} from '../src/store.js';
-import {coreView,validateCoreChoice,coreChoiceSchema,coreAnswerPrompt,type CoreView} from '../src/core-planner.js';
+import {corePrompt,coreView,validateCoreChoice,coreChoiceSchema,coreAnswerPrompt,type CoreView} from '../src/core-planner.js';
 import {crewReport} from '../src/crew-log.js';
 import {claudeArgs,parseClaudeResult,CLAUDE_MODEL} from '../src/claude-decision.js';
 import {DecisionChannel} from '../src/decision-channel.js';
@@ -311,4 +311,16 @@ test('Luna core schema references preserve all choice constraints while fitting 
  const expanded=structuredClone(req.schema);for(const b of expanded.properties.core.anyOf)b.properties.topics.items=expanded.$defs.coreTopicUpdate;delete expanded.$defs;
  assert.deepEqual(expanded,codexSchema(original));assert(Buffer.byteLength(JSON.stringify(req))<64000);
  v.messages[0]!.text='x'.repeat(25000);assert.throws(()=>codexRequest('core',v),/too large/);s.close();
+});
+
+test('topic dates are based on the supplied snapshot, not refreshed by reading or unrelated turns',async()=>{
+ const {c,s,g}=await setup();let calls=0;
+ const r=await c.planCore(planner(v=>{calls++;g.data.ticks=120;return {topics:[{sourceId:'brief',text:'An older interpretation',status:'open'}],actionTopicId:null,action:{kind:'wait',reason:'Wait'}};}));
+ assert.equal(calls,1);assert.equal(r.status,'applied');
+ const topic=c.inspect().coreState!.topics[0]!;assert.equal(topic.basedOnTick,100);assert.equal(topic.updatedTick,120);
+ g.data.ticks=150;assert.equal((await c.planCore(planner(()=>wait))).status,'applied');
+ assert.deepEqual(c.inspect().coreState!.topics[0],topic);
+ await c.checkpoint('lab-concord-dated-topics');g.data.ticks=200;await c.restore('lab-concord-dated-topics');assert.deepEqual(c.inspect().coreState!.topics[0],topic);
+ const d=c.inspect();delete d.coreState!.topics[0]!.basedOnTick;delete d.coreState!.topics[0]!.updatedTick;
+ const v=corePrompt(coreView(d,await g.state()));assert.equal(v.perspective.plannerHistory.topics[0]!.basedOnTick,null);assert.equal(v.perspective.plannerHistory.topics[0]!.updatedTick,null);s.close();
 });

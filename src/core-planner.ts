@@ -25,7 +25,7 @@ export const CoreChoice=z.union([
 ]);
 export type CoreChoice=z.infer<typeof CoreChoice>;
 export type CoreQuestion={id:string;pawn:string;text:string;status:'pending'|'running'|'answered'|'silent'|'failed';messages:SocialMessage[];context?:string};
-export type CoreTopic={sourceId:string;text:string;status:'open'|'blocked'|'deferred'|'resolved'|'declined';proposalIds:string[]};
+export type CoreTopic={sourceId:string;text:string;status:'open'|'blocked'|'deferred'|'resolved'|'declined';proposalIds:string[];basedOnTick?:number;updatedTick?:number};
 export type CoreState={schedule?:import('./core-scheduler.js').CoreSchedule;revision:number;brief:{id:string;text:string};topics:CoreTopic[];questions:CoreQuestion[];turns:{id:string;status:'running'|'applied'|'failed';choice?:CoreChoice;proposalId?:string;questionId?:string}[]};
 export type CoreQuestionView={pawn:Pawn;character:Character;question:{id:string;text:string;from:'core'}};
 export interface CoreBackend {readonly name:string;plan(view:CoreView,signal:AbortSignal):Promise<unknown>}
@@ -81,7 +81,7 @@ export function coreView(d:Domain,g:GameState){
   const ids=core.topics.find(t=>t.sourceId===sourceId)?.proposalIds??(d.proposals[sourceId]?[sourceId]:[]),care=linkedCare(sourceId),work=closure(ids);
   return {sourceId,selfCareIds:care.map(a=>a.id),statuses:care.length?(care.every(a=>a.completed)&&(!ids.length||work.includes('resolved'))?['resolved']:[]):work};
  });
- const topics=visibleTopics.map(t=>({...structuredClone(t),selfCareIds:linkedCare(t.sourceId).map(a=>a.id),outcomes:t.proposalIds.map(id=>{const p=d.proposals[id];return {id,status:p?agreementProgress(d,p,g.ticks,g.actions).status:'unknown'};})}));
+ const topics=visibleTopics.map(t=>({sourceId:t.sourceId,text:t.text,status:t.status,proposalIds:[...t.proposalIds],basedOnTick:t.basedOnTick??null,updatedTick:t.updatedTick??null,selfCareIds:linkedCare(t.sourceId).map(a=>a.id),outcomes:t.proposalIds.map(id=>{const p=d.proposals[id];return {id,status:p?agreementProgress(d,p,g.ticks,g.actions).status:'unknown'};})}));
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:core.revision,tick:g.ticks,brief:{...core.brief},
   selfCare:selfCare.slice(-12),
   ...(ongoing?{ongoing:true}:{}),questions:questions.map(q=>({id:q.id,pawn:q.pawn,status:q.status})),
@@ -114,7 +114,13 @@ export function validateCoreChoice(raw:unknown,v:CoreView){
  if(a.kind==='ask'&&!v.questionRecipients.includes(a.pawn))throw Error('Core question unavailable');
  return c;
 }
-export function corePrompt(v:CoreView){return {task:'core-plan',perspective:v,effects:'Propose and adopt_counter create offers only. The pawn must independently answer. Ask delivers one question, never a job; a reply can be silent. topics may update several earlier topics at once. actionTopicId must be null for ask and wait. For propose/adopt_counter it links only the new offer to one open/blocked/deferred topic (or null). Only topicClosures listed statuses may close a topic. A declined offer is not completed work. Topic prose remains interpretation. Wait preserves native activity.'};}
+export function corePrompt(v:CoreView){return {task:'core-plan',sourceContract:'currentRecords are authoritative only within their stated scope and timestamp. Shared telemetry can be unknown or stale. communication is attributed testimony, not verified physical truth. plannerHistory contains fallible older interpretations, never current need readings or proof a reply is absent. Reconcile summaries against currentRecords before carrying them forward; keep uncertainty explicit. availableChoices lists eligibility, not consent or a preferred action.',
+ perspective:{world:v.world,epoch:v.epoch,branch:v.branch,revision:v.revision,tick:v.tick,brief:v.brief,crew:v.crew,
+ currentRecords:{asOfTick:v.tick,sharedStatus:v.sharedStatus,questions:v.questions,selfCare:v.selfCare??[],topicClosures:v.topicClosures,agreements:v.agreements.map(a=>({id:a.id,pawn:a.pawn,action:a.action,status:a.status,progress:a.progress})),...(v.foodSightings?{foodSightings:v.foodSightings,foodKnowledge:v.foodKnowledge}:{})},
+ communication:{messages:v.messages,requests:v.requests,reoffers:v.reoffers,agreementSpeech:v.agreements.map(a=>({id:a.id,reason:a.reason,...(a.reply?{reply:a.reply,evidence:a.replyEvidence}:{})}))},
+ availableChoices:{opportunities:v.opportunities,counters:v.counters,questionRecipients:v.questionRecipients,availability:v.availability,capabilities:v.capabilities,limits:v.limits},
+ plannerHistory:{authority:'interpretation-only; unknown dates stay unknown',topics:v.topics.map(t=>({sourceId:t.sourceId,interpretation:t.text,status:t.status,basedOnTick:t.basedOnTick??null,updatedTick:t.updatedTick??null,proposalIds:t.proposalIds,selfCareIds:t.selfCareIds,outcomes:t.outcomes}))},
+ ...('wakeReasons' in v?{wakeReasons:v.wakeReasons}:{})},effects:'Propose and adopt_counter create offers only. The pawn must independently answer. Ask delivers one question, never a job; a reply can be silent. topics may update several earlier topics at once. actionTopicId must be null for ask and wait. For propose/adopt_counter it links only the new offer to one open/blocked/deferred topic (or null). Only topicClosures listed statuses may close a topic. A declined offer is not completed work. Topic prose remains interpretation. Wait preserves native activity.'};}
 const string=(maxLength=600)=>({type:'string',minLength:1,maxLength});
 export function coreChoiceSchema(v:CoreView){
  const actions:any[]=[{type:'object',additionalProperties:false,required:['kind','reason'],properties:{kind:{const:'wait'},reason:string()}}];
