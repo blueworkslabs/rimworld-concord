@@ -53,7 +53,7 @@ export class LabBridge implements GameBridge {
   }
   async state():Promise<GameState> {return (await this.request({op:'state'})).state;}
   /** Native-intent and lab-only intent operations (docs/SPIKE_NATIVE_HAUL.md). */
-  async intent(payload:{op:'intent-accept'|'intent-exclude'|'intent-stop'|`lab-${string}`}&Record<string,unknown>):Promise<{state:GameState;receipt:unknown}> {return this.request(payload);}
+  async intent(payload:{op:'intent-accept'|'intent-exclude'|'intent-stop'|'build-accept'|'build-exclude'|'build-stop'|`lab-${string}`}&Record<string,unknown>):Promise<{state:GameState;receipt:unknown}> {return this.request(payload);}
   async move(r:ActionRequest):Promise<Receipt> {
     return (await this.request({op:r.action.kind,...r.action,actionId:r.id,epoch:r.epoch,actor:r.actor,untilTick:r.untilTick,mapId:r.mapId??-1})).receipt;
   }

@@ -942,6 +942,73 @@ patch's inactive fast path to an O(1) check; applicable work still needs measure
    new-process cold restores (C3). The coordinator PR carries offers, wakes, legibility
    texts (C5) and the readiness debt (C4). No separate trials PR.
 
+## Construction implementation (slice 1): caller inventory and patch ledger
+
+**Status: implemented, not yet run in the game.** Mod: `mod/NativeBuild.cs` (state, ops, lab
+ops) and `mod/NativeBuildPatches.cs` (patches). Coordinator types: `src/native-build.ts`.
+Scripted cases: `trials/native-construction-game.ts` (1–17) with the new-process restore in
+`trials/native-construction-restore.ts`, run by `scripts/run-native-construction-lab.sh`. Offers,
+wakes, legibility texts and the readiness debt are the coordinator PR (amendment 6).
+
+### Scanner callers on 1.6.4871 (amendment 1 entry check)
+
+From a full-assembly search of the pinned decompile (private, outside the repository):
+
+- `FloatMenuOptionProvider_WorkGivers.GetWorkGiverOption`: the **only** caller that passes
+  `forced: true` to `HasJobOnThing`/`JobOnThing` (and the cell variants, and `ShouldSkip`). The
+  chosen job goes through `TryTakeOrderedJobPrioritizedWork`.
+- `JobGiver_Work.GiverTryGiveJobPrioritized` (prioritized continuation): default `false`;
+  `playerForced` is set on the returned job afterwards. **Ordinary under the amendment.**
+- `JobGiver_Work` ordinary scan and `NonScanJob`: default `false`.
+- Work givers that call other scanners pass their own caller's value through (cleaning,
+  paint removal, harvest extensions, and base-class calls in tending, warden, deconstruct,
+  uninstall, haul, fish, remove-foundation); `WorkGiver_ConstructRemoveFloor` hard-codes `false`.
+- Inside the construction givers, `forced` reaches `CanConstruct`, blocking-thing handling and
+  `ResourceDeliverJobFor`, but **`IsNewValidNearbyNeeder` calls `CanConstruct` with `false`**:
+  a forced order never extends to nearby tagged sites, so the nearby filter (B3) applies to
+  every delivery.
+- No designator, gizmo, colonist-bar, caravan, mechanitor or debug path calls the scanners.
+  `WorkGiver_DoBill` has no external `JobOnThing` caller (relevant to the cooking slice).
+
+### Patch ledger (construction)
+
+Thirteen patched methods; the cooking slice has seven left under the twenty ceiling. Every
+patch checks the static `BuildState.Active` flag (O(1)) before any other work; the global
+paths add only a job-def or dictionary check. Costs are measured on staging with
+`lab-build-cost` (case 1 enables timing); none is claimed yet.
+
+| # | Method | Kind | Does work when | Cost |
+|---|---|---|---|---|
+| B1 | `WorkGiver_ConstructDeliverResourcesToBlueprints.JobOnThing` | prefix + postfix | a tagged target: excluded pawn on an ordinary scan gets no job; a forced call's returned job is stamped | pending |
+| B2 | `WorkGiver_ConstructDeliverResourcesToFrames.JobOnThing` | prefix + postfix | as B1 | pending |
+| B3 | `WorkGiver_ConstructDeliverResources.IsNewValidNearbyNeeder` | postfix | a tagged nearby needer for an excluded pawn | pending |
+| B4 | `WorkGiver_ConstructFinishFrames.JobOnThing` | prefix + postfix | as B1, for construction work | pending |
+| B5 | `Pawn_JobTracker.StartJob` (global; hauling also patches it) | prefix | a `HaulToContainer`/`FinishFrame` job touching a tagged carrier: admission, segments, work baseline | pending |
+| B6 | `Pawn_JobTracker.CleanupCurrentJob` (global; hauling also patches it) | prefix | a `FinishFrame` job on a tagged frame: settle work | pending |
+| B7 | `Toils_Haul.TryGetNextDestinationFromQueue` | postfix | a tagged next destination for an excluded, unforced job | pending |
+| B8 | `Toils_Haul.DepositHauledThingInContainer` | postfix installing an `initAction` wrapper | wrapper, per deposit into a tagged frame: consent recheck, per-def delta | pending (wrapper) |
+| B9 | `Blueprint.TryReplaceWithSolidThing` | prefix + postfix + finalizer | a tagged blueprint: consent recheck, transition scope, `createdThing` validation | pending |
+| B10 | `Frame.CompleteConstruction` | prefix + postfix + finalizer | a tagged frame: settle the finisher, spawn-collector scope, successor validation | pending |
+| B11 | `GenSpawn.Spawn(Thing, IntVec3, Map, Rot4, WipeMode, bool, bool)` (global; every overload forwards here) | postfix | only inside a completion scope | pending |
+| B12 | `Frame.FailConstruction` | prefix + postfix + finalizer | a tagged frame: settle the worker, record what it held | pending |
+| B13 | `Thing.Destroy` (global) | prefix | a tagged carrier or watched building (dictionary lookup) | pending |
+
+Implementation choices within the signed design, for review:
+
+- **Conversion recheck without a second toil patch.** P5.2(c)'s conversion check runs in B9's
+  prefix (the method receives the worker); a blocked conversion returns false with the
+  blueprint intact, and the deposit wrapper (B8) then ends the job without a transfer.
+- **Removal classification by destroy mode, no designator patch.** Cancel → stopped
+  (cancelled); Deconstruct, which only the player's build designator uses on a blueprint or
+  frame (entry item 4), → stopped (replaced by the player); Vanish → failed (removed); other →
+  failed (destroyed). Case 12 exercises the real designator.
+- **Polled facts.** Expiry, the forbidden note, a different occupant on the footprint and a
+  building that leaves its place without being destroyed are checked every 60 ticks.
+- **Forced stamps** are saved by job load ID and dropped 600 ticks after the job exists nowhere.
+- **Offline patch check:** 11 of the 13 apply in the offline harness. B10 and B12 cannot be
+  applied offline because `Frame`'s static initializer needs Unity's shader database; their
+  first application is on staging.
+
 ## Gate A open decisions (as posed; decided under "Direction")
 
 1. **Build tag identity** across blueprint → frame → building: the footprint key

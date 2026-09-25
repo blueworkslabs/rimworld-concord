@@ -38,7 +38,7 @@ export type Receipt = {id:string;actor:string;status:Outcome;reason:string;failu
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
   pawns:Pawn[];actions:Receipt[];crewLog?:CrewReport;events?:NativeEvent[];eventSeq?:number;
-  intents?:NativeIntentView[];clock?:string;
+  intents?:NativeIntentView[];buildIntents?:import('./native-build.js').BuildView[];clock?:string;
   /** Colony stockpiles on the current map (colony-public: someone placed them). */
   stockpiles?:{zoneId:number;label:string;x:number;z:number;w:number;h:number;cells:number}[];
 };

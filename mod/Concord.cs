@@ -176,7 +176,7 @@ namespace Concord
             }).TrimEnd('}')+",\"eating\":"+Eating.Options(p,w.epoch)+",\"foodObservation\":"+FoodObservation.Json(p,w.epoch)+",\"production\":"+Production.Options(p,w.epoch)+",\"linkStatus\":"+LinkTelemetry.Json(p,w.epoch)+",\"facts\":"+Awareness.Facts(p)+",\"movement\":"+Movement.Options(p,w.epoch)+",\"rescue\":"+Rescue.Options(p,w.epoch)+",\"rescueHandover\":"+(p.IsCarrying()&&IntentHooks.TaggedHaul(p.CurJob)?Rescue.Options(p,w.epoch,true):"null")+",\"casualties\":"+Casualties.View(p,w.epoch)+"}");
             return JsonUtility.ToJson(snapshot).TrimEnd('}')+",\"pawns\":["+String.Join(",",pawns.ToArray())+"],\"actions\":["+
                 String.Join(",",w.actions.Select(a=>JsonUtility.ToJson(a)).ToArray())+"],\"eventSeq\":"+w.eventSeq+",\"events\":["+
-                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"intents\":"+IntentState.Get().Json()+",\"stockpiles\":"+IntentState.StockpilesJson()+",\"crewLog\":"+CrewLog.Json(w)+"}";
+                String.Join(",",w.events.Select(e=>JsonUtility.ToJson(e)).ToArray())+"],\"intents\":"+IntentState.Get().Json()+",\"buildIntents\":"+BuildState.Get().Json()+",\"stockpiles\":"+IntentState.StockpilesJson()+",\"crewLog\":"+CrewLog.Json(w)+"}";
         }
         private static ActionRecord Move(Request r) {
             var w=World();
@@ -261,6 +261,13 @@ namespace Concord
                     else {var i=s.ById(r.intentId);if(i==null) throw new Exception("Unknown intent");s.Retire(i,"stopped");}
                     receipt=s.Json();
                 }
+                else if(r.op=="build-accept"||r.op=="build-exclude"||r.op=="build-stop") {
+                    var w=World();if(r.epoch!=w.epoch) throw new Exception("Stale timeline");
+                    var s=BuildState.Get();
+                    if(r.op=="build-accept")s.Accept(r);else if(r.op=="build-exclude")s.Exclude(r);else s.Stop(r);
+                    receipt=s.Json();
+                }
+                else if(r.op.StartsWith("lab-build-")) {var w=World();if(r.epoch!=w.epoch) throw new Exception("Stale timeline");receipt=BuildState.Get().Lab(r);}
                 else if(r.op.StartsWith("lab-")) {var w=World();if(r.epoch!=w.epoch) throw new Exception("Stale timeline");receipt=IntentState.Get().Lab(r);}
                 else if(r.op=="decision-pause") {World();DecisionPauses.Set(r.epoch,r.actor,r.leaseId,r.ttlMs);}
                 else if(r.op=="activity") {
