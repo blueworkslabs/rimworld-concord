@@ -8,6 +8,8 @@ This confirms design testability, not implemented or game-tested behavior; no ne
 policy signature is claimed.
 Implementation and scripted trials are authorized after the documentation merge;
 no live run, scene freeze or ordered-path deletion is authorized. Gate C is not signed.
+**Current implementation authority:** the [Gate B amendment](#gate-b-amendment-fable-2026-09-25-after-the-merge-at-593c904) below supersedes the earlier forced-order provenance, ingredient-count capture, conversion collector and affected scripted assertions. The earlier signature/review remains the historical record.
+
 Pinned build: RimWorld 1.6.4871 (`Assembly-CSharp` prefix `082db1dd4f7f`).
 
 ## Goal
@@ -854,6 +856,91 @@ them before Gate C is entered.
   Then one iteration happens, recorded the same way, not counted toward the quota. For a core-added
   quota-2 bill, follow it with one credited iteration: native repeat count is 0,
   credited count is 1, and the intent is not falsely met or the bill silently refilled.
+
+## Gate B amendment (Fable, 2026-09-25, after the merge at `593c904`)
+
+The attribution/ordinary-work consent policy stands. This amendment replaces the
+operational definition of the order exception and reduces receipt detail; it takes
+precedence over conflicting text above, including P2, P3, P5.4/P5.5 and cases 10/11.
+P5.1 ownership/generation, P5.2 admission and P5.3 the sweep remain required, interpreting
+old `player` provenance as the scanner-stamped `forced` exception below. No remaining
+reference to player contexts or exact consumed counts requires those removed mechanisms. Three parts
+of P5 record more than the game hands us and cost more patches than the guarantee
+needs. They are trimmed before implementation. The hauling migration patched eleven
+methods; the trims below keep this migration near that footprint and keep every hot-path
+patch's inactive fast path to an O(1) check; applicable work still needs measured cost.
+
+1. **Player-order provenance is the scanner's `forced` argument, in scope.** A job
+   returned from a supported work giver's `JobOnThing(pawn, thing, forced: true)` call
+   is stamped `forced` by exact job identity before admission; preserve it on queueing
+   and restore, remove it with job ownership. Predicate probes may construct discarded
+   jobs: do not create durable ownership or reservations merely for a probe. A new job
+   does not inherit another job's stamp; `playerForced` alone never supplies it. P5.5's float-menu
+   preview context, `Chosen` context and priority-order tokens are dropped. The record
+   text becomes **"forced by an order (had refused)"**, because the argument proves an
+   forced scanner call, not who gave it. A non-player caller passing true receives the
+   same uncredited exception by this amended rule; do not claim player-only authority.
+   An excluded forced contribution is not a violation; ordinary excluded contributions
+   still are. The “had refused” wording applies only where an exclusion was overridden.
+   Entry check before the construction PR: enumerate the actual supported scanner callers
+   in 1.6.4871, one line each (including any other engine/mod caller). Already source-checked:
+   - `FloatMenuOptionProvider_WorkGivers.GetWorkGiverOption`: passes true to predicate
+     and candidate calls. Base `WorkGiver_Scanner.HasJobOnThing` forwards that argument.
+   - `JobGiver_Work.GiverTryGiveJobPrioritized`: passes the default **false** to scanners;
+     its caller sets `playerForced` only afterward. These continuation jobs are ordinary
+     under this amendment, so a refused pawn is blocked. No priority-token replacement.
+   - `JobGiver_Work` ordinary scan: default false. Direct ordered jobs without a scanner
+     stamp remain ordinary for this consent check, even if their job flag says forced.
+2. **The bill filter is scoped through `WorkGiver_DoBill.JobOnThing`.** Its `forced`
+   argument opens a pawn/bench-scoped context, unwound on every return/exception;
+   `Bill.PawnAllowedToStartAnew` suppresses only Concord's exclusion when the matching
+   scope is true. False, absent or mismatched scope is ordinary; native restrictions
+   remain intact. Stamp only the exact returned candidate. No patch on menu construction.
+   The menu's inherited predicate reaches this same `JobOnThing` scope before selection,
+   resolving the eligibility finding. Prioritized continuation does **not** carry true.
+   Revised cooking case 10 checks the real menu, forced stamp through queue/restore,
+   default-false continuation rejection, and no leakage into a later ordinary scan;
+   the previous authenticated-priority-token assertion is superseded.
+3. **Ingredient quantities are "not recorded" for Gate C.** The iteration receipt takes
+   the doer and the ingredient defs from `Notify_IterationCompleted` and the product
+   defs and counts from `Notify_BillDone`; consumed counts are not reconstructed. The
+   `CalculateIngredients` and `ConsumeIngredients` patches and the call-scoped snapshot
+   are dropped. Cooking case 11 reduces to: product counts exact; a failure injected at
+   iteration notification earns no iteration and no duplicate receipt. No legibility
+   text needs an ingredient count. Keep successful-return qualification on the actual
+   `Bill_Production.Notify_IterationCompleted` override (it does not call the base):
+   capture defs/doer and exact current job/bill/generation identity at entry, mark pending
+   only on normal return, discard on exception. Join the next matching
+   `RecordsUtility.Notify_BillDone` product list once. If it never arrives, flush the
+   completed pending receipt with “products: not recorded” at that job's cleanup; persist
+   pending state if it crosses a save. Never join by pawn alone, reuse pending state for
+   another job/iteration, or count callback entry as success. Consumed quantities always
+   read “not recorded”, not zero. No ingredient snapshot or new recipe-finish wrapper
+   is required for capture.
+4. **Successor identity: conversion uses the out `createdThing`.** Keep its existing
+   prefix/postfix/finalizer transition scope to defer nested predecessor removal and
+   reconcile exceptions, but no conversion spawn collector. Commit only on true return
+   with that exact successor spawned on the expected map/key, def and rotation and the
+   predecessor removed. False with intact blueprint stays open; actual removal without
+   qualified successor fails. Only frame completion uses the scoped spawn collector.
+   Deferring removal classification inside either transition scope is a read-side rule,
+   not an engine change. Dropping the conversion finalizer itself is not intended.
+5. **Patch ledger and ceiling.** The implementation PRs list every patched method with
+   its kind (prefix, postfix, finalizer, wrap), the condition under which it does work,
+   and its measured per-call cost, as the spike did. Ceiling for both carriers together:
+   **twenty patched methods**; anything beyond needs a line saying which scripted case
+   fails without it. `StartJob`, `CleanupCurrentJob`, `GenSpawn.Spawn` and
+   `Thing.Destroy` are global paths: their patches must be a static flag or dictionary
+   lookup before any other work. Count distinct patched targets (each overload separately),
+   including toil-factory patches that install action wrappers; list wrapper work/cost,
+   not just the cheap factory. Multiple prefix/postfix/finalizer hooks on one target count
+   as one method. The first commit lists pending measurements honestly; acceptance fills
+   them in. Exceeding twenty requires the stated failing-case justification, never an
+   unlisted hook or a claim of measured cost from an estimate.
+6. **Slices.** Scripted cases ship with their carrier: the construction PR carries the
+   17 construction cases and the cooking PR the 13 cooking cases, each with paired and
+   new-process cold restores (C3). The coordinator PR carries offers, wakes, legibility
+   texts (C5) and the readiness debt (C4). No separate trials PR.
 
 ## Gate A open decisions (as posed; decided under "Direction")
 
