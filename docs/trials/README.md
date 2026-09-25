@@ -75,4 +75,6 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 | 09-24 | [#69](https://github.com/blueworkslabs/rimworld-concord/pull/69) | L | Single signed native-haul scene | Uncut recording retained; receipt findings identify late acceptance, stale narration and attention failures. Gate C verdict pending | [recording metadata](../evidence/native-haul-live-recording.json), [findings](../evidence/native-haul-live-findings.json) | [NATIVE_HAUL_LIVE](NATIVE_HAUL_LIVE.md) |
 | 09-24 | [#70](https://github.com/blueworkslabs/rimworld-concord/pull/70) | — | Gate C verdict on the native-haul spike | Migrate; three fixes block the next live run; attribution-only default; silent wait | [findings](../evidence/native-haul-live-findings.json) | [NATIVE_HAUL_GATE_C](NATIVE_HAUL_GATE_C.md) |
 
+| 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O (attempted) | Jev wake/grounding replay over recorded core turns | 29 transport failures, zero answers; protected-route expired certificate diagnosed; no rerolls; USD 0.058 reserved, actual charge unknown | [jev-replay](../evidence/jev-replay.json) | [JEV_REPLAY](JEV_REPLAY.md#result--2026-09-25-transport-failure-not-a-scoring-result) |
+
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.

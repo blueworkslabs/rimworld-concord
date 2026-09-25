@@ -135,6 +135,10 @@ Luna's, agreement, and counterfactual avoidable calls. Include consequential eve
 that must not be missed and validate thresholds on held-out cases. Logged
 recommendations only.
 
+The [first core wake/grounding replay attempt](trials/JEV_REPLAY.md#result--2026-09-25-transport-failure-not-a-scoring-result)
+produced 29 transport failures and no judgments on 2026-09-25. An expired certificate
+in the protected route blocks the experiment; no threshold or routing change follows.
+
 ## Later experiments
 
 - **Standing commitments in the think tree**: a `ThinkNode` that consults cached

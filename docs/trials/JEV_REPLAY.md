@@ -1,6 +1,6 @@
 # Jev offline replay — protocol `jev-replay-v2`
 
-**Status: harness corrected and mock-tested; no live replay yet.** Owner: Fable. Reviewer:
+**Status: reviewed; the single 2026-09-25 pass failed at transport (29 failures, no answers).** Owner: Fable. Reviewer:
 Astra. This is the "Jev, offline" track from [ROADMAP](../ROADMAP.md#in-parallel-jev-offline),
 reordered after the [native-haul live run](NATIVE_HAUL_GATE_C.md): core wake gating
 first, prose grounding second. Nothing here changes routing, receipts, consent or the
@@ -123,3 +123,41 @@ ledger row when the pass has run.
 
 Which use, if any, gets wired; where thresholds sit; whether the native TypeSafe
 endpoint replaces OpenRouter. Each of those is its own decision after the numbers.
+
+
+## Result — 2026-09-25 (transport failure, not a scoring result)
+
+Runtime `eab4502` passed independent focused re-review, 402 coordinator tests and
+CI/Pages. Corrections retain supplied testimony and eligible question recipients,
+preserve complete received JSON and billing on invalid output, claim runs atomically,
+and validate evidence/request hashes before reporting. The dry run has 29 requests;
+largest state is 6,581 bytes, below the unchanged 16,000-byte cap.
+
+The approved single protected pass ran at 05:00:56–05:00:57 UTC: **29 attempts,
+29 transport failures, zero received responses, zero scored cases**. All attempt
+records and reservations remain intact. The CLI completed its loop, but this is **not
+a successful model evaluation**. No retry or model-choice reroll was made.
+
+A subsequent **non-inference** read-only authentication check on the same protected
+route failed with `CERT_HAS_EXPIRED`. The injected CA bundle contains a certificate
+that expired at **2026-09-25 01:31:20 UTC**. TLS verification was not disabled; no
+plaintext route or credential fallback was used. No gateway restart or infrastructure
+change was made during this review.
+
+The ledger retains **USD 0.058 reserved**, within the USD 0.0725 local allowance and
+USD 0.08 operator limit. **USD 0 reported** means no billing receipts arrived, not
+that zero cost has been proven. The expected response version remains
+`typesafe/jev-1.13-20260917`; no actual model version was observed. Public endpoint
+metadata before the run confirmed that version and input pricing of USD 0.042/M
+(output free); this was not an inference probe.
+
+[Sanitized run record and hashes](../evidence/jev-replay.json). Raw request artifacts,
+attempt journal and non-rewindable ledger are preserved privately. Recomputing the
+report offline passed provenance checks; it made no new calls. Zero flags in that
+report have **zero scored answers**, so no threshold, agreement, quality or routing
+conclusion follows. Certificate repair and an explicit new trial disposition are
+needed before another pass; the old run will not be overwritten or resumed.
+
+Fable's interpretation is pending; there are no Jev judgment numbers to interpret
+from this attempt. Hauling PR #73, its remaining B1 round, and stopped staging are
+unchanged.
