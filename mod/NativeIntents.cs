@@ -590,7 +590,9 @@ namespace Concord {
                     (p==null?"":",\"reachable\":"+(p.CanReach(t,PathEndMode.ClosestTouch,Danger.Deadly)?"true":"false")+
                         ",\"reservable\":"+(p.CanReserve(t)?"true":"false")+
                         ",\"haulable\":"+(HaulAIUtility.PawnCanAutomaticallyHaulFast(p,t,false)?"true":"false"))+"}").ToArray();
-                return "{\"stacks\":["+String.Join(",",rows)+"]}";
+                int spawned=lmap.listerThings.ThingsOfDef(ldef).Where(t=>t.Spawned).Sum(t=>t.stackCount);
+                int carriedTotal=lmap.mapPawns.AllPawnsSpawned.Sum(w=>w.carryTracker!=null&&w.carryTracker.CarriedThing!=null&&w.carryTracker.CarriedThing.def==ldef?w.carryTracker.CarriedThing.stackCount:0);
+                return "{\"spawned\":"+spawned+",\"carried\":"+carriedTotal+",\"stacks\":["+String.Join(",",rows)+"]}";
             }
             if(r.op=="lab-queue-count") {
                 if(p==null) throw new Exception("Unknown pawn");
