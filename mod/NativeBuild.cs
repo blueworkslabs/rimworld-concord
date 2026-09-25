@@ -130,7 +130,7 @@ namespace Concord {
         public override void StartedNewGame(){Reindex();}
         public override void LoadedGame(){Reindex();}
         public void Reindex() {
-            byThing.Clear();transition=null;
+            byThing.Clear();transition=null;pending=null;fault=null;
             foreach(var i in intents)if((i.Open||i.watchFate)&&i.thingId>=0)byThing[i.thingId]=i;
             Active=byThing.Count>0||intents.Any(i=>i.Open);
         }
@@ -223,13 +223,16 @@ namespace Concord {
             var c=new IntVec3(i.x,0,i.z);if(!c.InBounds(map))return null;
             return c.GetThingList(map).FirstOrDefault(t=>t.thingIDNumber==i.thingId);
         }
+        private void SettleCurrentFrame(Frame frame) {
+            if(frame==null||!frame.Spawned)return;
+            foreach(var pawn in frame.Map.mapPawns.AllPawnsSpawned)
+                if(pawn.CurJob!=null&&pawn.CurJob.def==JobDefOf.FinishFrame&&pawn.CurJob.targetA.Thing==frame)
+                    Settle(pawn,pawn.CurJob,frame,"intent ending");
+        }
         public void End(BuildIntent i,string status,string reason,Pawn p=null) {
             if(!i.Open)return;
             // Close the accounting boundary before removing lookup/ownership. Accrued work stands.
-            var frame=Carrier(i) as Frame;
-            if(frame!=null)foreach(var pawn in frame.Map.mapPawns.AllPawnsSpawned)
-                if(pawn.CurJob!=null&&pawn.CurJob.def==JobDefOf.FinishFrame&&pawn.CurJob.targetA.Thing==frame)
-                    Settle(pawn,pawn.CurJob,frame,"intent ending");
+            SettleCurrentFrame(Carrier(i) as Frame);
             i.status=status;i.stopReason=reason;
             foreach(var bj in jobs.Values)foreach(var s in bj.segments.Where(s=>s.intentId==i.intentId&&s.generation==i.generation))s.open=false;
             if(status=="built"){i.watchFate=true;i.fate="standing";}
@@ -254,7 +257,7 @@ namespace Concord {
                 Active=byThing.Count>0||intents.Any(x=>x.Open);return;
             }
             var frame=t as Frame;
-            if(frame!=null)i.held=Held(frame);
+            if(frame!=null){SettleCurrentFrame(frame);i.held=Held(frame);i.finalWork=frame.workDone;}
             // Cancel and Deconstruct are both player removals, but the destroy mode does not say which:
             // the deconstruct designator removes frames with Deconstruct, and the build designator may
             // cancel first and then wipe with Deconstruct before placing its own blueprint. Wait.

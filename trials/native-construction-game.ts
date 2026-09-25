@@ -75,7 +75,7 @@ async function scenario(name:string,base:string,body:(c:Case)=>Promise<void>){
     await body(c);
   }catch(e){c.findings.push('error: '+String(e));}
   finally{
-    try{await b.admin('pause');await poll();}catch(e){c.findings.push('final capture: '+String(e));}
+    try{await b.admin('pause');await op({op:'lab-build-fault',reason:'none'});await poll();}catch(e){c.findings.push('final capture: '+String(e));}
     c.data.events=[...events];c.data.buildIntents=state?.buildIntents;
     if(receipt.eventGaps>gapsBefore)c.findings.push('native event gap: evidence incomplete');
     c.passed=c.findings.length===0;await persist();
@@ -90,7 +90,7 @@ const workOf=(v:BuildView,pawnId?:string,role?:string)=>v.work.filter(w=>(!pawnI
  * exclusion membership against all past shares; case 15 checks effects after the boundary. */
 /** Settled shares must sum to the frame's native workDone at completion/failure (C1). */
 function reconcile(c:Case,v:BuildView){
-  if(v.finalWork<0)return;const sum=v.work.reduce((n,w)=>n+w.work,0);
+  if(v.finalWork<0){expect(c,false,'native final work was not captured');return;}const sum=v.work.reduce((n,w)=>n+w.work,0);
   expect(c,Math.abs(sum-v.finalWork)<0.01,`work shares ${sum} != native frame work ${v.finalWork}`);
 }
 function consent(c:Case,v:BuildView){
@@ -126,8 +126,8 @@ try{
     expect(c,kinds('build-stage').filter(e=>field(e,'stage')==='frame').length===1,'expected exactly one frame transition');
     consent(c,v);reconcile(c,v);
     } finally {
-      try { receipt.patchCost={scope:'every hook body (prefix, postfix, finalizer, wrapper) during case 1; B8 native transfer reported separately; Harmony dispatch not visible from inside a hook (see 18-patch-cost for the throughput arm)',
-        limitations:['one scripted build, three pawns; not a colony-scale load'],
+      try { receipt.patchCost={scope:'instrumented hook bodies during case 1; B8 factory and native transfer reported separately; excludes full timer bookkeeping and Harmony dispatch',
+        limitations:['one scripted build, three pawns; not a colony-scale load','active is an applicable-handler count, not universally a tagged hit','nested timings are not exclusive costs; zero calls means unmeasured'],
         values:await op({op:'lab-build-cost',count:2})}; }
       finally { await op({op:'lab-build-cost',count:0}); }
     }
@@ -289,8 +289,7 @@ try{
     await op({op:'lab-build-forced',intentId:id2,actor:B,reason:'delivery',count:1});
     const before=await jobOf(B);c.data.queuedForced=before;
     const qf=(before.queued as {forced:boolean;segments:number}[]).find(q=>q.segments>0||q.forced);
-    const current=before.current?.forced?before.current:undefined;
-    expect(c,!!qf||!!current,'unexercised: no queued or current forced job');
+    if(!qf)throw Error('unexercised: no genuinely queued forced job');
     const name='lab-concord-nc-forced-'+Date.now();await b.save(name);await b.load(name);await b.admin('pause');await poll();
     const after=await jobOf(B);c.data.queuedForcedAfterRestore=after;
     expect(c,JSON.stringify(after)===JSON.stringify(before),'forced stamp or queue changed across restore');
@@ -315,7 +314,7 @@ try{
       const fid=randomUUID();await open(fid,P);await prio(P,1,1);await op({op:'lab-build-fault',reason:fault});
       await run(ended(fid),300000);const fv=view(fid)!;(c.data.faults??={} as Record<string,unknown>) as Record<string,unknown>;(c.data.faults as Record<string,unknown>)[fault]=fv;
       expect(c,fv.status==='failed'&&reason.test(fv.stopReason??''),`${fault}: ${fv.status} ${fv.stopReason}`);
-      expect(c,kinds('build-stage').filter(e=>field(e,'stage')==='built').length===0,`${fault}: a built transition was recorded`);
+      expect(c,kinds('build-stage').filter(e=>field(e,'stage')==='built'&&field(e,'intent')===fid).length===0,`${fault}: a built transition was recorded`);
       await op({op:'lab-build-fault',reason:'none'});
     }
   });
@@ -407,16 +406,21 @@ try{
       expect(c,(state.buildIntents??[]).every(i=>i.status!=='open'),'the replacement blueprint was tagged automatically');
       const id3=randomUUID();await open(id3,P,{target:nb,x:undefined,z:undefined});
       expect(c,view(id3)?.generation===v2b.generation+1,`generation ${view(id3)?.generation} after ${v2b.generation}`);
-    }else (receipt.observedOnly['17: same-def replacement not reached']??=[]).push({status:v2b.status,reason:v2b.stopReason});
+    }else { (receipt.observedOnly['17: same-def replacement not reached']??=[]).push({status:v2b.status,reason:v2b.stopReason});expect(c,false,'unexercised: same-def physical replacement not reached'); }
   });
-  // 18. Throughput arm: the same open intent with all Concord patches applied versus none.
+  // 18. Policy-independent untagged baseline; each arm reloads the same quiet save.
   await scenario('18-patch-cost',base,async c=>{
-    const id=randomUUID();await open(id,P);await prio(P,0,0);
-    const arm=async(mode:number)=>{await op({op:'lab-patches',count:mode});await startNative(b);const s0=await b.state(),w0=Date.now();await delay(20000);const s1=await b.state();await b.admin('pause');
-      return {mode,ticks:s1.ticks-s0.ticks,ms:Date.now()-w0,tps:(s1.ticks-s0.ticks)*1000/(Date.now()-w0)};};
+    const arm=async(mode:number)=>{
+      await b.load(base);await b.admin('pause');await poll();
+      if((state.buildIntents??[]).some(i=>i.status==='open'))throw Error('throughput requires an untagged baseline');
+      await op({op:'lab-patches',count:mode});await startNative(b);
+      try {const s0=await b.state(),w0=Date.now();await delay(20000);const s1=await b.state(),ms=Date.now()-w0;
+        return {mode,ticks:s1.ticks-s0.ticks,ms,tps:(s1.ticks-s0.ticks)*1000/ms};}
+      finally {await b.admin('pause');}
+    };
     try{c.data.arms=[await arm(1),await arm(0),await arm(1),await arm(0)];}
     finally{await op({op:'lab-patches',count:1});}
-    receipt.patchCost={...(receipt.patchCost as object??{}),throughput:c.data.arms,note:'mode 1: all Concord patches with one open construction intent; mode 0: vanilla. Game speed, recording and host load are the same in every arm; not a colony-scale load.'};
+    receipt.patchCost={...(receipt.patchCost as object??{}),throughput:c.data.arms,note:'quiet untagged baseline restored before each arm; all-Concord versus detached-Concord patches (other mods remain); capped/noisy throughput is inconclusive, not a colony slowdown or tagged-handler cost'};
   });
   receipt.passed=receipt.cases.length>0&&receipt.cases.every(c=>c.passed);
 }catch(e){receipt.error=String(e);}

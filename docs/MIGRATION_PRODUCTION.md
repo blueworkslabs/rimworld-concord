@@ -977,13 +977,17 @@ patch uses constant-time guards and counter/timing bookkeeping; global paths use
 `Active`, a job-def/dictionary check, or (B11) the current transition scope. B8 installs
 a wrapper at toil creation even without an active tag. These are not zero-work guards. Costs are measured on staging with
 `lab-build-cost` (case 1 enables timing and resets it in `finally`); none is claimed yet.
-After the first staging review the instrumentation covers **every hook body**: prefix,
-postfix, finalizer and wrapper time are summed per patch; B8 reports the native deposit it
-calls separately (`nativeMicros`) and excludes it from its own time; `active` counts entries
-that did Concord work after the fast path (a tagged target or scope), not the global flag.
-Harmony's own dispatch is not visible from inside a hook, so case `18-patch-cost` adds a
-throughput arm: ticks per second with all Concord patches applied versus none (`lab-patches`),
-alternating twice, one open construction intent. Costs stay pending until those runs report.
+Instrumentation now times prefix/postfix/finalizer bodies and both active/inactive
+wrapper paths. B8's factory allocation body has separate `factoryCalls`/`factoryMicros`;
+its wrapper excludes native transfer time (also on exceptions), reporting it separately
+as `nativeMicros`. `active` counts applicable handler entries, not universally tagged
+hits: B5 includes supported job admission checks and B6 includes valid finish-frame
+cleanup even when no tag matches. Counters/timer bookkeeping and Harmony dispatch are
+not complete overhead measurements, and nested timings must not be summed as exclusive
+cost. Case `18-patch-cost` alternates all-Concord versus detached-Concord patches on the
+same **untagged quiet save**, restored before each arm; other mods remain installed.
+Capped/noisy throughput is inconclusive, not a colony slowdown or tagged-handler cost.
+Costs stay pending until scoped runs report.
 
 | # | Method | Kind | Does work when | Cost |
 |---|---|---|---|---|

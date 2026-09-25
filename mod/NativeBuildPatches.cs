@@ -8,7 +8,7 @@ using Verse.AI;
 
 namespace Concord {
     // Construction patch ledger (docs/MIGRATION_PRODUCTION.md, amendment 5). Every patch starts
-    // with the static BuildState.Active check (O(1)) before any other work. Per-patch call counts
+    // with constant-time applicability checks and measurement bookkeeping. Per-patch call counts
     // always; wall-clock cost only while a lab measurement enables it (lab-build-cost).
     public static class BuildCost {
         public static readonly string[] Names={"","B1 DeliverToBlueprints.JobOnThing","B2 DeliverToFrames.JobOnThing","B3 IsNewValidNearbyNeeder",
@@ -17,19 +17,20 @@ namespace Concord {
             "B12 Frame.FailConstruction","B13 Thing.Destroy"};
         public static bool timing;
         // calls: every entry of the patch's first hook; active: entries that did Concord work after the
-        // fast path; micros: every hook body (prefix, postfix, finalizer, wrapper), excluding the
+        // fast path (not universally a tagged hit); micros: instrumented hook bodies, excluding the
         // native work a wrapper calls (reported separately as nativeMicros). Harmony dispatch itself
-        // is not visible from inside a hook; the throughput arm measures the whole.
-        public static readonly long[] calls=new long[16],active=new long[16],ticks=new long[16],native=new long[16];
+        // is not visible from inside a hook; B8 factory bodies have separate counters.
+        public static readonly long[] calls=new long[16],active=new long[16],ticks=new long[16],native=new long[16],factoryTicks=new long[16],factoryCalls=new long[16];
         public static long Start(){return timing?System.Diagnostics.Stopwatch.GetTimestamp():0;}
         public static void Stop(int i,long t0,bool work){calls[i]++;if(work)active[i]++;if(timing)ticks[i]+=System.Diagnostics.Stopwatch.GetTimestamp()-t0;}
         /** A later hook body of the same patch (postfix, finalizer): time only. */
         public static void More(int i,long t0){if(timing)ticks[i]+=System.Diagnostics.Stopwatch.GetTimestamp()-t0;}
         public static void Native(int i,long t0){if(timing){var d=System.Diagnostics.Stopwatch.GetTimestamp()-t0;native[i]+=d;ticks[i]-=d;}}
-        public static void Reset(){Array.Clear(calls,0,calls.Length);Array.Clear(active,0,active.Length);Array.Clear(ticks,0,ticks.Length);Array.Clear(native,0,native.Length);}
+        public static void Factory(int i,long t0){factoryCalls[i]++;if(timing)factoryTicks[i]+=System.Diagnostics.Stopwatch.GetTimestamp()-t0;}
+        public static void Reset(){Array.Clear(calls,0,calls.Length);Array.Clear(active,0,active.Length);Array.Clear(ticks,0,ticks.Length);Array.Clear(native,0,native.Length);Array.Clear(factoryTicks,0,factoryTicks.Length);Array.Clear(factoryCalls,0,factoryCalls.Length);}
         public static string Json(){
             var f=1e6/System.Diagnostics.Stopwatch.Frequency;var parts=new List<string>();var inv=System.Globalization.CultureInfo.InvariantCulture;
-            for(int i=1;i<Names.Length;i++)parts.Add("{\"patch\":\""+Names[i]+"\",\"calls\":"+calls[i]+",\"active\":"+active[i]+",\"micros\":"+(ticks[i]*f).ToString("0.0",inv)+",\"nativeMicros\":"+(native[i]*f).ToString("0.0",inv)+"}");
+            for(int i=1;i<Names.Length;i++)parts.Add("{\"patch\":\""+Names[i]+"\",\"calls\":"+calls[i]+",\"active\":"+active[i]+",\"micros\":"+(ticks[i]*f).ToString("0.0",inv)+",\"nativeMicros\":"+(native[i]*f).ToString("0.0",inv)+",\"factoryCalls\":"+factoryCalls[i]+",\"factoryMicros\":"+(factoryTicks[i]*f).ToString("0.0",inv)+"}");
             return "{\"timing\":"+(timing?"true":"false")+",\"patches\":["+String.Join(",",parts.ToArray())+"]}";
         }
     }
@@ -54,7 +55,7 @@ namespace Concord {
             try{return !w||BuildScan.Prefix(pawn,t,forced,ref result);}finally{BuildCost.Stop(n,c,w);}
         }
         public static void Postfix(int n,Pawn pawn,Thing t,bool forced,Job result){
-            if(!BuildState.Active||!forced)return;long c=BuildCost.Start();try{BuildScan.Postfix(pawn,t,forced,result);}finally{BuildCost.More(n,c);}
+            long c=BuildCost.Start();try{if(!BuildState.Active||!forced)return;BuildScan.Postfix(pawn,t,forced,result);}finally{BuildCost.More(n,c);}
         }
     }
     [HarmonyPatch(typeof(WorkGiver_ConstructDeliverResourcesToBlueprints),nameof(WorkGiver_ConstructDeliverResourcesToBlueprints.JobOnThing))]
@@ -113,23 +114,24 @@ namespace Concord {
     [HarmonyPatch(typeof(Toils_Haul),nameof(Toils_Haul.DepositHauledThingInContainer))]
     static class BuildPatch8 {
         static void Postfix(Toil __result,TargetIndex containerInd){
+            long factory=BuildCost.Start();try{
             var toil=__result;var original=toil.initAction;if(original==null)return;
             toil.initAction=()=>{
-                if(!BuildState.Active){BuildCost.calls[8]++;original();return;}
                 long c=BuildCost.Start();var actor=toil.actor;var job=actor==null?null:actor.CurJob;
                 var frame=job!=null?job.GetTarget(containerInd).Thing as Frame:null;
-                var i=BuildState.OpenFor(frame);bool w=i!=null;
+                var i=BuildState.Active?BuildState.OpenFor(frame):null;bool w=i!=null;
                 try{
-                    if(!w){long n0=BuildCost.Start();original();BuildCost.Native(8,n0);return;}
+                    if(!w){long n0=BuildCost.Start();try{original();}finally{BuildCost.Native(8,n0);}return;}
                     var s=BuildState.Get();
                     if(s.Blocked(i,actor,job)){s.Emit(actor,"build-rejected-deposit","intent="+i.intentId+";job="+job.loadID);actor.jobs.EndCurrentJob(JobCondition.Incompletable);return;}
                     var def=actor.carryTracker.CarriedThing==null?null:actor.carryTracker.CarriedThing.def;
                     int before=def==null?0:frame.resourceContainer.TotalStackCountOfDef(def);
-                    long n1=BuildCost.Start();original();BuildCost.Native(8,n1);
+                    long n1=BuildCost.Start();try{original();}finally{BuildCost.Native(8,n1);}
                     int after=def==null||frame.Destroyed?before:frame.resourceContainer.TotalStackCountOfDef(def);
                     if(def!=null)s.Deposited(actor,job,frame,def,after-before);
                 }finally{BuildCost.Stop(8,c,w);}
             };
+            }finally{BuildCost.Factory(8,factory);}
         }
     }
     // P1/P5.4 conversion: the out createdThing is the successor (amendment 4); the nested blueprint
@@ -145,7 +147,7 @@ namespace Concord {
             BuildState.transition=__state;return true;
         }finally{BuildCost.Stop(9,c,w);}}
         static void Postfix(bool __result,ref Thing createdThing,BuildTransition __state){
-            if(__state==null)return;long c=BuildCost.Start();try{
+            long c=BuildCost.Start();try{if(__state==null)return;
             var i=__state.intent;var s=BuildState.Get();__state.committed=true;
             var ok=__result&&createdThing is Frame&&createdThing.Spawned&&createdThing.Map==__state.map&&createdThing.Position==new IntVec3(i.x,0,i.z)&&createdThing.Rotation.AsInt==i.rot&&createdThing.def.entityDefToBuild==i.Def;
             if(ok)s.Move(i,createdThing,"frame");
@@ -154,8 +156,8 @@ namespace Concord {
             }finally{BuildCost.More(9,c);}
         }
         static Exception Finalizer(Exception __exception,BuildTransition __state){
-            if(__state!=null){long c=BuildCost.Start();BuildState.transition=null;if(__exception!=null&&!__state.committed&&__state.predecessorRemoved)BuildState.Get().End(__state.intent,"failed","conversion error");BuildCost.More(9,c);}
-            return __exception;
+            long c=BuildCost.Start();try{if(__state!=null){BuildState.transition=null;if(__exception!=null&&!__state.committed&&__state.predecessorRemoved)BuildState.Get().End(__state.intent,"failed","conversion error");}
+            return __exception;}finally{BuildCost.More(9,c);}
         }
     }
     // Completion: settle the finisher's work first (the tick adds its increment before calling this),
@@ -170,7 +172,7 @@ namespace Concord {
             BuildState.transition=__state;
         }finally{BuildCost.Stop(10,c,w);}}
         static void Postfix(Pawn worker,BuildTransition __state){
-            if(__state==null)return;long c=BuildCost.Start();try{
+            long c=BuildCost.Start();try{if(__state==null)return;
             var i=__state.intent;var s=BuildState.Get();__state.committed=true;
             var qualified=__state.spawned.Distinct().Where(t=>t.Spawned).ToList();
             // Lab faults (scripted case 14 only): an absent or ambiguous successor.
@@ -183,16 +185,16 @@ namespace Concord {
             }finally{BuildCost.More(10,c);}
         }
         static Exception Finalizer(Exception __exception,BuildTransition __state){
-            if(__state!=null){long c=BuildCost.Start();BuildState.transition=null;if(__exception!=null&&!__state.committed&&__state.predecessorRemoved)BuildState.Get().End(__state.intent,"failed","completion error");BuildCost.More(10,c);}
-            return __exception;
+            long c=BuildCost.Start();try{if(__state!=null){BuildState.transition=null;if(__exception!=null&&!__state.committed&&__state.predecessorRemoved)BuildState.Get().End(__state.intent,"failed","completion error");}
+            return __exception;}finally{BuildCost.More(10,c);}
         }
     }
     // The main Spawn overload every other overload forwards to. Works only inside a completion
     // scope (successor collection) or while a player removal is pending (replacement attribution).
     [HarmonyPatch(typeof(GenSpawn),nameof(GenSpawn.Spawn),new[]{typeof(Thing),typeof(IntVec3),typeof(Map),typeof(Rot4),typeof(WipeMode),typeof(bool),typeof(bool)})]
     static class BuildPatch11 {
-        static void Postfix(Thing __result,IntVec3 loc,Map map){var t=BuildState.transition;var pend=BuildState.pending;bool w=t!=null&&t.kind=="complete"||pend!=null;if(!w){BuildCost.calls[11]++;return;}
-            long c=BuildCost.Start();try{
+        static void Postfix(Thing __result,IntVec3 loc,Map map){long c=BuildCost.Start();var t=BuildState.transition;var pend=BuildState.pending;bool w=t!=null&&t.kind=="complete"||pend!=null;
+            try{if(!w)return;
             if(__result==null)return;
             if(pend!=null&&__result is Blueprint&&BuildState.Get().Overlaps(pend,__result,map)){BuildState.Get().ResolvePending(true);return;}
             if(t==null||t.kind!="complete"||map!=t.map||__result.def!=t.expected)return;
@@ -213,13 +215,13 @@ namespace Concord {
             BuildState.transition=__state;
         }finally{BuildCost.Stop(12,c,w);}}
         static void Postfix(Pawn worker,BuildTransition __state){
-            if(__state==null)return;long c=BuildCost.Start();__state.committed=true;
+            long c=BuildCost.Start();try{if(__state==null)return;__state.committed=true;
             BuildState.Get().End(__state.intent,"failed","construction failed; held "+(String.IsNullOrEmpty(__state.intent.held)?"nothing":__state.intent.held)+"; returned: not recorded",worker);
-            BuildCost.More(12,c);
+            }finally{BuildCost.More(12,c);}
         }
         static Exception Finalizer(Exception __exception,BuildTransition __state){
-            if(__state!=null){long c=BuildCost.Start();BuildState.transition=null;if(__exception!=null&&!__state.committed)BuildState.Get().End(__state.intent,"failed","failure error");BuildCost.More(12,c);}
-            return __exception;
+            long c=BuildCost.Start();try{if(__state!=null){BuildState.transition=null;if(__exception!=null&&!__state.committed)BuildState.Get().End(__state.intent,"failed","failure error");}
+            return __exception;}finally{BuildCost.More(12,c);}
         }
     }
     // Removal classifier for tagged carriers and watched buildings; O(1) dictionary lookup first.
