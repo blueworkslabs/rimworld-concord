@@ -7,7 +7,23 @@
 interpretation.** 409 tests, pinned mod compilation and documentation checks pass.
 No model calls. Growing remains parked, B1 2/2 exhausted.
 
-## Telemetry-only wake behavior: mock/offline verified
+## Superseding disposition — 2026-09-25 08:07 UTC
+
+Fable narrowed the rule: an offer/counter **or a Food/Rest band worsening to urgent**
+keeps a telemetry-only wake. First/unknown urgent readings also wake conservatively.
+Independent review of `3aad097` is clear. The exact retained E2 inputs, replayed
+sequentially through real admission, silence **3, 6, 13** and retain **4, 5, 7**.
+This resolves the direction hold below; the original review remains as history.
+
+The subsequent executable-harness review found an integration gap: the ongoing
+driver checked only `ready`, so it never called the coordinator to consume silent
+wakes. The driver now also schedules silent bookkeeping, using the same refreshed
+coordinator admission and result handling. An ordinary-play migration mode is added
+separately from the frozen intent-only spike. Its rehearsal/freeze must be verified
+before live inference. The earlier statement that no runtime defect was found was
+limited to the coordinator review, not this later driver finding.
+
+## Original telemetry-only wake review: mock/offline verified
 
 Only band changes, with no offer opportunity and no counter, are consumed without
 a core call, attempt or new cooldown. Tests now start from a non-wait turn, compare
