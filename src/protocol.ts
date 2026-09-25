@@ -92,7 +92,7 @@ export type Domain = {
   eventCursor?:number;crew?:CrewArchive;
   pendingIntentAcceptances?:string[];
   pendingIntentExclusions?:Record<string,{intentId:string;actor:string;reason:string}>;
-  diagnostics?:{attentionGaps:number;attentionGapKinds:Record<string,number>};
+  diagnostics?:{attentionGaps:number;attentionGapKinds:Record<string,number>;laneFailures?:Record<string,{total:number;causes:Record<string,number>}>};
   /** B7: durable rescue handovers replacing a native haul, one per replacement proposal. */
   handovers?:Record<string,{capturedJobId?:number;proposalId:string;oldId:string;pawn:string;intentId:string;step:'excluding'|'draining'|'dispatched'|'stopped';deadline:number;dispatchId:string;reason?:string}>;
   nativeHaul?:import('./native-intents.js').NativeHaulConfig;nativeHauls?:import('./native-intents.js').NativeHaulEntry[];nativeIntentOnly?:boolean;intentViews?:Record<string,NativeIntentView>;

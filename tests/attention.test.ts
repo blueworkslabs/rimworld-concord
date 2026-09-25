@@ -288,3 +288,11 @@ test('admission is consumed before an attempted reflection and released on failu
  game.event();assert.equal((await c.attend('A',backend,low,{},undefined,'model',admission)).status,'failed');assert.deepEqual([consumed,released,calls],[1,1,1]);
  permit=false;game.event();assert.equal((await c.attend('A',backend,low,{},undefined,'model',admission)).status,'failed');assert.deepEqual([consumed,released,calls],[2,2,1]);store.close();
 });
+
+test('reflection failure cause remains visible after a successful core turn and reopen',async()=>{
+ const {game,store,c}=await setup();await c.initializeCore('Optional work');game.event('memory');
+ assert.equal((await c.attend('A',{name:'oversize',async reflect(){throw Object.assign(Error('No text exported'),{failureCause:'context-too-large'});}})).status,'failed');
+ await c.planCore({name:'wait',async plan(){return {topics:[],actionTopicId:null,action:{kind:'wait',reason:'Wait'}};}});
+ const {crewReport}=await import('../src/crew-log.js');assert.match(crewReport(c.inspect(),game.data.ticks).observerText!,/reflection failures: 1 \(context-too-large 1\)/);
+ const reopened=new Coordinator(store,game);await reopened.open();assert.deepEqual(reopened.inspect().diagnostics?.laneFailures?.reflection,{total:1,causes:{'context-too-large':1}});store.close();
+});
