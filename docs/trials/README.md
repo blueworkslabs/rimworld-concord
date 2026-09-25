@@ -96,4 +96,3 @@ New trials: add a row here in the same PR, with sanitized evidence in `docs/evid
 [Verdict and deletion sequence](HAULING_MIGRATION_GATE_C.md): game-side pass; generic
 test port before runtime deletion. Medical-alert inspection identifies Beatrice's
 pre-existing asthma needing tending. Crew-side follow-ups remain separate.
-
