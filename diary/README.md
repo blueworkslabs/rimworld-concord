@@ -68,8 +68,10 @@ Rules the build enforces:
   the part count, final part size and SHA-256 on its load button (`site/assets/watch.js`).
 - `_headers`: Cloudflare Pages headers (same-origin only, no third-party requests).
 
-The only JavaScript is `site/assets/site.js`, a same-origin file that plays the
-explainer loops only after explicit play, pauses them offscreen, and never automatically resumes them. The site loads
+The same-origin `site/assets/site.js` plays explainer loops only after explicit
+play, pauses them offscreen, and never automatically resumes them.
+`site/assets/watch.js` loads and verifies recording parts on request, then enables
+local playback and scrubbing. The site loads
 no third-party resources, so no model or API keys can end up in the browser.
 Model calls happen in the drafting workflow, not here.
 

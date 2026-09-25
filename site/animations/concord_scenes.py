@@ -244,7 +244,7 @@ class CoreWakes(Scene):
         clbl = T("core: asleep", 18, DIM).next_to(core, RIGHT, buff=0.3)
         budget_lbl = T("turn budget", 16, DIM).move_to(RIGHT * 3.6 + UP * 2.6)
         pips = VGroup(*[Square(0.26, fill_color=AMBER, fill_opacity=1, stroke_width=0) for _ in range(5)]).arrange(RIGHT, buff=0.1).next_to(budget_lbl, DOWN, buff=0.15)
-        rule = T("Wakes it: messages · answers · finished or stopped work · requests · offer/counter openings", 15, DIM).move_to(UP * 1.35)
+        rule = T("Wakes it: messages · answers · work outcomes · requests · native-intent milestones", 15, DIM).move_to(UP * 1.35)
 
         status_box = panel(5.4, 1.75).move_to(LEFT * 3.6 + DOWN * 1.98)
         log_box = panel(6.9, 1.75).move_to(RIGHT * 2.85 + DOWN * 1.98)
@@ -304,11 +304,11 @@ class CoreWakes(Scene):
             else:
                 z = T(turn, 14, DIM).next_to(mark, UP, buff=0.3)
                 if stat:
-                    quiet = T("telemetry: consumed silently, no core call, no log", 14, DIM).next_to(status_box.get_bottom(), UP, buff=0.2).align_to(status, LEFT)
+                    quiet = T("no offer/counter: silent, no core call or log", 14, DIM).next_to(status_box.get_bottom(), UP, buff=0.2).align_to(status, LEFT)
                     self.play(FadeIn(z), set_status(stat, DIM), FadeIn(quiet), run_time=0.6)
                 else:
                     self.play(FadeIn(z), run_time=0.4)
-        cap = caption("Shared events spend a turn. Telemetry waits silently, unless it turns urgent.")
+        cap = caption("Status-only: silent unless work is offerable or a band reaches urgent.")
         self.play(FadeIn(cap), run_time=0.7)
         self.wait(2.4)
 
@@ -445,7 +445,7 @@ class NativeIntent(Scene):
         self.play(*haul(btok, stacks[2], slots[3]), run_time=1.2)
         self.play(*ledger_to(35, 40, 0, 0), run_time=0.6)
 
-        refuse = VGroup(Square(0.14, fill_color=RED, fill_opacity=1, stroke_width=0), T("refused or deferred → never tagged work", 15, DIM)).arrange(RIGHT, buff=0.15).move_to(RIGHT * 4.3 + UP * 0.45)
+        refuse = VGroup(Square(0.14, fill_color=RED, fill_opacity=1, stroke_width=0), T("refused or deferred → no new tagged work", 15, DIM)).arrange(RIGHT, buff=0.15).move_to(RIGHT * 4.3 + UP * 0.45)
         self.play(FadeIn(refuse, shift=UP * 0.1), run_time=0.6)
         self.wait(0.6)
 

@@ -165,7 +165,7 @@
     <span class="eyebrow">02 · Knowledge boundaries</span>
     <h3>Who knows what</h3>
     <p>Each mind gets a <strong>scoped perspective</strong>; the core uses an explicit allowlist rather than receiving pawn or character state wholesale. A colonist sees its own traits, skills, exact needs, surviving memories, its own history and a private outlook of up to four revisable notes, each tied to its own experiences.</p>
-    <p>The core receives <strong>explicitly shared information</strong>: addressed messages, agreement receipts, grounded opportunities, attributed local food/campfire sightings, and shared-link Food/Rest telemetry (urgent, low, satisfied, unknown) with a timestamp. Telemetry is not a visual observation. Stale readings become <em>unknown</em>, never zero, and every fact carries the tick it was observed.</p>
+    <p>The core receives <strong>explicitly shared information</strong>: addressed messages, agreement receipts, grounded opportunities, attributed local food/campfire sightings, and shared-link Food/Rest telemetry (urgent, low, satisfied, unknown) with a timestamp. Telemetry is not a visual observation. Stale readings become <em>unknown</em>, never zero, and the core view distinguishes observation ticks from event/receipt times.</p>
     <p>What the colony has <strong>built</strong> (stockpiles, blueprints, bills) is colony-public, because someone placed it on the map. Loose things stay attributed sightings: a native work scan seeing the whole map is not permission to put unobserved resources in a model's menu.</p>
   </div>
   <figure class="anim window">
@@ -202,7 +202,7 @@
     <span class="eyebrow">03 · Native intents</span>
     <h3>Steer the planner, don't drive the pawn</h3>
     <p>RimWorld already has an intent layer: the player's controls. Stockpile zones, blueprints, bills and designations are state on the map, and pawns fulfil them through their own <strong>work givers</strong>, in between eating and sleeping. Concord now uses that layer. An accepted haul becomes a <strong>stockpile tagged with its agreement</strong> and a quota ("up to 30 wood"), not a stream of orders.</p>
-    <p>Harmony hooks report job starts and ends, eating and actual placements. <strong>Credit comes from placements</strong>, per pawn: credited plus reserved never exceeds the quota, and anything else that lands in the zone is counted as incidental, never hidden. The tag sits on the zone, not the wood. A pawn who refused or deferred never does the tagged work; anyone else who pitches in is labelled <em>helping, not asked</em>. When the quota is met, one record retires the agreement and the zone becomes an ordinary stockpile.</p>
+    <p>Harmony hooks report job starts and ends, eating and actual placements. <strong>Credit comes from placements</strong>, per pawn: credited plus reserved never exceeds the quota, and anything else that lands in the zone is counted as incidental, never hidden. The tag sits on the zone, not the wood. Trips already under way before tagging remain ordinary work and get no agreement credit; withdrawal blocks new pickups but lets already-carried cargo finish. A pawn who refused or deferred is excluded from new tagged work; anyone else who pitches in is labelled <em>helping, not asked</em>. When the quota is met, one record retires the agreement and the zone becomes an ordinary stockpile.</p>
     <p>The core never sets work priorities, and a pawn who can't do a kind of work is visibly not offered it. The loads are <strong>strict</strong>: one source per trip, no extra pickups on the way; a growing hold is parked after it failed to come through two fix rounds cleanly.</p>
     <p class="files">mod/NativeIntents.cs · mod/IntentPatches.cs · src/native-intents.ts · docs/NATIVE_INTENTS.md · docs/MIGRATION_HAULING.md</p>
   </div>
@@ -210,14 +210,14 @@
     <video data-loop controls loop muted playsinline preload="metadata" poster="../media/native-intent.jpg" width="1280" height="720" aria-label="Animation: before, the core issued one hand-built job per trip, and a haul that stopped for hunger never resumed. Now the core offers a shared haul of up to 75 wood only to pawns who can haul; Alvin is shown as not offered. Beatrice accepts, and the agreement becomes a tagged stockpile on the map. Beatrice and Pedro, helping before he was asked, fill it through RimWorld's own work givers, around a meal. A quota ledger fills to 75 (Beatrice 35, Pedro 40) and one record retires the agreement.">
       <source src="../media/native-intent.mp4" type="video/mp4">
     </video>
-    <figcaption><b>The intent is state on the map. Receipts decide the credit.</b></figcaption>
+    <figcaption><b>The intent is state on the map. Receipts decide the credit.</b> Illustrative sequence, not a replay: the final 35/40 split is from the live spike; the meal interruption demonstrates separately scripted behaviour.</figcaption>
   </figure>
 </article>
 
   <figure class="diagram" aria-labelledby="life-cap">
     <svg viewBox="0 0 1000 300" role="img" aria-labelledby="life-title life-desc">
       <title id="life-title">The life of a native haul intent</title>
-      <desc id="life-desc">An offer goes only to pawns who can do the work. A fresh acceptance opens a stockpile tagged with the agreement and a quota. Refusal or not-now means that pawn never does the tagged work; an answer after the work is done lapses and starts nothing. While the stockpile is open, a quota ledger credits placements per pawn, agreed pawns and unasked helpers separately, and never lets credited plus reserved exceed the quota. Meals and sleep interrupt, but the intent stays on the map and work resumes through the game's work givers. Once the quota is met from placement receipts, one record retires the agreement and the zone becomes an ordinary stockpile.</desc>
+      <desc id="life-desc">An offer goes only to pawns who can do the work. A fresh acceptance opens a stockpile tagged with the agreement and a quota. Refusal or not-now excludes that pawn from new tagged work; pre-tag trips remain ordinary work; an answer after the work is done lapses and starts nothing. While the stockpile is open, a quota ledger credits placements per pawn, agreed pawns and unasked helpers separately, and never lets credited plus reserved exceed the quota. Meals and sleep interrupt, but the intent stays on the map and work resumes through the game's work givers. Once the quota is met from placement receipts, one record retires the agreement and the zone becomes an ordinary stockpile.</desc>
       <defs>
         <marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7C8894"/></marker>
       </defs>
@@ -249,7 +249,7 @@
       </g>
       <g font-size="12.5">
         <rect x="20" y="134" width="360" height="40" rx="3" fill="#161B20" stroke="#D8614F"/>
-        <text x="34" y="159" fill="#E7E3D9"><tspan font-weight="700" fill="#D8614F">refuse · not now</tspan>  never does the tagged work</text>
+        <text x="34" y="159" fill="#E7E3D9"><tspan font-weight="700" fill="#D8614F">refuse · not now</tspan>  no new tagged work</text>
         <rect x="20" y="186" width="360" height="40" rx="3" fill="#161B20" stroke="#46525E"/>
         <text x="34" y="211" fill="#E7E3D9"><tspan font-weight="700" fill="#B4B0A6">yes after the work is done</tspan>  lapses, starts nothing</text>
         <rect x="400" y="134" width="400" height="118" rx="3" fill="#161B20" stroke="#8DB9E8"/>
@@ -310,14 +310,14 @@
     <span class="eyebrow">06 · The core</span>
     <h3>A planner that waits to be needed</h3>
     <p>Each core turn picks one of four moves: <strong>propose</strong> a listed opportunity, <strong>adopt</strong> a counter for fresh consent, <strong>ask</strong> one pawn one question, or <strong>wait</strong>. It keeps up to eight sourced topics marked open, blocked, deferred, resolved or declined. "Resolved" requires completed linked work, so its prose can't close a topic that the receipts don't close.</p>
-    <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, something new to offer. A shared status band changing on its own is handled <strong>silently</strong>, with no model call and no crew-log entry, just a "waiting on…" status line, unless Food or Rest worsens to urgent. Idle time and private needs never wake it, and a wait never writes to the log. Messages published after newer receipts carry an "as of" mark. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
+    <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, and native-intent milestones or stalls. Opportunity churn alone does not wake it. A shared status band changing on its own, with no offerable opportunity or counter, is handled <strong>silently</strong>, with no model call and no crew-log entry, just a "waiting on…" status line, unless Food or Rest reaches urgent (including a first or previously unknown reading). Idle time and private needs never wake it, and a wait never writes to the log. Messages published after newer receipts carry an "as of" mark. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
     <p class="files">src/core-planner.ts · src/core-scheduler.ts · mod/SharedStatus.cs</p>
   </div>
   <figure class="anim window">
-    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of game events. A finished haul, a not-now answer, a Rest band turning urgent and a request for work each wake the core. A Food band changing on its own is consumed silently and only updates a 'waiting on' status line; idle time and private needs never call the core, and a wait never adds a crew-log entry.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of game events. A finished haul, a not-now answer, a Rest band turning urgent and a request for work each wake the core. A Food band changing with no offerable opportunity or counter is consumed silently and only updates a 'waiting on' status line; idle time and private needs never call the core, and a wait never adds a crew-log entry.">
       <source src="../media/core-wakes.mp4" type="video/mp4">
     </video>
-    <figcaption><b>Public changes wake it. Status-only changes wait quietly, unless someone turns urgent.</b></figcaption>
+    <figcaption><b>Public events wake it. Status-only changes wait quietly unless work is offerable or someone turns urgent.</b></figcaption>
   </figure>
 </article>
 
@@ -326,7 +326,7 @@
     <span class="eyebrow">07 · Timeline safety</span>
     <h3>Saves, reloads and slow thoughts</h3>
     <p>Model calls take seconds; players save, load and rewind. Every loaded game gets a fresh <strong>epoch</strong>, so an answer from before a reload can't act in the new timeline. Each accepted action gets an ID <strong>before</strong> dispatch, and the game's saved ledger makes a duplicate a no-op.</p>
-    <p><strong>Paired checkpoints</strong> save the paused game, hash it and store the matching character state together. Restoring checks the hash and forks the timeline. Gameplay reports distinguish paired restore from a <strong>cold restore</strong>: a full process restart, with retained results and no extra model calls. Some experiments left restore gaps; offline checks do not demonstrate native persistence.</p>
+    <p><strong>Paired checkpoints</strong> save the paused game, hash it and store the matching character state together. Restoring checks the hash and forks the timeline. Gameplay reports distinguish paired restore from a <strong>cold coordinator restore</strong>: a new coordinator process (not necessarily a game restart), with retained results and no extra model calls. Some experiments left restore gaps; offline checks do not demonstrate native persistence.</p>
     <p class="files">src/store.ts · src/lab-bridge.ts · mod/Concord.cs</p>
   </div>
   <figure class="anim window">
@@ -355,7 +355,7 @@
   <figure class="window">
     <div class="window-bar"><b>Concord · observer</b><span>live native haul · 24 Sep 2026</span></div>
     <img src="../images/2026-09-24-native-haul-quota-met.png" alt="The Concord observer during the live native-haul run. The journal shows the game record 'Stockpile haul quota met: 75/75 wood (Pedro 40, Beatrice 35)', then 'Pending offer withdrawn; no work authorized', then a core message that nothing can be proposed. The colony wood counter reads 120." width="1280" height="800" loading="lazy">
-    <figcaption>The quota closes from placement receipts. The "withdrawn" line below it is a real defect, kept on the record: Pedro had said yes after the work was done. The 120 wood includes ordinary hauling after the agreement retired.</figcaption>
+    <figcaption>The quota closes from placement receipts. The "withdrawn" line below it is a real defect, kept on the record: Pedro had said yes after the work was done. The counter later reads 120; post-retirement hauling is recorded, but the exact quantities and destinations of the remaining 45 are unknown.</figcaption>
   </figure>
 </article>
 
@@ -409,7 +409,7 @@
   <h2 id="missing-h">Known gaps, stated plainly</h2>
   <div class="caveat">
     <p><strong>The live build-and-cook chain remains unproved.</strong> Live runs show the core asking, waiting for receipts and closing follow-ups, colonists choosing to eat, and one native haul carried to its quota. No live run has yet produced a build or cooking offer; those move to blueprints and bills next.</p>
-    <p><strong>The native side won on the game, not yet on the crew.</strong> In the live native haul nobody refused, no plan formed between colonists, the three voices sounded alike, and a late yes was mislabelled as a withdrawal. The fixes (lapsed answers, observation ages, per-lane failure counts) are merged and scripted-tested, not yet exercised live.</p>
+    <p><strong>The native side won on the game, not yet on the crew.</strong> In the live native haul nobody refused, no plan formed between colonists, the three voices sounded alike, and a late yes was mislabelled as a withdrawal. The fixes (lapsed answers, observation ages, per-lane failure counts) are merged and checked in mocks/offline replay. The migration run is recorded in <a href="https://github.com/blueworkslabs/rimworld-concord/pull/75" rel="noopener">PR #75</a>; its recording-first review and live validation verdict are pending.</p>
     <p><strong>Hauling runs strict.</strong> The growing hold, which would keep RimWorld's extra pickups within the quota, is parked after its two fix rounds; the in-game clock is verified on one map only.</p>
     <p><strong>Character continuity is early.</strong> Outlooks form, persist and show up in later reasoning. Whether they add up to stable personalities over a long game is an open question.</p>
     <p><strong>It's a lab harness, not a player download.</strong> The mod only activates in a configured lab environment.</p>

@@ -14,7 +14,7 @@
     {
       "heading": "Luna in Continuous Play",
       "paragraphs": [
-        "The Luna model now runs core turns, pawn answers and reflections natively while the game keeps running, woken by events rather than a fixed number of turns. In a first corrected three-minute check, Beatrice ate nine berries and the core closed her three linked topics. Two of Alvin's choices failed fresh availability checks: by the time they arrived, the option was gone. A six-answer offline comparison with Terra found stale explanations in both models, so Luna stays the default without automatic escalation."
+        "The Luna model now runs core turns, pawn answers and reflections natively while the game keeps running, woken by events rather than a fixed number of turns. In a first corrected three-minute check, Beatrice ate nine berries and the core closed her three linked topics. Two of Alvin's choices failed fresh availability checks: by the time they arrived, the option no longer passed validation; the exact failed predicates remain unknown. A six-answer offline comparison with Terra found stale explanations in both models, so Luna stays the default without automatic escalation."
       ]
     },
     {
