@@ -210,7 +210,7 @@ With a schedule, the core runs only when admitted:
   cause may admit another attempt within the remaining allowance, or without a count
   ceiling in ongoing mode. Waiting is a valid success, not a non-progress failure.
 
-Wake causes are public changes only:
+Wake causes are public changes, plus the explicitly bounded review nudge:
 
 | Cause | When |
 |---|---|
@@ -239,7 +239,8 @@ no second look. Fable's rule:
 - **Chain:** the first review is due `NATIVE_INTENT_STALL_TICKS` (2,500) after the wait;
   a review that ends in another wait earns a second at twice that (5,000); after the
   second, silence until a real cause. Any real cause resets the chain, and that turn's
-  own wait starts it again. Anything but a wait ends it.
+  own wait starts it again. A silently consumed telemetry change also ends the old
+  chain without spending a turn or starting another chain. Anything but a wait ends it.
 - **Budget:** at most **two extra core turns per deliberate wait**. Reviews go through
   ordinary admission (cooldown and, in bounded schedules, the attempt budget apply).
 - **What the core sees:** `wakeReasons` names it `review`, with "Review n of 2, a nudge

@@ -43,7 +43,8 @@ export type AttentionResult={pawn:string;status:'idle'|'busy'|'cooldown'|'paced'
  */
 export function coalesce(events:Attention[]):Attention[] {
   const latest=new Map<string,Attention>();
-  for(const e of events) latest.set(e.route==='deliberation'&&(attentionInterrupt(e))?`significant:${e.event.seq}`:`${e.event.kind}:${e.event.kind==='memory'?e.event.detail:''}`,e);
+  // A native recovery must not erase queued urgent evidence before native events are filtered.
+  for(const e of events) latest.set(e.route==='deliberation'&&(attentionInterrupt(e))?`significant:${e.event.seq}`:`${e.route}:${e.event.kind}:${e.event.kind==='memory'?e.event.detail:''}`,e);
   return [...latest.values()].sort((a,b)=>a.event.seq-b.event.seq);
 }
 

@@ -491,3 +491,29 @@ test('no review when nothing was offerable at the wait',async()=>{
  assert.equal(c.inspect().coreState!.schedule!.review,undefined,'nothing was offerable at the wait');
  g.available=true;g.data.ticks=100000;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');s.close();
 });
+
+test('silent telemetry ends an old review chain even when work later returns',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');
+ assert.equal(c.inspect().coreState!.schedule!.review!.dueTick,2600);
+ g.available=false;g.data.ticks=1000;g.data.pawns[0]!.linkStatus={source:'shared-link-telemetry',epoch:g.data.epoch,tick:1000,food:'low',rest:'satisfied'};
+ const silent=await c.planCoreWhenDue(planner(()=>{throw Error('silent telemetry must not spend');}));
+ assert.equal(silent.status,'idle');if(silent.status==='idle')assert.equal(silent.reason,'telemetry-only');
+ assert.equal(c.inspect().coreState!.schedule!.review,undefined);
+ g.available=true;g.data.ticks=2600;g.data.pawns[0]!.linkStatus!.tick=2600;
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');assert.equal(c.inspect().coreState!.schedule!.attempts,1);s.close();
+});
+
+test('review admission survives reopen and respects budget; failed reviews are not retried',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:2,windowTicks:10000,cooldownTicks:60});
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');
+ const reopened=new Coordinator(s,g);await reopened.open();g.data.ticks=2600;
+ assert.equal((await reopened.planCoreWhenDue(planner(()=>wait))).status,'applied');
+ g.data.ticks=7600;const blocked=await reopened.planCoreWhenDue(planner(()=>wait));
+ assert.equal(blocked.status,'idle');if(blocked.status==='idle')assert.equal(blocked.reason,'budget-exhausted');s.close();
+ const f=await setup();await f.c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ assert.equal((await f.c.planCoreWhenDue(planner(()=>wait))).status,'applied');f.g.data.ticks=2600;
+ assert.equal((await f.c.planCoreWhenDue(planner(()=>{throw Error('provider failed');}))).status,'failed');
+ const recovery=new Coordinator(f.s,f.g);await recovery.open();f.g.data.ticks=10000;
+ assert.equal((await recovery.planCoreWhenDue(planner(()=>wait))).status,'idle');assert.equal(recovery.inspect().coreState!.schedule!.attempts,2);f.s.close();
+});

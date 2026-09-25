@@ -63,6 +63,9 @@ The core has one telemetry rule of its own (details in [CORE](CORE.md)):
 | Any message, answer, agreement, request, self-care or native-intent cause | yes, as before |
 | `review`: nothing new, but the core waited with work offerable 2,500 (then 5,000) ticks ago | yes, at most twice per deliberate wait |
 
+A queued urgent need event is not coalesced away by a later native recovery; the
+recovery remains in the shown history, without being a new reflection trigger.
+
 An appraisal score of 0.5 or more sends an event on to deliberation; a lower score
 leaves it to native behaviour, with no pause and no badge.
 

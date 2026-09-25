@@ -9,7 +9,8 @@ would the pawns have thought". Prints losses as run, with intent-ordinary routed
 with native/considered experiences evicted first.
 """
 import collections,json,sqlite3,sys
-rows=[json.loads(d) for (d,) in sqlite3.connect(sys.argv[1]).execute('select data from events order by seq')]
+from pathlib import Path
+rows=[json.loads(d) for (d,) in sqlite3.connect(Path(sys.argv[1]).resolve().as_uri()+'?mode=ro',uri=True).execute('select data from events order by seq')]
 def replay(native_first,ordinary_native):
     buf=collections.defaultdict(list);cursor=collections.defaultdict(int);lost=collections.Counter();waiting=0
     for r in rows:

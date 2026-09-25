@@ -486,6 +486,8 @@ export class Coordinator {
         const admission=coreAdmission(state.schedule!,coreView(this.domain,game));
         if(!admission.ready){
           if(admission.silent){
+            // A real public change ends the old review chain even when it spends no turn.
+            delete state.schedule!.review;
             state.schedule!.consumed=admission.silent.snapshot;state.silentWake={tick:game.ticks,causes:admission.silent.causes};
             this.commit('core-wake-silent','core',{tick:game.ticks,causes:admission.silent.causes});
           }

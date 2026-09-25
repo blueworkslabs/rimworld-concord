@@ -337,3 +337,12 @@ test('reflection relay cannot cite evidence removed from the recorded trimmed vi
   assert.equal(d.characters.A.experiences[0].event.seq,1,'stored evidence was not trimmed');
  } finally {channel.close();store.close();}
 });
+
+test('queued urgent need evidence survives a later native recovery in the same batch',async()=>{
+ const {game,store,c}=await setup();game.event('food','A','0');game.event('food','A','1');
+ let shown:AttentionView|undefined;const result=await c.attend('A',{name:'capture',async reflect(view){shown=view;return {kind:'continue',reason:'The urgent band passed; continue native work'};}});
+ assert.equal(result.status,'continued');assert.ok(shown,'the backend was called');
+ assert.deepEqual(shown.events.map(e=>({kind:e.kind,detail:e.detail})),[{kind:'food',detail:'0'}]);
+ assert.ok(shown.character.experiences!.some(e=>e.event.kind==='food'&&e.event.detail==='1'&&e.route==='native'),'current recovery remains in the shown history');
+ assert.equal(c.inspect().characters.A!.attention!.cursor,2);store.close();
+});
