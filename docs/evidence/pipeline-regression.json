@@ -67,7 +67,7 @@
       "videoSeconds": 100,
       "visibleText": "Core: heard Pedro; no reply to them yet",
       "typedRequestCount": 0,
-      "limit": "Ordinary pawn message asking about food, not a typed Request record. Typed-request branch unexercised."
+      "limit": "Ordinary pawn message reporting a food/access problem, not a typed Request record. Typed-request branch unexercised."
     },
     "mealGate": {
       "status": "live-pass",
