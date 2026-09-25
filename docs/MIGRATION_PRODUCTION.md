@@ -973,8 +973,9 @@ From a full-assembly search of the pinned decompile (private, outside the reposi
 ### Patch ledger (construction)
 
 Thirteen patched methods; the cooking slice has seven left under the twenty ceiling. Every
-patch checks the static `BuildState.Active` flag (O(1)) before any other work; the global
-paths add only a job-def or dictionary check. Costs are measured on staging with
+patch uses constant-time guards and counter/timing bookkeeping; global paths use
+`Active`, a job-def/dictionary check, or (B11) the current transition scope. B8 installs
+a wrapper at toil creation even without an active tag. These are not zero-work guards. Costs are measured on staging with
 `lab-build-cost` (case 1 enables timing and resets it in `finally`); none is claimed yet.
 The current counters are **partial instrumentation, not full per-patch overhead**:
 B1/B2/B4 and B9/B10/B12 time prefixes but omit postfix/finalizer work; B8 includes
@@ -1002,11 +1003,16 @@ Implementation choices within the signed design, for review:
 
 - **Conversion recheck without a second toil patch.** P5.2(c)'s conversion check runs in B9's
   prefix (the method receives the worker); a blocked conversion returns false with the
-  blueprint intact, and the deposit wrapper (B8) then ends the job without a transfer.
-- **Removal classification by destroy mode, no designator patch.** Cancel → stopped
-  (cancelled); Deconstruct, which only the player's build designator uses on a blueprint or
-  frame (entry item 4), → stopped (replaced by the player); Vanish → failed (removed); other →
-  failed (destroyed). Case 12 exercises the real designator.
+  blueprint intact. B8 explicitly rejects excluded **frame** deposits; it does not
+  handle a remaining blueprint as a frame. The original blueprint path has no resource
+  container, but the broader denied-conversion cleanup still needs scripted evidence.
+- **Removal classification by destroy mode, no designator patch.** The implementation currently maps Cancel → stopped
+  (cancelled), Deconstruct → stopped (replaced by the player), Vanish → failed (removed),
+  other → failed (destroyed). **Confirmed review blocker:** native
+  `Designator_Deconstruct.DesignateThing` also destroys frames with Deconstruct, so
+  this cannot establish replacement. Conversely, the build designator can cancel a
+  replace-tag-matching frame before its later deconstruct wipe. Case 12 alone cannot
+  prove this classification; fix the cause attribution within the agreed patch ceiling.
 - **Polled facts.** Expiry, the forbidden note, a different occupant on the footprint and a
   building that leaves its place without being destroyed are checked every 60 ticks.
 - **Forced stamps** are saved by job load ID and dropped 600 ticks after the job exists nowhere.
@@ -1036,3 +1042,5 @@ Implementation choices within the signed design, for review:
 10. **Failure accounting:** how materials lost on a failed construction, and ingredients
    in an interrupted bill, appear in receipts and the crew log.
 11. **One Gate C scene for both**, or construction first and cooking second.
+
+Scripted review status and remaining coverage: [initial construction review](trials/NATIVE_CONSTRUCTION_REVIEW.md).

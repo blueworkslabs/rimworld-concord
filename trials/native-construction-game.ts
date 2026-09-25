@@ -35,6 +35,13 @@ const receipt:{runId:string;unimplemented:string[];observedOnly:Record<string,un
     'crew-log wording (helper label, completion record, fate line with clock time): coordinator PR',
     // Case 7's exact refunds: no leavings hook for Gate C (signature answer 4); the record says "not recorded".
     'exact returned units on cancel/failure (answer 4: "returned: not recorded")',
+    'case 4: actual nearby-extension and queued-destination opportunity evidence',
+    'case 5: work-share reconciliation against native deltas and failure-before-increment',
+    'case 13: queued/restored forced provenance, ordinary continuation and stamp isolation',
+    'case 14: absent/ambiguous successors and exception unwind',
+    'case 15: current-frame withdrawal, queued/reserved candidates, unrelated current work and reentrancy',
+    'case 16: restore between deposits followed by the next physical transfer',
+    'case 17: post-retag effects and same-def physical replacement',
    ],observedOnly:{},passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,eventEpoch:string|undefined,state:GameState;
 const persist=()=>writeFile(root+`/.runtime/native-construction-${runId}.json`,JSON.stringify(receipt,null,2));

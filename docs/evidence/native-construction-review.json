@@ -1,0 +1,2319 @@
+{
+  "scope": "Partial scripted construction review; not Gate C or full seventeen-case acceptance",
+  "pr": 89,
+  "pinnedAssemblySha256": "082db1dd4f7f1d0b72960d7e1beead8fbfe6957200e8627f65bda0dbbe1dd8f8",
+  "correctedModSha256": "21c012986abc02475be8e6b0872f1d588aca08044a8d995ec746983a26af5bb6",
+  "offlineTests": 460,
+  "originalSaves": 423,
+  "originalSavesUnchanged": true,
+  "newSavesRetained": 5,
+  "previousModRestored": true,
+  "gameAndDisplayStopped": true,
+  "recordingHashesMatchRemote": true,
+  "recordings": [
+    {
+      "file": "1-accept-build-1790356203.mp4",
+      "sha256": "46656c7605779e47b3e76252728cc4faa8b55fa783a9f0c60c221875693cac79",
+      "durationSeconds": 15.0,
+      "bytes": 1164074
+    },
+    {
+      "file": "1-accept-build-1790356505.mp4",
+      "sha256": "8ac2142679d6a20830a4c31d53ae6b3cd8d34507e99423c6c117c6a24667fd72",
+      "durationSeconds": 27.6,
+      "bytes": 2088595
+    },
+    {
+      "file": "9-restore-1790356561.mp4",
+      "sha256": "2c8182492f0e6be4475a692187e4a357452fdea8acd0ebb8ba299e2bd055f44d",
+      "durationSeconds": 54.0,
+      "bytes": 5403951
+    }
+  ],
+  "runs": [
+    {
+      "runId": "a1c07217-7b65-4a0b-93a2-7cc5d4af1a96",
+      "at": "2026-09-25T17:10:05.062Z",
+      "passed": false,
+      "inferenceCalls": 0,
+      "eventGaps": 0,
+      "cases": [
+        {
+          "name": "1-accept-build",
+          "passed": false,
+          "findings": [
+            "error: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"array\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"delivered\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"array\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"work\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"array\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"records\"\n    ],\n    \"message\": \"Required\"\n  }\n]"
+          ],
+          "data": {
+            "events": [
+              {
+                "seq": 7,
+                "tick": 3,
+                "pawn": "Thing_Human411",
+                "kind": "build-opened",
+                "detail": "intent=592a79b1-bfee-45ee-bd5f-46acb6a8a912;def=Campfire;stage=blueprint;generation=1",
+                "subject": ""
+              },
+              {
+                "seq": 8,
+                "tick": 4,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "HaulToContainer;job=5",
+                "subject": ""
+              },
+              {
+                "seq": 9,
+                "tick": 4,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "HaulToContainer",
+                "subject": ""
+              },
+              {
+                "seq": 10,
+                "tick": 5,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=6",
+                "subject": ""
+              },
+              {
+                "seq": 11,
+                "tick": 5,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=7",
+                "subject": ""
+              },
+              {
+                "seq": 12,
+                "tick": 12,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 13,
+                "tick": 12,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              }
+            ],
+            "buildIntents": [
+              {
+                "intentId": "592a79b1-bfee-45ee-bd5f-46acb6a8a912",
+                "status": "open",
+                "stage": "blueprint",
+                "def": "Campfire",
+                "label": "campfire at the east site",
+                "siteId": "east-site",
+                "stopReason": "",
+                "finisher": "",
+                "note": "",
+                "fate": "",
+                "held": "",
+                "mapId": 0,
+                "x": 76,
+                "z": 82,
+                "rot": 0,
+                "generation": 1,
+                "thingId": 7238,
+                "createdTick": 3,
+                "untilTick": 60003,
+                "fateTick": -1,
+                "violations": 0,
+                "rejectedStarts": 0,
+                "accepted": [
+                  "Thing_Human411"
+                ],
+                "excluded": []
+              }
+            ]
+          }
+        }
+      ],
+      "sourceRevision": "856b87a05aa7a2a3792fdc286431711ac314b682",
+      "retainedRawSha256": "8710ddc6500c66e239934d9ab6bd577d4ca9907293d57718ff5305d50d5c6466"
+    },
+    {
+      "runId": "3dabbe17-2128-4c74-8c84-01e825578f43",
+      "at": "2026-09-25T17:15:06.647Z",
+      "passed": true,
+      "inferenceCalls": 0,
+      "eventGaps": 0,
+      "cases": [
+        {
+          "name": "1-accept-build",
+          "passed": true,
+          "findings": [],
+          "data": {
+            "events": [
+              {
+                "seq": 7,
+                "tick": 3,
+                "pawn": "Thing_Human411",
+                "kind": "build-opened",
+                "detail": "intent=09087106-0270-481a-adf2-e9d0590cf69a;def=Campfire;stage=blueprint;generation=1",
+                "subject": ""
+              },
+              {
+                "seq": 8,
+                "tick": 4,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "HaulToContainer;job=5",
+                "subject": ""
+              },
+              {
+                "seq": 9,
+                "tick": 4,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "HaulToContainer",
+                "subject": ""
+              },
+              {
+                "seq": 10,
+                "tick": 5,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=6",
+                "subject": ""
+              },
+              {
+                "seq": 11,
+                "tick": 5,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=7",
+                "subject": ""
+              },
+              {
+                "seq": 12,
+                "tick": 12,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 13,
+                "tick": 12,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 14,
+                "tick": 114,
+                "pawn": "Thing_Human405",
+                "kind": "food",
+                "detail": "1",
+                "subject": ""
+              },
+              {
+                "seq": 15,
+                "tick": 161,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=7;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 16,
+                "tick": 161,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=15",
+                "subject": ""
+              },
+              {
+                "seq": 17,
+                "tick": 164,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=15;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 18,
+                "tick": 164,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "GotoWander;job=16",
+                "subject": ""
+              },
+              {
+                "seq": 19,
+                "tick": 169,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 20,
+                "tick": 260,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=6;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 21,
+                "tick": 260,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=21",
+                "subject": ""
+              },
+              {
+                "seq": 22,
+                "tick": 263,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=21;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 23,
+                "tick": 263,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=22",
+                "subject": ""
+              },
+              {
+                "seq": 24,
+                "tick": 265,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 25,
+                "tick": 291,
+                "pawn": "",
+                "kind": "build-stage",
+                "detail": "intent=09087106-0270-481a-adf2-e9d0590cf69a;stage=frame",
+                "subject": ""
+              },
+              {
+                "seq": 26,
+                "tick": 291,
+                "pawn": "Thing_Human411",
+                "kind": "build-delivered",
+                "detail": "intent=09087106-0270-481a-adf2-e9d0590cf69a;def=WoodLog;count=20;role=accepted",
+                "subject": ""
+              },
+              {
+                "seq": 27,
+                "tick": 291,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "HaulToContainer;job=5;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 28,
+                "tick": 291,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=27",
+                "subject": ""
+              },
+              {
+                "seq": 29,
+                "tick": 291,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "Wait_MaintainPosture",
+                "subject": ""
+              },
+              {
+                "seq": 30,
+                "tick": 292,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=27;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 31,
+                "tick": 292,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "FinishFrame;job=29",
+                "subject": ""
+              },
+              {
+                "seq": 32,
+                "tick": 300,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "FinishFrame",
+                "subject": ""
+              },
+              {
+                "seq": 33,
+                "tick": 673,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "GotoWander;job=16;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 34,
+                "tick": 673,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=40",
+                "subject": ""
+              },
+              {
+                "seq": 35,
+                "tick": 674,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=40;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 36,
+                "tick": 674,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=41",
+                "subject": ""
+              },
+              {
+                "seq": 37,
+                "tick": 681,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 38,
+                "tick": 745,
+                "pawn": "Thing_Human411",
+                "kind": "build-work",
+                "detail": "intent=09087106-0270-481a-adf2-e9d0590cf69a;work=201.0;role=accepted",
+                "subject": ""
+              },
+              {
+                "seq": 39,
+                "tick": 745,
+                "pawn": "",
+                "kind": "build-stage",
+                "detail": "intent=09087106-0270-481a-adf2-e9d0590cf69a;stage=built",
+                "subject": ""
+              },
+              {
+                "seq": 40,
+                "tick": 745,
+                "pawn": "Thing_Human411",
+                "kind": "build-ended",
+                "detail": "intent=09087106-0270-481a-adf2-e9d0590cf69a;status=built",
+                "subject": ""
+              },
+              {
+                "seq": 41,
+                "tick": 745,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "FinishFrame;job=29;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 42,
+                "tick": 745,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=45",
+                "subject": ""
+              },
+              {
+                "seq": 43,
+                "tick": 748,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=45;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 44,
+                "tick": 748,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=46",
+                "subject": ""
+              },
+              {
+                "seq": 45,
+                "tick": 750,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              }
+            ],
+            "buildIntents": [
+              {
+                "intentId": "09087106-0270-481a-adf2-e9d0590cf69a",
+                "status": "built",
+                "stage": "built",
+                "def": "Campfire",
+                "label": "campfire at the east site",
+                "siteId": "east-site",
+                "stopReason": "",
+                "finisher": "Thing_Human411",
+                "note": "",
+                "fate": "standing",
+                "held": "",
+                "mapId": 0,
+                "x": 76,
+                "z": 82,
+                "rot": 0,
+                "generation": 1,
+                "thingId": 7247,
+                "createdTick": 3,
+                "untilTick": 60003,
+                "fateTick": -1,
+                "violations": 0,
+                "rejectedStarts": 0,
+                "accepted": [
+                  "Thing_Human411"
+                ],
+                "excluded": [],
+                "delivered": [
+                  {
+                    "pawn": "Thing_Human411",
+                    "role": "accepted",
+                    "def": "WoodLog",
+                    "count": 20,
+                    "work": 0
+                  }
+                ],
+                "work": [
+                  {
+                    "pawn": "Thing_Human411",
+                    "role": "accepted",
+                    "def": "",
+                    "count": 0,
+                    "work": 200.99615478515625
+                  }
+                ],
+                "records": [
+                  {
+                    "seq": 1,
+                    "tick": 291,
+                    "generation": 1,
+                    "count": 0,
+                    "work": 0,
+                    "kind": "note",
+                    "pawn": "",
+                    "role": "",
+                    "def": "",
+                    "occurrence": "stage:frame:1",
+                    "text": "stage frame"
+                  },
+                  {
+                    "seq": 2,
+                    "tick": 291,
+                    "generation": 1,
+                    "count": 20,
+                    "work": 0,
+                    "kind": "delivery",
+                    "pawn": "Thing_Human411",
+                    "role": "accepted",
+                    "def": "WoodLog",
+                    "occurrence": "deposit:5:7244:1:1",
+                    "text": ""
+                  },
+                  {
+                    "seq": 3,
+                    "tick": 745,
+                    "generation": 1,
+                    "count": 0,
+                    "work": 200.99615478515625,
+                    "kind": "work",
+                    "pawn": "Thing_Human411",
+                    "role": "accepted",
+                    "def": "",
+                    "occurrence": "work:29:1:1",
+                    "text": "completion"
+                  },
+                  {
+                    "seq": 4,
+                    "tick": 745,
+                    "generation": 1,
+                    "count": 0,
+                    "work": 0,
+                    "kind": "note",
+                    "pawn": "",
+                    "role": "",
+                    "def": "",
+                    "occurrence": "stage:built:1",
+                    "text": "stage built"
+                  },
+                  {
+                    "seq": 5,
+                    "tick": 745,
+                    "generation": 1,
+                    "count": 0,
+                    "work": 0,
+                    "kind": "finish",
+                    "pawn": "Thing_Human411",
+                    "role": "",
+                    "def": "",
+                    "occurrence": "finish:1",
+                    "text": ""
+                  },
+                  {
+                    "seq": 6,
+                    "tick": 745,
+                    "generation": 1,
+                    "count": 0,
+                    "work": 0,
+                    "kind": "ending",
+                    "pawn": "Thing_Human411",
+                    "role": "",
+                    "def": "",
+                    "occurrence": "end:1",
+                    "text": "built"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sourceRevision": "8ec40a9f31d6b4a9f96111228a486a6bad396788",
+      "retainedRawSha256": "bc2537dbf1449a8a9cb494f3d55a7161f7732e62f6ab697b6bea874273a2b031",
+      "patchCost": {
+        "scope": "incomplete handler-body instrumentation; not total patch overhead",
+        "limitations": [
+          "prefix-only for B1/B2/B4/B9/B10/B12; postfix/finalizer excluded",
+          "B8 includes the original native deposit action",
+          "active counts use the global Active flag, not tagged-handler hits"
+        ],
+        "values": {
+          "timing": true,
+          "patches": [
+            {
+              "patch": "B1 DeliverToBlueprints.JobOnThing",
+              "calls": 1,
+              "active": 1,
+              "micros": 710.1
+            },
+            {
+              "patch": "B2 DeliverToFrames.JobOnThing",
+              "calls": 0,
+              "active": 0,
+              "micros": 0
+            },
+            {
+              "patch": "B3 IsNewValidNearbyNeeder",
+              "calls": 0,
+              "active": 0,
+              "micros": 0
+            },
+            {
+              "patch": "B4 FinishFrames.JobOnThing",
+              "calls": 2,
+              "active": 2,
+              "micros": 21.3
+            },
+            {
+              "patch": "B5 Pawn_JobTracker.StartJob",
+              "calls": 44,
+              "active": 2,
+              "micros": 3995.2
+            },
+            {
+              "patch": "B6 Pawn_JobTracker.CleanupCurrentJob",
+              "calls": 36,
+              "active": 1,
+              "micros": 29.5
+            },
+            {
+              "patch": "B7 TryGetNextDestinationFromQueue",
+              "calls": 0,
+              "active": 0,
+              "micros": 0
+            },
+            {
+              "patch": "B8 DepositHauledThingInContainer (wrap)",
+              "calls": 1,
+              "active": 1,
+              "micros": 3320
+            },
+            {
+              "patch": "B9 Blueprint.TryReplaceWithSolidThing",
+              "calls": 1,
+              "active": 1,
+              "micros": 203.5
+            },
+            {
+              "patch": "B10 Frame.CompleteConstruction",
+              "calls": 1,
+              "active": 1,
+              "micros": 635.4
+            },
+            {
+              "patch": "B11 GenSpawn.Spawn",
+              "calls": 3,
+              "active": 1,
+              "micros": 23.2
+            },
+            {
+              "patch": "B12 Frame.FailConstruction",
+              "calls": 0,
+              "active": 0,
+              "micros": 0
+            },
+            {
+              "patch": "B13 Thing.Destroy",
+              "calls": 3,
+              "active": 2,
+              "micros": 597.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "runId": "7bd0c66f-d849-4f62-95f4-50cb441f5f12",
+      "at": "2026-09-25T17:16:02.781Z",
+      "passed": false,
+      "inferenceCalls": 0,
+      "eventGaps": 0,
+      "cases": [
+        {
+          "name": "9-restore",
+          "passed": false,
+          "findings": [
+            "after restore: failed delivered 20 of 20"
+          ],
+          "data": {
+            "restores": [
+              {
+                "label": "blueprint",
+                "name": "lab-concord-nc-blueprint-1790356573062",
+                "before": {
+                  "intentId": "7b9f1ead-0b8d-45c0-b892-e2c28642abcb",
+                  "status": "open",
+                  "stage": "blueprint",
+                  "def": "Campfire",
+                  "label": "campfire at the east site",
+                  "siteId": "east-site",
+                  "stopReason": "",
+                  "finisher": "",
+                  "note": "",
+                  "fate": "",
+                  "held": "",
+                  "mapId": 0,
+                  "x": 76,
+                  "z": 82,
+                  "rot": 0,
+                  "generation": 1,
+                  "thingId": 7238,
+                  "createdTick": 3,
+                  "untilTick": 60003,
+                  "fateTick": -1,
+                  "violations": 0,
+                  "rejectedStarts": 0,
+                  "accepted": [
+                    "Thing_Human411"
+                  ],
+                  "excluded": [],
+                  "delivered": [],
+                  "work": [],
+                  "records": []
+                },
+                "same": {
+                  "intentId": "7b9f1ead-0b8d-45c0-b892-e2c28642abcb",
+                  "status": "open",
+                  "stage": "blueprint",
+                  "def": "Campfire",
+                  "label": "campfire at the east site",
+                  "siteId": "east-site",
+                  "stopReason": "",
+                  "finisher": "",
+                  "note": "",
+                  "fate": "",
+                  "held": "",
+                  "mapId": 0,
+                  "x": 76,
+                  "z": 82,
+                  "rot": 0,
+                  "generation": 1,
+                  "thingId": 7238,
+                  "createdTick": 3,
+                  "untilTick": 60003,
+                  "fateTick": -1,
+                  "violations": 0,
+                  "rejectedStarts": 0,
+                  "accepted": [
+                    "Thing_Human411"
+                  ],
+                  "excluded": [],
+                  "delivered": [],
+                  "work": [],
+                  "records": []
+                },
+                "cold": {
+                  "pid": 190220,
+                  "name": "lab-concord-nc-blueprint-1790356573062",
+                  "view": {
+                    "intentId": "7b9f1ead-0b8d-45c0-b892-e2c28642abcb",
+                    "status": "open",
+                    "stage": "blueprint",
+                    "def": "Campfire",
+                    "label": "campfire at the east site",
+                    "siteId": "east-site",
+                    "stopReason": "",
+                    "finisher": "",
+                    "note": "",
+                    "fate": "",
+                    "held": "",
+                    "mapId": 0,
+                    "x": 76,
+                    "z": 82,
+                    "rot": 0,
+                    "generation": 1,
+                    "thingId": 7238,
+                    "createdTick": 3,
+                    "untilTick": 60003,
+                    "fateTick": -1,
+                    "violations": 0,
+                    "rejectedStarts": 0,
+                    "accepted": [
+                      "Thing_Human411"
+                    ],
+                    "excluded": [],
+                    "delivered": [],
+                    "work": [],
+                    "records": []
+                  }
+                },
+                "parentPid": 190121
+              },
+              {
+                "label": "frame",
+                "name": "lab-concord-nc-frame-1790356596102",
+                "before": {
+                  "intentId": "7b9f1ead-0b8d-45c0-b892-e2c28642abcb",
+                  "status": "open",
+                  "stage": "frame",
+                  "def": "Campfire",
+                  "label": "campfire at the east site",
+                  "siteId": "east-site",
+                  "stopReason": "",
+                  "finisher": "",
+                  "note": "",
+                  "fate": "",
+                  "held": "",
+                  "mapId": 0,
+                  "x": 76,
+                  "z": 82,
+                  "rot": 0,
+                  "generation": 1,
+                  "thingId": 8818,
+                  "createdTick": 3,
+                  "untilTick": 60003,
+                  "fateTick": -1,
+                  "violations": 0,
+                  "rejectedStarts": 0,
+                  "accepted": [
+                    "Thing_Human411"
+                  ],
+                  "excluded": [],
+                  "delivered": [
+                    {
+                      "pawn": "Thing_Human411",
+                      "role": "accepted",
+                      "def": "WoodLog",
+                      "count": 20,
+                      "work": 0
+                    }
+                  ],
+                  "work": [],
+                  "records": [
+                    {
+                      "seq": 1,
+                      "tick": 456,
+                      "generation": 1,
+                      "kind": "note",
+                      "pawn": "",
+                      "role": "",
+                      "def": "",
+                      "count": 0,
+                      "work": 0,
+                      "occurrence": "stage:frame:1",
+                      "text": "stage frame"
+                    },
+                    {
+                      "seq": 2,
+                      "tick": 456,
+                      "generation": 1,
+                      "kind": "delivery",
+                      "pawn": "Thing_Human411",
+                      "role": "accepted",
+                      "def": "WoodLog",
+                      "count": 20,
+                      "work": 0,
+                      "occurrence": "deposit:20:8818:1:1",
+                      "text": ""
+                    }
+                  ]
+                },
+                "same": {
+                  "intentId": "7b9f1ead-0b8d-45c0-b892-e2c28642abcb",
+                  "status": "open",
+                  "stage": "frame",
+                  "def": "Campfire",
+                  "label": "campfire at the east site",
+                  "siteId": "east-site",
+                  "stopReason": "",
+                  "finisher": "",
+                  "note": "",
+                  "fate": "",
+                  "held": "",
+                  "mapId": 0,
+                  "x": 76,
+                  "z": 82,
+                  "rot": 0,
+                  "generation": 1,
+                  "thingId": 8818,
+                  "createdTick": 3,
+                  "untilTick": 60003,
+                  "fateTick": -1,
+                  "violations": 0,
+                  "rejectedStarts": 0,
+                  "accepted": [
+                    "Thing_Human411"
+                  ],
+                  "excluded": [],
+                  "delivered": [
+                    {
+                      "pawn": "Thing_Human411",
+                      "role": "accepted",
+                      "def": "WoodLog",
+                      "count": 20,
+                      "work": 0
+                    }
+                  ],
+                  "work": [],
+                  "records": [
+                    {
+                      "seq": 1,
+                      "tick": 456,
+                      "generation": 1,
+                      "kind": "note",
+                      "pawn": "",
+                      "role": "",
+                      "def": "",
+                      "count": 0,
+                      "work": 0,
+                      "occurrence": "stage:frame:1",
+                      "text": "stage frame"
+                    },
+                    {
+                      "seq": 2,
+                      "tick": 456,
+                      "generation": 1,
+                      "kind": "delivery",
+                      "pawn": "Thing_Human411",
+                      "role": "accepted",
+                      "def": "WoodLog",
+                      "count": 20,
+                      "work": 0,
+                      "occurrence": "deposit:20:8818:1:1",
+                      "text": ""
+                    }
+                  ]
+                },
+                "cold": {
+                  "pid": 190362,
+                  "name": "lab-concord-nc-frame-1790356596102",
+                  "view": {
+                    "intentId": "7b9f1ead-0b8d-45c0-b892-e2c28642abcb",
+                    "status": "open",
+                    "stage": "frame",
+                    "def": "Campfire",
+                    "label": "campfire at the east site",
+                    "siteId": "east-site",
+                    "stopReason": "",
+                    "finisher": "",
+                    "note": "",
+                    "fate": "",
+                    "held": "",
+                    "mapId": 0,
+                    "x": 76,
+                    "z": 82,
+                    "rot": 0,
+                    "generation": 1,
+                    "thingId": 8818,
+                    "createdTick": 3,
+                    "untilTick": 60003,
+                    "fateTick": -1,
+                    "violations": 0,
+                    "rejectedStarts": 0,
+                    "accepted": [
+                      "Thing_Human411"
+                    ],
+                    "excluded": [],
+                    "delivered": [
+                      {
+                        "pawn": "Thing_Human411",
+                        "role": "accepted",
+                        "def": "WoodLog",
+                        "count": 20,
+                        "work": 0
+                      }
+                    ],
+                    "work": [],
+                    "records": [
+                      {
+                        "seq": 1,
+                        "tick": 456,
+                        "generation": 1,
+                        "kind": "note",
+                        "pawn": "",
+                        "role": "",
+                        "def": "",
+                        "count": 0,
+                        "work": 0,
+                        "occurrence": "stage:frame:1",
+                        "text": "stage frame"
+                      },
+                      {
+                        "seq": 2,
+                        "tick": 456,
+                        "generation": 1,
+                        "kind": "delivery",
+                        "pawn": "Thing_Human411",
+                        "role": "accepted",
+                        "def": "WoodLog",
+                        "count": 20,
+                        "work": 0,
+                        "occurrence": "deposit:20:8818:1:1",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                "parentPid": 190121
+              }
+            ],
+            "events": [
+              {
+                "seq": 7,
+                "tick": 3,
+                "pawn": "Thing_Human411",
+                "kind": "build-opened",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;def=Campfire;stage=blueprint;generation=1",
+                "subject": ""
+              },
+              {
+                "seq": 1,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=1",
+                "subject": ""
+              },
+              {
+                "seq": 2,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "GotoWander;job=2",
+                "subject": ""
+              },
+              {
+                "seq": 3,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "GotoWander;job=2;condition=InterruptForced",
+                "subject": ""
+              },
+              {
+                "seq": 4,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "",
+                "subject": ""
+              },
+              {
+                "seq": 5,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "GotoWander;job=1;condition=InterruptForced",
+                "subject": ""
+              },
+              {
+                "seq": 6,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "",
+                "subject": ""
+              },
+              {
+                "seq": 7,
+                "tick": 3,
+                "pawn": "Thing_Human411",
+                "kind": "build-opened",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;def=Campfire;stage=blueprint;generation=1",
+                "subject": ""
+              },
+              {
+                "seq": 8,
+                "tick": 4,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=4",
+                "subject": ""
+              },
+              {
+                "seq": 1,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=1",
+                "subject": ""
+              },
+              {
+                "seq": 2,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "GotoWander;job=2",
+                "subject": ""
+              },
+              {
+                "seq": 3,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "GotoWander;job=2;condition=InterruptForced",
+                "subject": ""
+              },
+              {
+                "seq": 4,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "",
+                "subject": ""
+              },
+              {
+                "seq": 5,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "GotoWander;job=1;condition=InterruptForced",
+                "subject": ""
+              },
+              {
+                "seq": 6,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "",
+                "subject": ""
+              },
+              {
+                "seq": 7,
+                "tick": 3,
+                "pawn": "Thing_Human411",
+                "kind": "build-opened",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;def=Campfire;stage=blueprint;generation=1",
+                "subject": ""
+              },
+              {
+                "seq": 8,
+                "tick": 4,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=4",
+                "subject": ""
+              },
+              {
+                "seq": 9,
+                "tick": 5,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=5",
+                "subject": ""
+              },
+              {
+                "seq": 10,
+                "tick": 5,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=6",
+                "subject": ""
+              },
+              {
+                "seq": 11,
+                "tick": 14,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 12,
+                "tick": 14,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 13,
+                "tick": 112,
+                "pawn": "Thing_Human405",
+                "kind": "food",
+                "detail": "1",
+                "subject": ""
+              },
+              {
+                "seq": 14,
+                "tick": 161,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=5;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 15,
+                "tick": 161,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=16",
+                "subject": ""
+              },
+              {
+                "seq": 16,
+                "tick": 162,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_MaintainPosture",
+                "subject": ""
+              },
+              {
+                "seq": 17,
+                "tick": 164,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=16;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 18,
+                "tick": 164,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=17",
+                "subject": ""
+              },
+              {
+                "seq": 19,
+                "tick": 166,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=4;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 20,
+                "tick": 166,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=18",
+                "subject": ""
+              },
+              {
+                "seq": 21,
+                "tick": 169,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=18;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 22,
+                "tick": 169,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "HaulToContainer;job=20",
+                "subject": ""
+              },
+              {
+                "seq": 23,
+                "tick": 176,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 24,
+                "tick": 176,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "HaulToContainer",
+                "subject": ""
+              },
+              {
+                "seq": 25,
+                "tick": 251,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=6;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 26,
+                "tick": 251,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=23",
+                "subject": ""
+              },
+              {
+                "seq": 27,
+                "tick": 252,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_MaintainPosture",
+                "subject": ""
+              },
+              {
+                "seq": 28,
+                "tick": 254,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=23;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 29,
+                "tick": 254,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "GotoWander;job=24",
+                "subject": ""
+              },
+              {
+                "seq": 30,
+                "tick": 265,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 31,
+                "tick": 365,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "GotoWander;job=17;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 32,
+                "tick": 365,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=29",
+                "subject": ""
+              },
+              {
+                "seq": 33,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=29;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 34,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=30",
+                "subject": ""
+              },
+              {
+                "seq": 35,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 36,
+                "tick": 456,
+                "pawn": "",
+                "kind": "build-stage",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;stage=frame",
+                "subject": ""
+              },
+              {
+                "seq": 37,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "build-delivered",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;def=WoodLog;count=20;role=accepted",
+                "subject": ""
+              },
+              {
+                "seq": 38,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "HaulToContainer;job=20;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 39,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=31",
+                "subject": ""
+              },
+              {
+                "seq": 40,
+                "tick": 457,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=31;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 41,
+                "tick": 457,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "FinishFrame;job=33",
+                "subject": ""
+              },
+              {
+                "seq": 42,
+                "tick": 459,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "FinishFrame",
+                "subject": ""
+              },
+              {
+                "seq": 1,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=1",
+                "subject": ""
+              },
+              {
+                "seq": 2,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "GotoWander;job=2",
+                "subject": ""
+              },
+              {
+                "seq": 3,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "GotoWander;job=2;condition=InterruptForced",
+                "subject": ""
+              },
+              {
+                "seq": 4,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "",
+                "subject": ""
+              },
+              {
+                "seq": 5,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "GotoWander;job=1;condition=InterruptForced",
+                "subject": ""
+              },
+              {
+                "seq": 6,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "",
+                "subject": ""
+              },
+              {
+                "seq": 7,
+                "tick": 3,
+                "pawn": "Thing_Human411",
+                "kind": "build-opened",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;def=Campfire;stage=blueprint;generation=1",
+                "subject": ""
+              },
+              {
+                "seq": 8,
+                "tick": 4,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=4",
+                "subject": ""
+              },
+              {
+                "seq": 9,
+                "tick": 5,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=5",
+                "subject": ""
+              },
+              {
+                "seq": 10,
+                "tick": 5,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=6",
+                "subject": ""
+              },
+              {
+                "seq": 11,
+                "tick": 14,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 12,
+                "tick": 14,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 13,
+                "tick": 112,
+                "pawn": "Thing_Human405",
+                "kind": "food",
+                "detail": "1",
+                "subject": ""
+              },
+              {
+                "seq": 14,
+                "tick": 161,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=5;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 15,
+                "tick": 161,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=16",
+                "subject": ""
+              },
+              {
+                "seq": 16,
+                "tick": 162,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_MaintainPosture",
+                "subject": ""
+              },
+              {
+                "seq": 17,
+                "tick": 164,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=16;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 18,
+                "tick": 164,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=17",
+                "subject": ""
+              },
+              {
+                "seq": 19,
+                "tick": 166,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=4;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 20,
+                "tick": 166,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=18",
+                "subject": ""
+              },
+              {
+                "seq": 21,
+                "tick": 169,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=18;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 22,
+                "tick": 169,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "HaulToContainer;job=20",
+                "subject": ""
+              },
+              {
+                "seq": 23,
+                "tick": 176,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 24,
+                "tick": 176,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "HaulToContainer",
+                "subject": ""
+              },
+              {
+                "seq": 25,
+                "tick": 251,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=6;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 26,
+                "tick": 251,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=23",
+                "subject": ""
+              },
+              {
+                "seq": 27,
+                "tick": 252,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_MaintainPosture",
+                "subject": ""
+              },
+              {
+                "seq": 28,
+                "tick": 254,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=23;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 29,
+                "tick": 254,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "GotoWander;job=24",
+                "subject": ""
+              },
+              {
+                "seq": 30,
+                "tick": 265,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 31,
+                "tick": 365,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "GotoWander;job=17;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 32,
+                "tick": 365,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=29",
+                "subject": ""
+              },
+              {
+                "seq": 33,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=29;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 34,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=30",
+                "subject": ""
+              },
+              {
+                "seq": 35,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 36,
+                "tick": 456,
+                "pawn": "",
+                "kind": "build-stage",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;stage=frame",
+                "subject": ""
+              },
+              {
+                "seq": 37,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "build-delivered",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;def=WoodLog;count=20;role=accepted",
+                "subject": ""
+              },
+              {
+                "seq": 38,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "HaulToContainer;job=20;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 39,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=31",
+                "subject": ""
+              },
+              {
+                "seq": 40,
+                "tick": 457,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=31;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 41,
+                "tick": 457,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "FinishFrame;job=33",
+                "subject": ""
+              },
+              {
+                "seq": 42,
+                "tick": 459,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "FinishFrame",
+                "subject": ""
+              },
+              {
+                "seq": 1,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=1",
+                "subject": ""
+              },
+              {
+                "seq": 2,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "GotoWander;job=2",
+                "subject": ""
+              },
+              {
+                "seq": 3,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "GotoWander;job=2;condition=InterruptForced",
+                "subject": ""
+              },
+              {
+                "seq": 4,
+                "tick": 2,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "",
+                "subject": ""
+              },
+              {
+                "seq": 5,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "GotoWander;job=1;condition=InterruptForced",
+                "subject": ""
+              },
+              {
+                "seq": 6,
+                "tick": 2,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "",
+                "subject": ""
+              },
+              {
+                "seq": 7,
+                "tick": 3,
+                "pawn": "Thing_Human411",
+                "kind": "build-opened",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;def=Campfire;stage=blueprint;generation=1",
+                "subject": ""
+              },
+              {
+                "seq": 8,
+                "tick": 4,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=4",
+                "subject": ""
+              },
+              {
+                "seq": 9,
+                "tick": 5,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=5",
+                "subject": ""
+              },
+              {
+                "seq": 10,
+                "tick": 5,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=6",
+                "subject": ""
+              },
+              {
+                "seq": 11,
+                "tick": 14,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 12,
+                "tick": 14,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 13,
+                "tick": 112,
+                "pawn": "Thing_Human405",
+                "kind": "food",
+                "detail": "1",
+                "subject": ""
+              },
+              {
+                "seq": 14,
+                "tick": 161,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=5;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 15,
+                "tick": 161,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=16",
+                "subject": ""
+              },
+              {
+                "seq": 16,
+                "tick": 162,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_MaintainPosture",
+                "subject": ""
+              },
+              {
+                "seq": 17,
+                "tick": 164,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=16;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 18,
+                "tick": 164,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=17",
+                "subject": ""
+              },
+              {
+                "seq": 19,
+                "tick": 166,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=4;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 20,
+                "tick": 166,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=18",
+                "subject": ""
+              },
+              {
+                "seq": 21,
+                "tick": 169,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=18;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 22,
+                "tick": 169,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "HaulToContainer;job=20",
+                "subject": ""
+              },
+              {
+                "seq": 23,
+                "tick": 176,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 24,
+                "tick": 176,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "HaulToContainer",
+                "subject": ""
+              },
+              {
+                "seq": 25,
+                "tick": 251,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=6;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 26,
+                "tick": 251,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=23",
+                "subject": ""
+              },
+              {
+                "seq": 27,
+                "tick": 252,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "Wait_MaintainPosture",
+                "subject": ""
+              },
+              {
+                "seq": 28,
+                "tick": 254,
+                "pawn": "Thing_Human408",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=23;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 29,
+                "tick": 254,
+                "pawn": "Thing_Human408",
+                "kind": "job-start",
+                "detail": "GotoWander;job=24",
+                "subject": ""
+              },
+              {
+                "seq": 30,
+                "tick": 265,
+                "pawn": "Thing_Human408",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 31,
+                "tick": 365,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "GotoWander;job=17;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 32,
+                "tick": 365,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=29",
+                "subject": ""
+              },
+              {
+                "seq": 33,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=29;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 34,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_Wander;job=30",
+                "subject": ""
+              },
+              {
+                "seq": 35,
+                "tick": 368,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "Wait_Wander",
+                "subject": ""
+              },
+              {
+                "seq": 36,
+                "tick": 456,
+                "pawn": "",
+                "kind": "build-stage",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;stage=frame",
+                "subject": ""
+              },
+              {
+                "seq": 37,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "build-delivered",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;def=WoodLog;count=20;role=accepted",
+                "subject": ""
+              },
+              {
+                "seq": 38,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "HaulToContainer;job=20;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 39,
+                "tick": 456,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=31",
+                "subject": ""
+              },
+              {
+                "seq": 40,
+                "tick": 457,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=31;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 41,
+                "tick": 457,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "FinishFrame;job=33",
+                "subject": ""
+              },
+              {
+                "seq": 42,
+                "tick": 459,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "FinishFrame",
+                "subject": ""
+              },
+              {
+                "seq": 43,
+                "tick": 560,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_Wander;job=30;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 44,
+                "tick": 560,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=39",
+                "subject": ""
+              },
+              {
+                "seq": 45,
+                "tick": 563,
+                "pawn": "Thing_Human405",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=39;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 46,
+                "tick": 563,
+                "pawn": "Thing_Human405",
+                "kind": "job-start",
+                "detail": "GotoWander;job=41",
+                "subject": ""
+              },
+              {
+                "seq": 47,
+                "tick": 565,
+                "pawn": "Thing_Human405",
+                "kind": "job",
+                "detail": "GotoWander",
+                "subject": ""
+              },
+              {
+                "seq": 48,
+                "tick": 730,
+                "pawn": "Thing_Human411",
+                "kind": "build-work",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;work=119.8;role=accepted",
+                "subject": ""
+              },
+              {
+                "seq": 49,
+                "tick": 730,
+                "pawn": "Thing_Human411",
+                "kind": "build-ended",
+                "detail": "intent=7b9f1ead-0b8d-45c0-b892-e2c28642abcb;status=failed;reason=construction failed; held 20 WoodLog; returned: not recorded",
+                "subject": ""
+              },
+              {
+                "seq": 50,
+                "tick": 730,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "FinishFrame;job=33;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 51,
+                "tick": 730,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "Wait_MaintainPosture;job=52",
+                "subject": ""
+              },
+              {
+                "seq": 52,
+                "tick": 730,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "Wait_MaintainPosture",
+                "subject": ""
+              },
+              {
+                "seq": 53,
+                "tick": 733,
+                "pawn": "Thing_Human411",
+                "kind": "job-end",
+                "detail": "Wait_MaintainPosture;job=52;condition=Succeeded",
+                "subject": ""
+              },
+              {
+                "seq": 54,
+                "tick": 733,
+                "pawn": "Thing_Human411",
+                "kind": "job-start",
+                "detail": "HaulToCell;job=54;def=WoodLog",
+                "subject": ""
+              },
+              {
+                "seq": 55,
+                "tick": 750,
+                "pawn": "Thing_Human411",
+                "kind": "job",
+                "detail": "HaulToCell",
+                "subject": ""
+              }
+            ],
+            "buildIntents": [
+              {
+                "intentId": "7b9f1ead-0b8d-45c0-b892-e2c28642abcb",
+                "status": "failed",
+                "stage": "frame",
+                "def": "Campfire",
+                "label": "campfire at the east site",
+                "siteId": "east-site",
+                "stopReason": "construction failed; held 20 WoodLog; returned: not recorded",
+                "finisher": "",
+                "note": "",
+                "fate": "",
+                "held": "20 WoodLog",
+                "mapId": 0,
+                "x": 76,
+                "z": 82,
+                "rot": 0,
+                "generation": 1,
+                "thingId": 8818,
+                "createdTick": 3,
+                "untilTick": 60003,
+                "fateTick": -1,
+                "violations": 0,
+                "rejectedStarts": 0,
+                "accepted": [
+                  "Thing_Human411"
+                ],
+                "excluded": [],
+                "delivered": [
+                  {
+                    "pawn": "Thing_Human411",
+                    "role": "accepted",
+                    "def": "WoodLog",
+                    "count": 20,
+                    "work": 0
+                  }
+                ],
+                "work": [
+                  {
+                    "pawn": "Thing_Human411",
+                    "role": "accepted",
+                    "def": "",
+                    "count": 0,
+                    "work": 119.79903411865234
+                  }
+                ],
+                "records": [
+                  {
+                    "seq": 1,
+                    "tick": 456,
+                    "generation": 1,
+                    "count": 0,
+                    "work": 0,
+                    "kind": "note",
+                    "pawn": "",
+                    "role": "",
+                    "def": "",
+                    "occurrence": "stage:frame:1",
+                    "text": "stage frame"
+                  },
+                  {
+                    "seq": 2,
+                    "tick": 456,
+                    "generation": 1,
+                    "count": 20,
+                    "work": 0,
+                    "kind": "delivery",
+                    "pawn": "Thing_Human411",
+                    "role": "accepted",
+                    "def": "WoodLog",
+                    "occurrence": "deposit:20:8818:1:1",
+                    "text": ""
+                  },
+                  {
+                    "seq": 3,
+                    "tick": 730,
+                    "generation": 1,
+                    "count": 0,
+                    "work": 119.79903411865234,
+                    "kind": "work",
+                    "pawn": "Thing_Human411",
+                    "role": "accepted",
+                    "def": "",
+                    "occurrence": "work:33:1:1",
+                    "text": "failure"
+                  },
+                  {
+                    "seq": 4,
+                    "tick": 730,
+                    "generation": 1,
+                    "count": 0,
+                    "work": 0,
+                    "kind": "ending",
+                    "pawn": "Thing_Human411",
+                    "role": "",
+                    "def": "",
+                    "occurrence": "end:1",
+                    "text": "failed: construction failed; held 20 WoodLog; returned: not recorded"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sourceRevision": "8ec40a9f31d6b4a9f96111228a486a6bad396788",
+      "retainedRawSha256": "bb2077bf491e27fee93b9da5eec310be27446f51c6236ad323e4f8e5308e6cd9"
+    }
+  ],
+  "limitations": [
+    "Fifteen other case names not executed in this pass",
+    "Fresh bridge processes, not game-process restart or coordinator construction-store verification",
+    "Deconstruct destroy mode does not establish replacement; confirmed runtime attribution blocker",
+    "Full per-patch costs and named subcase coverage remain pending"
+  ]
+}
