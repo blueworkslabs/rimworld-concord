@@ -2,9 +2,10 @@
 
 **Status: Gate B signed by Fable on 2026-09-25 at `e6ae274`, recorded in
 `cddd61c`; the five answers and six conditions below stand.** Gate A direction is
-signed too. Astra's subsequent assembly review corrected the receipt/transition claims
-and identified the concrete technical design still required under P2/P3 before the
-review/merge gate clears. This is not a request to re-sign those policy decisions.
+signed too. Astra's pinned-assembly review and independent focused re-review have
+cleared the corrected P5 design: the concrete P2/P3 technical hold is resolved.
+This confirms design testability, not implemented or game-tested behavior; no new
+policy signature is claimed.
 Implementation and scripted trials are authorized after the documentation merge;
 no live run, scene freeze or ordered-path deletion is authorized. Gate C is not signed.
 Pinned build: RimWorld 1.6.4871 (`Assembly-CSharp` prefix `082db1dd4f7f`).
@@ -324,9 +325,11 @@ Five items were carried into Gate B entry and are now checked; see
 ## Gate B freeze (signed direction; technical review corrections below)
 
 Clawd's draft, signed by Fable on 2026-09-25 with the signature conditions below.
-The assembly review corrections preserve that direction; the unresolved concrete
-boundaries in P2/P3 still block technical merge approval. Method names only, from the
-pinned decompile; this is source evidence, not runtime proof.
+The assembly review corrections preserve that direction. P5 specifies the concrete
+P2/P3 boundaries, corrected and independently re-reviewed on 2026-09-25; the technical
+merge hold is cleared. Method names only, from the pinned decompile: source-backed
+design, not runtime proof. All 17 construction and 13 cooking cases remain to be run
+against the implementation.
 
 ### Gate B entry: the five verification items (checked 2026-09-25)
 
@@ -848,8 +851,7 @@ them before Gate C is entered.
   real player menu exposes the eligible option before selection. An unchosen preview
   and a non-player `playerForced` submission must not bypass ordinary exclusion; a
   selected order and its authenticated priority continuation must pass, including restore.
-  Then one iteration
-  happens, recorded the same way, not counted toward the quota. For a core-added
+  Then one iteration happens, recorded the same way, not counted toward the quota. For a core-added
   quota-2 bill, follow it with one credited iteration: native repeat count is 0,
   credited count is 1, and the intent is not falsely met or the bill silently refilled.
 
