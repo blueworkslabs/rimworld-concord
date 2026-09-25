@@ -116,6 +116,11 @@ the same three gates: [MIGRATION_HAULING](MIGRATION_HAULING.md). **Gate B signed
 2026-09-24**; implementation is next. Growing hold has a two-fix-round bound with strict
 fallback, and the migration's live run must measure the #71 corrections.
 
+**Decided 2026-09-25: the hauling migration passed Gate C on the game side; the ordered-job
+hauling model is retired.** Verdict, deletion scope and follow-ups:
+[HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md). Next: construction and
+cooking through blueprints and bills.
+
 If the spike wins: hauling, then campfire construction and cooking through blueprints
 and bills, then rescue through the native rescue job. Each migration keeps the
 coordinator contract, adapts receipts and topic closure to aggregate progress, and is
