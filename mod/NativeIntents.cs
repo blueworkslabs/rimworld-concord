@@ -611,8 +611,9 @@ namespace Concord {
                 if(r.op=="lab-store-probe") return "{"+head+"}";
                 var hj=HaulAIUtility.HaulToStorageJob(p,st,false);
                 if(hj==null) throw new Exception("Native factory built no haul job");
+                int startedId=hj.loadID;string startedDef=hj.def.defName;
                 p.jobs.StartJob(hj,JobCondition.InterruptForced);
-                return "{"+head+",\"job\":"+hj.loadID+",\"jobDef\":\""+hj.def.defName+"\",\"started\":"+(p.CurJob==hj?"true":"false")+"}";
+                return "{"+head+",\"job\":"+startedId+",\"jobDef\":\""+startedDef+"\",\"started\":"+(p.CurJob==hj&&hj.loadID==startedId?"true":"false")+"}";
             }
             if(r.op=="lab-queue-count") {
                 if(p==null) throw new Exception("Unknown pawn");

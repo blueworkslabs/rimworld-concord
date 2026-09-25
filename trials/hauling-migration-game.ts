@@ -392,6 +392,13 @@ try{
     const target=m.rescue.target as string;
     if(!state.pawns.find(x=>x.id===target)?.downed){c.findings.push('precondition: the fixture patient is not downed');return;}
     const s=new Store(root+`/.runtime/hauling-migration-rescue-${runId}.db`),co=new Coordinator(s,b);
+    const originalMove=b.move.bind(b);
+    const dispatches:{id:string;before:GameState;jobId?:number}[]=[];
+    b.move=async request=>{
+      if(request.action.kind!=='rescue')return originalMove(request);
+      const trace={id:request.id,before:await b.state()} as typeof dispatches[number];dispatches.push(trace);
+      const reply=await originalMove(request);trace.jobId=(reply as typeof reply&{jobId?:number}).jobId;return reply;
+    };
     try{
       await co.open();await co.initializeCore('Scripted core for the rescue handover; every answer is authored.');
       const [e]=await co.configureNativeHauls([{intentId:randomUUID(),thing:'WoodLog',thingLabel:'wood',label:m.zone.label,zoneId,quota:30,maxTicks:30000,variant:'attribution',hold}],{experimentalGrowing:hold==='growing'});
@@ -399,9 +406,9 @@ try{
       await co.pawn(P).decide(haul.id,scripted({kind:'accept',reason:'Authored acceptance'}));
       // Pedro carries on a tagged trip and has seen the patient.
       const saw=()=>events.some(x=>x.pawn===P&&x.kind==='casualty'&&x.subject===target);
-      const carrying=()=>pawn('Pedro').job==='HaulToCell'&&(pawn('Pedro').carryingCount??0)>0;
+      const carrying=()=>settled(e!.intentId)&&!jobOf(e!.intentId,pawn('Pedro').jobId!)?.preTag&&kinds('job-start',P).some(x=>Number(field(x,'job'))===pawn('Pedro').jobId&&field(x,'intent')===e!.intentId&&field(x,'def')==='WoodLog');
       if(!await run(()=>saw()&&carrying(),180000,()=>co.reconcile().then(()=>{}))){c.findings.push(`precondition: no carrying tagged trip with a sighting of the patient (sighted ${saw()}, carrying ${carrying()})`);return;}
-      const tripJob=pawn('Pedro').jobId!,cargo=pawn('Pedro').carryingCount??0;c.data.trip={job:tripJob,cargo};
+      const tripJob=pawn('Pedro').jobId!,cargo=pawn('Pedro').carryingCount??0;c.data.trip={job:tripJob,cargo,hold:jobOf(e!.intentId,tripJob)};
       await co.attend(P,{name:'scripted',async reflect(){return {kind:'request_rescue',agreementId:haul.id,target,reason:'Someone is down near the pile; can I help?'};}});
       const request=co.core().requests().find(r=>r.pawn===P&&r.agreementId===haul.id&&r.status==='pending');
       if(!request){c.findings.push('the carrying pawn could not raise a rescue request');return;}
@@ -417,18 +424,27 @@ try{
       const steps=s.events().map(x=>x.event).filter(x=>['replacement-consented','handover-started','handover-owned','intention-stopped','handover-excluded','handover-dispatching','handover-stopped'].includes(x.kind)).map(x=>x.kind);c.data.steps=steps;
       const tripEnd=kinds('job-end',P).find(x=>Number(field(x,'job'))===tripJob);c.data.tripEnd=tripEnd;
       const dispatched=(state.actions??[]).filter(a=>a.id===handover?.dispatchId);
-      const rescueStart=events.find(x=>x.pawn===P&&x.kind==='job-start'&&!/HaulToCell/.test(x.detail)&&x.tick>=(tripEnd?.tick??Infinity)&&/Rescue|Concord/i.test(x.detail));
+      c.data.dispatches=dispatches;
+      const sent=dispatches.filter(d=>d.id===handover?.dispatchId),trace=sent[0];
+      const rescueStart=events.find(x=>x.pawn===P&&x.kind==='job-start'&&Number(field(x,'job'))===trace?.jobId);
+      c.data.rescueStart=rescueStart;
+      const before=trace?.before.pawns.find(p=>p.id===P);
+      const beforeIntent=trace?.before.intents?.find(i=>i.intentId===e!.intentId);
+      expect(c,sent.length===1&&dispatches.length===1,'expected exactly one rescue dispatch call under the persisted id');
+      expect(c,!!before&&before.carrying===''&&before.jobId!==tripJob&&!!beforeIntent?.excluded.includes(P),'dispatch did not observe exclusion and drained cargo');
       expect(c,handover?.step==='dispatched','handover did not reach dispatch: '+JSON.stringify(handover));
-      expect(c,steps.indexOf('handover-excluded')>steps.indexOf('replacement-consented')&&steps.indexOf('handover-dispatching')>steps.indexOf('handover-excluded')&&steps.filter(k=>k==='handover-dispatching').length===1,'handover steps out of order or repeated: '+steps.join(' > '));
+      expect(c,steps.indexOf('replacement-consented')>=0&&steps.indexOf('handover-excluded')>steps.indexOf('replacement-consented')&&steps.indexOf('handover-dispatching')>steps.indexOf('handover-excluded')&&steps.filter(k=>k==='handover-dispatching').length===1,'handover steps out of order or repeated: '+steps.join(' > '));
       expect(c,!!view(e!.intentId)?.excluded.includes(P),'Pedro is not excluded from the wood agreement in the game');
-      expect(c,!!tripEnd&&(!rescueStart||rescueStart.tick>=tripEnd.tick),'the rescue started before the carried trip ended');
+      expect(c,!!tripEnd&&!!rescueStart&&rescueStart.seq>tripEnd.seq&&rescueStart.tick>=tripEnd.tick,'the rescue started before the carried trip ended');
       expect(c,dispatched.length===1,`expected one rescue action under the persisted id, got ${dispatched.length}`);
       expect(c,outcome()?.status==='completed'&&pawn(state.pawns.find(x=>x.id===target)!.name).currentBed===option.bed,`rescue ${outcome()?.status??'missing'}; patient bed ${state.pawns.find(x=>x.id===target)?.currentBed}`);
       const v=invariants(c,e!.intentId);
-      if(v)expect(c,v.drops.filter(d=>d.job===tripJob&&d.kind==='participation').every(d=>d.pawn===P),'the carried trip was credited to someone else');
+      if(v){const drops=v.drops.filter(d=>d.job===tripJob&&d.kind==='participation');
+        expect(c,drops.length>0&&drops.every(d=>d.pawn===P)&&drops.reduce((n,d)=>n+d.count,0)===cargo,'captured wood cargo was not credited exactly to Pedro');
+      }
       const text=crewReport(co.inspect(),state.ticks).entries.map(x=>x.text);c.data.crew=text;
       expect(c,text.some(t=>/rescue now starts/.test(t)),'no crew record of the rescue starting');
-    }finally{s.close();}
+    }finally{b.move=originalMove;s.close();}
   });
 
   // --- B6: presentation while open, restored after retirement; offer record via the coordinator.
