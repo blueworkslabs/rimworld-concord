@@ -231,7 +231,7 @@ class TimelineGuard(Scene):
 
 
 class CoreWakes(Scene):
-    """Event-driven core: shared events spend a turn; telemetry waits silently unless it turns urgent."""
+    """Event-driven core: status-only changes wait unless work is offerable or a band reaches urgent."""
 
     def construct(self):
         self.add(heading("The core wakes on shared events"))
