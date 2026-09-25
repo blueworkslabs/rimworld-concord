@@ -21,6 +21,6 @@ test('a construction view parses strictly and credits only accepted pawns and he
 });
 
 test('construction events are native texture, never a pawn wake',()=>{
-  for(const kind of ['build-opened','build-excluded','build-stage','build-delivered','build-work','build-ended','build-fate','build-pretag-marked','build-rejected-start','build-rejected-destination','build-rejected-deposit'])
+  for(const kind of ['build-opened','build-excluded','build-stage','build-delivered','build-work','build-ended','build-fate','build-pretag-marked','build-rejected-start','build-rejected-destination','build-rejected-deposit','build-nearby-filtered'])
     assert.deepEqual(nativeAttention({kind,detail:'intent=i1'}),{next:'native',interrupt:false},kind);
 });

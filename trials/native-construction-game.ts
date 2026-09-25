@@ -21,7 +21,7 @@ import {BuildView} from '../src/native-build.js';
 import {startNative} from './native-run.js';
 if(process.env.CONCORD_NATIVE_CONSTRUCTION_LOCKED!=='1')throw Error('Exclusive lab lock required');
 const root=new URL('../..',import.meta.url).pathname;
-const caseNames=['1-accept-build','2-helper-delivers','3-refusal-ordinary','4-nearby-untagged','5-shared-work','6-forced-failure','7-cancel','8-different-def','9-restore','10-fate','11-forbid','12-replace','13-forced-after-refusal','14-transitions','15-withdraw-in-flight','16-two-sites','17-generations'];
+const caseNames=['1-accept-build','2-helper-delivers','3-refusal-ordinary','4-nearby-untagged','5-shared-work','6-forced-failure','7-cancel','8-different-def','9-restore','10-fate','11-forbid','12-replace','13-forced-after-refusal','14-transitions','15-withdraw-in-flight','16-two-sites','17-generations','18-patch-cost'];
 const args=process.argv.slice(2);
 const only=args[0]?.slice(7);
 if(args.length>1||(args.length===1&&(!args[0]!.startsWith('--case=')||!caseNames.includes(only!))))throw Error('Unknown construction case');
@@ -35,13 +35,12 @@ const receipt:{runId:string;unimplemented:string[];observedOnly:Record<string,un
     'crew-log wording (helper label, completion record, fate line with clock time): coordinator PR',
     // Case 7's exact refunds: no leavings hook for Gate C (signature answer 4); the record says "not recorded".
     'exact returned units on cancel/failure (answer 4: "returned: not recorded")',
-    'case 4: actual nearby-extension and queued-destination opportunity evidence',
-    'case 5: work-share reconciliation against native deltas and failure-before-increment',
-    'case 13: queued/restored forced provenance, ordinary continuation and stamp isolation',
-    'case 14: absent/ambiguous successors and exception unwind',
-    'case 15: current-frame withdrawal, queued/reserved candidates, unrelated current work and reentrancy',
-    'case 16: restore between deposits followed by the next physical transfer',
-    'case 17: post-retag effects and same-def physical replacement',
+    // Native failure roll at the tick boundary: forced only by chance (no skill changes); reconciled when it occurs.
+    'case 5: the native failure roll before an increment is reconciled only when it happens (case 9 or any build)',
+    // The game's prioritized continuation (forced: false after a menu order) needs a real menu click.
+    'case 13: prioritized continuation after a real menu order (the scanner call is exercised directly)',
+    // Case 4b and case 14 use one-shot lab faults to reach defence-in-depth branches the sweep normally prevents.
+    'cases 4b and 14b-d exercise defence-in-depth branches through one-shot lab faults, not ordinary play',
    ],observedOnly:{},passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,eventEpoch:string|undefined,state:GameState;
 const persist=()=>writeFile(root+`/.runtime/native-construction-${runId}.json`,JSON.stringify(receipt,null,2));
@@ -89,6 +88,11 @@ const total=(v:BuildView,role?:string,pawnId?:string)=>v.delivered.filter(d=>(!r
 const workOf=(v:BuildView,pawnId?:string,role?:string)=>v.work.filter(w=>(!pawnId||w.pawn===pawnId)&&(!role||w.role===role)).reduce((n,w)=>n+w.work,0);
 /** Historical accepted work stands after withdrawal. Check recorded violations, not current
  * exclusion membership against all past shares; case 15 checks effects after the boundary. */
+/** Settled shares must sum to the frame's native workDone at completion/failure (C1). */
+function reconcile(c:Case,v:BuildView){
+  if(v.finalWork<0)return;const sum=v.work.reduce((n,w)=>n+w.work,0);
+  expect(c,Math.abs(sum-v.finalWork)<0.01,`work shares ${sum} != native frame work ${v.finalWork}`);
+}
 function consent(c:Case,v:BuildView){
   expect(c,v.violations===0&&!v.delivered.some(r=>r.role==='violation')&&!v.work.some(r=>r.role==='violation'),`violations: ${v.violations}`);
 }
@@ -120,10 +124,10 @@ try{
     expect(c,workOf(v,P,'accepted')>0,'no accepted work recorded');
     expect(c,v.finisher===P,`finisher ${v.finisher}`);
     expect(c,kinds('build-stage').filter(e=>field(e,'stage')==='frame').length===1,'expected exactly one frame transition');
-    consent(c,v);
+    consent(c,v);reconcile(c,v);
     } finally {
-      try { receipt.patchCost={scope:'incomplete handler-body instrumentation; not total patch overhead',
-        limitations:['prefix-only for B1/B2/B4/B9/B10/B12; postfix/finalizer excluded','B8 includes the original native deposit action','active counts use the global Active flag, not tagged-handler hits'],
+      try { receipt.patchCost={scope:'every hook body (prefix, postfix, finalizer, wrapper) during case 1; B8 native transfer reported separately; Harmony dispatch not visible from inside a hook (see 18-patch-cost for the throughput arm)',
+        limitations:['one scripted build, three pawns; not a colony-scale load'],
         values:await op({op:'lab-build-cost',count:2})}; }
       finally { await op({op:'lab-build-cost',count:0}); }
     }
@@ -157,10 +161,22 @@ try{
   await scenario('4-nearby-untagged',base,async c=>{
     const id=randomUUID();await open(id,P);await exclude(id,B,'Not this one');
     await op({op:'lab-build-blueprint',actor:B,thing:'Campfire',x:f.site2.x,z:f.site2.z});await prio(B,1,1);
-    await run(()=>(kinds('build-rejected-destination').length>0)||false,180000);
+    await run(()=>kinds('build-nearby-filtered',B).length>0&&(view(id)!.stage==='blueprint'),180000);await run(()=>false,20000);
     const v=view(id)!;const tagged=await site(f.site.x,f.site.z),other=await site(f.site2.x,f.site2.z);c.data.sites={tagged,other};
+    expect(c,kinds('build-nearby-filtered',B).length>0,'unexercised: the nearby extension never considered the tagged site');
     expect(c,!v.delivered.some(d=>d.pawn===B),'Beatrice filled the tagged site');
     expect(c,other.some(t=>t.kind==='frame'||t.def==='Campfire'),'Beatrice did not work the untagged site (precondition)');consent(c,v);
+    // 4b. Queued destination recheck (fault-injected: the sweep is skipped once so a job whose queue
+    // already holds the tagged site survives the exclusion; B7/B8 must still stop the effect).
+    await b.load(base);await b.admin('pause');await poll();
+    const id2=randomUUID();await open(id2,P);await open(id2,B);await op({op:'lab-build-blueprint',actor:P,thing:'Campfire',x:f.site2.x,z:f.site2.z});await prio(P,0,1);
+    let both=false;await run(()=>both,180000,async()=>{const j=await jobOf(P);both=j.current?.def==='HaulToContainer'&&j.carrying>0&&(j.current.segments??0)>0;});
+    if(!both)throw Error('precondition: no delivery job with the tagged site in its path');
+    await op({op:'lab-build-fault',reason:'no-sweep'});await exclude(id2,P,'Changed my mind');const t2=state.ticks;
+    await run(()=>kinds('build-rejected-destination',P).length+kinds('build-rejected-deposit',P).length>0,60000);await run(()=>false,10000);
+    c.data.queuedRecheck={destination:kinds('build-rejected-destination',P).length,deposit:kinds('build-rejected-deposit',P).length};
+    expect(c,kinds('build-rejected-destination',P).length+kinds('build-rejected-deposit',P).length>0,'unexercised: no queued-destination or deposit recheck fired');
+    expect(c,!view(id2)!.records.some(r=>r.kind==='delivery'&&r.pawn===P&&r.tick>=t2),'a post-exclusion deposit reached the tagged site');
   });
   // 5. Work shared: the acceptor is interrupted mid-frame, a helper finishes.
   await scenario('5-shared-work',base,async c=>{
@@ -170,6 +186,7 @@ try{
     await run(ended(id),240000);const v=view(id)!;const wp=workOf(v,P),wb=workOf(v,B);c.data.work={P:wp,B:wb};
     expect(c,wp>0,'no work settled for the interrupted acceptor');expect(c,wb>0,'no work for the helper');
     expect(c,v.finisher===B,`finisher ${v.finisher}`);expect(c,v.work.every(w=>w.role!=='accepted'||w.pawn===P),'role mixup');consent(c,v);
+    expect(c,v.finalWork>0,'native final work not captured');reconcile(c,v);
   });
   // 6. Forced construction failure: failed with what the frame held; the respawned blueprint is untagged.
   await scenario('6-forced-failure',base,async c=>{
@@ -177,7 +194,7 @@ try{
     await run(()=>view(id)?.stage==='frame'&&total(view(id)!)>=cost,240000);await prio(P,0,0);
     await op({op:'lab-build-fail',intentId:id,actor:P});await poll();const v=view(id)!;
     expect(c,v.status==='failed'&&/construction failed/.test(v.stopReason??''),`expected failed, got ${v.status} ${v.stopReason}`);
-    expect(c,/returned: not recorded/.test(v.stopReason??''),'refund line missing');
+    expect(c,/returned: not recorded/.test(v.stopReason??''),'refund line missing');reconcile(c,v);
     const after=await site(f.site.x,f.site.z);c.data.after=after;
     expect(c,after.some(t=>t.kind==='blueprint'),'no respawned blueprint');
     expect(c,!after.some(t=>t.id===v.thingId&&t.kind==='blueprint'),'tag moved to the respawned blueprint');
@@ -189,11 +206,18 @@ try{
     const id=randomUUID();await open(id,P);await op({op:'lab-build-destroy',intentId:id,reason:'Cancel'});await poll();
     const v=view(id)!;expect(c,v.status==='stopped'&&/cancelled by the player/.test(v.stopReason??''),`blueprint cancel: ${v.status} ${v.stopReason}`);
     await b.load(base);await b.admin('pause');await poll();
-    const id2=randomUUID();await prio(P,1,1);await open(id2,P);
-    await run(()=>view(id2)?.stage==='frame'&&total(view(id2)!)>0,240000);await prio(P,0,0);await op({op:'lab-interrupt',actor:P,reason:'idle'});
-    expect(c,total(view(id2)!)>0&&total(view(id2)!)<cost,'unexercised: frame was not partially supplied');
-    await op({op:'lab-build-destroy',intentId:id2,reason:'Cancel'});await poll();const v2=view(id2)!;c.data.frameCancel=v2;
-    expect(c,v2.status==='stopped'&&/held .*WoodLog.*returned: not recorded/.test(v2.stopReason??''),`frame cancel: ${v2.status} ${v2.stopReason}`);
+    const partial=async()=>{
+      await op({op:'lab-build-ration',actor:P,thing:'WoodLog',count:7});const i2=randomUUID();await prio(P,1,1);await open(i2,P);
+      await run(()=>view(i2)?.stage==='frame'&&total(view(i2)!)===7,240000);await prio(P,0,0);await op({op:'lab-interrupt',actor:P,reason:'idle'});
+      expect(c,total(view(i2)!)===7,'unexercised: frame was not partially supplied (7 of '+cost+')');return i2;
+    };
+    const id2=await partial();await op({op:'lab-build-destroy',intentId:id2,reason:'Cancel'});await poll();const v2=view(id2)!;c.data.frameCancel=v2;
+    expect(c,v2.status==='stopped'&&/cancelled by the player; held 7 WoodLog; returned: not recorded/.test(v2.stopReason??''),`frame cancel: ${v2.status} ${v2.stopReason}`);
+    // The ordinary deconstruct designator on a partial frame is not a replacement.
+    await b.load(base);await b.admin('pause');await poll();
+    const id3=await partial();await op({op:'lab-build-deconstruct-order',intentId:id3});await poll();const v3=view(id3)!;c.data.frameDeconstruct=v3;
+    expect(c,v3.status==='stopped'&&/deconstructed by the player's order; held 7 WoodLog/.test(v3.stopReason??''),`frame deconstruct: ${v3.status} ${v3.stopReason}`);
+    expect(c,!/replaced/.test(v3.stopReason??''),'ordinary deconstruction labelled as replacement');
   });
   // 8. A different def appears on the footprint: failed, no re-tag.
   await scenario('8-different-def',base,async c=>{
@@ -218,8 +242,12 @@ try{
     await checkpoint('blueprint');
     await prio(P,1,1);await run(()=>view(id)?.stage==='frame'&&total(view(id)!)>0,240000);await checkpoint('frame');
     await run(ended(id),300000);const v=view(id)!;
-    expect(c,v.status==='built'&&total(v)===cost,`after restore: ${v.status} delivered ${total(v)} of ${cost}`);
-    const occ=v.records.map(r=>r.occurrence).filter(Boolean);expect(c,new Set(occ).size===occ.length,'duplicate occurrence IDs');consent(c,v);
+    // The property here is the restore. The continuation may end in the game's own failure roll
+    // (skills are not changed); that outcome is recorded and reconciled, not rerolled.
+    const nativeFailure=v.status==='failed'&&/construction failed/.test(v.stopReason??'');
+    if(nativeFailure)(receipt.observedOnly['native construction failure after restore']??=[]).push({case:'9-restore',tick:v.records.at(-1)?.tick,finalWork:v.finalWork});
+    expect(c,(v.status==='built'||nativeFailure)&&total(v)===cost,`after restore: ${v.status} ${v.stopReason} delivered ${total(v)} of ${cost}`);
+    const occ=v.records.map(r=>r.occurrence).filter(Boolean);expect(c,new Set(occ).size===occ.length,'duplicate occurrence IDs');consent(c,v);reconcile(c,v);
   });
   // 10. After built, deconstruction: the fate is recorded with its tick.
   await scenario('10-fate',base,async c=>{
@@ -252,7 +280,25 @@ try{
     expect(c,v.status==='built'&&v.finisher===B,'forced construction did not finish');
     expect(c,total(v,'forced',B)>0&&workOf(v,B,'forced')>0,'forced delivery or work missing');
     expect(c,!v.delivered.some(r=>r.pawn===B&&r.role!=='forced')&&!v.work.some(r=>r.pawn===B&&r.role!=='forced'),'Beatrice credited or labelled');
-    expect(c,v.violations===0,'forced work counted as a violation');
+    expect(c,v.violations===0,'forced work counted as a violation');reconcile(c,v);
+    // 13b. A forced order queued behind current work keeps its stamp through save/restore; after it,
+    // Beatrice's own scans stay excluded and no later job inherits the stamp.
+    await b.load(base);await b.admin('pause');await poll();
+    const id2=randomUUID();await open(id2,P);await exclude(id2,B,'No');await prio(B,0,0);
+    await run(()=>state.pawns.find(p=>p.id===B)?.job!=null&&state.pawns.find(p=>p.id===B)?.job!=='Wait',20000);
+    await op({op:'lab-build-forced',intentId:id2,actor:B,reason:'delivery',count:1});
+    const before=await jobOf(B);c.data.queuedForced=before;
+    const qf=(before.queued as {forced:boolean;segments:number}[]).find(q=>q.segments>0||q.forced);
+    const current=before.current?.forced?before.current:undefined;
+    expect(c,!!qf||!!current,'unexercised: no queued or current forced job');
+    const name='lab-concord-nc-forced-'+Date.now();await b.save(name);await b.load(name);await b.admin('pause');await poll();
+    const after=await jobOf(B);c.data.queuedForcedAfterRestore=after;
+    expect(c,JSON.stringify(after)===JSON.stringify(before),'forced stamp or queue changed across restore');
+    await prio(B,1,1);const forcedDone=()=>total(view(id2)!,'forced',B)>0;await run(forcedDone,180000);
+    const t3=state.ticks;await run(()=>false,20000);const v2=view(id2)!;
+    expect(c,total(v2,'forced',B)>0,'the queued forced delivery did not happen');
+    expect(c,!v2.records.some(r=>r.pawn===B&&r.tick>t3&&r.role!=='forced'&&(r.kind==='delivery'||r.kind==='work')),'ordinary continuation touched the tagged site');
+    const later=await jobOf(B);expect(c,!(later.current?.forced&&(later.current.segments??0)>0&&later.current.job!==after.current?.job&&!(after.queued as {job:number}[]).some(q=>q.job===later.current!.job)),'a new job inherited the forced stamp');
   });
   // 14. Transitions: one per replacement; a blocking thing makes conversion wait, then convert.
   await scenario('14-transitions',base,async c=>{
@@ -261,7 +307,17 @@ try{
     expect(c,v.status==='built',`expected built after unblocking, got ${v.status}`);
     expect(c,kinds('build-stage').filter(e=>field(e,'stage')==='frame').length===1&&kinds('build-stage').filter(e=>field(e,'stage')==='built').length===1,'expected exactly one frame and one built transition');
     c.data.conversionNotes=v.records.filter(r=>/conversion did not happen/.test(r.text));
-    expect(c,(c.data.conversionNotes as unknown[]).length>0,'unexercised: no blocked false-return conversion observed');
+    expect(c,(c.data.conversionNotes as unknown[]).length>0,'unexercised: no blocked false-return conversion observed');reconcile(c,v);
+    // 14b-d. Completion with an absent successor, an ambiguous one, and an exception inside the
+    // completion scope (one-shot lab faults): each fails once, never completes or re-tags.
+    for(const [fault,reason] of [['successor-absent',/successor not observed \(0 candidates\)/],['successor-ambiguous',/successor not observed \(2 candidates\)/],['completion-exception',/completion error/]] as const){
+      await b.load(base);await b.admin('pause');await poll();
+      const fid=randomUUID();await open(fid,P);await prio(P,1,1);await op({op:'lab-build-fault',reason:fault});
+      await run(ended(fid),300000);const fv=view(fid)!;(c.data.faults??={} as Record<string,unknown>) as Record<string,unknown>;(c.data.faults as Record<string,unknown>)[fault]=fv;
+      expect(c,fv.status==='failed'&&reason.test(fv.stopReason??''),`${fault}: ${fv.status} ${fv.stopReason}`);
+      expect(c,kinds('build-stage').filter(e=>field(e,'stage')==='built').length===0,`${fault}: a built transition was recorded`);
+      await op({op:'lab-build-fault',reason:'none'});
+    }
   });
   // 15. Withdrawal in flight: carrying toward the site; and an already-excluded pawn at attachment.
   await scenario('15-withdraw-in-flight',base,async c=>{
@@ -285,13 +341,38 @@ try{
     await exclude(id2,B,'No');await open(id2,P,{target:bp,x:undefined,z:undefined});const jb=await jobOf(B);c.data.attachment=jb;
     expect(c,jb.current?.def!=='HaulToContainer','the excluded pawn kept delivering at attachment');
     await run(()=>false,15000);expect(c,!view(id2)!.delivered.some(d=>d.pawn===B),'excluded pawn deposited after attachment');
+    // 15c. Withdrawal mid-construction: the finish-frame job ends, accrued work stands as accepted, no later work.
+    await b.load(base);await b.admin('pause');await poll();
+    const id3=randomUUID();await prio(P,1,1);await open(id3,P);await open(id3,B);
+    let building=false;await run(()=>building,240000,async()=>{const j=await jobOf(P);building=j.current?.def==='FinishFrame';});
+    if(!building)throw Error('precondition: Pedro never started construction work');
+    await run(()=>false,2000);await exclude(id3,P,'Tired');const t3=state.ticks;const jf=await jobOf(P);c.data.finishFrameWithdrawal=jf;
+    expect(c,jf.current?.def!=='FinishFrame','the finish-frame job kept running');
+    await run(()=>false,10000);const v3=view(id3)!;
+    expect(c,workOf(v3,P,'accepted')>0,'accrued work before withdrawal was lost');
+    expect(c,!v3.records.some(r=>r.kind==='work'&&r.pawn===P&&r.tick>t3),'work after withdrawal');consent(c,v3);
+    // 15d. A queued ordinary candidate behind unrelated current work: the queue entry goes, the current job stays.
+    await b.load(base);await b.admin('pause');await poll();
+    const id4=randomUUID();await open(id4,P);await open(id4,B);await prio(P,0,0);
+    await run(()=>state.pawns.find(p=>p.id===P)?.job!=null,20000);
+    await op({op:'lab-build-queue',intentId:id4,actor:P});const q0=await jobOf(P);c.data.queuedCandidate=q0;
+    expect(c,(q0.queued as {segments:number;def:string}[]).some(q=>q.def==='HaulToContainer'),'precondition: no queued candidate');
+    await exclude(id4,P,'No');const q1=await jobOf(P);c.data.afterQueuedExclusion=q1;
+    expect(c,!(q1.queued as {def:string}[]).some(q=>q.def==='HaulToContainer'),'the queued candidate survived exclusion');
+    expect(c,q1.current?.job===q0.current?.job,'unrelated current work was disturbed');
+    await prio(P,1,1);await run(()=>false,15000);const q2=await jobOf(P);c.data.afterQueuedRun=q2;
+    expect(c,!view(id4)!.records.some(r=>r.pawn===P&&(r.kind==='delivery'||r.kind==='work')),'a prohibited start slipped through cleanup');
   });
   // 16. One job deposits into two independently tagged sites: once each, also after restore.
   await scenario('16-two-sites',base,async c=>{
     const a=randomUUID(),b2=randomUUID();await open(a,P);await open(b2,P,{x:f.site2.x,z:f.site2.z,siteId:'west-site'});await prio(P,0,1);
-    await run(()=>total(view(a)!)>0&&total(view(b2)!)>0,300000);
+    // Checkpoint BETWEEN the two deposits: one site has material, the other none yet.
+    await run(()=>(total(view(a)!)>0)!==(total(view(b2)!)>0),300000);
+    if((total(view(a)!)>0)===(total(view(b2)!)>0))throw Error('precondition: never observed one site filled before the other');
     const name='lab-concord-nc-two-'+Date.now();const before=[view(a)!,view(b2)!];await b.save(name);await b.load(name);await b.admin('pause');await poll();
     expect(c,JSON.stringify([view(a),view(b2)])===JSON.stringify(before),'restore changed either site');
+    await run(()=>total(view(a)!)>0&&total(view(b2)!)>0,300000);
+    c.data.betweenDeposits={before:before.map(v=>total(v)),after:[total(view(a)!),total(view(b2)!)]};
     const jobsA=new Set(view(a)!.records.filter(r=>r.kind==='delivery').map(r=>r.occurrence.split(':')[1])),jobsB=new Set(view(b2)!.records.filter(r=>r.kind==='delivery').map(r=>r.occurrence.split(':')[1]));
     c.data.sharedJobs=[...jobsA].filter(j=>jobsB.has(j));
     expect(c,(c.data.sharedJobs as unknown[]).length>0,'unexercised: no single job filled both sites');
@@ -313,6 +394,29 @@ try{
     await open(id2,P,{target:cur.load,x:undefined,z:undefined});const v2=view(id2)!;
     expect(c,v2.generation===v1.generation+1,`generation ${v2.generation} after ${v1.generation}`);
     expect(c,v2.records.every(r=>r.generation===v2.generation)&&total(v2)===0,'the new generation inherited records');
+    // An effect after the re-tag lands in generation 2 only.
+    const g1=JSON.stringify(view(id)!.records);await prio(P,1,1);await run(ended(id2),300000);const v2b=view(id2)!;
+    expect(c,total(v2b)>0||workOf(v2b)>0,'unexercised: no effect after the re-tag');
+    expect(c,v2b.records.every(r=>r.generation===v2b.generation),'generation 2 holds foreign records');
+    expect(c,JSON.stringify(view(id)!.records)===g1,'generation 1 changed after the re-tag');
+    // Same-def physical replacement: the building goes, a new ordinary campfire blueprint takes the
+    // footprint; the old fate watch never re-tags it, and a new intent is generation 3.
+    if(v2b.status==='built'){
+      await op({op:'lab-build-deconstruct',intentId:id2});await run(()=>view(id2)?.fate!=='standing',180000);
+      const nb=(await op({op:'lab-build-blueprint',actor:P,thing:'Campfire',x:f.site.x,z:f.site.z})).blueprint as string;await poll();
+      expect(c,(state.buildIntents??[]).every(i=>i.status!=='open'),'the replacement blueprint was tagged automatically');
+      const id3=randomUUID();await open(id3,P,{target:nb,x:undefined,z:undefined});
+      expect(c,view(id3)?.generation===v2b.generation+1,`generation ${view(id3)?.generation} after ${v2b.generation}`);
+    }else (receipt.observedOnly['17: same-def replacement not reached']??=[]).push({status:v2b.status,reason:v2b.stopReason});
+  });
+  // 18. Throughput arm: the same open intent with all Concord patches applied versus none.
+  await scenario('18-patch-cost',base,async c=>{
+    const id=randomUUID();await open(id,P);await prio(P,0,0);
+    const arm=async(mode:number)=>{await op({op:'lab-patches',count:mode});await startNative(b);const s0=await b.state(),w0=Date.now();await delay(20000);const s1=await b.state();await b.admin('pause');
+      return {mode,ticks:s1.ticks-s0.ticks,ms:Date.now()-w0,tps:(s1.ticks-s0.ticks)*1000/(Date.now()-w0)};};
+    try{c.data.arms=[await arm(1),await arm(0),await arm(1),await arm(0)];}
+    finally{await op({op:'lab-patches',count:1});}
+    receipt.patchCost={...(receipt.patchCost as object??{}),throughput:c.data.arms,note:'mode 1: all Concord patches with one open construction intent; mode 0: vanilla. Game speed, recording and host load are the same in every arm; not a colony-scale load.'};
   });
   receipt.passed=receipt.cases.length>0&&receipt.cases.every(c=>c.passed);
 }catch(e){receipt.error=String(e);}

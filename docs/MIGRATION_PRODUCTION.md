@@ -977,17 +977,19 @@ patch uses constant-time guards and counter/timing bookkeeping; global paths use
 `Active`, a job-def/dictionary check, or (B11) the current transition scope. B8 installs
 a wrapper at toil creation even without an active tag. These are not zero-work guards. Costs are measured on staging with
 `lab-build-cost` (case 1 enables timing and resets it in `finally`); none is claimed yet.
-The current counters are **partial instrumentation, not full per-patch overhead**:
-B1/B2/B4 and B9/B10/B12 time prefixes but omit postfix/finalizer work; B8 includes
-its original native deposit action; `active` counts describe the global flag, not
-necessarily a tagged-handler hit. Keep ledger costs pending until scoped comparable
-measurements cover the omitted work. The runner retains these limitations with the raw values.
+After the first staging review the instrumentation covers **every hook body**: prefix,
+postfix, finalizer and wrapper time are summed per patch; B8 reports the native deposit it
+calls separately (`nativeMicros`) and excludes it from its own time; `active` counts entries
+that did Concord work after the fast path (a tagged target or scope), not the global flag.
+Harmony's own dispatch is not visible from inside a hook, so case `18-patch-cost` adds a
+throughput arm: ticks per second with all Concord patches applied versus none (`lab-patches`),
+alternating twice, one open construction intent. Costs stay pending until those runs report.
 
 | # | Method | Kind | Does work when | Cost |
 |---|---|---|---|---|
 | B1 | `WorkGiver_ConstructDeliverResourcesToBlueprints.JobOnThing` | prefix + postfix | a tagged target: excluded pawn on an ordinary scan gets no job; a forced call's returned job is stamped | pending |
 | B2 | `WorkGiver_ConstructDeliverResourcesToFrames.JobOnThing` | prefix + postfix | as B1 | pending |
-| B3 | `WorkGiver_ConstructDeliverResources.IsNewValidNearbyNeeder` | postfix | a tagged nearby needer for an excluded pawn | pending |
+| B3 | `WorkGiver_ConstructDeliverResources.IsNewValidNearbyNeeder` | postfix | a tagged nearby needer for an excluded pawn (emits `build-nearby-filtered` as evidence) | pending |
 | B4 | `WorkGiver_ConstructFinishFrames.JobOnThing` | prefix + postfix | as B1, for construction work | pending |
 | B5 | `Pawn_JobTracker.StartJob` (global; hauling also patches it) | prefix | a `HaulToContainer`/`FinishFrame` job touching a tagged carrier: admission, segments, work baseline | pending |
 | B6 | `Pawn_JobTracker.CleanupCurrentJob` (global; hauling also patches it) | prefix | a `FinishFrame` job on a tagged frame: settle work | pending |
@@ -995,7 +997,7 @@ measurements cover the omitted work. The runner retains these limitations with t
 | B8 | `Toils_Haul.DepositHauledThingInContainer` | postfix installing an `initAction` wrapper | wrapper, per deposit into a tagged frame: consent recheck, per-def delta | pending (wrapper) |
 | B9 | `Blueprint.TryReplaceWithSolidThing` | prefix + postfix + finalizer | a tagged blueprint: consent recheck, transition scope, `createdThing` validation | pending |
 | B10 | `Frame.CompleteConstruction` | prefix + postfix + finalizer | a tagged frame: settle the finisher, spawn-collector scope, successor validation | pending |
-| B11 | `GenSpawn.Spawn(Thing, IntVec3, Map, Rot4, WipeMode, bool, bool)` (global; every overload forwards here) | postfix | only inside a completion scope | pending |
+| B11 | `GenSpawn.Spawn(Thing, IntVec3, Map, Rot4, WipeMode, bool, bool)` (global; every overload forwards here) | postfix | inside a completion scope (successor collection), or while a player removal of a tagged carrier is pending (a blueprint spawning on its footprint means replacement) | pending |
 | B12 | `Frame.FailConstruction` | prefix + postfix + finalizer | a tagged frame: settle the worker, record what it held | pending |
 | B13 | `Thing.Destroy` (global) | prefix | a tagged carrier or watched building (dictionary lookup) | pending |
 
@@ -1006,16 +1008,29 @@ Implementation choices within the signed design, for review:
   blueprint intact. B8 explicitly rejects excluded **frame** deposits; it does not
   handle a remaining blueprint as a frame. The original blueprint path has no resource
   container, but the broader denied-conversion cleanup still needs scripted evidence.
-- **Removal classification by destroy mode, no designator patch.** The implementation currently maps Cancel → stopped
-  (cancelled), Deconstruct → stopped (replaced by the player), Vanish → failed (removed),
-  other → failed (destroyed). **Confirmed review blocker:** native
-  `Designator_Deconstruct.DesignateThing` also destroys frames with Deconstruct, so
-  this cannot establish replacement. Conversely, the build designator can cancel a
-  replace-tag-matching frame before its later deconstruct wipe. Case 12 alone cannot
-  prove this classification; fix the cause attribution within the agreed patch ceiling.
+- **Removal attribution without a designator patch (fixes the review blocker).** The destroy
+  mode alone cannot tell a player's replacement from an ordinary deconstruction: the
+  deconstruct designator removes frames with Deconstruct, and the build designator may cancel
+  a replace-tag-matching frame first and then wipe with Deconstruct before placing its own
+  blueprint. So a Cancel or Deconstruct removal of an open carrier is held **pending** for the
+  rest of that call. If a blueprint spawns on the footprint while it is pending (B11, which
+  already watches `GenSpawn.Spawn`), the ending is **"replaced by the player"**. Otherwise the
+  next frame update (or the next state export, whichever comes first) records **"cancelled by
+  the player"** (Cancel) or **"deconstructed by the player's order"** (Deconstruct). Vanish is
+  **"removed"** (failed) and any other mode **"destroyed"** (failed). Frames add "held …;
+  returned: not recorded". Case 7 exercises cancel and the real deconstruct designator on a
+  rationed, partially filled frame; case 12 the real build designator. No new patch: 13 remain.
 - **Polled facts.** Expiry, the forbidden note, a different occupant on the footprint and a
   building that leaves its place without being destroyed are checked every 60 ticks.
 - **Forced stamps** are saved by job load ID and dropped 600 ticks after the job exists nowhere.
+- **Work reconciliation.** Completion and failure record the frame's native `workDone`
+  (`finalWork`); the runner requires the settled shares to sum to it (C1), including the last
+  increment and any overshoot, and, at a failure, excluding the failed tick's increment.
+- **Lab faults (scripted cases only).** One-shot faults reach defence-in-depth branches that
+  ordinary play does not: `no-sweep` (an exclusion skips the sweep once, so the queued-destination
+  and deposit rechecks must stop the effect, case 4b), and `successor-absent`,
+  `successor-ambiguous`, `completion-exception` (case 14b–d). They are lab operations only and
+  never armed outside a scripted case.
 - **Offline patch check:** 11 of the 13 apply in the offline harness. B10 and B12 cannot be
   applied offline because `Frame`'s static initializer needs Unity's shader database; their
   first application is on staging.

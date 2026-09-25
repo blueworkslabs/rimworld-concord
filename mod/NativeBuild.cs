@@ -49,6 +49,8 @@ namespace Concord {
     public class BuildIntent : IExposable {
         public string intentId,status="open",stage="blueprint",def,label,siteId,stopReason,finisher,note,fate,held;
         public int mapId=-1,x,z,rot,generation,thingId=-1,createdTick,untilTick,fateTick=-1,violations,rejectedStarts;
+        /** The frame's native workDone at completion or failure: every settled share must sum to it. */
+        public float finalWork=-1f;
         public bool contributed,placedByCore,watchFate;
         public List<string> accepted=new List<string>(),excluded=new List<string>();
         public List<int> excludedTicks=new List<int>();
@@ -66,7 +68,7 @@ namespace Concord {
             Scribe_Values.Look(ref mapId,"mapId",-1);Scribe_Values.Look(ref x,"x");Scribe_Values.Look(ref z,"z");Scribe_Values.Look(ref rot,"rot");
             Scribe_Values.Look(ref generation,"generation");Scribe_Values.Look(ref thingId,"thingId",-1);
             Scribe_Values.Look(ref createdTick,"createdTick");Scribe_Values.Look(ref untilTick,"untilTick");Scribe_Values.Look(ref fateTick,"fateTick",-1);
-            Scribe_Values.Look(ref violations,"violations");Scribe_Values.Look(ref rejectedStarts,"rejectedStarts");
+            Scribe_Values.Look(ref violations,"violations");Scribe_Values.Look(ref rejectedStarts,"rejectedStarts");Scribe_Values.Look(ref finalWork,"finalWork",-1f);
             Scribe_Values.Look(ref contributed,"contributed");Scribe_Values.Look(ref placedByCore,"placedByCore");Scribe_Values.Look(ref watchFate,"watchFate");
             Scribe_Collections.Look(ref accepted,"accepted",LookMode.Value);Scribe_Collections.Look(ref excluded,"excluded",LookMode.Value);
             Scribe_Collections.Look(ref excludedTicks,"excludedTicks",LookMode.Value);
@@ -80,7 +82,7 @@ namespace Concord {
     [Serializable] public class BuildShare {public string pawn,role,def;public int count;public float work;}
     [Serializable] public class BuildView {
         public string intentId,status,stage,def,label,siteId,stopReason,finisher,note,fate,held;
-        public int mapId,x,z,rot,generation,thingId,createdTick,untilTick,fateTick,violations,rejectedStarts;
+        public int mapId,x,z,rot,generation,thingId,createdTick,untilTick,fateTick,violations,rejectedStarts;public float finalWork;
         public string[] accepted,excluded;
         [NonSerialized] public BuildShare[] delivered,work;
         [NonSerialized] public BuildRecord[] records;
@@ -105,6 +107,13 @@ namespace Concord {
         // Current carrier or watched building thing ID -> intent.
         public static readonly Dictionary<int,BuildIntent> byThing=new Dictionary<int,BuildIntent>();
         public static BuildTransition transition;
+        // A player removal (Cancel/Deconstruct) waiting to learn whether a blueprint takes its place in
+        // the same call (the build designator wipes, then places). Resolved by B11, the next frame
+        // update, or the next state export, whichever comes first. Never saved.
+        public static BuildIntent pending;public static DestroyMode pendingMode;
+        // Lab fault injection for scripted case 14 only; one-shot.
+        public static string fault;
+        public static bool TakeFault(string f){if(fault!=f)return false;fault=null;return true;}
         public BuildState(Game game) { }
         public static BuildState Get() {return Current.Game==null?null:Current.Game.GetComponent<BuildState>();}
         public static string KeyOf(int mapId,int x,int z,int rot,string def){return mapId+":"+x+","+z+":"+rot+":"+def;}
@@ -246,12 +255,26 @@ namespace Concord {
             }
             var frame=t as Frame;
             if(frame!=null)i.held=Held(frame);
-            var refund=frame==null?"":"; held "+(i.held==""?"nothing":i.held)+"; returned: not recorded";
-            if(mode==DestroyMode.Cancel)End(i,"stopped","cancelled by the player"+refund);
-            else if(mode==DestroyMode.Deconstruct)End(i,"stopped","replaced by the player"+refund);
-            else if(mode==DestroyMode.Vanish)End(i,"failed","removed");
+            // Cancel and Deconstruct are both player removals, but the destroy mode does not say which:
+            // the deconstruct designator removes frames with Deconstruct, and the build designator may
+            // cancel first and then wipe with Deconstruct before placing its own blueprint. Wait.
+            if(mode==DestroyMode.Cancel||mode==DestroyMode.Deconstruct){if(pending!=null&&pending!=i)ResolvePending(false);if(pending==null){pending=i;pendingMode=mode;}return;}
+            if(mode==DestroyMode.Vanish)End(i,"failed","removed");
             else End(i,"failed","destroyed");
         }
+        public string Refund(BuildIntent i){return i.stage=="frame"?"; held "+(String.IsNullOrEmpty(i.held)?"nothing":i.held)+"; returned: not recorded":"";}
+        public void ResolvePending(bool replaced) {
+            var i=pending;pending=null;if(i==null||!i.Open)return;
+            if(replaced)End(i,"stopped","replaced by the player"+Refund(i));
+            else if(pendingMode==DestroyMode.Cancel)End(i,"stopped","cancelled by the player"+Refund(i));
+            else End(i,"stopped","deconstructed by the player's order"+Refund(i));
+        }
+        public bool Overlaps(BuildIntent i,Thing t,Map map) {
+            if(map==null||map.uniqueID!=i.mapId||i.Def==null)return false;
+            var mine=GenAdj.OccupiedRect(new IntVec3(i.x,0,i.z),new Rot4(i.rot),i.Def.size);
+            return t.OccupiedRect().Overlaps(mine);
+        }
+        public override void GameComponentUpdate(){if(pending!=null)ResolvePending(false);}
         public static string Held(Frame f){return String.Join(", ",f.resourceContainer.Select(x=>x.stackCount+" "+x.def.defName).ToArray());}
 
         // ---- operator ops ------------------------------------------------------------------------
@@ -325,7 +348,7 @@ namespace Concord {
             bool wasAccepted=i.accepted.Remove(r.actor);
             if(i.Open) {
                 Record(i,new BuildRecord{kind="withdrawal",pawn=r.actor,text=(wasAccepted?"withdrew":"refused")+(String.IsNullOrEmpty(r.reason)?"":": "+r.reason)});
-                Sweep(i,p);
+                if(!TakeFault("no-sweep"))Sweep(i,p);
                 // All accepted pawns withdrew before any contribution: stop (signature C2).
                 if(i.accepted.Count==0&&!i.contributed)End(i,"stopped","every accepted pawn withdrew before any contribution",p);
             }
@@ -383,6 +406,7 @@ namespace Concord {
         }
 
         public string Json() {
+            if(pending!=null)ResolvePending(false);
             // Unity's runtime serializer omits nested custom-object arrays in this assembly. Emit
             // each receipt/share explicitly, as the existing hauling view does; never default
             // a missing ledger to zero on the TypeScript side.
@@ -399,7 +423,7 @@ namespace Concord {
             var work=i.records.Where(r=>r.kind=="work").GroupBy(r=>r.pawn+"|"+r.role).Select(g=>new BuildShare{pawn=g.First().pawn,role=g.First().role,work=g.Sum(r=>r.work)}).ToArray();
             return new BuildView{intentId=i.intentId,status=i.status,stage=i.stage,def=i.def,label=i.label,siteId=i.siteId,stopReason=i.stopReason,finisher=i.finisher,note=i.note,fate=i.fate,held=i.held,
                 mapId=i.mapId,x=i.x,z=i.z,rot=i.rot,generation=i.generation,thingId=i.thingId,createdTick=i.createdTick,untilTick=i.untilTick,fateTick=i.fateTick,
-                violations=i.violations,rejectedStarts=i.rejectedStarts,accepted=i.accepted.ToArray(),excluded=i.excluded.ToArray(),delivered=delivered,work=work,
+                violations=i.violations,rejectedStarts=i.rejectedStarts,finalWork=i.finalWork,accepted=i.accepted.ToArray(),excluded=i.excluded.ToArray(),delivered=delivered,work=work,
                 records=i.records.Skip(Math.Max(0,i.records.Count-32)).ToArray()};
         }
 
@@ -414,8 +438,39 @@ namespace Concord {
                 WorkGiver_Scanner g=r.reason=="work"?(WorkGiver_Scanner)DefDatabase<WorkGiverDef>.AllDefs.First(d=>d.giverClass==typeof(WorkGiver_ConstructFinishFrames)).Worker
                     :(WorkGiver_Scanner)DefDatabase<WorkGiverDef>.AllDefs.First(d=>d.giverClass==(t is Frame?typeof(WorkGiver_ConstructDeliverResourcesToFrames):typeof(WorkGiver_ConstructDeliverResourcesToBlueprints))).Worker;
                 var job=g.JobOnThing(p,t,true);if(job==null)throw new Exception("No forced job available");
-                p.jobs.TryTakeOrderedJob(job,JobTag.Misc);
+                // count 1: queued behind the current job (shift-click), to exercise queued/restored stamps.
+                p.jobs.TryTakeOrderedJob(job,JobTag.Misc,r.count==1);
                 return "{\"job\":"+job.loadID+",\"def\":\""+job.def.defName+"\"}";
+            }
+            if(r.op=="lab-build-queue") {
+                // An ordinary (forced: false) scanner job for the carrier, enqueued behind the current
+                // job without being started: a pre-existing queued candidate (cases 13 and 15).
+                if(p==null)throw new Exception("Unknown pawn");var t=carrier();
+                WorkGiver_Scanner g=r.reason=="work"?(WorkGiver_Scanner)DefDatabase<WorkGiverDef>.AllDefs.First(d=>d.giverClass==typeof(WorkGiver_ConstructFinishFrames)).Worker
+                    :(WorkGiver_Scanner)DefDatabase<WorkGiverDef>.AllDefs.First(d=>d.giverClass==(t is Frame?typeof(WorkGiver_ConstructDeliverResourcesToFrames):typeof(WorkGiver_ConstructDeliverResourcesToBlueprints))).Worker;
+                var job=g.JobOnThing(p,t,false);if(job==null)throw new Exception("No ordinary job available");
+                p.jobs.jobQueue.EnqueueLast(job,JobTag.Misc);
+                return "{\"job\":"+job.loadID+",\"def\":\""+job.def.defName+"\"}";
+            }
+            if(r.op=="lab-build-ration") {
+                // Genuinely partial supply (case 7): every loose stack of the def is forbidden except a
+                // split-off stack of exactly `count` placed near the actor.
+                if(p==null)throw new Exception("Unknown pawn");var def=DefDatabase<ThingDef>.GetNamedSilentFail(r.thing??"WoodLog");if(def==null)throw new Exception("Unknown def");
+                var loose=p.Map.listerThings.ThingsOfDef(def).Where(t=>t.Spawned&&!t.IsInValidStorage()).ToList();
+                var src=loose.OrderByDescending(t=>t.stackCount).FirstOrDefault();if(src==null||src.stackCount<r.count||r.count<1)throw new Exception("Not enough loose "+def.defName);
+                foreach(var t in loose)t.SetForbidden(true,false);
+                var part=src.SplitOff(r.count);part.SetForbidden(false,false);
+                if(!GenPlace.TryPlaceThing(part,p.Position,p.Map,ThingPlaceMode.Near))throw new Exception("Could not place the ration");
+                return "{\"ration\":"+r.count+",\"thing\":\""+part.GetUniqueLoadID()+"\"}";
+            }
+            if(r.op=="lab-build-deconstruct-order") {
+                // The player's ordinary deconstruct designator on the tagged blueprint/frame (case 7/12 contrast).
+                var t=carrier();var d=new Designator_Deconstruct();var ok=d.CanDesignateThing(t);
+                if(!ok.Accepted)throw new Exception("Deconstruct designator refused: "+ok.Reason);d.DesignateThing(t);return "{\"designated\":true}";
+            }
+            if(r.op=="lab-build-fault") {
+                if(r.reason!="no-sweep"&&r.reason!="successor-absent"&&r.reason!="successor-ambiguous"&&r.reason!="completion-exception"&&r.reason!="none")throw new Exception("Unknown fault");
+                fault=r.reason=="none"?null:r.reason;return "{\"fault\":\""+(fault??"none")+"\"}";
             }
             if(r.op=="lab-build-fail") {var f=carrier() as Frame;if(f==null)throw new Exception("Not a frame");f.FailConstruction(p??f.Map.mapPawns.FreeColonistsSpawned.First());return "{\"failed\":true}";}
             if(r.op=="lab-build-destroy") {
@@ -454,7 +509,7 @@ namespace Concord {
             if(r.op=="lab-build-site") {
                 // Evidence: what stands on a cell (def, id, kind, frame contents).
                 var smap=p!=null?p.Map:Find.CurrentMap;var cell=new IntVec3(r.x,0,r.z);
-                var rows=cell.GetThingList(smap).Select(t=>"{\"def\":\""+t.def.defName+"\",\"id\":"+t.thingIDNumber+",\"load\":\""+t.GetUniqueLoadID()+"\",\"kind\":\""+(t is Blueprint?"blueprint":t is Frame?"frame":t.def.category.ToString())+"\",\"forbidden\":"+(t.IsForbidden(Faction.OfPlayer)?"true":"false")+(t is Frame?",\"held\":\""+Held((Frame)t)+"\",\"workDone\":"+((Frame)t).workDone.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture):"")+"}").ToArray();
+                var rows=cell.GetThingList(smap).Select(t=>"{\"def\":\""+t.def.defName+"\",\"id\":"+t.thingIDNumber+",\"load\":\""+t.GetUniqueLoadID()+"\",\"kind\":\""+(t is Blueprint?"blueprint":t is Frame?"frame":t.def.category.ToString())+"\",\"forbidden\":"+(t.IsForbidden(Faction.OfPlayer)?"true":"false")+(t is Frame?",\"held\":\""+Held((Frame)t)+"\",\"workDone\":"+((Frame)t).workDone.ToString("0.000",System.Globalization.CultureInfo.InvariantCulture)+",\"workToBuild\":"+((Frame)t).WorkToBuild.ToString("0.000",System.Globalization.CultureInfo.InvariantCulture):"")+"}").ToArray();
                 return "{\"things\":["+String.Join(",",rows)+"]}";
             }
             if(r.op=="lab-build-spawn") {

@@ -19,7 +19,7 @@ export function afterAppraisal(a:Appraisal,threshold:number,consequential:boolea
 export const NATIVE_KINDS=new Set(['job-start','job-end','ingested','haul-delivered','quota-escape',
  'intent-opened','intent-excluded','intent-incidental','intent-ordinary',
  'build-opened','build-excluded','build-stage','build-delivered','build-work','build-ended','build-fate','build-pretag-marked',
- 'build-rejected-start','build-rejected-destination','build-rejected-deposit','intent-admitted-start','intent-rejected-start','intent-retired','intent-trued-up','lab-fault','lab-drafted']);
+ 'build-rejected-start','build-rejected-destination','build-rejected-deposit','build-nearby-filtered','intent-admitted-start','intent-rejected-start','intent-retired','intent-trued-up','lab-fault','lab-drafted']);
 
 /** Known low-stakes conversations wait without losing their attention record.
  * Other memories remain conservative; this is not general semantic appraisal.

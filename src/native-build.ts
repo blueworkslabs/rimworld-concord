@@ -16,6 +16,8 @@ export const BuildView=z.object({
   fate:z.string().nullable().optional(),held:z.string().nullable().optional(),
   mapId:z.number().int(),x:z.number().int(),z:z.number().int(),rot:z.number().int(),generation:z.number().int(),thingId:z.number().int(),
   createdTick:z.number().int(),untilTick:z.number().int(),fateTick:z.number().int(),violations:z.number().int(),rejectedStarts:z.number().int(),
+  /** Native frame workDone at completion or failure (-1 before either); settled shares sum to it. */
+  finalWork:z.number().optional().default(-1),
   accepted:z.array(z.string()),excluded:z.array(z.string()),delivered:z.array(Share),work:z.array(Share),records:z.array(BuildRecord)});
 export type BuildView=z.infer<typeof BuildView>;
 
