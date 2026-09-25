@@ -84,3 +84,9 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 | 09-25 | [#77](https://github.com/blueworkslabs/rimworld-concord/pull/77), [#75](https://github.com/blueworkslabs/rimworld-concord/pull/75) | S + L | Six pipeline corrections, same-fixture authorized rerun | Authored rehearsal75/75; uncut10:04.867 live recording retained, paired/new-process cold restores pass; cold read + audit:75 credited,60 ordinary gross minus15 removed,120 stock;7/7 stale prefixes;4 visible failures; verdict pending;409 saves unchanged | [freeze](../evidence/hauling-migration-pipeline-rerun-freeze.json), [recording](../evidence/hauling-migration-pipeline-rerun-recording.json) | [Rerun record](HAULING_MIGRATION_PIPELINE_RERUN.md) |
 
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.
+
+### Hauling migration Gate C — 2026-09-25
+
+[Verdict and deletion sequence](HAULING_MIGRATION_GATE_C.md): game-side pass; generic
+test port before runtime deletion. Medical-alert inspection identifies Beatrice's
+pre-existing asthma needing tending. Crew-side follow-ups remain separate.

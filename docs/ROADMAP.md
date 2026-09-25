@@ -117,7 +117,7 @@ the same three gates: [MIGRATION_HAULING](MIGRATION_HAULING.md). **Gate B signed
 fallback, and the migration's live run must measure the #71 corrections.
 
 **Decided 2026-09-25: the hauling migration passed Gate C on the game side; the ordered-job
-hauling model is retired.** Verdict, deletion scope and follow-ups:
+hauling model is approved for retirement; deletion is pending.** Verdict, deletion scope and follow-ups:
 [HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md). Next: construction and
 cooking through blueprints and bills.
 
