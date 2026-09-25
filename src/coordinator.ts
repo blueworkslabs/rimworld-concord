@@ -4,7 +4,7 @@ import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
 import {deferredOffers} from './reoffers.js';
 import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
-import {questionContext,coreView,validateCoreChoice,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
+import {questionContext,coreView,validateCoreChoice,CoreChoice,coreFailureCause,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
@@ -470,9 +470,11 @@ export class Coordinator {
       return {id,controller,generation:this.generation,view:{...coreView(this.domain,game),...(scheduled?{wakeReasons:causes}:{})}};
     });
     if('idle' in prepared)return {status:'idle' as const,reason:prepared.idle};
-    const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
+    let timedOut=false,returned=false,raw:unknown;
+    const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>{timedOut=true;prepared.controller.abort();},timeoutMs);
     try{
-      const choice=validateCoreChoice(await bounded(combined,()=>backend.plan(structuredClone(prepared.view),combined)),prepared.view);
+      raw=await bounded(combined,()=>backend.plan(structuredClone(prepared.view),combined));returned=true;
+      const choice=validateCoreChoice(raw,prepared.view);
       return await this.serial(async()=>{
         combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale core turn');
         const g=await this.current();combined.throwIfAborted();
@@ -504,7 +506,13 @@ export class Coordinator {
         return {status:'applied' as const,proposalId,questionId,choice};
       });
     }catch(error){
-      await this.serial(async()=>{if(this.generation===prepared.generation){const state=this.domain.coreState!,turn=state.turns.find(t=>t.id===prepared.id)!;turn.status='failed';if(state.schedule?.config.maxAttempts===null&&state.turns.slice(-3).length===3&&state.turns.slice(-3).every(t=>t.status==='failed'))state.schedule.blocked='Repeated core failures; operator diagnosis required';state.revision++;this.commit('core-failed','core',{id:prepared.id,error:String(error)});}});
+      await this.serial(async()=>{if(this.generation===prepared.generation){const state=this.domain.coreState!,turn=state.turns.find(t=>t.id===prepared.id)!;turn.status='failed';if(state.schedule?.config.maxAttempts===null&&state.turns.slice(-3).length===3&&state.turns.slice(-3).every(t=>t.status==='failed'))state.schedule.blocked='Repeated core failures; operator diagnosis required';state.revision++;
+        // Shown in-game: the cause, and for a rejected offer or question, whom it was for.
+        const cause=coreFailureCause(error,{cancelled:signal.aborted,deadline:timedOut,returned});
+        const f=state.failures??={total:0,causes:{}};f.total++;f.causes[cause]=(f.causes[cause]??0)+1;
+        const parsed=CoreChoice.safeParse(raw),a=parsed.success?parsed.data.action:undefined;
+        const pawn=a?.kind==='propose'?prepared.view.opportunities.find(o=>o.id===a.opportunityId)?.pawn:a?.kind==='adopt_counter'?prepared.view.counters.find(p=>p.id===a.proposalId)?.pawn:a?.kind==='ask'?a.pawn:undefined;
+        this.commit('core-failed','core',{id:prepared.id,error:String(error).slice(0,300),cause,...(a?{action:{kind:a.kind,...(pawn?{pawn}:{})}}:{})});}});
       return {status:combined.aborted?'interrupted' as const:'failed' as const};
     }finally{clearTimeout(timer);if(this.pending.get('core')===prepared.controller)this.pending.delete('core');await this.serial(async()=>{});}
   }

@@ -108,6 +108,11 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
  if(kind==='core-question'||kind==='core-answer')add('message',data.from,data.to,data.exchangeId,staleNote(data)+data.text,`core-talk:${data.id}`);
  // The wait action is silent (Gate C): the status line says what the core is waiting on.
  if(kind==='core-planned'&&data.kind!=='wait')add('message','core','crew',data.id,staleNote(data)+data.reason,`core-plan:${data.id}`);
+ // A returned offer or question the pipeline rejected is visible, with its cause (never its text).
+ if(kind==='core-failed'&&typeof data.cause==='string'&&data.cause.startsWith('rejected: ')&&['propose','adopt_counter','ask'].includes(data.action?.kind)){
+  const what=data.action.kind==='ask'?'question':'offer',to=data.action.pawn?` to ${name(data.action.pawn)}`:'';
+  add('record','core','observer',data.id,`Core's ${what}${to} was rejected before publication (${safe(data.cause.slice(10),60)}).`,`core-rejected:${data.id}`);
+ }
  if(kind==='handover-dispatching')add('record','Game','observer',data.proposalId,`${name(data.pawn)}'s carried trip finished; rescue dispatch requested, not yet confirmed.`,`handover-go:${data.proposalId}`);
  if(kind==='handover-stopped')add('record','Game','observer',data.proposalId,`Rescue handover for ${name(data.pawn)} stopped: ${safe(data.reason,120)}. No automatic retry.`,`handover-stop:${data.proposalId}`);
  if(kind==='intent-offer-lapsed')add('record','Game','observer',data.proposal,data.answer?`${name(data.pawn)} answered ${safe(data.answer,20)} after the stockpile haul was already ${data.intentStatus==='met'?'complete':safe(data.intentStatus,20)}; no agreement started.`:`Offer to ${name(data.pawn)} lapsed unanswered: the stockpile haul was already ${data.intentStatus==='met'?'complete':safe(data.intentStatus,20)}.`,`lapsed:${data.proposal}`);
@@ -140,7 +145,8 @@ export function crewReport(d:Domain,tick:number,status:import('./shared-status.j
  const coreWaiting=lastTurn?.choice?.action.kind==='wait'||core?.silentWake?`Core: waiting on ${firstOpen?safe(firstOpen.text,120):'new events'}`:undefined;
  const coreState=thinking.includes('core')?'Core: thinking':coreWaiting!==undefined?coreWaiting:!core?'Core: not initialized':schedule?.config.maxAttempts!==null&&core.turns.length>=16?'Core: legacy lifetime limit reached':schedule?.blocked?'Core: '+schedule.blocked:schedule&&schedule.config.maxAttempts!==null&&schedule.attempts>=schedule.config.maxAttempts?'Core: configured allowance exhausted':schedule&&schedule.endTick!==null&&tick>=schedule.endTick?'Core: observation window ended':schedule&&schedule.lastAttemptTick!==undefined&&tick-schedule.lastAttemptTick<schedule.config.cooldownTicks?'Core: cooling down':'Core: no turn running; next call depends on operator/scheduler';
  const pendingQuestions=(core?.questions??[]).filter(q=>q.status==='pending'||q.status==='running').map(q=>`${nameForCare(d,q.pawn)}: ${q.status==='running'?'answering':'question awaiting reply'}`);
- const observerText=[coreState,...thinking.filter(id=>id!=='core'&&!!d.characters[id]).map(id=>`${nameForCare(d,id)}: thinking`),...pendingQuestions].join(' · ').slice(0,1600);
+ const failures=core?.failures,failed=failures&&failures.total>0?`Core outputs failed or rejected: ${failures.total} (${Object.entries(failures.causes).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${k.replace(/^rejected: /,'')} ${n}`).join(', ')})`:undefined;
+ const observerText=[coreState,...(failed?[failed]:[]),...thinking.filter(id=>id!=='core'&&!!d.characters[id]).map(id=>`${nameForCare(d,id)}: thinking`),...pendingQuestions].join(' · ').slice(0,1600);
  // The board is explicitly the core's interpretation; no private character state or raw audit data.
  const topicText=(core?.topics??[]).slice(-8).map(t=>`[${t.status}] ${safe(t.text,240)}`).join('\n').slice(0,2400);
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:d.crew?.revision??0,tick,entries,observerText,topicText,sharedStatus:status,waiting:waiting||'No outstanding offer or running agreement.',

@@ -355,3 +355,21 @@ test('core narration and questions retain snapshot age when ingestion arrives du
   s.close();
  }
 });
+
+test('rejected core outputs and failures are counted by cause and shown in-game, with whom a rejected offer was for',async()=>{
+ const {c,s,g}=await setup();const v=await c.corePerspective(),op=v.opportunities[0]!;
+ // A returned offer linked to a topic created this turn: rejected before publication.
+ assert.equal((await c.planCore(planner(()=>({topics:[{sourceId:'brief',text:'Need',status:'open'}],actionTopicId:'brief',action:{kind:'propose',opportunityId:op.id,reason:'Go'}})))).status,'failed');
+ // A backend that never answers: the deadline.
+ assert.equal((await c.planCore({name:'slow',async plan(){return new Promise(()=>{});}},10)).status,'interrupted');
+ // A backend with its own #71 cause.
+ assert.equal((await c.planCore({name:'big',async plan(){throw Object.assign(Error('Decision unavailable'),{failureCause:'context-too-large'});}})).status,'failed');
+ const f=c.inspect().coreState!.failures!;
+ assert.deepEqual(f,{total:3,causes:{'rejected: topic link':1,deadline:1,'context-too-large':1}});
+ const r=crewReport(c.inspect(),g.data.ticks);
+ assert.match(r.observerText??'',/Core outputs failed or rejected: 3 \(topic link 1, deadline 1, context-too-large 1\)/);
+ const name=c.inspect().characters[op.pawn]!.name;
+ assert.ok(r.entries.some(e=>e.text===`Core's offer to ${name} was rejected before publication (topic link).`));
+ assert.equal(r.entries.filter(e=>/rejected before publication/.test(e.text)).length,1,'only returned offers/questions get a record');
+ assert.equal(Object.keys(c.inspect().proposals).length,0);s.close();
+});

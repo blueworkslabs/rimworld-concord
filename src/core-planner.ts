@@ -28,6 +28,8 @@ export type CoreChoice=z.infer<typeof CoreChoice>;
 export type CoreQuestion={id:string;pawn:string;text:string;status:'pending'|'running'|'answered'|'silent'|'failed';messages:SocialMessage[];context?:string};
 export type CoreTopic={sourceId:string;text:string;status:'open'|'blocked'|'deferred'|'resolved'|'declined';proposalIds:string[];basedOnTick?:number;updatedTick?:number};
 export type CoreState={schedule?:import('./core-scheduler.js').CoreSchedule;
+ /** Failed core attempts by cause (#71 causes plus named validation rejections), shown in-game. */
+ failures?:{total:number;causes:Record<string,number>};
  /** Latest wake that spent no turn (telemetry only, nothing to offer); cleared by the next turn. */
  silentWake?:{tick:number;causes:import('./core-scheduler.js').CoreWake[]};revision:number;brief:{id:string;text:string};topics:CoreTopic[];questions:CoreQuestion[];turns:{id:string;status:'running'|'applied'|'failed';choice?:CoreChoice;proposalId?:string;questionId?:string}[]};
 export type CoreQuestionView={observedTick:number;pawn:Pawn;character:Character;question:{id:string;text:string;from:'core'}};
@@ -123,6 +125,23 @@ export function topicCapacity(v:Pick<CoreView,'topics'>&{ongoing?:boolean}){
 }
 /** Offers link only to an existing, not closed topic; a topic created this turn is linked next turn. */
 export const openTopicIds=(v:Pick<CoreView,'topics'>)=>v.topics.filter(t=>!closedStatus(t.status)).map(t=>t.sourceId);
+/** One cause per failed core attempt: the backend's own #71 cause, the deadline, a cancellation,
+ * or the validation rule that rejected a returned output before publication. */
+export function coreFailureCause(error:unknown,opts:{cancelled:boolean;deadline:boolean;returned:boolean}):string{
+ const own=(error as {failureCause?:string}|undefined)?.failureCause;
+ if(own)return own;
+ if(opts.cancelled)return 'cancelled';
+ if(opts.deadline)return 'deadline';
+ if(!opts.returned)return 'backend';
+ const m=error instanceof Error?error.message:String(error);
+ if(/Core topic (limit|capacity full)/.test(m))return 'rejected: topic capacity';
+ if(/action topic|Only offers link/.test(m))return 'rejected: topic link';
+ if(/closure unsupported/.test(m))return 'rejected: unsupported closure';
+ if(/Unknown core (opportunity|counter|topic source)|question unavailable|Counter unavailable|Duplicate topic/.test(m))return 'rejected: unavailable choice';
+ if(/superseded|Stale core turn|attempt retired|schedule expired/.test(m))return 'rejected: superseded';
+ if(error&&typeof error==='object'&&'issues' in error)return 'rejected: invalid output';
+ return 'rejected: other';
+}
 export function validateCoreChoice(raw:unknown,v:CoreView){
  const c=CoreChoice.parse(raw);
  // The legacy single-topic form links its offer to its topic implicitly. That link is kept only
