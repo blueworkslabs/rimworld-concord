@@ -1,10 +1,11 @@
+import {fitReflection} from './model-perspective.js';
 import {CoreAnswerChoice,EatingRevalidationError,revalidateEating,eatingOptions} from './pawn-eating.js';
 import {planProduction,workMap,workSteps,workReady,workKind} from './production-planning.js';
 import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
 import {deferredOffers} from './reoffers.js';
 import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
-import {questionContext,coreView,validateCoreChoice,CoreChoice,CoreRejection,coreFailureCause,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
+import {questionContext,coreView,fitCore,validateCoreChoice,CoreChoice,CoreRejection,coreFailureCause,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
@@ -16,7 +17,7 @@ import { randomUUID } from 'node:crypto';
 import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal,type AlternativeRequest } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
 import {rescueQuestionInvalid} from './decision-validity.js';
-import { nativeAttention,attentionInterrupt } from './routing.js';
+import { nativeAttention,attentionInterrupt,isFoodMemory } from './routing.js';
 import { Store } from './store.js';
 import {rescueView,planRescue} from './rescue-planning.js';
 import {groundedPawn} from './grounded-pawn.js';
@@ -132,7 +133,11 @@ export class Coordinator {
       const event={...rawEvent,...(subject?{subjectName:subject.name}:{})};
       const character=this.domain.characters[event.pawn];
       if(!character) continue;
-      const {next,interrupt}=nativeAttention(event);
+      const routed=nativeAttention(event),next=routed.next;
+      // A pawn's own meal memory never cancels its answer to the core (often about that meal):
+      // while an answer is pending it is queued behind it instead of interrupting.
+      const answering=!!this.domain.coreState?.questions.some(q=>q.pawn===event.pawn&&q.status==='running');
+      const foodQueued=routed.interrupt&&answering&&isFoodMemory(event),interrupt=routed.interrupt&&!foodQueued;
       const experiences=character.experiences??=[];
       experiences.push({event,route:next,interrupt});
       if(experiences.length>64) {
@@ -148,7 +153,8 @@ export class Coordinator {
         if(interrupt){
           this.commit('decision-interrupted',event.pawn,{seq:event.seq,kind:event.kind,reason:'New interrupting experience'});
           pending.abort(Error('New interrupting experience'));
-        }else if(event.kind==='memory')this.commit('experience-deferred',event.pawn,{seq:event.seq,kind:event.kind,detail:event.detail,reason:'Conversation queued behind current thought'});
+        }else if(foodQueued)this.commit('experience-deferred',event.pawn,{seq:event.seq,kind:event.kind,detail:event.detail,reason:'Meal memory queued behind the pawn\'s answer'});
+        else if(event.kind==='memory')this.commit('experience-deferred',event.pawn,{seq:event.seq,kind:event.kind,detail:event.detail,reason:'Conversation queued behind current thought'});
       }
       this.domain.eventCursor=event.seq;
       this.commit('native-event',event.pawn,{event,route:next});
@@ -313,6 +319,7 @@ export class Coordinator {
     if(prepared.status!=='running') return {pawn,status:prepared.status,throughSeq:'throughSeq' in prepared?prepared.throughSeq:undefined};
     const combined=AbortSignal.any([signal,prepared.controller.signal]);
     const timer=setTimeout(()=>prepared.controller.abort(),config.timeoutMs);
+    let shown=prepared.view;
     try {
       const result=await bounded(combined,async()=>{
         if(!prepared.significant) {
@@ -327,7 +334,9 @@ export class Coordinator {
         try {await this.game.setActivity?.(prepared.activity);} catch { /* cognition can proceed without UI */ }
         combined.throwIfAborted();
         if(prepared.lease&&!prepared.lease.consume())throw Error('Reflection admission expired');
-        return Reflection.parse(await backend.reflect(prepared.view,combined));
+        // The model is shown the trimmed copy; it is also what the channel records as the input.
+        shown=fitReflection(prepared.view);
+        return Reflection.parse(await backend.reflect(structuredClone(shown),combined));
       });
       return await this.serial(async()=>{
         combined.throwIfAborted();
@@ -345,7 +354,7 @@ export class Coordinator {
         const reflection={tick:this.observedTick,throughSeq,backend:backend.name,reason};
         if(result.kind==='revise_outlook') {
           // Validate against the frozen supplied perspective, then recheck the live revision.
-          const next=reviseOutlook(prepared.view.character,result.update,this.observedTick);
+          const next=reviseOutlook(shown.character,result.update,this.observedTick);
           if((character.outlook?.revision??0)!==result.update.expectedRevision)throw Error('Private outlook superseded');
           character.outlook=next;
           character.attention!.last={status:'continued',throughSeq,reason};
@@ -493,8 +502,10 @@ export class Coordinator {
     let timedOut=false,returned=false,raw:unknown;
     const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>{timedOut=true;prepared.controller.abort();},timeoutMs);
     try{
-      raw=await bounded(combined,()=>backend.plan(structuredClone(prepared.view),combined));returned=true;
-      const choice=validateCoreChoice(raw,prepared.view);
+      // The model is shown the trimmed copy; it is also what the channel records as the core input.
+      const shown=fitCore(prepared.view);
+      raw=await bounded(combined,()=>backend.plan(structuredClone(shown),combined));returned=true;
+      const choice=validateCoreChoice(raw,shown);
       return await this.serial(async()=>{
         combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale core turn');
         const g=await this.current();combined.throwIfAborted();
@@ -521,7 +532,11 @@ export class Coordinator {
           if(!topic){topic={...update,proposalIds:this.domain.proposals[update.sourceId]?[update.sourceId]:[]};state.topics.push(topic);}else Object.assign(topic,update);
         }
         if(proposalId&&choice.actionTopicId){const topic=state.topics.find(t=>t.sourceId===choice.actionTopicId)!;if(!topic.proposalIds.includes(proposalId))topic.proposalIds.push(proposalId);}
-        Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{}),...(prepared.heard.length?{heard:prepared.heard}:{})});state.revision++;
+        // Heard but not answered: pawns whose message woke this turn and to whom it sent nothing
+        // (no question, no offer). Shown whatever the core chose, not only on a wait.
+        const addressed=a.kind==='ask'?a.pawn:proposalId?this.domain.proposals[proposalId]?.pawn:undefined;
+        const heard=prepared.heard.filter(p=>p!==addressed);
+        Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{}),...(heard.length?{heard}:{})});state.revision++;
         this.commit('core-planned','core',{id:prepared.id,kind:a.kind,reason:a.reason,...this.asOf(prepared.view.tick,g)});
         return {status:'applied' as const,proposalId,questionId,choice};
       });
@@ -1061,7 +1076,7 @@ export class Coordinator {
       this.commit('intent-progress','Game',{intentId:v.intentId,status:v.status,previousStatus:old?.status,previousDelivered:old?.delivered??0,
         previousFinishedAfterExclusion:old?.finishedAfterExclusion??0,finishedAfterExclusion:v.finishedAfterExclusion,...intentProgress(v),
         thingLabel:v.thingLabel??entry?.thingLabel??v.thingDef,label:entry?.label??v.label??'stockpile',asked,stopReason:v.stopReason??null,
-        ordinaryByPawn:Object.fromEntries((v.ordinaryByPawn??[]).map(p=>[p.pawn,p.count])),ordinaryUnattributed:v.ordinaryUnattributed??0,
+        ordinaryByPawn:Object.fromEntries((v.ordinaryByPawn??[]).map(p=>[p.pawn,p.count])),ordinaryUnattributed:v.ordinaryUnattributed??0,ordinaryRemoved:v.ordinaryRemoved??0,
         preTagAtStart:(v.preTagAtStart??[]).map(j=>({pawn:j.pawn,planned:j.planned})),preTagByPawn:Object.fromEntries((v.preTagByPawn??[]).map(p=>[p.pawn,p.count]))});
       }
       if(v.status==='open'||v.status==='pending')continue;

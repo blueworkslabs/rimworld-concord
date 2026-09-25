@@ -78,13 +78,16 @@ test('the offer record says what is offered; helpers are labelled; retirement an
   Object.assign(v,{delivered:20,remaining:10,byPawn:[{pawn:'P',count:20}],lastDeliveryTick:40});game.data.ticks=50;await c.reconcile();
   Object.assign(v,{status:'met',delivered:30,remaining:0,byPawn:[{pawn:'P',count:20},{pawn:'B',count:10}],lastDeliveryTick:90,archiveOpen:true});game.data.ticks=100;await c.reconcile();
   Object.assign(v,{ordinaryByPawn:[{pawn:'P',count:25},{pawn:'B',count:20}]});game.data.ticks=200;await c.reconcile();
-  Object.assign(v,{ordinaryByPawn:[{pawn:'P',count:26},{pawn:'B',count:20}]});game.data.ticks=300;await c.reconcile();
-  const text=crewReport(c.inspect(),300).entries.map(e=>e.text);
+  Object.assign(v,{ordinaryByPawn:[{pawn:'P',count:26},{pawn:'B',count:20}],ordinaryRemoved:6});game.data.ticks=300;await c.reconcile();
+  const entries=crewReport(c.inspect(),300).entries,text=entries.map(e=>e.text);
   assert.ok(text.includes('Offer to Beatrice: haul up to 30 wood to the shared wood pile by the north wall; others may help.'));
   assert.ok(text.includes('Pedro is helping with the shared wood pile by the north wall (not asked).'));
   assert.ok(!text.some(t=>t.startsWith('Beatrice is helping')),'the accepting pawn is not a helper');
   assert.ok(text.includes('Agreement complete: 30 of 30 wood (Pedro 20, Beatrice 10). Further hauling here is ordinary work.'));
-  assert.deepEqual(text.filter(t=>t.startsWith('Since then:')),['Since then: 46 wood as ordinary work (Pedro 26, Beatrice 20).'],'archive line updated in place');
+  // Arrivals and removals side by side (30 + 46 - 6 = 70 in the pile); one line, updated in
+  // place, its time the latest update and its position the newest.
+  assert.deepEqual(text.filter(t=>t.startsWith('Since then:')),['Since then: 46 wood arrived as ordinary work (Pedro 26, Beatrice 20), 6 removed.'],'archive line updated in place');
+  const since=entries.find(e=>e.text.startsWith('Since then:'))!;assert.equal(since.tick,300);assert.equal(entries.at(-1),since);
 });
 
 test('expiry and zone edits use plain wording; nobody is blamed',async()=>{

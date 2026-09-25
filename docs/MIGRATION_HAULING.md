@@ -510,7 +510,9 @@ starting implementation ledger is round 0. Strict still must pass its migration 
 - **Expiry:**
   "Agreement expired at 20 of 30 wood (…); the topic stays open."
 - **Archive line, updated in place:**
-  "Since then: 45 wood as ordinary work (Pedro 25, Beatrice 20)."
+  "Since then: 45 wood arrived as ordinary work (Pedro 25, Beatrice 20), 15 removed."
+  Removals are shown whenever there are any. Each change moves the line to the newest
+  position with the current time.
 - **Zone label while open:** "Shared: <site or zone label> (<def>)", in a distinct
   colour. After retirement the original label and colour come back, with the material
   refreshed and the mesh dirtied (Q4). If several defs share the zone, the original

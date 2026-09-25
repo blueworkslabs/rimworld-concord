@@ -30,9 +30,11 @@ const safe=(s:unknown,max=1000)=>String(s??'').slice(0,max);
 export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:number) {
  const c=d.crew??={revision:0,nextSeq:0,entries:[]};c.revision++;
  const name=(id:string)=>id==='core'?'Core':safe(d.characters[id]?.name??id,80);
- // Updated in place (B6 archive line): same entry, newest text.
+ // Updated in place (B6 archive line): one entry, newest text. A changed total refreshes its
+ // time and moves it to the newest position, so the heading is when it was last updated.
  const upsert=(type:CrewEntry['kind'],from:string,to:string,subject:string,text:string,key:string)=>{
-  const e=c.entries.find(e=>e.key===key);if(e){e.text=safe(text);return;}
+  const e=c.entries.find(e=>e.key===key);
+  if(e){if(e.text!==safe(text)){e.text=safe(text);e.tick=tick;e.seq=++c.nextSeq;c.entries=[...c.entries.filter(x=>x!==e),e];}return;}
   add(type,from,to,subject,text,key);
  };
  const add=(type:CrewEntry['kind'],from:string,to:string,subject:string,text:string,key:string)=>{
@@ -77,8 +79,13 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
    const who=[...new Set(before.map(j=>name(j.pawn)))].join(', '),total=before.reduce((a,j)=>a+Math.max(0,Number(j.planned)||0),0);
    add('record','Game','observer',data.intentId,`Already on its way when the agreement started: ${total} ${item} (${who}).`,`intent-pretag:${data.intentId}`);
   }
-  const ordinary=Object.entries(data.ordinaryByPawn??{}),since=ordinary.reduce((a,[,n])=>a+Number(n),0)+Number(data.ordinaryUnattributed??0);
-  if(since>0)upsert('record','Game','observer',data.intentId,`Since then: ${since} ${item} as ordinary work (${[...ordinary.map(([p,n])=>`${name(p)} ${Number(n)}`),...(data.ordinaryUnattributed?[`unattributed ${Number(data.ordinaryUnattributed)}`]:[])].join(', ')}).`,`intent-since:${data.intentId}`);
+  // Arrivals are gross; removals are shown beside them, so the pile's count reconciles
+  // (credited + arrived - removed), e.g. 75 + 60 - 15 = 120.
+  const ordinary=Object.entries(data.ordinaryByPawn??{}),since=ordinary.reduce((a,[,n])=>a+Number(n),0)+Number(data.ordinaryUnattributed??0),removed=Math.max(0,Number(data.ordinaryRemoved??0));
+  if(since>0||removed>0){
+   const who=[...ordinary.map(([p,n])=>`${name(p)} ${Number(n)}`),...(data.ordinaryUnattributed?[`unattributed ${Number(data.ordinaryUnattributed)}`]:[])].join(', ');
+   upsert('record','Game','observer',data.intentId,`Since then: ${since} ${item} arrived as ordinary work${who?` (${who})`:''}${removed?`, ${removed} removed`:''}.`,`intent-since:${data.intentId}`);
+  }
   for(let n=data.previousFinishedAfterExclusion+1;n<=data.finishedAfterExclusion;n++)
    add('record','Game','observer',data.intentId,'Finished a trip started before withdrawing; credited to the carrier, not a new agreement.',`intent-finished-before:${data.intentId}:${n}`);
   if(data.status!==data.previousStatus&&['met','expired','stopped'].includes(data.status)){
@@ -143,14 +150,16 @@ export function crewReport(d:Domain,tick:number,status:import('./shared-status.j
  const lastTurn=[...(core?.turns??[])].reverse().find(t=>t.status==='applied'),firstOpen=(core?.topics??[]).find(t=>t.status==='open');
  // A wait after a pawn spoke to the core says it heard them (Fable: a silent wait after a plea
  // reads as being ignored). The topic is cut at a word, not mid-word.
- const heard=lastTurn?.choice?.action.kind==='wait'&&!core?.silentWake?(lastTurn.heard??[]).map(p=>safe(d.characters[p]?.name??p,40)):[];
+ const heard=lastTurn&&!core?.silentWake?(lastTurn.heard??[]).map(p=>safe(d.characters[p]?.name??p,40)):[];
  const clip=(t:string,max:number)=>{const s=t.replace(/\s+/g,' ').trim();if(s.length<=max)return s;const cut=s.slice(0,max);const at=cut.lastIndexOf(' ');return (at>max/2?cut.slice(0,at):cut).replace(/[,;:.\-]+$/,'')+'…';};
  const coreWaiting=lastTurn?.choice?.action.kind==='wait'||core?.silentWake?`Core: ${heard.length?`heard ${heard.join(', ')}; `:''}waiting on ${firstOpen?clip(firstOpen.text,120):'new events'}`:undefined;
  const coreState=thinking.includes('core')?'Core: thinking':coreWaiting!==undefined?coreWaiting:!core?'Core: not initialized':schedule?.config.maxAttempts!==null&&core.turns.length>=16?'Core: legacy lifetime limit reached':schedule?.blocked?'Core: '+schedule.blocked:schedule&&schedule.config.maxAttempts!==null&&schedule.attempts>=schedule.config.maxAttempts?'Core: configured allowance exhausted':schedule&&schedule.endTick!==null&&tick>=schedule.endTick?'Core: observation window ended':schedule&&schedule.lastAttemptTick!==undefined&&tick-schedule.lastAttemptTick<schedule.config.cooldownTicks?'Core: cooling down':'Core: no turn running; next call depends on operator/scheduler';
  const pendingQuestions=(core?.questions??[]).filter(q=>q.status==='pending'||q.status==='running').map(q=>`${nameForCare(d,q.pawn)}: ${q.status==='running'?'answering':'question awaiting reply'}`);
  const failures=core?.failures,failed=failures&&failures.total>0?`Core outputs failed or rejected: ${failures.total} (${Object.entries(failures.causes).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${k.replace(/^rejected: /,'')} ${n}`).join(', ')})`:undefined;
  const laneFailures=Object.entries(d.diagnostics?.laneFailures??{}).map(([lane,f])=>`${lane} failures: ${f.total} (${Object.entries(f.causes).map(([cause,n])=>`${cause} ${n}`).join(', ')})`);
- const observerText=[coreState,...(failed?[failed]:[]),...laneFailures,...thinking.filter(id=>id!=='core'&&!!d.characters[id]).map(id=>`${nameForCare(d,id)}: thinking`),...pendingQuestions].join(' · ').slice(0,1600);
+ // After a turn that answered someone else, the pawn who spoke is still visibly heard.
+ const heardLine=heard.length&&lastTurn?.choice?.action.kind!=='wait'?`Core: heard ${heard.join(', ')}; no reply to them yet`:undefined;
+ const observerText=[coreState,...(heardLine?[heardLine]:[]),...(failed?[failed]:[]),...laneFailures,...thinking.filter(id=>id!=='core'&&!!d.characters[id]).map(id=>`${nameForCare(d,id)}: thinking`),...pendingQuestions].join(' · ').slice(0,1600);
  // The board is explicitly the core's interpretation; no private character state or raw audit data.
  const topicText=(core?.topics??[]).slice(-8).map(t=>`[${t.status}] ${safe(t.text,240)}`).join('\n').slice(0,2400);
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:d.crew?.revision??0,tick,entries,observerText,topicText,sharedStatus:status,waiting:waiting||'No outstanding offer or running agreement.',

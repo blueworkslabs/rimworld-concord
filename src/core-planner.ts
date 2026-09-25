@@ -1,4 +1,5 @@
 import {selfCareFollowup} from './self-care-followup.js';
+import {PROMPT_LIMIT} from './prompt-limit.js';
 import {productionView} from './production-planning.js';
 import {sharedFood,foodKnowledge} from './food-observation.js';
 import {sharedStatus} from './shared-status.js';
@@ -103,6 +104,9 @@ export function coreView(d:Domain,g:GameState){
   const ids=core.topics.find(t=>t.sourceId===sourceId)?.proposalIds??(d.proposals[sourceId]?[sourceId]:[]),care=linkedCare(sourceId),work=closure(ids);
   return {sourceId,selfCareIds:care.map(a=>a.id),statuses:care.length?(care.every(a=>a.completed)&&(!ids.length||work.includes('resolved'))?['resolved']:[]):work};
  });
+ // No consumption follow-up while a pawn's meal is under way: its self-care receipt must be
+ // completed, failed or interrupted before the core may ask that pawn again.
+ const eatingUnsettled=(pawn:string)=>Object.values(d.selfCare??{}).some(a=>a.pawn===pawn&&!['completed','failed','interrupted'].includes(d.outcomes[a.id]?.status??'started'));
  const topics=visibleTopics.map(t=>({sourceId:t.sourceId,text:t.text,status:t.status,proposalIds:[...t.proposalIds],basedOnTick:t.basedOnTick??null,updatedTick:t.updatedTick??null,selfCareIds:linkedCare(t.sourceId).map(a=>a.id),outcomes:t.proposalIds.map(id=>{const p=d.proposals[id];return {id,status:p?agreementProgress(d,p,g.ticks,g.actions).status:'unknown'};})}));
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:core.revision,tick:g.ticks,brief:{...core.brief},
   selfCare:selfCare.slice(-12),
@@ -111,7 +115,7 @@ export function coreView(d:Domain,g:GameState){
   ...(ongoing?{ongoing:true}:{}),questions:questions.map(q=>({id:q.id,pawn:q.pawn,status:q.status})),
   topicClosures,reoffers:reoffers.map(r=>({id:r.id,pawn:r.pawn,deferredId:r.deferredId,tick:r.tick,status:r.status,reason:r.reason,evidence:'attributed-speech' as const})),
   ...(g.pawns.some(p=>p.foodObservation)?{foodSightings:sharedFood(d,g),foodKnowledge}:{}),sharedStatus:sharedStatus(d,g),crew:Object.values(d.characters).map(c=>({id:c.id,name:c.name})),messages,agreements,counters,requests,topics,opportunities,availability,
-  questionRecipients:ongoing?g.pawns.filter(p=>{const qs=core.questions.filter(q=>q.pawn===p.id),last=qs.at(-1);return d.characters[p.id]&&!p.downed&&!qs.some(q=>['pending','running'].includes(q.status))&&(!last||last.context!==questionContext(d,g,p.id));}).map(p=>p.id):core.questions.length>=3?[]:g.pawns.filter(p=>d.characters[p.id]&&!p.downed&&!core.questions.some(q=>q.pawn===p.id)).map(p=>p.id),
+  questionRecipients:ongoing?g.pawns.filter(p=>{const qs=core.questions.filter(q=>q.pawn===p.id),last=qs.at(-1);return d.characters[p.id]&&!p.downed&&!eatingUnsettled(p.id)&&!qs.some(q=>['pending','running'].includes(q.status))&&(!last||last.context!==questionContext(d,g,p.id));}).map(p=>p.id):core.questions.length>=3?[]:g.pawns.filter(p=>d.characters[p.id]&&!p.downed&&!core.questions.some(q=>q.pawn===p.id)).map(p=>p.id),
   capabilities:[...(entries.length?['propose the listed shared stockpile hauls to each able pawn separately, naming the stockpile'+(d.nativeIntentOnly?'; they are the only proposable work':'')+'; the quota is fixed after the first acceptance; progress and credit come from the game ledger']:[]),...(d.nativeIntentOnly?[]:[entries.length?'propose listed rescue/campfire construction/simple meals':'propose listed hauling/rescue/campfire construction/simple meals']),'adopt counter with fresh consent',ongoing?'one optional question to an eligible pawn after material shared status or outcome change; replies alone do not renew eligibility':'one optional addressed question per pawn, at most three total','wait'],
   limits:(entries.length&&!d.nativeIntentOnly?'Hauling is offered only as the listed shared stockpile hauls, naming the stockpile. Your public reason for any offer is a concrete reason in the world\'s voice, never an eligibility or consent disclaimer. ':'')+(d.nativeIntentOnly?'Only the listed shared stockpile hauls may be proposed. Your public reason is a concrete reason in the world\'s voice, never an eligibility or consent disclaimer: the offer record already says what is offered. No ordered movement, legacy hauling, rescue, construction or cooking offers in native intent mode. No work-priority or capability changes. ':'Only listed campfire construction and simple-meal cooking; no general construction, recipe selection, work-priority changes or direct pawn control. Cooking is optional when raw food is edible. One build means material delivery and native construction, not a promise to cook. Cooking accepts an exact ingredient stack and campfire, producing at most the agreed meals; no extra bills or ingredients. ')+'Only coarse explicitly shared Food/Rest telemetry, not exact need meters, memories or outlooks. Telemetry is not visual observation, consent, a diagnosis or a prediction. Read its timestamp and fresh flag; unknown is not satisfied. Topic text is a planner interpretation, not verified completion. Only linked agreement outcomes establish work completion. Self-care consumedUnit food-items counts individual food items, never nutrition points. A self-care receipt, its exact question/reply, or its explicitly receipt-bound consumption report (not an unrelated later question) may resolve only its own completed eating follow-up, not the broader food goal or other pawns. Questions and replies use their actual recipients: pawn replies go to Core only, even if their text names another pawn; no automatic forwarding or movement follows. Silence and deferral are not agreement. Deferred work is reoffered only after that pawn explicitly requests one fresh offer for that exact work; it remains a follow-up, not a permanent rejection or promise. Speech explains what someone reported, not a uniquely verified cause. Every tick in this view is an observation time (tick, observedTick, basedOnTick): it says when something was seen, not when it happened; only completedTick and receipt times date events. Facts may have changed since the snapshot tick.'};
 }
@@ -183,6 +187,24 @@ export function validateCoreChoice(raw:unknown,v:CoreView){
  if(a.kind==='ask'&&a.reportSelfCareId&&!(v.selfCare??[]).some(c=>c.id===a.reportSelfCareId&&c.pawn===a.pawn&&!c.reportQuestionId))throw Error('Core report receipt unavailable');
  return c;
 }
+export {PROMPT_LIMIT};
+/** Oversized core inputs are trimmed like reflections, never by raising the limit: the oldest
+ * messages, agreements, questions, self-care records and requests go first, each down to a floor
+ * of recent items. Topics and the offerable choices are never trimmed. Returns a trimmed COPY with
+ * a `trimmed` note; the input is untouched. The copy is what the model is shown, what is recorded
+ * as the core input, and what a returned choice is validated against first. Idempotent. */
+export function fitCore<V extends CoreView>(view:V,limit=PROMPT_LIMIT):V{
+ const shown:any=structuredClone(view),prior=shown.trimmed??{};
+ const trimmed={messages:prior.messages??0,agreements:prior.agreements??0,questions:prior.questions??0,selfCare:prior.selfCare??0,requests:prior.requests??0};
+ const lists:[keyof typeof trimmed,number][]=[['messages',6],['agreements',6],['questions',4],['selfCare',4],['requests',4]];
+ const size=()=>Buffer.byteLength(JSON.stringify(corePrompt(shown)));
+ while(size()>limit){
+  const next=lists.find(([key,keep])=>(shown[key]?.length??0)>keep);
+  if(!next)break;
+  shown[next[0]].shift();trimmed[next[0]]++;shown.trimmed={...trimmed,note:'Older items were left out to fit; they still happened.'};
+ }
+ return shown;
+}
 export function corePrompt(v:CoreView){return {task:'core-plan',sourceContract:'currentRecords are authoritative only within their stated scope and timestamp. Shared telemetry can be unknown or stale. communication is attributed testimony, not verified physical truth. plannerHistory contains fallible older interpretations, never current need readings or proof a reply is absent. Reconcile summaries against currentRecords before carrying them forward; keep uncertainty explicit. availableChoices lists eligibility, not consent or a preferred action.',
  perspective:{world:v.world,epoch:v.epoch,branch:v.branch,revision:v.revision,tick:v.tick,brief:v.brief,crew:v.crew,
  currentRecords:{asOfTick:v.tick,sharedStatus:v.sharedStatus,...(v.nativeIntents?{nativeIntents:v.nativeIntents}:{}),questions:v.questions,selfCare:v.selfCare??[],topicClosures:v.topicClosures,agreements:v.agreements.map(a=>({id:a.id,pawn:a.pawn,action:a.action,status:a.status,progress:a.progress})),...(v.foodSightings?{foodSightings:v.foodSightings,foodKnowledge:v.foodKnowledge}:{})},
@@ -190,7 +212,7 @@ export function corePrompt(v:CoreView){return {task:'core-plan',sourceContract:'
  availableChoices:{opportunities:v.opportunities,counters:v.counters,questionRecipients:v.questionRecipients,availability:v.availability,capabilities:v.capabilities,limits:v.limits,
   topicCapacity:{...topicCapacity(v),rule:topicCapacity(v).full?'Topic capacity is full: you may only update or close existing topics this turn; no new topic sources.':'New topics count against the limit; closing requires a listed closure.'},actionTopicIds:openTopicIds(v)},
  plannerHistory:{authority:'interpretation-only; unknown dates stay unknown',topics:v.topics.map(t=>({sourceId:t.sourceId,interpretation:t.text,status:t.status,basedOnTick:t.basedOnTick??null,updatedTick:t.updatedTick??null,proposalIds:t.proposalIds,selfCareIds:t.selfCareIds,outcomes:t.outcomes}))},
- ...('wakeReasons' in v?{wakeReasons:v.wakeReasons}:{})},effects:'Propose and adopt_counter create offers only. The pawn must independently answer. Ask delivers one question, never a job; a reply can be silent. For a consumption-report question, reportSelfCareId explicitly binds it to one listed selfCare receipt for that pawn which has no reportQuestionId. Use null for unrelated questions. A meal never closes an unlinked conversation merely because it came next. topics may update several earlier topics at once. actionTopicId must be null for ask and wait. For propose/adopt_counter it links only the new offer to one existing open/blocked/deferred topic listed in actionTopicIds (or null); a topic created in the same turn cannot be linked until the next turn. Only topicClosures listed statuses may close a topic. A declined offer is not completed work. Topic prose remains interpretation. Wait preserves native activity.'};}
+ ...('wakeReasons' in v?{wakeReasons:v.wakeReasons}:{}),...((v as any).trimmed?{trimmed:(v as any).trimmed}:{})},effects:'Propose and adopt_counter create offers only. The pawn must independently answer. Ask delivers one question, never a job; a reply can be silent. For a consumption-report question, reportSelfCareId explicitly binds it to one listed selfCare receipt for that pawn which has no reportQuestionId. Use null for unrelated questions. A meal never closes an unlinked conversation merely because it came next. topics may update several earlier topics at once. actionTopicId must be null for ask and wait. For propose/adopt_counter it links only the new offer to one existing open/blocked/deferred topic listed in actionTopicIds (or null); a topic created in the same turn cannot be linked until the next turn. Only topicClosures listed statuses may close a topic. A declined offer is not completed work. Topic prose remains interpretation. Wait preserves native activity.'};}
 const string=(maxLength=600)=>({type:'string',minLength:1,maxLength});
 export function coreChoiceSchema(v:CoreView){
  const actions:any[]=[{type:'object',additionalProperties:false,required:['kind','reason'],properties:{kind:{const:'wait'},reason:string()}}];

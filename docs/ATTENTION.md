@@ -64,7 +64,10 @@ leaves it to native behaviour, with no pause and no badge.
 
 An interrupting event aborts whatever the pawn is thinking about (an offer decision, a
 reflection, a social turn, a core question) and is recorded as an interruption. Queued
-events stay beyond the current thought and are considered next time.
+events stay beyond the current thought and are considered next time. One exception: a
+pawn's own meal memory ("Ate…") does not interrupt the core question it is answering. It
+is queued (`experience-deferred`, "Meal memory queued behind the pawn's answer"), so the
+answer about that meal is not aborted by the meal itself.
 
 ## Invalidation versus interruption
 

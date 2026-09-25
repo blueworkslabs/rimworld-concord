@@ -1,5 +1,5 @@
 import {codexSchema} from '../src/contract-cases.js';
-import {codexRequest} from '../src/codex-decision.js';
+import {codexRequest,fitCore,PROMPT_LIMIT} from '../src/codex-decision.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -333,7 +333,9 @@ test('Luna core schema references preserve all choice constraints while fitting 
  const req=codexRequest('core',v),original=JSON.parse(claudeArgs('core',v)[claudeArgs('core',v).indexOf('--json-schema')+1]!);
  const expanded=structuredClone(req.schema);for(const b of expanded.properties.core.anyOf)b.properties.topics.items=expanded.$defs.coreTopicUpdate;delete expanded.$defs;
  assert.deepEqual(expanded,codexSchema(original));assert(Buffer.byteLength(JSON.stringify(req))<64000);
- v.messages[0]!.text='x'.repeat(25000);assert.throws(()=>codexRequest('core',v),/too large/);s.close();
+ // An old oversized message is trimmed away; a recent one inside the kept floor still fails.
+ const old=structuredClone(v);old.messages[0]!.text='x'.repeat(25000);assert.doesNotThrow(()=>codexRequest('core',old));
+ v.messages.at(-1)!.text='x'.repeat(25000);assert.throws(()=>codexRequest('core',v),/too large/);s.close();
 });
 
 test('topic dates are based on the supplied snapshot, not refreshed by reading or unrelated turns',async()=>{
@@ -414,3 +416,50 @@ test('full capacity cannot reopen a retained closed topic through an existing-id
  for(const metadata of [false,true]){const {c,s,g}=await setup();const result=await c.planCore({name:'invalid recipient',async plan(){if(metadata)throw Object.assign(Error('Rejected'),{failureCause:'invalid-output',coreRejection:{cause:'unavailable choice',action:{kind:'ask',pawn:'UNPUBLISHED PRIVATE DIAGNOSTIC'}}});return {topics:[],actionTopicId:null,action:{kind:'ask',pawn:'UNPUBLISHED PRIVATE DIAGNOSTIC',text:'Unknown?',reason:'Unknown'}};}});
  assert.equal(result.status,'failed');const report=crewReport(c.inspect(),g.data.ticks);assert(!JSON.stringify(report).includes('UNPUBLISHED PRIVATE DIAGNOSTIC'));s.close();}
  });
+
+test('a pawn who spoke is visibly heard until the core answers them, whatever the core chose',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});
+ const q=await c.planCoreWhenDue(planner(()=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'How are you?',reason:'Ask'}})));
+ if(q.status!=='applied'||!q.questionId)throw Error('no question');
+ assert.equal((await c.answerCoreQuestion(q.questionId,{name:'plea',async answerCore(){return {choice:'say',text:'Please help me find food.'};}})).status,'delivered');
+ // The core answers someone else: A is still heard.
+ g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(()=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'B',text:'Can you look for food?',reason:'Ask B'}})))).status,'applied');
+ let status=crewReport(c.inspect(),g.data.ticks).observerText??'';const a=c.inspect().characters.A!.name;
+ assert.match(status,new RegExp(`Core: heard ${a}; no reply to them yet`));assert.deepEqual(c.inspect().coreState!.turns.at(-1)!.heard,['A']);
+ s.close();
+});
+test('a turn that answers the pawn who spoke clears the heard status',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});
+ const q=await c.planCoreWhenDue(planner(()=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'How are you?',reason:'Ask'}})));
+ if(q.status!=='applied'||!q.questionId)throw Error('no question');
+ await c.answerCoreQuestion(q.questionId,{name:'plea',async answerCore(){return {choice:'say',text:'Please help me.'};}});
+ g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(v=>({topics:[],actionTopicId:null,action:{kind:'propose',opportunityId:v.opportunities.find(o=>o.pawn==='A')!.id,reason:'An offer to you'}})))).status,'applied');
+ assert.equal(c.inspect().coreState!.turns.at(-1)!.heard,undefined);assert.doesNotMatch(crewReport(c.inspect(),g.data.ticks).observerText??'',/heard/);
+ s.close();
+});
+
+test('an oversized core input is trimmed oldest first; topics and choices stay, the model is told',async()=>{
+ const {g,s,c}=await setup();const full=coreView(c.inspect(),await g.state());const big='x'.repeat(900);
+ const view:any=structuredClone(full);view.messages=Array.from({length:30},(_,i)=>({id:'m'+i,tick:i,from:'A',to:'core',text:`message ${i} ${big}`,evidence:'attributed-speech'}));
+ const before=structuredClone(view),size=(v:any)=>Buffer.byteLength(JSON.stringify(corePrompt(v)));assert.ok(size(view)>PROMPT_LIMIT);
+ const shown:any=fitCore(view);
+ assert.deepEqual(view,before,'the input is untouched; a trimmed copy comes back');
+ assert.ok(size(shown)<=PROMPT_LIMIT);assert.ok(shown.trimmed.messages>0);assert.equal(shown.messages.at(-1).id,'m29','newest message kept');
+ assert.deepEqual(shown.topics,full.topics);assert.deepEqual(shown.opportunities,full.opportunities);
+ assert.equal(corePrompt(shown).perspective.trimmed.note,'Older items were left out to fit; they still happened.');
+ assert.deepEqual(fitCore(shown),shown,'fitting what was shown changes nothing');
+ assert.doesNotThrow(()=>validateCoreChoice(offer(shown),shown));assert.doesNotThrow(()=>validateCoreChoice(offer(shown),full));
+ assert.doesNotThrow(()=>codexRequest('core',before));assert.deepEqual(before.messages.length,30,'codexRequest does not mutate either');
+ s.close();
+});
+
+test('a coordinator core turn sends and records the trimmed view the model sees',async()=>{
+ const {g,s,c}=await setup();const big='x'.repeat(900);const domain=(c as any).domain;
+ for(let i=0;i<30;i++)domain.coreState.questions.push({id:'q'+i,pawn:'A',text:'old',status:'answered',messages:[{id:'m'+i,exchangeId:'q'+i,tick:i,from:'A',to:'core',text:`old ${i} ${big}`}]});
+ assert.ok(Buffer.byteLength(JSON.stringify(corePrompt(coreView(c.inspect(),await g.state()))))>PROMPT_LIMIT);
+ const requests:any[]=[];const channel=new DecisionChannel(m=>requests.push(m));const turn=c.planCore(channel);
+ while(!requests.length)await new Promise(r=>setImmediate(r));
+ const recorded=requests[0].view;
+ assert.ok(Buffer.byteLength(JSON.stringify(corePrompt(recorded)))<=PROMPT_LIMIT);assert.ok(recorded.trimmed.messages>0);assert.equal(recorded.messages.at(-1).id,'m29');
+ channel.receive({type:'decision-result',id:requests[0].id,output:wait});assert.equal((await turn).status,'applied');s.close();
+});

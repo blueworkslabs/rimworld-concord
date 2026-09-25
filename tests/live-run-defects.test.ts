@@ -29,15 +29,20 @@ test('reflection perspectives are trimmed oldest-first to fit, never by raising 
   const big='x'.repeat(900);
   const view:any={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Wait',health:1,facts:[]},events:[],proposals:[],
     character:{id:'A',name:'Ada',memories:Array.from({length:30},(_,i)=>`memory ${i} ${big}`),experiences:Array.from({length:20},(_,i)=>({event:{seq:i,tick:i,pawn:'A',kind:'food',detail:big},route:'appraisal'}))}};
-  const request=codexRequest('reflection',view);
+  const before=structuredClone(view),request=codexRequest('reflection',view);
+  assert.deepEqual(view,before,'codexRequest does not mutate the view');
+  const shown:any=fitReflection(view);
+  assert.deepEqual(view,before,'fitReflection returns a copy');
   assert.ok(Buffer.byteLength(request.prompt)<=PROMPT_LIMIT);
-  assert.ok(view.trimmed.experiences+view.trimmed.memories>0);
-  assert.deepEqual(JSON.parse(request.prompt).perspective.trimmed,view.trimmed);
-  const args=claudeArgs('reflection',view);
+  assert.ok(shown.trimmed.experiences+shown.trimmed.memories>0);
+  assert.deepEqual(JSON.parse(request.prompt).perspective.trimmed,shown.trimmed);
+  const args=claudeArgs('reflection',shown);
   assert.deepEqual(request.schema,codexSchema(JSON.parse(args[args.indexOf('--json-schema')+1]!)),'schema cites only the final supplied evidence');
-  assert.equal(view.character.memories.at(-1),`memory 29 ${big}`,'newest memory kept');
+  assert.equal(shown.character.memories.at(-1),`memory 29 ${big}`,'newest memory kept');
+  assert.deepEqual(fitReflection(shown),shown,'fitting what was shown changes nothing');
   // Nothing left to trim: the failure is reported, the limit is unchanged.
-  const tiny:any={size:0};let n=PROMPT_LIMIT+1;const trimmed=fitReflection(tiny,()=>n);assert.deepEqual(trimmed,{experiences:0,memories:0,messages:0});
+  const stuck:any=structuredClone(before);stuck.character.experiences=[];stuck.character.memories=Array.from({length:8},(_,i)=>`memory ${i} ${'y'.repeat(4000)}`);
+  assert.equal(fitReflection(stuck).trimmed,undefined);assert.throws(()=>codexRequest('reflection',stuck),/Context too large/);
 });
 
 test('narration built on a snapshot older than the newest receipt is flagged before publication',()=>{

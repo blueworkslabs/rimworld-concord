@@ -27,6 +27,8 @@ remain unchanged.
 | Native tagged-zone haul spike (historical) | [scripted and live evidence](docs/trials/NATIVE_HAUL_LIVE.md) retained | Superseded by the ordinary-play migration below |
 | Native stockpile hauling | strict holds; ordered implementation retired; [deletion check](docs/trials/HAULING_RETIREMENT.md): 75/75, two holders, paired/new-coordinator restore | [Migration Gate C passed on the game side](docs/trials/HAULING_MIGRATION_GATE_C.md); crew-side follow-ups remain; growing parked at B1 2/2 |
 
+Post-Gate-C [follow-ups 1–5](docs/trials/POST_GATE_C_FOLLOWUPS.md) add archive removals, request acknowledgments, meal-answer protection and recorded trimmed inputs. Verification is explicitly split between offline checks and scripted eating; no new live-model verdict.
+
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not
 now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private
 evidence-linked outlooks, an in-game crew log, coarse shared Food/Rest status, local
