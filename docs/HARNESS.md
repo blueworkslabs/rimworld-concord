@@ -265,3 +265,30 @@ settings, not just their counts; pawn changes include job targets and individual
   as runs). `look` by def, category, area or pawn returns the individual entries. On the retained
   staging capture the digest is 10.9 KB with nothing omitted (325 KB snapshot; pawns 2.8 KB,
   items 2.7 KB, structures 3.1 KB).
+
+## Implementation status: actions v1 and the T1 checker (Clawd, 2026-09-25)
+
+**Built, not yet run in the game.** `act` is a bridge op (mod `HarnessActions.cs`, no patches):
+one command per request, through the player's own path. `place_blueprint` uses the real build
+designator (its visibility check covers research; stuff and rotation as the player would set
+them); `designate` the real deconstruct, cancel, mine, harvest, cut, hunt and haul designators;
+`zone` the real stockpile and growing-zone designators for new zones (then label, storage
+priority, allowed defs or plant) and direct cell additions to an existing zone; `bill`,
+`bill_edit`, `bill_delete` the bench's bill stack with the recipe's own availability check;
+`work_priority` the work settings (setting a priority above 1 turns on manual priorities, as
+the player would, and says so in the receipt); `schedule` the timetable; `forbid` the forbid
+toggle; `allow_area` the pawn's allowed area. Anything else (draft, direct job orders) is refused
+by name. Receipts are `{ok, id, reason, source: game|harness, detail}`, saved with the game by
+request ID, so a repeated request returns its first receipt and creates nothing. The last 64
+receipts are in every snapshot's `receipts`.
+
+Coordinator side: `src/harness/actions.ts` (strict action schema and the flat wire mapping,
+`LabBridge.act`) and `src/harness/checker.ts` (`checkT1(start, end)`: a player campfire that did
+not exist at the start; a simple-meal bill created during the run, in repeat-count mode, counted
+down to zero; and at least three meals cooked since the start by the colonists' own Records tab,
+which the snapshot now exports as `records.mealsCooked`). The checker reads only the two
+snapshots, never the controller's receipts, so it judges both arms the same way. For the UI arm
+the controller never sees it. `trials/harness-t1-scripted.ts` walks T1 through the harness with a
+fixed script (priorities, a refused and an accepted placement, the idempotency repeat, an
+unknown-recipe refusal, the bill, the checker) as plumbing evidence; it is not the benchmark's
+harness arm. Staging should confirm the designators behave off-screen exactly as on screen.

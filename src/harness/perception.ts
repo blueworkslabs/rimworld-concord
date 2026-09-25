@@ -22,7 +22,9 @@ const Pawn=z.object({id,loadId:z.string(),name:z.string(),x:z.number().int(),z:z
   mood:z.object({level:z.number().nullable().optional(),thoughts:z.array(z.object({label:z.string(),mood:z.number().nullable()})).optional()}),
   traits:z.array(z.string()),skills:z.array(z.object({def:z.string(),level:z.number().int(),passion:z.string(),disabled:z.boolean()})),
   work:z.array(z.object({def:z.string(),priority:z.number().int(),disabled:z.boolean()})),schedule:z.array(z.string()),
-  carrying:z.object({id,def:z.string(),count:z.number().int()}).optional(),inventory:z.array(z.object({id,def:z.string(),count:z.number().int()})),bed:id});
+  carrying:z.object({id,def:z.string(),count:z.number().int()}).optional(),inventory:z.array(z.object({id,def:z.string(),count:z.number().int()})),bed:id,
+  /** The Records tab: counts the game keeps per colonist (checker evidence for T1). */
+  records:z.object({mealsCooked:z.number(),thingsConstructed:z.number()}).optional()});
 export const Snapshot=z.object({
   meta:z.object({world:z.string(),epoch:z.string(),mapId:id,tick:id,snapshotId:id,format:z.literal('concord-perception-v1')}),
   time:z.object({tick:id,hour:id,dayOfSeason:id,quadrum:z.string(),season:z.string(),year:id,daysPassed:id,speed:z.string(),paused:z.boolean(),clock:z.string().nullable()}),
@@ -39,7 +41,7 @@ export const Snapshot=z.object({
   research:z.object({project:z.string().nullable(),label:z.string().nullable(),progress:z.number().nullable()}),
   pawns:z.array(Pawn),
   threats:z.array(z.object({id,def:z.string(),label:z.string(),x:id,z:id,hostile:z.boolean(),manhunter:z.boolean(),predator:z.boolean(),downed:z.boolean()})),
-  receipts:z.array(z.unknown()),
+  receipts:z.array(z.object({seq:z.number().int(),tick:z.number().int(),requestId:z.string(),action:z.string().nullable(),ok:z.boolean(),id:z.string().nullable(),reason:z.string().nullable(),source:z.string().nullable(),detail:z.string().nullable()})),
   omitted:z.array(z.string()),
 });
 export type Snapshot=z.infer<typeof Snapshot>;
