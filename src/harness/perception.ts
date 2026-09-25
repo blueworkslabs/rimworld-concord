@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {PROMPT_LIMIT,TRIM_NOTE,trimToFit} from '../prompt-limit.js';
+import {PROMPT_LIMIT,trimToFit} from '../prompt-limit.js';
 
 /** The harness's perception half (docs/HARNESS.md): the mod's read-only snapshot of the player's
  * picture (`perceive`), and the two conveniences computed here from snapshots, never from engine
@@ -31,7 +31,7 @@ export const Snapshot=z.object({
   zones:z.array(z.object({id,label:z.string().nullable(),kind:z.string(),cells:z.array(Cell),priority:z.string().optional(),allowed:z.array(z.string()).optional(),
     contents:z.array(z.object({def:z.string(),count:id})).optional(),plant:z.string().nullable().optional(),allowSow:z.boolean().optional()})),
   bills:z.array(z.object({bench:id,benchDef:z.string(),x:id,z:id,bills:z.array(z.object({loadId:z.string(),recipe:z.string().nullable(),suspended:z.boolean(),ingredientRadius:z.number().nullable(),
-    restrictedTo:id,repeatMode:z.string().nullable().optional(),repeatCount:id.optional(),targetCount:id.optional(),paused:z.boolean().optional()}))})),
+    restrictedTo:id,slavesOnly:z.boolean().optional(),mechsOnly:z.boolean().optional(),nonMechsOnly:z.boolean().optional(),skillRange:z.object({min:id,max:id}).optional(),repeatMode:z.string().nullable().optional(),repeatCount:id.optional(),targetCount:id.optional(),paused:z.boolean().optional()}))})),
   designations:z.array(z.object({def:z.string(),thing:id.optional(),x:id.optional(),z:id.optional()})),
   research:z.object({project:z.string().nullable(),label:z.string().nullable(),progress:z.number().nullable()}),
   pawns:z.array(Pawn),
@@ -62,21 +62,22 @@ export function since(prev:Snapshot,next:Snapshot):Since{
   const a=new Map(prev.map.things.map(t=>[t.id,t])),b=new Map(next.map.things.map(t=>[t.id,t]));
   const changed:{id:number;def:string;from:Partial<SnapshotThing>;to:Partial<SnapshotThing>}[]=[];
   for(const [k,t] of b){const o=a.get(k);if(!o)continue;const from:Partial<SnapshotThing>={},to:Partial<SnapshotThing>={};
-    for(const f of ['def','x','z','stack','forbidden','kind'] as const)if(o[f]!==t[f]){(from as any)[f]=o[f];(to as any)[f]=t[f];}
+    for(const f of new Set([...Object.keys(o),...Object.keys(t)])){if(f==='id')continue;const before=(o as any)[f],after=(t as any)[f];if(JSON.stringify(before)!==JSON.stringify(after)){(from as any)[f]=before??null;(to as any)[f]=after??null;}}
     if(Object.keys(to).length)changed.push({id:k,def:t.def,from,to});}
   const alertKey=(x:{type:string;label:string})=>x.type+':'+x.label;
   const pa=new Set(prev.alerts.map(alertKey)),na=new Set(next.alerts.map(alertKey));
   const letterKey=(l:{label:string;tick:number})=>l.tick+':'+l.label;const pl=new Set(prev.letters.map(letterKey));
   const billsOf=(s:Snapshot)=>new Map(s.bills.flatMap(x=>x.bills.map(bl=>[bl.loadId,JSON.stringify({...bl,bench:x.bench})] as const)));
   const pb=billsOf(prev),nb=billsOf(next);
-  const zoneSig=(zz:Snapshot['zones'][number])=>JSON.stringify({label:zz.label,cells:zz.cells.length,priority:zz.priority,allowed:zz.allowed?.length,plant:zz.plant,contents:zz.contents});
+  const zoneSig=(zz:Snapshot['zones'][number])=>JSON.stringify(zz);
   const pz=new Map(prev.zones.map(zz=>[zz.id,zoneSig(zz)])),nz=new Map(next.zones.map(zz=>[zz.id,zoneSig(zz)]));
   const pp=new Map(prev.pawns.map(p=>[p.id,p]));
   const pawns=next.pawns.map(p=>{const o=pp.get(p.id);const changes:string[]=[];if(!o)return {id:p.id,name:p.name,changes:['appeared']};
     if(o.job.def!==p.job.def)changes.push(`job ${o.job.def} -> ${p.job.def}`);
+    else if(o.job.target!==p.job.target)changes.push('job target changed');
     for(const n of p.needs){const on=o.needs.find(x=>x.def===n.def);if(on&&band(on.level)!==band(n.level))changes.push(`${n.def} ${band(on.level)} -> ${band(n.level)}`);}
     if(band(o.mood.level)!==band(p.mood.level))changes.push(`mood ${band(o.mood.level)} -> ${band(p.mood.level)}`);
-    if(o.health.hediffs.length!==p.health.hediffs.length||Math.abs((o.health.summary??1)-(p.health.summary??1))>=0.05)changes.push('health changed');
+    if(JSON.stringify(o.health)!==JSON.stringify(p.health))changes.push('health changed');
     if(o.downed!==p.downed)changes.push(p.downed?'downed':'no longer downed');
     return {id:p.id,name:p.name,changes};}).filter(p=>p.changes.length);
   for(const o of prev.pawns)if(!next.pawns.some(p=>p.id===o.id))pawns.push({id:o.id,name:o.name,changes:['left the map or died']});
@@ -95,6 +96,7 @@ export function since(prev:Snapshot,next:Snapshot):Since{
 
 // ---- look -----------------------------------------------------------------------------------
 export const Look=z.discriminatedUnion('by',[
+  z.object({by:z.literal('section'),section:z.enum(['zones','letters','bills','designations','research','weather','time','alerts','resources','threats','omitted','receipts'])}).strict(),
   z.object({by:z.literal('area'),x:z.number().int().optional(),z:z.number().int().optional(),thing:id.optional(),radius:z.number().min(0).max(60)}).strict(),
   z.object({by:z.literal('category'),category:z.enum(['food','wood','beds','workbenches','blueprints','items','buildings','plants','corpses'])}).strict(),
   z.object({by:z.literal('capability'),work:z.string().min(1)}).strict(),
@@ -107,6 +109,7 @@ const CATEGORY:Record<string,(t:SnapshotThing)=>boolean>={
 /** A named filter over one snapshot: the slice the agent asked for, nothing else. */
 export function look(s:Snapshot,raw:unknown){
   const q=Look.parse(raw);
+  if(q.by==='section')return {query:q,meta:s.meta,value:s[q.section]};
   if(q.by==='area'){
     const anchor=q.thing!==undefined?[...s.map.things,...s.pawns].find(t=>t.id===q.thing):q.x!==undefined&&q.z!==undefined?{x:q.x,z:q.z}:undefined;
     if(!anchor)throw Error('look: area needs a known thing or a cell');
@@ -127,7 +130,7 @@ export function look(s:Snapshot,raw:unknown){
  * plants, filth, corpses, far items, letters, then other things), with the omission counts and a
  * note that `look` reaches the rest. The caller keeps the full snapshot in the record. */
 const fitted=(t:Record<string,number>,fits:boolean,changed:boolean)=>({omitted:Object.fromEntries(Object.entries(t).filter(([,n])=>n>0)),fits,
-  ...(changed?{note:TRIM_NOTE+' Use look (by area, category, capability or pawn) to see them.'}:{})});
+  ...(changed?{note:'State was omitted to fit. Use look (by area, category, capability, pawn or section) to retrieve it.'}:{})});
 export function digest(s:Snapshot,limit=PROMPT_LIMIT){
   const d:any=structuredClone(s);d.fitted=fitted({},true,false);
   const colony=d.pawns.length?{x:d.pawns.reduce((n:number,p:any)=>n+p.x,0)/d.pawns.length,z:d.pawns.reduce((n:number,p:any)=>n+p.z,0)/d.pawns.length}:{x:0,z:0};
@@ -135,12 +138,13 @@ export function digest(s:Snapshot,limit=PROMPT_LIMIT){
   const split=(k:string)=>d.map.things.filter((t:any)=>t.kind===k).sort((a:any,b:any)=>dist(b)-dist(a));
   d.map.plants=split('plant');d.map.filth=split('filth');d.map.corpses=split('corpse');d.map.items=split('item');
   d.map.things=d.map.things.filter((t:any)=>!['plant','filth','corpse','item'].includes(t.kind)).sort((a:any,b:any)=>dist(b)-dist(a));
-  for(const z of d.zones)z.cellCount=z.cells.length,delete z.cells;
+  // Zone geometry remains unless budget trimming explicitly removes cells.
+  for(const z of d.zones)z.cellCount=z.cells.length;
   d.letters.sort((a:any,b:any)=>a.tick-b.tick);
   // Least significant thoughts first, so trimming keeps each pawn's strongest mood effects.
   for(const p of d.pawns)p.mood.thoughts?.sort((a:any,b:any)=>Math.abs(a.mood??0)-Math.abs(b.mood??0));
   const r=trimToFit([['plants',()=>d.map.plants,0],['filth',()=>d.map.filth,0],['corpses',()=>d.map.corpses,0],['items',()=>d.map.items,20],
-    ['letters',()=>d.letters,3],['things',()=>d.map.things,20],['thoughts',()=>d.pawns.flatMap((p:any)=>p.mood.thoughts?.length>3?[p.mood.thoughts]:[]).sort((a:any,b:any)=>b.length-a.length)[0],0]] as const,
+    ['letters',()=>d.letters,3],['things',()=>d.map.things,20],['zoneCells',()=>d.zones.find((z:any)=>z.cells.length)?.cells,0],['thoughts',()=>d.pawns.flatMap((p:any)=>p.mood.thoughts?.length>3?[p.mood.thoughts]:[]).sort((a:any,b:any)=>b.length-a.length)[0],0]] as const,
     ()=>Buffer.byteLength(JSON.stringify(d)),limit,{},t=>{d.fitted=fitted(t,false,true);});
   d.fitted=fitted(r.trimmed,r.fits,r.changed);
   return d as Omit<Snapshot,'map'>&{map:any;fitted:{omitted:Record<string,number>;fits:boolean;note?:string}};

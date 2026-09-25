@@ -68,3 +68,25 @@ test('the digest fits with the shared loop: plants and far clutter go first, omi
   const tight=digest(s,1500);assert.equal(tight.fitted.fits,false,'a limit below the floors is reported, never hidden');
   assert.equal(s.map.things.length,2006,'the snapshot itself is untouched');
 });
+
+test('since observes same-size zone edits, job retargeting, health details and frame progress',()=>{
+ const a=fixture(),b=structuredClone(a);
+ a.zones=[{id:1,label:'zone',kind:'growing',cells:[{x:1,z:1}],plant:'Plant_Rice',allowSow:true}];
+ b.zones=[{...structuredClone(a.zones[0]!),cells:[{x:2,z:1}],allowSow:false}];
+ a.pawns[0]!.job={def:'HaulToContainer',report:null,target:104};b.pawns[0]!.job={def:'HaulToContainer',report:null,target:105};
+ b.pawns[1]!.health.hediffs[0]!.bleeding=0.1;
+ a.map.things[0]!.workDone=1;b.map.things[0]!.workDone=2;
+ const d=since(a,b);assert(!d.reset);assert.deepEqual(d.zones.changed,[1]);
+ assert(d.pawns.find(p=>p.id===201)!.changes.includes('job target changed'));
+ assert(d.pawns.find(p=>p.id===202)!.changes.includes('health changed'));
+ assert.equal(d.things.changed[0]!.to.workDone,2);
+ a.zones=[{id:2,label:'store',kind:'stockpile',cells:[],allowed:['WoodLog']}];b.zones=[{...a.zones[0]!,allowed:['Steel']}];
+ const changed=since(a,b);assert(!changed.reset);assert.deepEqual(changed.zones.changed,[2]);
+});
+test('digest geometry is retained at full budget and omitted sections stay retrievable',()=>{
+ const s=fixture();s.zones=[{id:8,label:'large zone',kind:'stockpile',cells:Array.from({length:2000},(_,i)=>({x:i%100,z:Math.floor(i/100)}))}];
+ const full=digest(s,1000000);assert.deepEqual(full.zones[0]!.cells,s.zones[0]!.cells);
+ const d=digest(s,9000);assert(d.fitted.omitted.zoneCells!>0);assert.match(d.fitted.note!,/section/);
+ assert.deepEqual(look(s,{by:'section',section:'zones'}).value,s.zones);
+ assert.deepEqual(look(s,{by:'section',section:'letters'}).value,s.letters);
+});

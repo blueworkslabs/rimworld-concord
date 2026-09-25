@@ -152,7 +152,8 @@ namespace Concord {
                 j.Arr("bills");
                 foreach(var b in bench.BillStack.Bills){
                     j.Obj().S("loadId",b.GetUniqueLoadID()).S("recipe",b.recipe==null?null:b.recipe.defName).B("suspended",b.suspended).F("ingredientRadius",b.ingredientSearchRadius);
-                    var restricted=HarmonyLib.Traverse.Create(b).Field("pawnRestriction").GetValue<Pawn>();j.I("restrictedTo",restricted==null?-1:restricted.thingIDNumber);
+                    var restricted=HarmonyLib.Traverse.Create(b).Field("pawnRestriction").GetValue<Pawn>();j.I("restrictedTo",restricted==null?-1:restricted.thingIDNumber).B("slavesOnly",b.SlavesOnly).B("mechsOnly",b.MechsOnly).B("nonMechsOnly",b.NonMechsOnly);
+                    j.Obj("skillRange").I("min",b.allowedSkillRange.min).I("max",b.allowedSkillRange.max).End();
                     var bp=b as Bill_Production;
                     if(bp!=null)j.S("repeatMode",bp.repeatMode==null?null:bp.repeatMode.defName).I("repeatCount",bp.repeatCount).I("targetCount",bp.targetCount).B("paused",bp.paused);
                     j.End();
@@ -209,7 +210,7 @@ namespace Concord {
         private static void Threats(Json j,Map map){
             j.Arr("threats");
             foreach(var p in map.mapPawns.AllPawnsSpawned.ToList()){
-                if(p.Faction==Faction.OfPlayer||p.Position.Fogged(map))continue;
+                if(p.Faction==Faction.OfPlayer||p.Position.Fogged(map)||p.IsHiddenFromPlayer())continue;
                 bool hostile=p.HostileTo(Faction.OfPlayer);bool manhunter=p.InMentalState&&p.MentalStateDef!=null&&p.MentalStateDef.IsAggro;
                 bool predator=p.RaceProps!=null&&p.RaceProps.predator;
                 if(!hostile&&!manhunter&&!predator)continue;

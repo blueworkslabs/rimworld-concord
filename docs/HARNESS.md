@@ -222,17 +222,20 @@ cells, and weather forecasts (not player-visible). `receipts` is empty until act
 Getters used and why they are safe to call outside the UI: `Alert.GetReport`/`GetLabel`
 (what the alert readout calls every frame; read through its private active list, no patch),
 `Letter.Label`/`ChoiceLetter.Text`, `JobDriver.GetReport`, `ThoughtHandler`'s distinct mood
-groups, `ResourceCounter.AllCountedAmounts`, `GenDate` for the clock. Staging should confirm
-none of them mutates state.
+groups, `ResourceCounter.AllCountedAmounts`, `GenDate` for the clock. These may refresh UI/thought caches; they must not reconcile jobs or issue gameplay actions.
+The perception response bypasses legacy `StateJson` reconciliation, including rejected reads.
+Paused capture checks exported state stability, not the absence of every internal cache write.
 
 On the coordinator side (`src/harness/perception.ts`): the `Snapshot` schema, `since` (things
 appeared, disappeared or changed def, position, stack, forbidden; alerts raised/cleared;
 letters; bills and zones added/removed/changed; pawn job, need band, mood band, health and
 downed; resource thresholds 1/10/25/50/100/250/500/1000 crossed; designation counts; a reset,
 never a comparison, across a world, load or map change), `look` (area around a cell or thing,
-category, capability, pawn) and `digest`. The digest uses the core's fitting loop, now shared
+category, capability, pawn, or named section) and `digest`. The digest uses the core's fitting loop, now shared
 as `trimToFit` (core and reflection use it unchanged): plants, filth, corpses, then far items,
-old letters, far things and each pawn's weakest thoughts go first, and it states what it left
+old letters, far things, zone geometry and each pawn's weakest thoughts go first, and it states what it left
 out and that `look` reaches it. `trials/harness-perceive.ts` captures a real snapshot, digest
-and size summary on staging; its first run replaces the synthetic test fixture and answers the
-thought-list question from real numbers.
+and size summary on staging; its first run supplements the synthetic fixture with actual wire round-trip evidence and
+answers the thought-list question from real numbers. Hidden/invisible enemies are excluded;
+bill worker restrictions and skill ranges are exported. Zone changes compare contents and
+settings, not just their counts; pawn changes include job targets and individual injuries.
