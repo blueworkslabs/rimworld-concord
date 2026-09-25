@@ -39,13 +39,20 @@ export function coreWakeSnapshot(v:CoreView):CoreWake[]{
  return wakes;
 }
 const key=(w:CoreWake)=>w.kind+':'+w.sourceId;
-/** Fable (E2): a wake made only of telemetry band changes, when the core has nothing it could
- * do about them (no opportunity to offer and no counter to adopt, so no eligible offer
- * recipient), spends no core turn. Same decision as the silent wait, one step earlier.
- * Question recipients do not count under this proposed offer-only interpretation. In the
- * retained E2 sample they appear on every turn; that is not a runtime invariant. */
-export function telemetryOnlyIdle(causes:CoreWake[],v:Pick<CoreView,'opportunities'|'counters'>){
- return causes.length>0&&causes.every(w=>w.kind==='telemetry')&&v.opportunities.length===0&&v.counters.length===0;
+/** A pawn's Food or Rest band got worse and reached `urgent` since the consumed snapshot
+ * (a first or previously unknown reading that is urgent counts as reaching it). */
+export function turnedUrgent(previous:string|undefined,current:string){
+ const band=(v:string|undefined,need:'food'|'rest')=>{try{return v===undefined?undefined:(JSON.parse(v) as Record<string,string>)[need];}catch{return undefined;}};
+ return (['food','rest'] as const).some(n=>band(current,n)==='urgent'&&band(previous,n)!=='urgent');
+}
+/** Fable's rule (E2, final): a wake made only of telemetry band changes spends no core turn
+ * unless something is offerable (an opportunity or a counter: an eligible offer recipient) or
+ * some crew member's Food or Rest band got worse and reached `urgent`. Improving and lateral
+ * band changes never wake the core on their own; current bands are in every view anyway.
+ * Question recipients do not count: in the E2 sample they appear on every turn. */
+export function telemetryOnlyIdle(causes:CoreWake[],v:Pick<CoreView,'opportunities'|'counters'>,consumed:Record<string,string>={}){
+ return causes.length>0&&causes.every(w=>w.kind==='telemetry')&&v.opportunities.length===0&&v.counters.length===0&&
+  !causes.some(w=>turnedUrgent(consumed[key(w)],w.value));
 }
 export function coreAdmission(s:CoreSchedule,v:CoreView):{ready:true;causes:CoreWake[];snapshot:Record<string,string>}|{ready:false;reason:string;silent?:{causes:CoreWake[];snapshot:Record<string,string>}}{
  if(s.blocked)return {ready:false,reason:s.blocked};
@@ -58,6 +65,6 @@ export function coreAdmission(s:CoreSchedule,v:CoreView):{ready:true;causes:Core
  // Persistent deduplication is separate from bounded prompt history.
  const snapshot={...s.consumed,...Object.fromEntries(wakes.map(w=>[key(w),w.value]))};
  // Consumed without a turn, attempt or cooldown: the same bands never re-wake the core.
- if(telemetryOnlyIdle(causes,v))return {ready:false,reason:'telemetry-only',silent:{causes,snapshot}};
+ if(telemetryOnlyIdle(causes,v,s.consumed))return {ready:false,reason:'telemetry-only',silent:{causes,snapshot}};
  return {ready:true,causes,snapshot};
 }

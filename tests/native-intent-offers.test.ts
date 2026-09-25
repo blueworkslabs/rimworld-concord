@@ -290,17 +290,38 @@ test('terminal offer survives active inference, then lapses after failure withou
 });
 
 
-test('telemetry-only wakes with nothing to offer spend no core turn (E2 turn shapes)',()=>{
- const t=(n=1):CoreWake[]=>Array.from({length:n},(_,i)=>({sourceId:'p'+i,kind:'telemetry',value:'{}'}));
- const none={opportunities:[],counters:[]} as any,withOffer={opportunities:[{id:'o'}],counters:[]} as any,withCounter={opportunities:[],counters:[{id:'c'}]} as any;
- // The E2 native-haul run's 14 wakes, as recorded: kinds and whether anything was offerable.
- const e2:[CoreWake['kind'][],boolean][]=[[['start','telemetry','telemetry','telemetry'],true],[['native-intent'],true],[['telemetry','agreement','agreement','native-intent'],false],
-  [['telemetry'],false],[['telemetry'],false],[['telemetry'],false],[['telemetry'],false],[['telemetry'],false],[['message','answer'],false],[['telemetry','self-care'],false],
-  [['telemetry','message','answer'],false],[['message','answer'],false],[['telemetry','telemetry','telemetry','message','answer'],false],[['telemetry'],false]];
- const silent=e2.map(([kinds,offer],i)=>telemetryOnlyIdle(kinds.map((kind,j)=>({sourceId:i+':'+j,kind,value:'v'})),offer?withOffer:none)?i:-1).filter(i=>i>=0);
- assert.deepEqual(silent,[3,4,5,6,7,13],'exactly the six telemetry-only turns');
- assert.equal(telemetryOnlyIdle(t(2),withOffer),false,'an offer to make is a reason to think');
- assert.equal(telemetryOnlyIdle(t(),withCounter),false,'a counter to adopt is a reason to think');
+test('telemetry-only wakes spend no core turn unless something is offerable or a band worsens to urgent (E2 replay)',()=>{
+ // The E2 native-haul run's 14 core inputs, as exported (#74): offerable counts, non-telemetry
+ // causes, and each crew member's shared Food/Rest bands. Replayed in order through the real
+ // admission, carrying the consumed snapshot forward (silent wakes consume too).
+ const e2:[number,number,boolean,string][]=[[90,2,true,'low satisfied|satisfied satisfied|satisfied satisfied'],[1577,1,true,'low satisfied|satisfied satisfied|satisfied satisfied'],
+  [2759,0,true,'low satisfied|satisfied satisfied|low satisfied'],[5680,0,false,'low satisfied|low satisfied|low satisfied'],[8986,0,false,'urgent satisfied|low satisfied|low satisfied'],
+  [14496,0,false,'urgent satisfied|low satisfied|urgent satisfied'],[16355,0,false,'satisfied satisfied|low satisfied|urgent satisfied'],[18211,0,false,'satisfied satisfied|urgent satisfied|urgent satisfied'],
+  [20100,0,true,'satisfied satisfied|urgent satisfied|urgent satisfied'],[21242,0,true,'satisfied satisfied|satisfied satisfied|urgent satisfied'],[22740,0,true,'satisfied satisfied|satisfied satisfied|satisfied satisfied'],
+  [24247,0,true,'satisfied satisfied|satisfied satisfied|satisfied satisfied'],[25943,0,true,'satisfied low|satisfied low|satisfied low'],[34935,0,false,'low low|satisfied low|satisfied low']];
+ const schedule:any={config:{maxAttempts:null,cooldownTicks:60,windowTicks:null},startTick:0,endTick:null,attempts:0,consumed:{}};
+ const silent:number[]=[];
+ e2.forEach(([tick,offers,other,bands],i)=>{
+  const sharedStatus=bands.split('|').map((b,k)=>{const [food,rest]=b.split(' ');return {pawn:'p'+k,food,rest};});
+  const v:any={tick,brief:{id:'brief'},sharedStatus,selfCare:[],agreements:[],nativeIntents:[],requests:[],reoffers:[],questions:[],counters:[],
+   opportunities:Array.from({length:offers},(_,k)=>({id:'o'+k})),messages:other?[{id:'m'+i,to:'core',from:'p0',text:'news'}]:[]};
+  const a=coreAdmission(schedule,v);
+  if(a.ready){schedule.attempts++;schedule.lastAttemptTick=tick;schedule.consumed=a.snapshot;}
+  else if(a.silent){schedule.consumed=a.silent.snapshot;silent.push(i);}
+  else assert.fail(`turn ${i} did not wake at all: ${a.reason}`);
+ });
+ assert.deepEqual(silent,[3,6,13],'turns 4, 5 and 7 (a band worsening to urgent) stay awake');
+ const t=(value:string):CoreWake[]=>[{sourceId:'p0',kind:'telemetry',value}];
+ const none={opportunities:[],counters:[]} as any;
+ const band=(food:string,rest='satisfied')=>JSON.stringify({food,rest});
+ assert.equal(telemetryOnlyIdle(t(band('urgent')),none,{'telemetry:p0':band('low')}),false,'low -> urgent wakes');
+ assert.equal(telemetryOnlyIdle(t(band('satisfied','urgent')),none,{'telemetry:p0':band('satisfied','low')}),false,'rest reaching urgent wakes');
+ assert.equal(telemetryOnlyIdle(t(band('urgent')),none,{}),false,'a first reading that is urgent wakes');
+ assert.equal(telemetryOnlyIdle(t(band('urgent','low')),none,{'telemetry:p0':band('urgent')}),true,'still urgent, other band worsening short of urgent: silent');
+ assert.equal(telemetryOnlyIdle(t(band('low')),none,{'telemetry:p0':band('urgent')}),true,'improving never wakes on its own');
+ assert.equal(telemetryOnlyIdle(t(band('low')),none,{'telemetry:p0':band('satisfied')}),true,'worsening short of urgent stays silent');
+ assert.equal(telemetryOnlyIdle(t(band('low')),{opportunities:[{id:'o'}],counters:[]} as any,{}),false,'an offer to make is a reason to think');
+ assert.equal(telemetryOnlyIdle(t(band('low')),{opportunities:[],counters:[{id:'c'}]} as any,{}),false,'a counter to adopt is a reason to think');
  assert.equal(telemetryOnlyIdle([],none),false);
 });
 
@@ -328,7 +349,15 @@ test('a silent telemetry wake consumes its bands without a turn, attempt or cool
  let answers=0;assert.equal((await reopened.answerCoreQuestion(initial.questionId,{name:'scripted',async answerCore(){answers++;return {choice:'say',text:'I am fine.'};}})).status,'delivered');assert.equal(answers,1);
  assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,2,'message/answer wakes without a new offer');
  assert.equal(reopened.inspect().coreState!.silentWake,undefined);
+ // With nothing offerable, a band worsening to urgent is the one telemetry change that wakes it alone.
+ assert.equal((await reopened.corePerspective()).opportunities.length,0);
+ game.data.ticks=1400;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1400,food:'urgent',rest:'satisfied'};
+ assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,3,'urgent wakes the core');
+ game.data.ticks=1800;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1800,food:'low',rest:'satisfied'};
+ assert.deepEqual(await reopened.planCoreWhenDue(choose),{status:'idle',reason:'telemetry-only'},'recovery does not wake it');
+ game.data.ticks=1810;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1810,food:'low',rest:'low'};
+ assert.deepEqual(await reopened.planCoreWhenDue(choose),{status:'idle',reason:'telemetry-only'},'worsening short of urgent stays silent');
  // A band change while something is offerable still wakes the core, and the turn clears the silent status.
- await reopened.configureNativeHaul(cfg);game.data.ticks=1400;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1400,food:'urgent',rest:'satisfied'};
- assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,3);assert.equal(reopened.inspect().coreState!.silentWake,undefined);
+ await reopened.configureNativeHaul(cfg);game.data.ticks=2200;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:2200,food:'satisfied',rest:'low'};
+ assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,4);assert.equal(reopened.inspect().coreState!.silentWake,undefined);
 });

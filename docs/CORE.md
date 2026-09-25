@@ -194,22 +194,27 @@ than 120 ticks is `unknown`. The same projection goes to the core, to every pawn
 perspective, and to the crew-log board. Bands inform; they are not consent and don't
 authorize work. Only band changes wake the core, not timestamp refreshes.
 
-**Telemetry-only wakes (implementation proposed after E2).** A wake whose only causes are band changes spends
-no core turn when the core has nothing it could act on: no listed opportunity and no counter
-to adopt, so no eligible offer recipient. The bands are consumed, so they don't wake the
-core again. No attempt is counted and no cooldown starts. The event is recorded as
-`core-wake-silent`, and the status line reads "Core: waiting on …", as for a silent wait.
-Nothing is written to the crew log. The next real turn clears the status. Any other cause
-(message, answer, agreement, request, self-care, native intent) still wakes the core, and so
-does a band change while something is offerable. This implementation excludes question
-recipients. In the retained E2 sample they are available on every turn, so counting them
-would suppress none of this sample; in general that list can be empty. On the E2 native-haul run
-this silences exactly the six telemetry-only wakes (turns 3–7 and 13). That includes
-turn 7, where the core asked a question. Exact exported inputs classify the suppressed
-set as four waits, one ask and one cancelled attempt, not six waits.
-**Direction pending:** the implementation interprets "eligible recipient" as an offer
-recipient, excluding available question recipients. Fable must resolve this before
-merge/live; these measurements do not establish that the question was dispensable.
+**Telemetry-only wakes (Fable, final after E2).** A band turning `urgent` is the one
+telemetry change that can wake the core by itself. A wake made only of band changes
+spends no core turn unless:
+- something is offerable (a listed opportunity or a counter to adopt, i.e. an eligible
+  offer recipient); or
+- some crew member's Food or Rest band got worse and reached `urgent` since the last
+  consumed snapshot. A first or previously unknown reading that is `urgent` counts.
+
+Improving bands (urgent → low → satisfied) and lateral or sub-urgent changes never wake
+the core on their own; the core sees the current bands in every view anyway. Question
+recipients don't count as recipients: they are listed on every E2 turn.
+
+A silent wake still consumes its bands, so they don't wake the core again. No attempt is
+counted and no cooldown starts. It is recorded as `core-wake-silent`, and the status line
+reads "Core: waiting on …", as for a silent wait. Nothing goes into the crew log, and the
+next real turn clears the status. Any other cause (message, answer, agreement, request,
+self-care, native intent) still wakes the core.
+
+Replaying the E2 native-haul run's exported inputs through the admission silences turns
+3, 6 and 13. Turns 4, 5 and 7 stay awake (Alvin, Pedro, then Beatrice reaching urgent
+food). Turn 7 is where the core asked Beatrice and she chose her own meal.
 
 ## Food sightings
 

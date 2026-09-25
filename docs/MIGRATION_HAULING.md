@@ -665,8 +665,9 @@ or reopens growing.
 - **Still recorded by hand:** on-screen label and colour. The live #71 checks belong to the
   separately frozen live run.
 - **Before the live run (Fable's step 1):** the telemetry-only wake rule in
-  [CORE](CORE.md). A wake made only of band changes, with no opportunity and no counter,
-  spends no core turn and writes the silent status. The completion-report-to-receipt link
+  [CORE](CORE.md). A wake made only of band changes spends no core turn and writes the
+  silent status. The exceptions: something is offerable, or a crew member's Food or Rest
+  band worsened to `urgent`. On E2 that silences turns 3, 6 and 13 and keeps 4, 5 and 7. The completion-report-to-receipt link
   waits until after the live run.
 
 ## Gate C will measure
