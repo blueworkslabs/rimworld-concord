@@ -11,7 +11,7 @@ game or model was run; staging files were copied read-only.
 
 ## What filled the buffer
 
-Each pawn keeps its last 64 experiences. In this run:
+Each pawn then kept its last 64 experiences in arrival order. In this run:
 
 | Pawn | Experiences | Native | Appraisal | Deliberation |
 |---|---|---|---|---|
@@ -32,7 +32,7 @@ after it arrived, because the oldest entry was always the one removed, whatever 
   starts a reflection that happens to cover them. Pawn 405's cursor stayed at seq 551 from
   t10,556 to t26,694 while up to five need changes waited; no pawn reflected at all
   between t11,520 and t29,601.
-- **3 of 17 were `intent-ordinary`**, which is missing from `NATIVE_KINDS` and so fell to
+- **3 of 17 were `intent-ordinary`**, which was missing from `NATIVE_KINDS` and so fell to
   the default appraisal route. By the documented rule, native-intent hooks are texture and
   receipts, never a per-event wake. The archive line already reports ordinary arrivals.
 - **1 of 17** (pawn 405's quiet Chitchat memory, seq 148) was deliberation-routed but lost
@@ -66,3 +66,22 @@ pawns. The exception mirrors the core rule: a pawn's own Food or Rest band reach
 now" stays possible from the pawn's side. The appraisal route stays defined for unknown
 kinds. The Chitchat case is lane scheduling, not buffering. The replay says 0 of 17; the
 next live run will say whether that holds.
+
+## Review verification (PR #83)
+
+Independent Codex review found and corrected two edge cases: a silently consumed
+telemetry change now retires the old review chain without spending a turn, and a
+later native recovery cannot coalesce away the queued urgent trigger. The recovery
+remains in the shown history. Two regression tests failed before those corrections.
+
+**423 tests pass, zero failures or TODOs.** The scripted coordinator case waits at
+100, reviews at 2600 and 7600, and stays silent through 60000 until a fresh public cause.
+Additional checks cover pending-review reopen, attempt budgets and failure deduplication.
+These are mock/offline tests, not a game or model run. Mood remains native; only own
+Food/Rest reaching band 0 gets the urgent exception, matching the core rule.
+
+The historical replay independently reproduces all 17 audited gaps, then 14 and 0 under
+the two buffer corrections. Its database connection is explicitly read-only. The table
+above does **not** replay the subsequent need-band routing change; it retains the old
+cursor movements and cannot predict when the revised scheduler would reflect.
+[Sanitized verification receipt](../evidence/attention-rewake-review.json).
