@@ -1,0 +1,385 @@
+{
+  "schema": 1,
+  "kind": "post-cold-read-offline-receipt-audit",
+  "runId": "45687b73-2a7c-47d9-a515-b49c2bc62898",
+  "runtimeRevision": "ba2ee7ae3e30f51c46c747ae296c6964ca1e07e5",
+  "setupSha256": "1f23ad7e7e780ec42f428db456f058f38d8423d2b12279bedf3e77d6b1d82445",
+  "recordingSha256": "b2c281ab7ecff69afb98546d341ca42f0daa3eb3cfd54292d060e4c8523b1368",
+  "coldRead": [
+    "https://discord.com/channels/1083662512806965308/1467116597645676546/1552966444105342987",
+    "https://discord.com/channels/1083662512806965308/1467116597645676546/1552966446730969126"
+  ],
+  "method": "Exact saved core views paired in request order with retained raw core returns and coordinator results. Five returned invalid choices revalidated offline against the unchanged compiled parser; no model rerun or application. Publications independently joined to native receipt ticks and persisted crew entries. No pawn-private inputs or reflections exported.",
+  "sourceHashes": {
+    "receipt.json": "2865f8ccdd96edfe4c2f01d1a7761c9cc30d4d01791198beb5aed452f9df6c7a",
+    "receipt.json.cold.json": "37041b3201bbd5320e8369f8be5e798778c9d0945f2b3d4678cd3223ebb6c20e",
+    "audit-events.json": "0ba0f43f795b783b9de2bc0d224634999f559743e056056ee4a1c2ff4d3ec7bf",
+    "offline-parse-audit.json": "5f0e47ab3e0f40c9da2eae2232982c0db1c3fc117e3613136355ad387daf7a4f",
+    "narration-age-audit.json": "aa98190a2608b684a97a953b4eb1fed51545998560e75ae3c42325f1533d4d09"
+  },
+  "counts": {
+    "coreAttempts": 19,
+    "coreApplied": 13,
+    "coreAppliedAsk": 11,
+    "coreAppliedWait": 2,
+    "coreInvalidOutput": 5,
+    "coreDeadlineCancelled": 1,
+    "returnedProposalsRejected": 3,
+    "publishedOffers": 0,
+    "offerAcceptances": 0,
+    "offerRefusals": 0,
+    "counters": 0,
+    "questionsPublished": 11,
+    "answersPublished": 10,
+    "answersFailedRevalidation": 1,
+    "reflectionsCompleted": 19,
+    "typedRequests": 0,
+    "haulingIntentsOpened": 0,
+    "creditedHaulUnits": 0,
+    "completedHaulTrips": 0
+  },
+  "coreTurns": [
+    {
+      "indexZeroBased": 0,
+      "snapshotTick": 87,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 0,
+      "activeTopicsIfApplied": 1
+    },
+    {
+      "indexZeroBased": 1,
+      "snapshotTick": 1586,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 1,
+      "activeTopicsIfApplied": 2
+    },
+    {
+      "indexZeroBased": 2,
+      "snapshotTick": 2964,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 2,
+      "activeTopicsIfApplied": 2
+    },
+    {
+      "indexZeroBased": 3,
+      "snapshotTick": 4442,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 2,
+      "activeTopicsIfApplied": 5
+    },
+    {
+      "indexZeroBased": 4,
+      "snapshotTick": 6077,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 5,
+      "activeTopicsIfApplied": 4
+    },
+    {
+      "indexZeroBased": 5,
+      "snapshotTick": 8044,
+      "status": "failed",
+      "returnedAction": "propose",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 4,
+      "activeTopicsIfApplied": 6,
+      "offlineValidatorError": "Offer requires nonclosed action topic",
+      "proposedTo": "Beatrice",
+      "proposedWork": "haul-zone",
+      "opportunityPresentInExactInput": true
+    },
+    {
+      "indexZeroBased": 6,
+      "snapshotTick": 9410,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 4,
+      "activeTopicsIfApplied": 5
+    },
+    {
+      "indexZeroBased": 7,
+      "snapshotTick": 11271,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 5,
+      "activeTopicsIfApplied": 7
+    },
+    {
+      "indexZeroBased": 8,
+      "snapshotTick": 13054,
+      "status": "applied",
+      "returnedAction": "wait",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 7,
+      "activeTopicsIfApplied": 6
+    },
+    {
+      "indexZeroBased": 9,
+      "snapshotTick": 18301,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": false,
+      "activeTopicsBefore": 6,
+      "activeTopicsIfApplied": 6
+    },
+    {
+      "indexZeroBased": 10,
+      "snapshotTick": 19634,
+      "status": "applied",
+      "returnedAction": "wait",
+      "haulAvailable": true,
+      "constructionAvailable": false,
+      "activeTopicsBefore": 6,
+      "activeTopicsIfApplied": 8
+    },
+    {
+      "indexZeroBased": 11,
+      "snapshotTick": 22503,
+      "status": "failed",
+      "returnedAction": "propose",
+      "haulAvailable": true,
+      "constructionAvailable": false,
+      "activeTopicsBefore": 8,
+      "activeTopicsIfApplied": 9,
+      "offlineValidatorError": "Core topic limit",
+      "proposedTo": "Pedro",
+      "proposedWork": "haul-zone",
+      "opportunityPresentInExactInput": true
+    },
+    {
+      "indexZeroBased": 12,
+      "snapshotTick": 25349,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 8,
+      "activeTopicsIfApplied": 8
+    },
+    {
+      "indexZeroBased": 13,
+      "snapshotTick": 27499,
+      "status": "failed",
+      "returnedAction": "wait",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 8,
+      "activeTopicsIfApplied": 9,
+      "offlineValidatorError": "Core topic limit"
+    },
+    {
+      "indexZeroBased": 14,
+      "snapshotTick": 29276,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 8,
+      "activeTopicsIfApplied": 8
+    },
+    {
+      "indexZeroBased": 15,
+      "snapshotTick": 30541,
+      "status": "failed",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 8,
+      "activeTopicsIfApplied": 11,
+      "offlineValidatorError": "Core topic limit"
+    },
+    {
+      "indexZeroBased": 16,
+      "snapshotTick": 32168,
+      "status": "applied",
+      "returnedAction": "ask",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 8,
+      "activeTopicsIfApplied": 8
+    },
+    {
+      "indexZeroBased": 17,
+      "snapshotTick": 34013,
+      "status": "failed",
+      "returnedAction": "propose",
+      "haulAvailable": true,
+      "constructionAvailable": true,
+      "activeTopicsBefore": 8,
+      "activeTopicsIfApplied": 10,
+      "offlineValidatorError": "Core topic limit",
+      "proposedTo": "Alvin",
+      "proposedWork": "build",
+      "opportunityPresentInExactInput": true
+    },
+    {
+      "indexZeroBased": 18,
+      "snapshotTick": 35227,
+      "status": "interrupted",
+      "returnedAction": null,
+      "haulAvailable": true,
+      "constructionAvailable": false
+    }
+  ],
+  "failureAccounting": {
+    "backendCauses": {
+      "invalid-output": 5,
+      "cancelled": 1
+    },
+    "coordinatorLaneTotals": {
+      "core": 6,
+      "core-answer": 1,
+      "reflection": 0
+    },
+    "answerFailures": [
+      {
+        "lane": "core-answer",
+        "pawn": "Alvin",
+        "cause": "portion-increased",
+        "offeredTick": 741,
+        "checkedTick": 1074,
+        "offeredCount": 12,
+        "currentCount": 13,
+        "publicReplyCreated": false
+      }
+    ],
+    "operatorReceiptCountsRetained": true,
+    "inGameFailureCausesAndLaneCountsShown": false,
+    "preModelOversizeFailureObserved": false,
+    "scope": "Operator accounting verified; in-scene visibility not met. Final cancellation is retained separately from five invalid outputs."
+  },
+  "narrationAge": {
+    "scope": "Published questions, public non-wait reasons and delivered answers; not a semantic truth score or topic-board freshness guarantee. Receipt kinds from the frozen observation-age contract.",
+    "entriesChecked": 32,
+    "staleEntries": 4,
+    "unflagged": 0,
+    "stalePublications": [
+      {
+        "kind": "core-question",
+        "snapshotTick": 4442,
+        "publishedTick": 5196,
+        "newerReceiptTick": 4659,
+        "prefixRequired": true,
+        "prefixPresent": true
+      },
+      {
+        "kind": "core-planned",
+        "snapshotTick": 4442,
+        "publishedTick": 5196,
+        "newerReceiptTick": 4659,
+        "prefixRequired": true,
+        "prefixPresent": true
+      },
+      {
+        "kind": "core-question",
+        "snapshotTick": 11271,
+        "publishedTick": 12173,
+        "newerReceiptTick": 11442,
+        "prefixRequired": true,
+        "prefixPresent": true
+      },
+      {
+        "kind": "core-planned",
+        "snapshotTick": 11271,
+        "publishedTick": 12173,
+        "newerReceiptTick": 11442,
+        "prefixRequired": true,
+        "prefixPresent": true
+      }
+    ]
+  },
+  "ui": {
+    "messageEntriesWithoutMapProvenance": 32,
+    "recordEntriesWithMapProvenance": 9,
+    "recordEntriesWithoutMapProvenance": 1,
+    "waitStatusSource": "First open topic, sliced to 120 characters, not the returned wait reason.",
+    "controlOrFormatCharactersInReturnedTopics": [
+      {
+        "indexZeroBased": 7,
+        "topicIndex": 0,
+        "codePoints": [
+          "U+200B"
+        ],
+        "applied": true
+      },
+      {
+        "indexZeroBased": 10,
+        "topicIndex": 0,
+        "codePoints": [
+          "U+007F",
+          "U+0012"
+        ],
+        "applied": true
+      }
+    ]
+  },
+  "nativeIngestion": [
+    {
+      "tick": 4659,
+      "pawn": "Pedro",
+      "detail": "RawBerries;count=11;nutrition=0.55",
+      "coordinatorChosen": true
+    },
+    {
+      "tick": 11442,
+      "pawn": "Alvin",
+      "detail": "RawBerries;count=16;nutrition=0.8",
+      "coordinatorChosen": true
+    },
+    {
+      "tick": 25279,
+      "pawn": "Beatrice",
+      "detail": "RawBerries;count=18;nutrition=0.9",
+      "coordinatorChosen": false
+    },
+    {
+      "tick": 31171,
+      "pawn": "Alvin",
+      "detail": "RawBerries;count=11;nutrition=0.55",
+      "coordinatorChosen": true
+    }
+  ],
+  "attentionGaps": {
+    "attentionGaps": 12,
+    "attentionGapKinds": {
+      "memory": 1,
+      "interaction": 1,
+      "rest": 3,
+      "food": 6,
+      "mood": 1
+    }
+  },
+  "coverage": {
+    "haulingConsentQuotaHelperExpiry": "not exercised live; no offer or intent opened",
+    "lateOfferAnswer": "not exercised live",
+    "silentTelemetryBranch": "not exercised live; zero core-wake-silent events",
+    "restores": "paired and new-host/new-coordinator passed; empty game intent ledger, not an active hauling restore",
+    "matchedPairsAndWrapperCost": "prior scripted evidence only; no live delivery denominator",
+    "medicalAlertCause": "unresolved; retained bridge evidence has no alert-to-cause provenance",
+    "gateCVerdict": "pending Fable; this audit does not authorize deletion or another run"
+  },
+  "newInferenceCallsForAudit": 0,
+  "originalRecordingModified": false,
+  "privateReceiptsPublished": false
+}

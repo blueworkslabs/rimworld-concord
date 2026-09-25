@@ -1,0 +1,52 @@
+{
+  "runId": "25bcdc7e-c6c3-40bc-8f95-f9659afc1e10",
+  "setupSha256": "ac88cea172160541a20a6a280e398ae7273ac82852e77efce7736ffd064e3d4f",
+  "behaviorHead": "e436933d349942d4e1062acb2768ef4a224e8875",
+  "nativeElapsedMs": 601766,
+  "samples": 371,
+  "allSamplesUnpaused": true,
+  "pairedRestore": true,
+  "coldRestore": true,
+  "hostProcessIds": [
+    551655,
+    566669
+  ],
+  "coordinatorProcessIds": [
+    177691,
+    178643
+  ],
+  "gameProcessRestarted": false,
+  "inferenceAccountingUnchangedByColdRestore": true,
+  "originalSavesUnchanged": 409,
+  "recording": {
+    "sha256": "9ea5f3bcc6cd00b03096515b43127dcc4a01ad54aec07ae80da640a6f96c12cf",
+    "bytes": 14143927,
+    "durationSeconds": 604.866667,
+    "width": 1280,
+    "height": 800,
+    "frames": 9073,
+    "fps": "15/1",
+    "captureLastProgress": {
+      "frame": "9073",
+      "fps": "15.00",
+      "stream_0_0_q": "-1.0",
+      "bitrate": " 187.1kbits/s",
+      "total_size": "14143927",
+      "out_time_us": "604666667",
+      "out_time_ms": "604666667",
+      "out_time": "00:10:04.666667",
+      "dup_frames": "1",
+      "drop_frames": "0",
+      "speed": "   1x",
+      "progress": "end"
+    },
+    "remoteHashMatched": true,
+    "uncut": true,
+    "audio": false,
+    "file": "hauling-migration-pipeline-rerun-2026-09-25.mp4"
+  },
+  "findingsWithheldForColdRead": true,
+  "stagingStopped": true,
+  "handoffSave": "lab-concord-hm-pipeline-20260925-100819",
+  "priorRunAndRecordingUnchanged": true
+}
