@@ -8,6 +8,7 @@ import {InferenceLane} from '../dist/src/inference-lane.js';
 import {ongoingProtocol} from '../dist/trials/ongoing-protocol.js';
 import {retentionDeadline} from '../dist/trials/retention-policy.js';
 
+import {CoreRejection} from '../dist/src/core-planner.js';
 import {CodexDecisionBackend} from '../dist/src/codex-decision.js';
 
 
@@ -82,7 +83,8 @@ async function handle(line){
   // is content-free and travels with the result, so no lane failure hides as "unavailable".
   const cause=error?.failureCause??(String(error?.message).startsWith('Decision deadline')?'deadline':'backend');
   laneFailures.push({mode:m.mode,cause,at:new Date().toISOString()});
-  send({type:'decision-result',id:m.id,error:'Decision unavailable',cause});
+  const rejection=m.mode==='core'&&cause==='invalid-output'?CoreRejection.safeParse(error?.coreRejection):null;
+  send({type:'decision-result',id:m.id,error:'Decision unavailable',cause,...(rejection?.success?{coreRejection:rejection.data}:{})});
  }finally{deadline.dispose();active.delete(m.id);}
 }
 input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill();})));

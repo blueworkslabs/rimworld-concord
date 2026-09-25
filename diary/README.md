@@ -63,10 +63,15 @@ Rules the build enforces:
 - `entries/<slug>/index.html`: one page per entry with earlier/later links (URLs unchanged).
 - `feed.xml`: RSS of the latest 20 entries. `entries.json`: machine-readable index.
 - `media/`: explainer animations (MP4 + poster), rendered from `site/animations/`.
+- `watch/<name>/`: uncut recordings. Every MP4 in `diary/assets/recordings/` is also
+  written as byte-identical 3 MiB `.partN.bin` transport parts; the watch page declares
+  the part count, final part size and SHA-256 on its load button (`site/assets/watch.js`).
 - `_headers`: Cloudflare Pages headers (same-origin only, no third-party requests).
 
-The only JavaScript is `site/assets/site.js`, a same-origin file that plays the
-explainer loops only after explicit play, pauses them offscreen, and never automatically resumes them. The site loads
+The same-origin `site/assets/site.js` plays explainer loops only after explicit
+play, pauses them offscreen, and never automatically resumes them.
+`site/assets/watch.js` loads and verifies recording parts on request, then enables
+local playback and scrubbing. The site loads
 no third-party resources, so no model or API keys can end up in the browser.
 Model calls happen in the drafting workflow, not here.
 
@@ -77,6 +82,6 @@ and `docs/ROADMAP.md`, and link evidence for quoted model output. Animations use
 
 ```sh
 cd site/animations
-manim render -qm --format mp4 concord_scenes.py ConsentLoop WhoKnowsWhat TimelineGuard CoreWakes
+manim render -qm --format mp4 concord_scenes.py ConsentLoop WhoKnowsWhat TimelineGuard CoreWakes NativeIntent
 ./export.sh   # H.264 + poster frames into site/media/
 ```

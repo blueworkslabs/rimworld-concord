@@ -68,7 +68,21 @@ stockpile hauls: an existing colony stockpile (`zoneId`) or a candidate site, on
   the stockpile hauls are the only proposable work.
 - The view carries the colony `clock`.
 - A wait produces no crew-log entry; the status line reads "Core: waiting on <first
-  open topic>".
+  open topic>", cut at a word. **A wait after a pawn spoke is never silent:** when the
+  wake carried a pawn's message to the core, the line reads "Core: heard Beatrice;
+  waiting on …", even if the model chose wait. Typed pawn requests are in the design
+  queue.
+- **Failed and rejected core outputs are visible in the game.** Every failed attempt
+  gets one cause:
+  - the backend's #71 cause;
+  - `deadline` or `cancelled`;
+  - or the rule that rejected a returned output before publication: topic capacity,
+    topic link, unsupported closure, unavailable choice, superseded, or invalid output.
+
+  Counts are kept in `coreState.failures`, and the status line reads "Core outputs
+  failed or rejected: N (…)". A rejected offer or question also gets a crew record
+  naming whom it was for and why, never its text. In the migration's live run, three
+  proposals were rejected this way and nothing showed on screen.
 
 | Action | Effect |
 |---|---|
@@ -119,12 +133,30 @@ filter, private-state access, new action or model escalation is added.
 
 The legacy core keeps up to 8 topics, each tied to a source it can see (the brief, a message,
 an agreement, a request, an opportunity, a re-invitation or a self-care record). A turn
-may update several topics at once; `actionTopicId` links a new offer to a topic (it
-must be null for `ask` and `wait`). Invalid updates reject the whole turn before any
-effect.
+may update several topics at once. `actionTopicId` links a new offer to an **existing**
+open, blocked or deferred topic, or it is null (always null for `ask` and `wait`). A
+topic created in the same turn can't be linked; the offer links to it next turn. The
+schema lists only those ids (`actionTopicIds` in the prompt). The legacy single-topic
+form keeps its implicit link only for an existing topic. Invalid updates reject the
+whole turn before any effect.
+
+**Capacity-aware schema.** When eight topics are active, the choice schema offers only
+the existing topic ids: they can be updated or closed, but no new source can be added.
+The prompt says `topicCapacity.full`, and the validator rejects a new topic with "Core
+topic capacity full". Closed topics cannot be reopened at capacity. This narrows
+expressible sources; runtime validation still enforces aggregate capacity and all
+other constraints.
 
 Statuses are `open`, `blocked`, `deferred`, `resolved` and `declined`. The last two are
-only allowed when the receipts say so (`topicClosures`):
+only allowed when the receipts say so (`topicClosures`). **Completion reports:** the
+core explicitly selects `reportSelfCareId` on a consumption-report question, or null
+for an unrelated question. Only an unclaimed receipt belonging to that pawn is listed;
+the binding is persisted, and the answering pawn receives the public receipt context.
+Its topics can resolve once that receipt verifies the meal. If the report answer
+chooses another meal, the report remains claimed but its messages cannot close
+from the older meal; the new eating action requires its own receipt. Mere question order or
+prose never establishes a link, even for the first question after eating. In the live
+run, three receipted follow-ups had no permitted closure and filled the topic slots.
 
 - **resolved**: every linked offer, followed through counters and re-invitations to
   its final revision, is accepted and fully completed with no active, unconfirmed or
@@ -236,3 +268,11 @@ paired checkpoints. On restart, checkpoint or restore, running turns and answers
 progress become failed; questions nobody has started answering stay pending. Late
 answers from a discarded timeline can't apply. Model attempts are
 counted in separate ledgers for the core and for pawns, which never rewind.
+
+Named native-backend rejections cross the operator relay as a strict, content-free
+cause/action/recipient envelope. The unpublished answer text remains in private
+receipts, never in the crew record. Both host-side and arrival-time validation feed
+the same persistent rejection counts.
+
+Answer and reflection failure totals/causes are also persisted per lane and shown in
+the observer status; a successful core turn cannot hide another lane’s failures.
