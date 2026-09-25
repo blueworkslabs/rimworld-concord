@@ -103,3 +103,5 @@ New trials: add a row here in the same PR, with sanitized evidence in `docs/evid
 [Verdict and deletion sequence](HAULING_MIGRATION_GATE_C.md): game-side pass; generic
 test port before runtime deletion. Medical-alert inspection identifies Beatrice's
 pre-existing asthma needing tending. Crew-side follow-ups remain separate.
+
+| 09-25 | [#86](https://github.com/blueworkslabs/rimworld-concord/pull/86) | D | Opt-in annotate-only grounding wiring | 453 offline tests; request equivalence and journal/budget/cancellation fault checks; no live Jev use | [tests](../../tests/jev-annotate.test.ts) | [JEV_ANNOTATE](JEV_ANNOTATE.md) |
