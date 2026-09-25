@@ -1,0 +1,142 @@
+{
+  "date": "2026-09-25",
+  "pr": 82,
+  "behaviorCommit": "666946144dfa99c2a53f9866aebe35cd207acd56",
+  "inferenceCalls": 0,
+  "tests": {
+    "passed": 416,
+    "failed": 0,
+    "todo": 0,
+    "focusedPassed": 117
+  },
+  "inputs": {
+    "passed": true,
+    "inferenceCalls": 0,
+    "scope": "offline authored DecisionChannel with actual Codex request builder and Claude schema builder; no provider invoked",
+    "checks": [
+      {
+        "mode": "core",
+        "status": "applied",
+        "promptBytes": 23643,
+        "requestBytes": 31298,
+        "trimmed": {
+          "messages": 12,
+          "agreements": 0,
+          "questions": 0,
+          "selfCare": 0,
+          "requests": 0,
+          "note": "Older items were left out to fit; they still happened."
+        },
+        "recordedViewEqualsBackendInput": true,
+        "refitIdempotent": true,
+        "originalUnchanged": true,
+        "newestRetained": true
+      },
+      {
+        "mode": "reflection",
+        "status": "continued",
+        "promptBytes": 23897,
+        "requestBytes": 26536,
+        "trimmed": {
+          "experiences": 0,
+          "memories": 7,
+          "messages": 0,
+          "note": "Older items were left out to fit; they still happened."
+        },
+        "recordedViewEqualsBackendInput": true,
+        "refitIdempotent": true,
+        "originalUnchanged": true,
+        "newestRetained": true
+      }
+    ]
+  },
+  "game": {
+    "passed": true,
+    "run": "e7b6d12a-1edf-4208-8c6f-dd51b4046df6",
+    "fixture": "controlled historical pawn-eating fixture; not ordinary-play helper fixture",
+    "cases": [
+      {
+        "variant": "speech",
+        "receiptStatus": "no action",
+        "consumed": 0,
+        "berriesBefore": 225,
+        "berriesAfter": 225,
+        "pairedRestore": true,
+        "exactClosure": "failed",
+        "broadClosure": "failed"
+      },
+      {
+        "variant": "eat",
+        "receiptStatus": "completed",
+        "consumed": 16,
+        "berriesBefore": 225,
+        "berriesAfter": 209,
+        "pairedRestore": true,
+        "exactClosure": "applied",
+        "broadClosure": "failed"
+      },
+      {
+        "variant": "stop",
+        "receiptStatus": "interrupted",
+        "consumed": 0,
+        "berriesBefore": 225,
+        "berriesAfter": 225,
+        "pairedRestore": true,
+        "exactClosure": "failed",
+        "broadClosure": "failed"
+      },
+      {
+        "variant": "cleanup",
+        "receiptStatus": "interrupted",
+        "consumed": 0,
+        "berriesBefore": 225,
+        "berriesAfter": 225,
+        "pairedRestore": true,
+        "exactClosure": "failed",
+        "broadClosure": "failed"
+      }
+    ],
+    "cold": {
+      "passed": true,
+      "newCoordinatorProcess": true,
+      "gameProcessRestarted": false,
+      "cases": [
+        {
+          "variant": "speech",
+          "restored": true
+        },
+        {
+          "variant": "eat",
+          "restored": true
+        },
+        {
+          "variant": "stop",
+          "restored": true
+        },
+        {
+          "variant": "cleanup",
+          "restored": true
+        }
+      ]
+    }
+  },
+  "preservation": {
+    "originalSaveCount": 413,
+    "originalSavesUnchanged": true,
+    "newSavesRetained": 9,
+    "previousCompleteModRestored": true,
+    "gameAndDisplayStopped": true
+  },
+  "privateReceiptSha256": {
+    "pawn-eating-e7b6d12a-1edf-4208-8c6f-dd51b4046df6-game.json": "df89b2137ed48a4064130eec2ffa74a7e21fcccb9d0d938e649e6364baf3e480",
+    "pawn-eating-e7b6d12a-1edf-4208-8c6f-dd51b4046df6-cold.json": "61b77fba47521b0a06702fbb4f2f150595151298f03329b454fc5dfdafee73fa",
+    "preservation.json": "98977376324e84bb5e19ab03729f6b68e88d3d26e8fc5c88480e3f2cfe5872c9",
+    "input-receipt.json": "d8bae26388246b614cb2a9ab100be01aac52d2ab3ddbafea2f9496e0e702c6af"
+  },
+  "limits": [
+    "No provider/model calls or video/UI acceptance.",
+    "Pending meal-memory/answer collision, archive and heard lines are mock-tested, not newly demonstrated in-game.",
+    "Cold restore restarts coordinator only; game stays up.",
+    "Re-wake design and attention eviction diagnosis remain separate."
+  ]
+}
