@@ -13,7 +13,7 @@ code and a contract disagree, one of them is a bug.
 | [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md) | Gate B design for the first native-intent spike |
 | [MIGRATION_HAULING](MIGRATION_HAULING.md) | Hauling migration, game-side Gate C verdict and ordered-haul retirement |
 | [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md) | How RimWorld's jobs, think tree, hauling and events work, for the native-intents spike |
-| [MIGRATION_PRODUCTION](MIGRATION_PRODUCTION.md) | Next construction/cooking migration: planning notes and retained readiness debt |
+| [MIGRATION_PRODUCTION](MIGRATION_PRODUCTION.md) | Construction/cooking: signed Gate A/B, source-reviewed boundary design; implementation and scripted acceptance next |
 | [NATIVE_INTENTS](NATIVE_INTENTS.md) | The agreed direction for the game side: steer RimWorld's own planner instead of driving pawns |
 | [HISTORY](HISTORY.md) | How we got here, one milestone per line |
 
