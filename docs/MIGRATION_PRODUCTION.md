@@ -1,8 +1,10 @@
 # Construction and cooking migration: native blueprints and bills (Gate A)
 
 **Status: Gate A signed by Fable on 2026-09-25, with the eleven decisions recorded
-under "Direction"; the five Gate B entry items are checked (below).** A Gate B freeze
-draft follows for Fable; Gate B and Gate C (staging verdict) are not signed. This authorizes the
+under "Direction"; the five Gate B entry items are source-checked (below).** Astra's
+assembly-backed review corrected the receipt and transition boundaries on 2026-09-25.
+A Gate B draft follows; its implementation-boundary checklist still needs a concrete
+design before freeze. Gate B and Gate C (staging verdict) are not signed. This authorizes the
 design work for the freeze, not implementation of runtime behaviour, a live run or
 deletion of the ordered path. The pinned build is RimWorld 1.6.4871
 (`Assembly-CSharp` prefix `082db1dd4f7f`), the same as the hauling migration.
@@ -23,8 +25,10 @@ for construction, and a **bill** on a workbench for cooking.
 - **The tag is on the carrier, not on the materials.** Wood carried to some other
   blueprint, or berries cooked on some other bill, is not a violation.
 - **No needs stop** for native intents: the game decides when a pawn eats or sleeps.
-- **Capability comes from the game.** A pawn whose Construction or Cooking work type is
-  disabled is never offered that work, and the reason is visible.
+- **Capability comes from the game, per role.** Construction-disabled pawns cannot be
+  offered construction work, but may be eligible material deliverers through Hauling
+  (C3). Cooking offers respect native bill eligibility too. Disabled roles have a visible
+  not-offered reason; tagging never broadens native permissions.
 - **Silent wait, late answers lapse, observation age shown, failures counted per
   lane**, the bounded review wake, and the fitted-input evidence rule, all as merged.
 - **Retirement writes one record** and the carrier becomes ordinary afterwards; a
@@ -104,7 +108,7 @@ differently, because a built thing and a cooked meal are not a pile.
 
 - **What the intent tags.** One placed build: the blueprint, then the frame that
   replaces it, then the finished building. The game replaces the thing at each step
-  (Gate A, C1), so a tag on one thing ID does not survive. **Proposal:** key the tag by
+  (Gate A, C1), so a tag on one thing ID does not survive. **Decided:** key the tag by
   (map, footprint cells, build def, rotation, placement generation), carried across the
   replacements, with the current thing ID recorded at each stage.
 - **Who places it.** Mirroring hauling's stockpile source: the core may tag an
@@ -114,25 +118,25 @@ differently, because a built thing and a cooked meal are not a pile.
   **delivering materials** to the blueprint or frame, and **construction work** on the
   frame (several pawns may add work in turn; one finishes it). Each is credited per pawn.
   The game records neither delivery nor work shares, only the finisher (C2, C4), so both
-  need our own receipts. Whether "built by" means the finisher, the largest work share,
-  or everyone who did construction work is an open decision. Delivery also runs under
+  need our own receipts. Name the finisher and list all material/work contributions
+  (decision 2), not a single awarded "built by" title. Delivery also runs under
   Hauling (C3), so a pawn who cannot construct can still deliver.
 - **What the receipt is.** Per pawn: units of each material delivered, construction
-  work contributed, and who finished. **Complete** when a finished building of the
-  tagged def stands on the tagged footprint. **Failed** when construction fails
-  (materials partly lost, as the game does), the blueprint or frame is cancelled,
-  destroyed or replaced, or the deadline passes. A refused pawn delivering or building
+  work contributed, and who finished. **Complete** only after the exact successor of
+  the tagged frame is successfully spawned and matched (C7/P1), not merely a same-def
+  occupant. Construction failure/removal is **failed**, player cancellation/replacement
+  is **stopped**, and the deadline is **expired**, as distinguished in P1.
+  A refused pawn delivering or building
   on it counts as a violation, as in hauling.
 - **What "since then" means.** Nothing more arrives at a finished building. The
-  natural analogue is **its fate**, updated in place: "Since then: still standing, used
-  for 4 meals", or "deconstructed at 14:00". Whether "used" belongs in that line (it
-  needs bill attribution at the building) is an open decision.
+  decided analogue is **its fate only**, updated in place: "Since then: still standing"
+  or "deconstructed at 14:00". Later cooking has its own record (decision 3).
 
 ### Cooking: a bill on a workbench
 
 - **What the intent tags.** One bill on one colony workbench (today a campfire),
-  identified by the bill's own load ID. The bill's repeat count is the quota: "cook up
-  to 3 simple meals".
+  identified by the bill's own load ID. Our iteration counter supplies the quota:
+  "cook up to 3 simple meals"; the player's repeat settings are independent (K5).
 - **Who creates it.** The core may tag an **existing colony bill** or add a new bill to
   an existing colony workbench. It never builds the bench itself; that is a
   construction intent.
@@ -140,17 +144,14 @@ differently, because a built thing and a cooked meal are not a pile.
   fetched the ingredients and did the work. Credit is per pawn, per iteration: meals
   produced and ingredients consumed. Another cook completing an iteration is a helper.
 - **What the receipt is.** Per iteration: doer, product def and count, ingredient defs
-  and counts, tick. **Complete** at the repeat count; **failed or stopped** when the
-  bill is deleted or suspended by the player, the workbench is destroyed or unusable,
-  or the deadline passes. Making a meal is not eating it; eating stays the self-care
+  and counts, tick. **Complete** at our quota, **stopped** on bill deletion,
+  **failed** on bench removal, **expired** on deadline. Suspension policy is still
+  open for Fable; temporary usability must not be mistaken for removal. Making a
+  meal is not eating it; eating stays the self-care
   choice it is today.
-- **What "since then" means.** Two readings, both plausible, open for Fable:
-  (a) **ordinary cooking at the same bench** after retirement, mirroring hauling's
-  ordinary arrivals ("Since then: 5 more meals cooked here as ordinary work"); or
-  (b) **the tagged meals' fate**: eaten by whom (the existing `ingested` receipts),
-  spoiled, or still stored ("Since then: 2 eaten (Pedro, Beatrice), 1 stored").
-  The internals favour (a): a meal carries no link to its bill, and stacks merge and
-  split (K3).
+- **What "since then" means.** **Ordinary cooking at the same bench** after retirement
+  (decision 4): "Since then: 5 more meals cooked here as ordinary work". Meals carry
+  no bill link and stacks merge/split (K3); no per-unit fate claim is made.
 
 ## Scope
 
@@ -160,7 +161,8 @@ operator-declared candidate build sites; several intents at once within topic
 capacity; retirement of ordered build and cook; the legibility items below; paying the
 readiness debt.
 
-**Out:** the core choosing build sites or creating workbenches; research, mining,
+**Out:** the core choosing undeclared build sites or creating a bench inside a cooking
+intent (a separate construction intent may build the declared campfire); research, mining,
 growing, medical recipes; priorities and the standing-commitment `ThinkNode`; eating
 as an agreement (it stays a self-care choice); rescue as a native intent.
 
@@ -174,7 +176,7 @@ as an agreement (it stays a self-care choice); rescue as a native intent.
   Beatrice delivered 20 wood)". "3 of 3 simple meals cooked (Pedro 2, Alvin 1)".
 - **Findable:** the crew log entry's "show" jumps to the blueprint, frame or building,
   or to the workbench; the bill's label in the bench's list names the agreement.
-- **The archive line** is the "since then" reading Fable selects above.
+- **The archive line** uses the "since then" readings decided above.
 
 ## Readiness debt (carried from the hauling deletion)
 
@@ -219,15 +221,18 @@ outside the repository. Method names are cited; no game code is reproduced.
   across is cosmetic (style, glower colour, storage settings) plus in-flight delivery
   reservations (`EnrouteManager.SendReservations`); pawns' paths and job targets are
   rewritten via `NotifyThingTransformed`. The tag therefore has to be ours, moved at both
-  replacement points (and at `FailConstruction`, below), which supports the footprint key
-  proposed above.
+  successful replacement points only. `FailConstruction` ends the intent and its fresh
+  blueprint is ordinary work (decision 7). Nested destruction during a successful
+  transition must not be mistaken for failure (P1).
 - **C2. Who delivered what?** Not recorded natively. Delivery is a `HaulToContainer` job from
   `WorkGiver_ConstructDeliverResourcesToBlueprints`/`…ToFrames`; the deposit toil notifies
   only `INotifyHauledTo` containers, which `Frame` is not. The only per-pawn trace is
   transient (`HaulEnrouteAdded`/`Released` map events). Per-pawn delivery credit needs our
-  own hook at the deposit into a tagged blueprint or frame, deduplicated like hauling's
-  placement receipts. One delivery job may also fill other constructibles within 8 cells:
-  credit must be per container, not per job.
+  own hook around the actual deposit action. A blueprint has no material container:
+  `MakeSolidThingFromBlueprintIfNecessary` first replaces it, then the deposit targets
+  the frame. `DepositHauledThingInContainer` is a toil factory, not the transfer itself.
+  One job reuses the deposit toil for constructibles within 8 cells: credit must be per
+  physical deposit and destination, not just per job/toil (P2).
 - **C3. Delivery is also hauling.** Both delivery work givers are registered under
   **Construction and Hauling**. A pawn with Construction disabled can still deliver
   materials through Hauling, and `GenConstruct.CanConstruct` skips skill checks for the
@@ -237,61 +242,77 @@ outside the repository. Method names are cited; no game code is reproduced.
   a time and adds to the saved `Frame.workDone`, so several pawns can contribute in turn,
   but only the finishing pawn is known natively (`CompleteConstruction(worker)`): quality,
   art and the `ThingsConstructed` record all go to the finisher. Work shares need our own
-  per-tick or per-job accounting; "built by = finisher" is the only native answer (open
-  decision 2).
+  actual work-delta accounting (decision 2). The final increment synchronously calls
+  completion inside the same work action; settle that contribution before retirement,
+  including any native overshoot beyond required work. Reservation time is not work.
 - **C5. Eligibility.** Every construction work giver requires the target to be the
   pawn's faction; ordinary work skips forbidden things (`JobGiver_Work`). The ordered path
-  forbids its blueprint precisely so ordinary work ignores it; a native intent must be
-  unforbidden. `CanConstruct` also checks the work type is active (unless forced),
+  forbids its blueprint precisely so ordinary work ignores it; ordinary native work
+  requires an unforbidden target. A player may later forbid a tagged site without
+  retiring it (entry item 2). `CanConstruct` also checks the work type is active (unless forced),
   construction/artistic skill prerequisites, ideology `MembersCanBuild`, blocking things,
   reach and reservations.
 - **C6. Failure and cancellation.** `Frame.FailConstruction(worker)` destroys the frame
-  (refunding half the materials) and spawns a **new blueprint** with a new ID, so a tag
-  must follow it or the intent must stop (a decision for Gate B). Player cancel destroys a
-  blueprint or frame with `DestroyMode.Cancel` (full refund for a frame). There is no
+  (nominal half refund, randomly rounded with a minimum of one per resource stack)
+  and spawns a **new blueprint** with a new ID. The intent stops as failed, never
+  follows it (decision 7). Player cancel uses `DestroyMode.Cancel`: nominally all
+  materials actually in the frame, not the full build cost. Placement can fail or merge,
+  so these rules do not prove returned-unit counts. There is no
   cancel-specific callback: only generic destroy/despawn signals and map events, without
   the destroy mode on the map events.
 - **C7. Completion hooks.** `CompleteConstruction` sends the faction quest signal
-  `BuiltBuilding`, increments `ThingsConstructed`, notifies a lord, and spawning fires
-  `BuildingSpawned`. Any of these can confirm completion; the finished building's own
-  saved `questTags` fire `Destroyed`/`Despawned` later, which serves the fate reading of
-  "since then" (deconstruction goes through `JobDriver_Deconstruct` with
-  `DestroyMode.Deconstruct`).
+  `BuiltBuilding` **before** destroying materials/the frame and spawning the building;
+  it is not success proof. Counters and notifications are not an identity chain either.
+  Capture the exact successor inside the matching completion context and commit only
+  after successful spawn with the expected map/def/footprint/rotation (P1).
+  Fate tracking uses our saved building ID and destruction/despawn hooks, not assumed
+  inherited `questTags`. Despawn alone proves departure, not destruction;
+  deconstruction uses `DestroyMode.Deconstruct`.
 
 ### Cooking
 
 - **K1. Bill identity is stable.** A bill has a saved `loadID` and
   `GetUniqueLoadID()`; the owning bench is `BillStack.billGiver`. Tagging a bill by load ID
-  works for existing and new bills. (Who assigns the ID after `Clone()` or paste was not
-  verified.)
+  works for existing and new bills. Clipboard/paste initialization assigns a fresh
+  clone ID; see entry item 3. Also retain bench/map and intent generation for attribution.
 - **K2. Per-iteration receipt.** `Toils_Recipe.FinishRecipeAndStartStoringProduct` makes
   the products, consumes the ingredients, then calls
-  `Bill.Notify_IterationCompleted(billDoer, ingredients)` and `RecordsUtility.Notify_BillDone`
-  (`MealsCooked` for meals). That call gives doer and ingredients per iteration; the
-  product list is available in the same toil. Only the bill doer carries ingredients
+  `Bill_Production.Notify_IterationCompleted(billDoer, ingredients)` and
+  `RecordsUtility.Notify_BillDone` (`MealsCooked` for meals). The default
+  `RecipeWorker.ConsumeIngredient` destroys ingredients, and `Thing.Destroy` zeros their
+  stack counts **before** the iteration callback. It cannot supply consumed amounts.
+  Snapshot the actual selected/split portions before consumption and correlate confirmed
+  consumption with products in one iteration context (P2). The production override does
+  not call the base method; patching only the base misses it. Only the bill doer carries ingredients
   (inside its own `DoBill` job), so "who cooked" is unambiguous per iteration.
 - **K3. Products cannot be traced back.** A meal holds its ingredient defs
   (`CompIngredients`) but no bill or cook. Stacks merge (`TryAbsorbStack` destroys the
   absorbed stack) and split on partial eating (`SplitOff` makes a new thing without
-  `questTags`). The "meals' fate" reading of "since then" (open decision 4b) therefore
-  needs our own per-unit tracking, which is fragile. Ordinary cooking at the same bench
-  (4a) comes from the same `Notify_IterationCompleted` hook and is robust.
+  `questTags`). Per-unit fate would need additional tracking and is out of scope.
+  Ordinary cooking at the same bench uses the same joined iteration/product receipts,
+  measured before storage/merge; production does not prove successful storage.
 - **K4. Restriction versus attribution.** The native `pawnRestriction` (and slaves/mechs
   flags, allowed skill range) is enforced in `Bill.PawnAllowedToStartAnew`; a restricted
   bill is exclusive. Attribution-only with binding refusal means leaving the bill open and
   filtering refusing pawns for tagged bills. The ordered path's `ConcordBill` subclass works
   only for bills we create; an **existing** player bill keeps its class, so enforcement there
-  needs a narrow patch on the start check, keyed by tagged load ID.
-- **K5. Quota versus the player's repeat mode.** `Notify_IterationCompleted` decrements the
-  bill's own `repeatCount`. A tagged existing bill may be "forever" or "do until X"
+  needs a narrow patch on the start check, keyed by tagged load ID. Preserve the
+  player's original restrictions: our filter can reject, never broaden eligibility.
+  This candidate check does not re-run throughout queued/running jobs (P3).
+- **K5. Quota versus the player's repeat mode.** The production iteration override
+  decrements `repeatCount` only in repeat-count mode. An existing bill may be "forever" or "do until X"
   (`RecipeWorkerCounter` counts map-wide, never per bill). The intent's quota must be its own
   counter from K2, not the bill's repeat settings, and tagging must not rewrite the player's
   bill.
-- **K6. Interruption and deletion.** Without an unfinished thing, recipe progress lives only
-  in the job and is lost if interrupted; hauled ingredients stay at the bench. (Whether the
-  simple-meal recipe uses an unfinished thing is set in XML and was not verified.)
+- **K6. Interruption and deletion.** Simple meals have no unfinished thing (entry item 1).
+  Ending that job loses its work progress; a new job cannot resume through an unfinished
+  item. This is not a save/load reset: `JobDriver_DoBill.ExposeData` saves `workLeft`,
+  `billStartTick` and `ticksSpentDoingRecipeWork` for the same active job. Observe actual
+  leftover ingredients, including carried ones; do not infer their location from interruption.
   `BillStack.Delete` marks the bill deleted and notifies the bench; `Clear()` does not mark
-  it. Suspend and pause are field toggles with no event, so the intent must poll them.
+  it, and `RemoveIncompletableBills` also removes bills without that flag. Reconcile
+  actual bill-stack membership, not only a delete flag/hook. Suspend and pause are
+  field toggles with no event, so the intent must poll them.
   `DoBill` jobs fail when the bill is deleted, dereferenced or suspended, or the bench is
   unusable.
 
@@ -314,7 +335,8 @@ the repository.
 1. **Recipe XML (K6).** No meal recipe in the installed Core, Biotech or Odyssey data
    sets `unfinishedThingDef` (the only two in any recipe file are components).
    `CookMealSimple` inherits from `CookMealBase` without one. An interrupted simple meal
-   therefore keeps no progress and has no resume path. The campfire lists
+   therefore has no unfinished-item resume path after the job ends; the same saved
+   active job does retain its work state (K6). The campfire lists
    `CookMealSimple` and `CookMealSimpleBulk`; Gate C tags only `CookMealSimple`
    (decision 9).
 2. **Forbid comp (C5).** Every generated blueprint and frame def gets the forbid comp
@@ -322,7 +344,7 @@ the repository.
    forbid a tagged blueprint or frame, and ordinary work (including delivery) then skips
    it. `PlaceBlueprintForBuild` never forbids, so a core-placed blueprint starts
    unforbidden, unlike the ordered path, which forbids its own on purpose. **Freeze:** a
-   forbidden tagged blueprint or frame is not a stop; like a suspended bill it is polled
+   forbidden tagged blueprint or frame is not a stop; it is polled
    and shown ("forbidden by the player") while the deadline runs.
 3. **Cloned bills (K1).** `Clone()` makes a new instance and copies the base and
    production fields one by one; a subclass's extra fields are not copied unless it
@@ -334,7 +356,8 @@ the repository.
 4. **Placing over a tagged blueprint or frame (C6).** The player's build designator first
    cancels frames whose replace tags match the new def (full refund), then wipes the
    footprint with `DestroyMode.Deconstruct`, which the leavings rules treat as cancel for
-   frames (full refund). Blueprints never leave resources. Direct `PlaceBlueprintForBuild`
+   frames (nominal full refund of held contents; actual placements need receipts).
+   Blueprints never leave resources. Direct `PlaceBlueprintForBuild`
    calls use the default `Vanish` wipe: a frame's materials are lost and no leavings
    spawn. **Freeze:** a tagged blueprint or frame wiped by the player's designator is
    `stopped: replaced by the player`, with the refund proved; a vanish wipe is
@@ -362,7 +385,15 @@ the repository.
 | → `expired` | deadline passed before `built` | stage reached |
 
 - A forbidden tagged blueprint or frame stays in its stage with a visible note (entry
-  item 2). Whichever ending event comes first is recorded; later ones are not.
+  item 2). Record one logical ending, after resolving the scoped transition below;
+  "first callback wins" is unsafe.
+- Both legitimate replacements destroy their predecessor before the successor exists.
+  Capture map, key/generation and exact predecessor before entering the method; defer
+  only that context's nested removal. Capture and validate its actual spawned successor
+  before committing the new stage. On failure/exception unwind the guard and reconcile
+  any real removal without inventing a successor. Do not select a same-def occupant by
+  footprint alone. Failure's nested destruction is joined into its single failed record,
+  not a successful transfer to the new ordinary blueprint.
 - The tag moves only at the two replacement points; every other disappearance is an
   event, never a re-tag. The blueprint respawned by `FailConstruction` is untagged
   ordinary work (decision 7).
@@ -371,6 +402,10 @@ the repository.
   records `failed: tagged thing missing after load` rather than guessing.
 - After `built`, the building's fate is watched by thing ID until it leaves the map
   (decision 3).
+- The draft's "all accepted pawns withdrew before any delivery" terminal rule must be
+  reconciled with cooking's unconditional rule before freeze: specify post-contribution
+  shared-intent lifetime separately from binding each pawn's withdrawal. This is not
+  settled by the work-giver patches.
 
 **Cooking** (one intent per tagged bill load ID):
 
@@ -378,7 +413,7 @@ the repository.
 |---|---|---|
 | `offered` → `open` | acceptance; the core added a bill to an existing colony bench, or tagged an existing colony bill | bill load ID, bench thing ID, recipe, quota |
 | `open` → `met` | our counter reaches the quota (decision 8) | per-iteration receipts |
-| → `stopped` | `BillStack.Delete` on the tagged bill; all accepted pawns withdrew | cause |
+| → `stopped` | tagged bill removed from its actual stack, including `Delete`, `Clear` or other removal; all accepted pawns withdrew (lifetime consistency still to specify above) | cause |
 | → `failed` | bench destroyed or despawned | cause |
 | → `expired` | deadline passed | iterations reached |
 
@@ -389,30 +424,39 @@ the repository.
   so the bench stops at the agreed number; a tagged existing bill is never modified
   (K5). Our counter decides `met` in both cases.
 - After retirement the bench is watched for "since then": every later completed
-  iteration at that bench counts as ordinary cooking, per pawn (decision 4).
+  ordinary cooking iteration at that bench is recorded per pawn (decision 4).
+- Reconcile saved load ID and bench membership on load; a missing bill is not replaced
+  by a matching recipe or clone. Before freeze, define generation ownership for jobs
+  begun before tagging and for re-tagged carriers. A physical iteration must not be
+  both a new intent's credit and an old record's "ordinary since" work.
 
 ### P2. Receipt hooks
 
 | Receipt | Hook | Proves |
 |---|---|---|
-| Material delivered | the deposit into a tagged blueprint's or frame's container (`Toils_Haul.DepositHauledThingInContainer`), counted as the container's per-def delta around the deposit | pawn, def, units, container. One job may fill several containers within 8 cells (C2): credit per container, deduplicated per job and toil |
-| Construction work | `JobDriver_ConstructFinishFrame` tick, as the change in the saved `Frame.workDone` while this pawn's job holds the frame | pawn, work units (decision 2) |
-| Finisher | `Frame.CompleteConstruction(worker)` | pawn, building |
-| Failed construction | `Frame.FailConstruction(worker)`: container contents before, leavings spawned after | materials in the frame, units returned. If the leavings cannot be seen, "not recorded" (decision 10) |
-| Cancel | `Thing.Destroy` with `DestroyMode.Cancel` on the tagged blueprint or frame | stopped, refund as for failure |
-| Building fate | `Thing.Destroy`/`DeSpawn` on the tagged building, with the destroy mode | standing / deconstructed / destroyed, clock time |
-| Cooked iteration | `Bill.Notify_IterationCompleted(billDoer, ingredients)` on the tagged bill (base and the `Bill_Production` override) | doer, ingredient defs and counts, tick |
-| Products | `RecordsUtility.Notify_BillDone(billDoer, products)`, called right after in the same toil, matched to the doer's current bill | product def and count |
-| Ordinary cooking since | the same two hooks at the retired bench, any bill | per pawn, per iteration |
-| Bill deleted | `BillStack.Delete` | stopped |
+| Material delivered | wrap the returned deposit toil's `initAction`, after blueprint-to-frame replacement; measure the actual destination's positive per-def transfer delta on each execution | pawn, def, units, frame; identity includes generation, destination and physical deposit occurrence, not just job/toil |
+| Construction work | capture the exact frame and `workDone` before the finish-frame work action, joining its final increment into completion before terminal snapshot | actual work delta, including native overshoot; no final-tick loss or wrapper/completion double count |
+| Finisher | successful `Frame.CompleteConstruction(worker)` context with exact spawned successor validated under P1 | pawn and building, not an early signal |
+| Failed construction | `Frame.FailConstruction(worker)` context: contents before, observed positive leavings placement/merge deltas after | held units and actually returned units; otherwise "not recorded", never nominal fraction or final merged-stack size |
+| Carrier removed | `Thing.Destroy`/`DeSpawn` for blueprint, frame and building, with mode where present and scoped transition/caller provenance | one removal/fate record; distinguish cancel, player-designator replacement, failure and generic departure; despawn alone is not destruction |
+| Ingredient consumption | within the actual recipe finish action, snapshot selected portions after `CalculateIngredients` splitting and before `ConsumeIngredients`, correlate successful consumption | actual consumed defs/counts, not zeroed ingredient references at the later callback |
+| Cooked iteration | actual `Bill_Production.Notify_IterationCompleted` override, joined with consumption and product observations | bill/doer/iteration/tick; this override does not call the base; one logical receipt |
+| Products | `RecordsUtility.Notify_BillDone(billDoer, products)` in that same captured job/bill/iteration context, before storage | produced defs/counts, not successful storage; no bill parameter, so pawn-only matching is insufficient |
+| Ordinary cooking since | the same joined receipt at the retired bench for ordinary iterations, excluding new active-intent credits | per pawn, per iteration, with generation ownership |
+| Bill removed | `BillStack.Delete` plus membership reconciliation covering `Clear`, other removals and restore | stopped, no clone/recipe-based retag |
 
 Receipts carry actor, intent, tick and a deduplication identity, as in hauling;
-restores and retries must not count twice.
+restores and retries must not count twice. These are required boundaries, not a proven
+patch implementation. Gate B must name how the intermediate ingredient snapshot,
+successor identity and final work delta are captured; a method name alone is insufficient.
+Refund hook choice remains Fable's question 4. Without observed return quantities,
+do not infer either returned or lost units by subtraction from a nominal refund.
 
 ### P3. The three filter points (decision 6)
 
-All three return "not available" for a pawn who refused, deferred or withdrew from the
-intent, and do nothing for anyone else. Patch cost is measured as it was for hauling.
+All three candidate filters return "not available" for a pawn who refused, deferred
+or withdrew, otherwise preserving native eligibility and player restrictions. Patch
+cost is measured as it was for hauling. These filters are necessary, **not sufficient**.
 
 1. **Delivery:** `WorkGiver_ConstructDeliverResourcesToBlueprints` and `…ToFrames`.
    Each class is registered under both Construction and Hauling (C3), so one patch per
@@ -421,8 +465,22 @@ intent, and do nothing for anyone else. Patch cost is measured as it was for hau
    skip tagged containers for that pawn, or a refusing pawn could fill the tagged site as
    a side effect of an untagged delivery.
 2. **Construction work:** `WorkGiver_ConstructFinishFrames.JobOnThing` for tagged frames.
-3. **Bill work:** `Bill.PawnAllowedToStartAnew`, keyed by the tagged load ID (K4). There
-   is no resume path to cover: simple meals use no unfinished thing (entry item 1).
+3. **Bill work:** `Bill.PawnAllowedToStartAnew`, keyed by tagged load ID (K4).
+   Simple meals have no unfinished-item resume search, but queued, current and restored
+   active jobs still need the checks below.
+
+**Required before freeze: admission and effect-boundary design.** Jobs can be created
+before tagging/refusal, and a nearby destination queue can already contain the tagged
+site. `TryGetNextDestinationFromQueue` does not rerun our work-giver filters.
+`DoBill` reservation/work checks likewise do not continuously recheck our bill predicate.
+Specify treatment of existing current/queued work at tag admission, with pre-tag
+contribution baselines; do not retroactively claim ordinary work. Recheck generation,
+consent and native validity at actual job admission, queued destination selection,
+blueprint conversion/deposit, each construction work effect, and recipe work/consumption
+or completion effects. Define safe interruption and cargo/ingredient disposition on
+withdrawal, including cleanup effects; no prohibited contribution may slip through.
+Persist ownership across restore and release it on termination. These ordinary-job
+boundaries are required regardless of the separate player-forced-order policy.
 
 **Open for Fable:** whether refusal also binds a player's forced order (a right-click
 "prioritize"), or only the pawn's own work scan. Hauling never had to answer this.
@@ -438,10 +496,13 @@ intent, and do nothing for anyone else. Patch cost is measured as it was for hau
 4. An untagged blueprint within 8 cells of the tagged one: a refusing pawn's delivery to
    the untagged one never fills the tagged one.
 5. Work shared: the acceptor is interrupted mid-frame, a helper finishes; work shares sum
-   to the frame's total, and the helper is the finisher.
+   to measured work deltas (including the final tick and any overshoot), and the helper
+   is the finisher. Failure before a work increment earns no invented work.
 6. Forced construction failure: `failed`, materials and returned units as proved; the
    respawned blueprint is untagged; a new offer needs fresh consent.
-7. Player cancels the blueprint, then (separately) the frame: `stopped` with the refund.
+7. Player cancels the blueprint, then (separately) the partially filled frame: `stopped`
+   with returned units observed or explicitly not recorded. Include odd counts, merging
+   into an existing stack, and placement failure if claiming exact refunds.
 8. A different def appears on the footprint: `failed`, no re-tag.
 9. Save and cold restore at `blueprint` and at `frame`: stage, IDs and credits survive
    exactly, with no double counting.
@@ -449,7 +510,17 @@ intent, and do nothing for anyone else. Patch cost is measured as it was for hau
 11. The player forbids the tagged blueprint: ordinary work stops, the note shows, the
     stage and deadline are unchanged; unforbidding resumes it.
 12. The player places a different building over the tagged frame: `stopped: replaced by
-    the player`, with the full refund proved.
+    the player`, distinguished from a direct vanish wipe and generic destruction;
+    nominal full refund is not a substitute for observed placed units.
+13. Successful blueprint/frame replacements each survive nested removal with exactly
+    one stage transition; failed/aborted replacements do not falsely complete or retag.
+14. Tag with current/queued ordinary delivery or work; then refuse/withdraw while
+    carrying, mid-work and after a nearby destination queue was built. Enforce the
+    specified admission/cleanup disposition with no post-withdrawal credit or effect.
+15. One job deposits into two independently tagged sites through the reused toil:
+    both physical deposits count once at their own destination, including after restore.
+16. Same-def replacement or a later intent at the same footprint never inherits an
+    old generation's credit; pre-tag baselines remain ordinary work.
 
 **Cooking (simple meal at the campfire):**
 1. A core-added bill, quota 2, cooked by the acceptor: two iteration receipts, `met`.
@@ -458,13 +529,22 @@ intent, and do nothing for anyone else. Patch cost is measured as it was for hau
    same bench.
 4. A tagged existing player bill set to "forever": our counter reaches the quota, the
    bill's own settings are unchanged, and later iterations appear in "since then".
-5. The player deletes the tagged bill: `stopped`. The player suspends it: note shown,
-   deadline running.
+5. Delete or clear the tagged bill: `stopped`, including after restore. Suspension
+   follows Fable's eventual decision; the current proposal is a note/deadline running.
 6. An iteration interrupted mid-work: no iteration recorded; ingredients noted at the
    bench only if the game left them there.
 7. Copy and paste the tagged bill: the clone is untagged (entry item 3).
-8. Save and cold restore mid-intent: counter and receipts survive exactly.
+8. Save and cold restore mid-work: the same active job's saved progress, counter and
+   receipts survive exactly; no duplicate or prematurely complete iteration.
 9. The bench is destroyed: `failed`.
+10. Consume a selected partial ingredient stack: the receipt records its nonzero
+    consumed quantity, not the larger source stack or destroyed references' zero.
+    Merge/drop products after production; produced units remain exact without claiming storage.
+11. Tag with a current/queued bill job, then refuse/withdraw during ingredient hauling
+    and recipe work. Enforce the specified admission/cleanup boundary before prohibited
+    effects, without widening the player's bill restrictions.
+12. Re-tag a bill/bench while old jobs or archived records exist: no iteration receives
+    both active-intent credit and ordinary-since attribution, and no stale generation wins.
 
 **Scene (Gate C, decision 11):** one scene, two stages: the campfire agreement, then
 cooking at it. The live read judges only whether the core strings the two agreements

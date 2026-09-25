@@ -120,7 +120,7 @@ fallback, and the migration's live run must measure the #71 corrections.
 
 **Decided 2026-09-25: the hauling migration passed Gate C on the game side; the ordered-job
 hauling model is retired in #80 after the #79 test port.** Verdict, deletion scope and follow-ups:
-[HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md). Next: [construction and cooking](MIGRATION_PRODUCTION.md) through blueprints and bills (Gate A draft; open decisions for Fable).
+[HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md). Next: [construction and cooking](MIGRATION_PRODUCTION.md) through blueprints and bills (Gate A direction signed; assembly review corrected receipt/transition boundaries; Gate B draft needs the concrete boundary design and Fable's open decisions).
 
 If the spike wins: hauling, then campfire construction and cooking through blueprints
 and bills, then rescue through the native rescue job. Each migration keeps the
