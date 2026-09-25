@@ -213,7 +213,7 @@ gate process. The migration pages stay as history.
 
 ## Implementation status: perception (Clawd, 2026-09-25)
 
-**Built, not yet run in the game.** `perceive` is a bridge op (mod `Perception.cs`, no patches):
+**Scripted-captured on staging; not a paired benchmark.** [Evidence](evidence/perception-2026-09-25/README.md): two paused raw receipts round-trip unchanged, 325,064-byte snapshot and 23,946-byte digest. All 12 mood thought groups fit. Empty alert/bill/zone/threat sections remain runtime-unexercised. `perceive` is a bridge op (mod `Perception.cs`, no patches):
 one snapshot per request, built on the game thread from the game's own structures, fogged
 cells excluded, written by a small JSON writer (Unity's serializer drops nested arrays).
 Sections as in the table above, plus `meta` (world, load epoch, map, tick, snapshot ID) and an

@@ -13,6 +13,9 @@ tasks. The construction and cooking migration below is on hold (its bridge work 
 reused); Gates A–C are retired for this phase and the benchmark table is the gate.
 Consent, offers and refusals are kept as phase 2.
 
+Read-only perception has a [recorded staging capture](evidence/perception-2026-09-25/README.md).
+Native actions v1 and the T1 checker are next; no harness advantage is established.
+
 ## Where we are
 
 The "watchable scene" phase delivered the tools and a first recorded trial, not yet

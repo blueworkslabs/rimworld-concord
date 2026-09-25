@@ -24,7 +24,7 @@ remain unchanged.
 | Build a campfire (20 wood) | yes | scripted game tests only |
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
-| Agent harness (perceive and act like a player, minus draft) | [phase definition](docs/HARNESS.md); nothing built | UI-only pilot baseline: T1 in 4 min 12 s, 20 inputs, 12 screenshots (provisional) |
+| Agent harness (perceive and act like a player, minus draft) | [phase definition](docs/HARNESS.md); read-only perception implemented | [Recorded perception capture](docs/evidence/perception-2026-09-25/README.md); UI-only pilot T1 4m12s remains provisional; actions/paired benchmark next |
 | Annotate-only Jev grounding over live core replies | wired in the host runner (`--annotate-grounding`), [gates nothing](docs/trials/JEV_ANNOTATE.md) | not yet exercised; first use is the construction and cooking scene |
 | Offline Jev wake/grounding replay | no gameplay | [authorized retry: 29 valid answers](docs/trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first) and [E2 over the native-haul turns: 27 valid](docs/trials/JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation); transport failures retained; no threshold/routing decision |
 | Native tagged-zone haul spike (historical) | [scripted and live evidence](docs/trials/NATIVE_HAUL_LIVE.md) retained | Superseded by the ordinary-play migration below |

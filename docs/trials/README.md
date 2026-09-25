@@ -100,3 +100,8 @@ pre-existing asthma needing tending. Crew-side follow-ups remain separate.
 ## 2026-09-25 — standard-UI harness feasibility pilot
 
 [Report](../evidence/ui-baseline-2026-09-25/REPORT.md) · [metrics](../evidence/ui-baseline-2026-09-25/metrics.json): first-attempt campfire + three cooking iterations using only standard UI, 251.903s and 20 controls. Provisional: adapter stalls retained, controller cost unavailable; not a harness comparison.
+
+## Harness perception capture, 2026-09-25
+
+[Recorded read-only capture](../evidence/perception-2026-09-25/README.md): paired paused
+wire receipts, full snapshot/digest and size counts. Not a benchmark or model run.

@@ -92,3 +92,13 @@ test('digest geometry is retained at full budget and omitted sections stay retri
  assert.deepEqual(look(s,{by:'section',section:'zones'}).value,s.zones);
  assert.deepEqual(look(s,{by:'section',section:'letters'}).value,s.letters);
 });
+
+test('retained game receipt preserves all real wire fields and fits without losing T1 thoughts',()=>{
+ const raw=JSON.parse(readFileSync(join(root,'tests/fixtures/perception-staging.json'),'utf8'));
+ const s=Snapshot.parse(raw);assert.deepEqual(s,raw,'actual mod fields must not be stripped');
+ assert.equal(s.map.things.length,2072);assert.deepEqual(s.pawns.map(p=>p.mood.thoughts?.length),[5,4,3]);
+ assert.equal(s.pawns.find(p=>p.name==='Beatrice')!.health.hediffs.filter(h=>h.label.startsWith('Asthma')).length,2);
+ const d=digest(s);assert(d.fitted.fits);assert(Buffer.byteLength(JSON.stringify(d))<=24000);
+ assert.deepEqual(d.pawns.map(p=>p.mood.thoughts?.length),[5,4,3]);
+ assert.deepEqual(since(s,{...s,meta:{...s.meta,snapshotId:s.meta.snapshotId+1}}).reset,false);
+});
