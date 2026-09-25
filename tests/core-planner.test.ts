@@ -373,3 +373,18 @@ test('rejected core outputs and failures are counted by cause and shown in-game,
  assert.equal(r.entries.filter(e=>/rejected before publication/.test(e.text)).length,1,'only returned offers/questions get a record');
  assert.equal(Object.keys(c.inspect().proposals).length,0);s.close();
 });
+
+test('a wait after a pawn spoke to the core is never silent: the status says it heard them, and cuts topics at a word',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});
+ const long='Beatrice reported urgent hunger and asked for help finding something edible before she can haul the shared wood pile safely';
+ const ask=await c.planCoreWhenDue(planner(()=>({topics:[{sourceId:'brief',text:long,status:'open'}],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'How are you?',reason:'Ask'}})));
+ if(ask.status!=='applied'||!ask.questionId)throw Error('no question');
+ assert.equal((await c.answerCoreQuestion(ask.questionId,{name:'plea',async answerCore(){return {choice:'say',text:'Please help me find food first.'};}})).status,'delivered');
+ g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');
+ const status=crewReport(c.inspect(),g.data.ticks).observerText??'';const name=c.inspect().characters.A!.name;
+ assert.match(status,new RegExp(`Core: heard ${name}; waiting on `));
+ const topic=/waiting on (.*?)(?: · |$)/.exec(status)![1]!;
+ assert.ok(topic.endsWith('…')&&long.startsWith(topic.slice(0,-1))&&long[topic.length-1]===' ','cut at a word boundary: '+topic);
+ assert.deepEqual(c.inspect().coreState!.turns.at(-1)!.heard,['A']);
+ s.close();
+});

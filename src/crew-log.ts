@@ -142,7 +142,11 @@ export function crewReport(d:Domain,tick:number,status:import('./shared-status.j
  const core=d.coreState,schedule=core?.schedule;
  // A wait is silent in the log; the status line names what the core is waiting on.
  const lastTurn=[...(core?.turns??[])].reverse().find(t=>t.status==='applied'),firstOpen=(core?.topics??[]).find(t=>t.status==='open');
- const coreWaiting=lastTurn?.choice?.action.kind==='wait'||core?.silentWake?`Core: waiting on ${firstOpen?safe(firstOpen.text,120):'new events'}`:undefined;
+ // A wait after a pawn spoke to the core says it heard them (Fable: a silent wait after a plea
+ // reads as being ignored). The topic is cut at a word, not mid-word.
+ const heard=lastTurn?.choice?.action.kind==='wait'&&!core?.silentWake?(lastTurn.heard??[]).map(p=>safe(d.characters[p]?.name??p,40)):[];
+ const clip=(t:string,max:number)=>{const s=t.replace(/\s+/g,' ').trim();if(s.length<=max)return s;const cut=s.slice(0,max);const at=cut.lastIndexOf(' ');return (at>max/2?cut.slice(0,at):cut).replace(/[,;:.\-]+$/,'')+'…';};
+ const coreWaiting=lastTurn?.choice?.action.kind==='wait'||core?.silentWake?`Core: ${heard.length?`heard ${heard.join(', ')}; `:''}waiting on ${firstOpen?clip(firstOpen.text,120):'new events'}`:undefined;
  const coreState=thinking.includes('core')?'Core: thinking':coreWaiting!==undefined?coreWaiting:!core?'Core: not initialized':schedule?.config.maxAttempts!==null&&core.turns.length>=16?'Core: legacy lifetime limit reached':schedule?.blocked?'Core: '+schedule.blocked:schedule&&schedule.config.maxAttempts!==null&&schedule.attempts>=schedule.config.maxAttempts?'Core: configured allowance exhausted':schedule&&schedule.endTick!==null&&tick>=schedule.endTick?'Core: observation window ended':schedule&&schedule.lastAttemptTick!==undefined&&tick-schedule.lastAttemptTick<schedule.config.cooldownTicks?'Core: cooling down':'Core: no turn running; next call depends on operator/scheduler';
  const pendingQuestions=(core?.questions??[]).filter(q=>q.status==='pending'||q.status==='running').map(q=>`${nameForCare(d,q.pawn)}: ${q.status==='running'?'answering':'question awaiting reply'}`);
  const failures=core?.failures,failed=failures&&failures.total>0?`Core outputs failed or rejected: ${failures.total} (${Object.entries(failures.causes).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${k.replace(/^rejected: /,'')} ${n}`).join(', ')})`:undefined;

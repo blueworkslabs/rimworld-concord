@@ -467,7 +467,9 @@ export class Coordinator {
       const controller=new AbortController(),id=randomUUID();this.pending.set('core',controller);
       delete state.silentWake;
       state.turns.push({id,status:'running'});state.revision++;this.commit('core-started','core',{id,causes});
-      return {id,controller,generation:this.generation,view:{...coreView(this.domain,game),...(scheduled?{wakeReasons:causes}:{})}};
+      const view=coreView(this.domain,game);
+      const heard=[...new Set(causes.filter(w=>w.kind==='message').map(w=>view.messages.find(m=>m.id===w.sourceId)?.from).filter((p):p is string=>!!p&&p!=='core'))];
+      return {id,controller,generation:this.generation,heard,view:{...view,...(scheduled?{wakeReasons:causes}:{})}};
     });
     if('idle' in prepared)return {status:'idle' as const,reason:prepared.idle};
     let timedOut=false,returned=false,raw:unknown;
@@ -501,7 +503,7 @@ export class Coordinator {
           if(!topic){topic={...update,proposalIds:this.domain.proposals[update.sourceId]?[update.sourceId]:[]};state.topics.push(topic);}else Object.assign(topic,update);
         }
         if(proposalId&&choice.actionTopicId){const topic=state.topics.find(t=>t.sourceId===choice.actionTopicId)!;if(!topic.proposalIds.includes(proposalId))topic.proposalIds.push(proposalId);}
-        Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{})});state.revision++;
+        Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{}),...(prepared.heard.length?{heard:prepared.heard}:{})});state.revision++;
         this.commit('core-planned','core',{id:prepared.id,kind:a.kind,reason:a.reason,...this.asOf(prepared.view.tick,g)});
         return {status:'applied' as const,proposalId,questionId,choice};
       });

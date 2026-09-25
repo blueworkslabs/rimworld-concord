@@ -31,7 +31,9 @@ export type CoreState={schedule?:import('./core-scheduler.js').CoreSchedule;
  /** Failed core attempts by cause (#71 causes plus named validation rejections), shown in-game. */
  failures?:{total:number;causes:Record<string,number>};
  /** Latest wake that spent no turn (telemetry only, nothing to offer); cleared by the next turn. */
- silentWake?:{tick:number;causes:import('./core-scheduler.js').CoreWake[]};revision:number;brief:{id:string;text:string};topics:CoreTopic[];questions:CoreQuestion[];turns:{id:string;status:'running'|'applied'|'failed';choice?:CoreChoice;proposalId?:string;questionId?:string}[]};
+ silentWake?:{tick:number;causes:import('./core-scheduler.js').CoreWake[]};revision:number;brief:{id:string;text:string};topics:CoreTopic[];questions:CoreQuestion[];turns:{id:string;status:'running'|'applied'|'failed';choice?:CoreChoice;proposalId?:string;questionId?:string;
+ /** Pawns whose message to the core woke this turn: a wait after them is never silent. */
+ heard?:string[]}[]};
 export type CoreQuestionView={observedTick:number;pawn:Pawn;character:Character;question:{id:string;text:string;from:'core'}};
 export interface CoreBackend {readonly name:string;plan(view:CoreView,signal:AbortSignal):Promise<unknown>}
 export interface CoreAnswerBackend {readonly name:string;answerCore(view:CoreQuestionView,signal:AbortSignal):Promise<unknown>}
