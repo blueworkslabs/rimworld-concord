@@ -204,6 +204,15 @@ smaller of the two). A portion that grows while the pawn thinks no longer fails 
 choice; one that shrinks dispatches the smaller current portion. The mod rejects only
 counts above its current portion.
 `option-not-current` does **not** explain why native option generation omitted it.
+**One fresh-menu deliberation (Fable).** When an eat choice fails only because the chosen
+food is no longer on the menu (`option-not-current`), the pawn gets exactly one more
+deliberation, within the same deadline: a fresh question view with the current menu and
+the note "The food you chose is no longer available…". This is new input, not a reroll;
+the pawn may choose again, say something or stay silent. The audit records
+`core-answer-requeued` with the validation. A second rejection stands and is recorded as
+`core-answer-failed`. No other rejection code is requeued. The rejected first answer
+is never published; only a successfully applied answer appears. Cancellation during
+the fresh-state read cannot record a requeue or start a second call.
 Earlier schema failures, cancellations or a question no longer being answerable keep
 their existing errors. This diagnostic is not added to a character's public core perspective.
 

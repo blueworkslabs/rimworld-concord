@@ -1,0 +1,181 @@
+{
+  "runId": "6b250afd-50ce-4fc5-ae7f-88679a6c6462",
+  "behaviorHead": "4b4a05340b8de7463f45e1aac9ccbd659d6d0219",
+  "setupSha256": "fe24b2fa590f24b98a9b2e7f52dd0caa2fb0aa78a242716cf254e531aa0b256c",
+  "runnerDigest": "84e046581867f433e32c7d3bb9d70c0a69514adc7a29534d35d63815706051dc",
+  "fixtureSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+  "protocol": {
+    "policy": "luna-hauling-migration-v1",
+    "nativeMs": 600000,
+    "wallMs": 960000,
+    "cooldownTicks": 300,
+    "nativeIntentStallTicks": 2500,
+    "turnCap": null,
+    "pausedInference": false,
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "low",
+    "jevCalls": 0
+  },
+  "historicalEvidenceUnchanged": true,
+  "harnessPassed": true,
+  "checks": {
+    "evictions": {
+      "status": "live-pass",
+      "nativeEvents": 1937,
+      "pawnEventCounts": {
+        "Alvin": 638,
+        "Beatrice": 636,
+        "Pedro": 663
+      },
+      "jobChurnEvents": 1857,
+      "attentionGaps": 0,
+      "gapKinds": {},
+      "limit": "One live trajectory; not a universal guarantee or an appraisal-quality measurement."
+    },
+    "review": {
+      "status": "partial-live",
+      "firstReviews": [
+        {
+          "waitTick": 8864,
+          "dueTick": 11364,
+          "inputTick": 11415
+        },
+        {
+          "waitTick": 27850,
+          "dueTick": 30350,
+          "inputTick": 30416
+        }
+      ],
+      "interveningRealCauseTick": 14515,
+      "finalPending": {
+        "turnId": "1af45b31-74c1-4587-85b9-111b94363d7b",
+        "waitTick": 30968,
+        "dueTick": 35968,
+        "step": 2
+      },
+      "finalTick": 35790,
+      "secondReviews": 0,
+      "limit": "Two separate first-review nudges, not one two-review chain. First chain reset by urgent telemetry. Second review due after run end. Stop-at-two remains scripted-tested only."
+    },
+    "heard": {
+      "status": "live-message-pass",
+      "pawn": "Pedro",
+      "messageTick": 4741,
+      "inputTick": 5310,
+      "questionTo": "Beatrice",
+      "publishedTick": 5826,
+      "videoSeconds": 100,
+      "visibleText": "Core: heard Pedro; no reply to them yet",
+      "typedRequestCount": 0,
+      "limit": "Ordinary pawn message reporting a food/access problem, not a typed Request record. Typed-request branch unexercised."
+    },
+    "mealGate": {
+      "status": "live-pass",
+      "openReceiptInputTicks": [
+        1682,
+        6435,
+        20089
+      ],
+      "ineligiblePawns": [
+        "Alvin",
+        "Beatrice",
+        "Alvin"
+      ],
+      "questionRecipientLeaks": 0,
+      "coreInputsAudited": 16,
+      "completedMeals": [
+        {
+          "pawn": "Alvin",
+          "consumed": 12
+        },
+        {
+          "pawn": "Beatrice",
+          "consumed": 10
+        },
+        {
+          "pawn": "Alvin",
+          "consumed": 10
+        }
+      ],
+      "consumptionReportQuestions": 0,
+      "limit": "Receipt-open exclusion exercised three times. No post-completion consumption-report question chosen, so that follow-up branch remains unexercised."
+    }
+  },
+  "calls": {
+    "core": 16,
+    "coreAnswer": 6,
+    "reflection": 21,
+    "decision": 1,
+    "returned": 44,
+    "backendFailures": 0,
+    "jev": 0,
+    "applicationFailures": {
+      "coreUnavailableChoice": 1,
+      "eatingOptionNotCurrent": 2
+    },
+    "coreApplied": 15
+  },
+  "hauling": {
+    "quota": 75,
+    "delivered": 75,
+    "accepted": [
+      "Beatrice"
+    ],
+    "credit": {
+      "Pedro": 55,
+      "Beatrice": 20
+    },
+    "peakHolders": 2,
+    "overshoot": 0,
+    "violations": 0,
+    "ordinaryArrivals": 45,
+    "ordinaryRemoved": 0
+  },
+  "nativeElapsedMs": 600748,
+  "samples": 373,
+  "allSamplesUnpaused": true,
+  "pairedRestore": true,
+  "coldRestore": true,
+  "actualGameLedgerCompared": true,
+  "gameProcessRestarted": false,
+  "hostProcessIds": [
+    713387,
+    731122
+  ],
+  "coordinatorProcessIds": [
+    186206,
+    187263
+  ],
+  "accountingUnchangedByCold": true,
+  "preservation": {
+    "saveCount": 422,
+    "unchanged": true,
+    "added": [
+      "lab-concord-followup-1790350043410.rws"
+    ],
+    "modRestored": true
+  },
+  "stagingStopped": true,
+  "sourceSha256": {
+    "receipt.json": "50d803b9c396f5b190b497806a2704515da7c72e60bfb7c7d5392eb473d3419f",
+    "receipt.json.cold.json": "3c41ae99dda5a21cd0637c0d3d6ea54aef886d03cfe2841827be4bfcd8601ed8",
+    "ongoing-6b250afd-50ce-4fc5-ae7f-88679a6c6462.db": "7aeda66c8d87e3540cf7598434c6dedbc4080dcf1c45307806cb139f66d53ce9",
+    "setup.json": "ff656c1f76de60f1f1ec3ce4dcb3d04a91317f04c56fc16a98ce40f46f5c28af",
+    "preservation.json": "ea89d96ed66720e0fa1bada3e560d0b3aa3ad4db4f5a3c898c39884bff7220b7"
+  },
+  "recording": {
+    "file": "pipeline-regression-2026-09-25.mp4",
+    "sha256": "777f92dee18aca1e16a0e24292993d80c2a3e266da4411475bc0c16c3f088323",
+    "remoteHashMatched": true,
+    "bytes": 15312747,
+    "durationSeconds": 603.666667,
+    "frames": 9055,
+    "width": 1280,
+    "height": 800,
+    "fps": "15/1",
+    "audio": false,
+    "uncut": true,
+    "droppedFrames": 0,
+    "duplicatedFrames": 1
+  }
+}

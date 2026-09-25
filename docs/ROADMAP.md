@@ -42,7 +42,7 @@ is complete. The recording-only read is complete; [receipt-backed findings](tria
 
 The hauling migration uses the signed [strict fallback](trials/HAULING_MIGRATION_STRICT.md): growing exhausted its two fix/recheck rounds without a clean result. Strict passed 15/16 scripted checks and both matched quotas; subsequent targeted mixed-item and rescue checks passed, closing those two evidence gaps. The [one-map clock check](trials/HAULING_MIGRATION_CLOCK_WAKE.md) passed; multi-map is explicitly deferred. The wake rule is settled (Fable): telemetry-only wakes are silent unless something is offerable or a band worsens to urgent (E2: turns 3, 6, 13 silent; 4, 5, 7 awake); [ordinary-play recorded rehearsal and process-restart restore](trials/HAULING_MIGRATION_LIVE_FREEZE.md) pass on merged #73. The signed [ordinary-play live recording](trials/HAULING_MIGRATION_LIVE.md) is complete; Fable’s cold read and the post-read audit are complete: three returned proposals were rejected before publication, no hauling intent opened, and failure counts remained off-screen. Receipt-age prefixes passed their observed scope; late offer answers were not exercised. Fable classified that run as retained diagnosis: Gate C not passed, no deletion. The six pipeline corrections merged in #77 after independent review; the [same-fixture authorized rerun](trials/HAULING_MIGRATION_PIPELINE_RERUN.md) has completed its recording-only read and receipt audit: 75 credited live, with 60 gross ordinary arrivals minus 15 recorded removal yielding 120 stock. Failure counts and required stale prefixes are visible; acknowledgement and archive display limitations remain. Fable [passed migration Gate C on the game side](trials/HAULING_MIGRATION_GATE_C.md); the ordered-haul retirement is documented in [the deletion ledger](MIGRATION_HAULING.md#retiring-the-ordered-haul). This is not a crew-side cognitive pass.
 
-The [post-Gate-C follow-up verification](trials/POST_GATE_C_FOLLOWUPS.md) covers items 1–5, including core/reflection evidence matching their fitted inputs. Item 7 is [diagnosed](trials/ATTENTION_EVICTIONS.md) (job churn plus appraisal items that the appraiser-less runner never picks up; a replay of the fixes loses 0 of 17). Per Fable, pawn need bands are now native texture (urgent Food/Rest is queued deliberation). Item 6 is [implemented](CORE.md#a-bounded-review-after-a-wait-post-gate-c-item-6): at most two review wakes per deliberate wait. This is not another live-model acceptance run.
+The [post-Gate-C follow-up verification](trials/POST_GATE_C_FOLLOWUPS.md) covers items 1–5, including core/reflection evidence matching their fitted inputs. Item 7 is [diagnosed](trials/ATTENTION_EVICTIONS.md) (job churn plus appraisal items that the appraiser-less runner never picks up; a replay of the fixes loses 0 of 17). Per Fable, pawn need bands are now native texture (urgent Food/Rest is queued deliberation). Item 6 is [implemented](CORE.md#a-bounded-review-after-a-wait-post-gate-c-item-6): at most two review wakes per deliberate wait. The later [same-setup pipeline regression](trials/PIPELINE_REGRESSION.md) observed zero attention losses, the heard-message UI and three open-meal recipient exclusions. Two separate first-review nudges fired, but neither chain reached its second review; stop-at-two remains unexercised live. Three fresh-state application rejections remain in the evidence. No new scene verdict or construction/cooking acceptance.
 
 ## Next phase: work with RimWorld's planner
 
@@ -143,6 +143,17 @@ Luna's, agreement, and counterfactual avoidable calls. Include consequential eve
 that must not be missed and validate thresholds on held-out cases. Logged
 recommendations only.
 
+The [first core wake/grounding replay attempt](trials/JEV_REPLAY.md#result--2026-09-25-transport-failure-not-a-scoring-result)
+produced 29 transport failures on 2026-09-25. After certificate renewal, an
+[owner-authorized unchanged retry](trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first)
+returned 29 valid answers for USD 0.004345194. The [E2 pass](trials/JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation)
+returned 27 valid answers for USD 0.002978598 after projection/pairing review. Frozen
+labels: 8 event, 6 band-change, no quiet examples; at 0.5 defer one event and no bands.
+The report retains the completed interpretations and later wake-rule correction;
+held-out validation remains pending. No gating threshold or live wiring is introduced.
+Snapshot-only grounding cannot test inference-time arrivals or validate historical
+coordinator bookkeeping.
+
 ## Later experiments
 
 - **Standing commitments in the think tree**: a `ThinkNode` that consults cached
@@ -156,7 +167,9 @@ recommendations only.
   instead of new hand-built capabilities.
 - **Core planning pauses** for substantial planning, under an operator policy: visible,
   released on completion or timeout, never bypassing consent.
-- **Jev in the loop**, one use at a time and only after offline evidence.
+- **Jev in the loop**, one use at a time and only after offline evidence. First use:
+  [annotate-only grounding](trials/JEV_ANNOTATE.md) over live core replies on the
+  construction and cooking scene; scores journaled, nothing gated.
 - **Pawn-to-pawn offers**, **human contact** (suggestions to the core, letters,
   comms-station conversations), **unattended operation** (after its own scope and
   spending decision), the gravship campaign, an installer and an OpenClaw operator

@@ -5,7 +5,7 @@ import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
 import {deferredOffers} from './reoffers.js';
 import {CoreScheduleConfig,coreAdmission,scheduleReview} from './core-scheduler.js';
-import {questionContext,coreView,fitCore,validateCoreChoice,CoreChoice,CoreRejection,coreFailureCause,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
+import {questionContext,coreView,fitCore,validateCoreChoice,CoreChoice,CoreRejection,coreFailureCause,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView,type CoreQuestion} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
@@ -14,7 +14,7 @@ import {newestReceiptTick} from './observation-age.js';
 import {NativeHaulConfig,NativeHaulEntry,nativeEntries,orderedEntries,fromLegacy,IntentView,planIntentOffer,counterAdoptable,notOfferedReason,progress as intentProgress} from './native-intents.js';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
-import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal,type AlternativeRequest } from './protocol.js';
+import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal,type AlternativeRequest,type Pawn } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
 import {rescueQuestionInvalid} from './decision-validity.js';
 import { nativeAttention,attentionInterrupt,isFoodMemory } from './routing.js';
@@ -561,6 +561,12 @@ export class Coordinator {
       return {status:combined.aborted?'interrupted' as const:'failed' as const};
     }finally{clearTimeout(timer);if(this.pending.get('core')===prepared.controller)this.pending.delete('core');await this.serial(async()=>{});}
   }
+  private questionView(q:CoreQuestion,g:GameState,own:Pawn,requeued?:string):CoreQuestionView{
+    const view:CoreQuestionView={observedTick:g.ticks,pawn:groundedPawn(this.domain,g,own),character:structuredClone(this.domain.characters[q.pawn]!),question:{id:q.id,text:q.text,from:'core',...(requeued?{requeued}:{})}};
+    if(q.reportSelfCareId)view.question.reportSelfCare=coreView(this.domain,g).selfCare.find(c=>c.id===q.reportSelfCareId&&c.pawn===q.pawn);
+    view.pawn.eating=own.eating?{...structuredClone(own.eating),options:this.game.eat?eatingOptions(this.domain,g,own):[]}:undefined;
+    return view;
+  }
   async answerCoreQuestion(id:string,backend:CoreAnswerBackend,timeoutMs=45000,signal=new AbortController().signal){
     if(!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>115000)throw Error('Invalid question timeout');
     const prepared=await this.serial(async()=>{
@@ -569,15 +575,15 @@ export class Coordinator {
       if(!q||q.status!=='pending'||this.pending.has(q.pawn))throw Error('Question unavailable');
       const own=g.pawns.find(p=>p.id===q.pawn);if(!own||own.downed){q.status='failed';this.commit('core-answer-unavailable',q.pawn,{id});throw Error('Pawn unavailable');}
       const controller=new AbortController();this.pending.set(q.pawn,controller);q.status='running';this.commit('core-answer-started',q.pawn,{id});
-      const view:CoreQuestionView={observedTick:g.ticks,pawn:groundedPawn(this.domain,g,own),character:structuredClone(this.domain.characters[q.pawn]!),question:{id,text:q.text,from:'core'}};
-      if(q.reportSelfCareId)view.question.reportSelfCare=coreView(this.domain,g).selfCare.find(c=>c.id===q.reportSelfCareId&&c.pawn===q.pawn);
-      view.pawn.eating=own.eating?{...structuredClone(own.eating),options:this.game.eat?eatingOptions(this.domain,g,own):[]}:undefined;
-      return {pawn:q.pawn,controller,generation:this.generation,view};
+      return {pawn:q.pawn,controller,generation:this.generation,view:this.questionView(q,g,own)};
     });
     const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>prepared.controller.abort(),timeoutMs);
-    try{
-      const choice=CoreAnswerChoice.parse(await bounded(combined,()=>backend.answerCore(prepared.view,combined)));
-      if(choice.choice==='eat'&&!prepared.view.pawn.eating?.options.some(o=>o.thing===choice.thing))throw Error('Eating choice was not offered');
+    // Fable: an eating answer rejected because the chosen food left the menu gets exactly one
+    // more deliberation on the fresh menu (new input, not a reroll), inside the same deadline.
+    let view=prepared.view;
+    try{for(let attempt=0;;attempt++)try{
+      const choice=CoreAnswerChoice.parse(await bounded(combined,()=>backend.answerCore(view,combined)));
+      if(choice.choice==='eat'&&!view.pawn.eating?.options.some(o=>o.thing===choice.thing))throw Error('Eating choice was not offered');
       return await this.serial(async()=>{
         combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale answer');
         const g=await this.current();this.ingest(g);combined.throwIfAborted();const q=this.domain.coreState!.questions.find(q=>q.id===id)!;
@@ -587,7 +593,7 @@ export class Coordinator {
         let care:import('./protocol.js').SelfCare|undefined;
         if(choice.choice==='eat'){
           const own=g.pawns.find(p=>p.id===q.pawn)!;const action=eatingOptions(this.domain,g,own).find(o=>o.thing===choice.thing);
-          const validation=revalidateEating(this.domain,g,own,prepared.view.pawn,choice.thing,!!this.game.eat);
+          const validation=revalidateEating(this.domain,g,own,view.pawn,choice.thing,!!this.game.eat);
           if(validation.code)throw new EatingRevalidationError(validation);
           if(!action||validation.dispatchCount===null)throw Error('Validated eating option missing');
           care={id:randomUUID(),pawn:q.pawn,questionId:id,action:{...structuredClone(action),count:validation.dispatchCount},mapId:own.eating!.mapId,untilTick:g.ticks+action.maxTicks};
@@ -595,11 +601,23 @@ export class Coordinator {
         }
         const m:SocialMessage={id:randomUUID(),exchangeId:id,tick:g.ticks,from:q.pawn,to:'core',fromName:ch.name,toName:'Core',text:choice.text};
         q.messages.push(m);q.status='answered';ch.messages=[...(ch.messages??[]),structuredClone(m)].slice(-16);
-        this.domain.coreState!.revision++;this.commit('core-answer',q.pawn,{...m,...this.asOf(prepared.view.observedTick,g)});
+        this.domain.coreState!.revision++;this.commit('core-answer',q.pawn,{...m,...this.asOf(view.observedTick,g)});
         if(care){this.commit('self-care-chosen',q.pawn,care);await this.dispatchEating(care);}
         return {status:'delivered' as const};
       });
-    }catch(error){await this.serial(async()=>{if(this.generation===prepared.generation){const q=this.domain.coreState!.questions.find(q=>q.id===id)!;q.status='failed';this.domain.coreState!.revision++;const cause=error instanceof EatingRevalidationError?'eating: '+error.validation.code:coreFailureCause(error,{cancelled:combined.aborted,deadline:false,returned:false});this.noteOtherLaneFailure('core-answer',cause);this.commit('core-answer-failed',q.pawn,{id,cause,error:String(error),...(error instanceof EatingRevalidationError?{eatingValidation:error.validation}:{})});}});return {status:combined.aborted?'interrupted' as const:'failed' as const};}
+    }catch(error){
+      if(attempt>0||combined.aborted||!(error instanceof EatingRevalidationError)||error.validation.code!=='option-not-current')throw error;
+      const next=await this.serial(async()=>{
+        if(this.generation!==prepared.generation)return undefined;
+        combined.throwIfAborted();
+        const g=await this.current();this.ingest(g);combined.throwIfAborted();const q=this.domain.coreState!.questions.find(q=>q.id===id)!;const own=g.pawns.find(p=>p.id===q.pawn);
+        if(q.status!=='running'||!own||own.downed)return undefined;
+        this.commit('core-answer-requeued',q.pawn,{id,cause:'eating: option-not-current',eatingValidation:error.validation});
+        return this.questionView(q,g,own,'The food you chose is no longer available. This is the current menu; choose again, say something, or stay silent.');
+      });
+      if(!next)throw error;
+      view=next;
+    }}catch(error){await this.serial(async()=>{if(this.generation===prepared.generation){const q=this.domain.coreState!.questions.find(q=>q.id===id)!;q.status='failed';this.domain.coreState!.revision++;const cause=error instanceof EatingRevalidationError?'eating: '+error.validation.code:coreFailureCause(error,{cancelled:combined.aborted,deadline:false,returned:false});this.noteOtherLaneFailure('core-answer',cause);this.commit('core-answer-failed',q.pawn,{id,cause,error:String(error),...(error instanceof EatingRevalidationError?{eatingValidation:error.validation}:{})});}});return {status:combined.aborted?'interrupted' as const:'failed' as const};}
     finally{clearTimeout(timer);if(this.pending.get(prepared.pawn)===prepared.controller)this.pending.delete(prepared.pawn);await this.serial(async()=>{});}
   }
   /** Freeze the one shared native intent the core may offer. Pawns the game says cannot

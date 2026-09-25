@@ -1,0 +1,1645 @@
+{
+  "kind": "jev-replay-authorized-retry",
+  "date": "2026-09-25",
+  "runtimeCommit": "eab4502941ab6d30d5531bf194f6be45ee3223ce",
+  "retryAuthorization": "Owner authorized retry after certificate renewal; original transport-failed run retained separately.",
+  "priorRunId": "96620234-2be3-4443-9f34-bf9a43abe65f",
+  "priorEvidence": "jev-replay.json",
+  "run": {
+    "version": "jev-replay-v2",
+    "runId": "958be9a8-c74d-41a3-a16d-c136fc96101e",
+    "createdAt": "2026-09-25T05:16:52.362Z",
+    "evidence": "docs/evidence/recorded-scene.json",
+    "evidenceSha256": "4181c4e8674ddfbe787a3099c07ba6d47f937615cadeeef3b0ab85dd69a8c607",
+    "requestsSha256": "0ee8e76a8b488561aecb039023e3753b1fb0308bb6948b55e83a1bd8cbe69796",
+    "model": "typesafe/jev-1.13",
+    "expectedModel": "typesafe/jev-1.13-20260917",
+    "ceilingUSD": 0.002,
+    "calls": 29,
+    "status": "completed",
+    "finishedAt": "2026-09-25T05:17:05.194Z",
+    "ledger": {
+      "calls": 29,
+      "reservedUSD": 0.058,
+      "reportedUSD": 0.004345194
+    }
+  },
+  "outcome": "completed_all_responses_valid",
+  "preflight": {
+    "expiredCertificates": 0,
+    "protectedAuthenticationHTTPStatus": 200,
+    "requestBodiesUnchanged": true,
+    "evidenceHashUnchanged": true
+  },
+  "attempts": 29,
+  "received": 29,
+  "validResponses": 29,
+  "failures": 0,
+  "reportedCostUSD": 0.004345194,
+  "actualModels": [
+    "typesafe/jev-1.13-20260917"
+  ],
+  "privateArtifactHashes": {
+    "ledger.sqlite": "f7dd6a3572a4f476c58c47844d6ac9d49080c761c481302d5da10190ff7debb2",
+    "requests.json": "d8a8485e9fe7cdeea359404289fe1a03f83ee104bf8037a5e0cc7a482caa8ee7",
+    "report.json": "4a92ffa7da2ec58d6e0b300515e36eded26f5bd87a477a9c9c91b9065d5c531e",
+    "run.json": "cceb1f545210e1806834dbe698ed4a3b94c54e9fdf88accdd3166383f8297426",
+    "attempts.jsonl": "cec4d6fa49745d0851346806ee0a929c9197969bf6c0af6ea6749314c5bffa76"
+  },
+  "sourceTruth": {
+    "known": 14,
+    "unknown": 1,
+    "consequential": 14,
+    "unchanged": 0,
+    "consequenceDefinition": "Non-wait action, new topic, or any status/text change to an open topic."
+  },
+  "report": {
+    "evidenceSha256": "4181c4e8674ddfbe787a3099c07ba6d47f937615cadeeef3b0ab85dd69a8c607",
+    "requestsSha256": "0ee8e76a8b488561aecb039023e3753b1fb0308bb6948b55e83a1bd8cbe69796",
+    "model": "typesafe/jev-1.13",
+    "expectedModel": "typesafe/jev-1.13-20260917",
+    "status": "completed",
+    "version": {
+      "replay": "jev-replay-v2",
+      "questions": "jev-questions-v2",
+      "expectedModel": "typesafe/jev-1.13-20260917"
+    },
+    "cases": 15,
+    "calls": 29,
+    "failed": 0,
+    "reportedCostUSD": 0.004345193999999999,
+    "unknown": {
+      "noWakeAnswer": 0,
+      "noUsableChoice": 1,
+      "misaligned": 0,
+      "ambiguousApplied": 0
+    },
+    "wake": {
+      "turns": [
+        {
+          "index": 0,
+          "tick": 78,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "worthTurn": 0.54,
+          "asksCore": 0.05,
+          "topics": [],
+          "messages": []
+        },
+        {
+          "index": 1,
+          "tick": 1641,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 3,
+          "worthTurn": 0.65,
+          "asksCore": 0.07,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.78
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 1
+              }
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "tick": 3150,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "worthTurn": 0.94,
+          "asksCore": 0.08,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.95
+              }
+            },
+            {
+              "key": "t1",
+              "id": "a3fbd715-e0f7-4e98-b876-e06a2fd0b47d",
+              "actual": "resolves",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.93
+              }
+            },
+            {
+              "key": "t2",
+              "id": "4f5e338d-bb1e-48bc-bf0a-f390548da433",
+              "actual": "resolves",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.99
+              }
+            },
+            {
+              "key": "t3",
+              "id": "826a323f-d1ea-4b09-88ae-c1433c8dcaab",
+              "actual": "resolves",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.99
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.87
+              }
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "tick": 4829,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 3,
+          "worthTurn": 0.87,
+          "asksCore": 0.07,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.86
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.96
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.99
+              }
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "tick": 6585,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 2,
+          "worthTurn": 0.91,
+          "asksCore": 0.1,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.95
+              }
+            },
+            {
+              "key": "t1",
+              "id": "9abef013-c43d-456b-85d1-0b55369f2032",
+              "actual": "resolves",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.99
+              }
+            },
+            {
+              "key": "t2",
+              "id": "6f25a83b-64d5-4041-9ee2-3d750138fb6f",
+              "actual": "resolves",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.97
+              }
+            },
+            {
+              "key": "t3",
+              "id": "e5b58d8d-0672-4c80-8e0c-b4de04cc45fd",
+              "actual": "resolves",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.97
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.52
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t3",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t1",
+                "confidence": 0.49
+              }
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "tick": 7943,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "worthTurn": 0.88,
+          "asksCore": 0.09,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.47
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.81
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.89
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.92
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.55
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.96
+              }
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "tick": 18279,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "worthTurn": 0.88,
+          "asksCore": 0.09,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.55
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.78
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.84
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.52
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.56
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.23
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.76
+              }
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "tick": 19461,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "worthTurn": 0.9,
+          "asksCore": 0.93,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.76
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.81
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.88
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.9
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.58
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "new",
+                "confidence": 0.27
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.61
+              }
+            },
+            {
+              "key": "m3",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.44
+              }
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "tick": 22454,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "worthTurn": 0.89,
+          "asksCore": 0.93,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.68
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.78
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.88
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.53
+              }
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.5
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.79
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "new",
+                "confidence": 0.27
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.94
+              }
+            },
+            {
+              "key": "m3",
+              "jev": {
+                "choice": "t4",
+                "confidence": 1
+              }
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "tick": 24597,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "worthTurn": 0.88,
+          "asksCore": 0.87,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.5
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.74
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.83
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.47
+              }
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.57
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.87
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.62
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.94
+              }
+            },
+            {
+              "key": "m3",
+              "jev": {
+                "choice": "t4",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m4",
+              "jev": {
+                "choice": "new",
+                "confidence": 0.29
+              }
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "tick": 26246,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "worthTurn": 0.89,
+          "asksCore": 0.87,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.33
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.79
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.92
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.36
+              }
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.65
+              }
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": "blocks",
+              "jev": {
+                "choice": "unrelated",
+                "confidence": 0.35
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.91
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.61
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.98
+              }
+            },
+            {
+              "key": "m3",
+              "jev": {
+                "choice": "t4",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m4",
+              "jev": {
+                "choice": "t5",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m5",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.34
+              }
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "tick": 31508,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "worthTurn": 0.9,
+          "asksCore": 0.91,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.49
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.85
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.9
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "unrelated",
+                "confidence": 0.41
+              }
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.73
+              }
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "unrelated",
+                "confidence": 0.33
+              }
+            },
+            {
+              "key": "t6",
+              "id": "741854ca-a725-435e-996a-bb25b2d4373d",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.35
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.95
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.68
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.95
+              }
+            },
+            {
+              "key": "m3",
+              "jev": {
+                "choice": "t4",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m4",
+              "jev": {
+                "choice": "t5",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m5",
+              "jev": {
+                "choice": "t6",
+                "confidence": 1
+              }
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "tick": 32999,
+          "alignment": "aligned",
+          "applied": "no",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 3,
+          "worthTurn": 0.92,
+          "asksCore": 0.85,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.49
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.76
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.65
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "unrelated",
+                "confidence": 0.63
+              }
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.59
+              }
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "unrelated",
+                "confidence": 0.74
+              }
+            },
+            {
+              "key": "t6",
+              "id": "741854ca-a725-435e-996a-bb25b2d4373d",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.55
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.8
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.92
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t4",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m3",
+              "jev": {
+                "choice": "t5",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m4",
+              "jev": {
+                "choice": "t6",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m5",
+              "jev": {
+                "choice": "t6",
+                "confidence": 0.9
+              }
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "tick": 33865,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "worthTurn": 0.92,
+          "asksCore": 0.88,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.43
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.82
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.79
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "unrelated",
+              "jev": {
+                "choice": "unrelated",
+                "confidence": 0.38
+              }
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances",
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.66
+              }
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": "advances",
+              "jev": {
+                "choice": "unrelated",
+                "confidence": 0.69
+              }
+            },
+            {
+              "key": "t6",
+              "id": "741854ca-a725-435e-996a-bb25b2d4373d",
+              "actual": "advances",
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.56
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.83
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.94
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t4",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m3",
+              "jev": {
+                "choice": "t5",
+                "confidence": 0.98
+              }
+            },
+            {
+              "key": "m4",
+              "jev": {
+                "choice": "t6",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m5",
+              "jev": {
+                "choice": "t6",
+                "confidence": 0.97
+              }
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "tick": 35502,
+          "alignment": "none",
+          "applied": "unknown",
+          "actualAction": null,
+          "actualConsequential": null,
+          "newTopics": 0,
+          "worthTurn": 0.91,
+          "asksCore": 0.88,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": null,
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.6
+              }
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": null,
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.72
+              }
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": null,
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.69
+              }
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": null,
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.3
+              }
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": null,
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.84
+              }
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": null,
+              "jev": {
+                "choice": "advances",
+                "confidence": 0.44
+              }
+            },
+            {
+              "key": "t6",
+              "id": "741854ca-a725-435e-996a-bb25b2d4373d",
+              "actual": null,
+              "jev": {
+                "choice": "resolves",
+                "confidence": 0.4
+              }
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0",
+              "jev": {
+                "choice": "t2",
+                "confidence": 0.78
+              }
+            },
+            {
+              "key": "m1",
+              "jev": {
+                "choice": "t4",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m2",
+              "jev": {
+                "choice": "t5",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m3",
+              "jev": {
+                "choice": "t6",
+                "confidence": 1
+              }
+            },
+            {
+              "key": "m4",
+              "jev": {
+                "choice": "t6",
+                "confidence": 0.73
+              }
+            },
+            {
+              "key": "m5",
+              "jev": {
+                "choice": "t0",
+                "confidence": 0.42
+              }
+            }
+          ]
+        }
+      ],
+      "curve": [
+        {
+          "threshold": 0.3,
+          "scored": 14,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.4,
+          "scored": 14,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.5,
+          "scored": 14,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.6,
+          "scored": 14,
+          "deferred": 1,
+          "avoidable": 0,
+          "missed": 1
+        },
+        {
+          "threshold": 0.7,
+          "scored": 14,
+          "deferred": 2,
+          "avoidable": 0,
+          "missed": 2
+        },
+        {
+          "threshold": 0.8,
+          "scored": 14,
+          "deferred": 2,
+          "avoidable": 0,
+          "missed": 2
+        },
+        {
+          "threshold": 0.9,
+          "scored": 14,
+          "deferred": 8,
+          "avoidable": 0,
+          "missed": 8
+        }
+      ],
+      "topicPairs": 58,
+      "confusion": {
+        "advances": {
+          "advances": 20,
+          "resolves": 11,
+          "unrelated": 1
+        },
+        "resolves": {
+          "resolves": 6
+        },
+        "unrelated": {
+          "resolves": 11,
+          "advances": 3,
+          "unrelated": 5
+        },
+        "blocks": {
+          "unrelated": 1
+        }
+      },
+      "closureAgreement": {
+        "resolvesPredicted": 28,
+        "resolvesActual": 6,
+        "resolvesAgreed": 6,
+        "exactAgreement": 0.5344827586206896
+      },
+      "coreWaits": 5
+    },
+    "grounding": {
+      "turns": [
+        {
+          "index": 0,
+          "tick": 78,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.17,
+            "completion_without_receipt": 0.05,
+            "speaks_for_other": 0.04,
+            "instruction_to_pawn": 0.04,
+            "forecast_as_certainty": 0.03,
+            "reason_contradicts_action": 0.04,
+            "observation_time_as_event_time": 0.2
+          }
+        },
+        {
+          "index": 1,
+          "tick": 1641,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.24,
+            "completion_without_receipt": 0.04,
+            "speaks_for_other": 0.13,
+            "instruction_to_pawn": 0.04,
+            "forecast_as_certainty": 0.04,
+            "reason_contradicts_action": 0.06,
+            "observation_time_as_event_time": 0.17
+          }
+        },
+        {
+          "index": 2,
+          "tick": 3150,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.5,
+            "completion_without_receipt": 0.12,
+            "speaks_for_other": 0.4,
+            "instruction_to_pawn": 0.04,
+            "forecast_as_certainty": 0.05,
+            "reason_contradicts_action": 0.05,
+            "observation_time_as_event_time": 0.18
+          }
+        },
+        {
+          "index": 3,
+          "tick": 4829,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.23,
+            "completion_without_receipt": 0.07,
+            "speaks_for_other": 0.1,
+            "instruction_to_pawn": 0.05,
+            "forecast_as_certainty": 0.05,
+            "reason_contradicts_action": 0.04,
+            "observation_time_as_event_time": 0.37
+          }
+        },
+        {
+          "index": 4,
+          "tick": 6585,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.38,
+            "completion_without_receipt": 0.1,
+            "speaks_for_other": 0.23,
+            "instruction_to_pawn": 0.05,
+            "forecast_as_certainty": 0.07,
+            "reason_contradicts_action": 0.07,
+            "observation_time_as_event_time": 0.16
+          }
+        },
+        {
+          "index": 5,
+          "tick": 7943,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.54,
+            "completion_without_receipt": 0.13,
+            "speaks_for_other": 0.1,
+            "instruction_to_pawn": 0.04,
+            "forecast_as_certainty": 0.05,
+            "reason_contradicts_action": 0.07,
+            "observation_time_as_event_time": 0.7
+          }
+        },
+        {
+          "index": 6,
+          "tick": 18279,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.38,
+            "completion_without_receipt": 0.12,
+            "speaks_for_other": 0.09,
+            "instruction_to_pawn": 0.05,
+            "forecast_as_certainty": 0.05,
+            "reason_contradicts_action": 0.07,
+            "observation_time_as_event_time": 0.17
+          }
+        },
+        {
+          "index": 7,
+          "tick": 19461,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.42,
+            "completion_without_receipt": 0.21,
+            "speaks_for_other": 0.11,
+            "instruction_to_pawn": 0.06,
+            "forecast_as_certainty": 0.06,
+            "reason_contradicts_action": 0.04,
+            "observation_time_as_event_time": 0.19
+          }
+        },
+        {
+          "index": 8,
+          "tick": 22454,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.49,
+            "completion_without_receipt": 0.17,
+            "speaks_for_other": 0.18,
+            "instruction_to_pawn": 0.07,
+            "forecast_as_certainty": 0.06,
+            "reason_contradicts_action": 0.2,
+            "observation_time_as_event_time": 0.18
+          }
+        },
+        {
+          "index": 9,
+          "tick": 24597,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.37,
+            "completion_without_receipt": 0.17,
+            "speaks_for_other": 0.14,
+            "instruction_to_pawn": 0.07,
+            "forecast_as_certainty": 0.06,
+            "reason_contradicts_action": 0.05,
+            "observation_time_as_event_time": 0.16
+          }
+        },
+        {
+          "index": 10,
+          "tick": 26246,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.65,
+            "completion_without_receipt": 0.24,
+            "speaks_for_other": 0.34,
+            "instruction_to_pawn": 0.05,
+            "forecast_as_certainty": 0.05,
+            "reason_contradicts_action": 0.06,
+            "observation_time_as_event_time": 0.16
+          }
+        },
+        {
+          "index": 11,
+          "tick": 31508,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.56,
+            "completion_without_receipt": 0.17,
+            "speaks_for_other": 0.23,
+            "instruction_to_pawn": 0.04,
+            "forecast_as_certainty": 0.05,
+            "reason_contradicts_action": 0.05,
+            "observation_time_as_event_time": 0.31
+          }
+        },
+        {
+          "index": 12,
+          "tick": 32999,
+          "applied": "no",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.24,
+            "completion_without_receipt": 0.06,
+            "speaks_for_other": 0.15,
+            "instruction_to_pawn": 0.08,
+            "forecast_as_certainty": 0.05,
+            "reason_contradicts_action": 0.07,
+            "observation_time_as_event_time": 0.08
+          }
+        },
+        {
+          "index": 13,
+          "tick": 33865,
+          "applied": "yes",
+          "answered": true,
+          "scores": {
+            "unsupported_fact": 0.48,
+            "completion_without_receipt": 0.24,
+            "speaks_for_other": 0.2,
+            "instruction_to_pawn": 0.04,
+            "forecast_as_certainty": 0.05,
+            "reason_contradicts_action": 0.07,
+            "observation_time_as_event_time": 0.32
+          }
+        }
+      ],
+      "perCategory": {
+        "unsupported_fact": {
+          "scored": 14,
+          "atOrAbove05": 4,
+          "atOrAbove08": 0,
+          "max": 0.65,
+          "topTurns": [
+            2,
+            5,
+            10,
+            11
+          ]
+        },
+        "completion_without_receipt": {
+          "scored": 14,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": 0.24,
+          "topTurns": []
+        },
+        "speaks_for_other": {
+          "scored": 14,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": 0.4,
+          "topTurns": []
+        },
+        "instruction_to_pawn": {
+          "scored": 14,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": 0.08,
+          "topTurns": []
+        },
+        "forecast_as_certainty": {
+          "scored": 14,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": 0.07,
+          "topTurns": []
+        },
+        "reason_contradicts_action": {
+          "scored": 14,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": 0.2,
+          "topTurns": []
+        },
+        "observation_time_as_event_time": {
+          "scored": 14,
+          "atOrAbove05": 1,
+          "atOrAbove08": 0,
+          "max": 0.7,
+          "topTurns": [
+            5
+          ]
+        }
+      }
+    },
+    "caveats": [
+      "Counterfactual: deferring a turn changes later inputs; avoidable counts are upper bounds.",
+      "Turns without a usable returned choice are unknown and excluded from the curve; their count is in `unknown`.",
+      "Agreement with the core is not correctness; the core made its own errors.",
+      "Thresholds here are unvalidated starting points; pick from these curves, then validate on held-out cases."
+    ]
+  },
+  "limitations": [
+    "No routing or threshold selected.",
+    "All 14 known source turns are consequential under the frozen definition, including topic text changes; this set has no unchanged-turn negatives.",
+    "Topic agreement is agreement with recorded core updates, not independent truth.",
+    "Grounding flags need human evidence adjudication; zero flags do not establish factual correctness.",
+    "The first run retains its 29 failures and USD 0.058 reservations with unknown actual charges.",
+    "This is the single newly authorized retry, with no within-run retries; no gameplay."
+  ]
+}

@@ -1,0 +1,978 @@
+{
+  "kind": "jev-replay-transport-failure",
+  "date": "2026-09-25",
+  "runtimeCommit": "eab4502941ab6d30d5531bf194f6be45ee3223ce",
+  "sourceEvidence": "recorded-scene.json",
+  "evidenceSha256": "4181c4e8674ddfbe787a3099c07ba6d47f937615cadeeef3b0ab85dd69a8c607",
+  "requestsSha256": "0ee8e76a8b488561aecb039023e3753b1fb0308bb6948b55e83a1bd8cbe69796",
+  "runId": "96620234-2be3-4443-9f34-bf9a43abe65f",
+  "startedAt": "2026-09-25T05:00:56.117Z",
+  "finishedAt": "2026-09-25T05:00:57.101Z",
+  "outcome": "transport_failed_no_scored_answers",
+  "attempts": 29,
+  "responsesReceived": 0,
+  "failures": 29,
+  "failureCode": "Protected Jev request failed",
+  "expectedModel": "typesafe/jev-1.13-20260917",
+  "actualModel": null,
+  "budget": {
+    "operatorLimitUSD": 0.08,
+    "localAllowanceUSD": 0.0725,
+    "reservedUSD": 0.058,
+    "reportedUSD": 0,
+    "actualCostKnown": false
+  },
+  "transportDiagnostic": {
+    "kind": "non-inference-protected-route-check",
+    "errorCode": "CERT_HAS_EXPIRED",
+    "certificateBundleHasExpiredCertificate": true,
+    "expiredCertificateNotAfterUTC": "2026-09-25T01:31:20Z",
+    "tlsVerificationDisabled": false,
+    "inferenceRerun": false
+  },
+  "privateArtifactHashes": {
+    "ledger.sqlite": "48573804c814ac8c9aab854b837c0ca7ee640ebcf97084681acf326474d5b8c4",
+    "requests.json": "d8a8485e9fe7cdeea359404289fe1a03f83ee104bf8037a5e0cc7a482caa8ee7",
+    "report.json": "fa7e4a5a4589cf2871f925f14131f24bc5c3c53e479e3653a2f3b950841db738",
+    "run.json": "76cf8f2756915daa7c5b90243fcc0b82339deec2c7bdb5b791f2ca68ba31eb1f",
+    "attempts.jsonl": "527800a61d6aceb8c8efd1eb9c5d214a716be2462134ce4c167c57c442824a99"
+  },
+  "report": {
+    "evidenceSha256": "4181c4e8674ddfbe787a3099c07ba6d47f937615cadeeef3b0ab85dd69a8c607",
+    "requestsSha256": "0ee8e76a8b488561aecb039023e3753b1fb0308bb6948b55e83a1bd8cbe69796",
+    "model": "typesafe/jev-1.13",
+    "expectedModel": "typesafe/jev-1.13-20260917",
+    "status": "report-only",
+    "version": {
+      "replay": "jev-replay-v2",
+      "questions": "jev-questions-v2",
+      "expectedModel": "typesafe/jev-1.13-20260917"
+    },
+    "cases": 15,
+    "calls": 29,
+    "failed": 29,
+    "reportedCostUSD": 0,
+    "unknown": {
+      "noWakeAnswer": 15,
+      "noUsableChoice": 1,
+      "misaligned": 0,
+      "ambiguousApplied": 0
+    },
+    "wake": {
+      "turns": [
+        {
+          "index": 0,
+          "tick": 78,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "topics": [],
+          "messages": []
+        },
+        {
+          "index": 1,
+          "tick": 1641,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 3,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "tick": 3150,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "a3fbd715-e0f7-4e98-b876-e06a2fd0b47d",
+              "actual": "resolves"
+            },
+            {
+              "key": "t2",
+              "id": "4f5e338d-bb1e-48bc-bf0a-f390548da433",
+              "actual": "resolves"
+            },
+            {
+              "key": "t3",
+              "id": "826a323f-d1ea-4b09-88ae-c1433c8dcaab",
+              "actual": "resolves"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "tick": 4829,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 3,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "tick": 6585,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 2,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "9abef013-c43d-456b-85d1-0b55369f2032",
+              "actual": "resolves"
+            },
+            {
+              "key": "t2",
+              "id": "6f25a83b-64d5-4041-9ee2-3d750138fb6f",
+              "actual": "resolves"
+            },
+            {
+              "key": "t3",
+              "id": "e5b58d8d-0672-4c80-8e0c-b4de04cc45fd",
+              "actual": "resolves"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "tick": 7943,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "advances"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "tick": 18279,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "tick": 19461,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "advances"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "advances"
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            },
+            {
+              "key": "m3"
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "tick": 22454,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "advances"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "advances"
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            },
+            {
+              "key": "m3"
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "tick": 24597,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "advances"
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            },
+            {
+              "key": "m3"
+            },
+            {
+              "key": "m4"
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "tick": 26246,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 1,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "advances"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "advances"
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances"
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": "blocks"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            },
+            {
+              "key": "m3"
+            },
+            {
+              "key": "m4"
+            },
+            {
+              "key": "m5"
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "tick": 31508,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances"
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t6",
+              "id": "741854ca-a725-435e-996a-bb25b2d4373d",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            },
+            {
+              "key": "m3"
+            },
+            {
+              "key": "m4"
+            },
+            {
+              "key": "m5"
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "tick": 32999,
+          "alignment": "aligned",
+          "applied": "no",
+          "actualAction": "wait",
+          "actualConsequential": true,
+          "newTopics": 3,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t6",
+              "id": "741854ca-a725-435e-996a-bb25b2d4373d",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            },
+            {
+              "key": "m3"
+            },
+            {
+              "key": "m4"
+            },
+            {
+              "key": "m5"
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "tick": 33865,
+          "alignment": "aligned",
+          "applied": "yes",
+          "actualAction": "ask",
+          "actualConsequential": true,
+          "newTopics": 0,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": "advances"
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": "unrelated"
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": "advances"
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": "advances"
+            },
+            {
+              "key": "t6",
+              "id": "741854ca-a725-435e-996a-bb25b2d4373d",
+              "actual": "advances"
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            },
+            {
+              "key": "m3"
+            },
+            {
+              "key": "m4"
+            },
+            {
+              "key": "m5"
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "tick": 35502,
+          "alignment": "none",
+          "applied": "unknown",
+          "actualAction": null,
+          "actualConsequential": null,
+          "newTopics": 0,
+          "topics": [
+            {
+              "key": "t0",
+              "id": "brief",
+              "actual": null
+            },
+            {
+              "key": "t1",
+              "id": "ff7099ac-e107-4aac-99b2-1c876bc242d3",
+              "actual": null
+            },
+            {
+              "key": "t2",
+              "id": "1804036f-ad87-44c0-b599-8baf260062bd",
+              "actual": null
+            },
+            {
+              "key": "t3",
+              "id": "289a037d-1e78-4f57-ad1d-dc9b0e94575b",
+              "actual": null
+            },
+            {
+              "key": "t4",
+              "id": "892645c5-38f2-49d7-9e2e-30e757c5954c",
+              "actual": null
+            },
+            {
+              "key": "t5",
+              "id": "1c674389-228d-4aaf-a812-1952c2379273",
+              "actual": null
+            },
+            {
+              "key": "t6",
+              "id": "741854ca-a725-435e-996a-bb25b2d4373d",
+              "actual": null
+            }
+          ],
+          "messages": [
+            {
+              "key": "m0"
+            },
+            {
+              "key": "m1"
+            },
+            {
+              "key": "m2"
+            },
+            {
+              "key": "m3"
+            },
+            {
+              "key": "m4"
+            },
+            {
+              "key": "m5"
+            }
+          ]
+        }
+      ],
+      "curve": [
+        {
+          "threshold": 0.3,
+          "scored": 0,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.4,
+          "scored": 0,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.5,
+          "scored": 0,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.6,
+          "scored": 0,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.7,
+          "scored": 0,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.8,
+          "scored": 0,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        },
+        {
+          "threshold": 0.9,
+          "scored": 0,
+          "deferred": 0,
+          "avoidable": 0,
+          "missed": 0
+        }
+      ],
+      "topicPairs": 0,
+      "confusion": {},
+      "closureAgreement": {
+        "resolvesPredicted": 0,
+        "resolvesActual": 0,
+        "resolvesAgreed": 0,
+        "exactAgreement": null
+      },
+      "coreWaits": 5
+    },
+    "grounding": {
+      "turns": [
+        {
+          "index": 0,
+          "tick": 78,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 1,
+          "tick": 1641,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 2,
+          "tick": 3150,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 3,
+          "tick": 4829,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 4,
+          "tick": 6585,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 5,
+          "tick": 7943,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 6,
+          "tick": 18279,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 7,
+          "tick": 19461,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 8,
+          "tick": 22454,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 9,
+          "tick": 24597,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 10,
+          "tick": 26246,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 11,
+          "tick": 31508,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 12,
+          "tick": 32999,
+          "applied": "no",
+          "answered": false,
+          "scores": {}
+        },
+        {
+          "index": 13,
+          "tick": 33865,
+          "applied": "yes",
+          "answered": false,
+          "scores": {}
+        }
+      ],
+      "perCategory": {
+        "unsupported_fact": {
+          "scored": 0,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": null,
+          "topTurns": []
+        },
+        "completion_without_receipt": {
+          "scored": 0,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": null,
+          "topTurns": []
+        },
+        "speaks_for_other": {
+          "scored": 0,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": null,
+          "topTurns": []
+        },
+        "instruction_to_pawn": {
+          "scored": 0,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": null,
+          "topTurns": []
+        },
+        "forecast_as_certainty": {
+          "scored": 0,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": null,
+          "topTurns": []
+        },
+        "reason_contradicts_action": {
+          "scored": 0,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": null,
+          "topTurns": []
+        },
+        "observation_time_as_event_time": {
+          "scored": 0,
+          "atOrAbove05": 0,
+          "atOrAbove08": 0,
+          "max": null,
+          "topTurns": []
+        }
+      }
+    },
+    "caveats": [
+      "Counterfactual: deferring a turn changes later inputs; avoidable counts are upper bounds.",
+      "Turns without a usable returned choice are unknown and excluded from the curve; their count is in `unknown`.",
+      "Agreement with the core is not correctness; the core made its own errors.",
+      "Thresholds here are unvalidated starting points; pick from these curves, then validate on held-out cases."
+    ]
+  },
+  "limitations": [
+    "Zero scored wake and grounding answers; zero flags are not evidence of clean prose.",
+    "No billing receipt: zero reported cost does not establish zero actual charge.",
+    "No rerolls, route substitution or disabled TLS verification.",
+    "Protected route certificate repair and a new explicit trial disposition are needed before another attempt.",
+    "No gameplay, deployment or routing changes."
+  ]
+}
