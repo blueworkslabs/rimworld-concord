@@ -21,9 +21,9 @@ import {coreWakeQuestions,coreWakeState,groundingCategories,groundingQuestions,g
 export const jevReplayVersion='jev-replay-v3';
 export const sha256=(x:unknown)=>createHash('sha256').update(typeof x==='string'?x:JSON.stringify(x)).digest('hex');
 
-const Choice=z.object({topics:z.array(z.object({sourceId:z.string(),text:z.string(),status:z.string()})).default([]),
- actionTopicId:z.string().nullable().optional(),action:z.object({kind:z.string(),reason:z.string().default(''),text:z.string().optional(),pawn:z.string().optional(),opportunityId:z.string().optional(),proposalId:z.string().optional()})});
-type Choice=z.infer<typeof Choice>;
+// One reply shape for replay and live annotation, so the grounding state is identical in both.
+import {CoreReply} from '../src/jev-annotate.js';
+const Choice=CoreReply;type Choice=CoreReply;
 export type TopicEffect='resolves'|'blocks'|'advances'|'unrelated';
 
 /** Input-side novelty, from the wake causes alone and never from what the core produced:

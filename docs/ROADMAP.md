@@ -167,7 +167,9 @@ coordinator bookkeeping.
   instead of new hand-built capabilities.
 - **Core planning pauses** for substantial planning, under an operator policy: visible,
   released on completion or timeout, never bypassing consent.
-- **Jev in the loop**, one use at a time and only after offline evidence.
+- **Jev in the loop**, one use at a time and only after offline evidence. First use:
+  [annotate-only grounding](trials/JEV_ANNOTATE.md) over live core replies on the
+  construction and cooking scene; scores journaled, nothing gated.
 - **Pawn-to-pawn offers**, **human contact** (suggestions to the core, letters,
   comms-station conversations), **unattended operation** (after its own scope and
   spending decision), the gravship campaign, an installer and an OpenClaw operator
