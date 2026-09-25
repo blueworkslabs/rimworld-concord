@@ -1,0 +1,58 @@
+{"at": 1790364539.4528325, "kind": "record-start", "pid": 196719}
+{"at": 1790364547.4922593, "kind": "screenshot", "file": "s001.png"}
+{"at": 1790364573.5367672, "kind": "screenshot", "file": "s002.png"}
+{"at": 1790364582.7561657, "kind": "click", "x": 483, "y": 594, "button": 1}
+{"at": 1790364593.7756004, "kind": "screenshot", "file": "s003.png"}
+{"at": 1790364604.9065073, "kind": "click", "x": 877, "y": 318, "button": 1}
+{"at": 1790364605.6906393, "kind": "screenshot", "file": "s004.png"}
+{"at": 1790364612.8015392, "kind": "click", "x": 828, "y": 122, "button": 1}
+{"at": 1790364626.6530366, "kind": "screenshot", "file": "s005.png"}
+{"at": 1790364636.02101, "kind": "click", "x": 971, "y": 742, "button": 1}
+{"at": 1790364648.0096352, "kind": "screenshot", "file": "s006.png"}
+{"at": 1790364664.3589978, "kind": "mark", "name": "task-start"}
+{"at": 1790364664.5179088, "kind": "click", "x": 49, "y": 782, "button": 1}
+{"at": 1790364664.928661, "kind": "screenshot", "file": "s007.png"}
+{"at": 1790364674.7734323, "kind": "click", "x": 144, "y": 688, "button": 1}
+{"at": 1790364675.1988835, "kind": "screenshot", "file": "s008.png"}
+{"at": 1790364688.8555527, "kind": "click", "x": 407, "y": 711, "button": 1}
+{"at": 1790364689.0441256, "kind": "click", "x": 641, "y": 419, "button": 1}
+{"at": 1790364689.1222446, "kind": "key", "keys": ["Escape"]}
+{"at": 1790364689.2935896, "kind": "click", "x": 153, "y": 782, "button": 1}
+{"at": 1790364689.6859777, "kind": "screenshot", "file": "s009.png"}
+{"at": 1790364707.1172273, "kind": "click", "x": 668, "y": 691, "button": 1}
+{"at": 1790364707.2843604, "kind": "click", "x": 146, "y": 783, "button": 1}
+{"at": 1790364707.3768535, "kind": "key", "keys": ["3"]}
+{"at": 1790364717.1079655, "kind": "screenshot", "file": "s010.png"}
+{"at": 1790364730.2666078, "kind": "key", "keys": ["space"]}
+{"at": 1790364730.4504578, "kind": "click", "x": 640, "y": 418, "button": 1}
+{"at": 1790364730.8630023, "kind": "screenshot", "file": "s011.png"}
+{"at": 1790364744.993379, "kind": "key", "keys": ["Escape"]}
+{"at": 1790364761.3509161, "kind": "click", "x": 640, "y": 418, "button": 1}
+{"at": 1790364761.7487438, "kind": "screenshot", "file": "s012.png"}
+{"at": 1790364774.4797623, "kind": "click", "x": 395, "y": 585, "button": 1}
+{"at": 1790364774.8285732, "kind": "screenshot", "file": "s013.png"}
+{"at": 1790364792.049076, "kind": "click", "x": 83, "y": 114, "button": 1}
+{"at": 1790364792.392641, "kind": "screenshot", "file": "s014.png"}
+{"at": 1790364803.9860337, "kind": "click", "x": 174, "y": 130, "button": 1}
+{"at": 1790364804.3306334, "kind": "screenshot", "file": "s015.png"}
+{"at": 1790364816.7021685, "kind": "click", "x": 178, "y": 175, "button": 1}
+{"at": 1790364832.9955013, "kind": "click", "x": 178, "y": 175, "button": 1}
+{"at": 1790364833.3620439, "kind": "screenshot", "file": "s016.png"}
+{"at": 1790364861.8493733, "kind": "mark", "name": "adapter-remove-mousemove-sync"}
+{"at": 1790364861.936914, "kind": "key", "keys": ["3"]}
+{"at": 1790364873.6496575, "kind": "screenshot", "file": "s017.png"}
+{"at": 1790364900.210187, "kind": "screenshot", "file": "s018.png"}
+{"at": 1790364916.197633, "kind": "key", "keys": ["space"]}
+{"at": 1790364916.2620823, "kind": "mark", "name": "task-success-ui"}
+{"at": 1790364916.3247852, "kind": "key", "keys": ["Escape"]}
+{"at": 1790364916.7149673, "kind": "screenshot", "file": "s019.png"}
+{"at": 1790364931.5232415, "kind": "key", "keys": ["Escape"]}
+{"at": 1790364931.8680754, "kind": "screenshot", "file": "s020.png"}
+{"at": 1790364943.6431134, "kind": "click", "x": 931, "y": 416, "button": 1}
+{"at": 1790364943.991702, "kind": "screenshot", "file": "s021.png"}
+{"at": 1790364956.5908384, "kind": "type", "text": "ui-baseline-finish"}
+{"at": 1790364956.7775555, "kind": "click", "x": 850, "y": 655, "button": 1}
+{"at": 1790364957.101346, "kind": "screenshot", "file": "s022.png"}
+{"at": 1790364971.8864505, "kind": "click", "x": 929, "y": 675, "button": 1}
+{"at": 1790364972.251849, "kind": "screenshot", "file": "s023.png"}
+{"at": 1790365017.6021135, "kind": "cleanup", "note": "UI quit stopped game/display; recorder exited on display closure; profile restored"}
