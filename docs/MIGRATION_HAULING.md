@@ -547,6 +547,66 @@ Fable ruled this a B2 boundary, not a B1 growing-hold fix.
   the on-screen label and colour. The receipt lists them under `needsRecordedEvidence`,
   and they are never counted as passed.
 
+### Before the last B1 round (after staging round 1; rounds used 1/2)
+
+These are harness preconditions and new cases. No admission, hold or accounting rule
+changed. The mod only gained lab ops and two evidence receipts. Causes come from round 1's
+raw receipts:
+- **Quiet base.** The round-1 base save carried Beatrice's running wood haul (job 4,
+  marked pre-tag at tick 3), so every case started with pre-agreement work in flight.
+  That starved the contention case (Pedro held 25 alone) and used up the pre-tag
+  case's supply before tagging. The runner now ends every pawn's job without starting a
+  new one (`lab-interrupt` with `idle`) before saving the base. The fixture save is
+  unchanged. A tag refused because a matching job started in the same tick is retried
+  after one tick.
+- **Carried cargo plus source.** A queued job drops carried cargo before it starts on
+  4871 (`JobDef.dropThingBeforeJob`, default true). Round 1's queued job had also
+  picked a stack someone else had reserved, so it ended `QueuedNoLongerValid`.
+  `lab-start-haul` starts the job the way the game does for a pawn already carrying
+  (`keepCarryingThingOverride`), with a source this pawn can reserve. The case requires
+  the admission receipt with `carried=5`, pickups of additional units, and job delivery
+  equal to cargo plus pickups.
+- **Pre-tag.** Two phases: first the captured trip's own `job-end`, then the quota. Before
+  the quota is required, the runner reads Pedro's haulable wood (`lab-loose`) and records
+  a precondition failure if it is below the quota. The broad "did not finish" wording is
+  gone.
+- **Ordered half.** The ordered model offers only what a pawn sees in a 13×13 square,
+  source and destination both included. Round 1 had one wood offer because no pawn stood
+  near both a stack and the pile, then the model's 35 % needs stop idled both pawns. The
+  scripted core now also offers a move to a spot within 6 cells of the nearest reachable
+  stack and the pile. Moves count as core turns. It plans exact quantities (count and
+  trips never past the quota). Supply more than 12 cells from the pile is out of the
+  model's reach and is labelled (`outOfReachUnits`), not counted against parity. If the
+  reachable supply is below the quota, the case fails as unmatched by fixture. The needs
+  stop is recorded as the reason, not waited out. Wood placed in the pile by ordinary
+  opportunistic hauling during the ordered half is reported as `nativeUnitsDuringOrdered`.
+- **Retargets.** On 4871 the only `SetTarget(B)` of a haul is the native placement
+  retarget in `Toils_Haul.PlaceHauledThingInCell`. It runs after collection, where the
+  hold always equals the cargo (patch 4b trues down, patch 10 rolls back). A retarget
+  with an extra still pending is therefore not reachable. Filling the target outright
+  fails the carry toil instead, and the job ends without a retarget. `lab-target-room`
+  leaves one unit of room at the carrier's target and occupies the other pile cells. The
+  direct drop then places one unit and the game searches storage for the remainder.
+  Patch 2 now emits `intent-retarget` (from, to, job, carried, hold before, haul mode).
+  New cases:
+  - `retarget-between-tagged-zones`: the remainder moves to a second tagged pile, the
+    hold before the move equals the cargo, and credit follows placement (1 and the rest).
+  - `retarget-insufficient-destination-quota`: the second pile can't take the whole
+    remainder. The game hauls it aside (`ToCellNonStorage`), nothing enters the second
+    pile, and no hold outlives the trip.
+  - `pending-extra-destination-lost` (growing only): the reachable neighbour of a
+    pending-extra retarget. The destination is lost while Pedro walks to an admitted
+    duplicate. The job fails, the extra is never collected, and the hold is released.
+- **Observed only.** A job ending inside the native pickup or duplicate check (reserve
+  failure or pooling) emits `intent-nested-end` with any hold left behind. The runner
+  collects these in `observedOnly`. A leftover hold is a finding. They can't be forced:
+  the native check validates reservability first.
+- **Wrapper cost.** Both native matched halves time every patch call (`lab-patch-cost`)
+  and keep the totals.
+
+Round 2 is the last B1 fix/recheck round. If B1 isn't clean after it, strict ships and
+growing is parked with this evidence (Astra's handoff).
+
 ## Gate C will measure
 
 **Signed condition: #71's fixes must be measured live in this migration.** Their

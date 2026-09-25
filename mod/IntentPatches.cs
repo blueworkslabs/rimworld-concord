@@ -72,7 +72,10 @@ namespace Concord {
                 s.ReleaseId(__instance.loadID);return;
             }
             if(old==next) return; // within the zone the reservation stays with the job
+            int holdBefore=old==null?0:old.Own(__instance);
             if(old!=null){old.reserved.Remove(__instance.loadID);old.reservedBy.Remove(__instance.loadID);old.tripBudget.Remove(__instance.loadID);}
+            var cargoNow=p.carryTracker.CarriedThing;
+            s.Emit(p,"intent-retarget","from="+(old==null?"":old.intentId)+";to="+(next==null?"":next.intentId)+";job="+__instance.loadID+";carried="+(cargoNow==null?0:cargoNow.stackCount)+";holdBefore="+holdBefore+";mode="+__instance.haulMode);
             if(next!=null) {
                 var carried=p.carryTracker.CarriedThing;var source=__instance.targetA.Thing;
                 if(carried!=null) {
@@ -273,6 +276,9 @@ namespace Concord {
                 try{original();}
                 finally{long postCost=PatchCost.Start();try{
                     // Only the same surviving job, still holding this intent, gets its budget back.
+                    if(p.CurJob!=job||job.loadID!=loadId)
+                        // Observed only: the job ended inside the native pickup (failure, recycling).
+                        s.Emit(p,"intent-nested-end","at=pickup;intent="+i.intentId+";job="+loadId+";holdLeft="+(i.reserved.ContainsKey(loadId)?i.reserved[loadId]:0));
                     if(p.CurJob==job&&job.loadID==loadId&&i.Open&&i.reserved.ContainsKey(loadId)){
                         var after=p.carryTracker.CarriedThing;int acquired=Math.Max(0,(after==null?0:after.stackCount)-carried);
                         int left=Math.Max(0,trip-acquired);i.tripBudget[loadId]=left;job.count=left;
@@ -305,6 +311,9 @@ namespace Concord {
                 try{original();}
                 finally{long postCost=PatchCost.Start();try{
                     // Post: guarded by identity; a nested pickup, retarget, retirement or cleanup wins.
+                    if(p.CurJob!=job||job.loadID!=loadId)
+                        // Observed only: the job ended inside the native check (reserve failure, recycling).
+                        s.Emit(p,"intent-nested-end","at=duplicate;intent="+i.intentId+";job="+loadId+";holdLeft="+(i.reserved.ContainsKey(loadId)?i.reserved[loadId]:0));
                     if(p.CurJob==job&&job.loadID==loadId&&i.Open&&i.reserved.ContainsKey(loadId)){
                         var now=p.carryTracker.CarriedThing;int nowCarried=now==null?0:now.stackCount;
                         if(job.targetA.Thing==before&&nowCarried==carried){s.Reserve(i,p,job,carried);job.count=i.Trip(job);}

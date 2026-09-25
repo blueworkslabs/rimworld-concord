@@ -573,8 +573,24 @@ namespace Concord {
                 // Forced cancellation of the pawn's current job (cleanup drops are incidental).
                 if(p==null) throw new Exception("Unknown pawn");
                 var cur=p.CurJob;
-                if(cur!=null)p.jobs.EndCurrentJob(JobCondition.InterruptForced);
+                // "idle": end without choosing a new job and clear the queue (a quiet base save;
+                // the pawn picks its next job on the next tick, as after any load).
+                bool idle=r.reason=="idle";
+                if(idle)p.jobs.ClearQueuedJobs();
+                if(cur!=null)p.jobs.EndCurrentJob(JobCondition.InterruptForced,!idle);
                 return "{\"ended\":"+(cur==null?"null":"\""+cur.def.defName+"\"")+",\"x\":"+p.Position.x+",\"z\":"+p.Position.z+"}";
+            }
+            if(r.op=="lab-loose") {
+                // Supply evidence: loose stacks of a def, and whether this pawn could haul them now.
+                var lmap=p!=null?p.Map:Find.CurrentMap;var ldef=DefDatabase<ThingDef>.GetNamedSilentFail(r.thing);
+                if(ldef==null) throw new Exception("Unknown def");
+                var rows=lmap.listerThings.ThingsOfDef(ldef).Where(t=>t.Spawned&&!t.IsInValidStorage()).Select(t=>
+                    "{\"thing\":\""+t.GetUniqueLoadID()+"\",\"x\":"+t.Position.x+",\"z\":"+t.Position.z+",\"count\":"+t.stackCount+
+                    ",\"forbidden\":"+(t.IsForbidden(Faction.OfPlayer)?"true":"false")+
+                    (p==null?"":",\"reachable\":"+(p.CanReach(t,PathEndMode.ClosestTouch,Danger.Deadly)?"true":"false")+
+                        ",\"reservable\":"+(p.CanReserve(t)?"true":"false")+
+                        ",\"haulable\":"+(HaulAIUtility.PawnCanAutomaticallyHaulFast(p,t,false)?"true":"false"))+"}").ToArray();
+                return "{\"stacks\":["+String.Join(",",rows)+"]}";
             }
             if(r.op=="lab-queue-count") {
                 if(p==null) throw new Exception("Unknown pawn");
@@ -613,6 +629,59 @@ namespace Concord {
                 if(r.count>0)queued.count=Math.Min(queued.count,r.count);
                 p.jobs.jobQueue.EnqueueLast(queued);
                 return "{\"queuedJob\":"+queued.loadID+",\"count\":"+queued.count+"}";
+            }
+            if(r.op=="lab-start-haul") {
+                // Cargo plus a further source, as the game starts it for a carried load: StartJob
+                // keeping the carried thing (queued starts drop it first: dropThingBeforeJob).
+                if(p==null) throw new Exception("Unknown pawn");
+                var cargo=p.carryTracker.CarriedThing;
+                var src=map.listerThings.ThingsOfDef(def).Where(t=>t.Spawned&&t!=cargo&&!t.IsInValidStorage()&&!t.IsForbidden(p)&&p.CanReserve(t)&&p.CanReach(t,PathEndMode.ClosestTouch,Danger.Deadly))
+                    .OrderBy(t=>(t.Position-p.Position).LengthHorizontalSquared).FirstOrDefault();
+                if(src==null) throw new Exception("No reservable haul source");
+                var cell=zone.cells.Where(c=>c.IsValidStorageFor(map,src)&&StoreUtility.IsGoodStoreCell(c,map,src,p,p.Faction)).DefaultIfEmpty(IntVec3.Invalid).First();
+                if(!cell.IsValid) throw new Exception("No valid cell in the tagged stockpile");
+                var hj=HaulAIUtility.HaulToCellStorageJob(p,src,cell,false);
+                if(hj==null) throw new Exception("No haul job");
+                p.jobs.StartJob(hj,JobCondition.InterruptForced,null,false,true,null,null,false,false,true);
+                return "{\"job\":"+hj.loadID+",\"started\":"+(p.CurJob==hj?"true":"false")+",\"carried\":"+(p.carryTracker.CarriedThing==null?0:p.carryTracker.CarriedThing.stackCount)+",\"source\":\""+src.GetUniqueLoadID()+"\"}";
+            }
+            if(r.op=="lab-target-room") {
+                // Native placement retarget setup (Toils_Haul.PlaceHauledThingInCell): the carrier's
+                // target cell stays valid storage but keeps room for only r.count units, and every
+                // other free cell of the stockpile holds one unit of a filler def. The direct drop then
+                // places r.count and the game searches storage for the remainder. (Filling the target
+                // outright fails the carry toil instead: the job ends, no retarget.)
+                if(p==null) throw new Exception("Unknown pawn");
+                var job=p.CurJob;var cargo=p.carryTracker.CarriedThing;
+                if(job==null||job.def!=JobDefOf.HaulToCell||cargo==null||cargo.def!=def) throw new Exception("Pawn is not carrying "+def.defName+" on a haul");
+                var target=job.targetB.Cell;
+                if(map.zoneManager.ZoneAt(target)!=zone) throw new Exception("Haul target is not in the tagged stockpile");
+                if(r.count<1||r.count>=cargo.stackCount) throw new Exception("Room must be 1..carried-1");
+                var filler=DefDatabase<ThingDef>.GetNamedSilentFail(r.reason);
+                if(filler==null||filler==def) throw new Exception("Filler must be another def");
+                if(target.GetThingList(map).Any(t=>t.def.category==ThingCategory.Item)) throw new Exception("Target cell is not empty");
+                var part=ThingMaker.MakeThing(def);part.stackCount=def.stackLimit-r.count;GenSpawn.Spawn(part,target,map);
+                int filled=0;
+                foreach(var c in zone.cells.ToList()) {
+                    if(c==target||c.GetThingList(map).Any(t=>t.def.category==ThingCategory.Item)) continue;
+                    var fill=ThingMaker.MakeThing(filler);fill.stackCount=1;GenSpawn.Spawn(fill,c,map);filled++;
+                }
+                return "{\"job\":"+job.loadID+",\"x\":"+target.x+",\"z\":"+target.z+",\"spawned\":"+part.stackCount+",\"room\":"+r.count+",\"carried\":"+cargo.stackCount+",\"filled\":"+filled+"}";
+            }
+            if(r.op=="lab-zone-fill") {
+                // Retarget setup: occupy every free cell of the tagged stockpile with one unit of
+                // another def, so a carried load cannot be placed and the game's own placement
+                // retarget (PlaceHauledThingInCell) runs. Partial same-def stacks are refused.
+                var filler=DefDatabase<ThingDef>.GetNamedSilentFail(r.thing);
+                if(filler==null||filler==def) throw new Exception("Filler must be another def");
+                int filled=0;
+                foreach(var c in zone.cells.ToList()) {
+                    var items=c.GetThingList(map).Where(t=>t.def.category==ThingCategory.Item).ToList();
+                    if(items.Any(t=>t.def==def)) throw new Exception("Stockpile already holds "+def.defName);
+                    if(items.Count>0) continue;
+                    var fill=ThingMaker.MakeThing(filler);fill.stackCount=1;GenSpawn.Spawn(fill,c,map);filled++;
+                }
+                return "{\"filled\":"+filled+"}";
             }
             if(r.op=="lab-zone-spawn") {
                 var cell=zone.cells.Where(c=>c.GetFirstItem(map)==null).DefaultIfEmpty(IntVec3.Invalid).First();

@@ -21,8 +21,11 @@ const deadline=Date.now()+2400000;
 let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
 const runId=randomUUID();
-const receipt:{runId:string;hold:string;unimplemented:string[];needsRecordedEvidence:string[];fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
-  {runId,hold,unimplemented:['full-load retarget with insufficient destination quota','pending-extra retarget','re-target between two tagged zones','nested reserve failure and job recycling inside the duplicate check (observed only)'],
+const receipt:{runId:string;hold:string;unimplemented:string[];observedOnly:Record<string,unknown>;needsRecordedEvidence:string[];fixture?:unknown;passed:boolean;inferenceCalls:0;cases:Case[];eventGaps:number;at:string;error?:string}=
+  {runId,hold,unimplemented:[],
+   // Not forceable on 4871 (the native check validates reservability first): tallied from every
+   // case, never counted as passed. A hold left after such an end is a finding in that case.
+   observedOnly:{'nested job end inside the pickup or duplicate check':[]},
    // Game cases this runner cannot observe: recorded by the operator, never counted as passed here.
    needsRecordedEvidence:['rescue handover in the game (consent, exclusion, drained cargo, one dispatch)','crew-log clock per event map and the Show button','zone label/colour on screen while open and after retirement'],
    passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
@@ -63,6 +66,10 @@ async function scenario(name:string,base:string,body:(c:Case)=>Promise<void>){
     await body(c);
     // Detectors, not mechanisms: any of these is a finding in every case.
     for(const k of DETECTORS)if(kinds(k).length&&!c.data.escapeExpected)c.findings.push(`${k}: ${kinds(k).map(e=>e.detail).join(' | ')}`);
+    for(const e of kinds('intent-nested-end')){
+      (receipt.observedOnly['nested job end inside the pickup or duplicate check'] as unknown[]).push({case:name,tick:e.tick,detail:e.detail});
+      if(Number(field(e,'holdLeft'))>0)c.findings.push('hold left after a nested job end: '+e.detail);
+    }
   }catch(e){c.findings.push('error: '+String(e));}
   finally{
     try{await b.admin('pause');await poll();}catch(e){safetyStopped=true;c.findings.push('final capture: '+String(e));}
@@ -80,10 +87,32 @@ try{
   const f=JSON.parse(await readFile(root+'/.runtime/hauling-migration-fixture.json','utf8'));receipt.fixture=f;
   const m=f.manifest,zoneId=m.zone.id as number;
   await b.load(f.save);await b.admin('pause');await poll();
+  // Quiet base: no job in flight at tag time. Round 1's base carried Beatrice's running wood haul
+  // (pre-agreement work for every case), which starved contention and pre-tag supply.
+  const quiet:unknown[]=[];for(const p of state!.pawns)quiet.push({pawn:p.name,...await op({op:'lab-interrupt',actor:p.id,reason:'idle'})});
+  receipt.fixture={...f,quietBase:quiet};
   const base='lab-concord-hm-base-'+Date.now();await b.save(base);
   const P=pawn('Pedro').id,B=pawn('Beatrice').id;
   const stacks=(def:string)=>m.stacks.filter((s:any)=>s.def===def);
-  const accept=(intentId:string,actor:string,o:Record<string,unknown>={})=>op({op:'intent-accept',intentId,actor,thing:'WoodLog',zoneId,label:m.zone.label,quota:30,maxTicks:30000,variant:'attribution',hold,...o});
+  const accept=async(intentId:string,actor:string,o:Record<string,unknown>={})=>{
+    for(let attempt=0;;attempt++){
+      try{return await op({op:'intent-accept',intentId,actor,thing:'WoodLog',zoneId,label:m.zone.label,quota:30,maxTicks:30000,variant:'attribution',hold,...o});}
+      catch(e){
+        // The mod refuses a tag in the tick a matching job started; the next tick is unambiguous.
+        if(attempt>=3||!/next game tick/.test(String(e)))throw e;
+        const t0=state.ticks;await run(()=>state.ticks>t0,10000);
+      }
+    }
+  };
+  const site=(o:Record<string,unknown>={})=>({zoneId:-1,siteId:m.site.id,label:m.site.label,x:m.site.x,z:m.site.z,w:m.site.w,h:m.site.h,...o});
+  const loose=async(def:string,actor?:string)=>((await op({op:'lab-loose',thing:def,actor})).stacks as {thing:string;x:number;z:number;count:number;forbidden:boolean;reachable?:boolean;reservable?:boolean;haulable?:boolean}[]);
+  /** Pedro's current job has finished collecting: its hold equals the cargo, and its latest
+   * pickup-phase receipt is a pickup (no duplicate selection pending). */
+  const settled=(id:string)=>{
+    const who=pawn('Pedro'),carried=who.carryingCount??0,job=who.jobId??-1;const j=jobOf(id,job);
+    const last=events.filter(e=>(e.kind==='intent-pickup'||e.kind==='intent-duplicate-admitted')&&Number(field(e,'job'))===job).pop();
+    return who.job==='HaulToCell'&&carried>0&&!!j&&j.hold===carried&&(hold==='strict'||last?.kind==='intent-pickup');
+  };
   const exclude=(intentId:string,actor:string,reason:string)=>op({op:'intent-exclude',intentId,actor,reason});
   const done=(id:string)=>()=>{const v=view(id);return !!v&&v.status!=='open';};
   const maxStack=(def:string)=>Math.max(...stacks(def).map((s:any)=>s.count));
@@ -147,7 +176,10 @@ try{
     c.data.atExclusion=atExclusion;
   });
   await scenario('two-pawns-last-units',base,async c=>{
-    const id=randomUUID();await accept(id,P,{quota:25});await accept(id,B,{quota:25});await run(done(id),300000);
+    // Both accept before the first tick of the quiet base: neither has a trip in flight.
+    const id=randomUUID();await accept(id,P,{quota:25});await accept(id,B,{quota:25});
+    expect(c,!kinds('intent-pretag-marked').length,'a trip was already in flight at tag time');
+    await run(done(id),300000);
     const v=invariants(c,id);if(!v)return;
     expect(c,v.peakHolders>=2,'no overlapping reservation holders: contention not exercised');
     expect(c,v.status==='met'&&v.delivered===25&&v.overshoot===0,`credited ${v.delivered}, overshoot ${v.overshoot}`);c.data.byPawn=v.byPawn;c.data.peakHolders=v.peakHolders;
@@ -155,13 +187,18 @@ try{
   await scenario('carried-cargo-plus-source',base,async c=>{
     const id=randomUUID();await accept(id,P,{quota:30});
     c.data.carry=await op({op:'lab-carry',intentId:id,actor:P,count:5});
-    c.data.queued=await op({op:'lab-queue-haul',intentId:id,actor:P});
+    // Started as the game starts a job for a pawn already carrying (keepCarryingThing): a queued
+    // start drops the cargo first (JobDef.dropThingBeforeJob), which round 1 observed.
+    c.data.started=await op({op:'lab-start-haul',intentId:id,actor:P});
+    const initial=(c.data.carry as {carried?:number}).carried??0,job=(c.data.started as {job?:number}).job;
     const completed=await run(done(id),240000),v=invariants(c,id);
-    const initial=(c.data.carry as {carried?:number}).carried??0,job=(c.data.queued as {queuedJob?:number}).queuedJob;
-    const admitted=kinds('intent-admitted-start',P).find(e=>e.detail.includes(';job='+job+';')&&e.detail.includes(';carried='+initial+';'));
-    expect(c,initial===5&&Number.isInteger(job)&&!!admitted,'positive cargo and linked queued-job admission were not established');
+    const admitted=kinds('intent-admitted-start',P).find(e=>Number(field(e,'job'))===job&&Number(field(e,'carried'))===initial);
+    expect(c,initial===5&&(c.data.started as {started?:boolean}).started===true&&(c.data.started as {carried?:number}).carried===initial&&!!admitted,'positive cargo and linked job admission were not established');
     expect(c,!!v&&completed&&v.status==='met'&&v.delivered===30,'carried-cargo scenario did not complete 30 units');
-    expect(c,!!v&&v.drops.filter(d=>d.kind==='participation'&&d.job===job&&d.pawn===P).reduce((n,d)=>n+d.count,0)>initial,'queued job did not deliver existing cargo plus additional source');
+    const deliveredByJob=v?v.drops.filter(d=>d.kind==='participation'&&d.job===job&&d.pawn===P).reduce((n,d)=>n+d.count,0):0;c.data.deliveredByJob=deliveredByJob;
+    // Growing: the pickup guard's receipts give the exact extra; strict has no guard receipts.
+    const extra=hold==='growing'?kinds('intent-pickup',P).filter(e=>Number(field(e,'job'))===job).reduce((n,e)=>n+Number(field(e,'acquired')),0):deliveredByJob-initial;c.data.extraPicked=extra;
+    expect(c,extra>0&&deliveredByJob===initial+extra,`job ${job} delivered ${deliveredByJob}; cargo ${initial} plus picked ${extra}`);
   });
   await scenario('save-load-mid-growth',base,async c=>{
     const id=randomUUID();await accept(id,P,{quota:30});
@@ -176,6 +213,72 @@ try{
     expect(c,!!after&&after.delivered===before.delivered&&after.quota===before.quota&&after.reserved===before.reserved,'intent changed across save/load');
     if(job)expect(c,!!jobAfter&&jobAfter.hold===job.hold&&jobAfter.trip===job.trip&&jobAfter.pawn===job.pawn,`job ${job.job} hold/budget changed across save/load: ${JSON.stringify(job)} -> ${JSON.stringify(jobAfter)}`);
     await run(done(id),240000);invariants(c,id);
+  });
+
+  // --- Retargets through the game's own placement path (Toils_Haul.PlaceHauledThingInCell): the
+  // target cell keeps room for one unit and every other pile cell is occupied, so the direct drop
+  // places one and the game searches storage for the remainder (patch 1 decides, patch 2 moves the
+  // hold). Filling the target outright fails the carry toil instead: the job ends, no retarget.
+  // On 4871 this is the only SetTarget(B) of a haul, and it runs after collection, so no extra is
+  // pending there; each case asserts the hold before the move equals the cargo.
+  const retargetTrip=async(c:Case,a:string)=>{
+    if(!m.site){c.findings.push('precondition: the manifest needs a candidate site');return undefined;}
+    // Beatrice refuses: helpers must not put wood in the pile before the setup.
+    await accept(a,P,{quota:30});await exclude(a,B,'refuse');
+    if(!await run(()=>settled(a),120000)){c.findings.push('precondition: no tagged trip finished collecting');return undefined;}
+    return {job:pawn('Pedro').jobId!,carried:pawn('Pedro').carryingCount??0};
+  };
+  const tripEnd=(job:number)=>kinds('job-end',P).find(e=>Number(field(e,'job'))===job);
+  const placedBy=(v:IntentView,job:number)=>v.drops.filter(d=>d.job===job&&d.kind==='participation').reduce((n,d)=>n+d.count,0);
+  await scenario('retarget-between-tagged-zones',base,async c=>{
+    const a=randomUUID(),second=randomUUID();const trip=await retargetTrip(c,a);if(!trip)return;
+    if(trip.carried<2){c.findings.push(`precondition: carried ${trip.carried}, need at least 2`);return;}
+    await accept(second,P,site({quota:30}));await exclude(second,B,'refuse');   // the second tagged pile appears while Pedro carries
+    c.data.setup=await op({op:'lab-target-room',intentId:a,actor:P,count:1,reason:'Steel'});
+    if(!await run(()=>!!tripEnd(trip.job),120000)){c.findings.push(`no job-end receipt for trip ${trip.job}`);return;}
+    const va=invariants(c,a),vb=invariants(c,second);if(!va||!vb)return;
+    const moved=kinds('intent-retarget',P).find(e=>Number(field(e,'job'))===trip.job&&field(e,'to')===second);
+    c.data.retarget=moved?.detail;c.data.ended=tripEnd(trip.job)!.detail;
+    const rest=Number(field(moved,'carried')),inA=placedBy(va,trip.job),inB=placedBy(vb,trip.job);c.data.placed={first:inA,second:inB};
+    expect(c,!!moved&&field(moved,'from')===a&&field(moved,'mode')==='ToCellStorage','no native storage retarget from the first pile to the second');
+    expect(c,!!moved&&Number(field(moved,'holdBefore'))===rest,`hold before the retarget ${field(moved,'holdBefore')} differs from the cargo ${rest}`);
+    expect(c,inA===1&&inB===rest&&rest>0,`placed ${inA} in the first pile and ${inB} in the second; ${rest} carried at the retarget, room 1`);
+    expect(c,(va.byPawn.find(x=>x.pawn===P)?.count??0)===inA&&(vb.byPawn.find(x=>x.pawn===P)?.count??0)===inB,'credit does not follow placement');
+    expect(c,!(va.jobs??[]).some(j=>j.job===trip.job)&&!(vb.jobs??[]).some(j=>j.job===trip.job),'a hold outlived the trip');
+  });
+  await scenario('retarget-insufficient-destination-quota',base,async c=>{
+    const a=randomUUID(),second=randomUUID();const trip=await retargetTrip(c,a);if(!trip)return;
+    if(trip.carried<3){c.findings.push(`precondition: carried ${trip.carried}, need at least 3`);return;}
+    // The second pile can take fewer units than the remainder: the whole load or nothing.
+    await accept(second,P,site({quota:trip.carried-2}));await exclude(second,B,'refuse');
+    c.data.setup=await op({op:'lab-target-room',intentId:a,actor:P,count:1,reason:'Steel'});
+    if(!await run(()=>!!tripEnd(trip.job),120000)){c.findings.push(`no job-end receipt for trip ${trip.job}`);return;}
+    const va=invariants(c,a),vb=invariants(c,second);if(!va||!vb)return;
+    const moves=kinds('intent-retarget',P).filter(e=>Number(field(e,'job'))===trip.job);c.data.retargets=moves.map(e=>e.detail);c.data.ended=tripEnd(trip.job)!.detail;
+    const aside=moves.find(e=>field(e,'from')===a&&field(e,'to')==='');
+    expect(c,!moves.some(e=>field(e,'to')===second),'the remainder was retargeted into a pile that could not take it whole');
+    expect(c,!!aside&&field(aside,'mode')==='ToCellNonStorage',`expected the game to haul the remainder aside, got ${moves.map(e=>e.detail).join(' | ')||'no retarget'}`);
+    expect(c,placedBy(va,trip.job)===1&&placedBy(vb,trip.job)===0&&vb.overshoot===0,`placed ${placedBy(va,trip.job)} in the first pile, ${placedBy(vb,trip.job)} in the second`);
+    expect(c,!(va.jobs??[]).some(j=>j.job===trip.job)&&!(vb.jobs??[]).some(j=>j.job===trip.job),'a hold outlived the trip');
+  });
+  // The reachable neighbour of a pending-extra retarget: the destination stops being valid storage
+  // while Pedro walks to an admitted duplicate. The game fails the job (JobDriver_HaulToCell's goto
+  // fail condition); the pending extra must be released uncollected. Growing only: strict never
+  // holds an extra.
+  if(hold==='growing')await scenario('pending-extra-destination-lost',base,async c=>{
+    const a=randomUUID();await accept(a,P,{quota:30});await exclude(a,B,'refuse');
+    const pending=()=>kinds('intent-duplicate-admitted',P).find(e=>field(e,'pickedNow')==='False'&&Number(field(e,'job'))===pawn('Pedro').jobId&&(jobOf(a,Number(field(e,'job')))?.hold??0)>(pawn('Pedro').carryingCount??0));
+    if(!await run(()=>!!pending(),120000)){c.findings.push('precondition: no pending duplicate selection (geometry)');return;}
+    const job=Number(field(pending(),'job')),fillTick=state.ticks;c.data.pending=pending()!.detail;c.data.holdAtFill=jobOf(a,job);
+    c.data.fill=await op({op:'lab-zone-fill',intentId:a,thing:'Steel'});
+    if(!await run(()=>!!tripEnd(job),120000)){c.findings.push(`no job-end receipt for trip ${job}`);return;}
+    const v=invariants(c,a);if(!v)return;c.data.ended=tripEnd(job)!.detail;
+    const later=kinds('intent-pickup',P).filter(e=>Number(field(e,'job'))===job&&e.tick>=fillTick&&Number(field(e,'acquired'))>0);
+    expect(c,!/Succeeded/.test(tripEnd(job)!.detail),'the trip succeeded although its destination was lost');
+    expect(c,later.length===0,`the pending extra was collected after the destination was lost: ${later.map(e=>e.detail).join(' | ')}`);
+    expect(c,!v.drops.some(d=>d.job===job&&d.kind==='participation'&&d.tick>=fillTick),'a placement was credited after the destination was lost');
+    expect(c,!(v.jobs??[]).some(j=>j.job===job)&&v.reserved===0,'the pending hold was not released');
+    expect(c,!kinds('intent-retarget',P).some(e=>Number(field(e,'job'))===job),'unexpected retarget of the failed trip');
   });
 
   // --- B3: (map, zone, def): independent balances; a refusing pawn stores a third def freely.
@@ -210,8 +313,15 @@ try{
     await accept(id,P,{quota:10});await poll();
     const marked=kinds('intent-pretag-marked',B).find(e=>Number(field(e,'job'))===job);c.data.marked=marked?.detail;
     if(!marked){c.findings.push(`precondition: Beatrice's trip ${job} was not heading into the pile at tag time`);return;}
-    const drained=await run(()=>done(id)()&&pawn('Beatrice').jobId!==job&&!(view(id)?.jobs??[]).some(j=>j.preTag),240000);
-    expect(c,drained,'pre-tag trip did not finish within the observation window');
+    // Phase 1: the captured trip ends (any condition, from its own receipt).
+    const ended=()=>kinds('job-end',B).find(e=>Number(field(e,'job'))===job);
+    if(!await run(()=>!!ended(),120000)){c.findings.push(`no job-end receipt for the captured trip ${job} within the window (Beatrice's job now ${pawn('Beatrice').job} ${pawn('Beatrice').jobId})`);return;}
+    c.data.capturedEnd=ended()!.detail;
+    // Phase 2 needs post-tag supply Pedro can haul now; otherwise the quota cannot be required.
+    const supply=(await loose('WoodLog',P)).filter(s=>!s.forbidden&&s.haulable);c.data.supplyAfterCapture=supply;
+    const units=supply.reduce((n,s)=>n+s.count,0);
+    if(units<10){c.findings.push(`precondition: ${units} wood haulable by Pedro after the captured trip, quota 10`);return;}
+    await run(()=>done(id)()&&!(view(id)?.jobs??[]).some(j=>j.preTag),240000);
     const v=invariants(c,id);if(!v)return;
     const before=(v.preTagByPawn??[]).find(p=>p.pawn===B)?.count??0;c.data.before=before;c.data.carriedAtTag=carried;
     const placed=v.drops.filter(d=>d.job===job&&d.kind==='pretag').reduce((n,d)=>n+d.count,0);
@@ -277,30 +387,74 @@ try{
       try{
         await co.open();await co.initializeCore('Scripted core for the ordered baseline; every answer is authored.');
         for(const p of state.pawns)await op({op:'lab-work-priority',actor:p.id,count:0});
-        const z=(state.stockpiles??[]).find(x=>x.zoneId===zoneId)!,start=state.ticks,ours=new Set<string>();let offers=0;
+        const z=(state.stockpiles??[]).find(x=>x.zoneId===zoneId)!,start=state.ticks;
         const inZone=(x:number,zz:number)=>x>=z.x&&x<z.x+z.w&&zz>=z.z&&zz<z.z+z.h;
-        const hauls=()=>Object.values(co.inspect().outcomes).filter(r=>r.kind==='haul'&&ours.has(r.id));
-        const delivered=()=>hauls().filter(r=>r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0);
-        await run(()=>delivered()>=quota,300000,async()=>{
+        // The ordered model sees a 13x13 square around the pawn: an option needs the source and a
+        // stockpile cell both within 6 cells (Chebyshev). Stacks farther than 12 from the pile are
+        // out of its reach whatever the core does; they are labelled, not counted against parity.
+        const nearest=(x:number,zz:number)=>({x:Math.min(Math.max(x,z.x),z.x+z.w-1),z:Math.min(Math.max(zz,z.z),z.z+z.h-1)});
+        const gap=(x:number,zz:number)=>{const n=nearest(x,zz);return Math.max(Math.abs(n.x-x),Math.abs(n.z-zz));};
+        const supplyAt=async(who:string)=>(await loose(def,who)).filter(t=>!t.forbidden&&t.reachable);
+        const initial=await supplyAt(P);
+        const reachable=initial.filter(t=>gap(t.x,t.z)<=12),outOfReach=initial.filter(t=>gap(t.x,t.z)>12);
+        const zoneBefore=Number((await op({op:'lab-zone-count',zoneId,thing:def})).count);
+        c.data.orderedSupply={reachable:reachable.reduce((n,t)=>n+t.count,0),outOfReach:outOfReach.map(t=>({x:t.x,z:t.z,count:t.count}))};
+        if(reachable.reduce((n,t)=>n+t.count,0)<quota){c.findings.push(`precondition: the ordered model can reach ${reachable.reduce((n,t)=>n+t.count,0)} ${def}, quota ${quota}; unmatched by fixture`);return;}
+        const ours=new Set<string>(),hauls=new Set<string>();let offers=0,moves=0,idleSince=-1,stop='';
+        const tries=new Map<string,number>();
+        const outcomes=()=>Object.values(co.inspect().outcomes);
+        const delivered=()=>outcomes().filter(r=>r.kind==='haul'&&ours.has(r.id)&&r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0);
+        /** Units still coming from running ordered agreements: planned minus completed steps. */
+        const inFlight=()=>Object.values(co.inspect().proposals).filter(p=>hauls.has(p.id)&&p.standing?.status==='running'&&p.action.kind==='haul').reduce((n,p)=>{
+          const a=p.action as {count:number;trips:number},done=(p.standing?.steps??[]).map(id=>co.inspect().outcomes[id]).filter(r=>r?.status==='completed').reduce((k,r)=>k+(r!.delivered??0),0);
+          return n+Math.max(0,a.count*a.trips-done);},0);
+        await run(()=>delivered()>=quota||!!stop,300000,async()=>{
           await co.reconcile();await co.advanceIntentions();const d=co.inspect();
-          for(const who of [P,B]){
-            if(Object.values(d.proposals).some(p=>p.pawn===who&&(p.status==='pending'||p.standing?.status==='running'))||d.characters[who]?.commitment)continue;
+          const busy=(who:string)=>Object.values(d.proposals).some(p=>p.pawn===who&&(p.status==='pending'||p.standing?.status==='running'))||!!d.characters[who]?.commitment;
+          // The ordered model's own 35 % needs stop: record it instead of waiting out the budget.
+          const ready=[P,B].filter(w=>state.pawns.find(x=>x.id===w)?.workReady);
+          if(!ready.length&&![P,B].some(busy)){if(idleSince<0)idleSince=state.ticks;else if(state.ticks-idleSince>2500)stop='ordered needs stop: no capable pawn ready for 2500 ticks';}else idleSince=-1;
+          for(const who of ready){
+            if(busy(who))continue;
+            const need=quota-delivered()-inFlight();if(need<=0)return;
             const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===who&&o.action.kind==='haul'&&new RegExp(def).test(o.action.thing)&&inZone(o.action.x,o.action.z));
-            if(!o)continue;const p=await co.core().propose(who,o.action,'Scripted ordered offer');offers++;
-            await co.pawn(who).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
-            const accepted=co.inspect().proposals[p.id];if(accepted?.actionId)ours.add(accepted.actionId);
-            for(const step of accepted?.standing?.steps??[])ours.add(step);
+            if(o&&o.action.kind==='haul'){
+              // Exact quantity: never plan past the quota.
+              const count=Math.min(o.action.count,need),trips=Math.max(1,Math.min(o.action.trips,Math.floor(need/count)));
+              try{
+                const p=await co.core().propose(who,{...o.action,count,trips},'Scripted ordered offer');offers++;hauls.add(p.id);
+                await co.pawn(who).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+              }catch(e){((c.data.orderedErrors??=[]) as string[]).push('haul: '+String(e).slice(0,200));}
+              continue;
+            }
+            // No option in view: move to a spot seeing both the nearest reachable stack and the pile.
+            const here=state.pawns.find(x=>x.id===who)!;
+            const stack=(await supplyAt(who)).filter(t=>gap(t.x,t.z)<=12&&(tries.get(t.thing)??0)<2&&t.reservable!==false)
+              .sort((u,v)=>Math.max(Math.abs(u.x-here.x),Math.abs(u.z-here.z))-Math.max(Math.abs(v.x-here.x),Math.abs(v.z-here.z)))[0];
+            if(!stack)continue;
+            const n=nearest(stack.x,stack.z),spot={x:Math.round((stack.x+n.x)/2),z:Math.round((stack.z+n.z)/2)};
+            tries.set(stack.thing,(tries.get(stack.thing)??0)+1);
+            try{
+              const p=await co.core().propose(who,{kind:'move',...spot},'Scripted ordered move toward the pile');moves++;
+              await co.pawn(who).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+            }catch(e){((c.data.orderedErrors??=[]) as string[]).push('move: '+String(e).slice(0,200));}
           }
-          for(const p of Object.values(co.inspect().proposals))if(p.action.kind==='haul'&&new RegExp(def).test(p.action.thing))for(const step of p.standing?.steps??[])ours.add(step);
+          for(const p of Object.values(co.inspect().proposals))if(hauls.has(p.id))for(const step of p.standing?.steps??[])ours.add(step);
+          if(!stop&&delivered()+inFlight()<quota&&!(await supplyAt(P)).some(t=>gap(t.x,t.z)<=12&&(tries.get(t.thing)??0)<2)&&![P,B].some(busy))stop='no reachable supply left for the ordered model';
         });
-        const units=delivered(),trips=hauls().length;
-        expect(c,offers>0&&units===quota,`ordered baseline delivered ${units} of ${quota} ${def} from ${offers} offers; not a passing comparison`);
-        // Exact quantities: a whole-stack ordered trip may carry past the quota; that part is labelled, not matched.
-        c.data.matched={model:'ordered',def,quota,delivered:units,unmatchedUnits:Math.max(0,units-quota),trips,offers,ticks:state.ticks-start,ticksPerUnit:units?(state.ticks-start)/units:null,estimatedCoreTurnsIfLive:offers};
+        for(const p of Object.values(co.inspect().proposals))if(hauls.has(p.id))for(const step of p.standing?.steps??[])ours.add(step);
+        const units=delivered(),trips=outcomes().filter(r=>r.kind==='haul'&&ours.has(r.id)).length;
+        // Wood moved into the pile by ordinary (opportunistic) hauling during this half is not the ordered model's.
+        const zoneAfter=Number((await op({op:'lab-zone-count',zoneId,thing:def})).count);
+        expect(c,offers>0&&units===quota,`ordered baseline delivered ${units} of ${quota} ${def} from ${offers} offers and ${moves} moves${stop?'; '+stop:''}; not a passing comparison`);
+        c.data.matched={model:'ordered',def,quota,delivered:units,trips,offers,moves,stop:stop||null,ticks:state.ticks-start,ticksPerUnit:units?(state.ticks-start)/units:null,
+          estimatedCoreTurnsIfLive:offers+moves,nativeUnitsDuringOrdered:Math.max(0,zoneAfter-zoneBefore-units),outOfReachUnits:outOfReach.reduce((n,t)=>n+t.count,0)};
       }finally{s.close();}
     });
     await scenario('matched-native-'+def,base,async c=>{
+      await op({op:'lab-patch-cost',count:1});   // time every patch call in this half (wrapper cost)
       const id=randomUUID(),start=state.ticks;await accept(id,P,{thing:def,quota});await accept(id,B,{thing:def,quota});await run(done(id),300000);
+      c.data.patchCost=await op({op:'lab-patch-cost',count:2});await op({op:'lab-patch-cost',count:0});
       const v=invariants(c,id);if(!v)return;
       expect(c,v.status==='met'&&v.delivered===quota,`native baseline delivered ${v.delivered} of ${quota} ${def}`);
       const perJob=new Map<number,number>();for(const d of v.drops.filter(d=>d.kind==='participation'))perJob.set(d.job,(perJob.get(d.job)??0)+d.count);
