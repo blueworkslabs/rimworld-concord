@@ -9,6 +9,8 @@ recorded attempts; coordinator checks pass (406 tests), pinned 4871 mod compilat
 passes. No character-model calls. Staging is stopped, all **377 pre-existing saves**
 (including the original 285) are unchanged, and **22 recordings** are hash-verified.
 
+Latest clock/wake review: [one-map clock passed; recipient-policy decision pending](HAULING_MIGRATION_CLOCK_WAKE.md). Fable has deferred multi-map evidence until a two-map scenario exists.
+
 Latest follow-up: [strict mixed-item and rescue acceptance](#strict-acceptance-follow-up): both targeted cases now pass, with the failed first rescue setup preserved. Historical results below are unchanged.
 
 ## Review and exhausted B1 budget
