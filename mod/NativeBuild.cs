@@ -456,15 +456,18 @@ namespace Concord {
                 return "{\"job\":"+job.loadID+",\"def\":\""+job.def.defName+"\"}";
             }
             if(r.op=="lab-build-ration") {
-                // Genuinely partial supply (case 7): every loose stack of the def is forbidden except a
-                // split-off stack of exactly `count` placed near the actor.
+                // Partial first delivery (case 7): isolate a nearby count-sized stack, but leave a
+                // distant full-cost stack available so native resource admission still succeeds.
                 if(p==null)throw new Exception("Unknown pawn");var def=DefDatabase<ThingDef>.GetNamedSilentFail(r.thing??"WoodLog");if(def==null)throw new Exception("Unknown def");
                 var loose=p.Map.listerThings.ThingsOfDef(def).Where(t=>t.Spawned&&!t.IsInValidStorage()).ToList();
                 var src=loose.OrderByDescending(t=>t.stackCount).FirstOrDefault();if(src==null||src.stackCount<r.count||r.count<1)throw new Exception("Not enough loose "+def.defName);
+                var distant=loose.Where(t=>t!=src&&t.stackCount>=20&&t.Position.DistanceToSquared(p.Position)>=400).FirstOrDefault();
+                if(distant==null)throw new Exception("Fixture needs a distant full-cost stack outside the five-cell pickup radius");
                 foreach(var t in loose)t.SetForbidden(true,false);
+                distant.SetForbidden(false,false);
                 var part=src.SplitOff(r.count);part.SetForbidden(false,false);
                 if(!GenPlace.TryPlaceThing(part,p.Position,p.Map,ThingPlaceMode.Near))throw new Exception("Could not place the ration");
-                return "{\"ration\":"+r.count+",\"thing\":\""+part.GetUniqueLoadID()+"\"}";
+                return "{\"ration\":"+r.count+",\"thing\":\""+part.GetUniqueLoadID()+"\",\"distant\":\""+distant.GetUniqueLoadID()+"\"}";
             }
             if(r.op=="lab-build-deconstruct-order") {
                 // The player's ordinary deconstruct designator on the tagged blueprint/frame (case 7/12 contrast).

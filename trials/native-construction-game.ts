@@ -209,7 +209,7 @@ try{
     const partial=async()=>{
       await op({op:'lab-build-ration',actor:P,thing:'WoodLog',count:7});const i2=randomUUID();await prio(P,1,1);await open(i2,P);
       await run(()=>view(i2)?.stage==='frame'&&total(view(i2)!)===7,240000);await prio(P,0,0);await op({op:'lab-interrupt',actor:P,reason:'idle'});
-      expect(c,total(view(i2)!)===7,'unexercised: frame was not partially supplied (7 of '+cost+')');return i2;
+      if(view(i2)?.stage!=='frame'||total(view(i2)!)!==7)throw Error('unexercised: frame was not partially supplied (7 of '+cost+')');return i2;
     };
     const id2=await partial();await op({op:'lab-build-destroy',intentId:id2,reason:'Cancel'});await poll();const v2=view(id2)!;c.data.frameCancel=v2;
     expect(c,v2.status==='stopped'&&/cancelled by the player; held 7 WoodLog; returned: not recorded/.test(v2.stopReason??''),`frame cancel: ${v2.status} ${v2.stopReason}`);
