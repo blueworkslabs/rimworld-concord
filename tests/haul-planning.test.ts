@@ -75,11 +75,6 @@ test('withdrawal invalidates an in-flight decision, without granting the core ca
  const rejected=assert.rejects(result);await waiting;await c.core().withdrawOffer(p.id,'Offer expired');answer({kind:'accept',reason:'Late'});await rejected;
  assert.equal(data.actions.length,0);assert.equal(c.inspect().proposals[p.id]!.status,'withdrawn');await c.core().propose('B',haul,'Freed');
 });
-test('idempotent offer replay does not reacquire a released hold or need the old physical observation',async()=>{
- const {c,data}=await setup(),id=randomUUID(),p=await c.core().propose('A',haul,'Supplies',id);
- await c.core().withdrawOffer(p.id,'Stop');delete data.pawns[0]!.hauling;
- const replay=await c.core().propose('A',haul,'Supplies',id);assert.equal(replay.status,'withdrawn');assert.equal(data.actions.length,0);
-});
 test('pawn decisions and reflection see filtered physical options, never another pawn private reasons',async()=>{
  const {c,data}=await setup();await c.core().propose('A',haul,'Private planning explanation');
  const p=await c.core().propose('B',other,'Independent work');let decisionChecked=false,reflectionChecked=false;

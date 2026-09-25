@@ -59,11 +59,19 @@ async function nativeSetup(entries=1){
  return {data,c,store,game,p,calls,ask,complete,frozen};
 }
 const moves=(calls:string[])=>calls.filter(x=>x.startsWith('move:'));
+function assertHandover(calls:string[]){
+ assert.deepEqual(moves(calls),['move:rescue'],'exactly one rescue dispatch');
+ const excluded=calls.indexOf('intent:intent-exclude');
+ assert(excluded>=0,'exclusion must actually have occurred');
+ assert(excluded<calls.indexOf('move:rescue'),'exclusion before rescue');
+ assert(!calls.includes('cancel'),'no ordered cancellation for native intent');
+}
+function nativeStanding(data:GameState){return data.intents!.map(i=>({intentId:i.intentId,status:i.status,accepted:i.accepted,excluded:i.excluded}));}
 test('request and core decline neither stop work nor confer consent; duplicate request blocked',async()=>{
- const {c,p,calls,ask,store}=await nativeSetup();assert.equal((await ask()).status,'continued');
+ const {c,p,calls,ask,store,data}=await nativeSetup();const beforeCalls=[...calls],beforeStanding=structuredClone(nativeStanding(data));assert.equal((await ask()).status,'continued');
  const r=c.core().requests()[0]!;assert.equal(c.inspect().characters.A!.intention,p.id);assert.deepEqual(moves(calls),[]);
  await c.core().declineRequest(r.id,'Keep current work for now');assert.equal(c.core().requests()[0]!.status,'declined');
- assert.equal((await ask()).status,'failed');assert.equal(c.core().requests().length,1);assert.deepEqual(moves(calls),[]);assert(!calls.includes('intent:intent-exclude'));store.close();
+ assert.equal((await ask()).status,'failed');assert.equal(c.core().requests().length,1);assert.deepEqual(moves(calls),[]);assert.deepEqual(calls,beforeCalls);assert.deepEqual(nativeStanding(data),beforeStanding);store.close();
 });
 test('a requested replacement cannot be invented by core or change the requested casualty',async()=>{
  const {c,ask,store}=await nativeSetup();await assert.rejects(c.core().propose('A',rescue,'Bypass request'));
@@ -75,17 +83,19 @@ test('a requested replacement cannot be invented by core or change the requested
 });
 test('refusal or counter preserves hauling; exact revised rescue still needs fresh consent',async()=>{
  for(const kind of ['refuse','counter'] as const){
-  const {c,p,ask,calls,store}=await nativeSetup();await ask();const r=c.core().requests()[0]!,offer=await c.core().offerAlternative(r.id,rescue,'Replace?');
+  const {c,p,ask,calls,store,data}=await nativeSetup();await ask();const r=c.core().requests()[0]!,offer=await c.core().offerAlternative(r.id,rescue,'Replace?');
+  const beforeCalls=[...calls],beforeStanding=structuredClone(nativeStanding(data));
   const reply=await c.pawn('A').decide(offer.id,scripted(kind==='refuse'?{kind,reason:'Keep hauling'}:{kind,reason:'Shorter scope',action:{...rescue,maxTicks:120}}));
+  assert.deepEqual(calls,beforeCalls);assert.deepEqual(nativeStanding(data),beforeStanding);
   assert.equal(reply.status,kind==='refuse'?'refused':'countered');assert.equal(c.inspect().characters.A!.intention,p.id);assert.deepEqual(moves(calls),[]);
-  if(kind==='counter'){const revised=await c.core().revise(offer.id,'Your scope');assert.equal(revised.replacesAgreementId,p.id);assert.deepEqual(moves(calls),[]);await c.pawn('A').decide(revised.id,yes);await c.reconcile();
-   assert.deepEqual(moves(calls),['move:rescue']);assert(calls.indexOf('intent:intent-exclude')<calls.indexOf('move:rescue'),'exclusion before the rescue');}
+  if(kind==='counter'){const revised=await c.core().revise(offer.id,'Your scope');assert.equal(revised.replacesAgreementId,p.id);assert.deepEqual(calls,beforeCalls);assert.deepEqual(nativeStanding(data),beforeStanding);await c.pawn('A').decide(revised.id,yes);await c.reconcile();
+   assertHandover(calls);}
   store.close();
  }
 });
 test('replacement acceptance stops old job before starting new one and persists both agreements',async()=>{
  const {c,p,ask,calls,store}=await nativeSetup();await ask();const r=c.core().requests()[0]!,offer=await c.core().offerAlternative(r.id,rescue,'Replace?');
- assert.equal(c.inspect().characters.A!.intention,p.id);await c.pawn('A').decide(offer.id,yes);await c.reconcile();assert(calls.indexOf('intent:intent-exclude')<calls.indexOf('move:rescue'));
+ assert.equal(c.inspect().characters.A!.intention,p.id);await c.pawn('A').decide(offer.id,yes);await c.reconcile();assertHandover(calls);
  assert.equal(c.inspect().proposals[p.id]!.standing!.status,'stopped');assert.equal(c.inspect().characters.A!.intention,offer.id);assert.equal(c.core().requests()[0]!.status,'closed');store.close();
 });
 // Ordered-haul specific (removed with the ordered haul): stopping an ordered job before a replacement.
@@ -151,6 +161,7 @@ test('pending goal gets standalone rescue after fresh final receipt, with old co
  assert.deepEqual(moves(calls),['move:rescue']);assert(!calls.includes('cancel'));assert.equal(c.core().requests()[0]!.status,'closed');store.close();
 });
 
+// Ordered baseline retained until retirement; native counterpart below exposes the same race.
 test('goal reply while original work runs remains a replacement; an issued replacement is never reinterpreted',async()=>{
  const {c,p,data,ask,calls,store}=await setup(1);await ask();const r=c.core().requests()[0]!;
  const offer=await c.core().offerRequestedRescue(r.id,rescue,'Optional replacement');assert.equal(offer.replacesAgreementId,p.id);
@@ -198,6 +209,20 @@ test('standalone refusal closes only the request and preserves completed work',a
 // visible here instead of hidden.
 test('a native haul met just before the core reply yields a standalone rescue, not a replacement',{todo:'native replacement does not refresh the intent before offering'},async()=>{
  const {c,p,ask,complete,store}=await nativeSetup();await ask();const r=c.core().requests()[0]!;
- complete();const offer=await c.core().offerRequestedRescue(r.id,rescue,'Your haul completed.');
- assert.equal(offer.replacesAgreementId,undefined);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');store.close();
+ try {complete();const offer=await c.core().offerRequestedRescue(r.id,rescue,'Your haul completed.');
+  assert.equal(offer.replacesAgreementId,undefined);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
+ } finally {store.close();}
+});
+
+// Distinct from pre-offer freshness: completion while an issued replacement awaits consent.
+test('issued native replacement is not reinterpreted when quota meets during its answer',{todo:'native replacement does not refresh the intent before applying acceptance'},async()=>{
+ const {c,p,ask,complete,store,calls}=await nativeSetup();
+ try {
+  await ask();const r=c.core().requests()[0]!,offer=await c.core().offerRequestedRescue(r.id,rescue,'Optional replacement');
+  assert.equal(offer.replacesAgreementId,p.id);const before=[...calls];let answered=false;
+  await assert.rejects(c.pawn('A').decide(offer.id,{name:'finish',async decide(){answered=true;complete();return {kind:'accept',reason:'Help'};}}));
+  assert(answered);assert.deepEqual(calls,before);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
+  assert.equal(c.inspect().proposals[offer.id]!.actionId,undefined);
+  await assert.rejects(c.core().offerRequestedRescue(r.id,rescue,'Try fresh instead'));
+ } finally {store.close();}
 });

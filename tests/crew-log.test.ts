@@ -11,7 +11,7 @@ const haul={kind:'haul' as const,thing:'steel',x:4,z:5,count:10,trips:3,maxTicks
 const rescue={kind:'rescue' as const,target:'X',bed:'bed',x:4,z:5,maxTicks:600};
 function fixture(action:Proposal['action']=rescue){
  const p:Proposal={id:'p',pawn:'A',action,reason:'Public offer',status:'accepted',actionId:'two',standing:{status:'stopped',deadline:600,steps:['one','two']}};
- const d:Domain={schema:1,world:'w',epoch:'e',branch:'b',characters:{A:{id:'A',name:'Ada',memories:['PRIVATE'],reflections:[{tick:1,throughSeq:1,backend:'mock',reason:'PRIVATE'}]}},proposals:{p},outcomes:{one:{id:'one',actor:'A',status:'completed',reason:'native',x:4,z:5,delivered:10},two:{id:'two',actor:'A',status:'started',reason:'native',x:4,z:5}}};return {d,p};
+ const d:Domain={schema:1,world:'w',epoch:'e',branch:'b',characters:{A:{id:'A',name:'Ada',memories:['PRIVATE'],reflections:[{tick:1,throughSeq:1,backend:'mock',reason:'PRIVATE'}]}},proposals:{p},outcomes:{one:{id:'one',actor:'A',status:'completed',reason:'native',x:4,z:5,delivered:10},two:{id:'two',actor:'A',status:'started',reason:'native',x:4,z:5}}};if(action.kind==='rescue'){p.actionId='one';p.standing!.steps=['one'];delete d.outcomes.two;delete d.outcomes.one!.delivered;}return {d,p};
 }
 test('progress separates completed, active, unknown, unsuccessful and never-started trips',()=>{
  const {d,p}=fixture(haul);let r=agreementProgress(d,p,10);assert.deepEqual([r.completed,r.active,r.notStarted,r.unfulfilled,r.delivered],[1,1,1,2,10]);assert.equal(r.status,'stopped');
