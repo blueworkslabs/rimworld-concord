@@ -178,3 +178,14 @@ test('a meal memory arriving while the pawn answers is queued behind the answer,
   s.close();
  }
 });
+test('no consumption follow-up while the meal is under way: the pawn is askable again once the receipt settles',async()=>{
+ const {g,s,c}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});
+ const r=await c.planCoreWhenDue({name:'ask',async plan(){return {topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'Are you hungry?',reason:'Ask'}};}});
+ if(r.status!=='applied'||!r.questionId)throw Error('no question');
+ assert.equal((await c.answerCoreQuestion(r.questionId,{name:'eat',async answerCore(){return eat;}})).status,'delivered');
+ g.data.ticks+=10;let v=await c.corePerspective();
+ assert.equal(g.data.actions[0]!.status,'started');assert.ok(!v.questionRecipients.includes('A'),'no follow-up while eating is started');
+ g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;g.data.ticks+=10;await c.reconcile();v=await c.corePerspective();
+ assert.ok(v.questionRecipients.includes('A'),'askable again once the receipt is completed');
+ s.close();
+});
