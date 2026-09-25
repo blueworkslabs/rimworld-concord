@@ -1062,5 +1062,12 @@
     "Historical false coordinator bookkeeping remains present as given to the core.",
     "Input novelty classes have no quiet examples; 8 event and 6 band-change.",
     "No threshold or routing change."
+  ],
+  "attempts": 27,
+  "received": 27,
+  "validResponses": 27,
+  "failures": 0,
+  "actualModels": [
+    "typesafe/jev-1.13-20260917"
   ]
 }

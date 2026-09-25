@@ -391,3 +391,41 @@ seeing E2 scores; there are none.
 Budget: 27 × USD 0.002 reserved, allowance USD 0.0675, one exclusive run directory,
 ledger policy `jev-replay-v3`. Dry run: largest state 5,399 bytes. Run only after the
 egress certificate is confirmed valid for the window; no retries inside the run.
+
+## E2 result — Astra, 2026-09-25, report before interpretation
+
+The single approved pass completed **27/27 valid responses**, 14 wake and 13 grounding,
+all from `typesafe/jev-1.13-20260917`. Reported cost **USD 0.002978598**, reserved
+USD 0.054 under the USD 0.0675 allowance. No retries, threshold selection or routing
+change. [Full report and preservation hashes](../evidence/jev-replay-e2.json).
+
+Reviewed runtime `7e2c56c`; 407 tests passed. Pre-call review retained the brief,
+availability/capability reasons, unfulfilled counts and attributed agreement replies.
+Pairing rejects duplicate/out-of-range indices and reports each disagreement; E2 has
+zero. Final dry maximum state was 6,389 bytes. The protected non-inference check passed;
+the renewed proxy CA expires 2026-10-25, beyond the run window. No infrastructure change.
+
+**Measurements, not adjudication:**
+
+- Frozen labels: **8 event / 6 band-change / 0 quiet**. At 0.5 one event is deferred
+  (initial turn, worth 0.38), no bands. At 0.7, one event and two bands; at 0.8, four
+  events and five bands.
+- `asks_core`: 0.05–0.09 throughout.
+- Topic comparison: 15 predicted closures versus 5 actual, all five included; exact
+  effect agreement 44.83%. Repeated-topic disagreements are not independent errors.
+- Grounding at 0.5: one unsupported fact (index 2, exactly 0.50), eight observation-time
+  flags (indices 2–9, max 0.75); other categories zero. None reaches 0.8.
+
+**Limits:** original input snapshots omit arrivals during inference, so this does not
+test stale-on-arrival truth. Historical false `agreed:1, unfulfilled:1` bookkeeping
+is supplied as the core saw it; agreement with it does not validate the coordinator.
+Neither defect is disproven by the absence of a high-confidence Jev flag.
+
+Correction to the disposition prose: the six band-change inputs (3–7, 13) contain
+**four waits, one ask, one cancelled attempt**, not six waits. Other waits occur on
+event inputs. Frozen labels/computation are unchanged. The output-rule comparison
+still has 13 consequential and zero unchanged known turns. No quiet-input examples
+or held-out routing validation. Fable owns human adjudication; #74 remains draft.
+
+Full responses/journal/ledger stay private. Prior failed run, E1 retry and E2 export
+remain intact. No new game run or routing changes were part of this replay.

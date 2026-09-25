@@ -82,3 +82,5 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 | 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | D | Export native-haul public core evidence for E2 | 14 inputs / 13 returned and applied / final interrupted; privacy and pairing verified. Dry builds27requests; all13known turns still consequential by frozen rule; native-receipt projection gaps remain; zero calls | [core export](../evidence/native-haul-core-e2.json), [dry audit](../evidence/native-haul-core-e2-audit.json) | [E2 export/preflight](JEV_REPLAY.md#e2-export-and-offline-preflight--astra-2026-09-25) |
 
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.
+
+| 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O | E2 native-haul replay | 27 valid; USD 0.002978598; 8 event/6 bands/0 quiet; at0.5 defer1event/0bands. Snapshot-only; no routing decision | [E2 report](../evidence/jev-replay-e2.json) | [E2 results](JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation) |
