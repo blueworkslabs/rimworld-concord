@@ -21,17 +21,18 @@ import {JEV_EXPECTED_MODEL,JEV_MODEL,JEV_CALL_CEILING_USD} from '../src/jev-ques
 import {buildRequests,loadCases,report,runReplay,jevReplayVersion,sha256,type ReplayAnswer,type AttemptEvent} from './jev-replay.js';
 
 const args=process.argv.slice(2);const flag=(k:string)=>{const i=args.indexOf(k);return i>=0?args[i+1]:undefined;};
-const evidencePath=args[0],out=flag('--out'),live=args.includes('--live'),reportOnly=args.includes('--report');
-if(!evidencePath||!out||(live&&reportOnly)){console.error('usage: run-jev-replay <evidence.json> --out <dir> [--live | --report]');process.exit(2);}
+const evidencePath=args[0],out=flag('--out'),live=args.includes('--live'),reportOnly=args.includes('--report'),only=flag('--only');
+if(!evidencePath||!out||(live&&reportOnly)||(only&&!['wake','grounding'].includes(only))){console.error('usage: run-jev-replay <evidence.json> --out <dir> [--live | --report] [--only wake|grounding]');process.exit(2);}
 const exists=async(p:string)=>{try{await stat(p);return true;}catch{return false;}};
 await mkdir(out,{recursive:true});
 const evidenceText=await readFile(evidencePath,'utf8');
 const cases=loadCases(JSON.parse(evidenceText));
-const requests=buildRequests(cases);
+// Scope is explicit and recorded; the request-list hash binds it, so a report cannot mix scopes.
+const requests=buildRequests(cases).filter(r=>!only||r.kind===only);
 if(live&&(requests.length>32||JEV_CALL_CEILING_USD*requests.length*1.25>0.08))throw Error('Replay exceeds approved 32-call / USD 0.08 bound');
 const identity=replayIdentity(evidenceText,requests);
 const {requestsSha256}=identity;
-const requestArtifact={version:jevReplayVersion,evidence:evidencePath,evidenceSha256:sha256(evidenceText),requestsSha256,cases:cases.length,
+const requestArtifact={version:jevReplayVersion,scope:only??'both',evidence:evidencePath,evidenceSha256:sha256(evidenceText),requestsSha256,cases:cases.length,
  requests:requests.map(r=>({kind:r.kind,index:r.index,bytes:r.bytes,questions:r.questions,sha256:r.sha256,questionKeys:Object.keys(r.request.questions)})),bodies:requests.map(r=>r.request)};
 console.log(`${cases.length} core turns (${cases.filter(c=>c.alignment==='aligned').length} aligned, ${cases.filter(c=>c.applied==='yes').length} applied), ${requests.length} requests (${requests.filter(r=>r.kind==='wake').length} wake, ${requests.filter(r=>r.kind==='grounding').length} grounding), largest state ${Math.max(...requests.map(r=>r.bytes))} bytes`);
 
@@ -44,14 +45,14 @@ const write=async(answers:ReplayAnswer[],status:string)=>{
 if(reportOnly){const journal=await readReplay(out,identity,requests);await write(journal.answers,journal.unfinished||journal.tornTail?'interrupted-report':'report-only');}
 else if(live){
  if(await exists(runPath)){console.error(`Refusing: ${runPath} exists; a live run owns its directory. Use --report or a new --out.`);process.exit(3);}
- const run={version:jevReplayVersion,runId:randomUUID(),createdAt:new Date().toISOString(),evidence:evidencePath,evidenceSha256:sha256(evidenceText),requestsSha256,
+ const run={version:jevReplayVersion,scope:only??'both',runId:randomUUID(),createdAt:new Date().toISOString(),evidence:evidencePath,evidenceSha256:sha256(evidenceText),requestsSha256,
   model:JEV_MODEL,expectedModel:JEV_EXPECTED_MODEL,ceilingUSD:JEV_CALL_CEILING_USD,calls:requests.length,status:'running'};
  // Atomic directory ownership before any retained input can be changed.
  await durableWrite(runPath,run,true);
  await durableWrite(join(out,'requests.json'),requestArtifact);
 
  // Exactly one call per request; the ledger cannot be reopened for a second pass.
- const budget=new TrialBudget(join(out,'ledger.sqlite'),JEV_CALL_CEILING_USD*requests.length*1.25,requests.length,'jev-replay-v2');
+ const budget=new TrialBudget(join(out,'ledger.sqlite'),JEV_CALL_CEILING_USD*requests.length*1.25,requests.length,'jev-replay-v3');
  const sink=(e:AttemptEvent)=>appendAttempt(attemptsPath,{runId:run.runId,...e});
  let status='completed';
  try{await runReplay(requests,protectedJevTransport(),budget,AbortSignal.timeout(10*60_000),sink);}

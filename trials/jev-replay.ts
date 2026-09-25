@@ -18,7 +18,7 @@ import {z} from 'zod';
 import type {AppraisalTransport, TrialBudget} from '../src/appraisal.js';
 import {coreWakeQuestions,coreWakeState,groundingCategories,groundingQuestions,groundingState,jevRequest,validateJevResponse,JEV_CALL_CEILING_USD,JEV_EXPECTED_MODEL,jevQuestionsVersion,type CoreWakeState,type GroundingState,type JevAnswer,type JevRequest} from '../src/jev-questions.js';
 
-export const jevReplayVersion='jev-replay-v2';
+export const jevReplayVersion='jev-replay-v3';
 export const sha256=(x:unknown)=>createHash('sha256').update(typeof x==='string'?x:JSON.stringify(x)).digest('hex');
 
 const Choice=z.object({topics:z.array(z.object({sourceId:z.string(),text:z.string(),status:z.string()})).default([]),
@@ -26,13 +26,27 @@ const Choice=z.object({topics:z.array(z.object({sourceId:z.string(),text:z.strin
 type Choice=z.infer<typeof Choice>;
 export type TopicEffect='resolves'|'blocks'|'advances'|'unrelated';
 
+/** Input-side novelty, from the wake causes alone and never from what the core produced:
+ * `event` = a public event (start, message, answer, request, agreement change, self-care
+ * outcome, shared-haul delivery or lifecycle); `band-change` = only coarse telemetry moved;
+ * `quiet` = only a stall wake, or nothing. Frozen before E2; reported, never tuned. */
+export type Novelty='event'|'band-change'|'quiet';
+export function inputNovelty(wakes:{kind:string;value:string}[]|undefined):Novelty{
+ const w=wakes??[];
+ if(w.some(x=>x.kind!=='telemetry'&&!(x.kind==='native-intent'&&/^\d+$/.test(x.value))))return 'event';
+ return w.some(x=>x.kind==='telemetry')?'band-change':'quiet';
+}
+
 export type ReplayCase={
  index:number;tick:number;decisionId?:string;
+ novelty:Novelty;
  wake:CoreWakeState;
  /** The choice returned for this input, only if it structurally fits this input. */
  returned?:Choice;
  alignment:'aligned'|'misaligned'|'none';
  applied:'yes'|'no'|'ambiguous'|'unknown';
+ /** Set when the evidence carries a pairing manifest and its verdict differs from ours. */
+ appliedMismatch?:{manifest:string;harness:string};
  grounding?:GroundingState;
  /** What actually happened to each open topic, from the aligned returned choice. */
  actualTopics:Record<string,TopicEffect>;newTopics:string[];
@@ -40,9 +54,10 @@ export type ReplayCase={
  actualConsequential:boolean|null;
 };
 
-/** Full action identity, so identical prose to different pawns or targets stays distinct. */
-const canonical=(c:Choice)=>JSON.stringify({topics:c.topics.map(t=>[t.sourceId,t.status,t.text]).sort(),actionTopicId:c.actionTopicId??null,
- action:[c.action.kind,c.action.reason,c.action.text??'',c.action.pawn??'',c.action.opportunityId??'',c.action.proposalId??'']});
+/** Full action identity, so identical prose to different pawns or targets stays distinct.
+ * Strings are trimmed because the production parser trims them before publishing. */
+const canonical=(c:Choice)=>JSON.stringify({topics:c.topics.map(t=>[t.sourceId,t.status,t.text.trim()]).sort(),actionTopicId:c.actionTopicId??null,
+ action:[c.action.kind,c.action.reason.trim(),(c.action.text??'').trim(),c.action.pawn??'',c.action.opportunityId??'',c.action.proposalId??'']});
 
 /** A returned choice belongs to an input only if every id it names exists in that input. */
 function alignedWith(c:Choice,v:any):boolean{
@@ -61,10 +76,14 @@ function alignedWith(c:Choice,v:any):boolean{
  * Inputs and backend decisions are recorded in the same order; that order is only trusted
  * when the counts match and each returned choice structurally fits its input. */
 export function loadCases(evidence:unknown):ReplayCase[]{
- const live=z.object({live:z.object({coreInputs:z.array(z.object({mode:z.string(),view:z.any()})),
+ const parsedEvidence=z.object({live:z.object({coreInputs:z.array(z.object({mode:z.string(),view:z.any()})),
   coreBackendDecisions:z.array(z.object({id:z.string().optional(),mode:z.string().optional(),status:z.string(),rawText:z.string().nullable().optional()})),
-  publicAnswers:z.array(z.object({index:z.number(),mode:z.string(),output:z.any()}))})}).parse(evidence).live;
+  publicAnswers:z.array(z.object({index:z.number(),mode:z.string(),output:z.any()}))}),
+  // Explicit pairing manifest (E2 export and later): the reviewed applied verdict per input.
+  pairing:z.array(z.object({inputIndex:z.number().int(),roundStatus:z.string(),backendDecisionId:z.string().optional()})).optional()}).parse(evidence);
+ const live=parsedEvidence.live,manifest=new Map((parsedEvidence.pairing??[]).map(p=>[p.inputIndex,p]));
  const inputs=live.coreInputs.filter(i=>i.mode==='core'),decisions=live.coreBackendDecisions.filter(d=>!d.mode||d.mode==='core');
+ if(manifest.size&&manifest.size!==inputs.length)throw Error(`Pairing manifest covers ${manifest.size} of ${inputs.length} inputs`);
  if(inputs.length!==decisions.length)throw Error(`Cannot pair ${inputs.length} core inputs with ${decisions.length} core decisions; a pairing manifest is required`);
  const published=new Map<string,number>();
  for(const a of live.publicAnswers.filter(a=>a.mode==='core')){const p=Choice.safeParse(a.output);if(p.success){const k=canonical(p.data);published.set(k,(published.get(k)??0)+1);}}
@@ -88,7 +107,15 @@ export function loadCases(evidence:unknown):ReplayCase[]{
   const actualConsequential=usable?usable.action.kind!=='wait'||Object.values(actualTopics).some(x=>x!=='unrelated')||newTopics.length>0:null;
   let applied:ReplayCase['applied']='unknown';
   if(usable){const k=canonical(usable),n=published.get(k)??0;applied=n===0?'no':n===1&&returnedKeys.get(k)===1?'yes':'ambiguous';}
-  return {index,tick:v.tick,...(decision.id?{decisionId:decision.id}:{}),wake,...(usable?{returned:usable}:{}),alignment,applied,
+  // A reviewed manifest outranks text matching; any disagreement is kept visible, not resolved.
+  const row=manifest.get(index);let appliedMismatch:ReplayCase['appliedMismatch'];
+  if(row){
+   if(row.backendDecisionId&&decision.id&&row.backendDecisionId!==decision.id)throw Error(`Pairing manifest decision id differs at input ${index}`);
+   const byManifest:ReplayCase['applied']=row.roundStatus==='applied'?'yes':usable?'no':'unknown';
+   if(byManifest!==applied)appliedMismatch={manifest:byManifest,harness:applied};
+   applied=byManifest;
+  }
+  return {index,tick:v.tick,...(decision.id?{decisionId:decision.id}:{}),novelty:inputNovelty(v.wakeReasons),wake,...(usable?{returned:usable}:{}),alignment,applied,...(appliedMismatch?{appliedMismatch}:{}),
    ...(usable?{grounding:groundingState(v,usable)}:{}),actualTopics,newTopics,actualConsequential};
  });
 }
@@ -154,16 +181,21 @@ export type ReplayReport=ReturnType<typeof report>;
 export function report(cases:ReplayCase[],answers:ReplayAnswer[]){
  const wake=new Map(answers.filter(a=>a.kind==='wake'&&!a.error).map(a=>[a.index,a]));
  const grounding=new Map(answers.filter(a=>a.kind==='grounding'&&!a.error).map(a=>[a.index,a]));
- const turns=cases.map(c=>{const a=wake.get(c.index);return {index:c.index,tick:c.tick,alignment:c.alignment,applied:c.applied,actualAction:c.returned?.action.kind??null,actualConsequential:c.actualConsequential,newTopics:c.newTopics.length,
+ const turns=cases.map(c=>{const a=wake.get(c.index);return {index:c.index,tick:c.tick,novelty:c.novelty,alignment:c.alignment,applied:c.applied,actualAction:c.returned?.action.kind??null,actualConsequential:c.actualConsequential,newTopics:c.newTopics.length,
   worthTurn:noul(a?.answers,'worth_turn'),asksCore:noul(a?.answers,'asks_core'),
   topics:c.wake.openTopics.map(t=>({key:t.key,id:t.id,actual:c.actualConsequential===null?null:c.actualTopics[t.key]??null,jev:pick(a?.answers,'topic_'+t.key)})),
   messages:c.wake.messagesToCore.map(m=>({key:m.key,jev:pick(a?.answers,'message_'+m.key)}))};});
  const known=turns.filter(t=>t.worthTurn!==undefined&&t.actualConsequential!==null);
- const unknown={noWakeAnswer:turns.filter(t=>t.worthTurn===undefined).length,noUsableChoice:turns.filter(t=>t.actualConsequential===null).length,misaligned:cases.filter(c=>c.alignment==='misaligned').length,ambiguousApplied:cases.filter(c=>c.applied==='ambiguous').length};
+ const unknown={noWakeAnswer:turns.filter(t=>t.worthTurn===undefined).length,noUsableChoice:turns.filter(t=>t.actualConsequential===null).length,misaligned:cases.filter(c=>c.alignment==='misaligned').length,ambiguousApplied:cases.filter(c=>c.applied==='ambiguous').length,appliedMismatch:cases.filter(c=>c.appliedMismatch).length};
  // Threshold curve over turns with a known consequence only. At t, Jev would defer turns with
- // worth_turn < t. Avoidable = deferred and the core changed nothing; missed = deferred and the
- // core did something. Counterfactual: deferring a turn changes later inputs.
- const curve=[0.3,0.4,0.5,0.6,0.7,0.8,0.9].map(t=>{const deferred=known.filter(x=>x.worthTurn!<t);return {threshold:t,scored:known.length,deferred:deferred.length,avoidable:deferred.filter(x=>!x.actualConsequential).length,missed:deferred.filter(x=>x.actualConsequential).length};});
+ // worth_turn < t. Two ground truths, both reported, neither tuned:
+ //  - output rule: avoidable = the core changed nothing; missed = the core did something;
+ //  - input novelty: what the deferred turns were woken by (event / band-change / quiet).
+ // Counterfactual either way: deferring a turn changes later inputs.
+ const byNovelty=(xs:typeof known)=>({event:xs.filter(x=>x.novelty==='event').length,'band-change':xs.filter(x=>x.novelty==='band-change').length,quiet:xs.filter(x=>x.novelty==='quiet').length});
+ const scoredWake=turns.filter(t=>t.worthTurn!==undefined);
+ const curve=[0.3,0.4,0.5,0.6,0.7,0.8,0.9].map(t=>{const deferred=known.filter(x=>x.worthTurn!<t),deferredAny=scoredWake.filter(x=>x.worthTurn!<t);return {threshold:t,scored:known.length,deferred:deferred.length,avoidable:deferred.filter(x=>!x.actualConsequential).length,missed:deferred.filter(x=>x.actualConsequential).length,deferredByNovelty:byNovelty(deferredAny)};});
+ const noveltyCounts=byNovelty(scoredWake);
  const topicPairs=turns.flatMap(t=>t.topics.filter(x=>x.jev&&x.actual).map(x=>({actual:x.actual as TopicEffect,jev:x.jev!.choice,confidence:x.jev!.confidence})));
  const confusion:Record<string,Record<string,number>>={};
  for(const p of topicPairs){const row=confusion[p.actual]??(confusion[p.actual]={});row[p.jev]=(row[p.jev]??0)+1;}
@@ -174,7 +206,7 @@ export function report(cases:ReplayCase[],answers:ReplayAnswer[]){
   return [k,{scored:s.length,atOrAbove05:s.filter(x=>x>=0.5).length,atOrAbove08:s.filter(x=>x>=0.8).length,max:s.length?Math.max(...s):null,topTurns:flags.filter(f=>(f.scores[k]??0)>=0.5).map(f=>f.index)}];}));
  const cost=answers.reduce((s,a)=>s+(a.costUSD??0),0);
  return {version:{replay:jevReplayVersion,questions:jevQuestionsVersion,expectedModel:JEV_EXPECTED_MODEL},cases:cases.length,calls:answers.length,failed:answers.filter(a=>a.error).length,reportedCostUSD:cost,
-  unknown,wake:{turns,curve,topicPairs:topicPairs.length,confusion,closureAgreement,coreWaits:turns.filter(t=>t.actualAction==='wait').length},
+  unknown,wake:{turns,curve,noveltyCounts,topicPairs:topicPairs.length,confusion,closureAgreement,coreWaits:turns.filter(t=>t.actualAction==='wait').length},
   grounding:{turns:flags,perCategory},
-  caveats:['Counterfactual: deferring a turn changes later inputs; avoidable counts are upper bounds.','Turns without a usable returned choice are unknown and excluded from the curve; their count is in `unknown`.','Agreement with the core is not correctness; the core made its own errors.','Thresholds here are unvalidated starting points; pick from these curves, then validate on held-out cases.']};
+  caveats:['Counterfactual: deferring a turn changes later inputs; avoidable counts are upper bounds.','Turns without a usable returned choice are unknown and excluded from the output-rule curve; their count is in `unknown`. deferredByNovelty counts every scored wake, since novelty needs no returned choice.','The output rule labels a turn consequential whenever the core changed its bookkeeping, which a rewording core always does; input novelty is the complementary label and is frozen from wake kinds alone.','Agreement with the core is not correctness; the core made its own errors.','Thresholds here are unvalidated starting points; pick from these curves, then validate on held-out cases.']};
 }

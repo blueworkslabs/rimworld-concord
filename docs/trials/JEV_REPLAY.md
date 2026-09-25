@@ -353,3 +353,41 @@ contains U+3058. These observations support inspecting generation/truncation beh
 not a blanket ban on non-Latin text. Being at the limit does not prove truncation;
 Unicode/script checks cannot establish sentence completeness. No new rejection or
 language policy is implemented here.
+
+## E2 disposition — Fable, 2026-09-25 (frozen before any paid call)
+
+Answers Astra's four preflight points on the export. Nothing below was chosen after
+seeing E2 scores; there are none.
+
+1. **Ground truth for deferral is input novelty, not the core's output.** The output
+   rule ("the core changed its bookkeeping") is degenerate for a core that rewrites its
+   topics every turn: it labels 27 of 27 known turns across both samples consequential.
+   It stays reported, untouched. The frozen complementary label is computed from the
+   wake causes alone, before the core produced anything:
+   - `event`: any wake of kind start, message, answer, request, agreement, self-care,
+     or a shared-haul delivery or lifecycle change;
+   - `band-change`: only coarse Food/Rest telemetry moved;
+   - `quiet`: only a stall wake, or nothing.
+   On the E2 export this gives 8 event turns and 6 band-change turns (indices 3–7 and
+   13), which are exactly the six "nothing to propose" waits and the deadline-cancelled
+   attempt. The report shows, per threshold, how many deferred turns fall in each class
+   over every scored wake. Deferring `quiet` is free; deferring `band-change` is a policy
+   question (a low→urgent band is real news even when no option exists); deferring
+   `event` is a miss. No claim of "avoidable" is made from the output rule.
+2. **Shared-haul evidence is in both projections.** The wake state lists the intent as an
+   outcome ("delivered 20 of 75 WoodLog (Pedro 20); accepted by Beatrice"); the grounding
+   records carry `sharedHauls` with status, delivered, quota, per-pawn credit, accepted
+   and declined names, last delivery tick and any overshoot. The two grounding questions
+   that concern completion name it explicitly.
+3. **Scope: both request kinds, 27 requests.** The grounding half is worth its 13 calls:
+   this run holds the two stale-on-arrival narrations and the "agreed: 1, unfulfilled: 1"
+   projection defect. `--only wake|grounding` exists as an explicit, recorded scope
+   for later passes; the request-list hash binds the scope so reports cannot mix.
+4. **Applied accounting uses the pairing manifest.** Canonical text is trimmed as the
+   production parser trims it (13 of 13 now match), and a reviewed manifest outranks
+   text matching; any disagreement is kept as `appliedMismatch` and counted, never
+   resolved silently. Manifest decision ids must match the decisions they pair.
+
+Budget: 27 × USD 0.002 reserved, allowance USD 0.0675, one exclusive run directory,
+ledger policy `jev-replay-v3`. Dry run: largest state 5,399 bytes. Run only after the
+egress certificate is confirmed valid for the window; no retries inside the run.

@@ -152,3 +152,40 @@ test('grounding keeps all supplied testimony and question eligibility, without t
  assert.deepEqual(cases[9]!.grounding!.records.questionRecipients,['Alvin']);
  assert.ok(cases[13]!.grounding!.communication.some(m=>m.from==='Pedro'&&/finish/i.test(m.text)));
 });
+
+const e2=JSON.parse(readFileSync(new URL('../../docs/evidence/native-haul-core-e2.json',import.meta.url),'utf8'));
+
+test('E2 export: pairing manifest decides applied, trimmed text matches, novelty comes from wake kinds, shared-haul evidence is kept',()=>{
+ const cases=loadCases(e2);
+ assert.equal(cases.length,14);
+ assert.equal(cases.filter(c=>c.alignment==='aligned').length,13);
+ assert.equal(cases.filter(c=>c.applied==='yes').length,13,'the manifest establishes 13 applied');
+ assert.equal(cases.filter(c=>c.appliedMismatch).length,0,'trimmed canonical text agrees with the manifest');
+ assert.deepEqual(cases.map(c=>c.novelty),['event','event','event','band-change','band-change','band-change','band-change','band-change','event','event','event','event','event','band-change']);
+ assert.equal(cases[1]!.wake.outcomes.some(o=>o.kind==='shared stockpile haul'&&o.detail.includes('20 of 75')),true);
+ const g=cases[2]!.grounding!;assert.equal(g.records.sharedHauls[0]!.delivered,75);assert.equal(g.records.sharedHauls[0]!.status,'met');
+ assert.ok(!JSON.stringify(g).includes('Thing_Human'));
+ const requests=buildRequests(cases);assert.equal(requests.length,27);
+ for(const r of requests)assert.ok(r.bytes<=JEV_STATE_LIMIT_BYTES,`${r.kind}#${r.index} ${r.bytes}`);
+});
+
+test('a pairing manifest that disagrees with text matching is kept visible, and mismatched ids are rejected',()=>{
+ const ask=(pawn:string)=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn,text:'hi',reason:'r'}});
+ const base=synthetic([{status:'completed',rawText:JSON.stringify(ask('A'))}],[view()],[]);
+ const withManifest={...base,pairing:[{inputIndex:0,roundStatus:'applied',backendDecisionId:'d0'}]};
+ const c=loadCases(withManifest)[0]!;assert.equal(c.applied,'yes');assert.deepEqual(c.appliedMismatch,{manifest:'yes',harness:'no'});
+ assert.throws(()=>loadCases({...base,pairing:[{inputIndex:0,roundStatus:'applied',backendDecisionId:'other'}]}),/decision id differs/);
+ assert.throws(()=>loadCases({...synthetic([{status:'completed'},{status:'completed'}],[view(),view()],[]),pairing:[{inputIndex:0,roundStatus:'applied'}]}),/covers 1 of 2/);
+});
+
+test('report splits deferrals by input novelty over every scored wake, independent of the output rule',async()=>{
+ const cases=loadCases(e2);const requests=buildRequests(cases).filter(r=>r.kind==='wake');
+ const budget=new TrialBudget(':memory:',0.08,32,'jev-replay-v3');
+ const answers=await runReplay(requests,fake(0.2),budget,new AbortController().signal);budget.close();
+ const r=report(cases,answers);
+ assert.deepEqual(r.wake.noveltyCounts,{event:8,'band-change':6,quiet:0});
+ const at05=r.wake.curve.find(c=>c.threshold===0.5)!;
+ assert.deepEqual(at05.deferredByNovelty,{event:8,'band-change':6,quiet:0});
+ assert.equal(at05.scored,13,'the cancelled turn has novelty but no output-rule ground truth');
+ assert.equal(r.unknown.appliedMismatch,0);
+});
