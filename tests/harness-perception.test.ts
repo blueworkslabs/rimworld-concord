@@ -48,6 +48,8 @@ test('since reports what changed between two snapshots and resets across a load'
 test('look answers area, category, capability and pawn queries as slices of one snapshot',()=>{
   const s=fixture();
   const near=look(s,{by:'area',thing:104,radius:5});
+  s.threats.push({id:999,def:'Human',label:'raider',x:10,z:10,hostile:true,manhunter:false,predator:false,downed:false});
+  assert.doesNotThrow(()=>look(s,{by:'area',thing:999,radius:5}));
   assert.deepEqual(near.things!.map(t=>t.id).sort(),[103,104,105]);assert.deepEqual(near.pawns!.map(p=>p.name),['Pedro','Beatrice']);
   assert.deepEqual(look(s,{by:'category',category:'beds'}).things!.map(t=>t.id),[105]);
   assert.deepEqual(look(s,{by:'category',category:'food'}).things!.map(t=>t.id),[103]);

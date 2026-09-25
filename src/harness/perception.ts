@@ -111,7 +111,7 @@ export function look(s:Snapshot,raw:unknown){
   const q=Look.parse(raw);
   if(q.by==='section')return {query:q,meta:s.meta,value:s[q.section]};
   if(q.by==='area'){
-    const anchor=q.thing!==undefined?[...s.map.things,...s.pawns].find(t=>t.id===q.thing):q.x!==undefined&&q.z!==undefined?{x:q.x,z:q.z}:undefined;
+    const anchor=q.thing!==undefined?[...s.map.things,...s.pawns,...s.threats].find(t=>t.id===q.thing):q.x!==undefined&&q.z!==undefined?{x:q.x,z:q.z}:undefined;
     if(!anchor)throw Error('look: area needs a known thing or a cell');
     const near=(t:{x:number;z:number})=>(t.x-anchor.x)**2+(t.z-anchor.z)**2<=q.radius**2;
     return {query:q,things:s.map.things.filter(near),pawns:s.pawns.filter(near).map(p=>({id:p.id,name:p.name,x:p.x,z:p.z,job:p.job.def})),threats:s.threats.filter(near)};
