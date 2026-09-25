@@ -150,14 +150,16 @@ export function crewReport(d:Domain,tick:number,status:import('./shared-status.j
  const lastTurn=[...(core?.turns??[])].reverse().find(t=>t.status==='applied'),firstOpen=(core?.topics??[]).find(t=>t.status==='open');
  // A wait after a pawn spoke to the core says it heard them (Fable: a silent wait after a plea
  // reads as being ignored). The topic is cut at a word, not mid-word.
- const heard=lastTurn?.choice?.action.kind==='wait'&&!core?.silentWake?(lastTurn.heard??[]).map(p=>safe(d.characters[p]?.name??p,40)):[];
+ const heard=lastTurn&&!core?.silentWake?(lastTurn.heard??[]).map(p=>safe(d.characters[p]?.name??p,40)):[];
  const clip=(t:string,max:number)=>{const s=t.replace(/\s+/g,' ').trim();if(s.length<=max)return s;const cut=s.slice(0,max);const at=cut.lastIndexOf(' ');return (at>max/2?cut.slice(0,at):cut).replace(/[,;:.\-]+$/,'')+'…';};
  const coreWaiting=lastTurn?.choice?.action.kind==='wait'||core?.silentWake?`Core: ${heard.length?`heard ${heard.join(', ')}; `:''}waiting on ${firstOpen?clip(firstOpen.text,120):'new events'}`:undefined;
  const coreState=thinking.includes('core')?'Core: thinking':coreWaiting!==undefined?coreWaiting:!core?'Core: not initialized':schedule?.config.maxAttempts!==null&&core.turns.length>=16?'Core: legacy lifetime limit reached':schedule?.blocked?'Core: '+schedule.blocked:schedule&&schedule.config.maxAttempts!==null&&schedule.attempts>=schedule.config.maxAttempts?'Core: configured allowance exhausted':schedule&&schedule.endTick!==null&&tick>=schedule.endTick?'Core: observation window ended':schedule&&schedule.lastAttemptTick!==undefined&&tick-schedule.lastAttemptTick<schedule.config.cooldownTicks?'Core: cooling down':'Core: no turn running; next call depends on operator/scheduler';
  const pendingQuestions=(core?.questions??[]).filter(q=>q.status==='pending'||q.status==='running').map(q=>`${nameForCare(d,q.pawn)}: ${q.status==='running'?'answering':'question awaiting reply'}`);
  const failures=core?.failures,failed=failures&&failures.total>0?`Core outputs failed or rejected: ${failures.total} (${Object.entries(failures.causes).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${k.replace(/^rejected: /,'')} ${n}`).join(', ')})`:undefined;
  const laneFailures=Object.entries(d.diagnostics?.laneFailures??{}).map(([lane,f])=>`${lane} failures: ${f.total} (${Object.entries(f.causes).map(([cause,n])=>`${cause} ${n}`).join(', ')})`);
- const observerText=[coreState,...(failed?[failed]:[]),...laneFailures,...thinking.filter(id=>id!=='core'&&!!d.characters[id]).map(id=>`${nameForCare(d,id)}: thinking`),...pendingQuestions].join(' · ').slice(0,1600);
+ // After a turn that answered someone else, the pawn who spoke is still visibly heard.
+ const heardLine=heard.length&&lastTurn?.choice?.action.kind!=='wait'?`Core: heard ${heard.join(', ')}; no reply to them yet`:undefined;
+ const observerText=[coreState,...(heardLine?[heardLine]:[]),...(failed?[failed]:[]),...laneFailures,...thinking.filter(id=>id!=='core'&&!!d.characters[id]).map(id=>`${nameForCare(d,id)}: thinking`),...pendingQuestions].join(' · ').slice(0,1600);
  // The board is explicitly the core's interpretation; no private character state or raw audit data.
  const topicText=(core?.topics??[]).slice(-8).map(t=>`[${t.status}] ${safe(t.text,240)}`).join('\n').slice(0,2400);
  return {world:d.world,epoch:d.epoch,branch:d.branch,revision:d.crew?.revision??0,tick,entries,observerText,topicText,sharedStatus:status,waiting:waiting||'No outstanding offer or running agreement.',

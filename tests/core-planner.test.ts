@@ -414,3 +414,24 @@ test('full capacity cannot reopen a retained closed topic through an existing-id
  for(const metadata of [false,true]){const {c,s,g}=await setup();const result=await c.planCore({name:'invalid recipient',async plan(){if(metadata)throw Object.assign(Error('Rejected'),{failureCause:'invalid-output',coreRejection:{cause:'unavailable choice',action:{kind:'ask',pawn:'UNPUBLISHED PRIVATE DIAGNOSTIC'}}});return {topics:[],actionTopicId:null,action:{kind:'ask',pawn:'UNPUBLISHED PRIVATE DIAGNOSTIC',text:'Unknown?',reason:'Unknown'}};}});
  assert.equal(result.status,'failed');const report=crewReport(c.inspect(),g.data.ticks);assert(!JSON.stringify(report).includes('UNPUBLISHED PRIVATE DIAGNOSTIC'));s.close();}
  });
+
+test('a pawn who spoke is visibly heard until the core answers them, whatever the core chose',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});
+ const q=await c.planCoreWhenDue(planner(()=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'How are you?',reason:'Ask'}})));
+ if(q.status!=='applied'||!q.questionId)throw Error('no question');
+ assert.equal((await c.answerCoreQuestion(q.questionId,{name:'plea',async answerCore(){return {choice:'say',text:'Please help me find food.'};}})).status,'delivered');
+ // The core answers someone else: A is still heard.
+ g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(()=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'B',text:'Can you look for food?',reason:'Ask B'}})))).status,'applied');
+ let status=crewReport(c.inspect(),g.data.ticks).observerText??'';const a=c.inspect().characters.A!.name;
+ assert.match(status,new RegExp(`Core: heard ${a}; no reply to them yet`));assert.deepEqual(c.inspect().coreState!.turns.at(-1)!.heard,['A']);
+ s.close();
+});
+test('a turn that answers the pawn who spoke clears the heard status',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});
+ const q=await c.planCoreWhenDue(planner(()=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'How are you?',reason:'Ask'}})));
+ if(q.status!=='applied'||!q.questionId)throw Error('no question');
+ await c.answerCoreQuestion(q.questionId,{name:'plea',async answerCore(){return {choice:'say',text:'Please help me.'};}});
+ g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(v=>({topics:[],actionTopicId:null,action:{kind:'propose',opportunityId:v.opportunities.find(o=>o.pawn==='A')!.id,reason:'An offer to you'}})))).status,'applied');
+ assert.equal(c.inspect().coreState!.turns.at(-1)!.heard,undefined);assert.doesNotMatch(crewReport(c.inspect(),g.data.ticks).observerText??'',/heard/);
+ s.close();
+});

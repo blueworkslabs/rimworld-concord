@@ -521,7 +521,11 @@ export class Coordinator {
           if(!topic){topic={...update,proposalIds:this.domain.proposals[update.sourceId]?[update.sourceId]:[]};state.topics.push(topic);}else Object.assign(topic,update);
         }
         if(proposalId&&choice.actionTopicId){const topic=state.topics.find(t=>t.sourceId===choice.actionTopicId)!;if(!topic.proposalIds.includes(proposalId))topic.proposalIds.push(proposalId);}
-        Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{}),...(prepared.heard.length?{heard:prepared.heard}:{})});state.revision++;
+        // Heard but not answered: pawns whose message woke this turn and to whom it sent nothing
+        // (no question, no offer). Shown whatever the core chose, not only on a wait.
+        const addressed=a.kind==='ask'?a.pawn:proposalId?this.domain.proposals[proposalId]?.pawn:undefined;
+        const heard=prepared.heard.filter(p=>p!==addressed);
+        Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{}),...(heard.length?{heard}:{})});state.revision++;
         this.commit('core-planned','core',{id:prepared.id,kind:a.kind,reason:a.reason,...this.asOf(prepared.view.tick,g)});
         return {status:'applied' as const,proposalId,questionId,choice};
       });
