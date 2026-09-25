@@ -9,6 +9,8 @@ recorded attempts; coordinator checks pass (406 tests), pinned 4871 mod compilat
 passes. No character-model calls. Staging is stopped, all **377 pre-existing saves**
 (including the original 285) are unchanged, and **22 recordings** are hash-verified.
 
+Latest follow-up: [strict mixed-item and rescue acceptance](#strict-acceptance-follow-up): both targeted cases now pass, with the failed first rescue setup preserved. Historical results below are unchanged.
+
 ## Review and exhausted B1 budget
 
 Clawd's `c98f3ea` corrected the first-round fixture/precondition problems. Independent
@@ -70,12 +72,49 @@ measure active growing-hold behavior, dispatch overhead or colony-wide performan
 
 ## Remaining work and ownership
 
-Clawd: establish the missing refusing-pawn/third-item evidence in strict mode, retain
-strict as the migration configuration, and finish the remaining migration acceptance
-work. In-game rescue handover, event-map clock behavior and the next live verification
-of #71 remain pending. Prior single-map UI/Show evidence is not a cross-map test.
-Growing nested callback termination and pending-extra cases are parked, not passed.
-Retirement of ordered hauling and the Gate C live freeze remain separate gates.
-Fable owns direction/verdict; no fresh live run or migration sign-off is implied.
+The missing refusing-pawn/third-item and in-game rescue evidence is now established
+by the follow-up below. Strict is the enforced migration default; growing requires
+explicit experimental opt-in and remains parked. Cross-map clock behavior and the
+next live verification of #71 remain pending. Prior single-map UI/Show evidence is
+not a cross-map test. Growing nested callback termination and pending-extra cases
+are parked, not passed. Retirement of ordered hauling and the Gate C live freeze
+remain separate gates. Fable owns direction/verdict; no fresh live run or migration
+sign-off is implied.
 
 Original round-1 evidence remains at [the earlier staging report](HAULING_MIGRATION_STAGING.md).
+
+## Strict acceptance follow-up
+
+Reviewed builds `d6b8d4c` (mixed case) and `cd261f2` (rescue recheck), 2026-09-25.
+[Public summary and retained hashes](../evidence/hauling-migration-strict-acceptance.json).
+**Two targeted cases pass; this is not a fresh full-suite run or Gate C approval.**
+407 coordinator tests, pinned mod compilation, typecheck, launcher lock guards and
+independent focused re-review pass. No character-model calls; no growing run.
+
+- **Mixed-item coverage closed.** While Beatrice's wood refusal was binding, the
+  patched native store search rejected wood for her, admitted steel for her, and
+  admitted Pedro's wood control. Her untagged Steel job 6 started at tick 3 and
+  succeeded at 443. Zone steel rose 0→30; wood 20 and components 10 met their separate
+  quotas. The harness selected Steel and started the native-factory job: this proves
+  that scoped refusal permits the real trip, not that she autonomously chose Steel
+  or personally delivered all 30. The earlier coverage failure stays retained.
+- **Rescue handover passed.** Pedro's captured tagged trip held/carried/credited
+  exactly 10 wood. It ended at tick 241 (native sequence 21); the single rescue
+  dispatch started job 27 at tick 289 (sequence 26). The dispatch trace confirmed
+  game-side exclusion, empty hands and departure from the captured haul job. Alvin
+  reached the agreed medical bed; treatment is not implied. Authored request, offer
+  and acceptance used the real coordinator; the crew record appeared.
+- **First rescue setup failed and is retained.** The patient was already visible
+  before the case's event cursor, so requiring a new casualty edge waited until the
+  wood was gone. Beatrice occupied the sole medical spot too. Re-review cleared use
+  of the current pawn-local sighting and a separate v2 save with a second spot. All
+  stacks, quotas and other fixture state remained unchanged. This is B7 work, not
+  another B1 growing round.
+- **Review repairs:** require exact tagged WoodLog/job ownership and positive cargo
+  credit; bind mandatory rescue-start evidence to the dispatch receipt and native
+  sequence; snapshot lab job identity before synchronous StartJob can pool it.
+
+No invariant detector events or native-event gaps were observed in these three
+attempts. All **395 pre-existing saves** are unchanged, all **three recordings**
+match the remote hashes, and both game and display services are stopped after a
+new uniquely named handoff save. B1 remains **2/2 exhausted**, growing parked.

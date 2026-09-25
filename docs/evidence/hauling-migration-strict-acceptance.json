@@ -1,0 +1,96 @@
+{
+  "kind": "hauling-migration-strict-acceptance-followup",
+  "date": "2026-09-25",
+  "mixedReviewedHead": "d6b8d4c",
+  "rescueReviewedHead": "cd261f2",
+  "mode": "strict",
+  "b1FixRoundsUsed": 2,
+  "growingDisposition": "parked; not run",
+  "tests": 407,
+  "cases": [
+    {
+      "receipt": "hauling-migration-strict-e5d1c386-bbe8-4930-8e4c-dae8f6775c1e.json",
+      "sha256": "dd3322b0cb5b60abb26d8322051950439160d4b798a4fcb0770d6536dd3e6089",
+      "at": "2026-09-25T07:10:22.074Z",
+      "case": "mixed-zone-independent",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0
+    },
+    {
+      "receipt": "hauling-migration-strict-b8a4b883-009d-4426-974d-23d113317f71.json",
+      "sha256": "57aaa62fff4633a28cef2087676e0d60bcee52dea23032ca18ae9d30826927eb",
+      "at": "2026-09-25T07:11:11.791Z",
+      "case": "rescue-handover-in-game",
+      "passed": false,
+      "findings": [
+        "precondition: no carrying tagged trip with a sighting of the patient (sighted false, carrying false)"
+      ],
+      "eventGaps": 0
+    },
+    {
+      "receipt": "hauling-migration-strict-a2977b95-12df-4a71-ae8b-a08fa556125e.json",
+      "sha256": "b4a60be7d56bac99a3dcf39554c3f112b3ce4e8bff9bebd186e5bb074c8702fb",
+      "at": "2026-09-25T07:15:02.439Z",
+      "case": "rescue-handover-in-game",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0
+    }
+  ],
+  "mixed": {
+    "woodDelivered": 20,
+    "componentDelivered": 10,
+    "refuserSteelSearchAdmitted": true,
+    "refuserWoodSearchAdmitted": false,
+    "PedroWoodSearchAdmitted": true,
+    "refuserSteelJob": 6,
+    "startTick": 3,
+    "endTick": 443,
+    "status": "Succeeded",
+    "zoneSteelBefore": 0,
+    "zoneSteelAfter": 30,
+    "limit": "The runner chooses Steel and starts the native-factory job; this is not evidence of autonomous Steel selection or a per-pawn split of all stored Steel."
+  },
+  "rescue": {
+    "capturedWoodCargo": 10,
+    "capturedHold": 10,
+    "capturedWoodCredit": 10,
+    "haulEndTick": 241,
+    "haulEndSeq": 21,
+    "rescueStartTick": 289,
+    "rescueStartSeq": 26,
+    "dispatchCalls": 1,
+    "excludedAndEmptyHandsAtDispatch": true,
+    "outcome": "completed",
+    "patientInAgreedBed": true,
+    "crewRecordPresent": true,
+    "answers": "authored only; zero character-model calls",
+    "fixtureCorrection": "First recording retained. Current pawn-local sighting replaces an edge-event precondition; new save adds a second medical sleeping spot because Beatrice occupied the first."
+  },
+  "fixtureHashes": {
+    "rescue-layout.json": "3dc9ae5d02f4939dede770dbde4c9b43341fe4b210a0600db04f86b78eb4d933",
+    "rescue-manifest.json": "28b950f5592d13255a4a62dfc8f27be4351728a601530f73db5ae0ecf955890b",
+    "lab-concord-hm-rescue-20260925.rws": "d6cb2f42ed774c1ad0265ac80ee7b70ca815efdcf8d919e21ee1925b40ee65d1",
+    "rescue-layout-v2.json": "5f76fba3243b55d42a8552285182e8b834847e5e28c426ad816a1eec74d585b0",
+    "rescue-manifest-v2.json": "c3027454cba5b5de5f8844a307a05933b0388f865c30327c34e820495590d0cb",
+    "lab-concord-hm-rescue-v2-20260925.rws": "4f1461b5499d282573c57499e3193438ff30436777a484fe3478bb1e26c3259b"
+  },
+  "preservation": {
+    "preexisting": 395,
+    "changed": [],
+    "recordings": {
+      "strict-mixed-zone-independent-1790320220545.mp4": "0ae7f1ebc1cf1dfb76861b97ec49a74f2d15134110ddb13787a8169350c7b7c1",
+      "strict-rescue-handover-in-game-1790320500814.mp4": "4dc35632923430db7b51711cbde16598b580413e51540340ab2ad97ea927a216",
+      "strict-rescue-handover-in-game-1790320270190.mp4": "fa8bce686d38bd0721de8a562e4223ec15a40d8fc5fb488e661852e08425c8e2"
+    },
+    "gameService": "inactive",
+    "displayService": "inactive"
+  },
+  "remaining": [
+    "cross-map clock evidence/disposition",
+    "live #71 validation in a separately frozen run",
+    "remaining UI/legibility and ordered-haul retirement gates",
+    "Gate C verdict"
+  ]
+}
