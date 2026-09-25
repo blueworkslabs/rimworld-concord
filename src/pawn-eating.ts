@@ -23,8 +23,12 @@ export function eatingOptions(d:Domain,g:GameState,p:Pawn):EatOption[]{
 }
 export function revalidateEating(d:Domain,g:GameState,p:Pawn,offered:Pawn,thing:string,bridgeAvailable:boolean){
  const original=offered.eating?.options.find(o=>o.thing===thing),current=eatingOptions(d,g,p).find(o=>o.thing===thing);
- const code=!bridgeAvailable?'bridge-unavailable':!original?'not-offered':eatingBlock(d,g,p)??(p.eating!.mapId!==offered.eating!.mapId?'map-changed':!current?'option-not-current':current.count>original.count?'portion-increased':null);
- return {layer:'coordinator' as const,code,thing,offeredTick:offered.eating?.tick??null,checkedTick:g.ticks,observationTick:p.eating?.tick??null,offeredMap:offered.eating?.mapId??null,currentMap:p.eating?.mapId??null,offeredCount:original?.count??null,currentCount:current?.count??null};
+ // Identity is the thing; the count is the one the pawn chose, at most the current portion.
+ // A portion that grew while the pawn thought no longer fails the choice (the mod accepts any
+ // count up to its current portion); one that shrank dispatches the smaller current portion.
+ const code=!bridgeAvailable?'bridge-unavailable':!original?'not-offered':eatingBlock(d,g,p)??(p.eating!.mapId!==offered.eating!.mapId?'map-changed':!current?'option-not-current':null);
+ const dispatchCount=original&&current?Math.min(original.count,current.count):null;
+ return {layer:'coordinator' as const,code,thing,dispatchCount,offeredTick:offered.eating?.tick??null,checkedTick:g.ticks,observationTick:p.eating?.tick??null,offeredMap:offered.eating?.mapId??null,currentMap:p.eating?.mapId??null,offeredCount:original?.count??null,currentCount:current?.count??null};
 }
 export class EatingRevalidationError extends Error {
  constructor(readonly validation:ReturnType<typeof revalidateEating>){super('Eating revalidation: '+validation.code);}

@@ -545,8 +545,8 @@ export class Coordinator {
           const own=g.pawns.find(p=>p.id===q.pawn)!;const action=eatingOptions(this.domain,g,own).find(o=>o.thing===choice.thing);
           const validation=revalidateEating(this.domain,g,own,prepared.view.pawn,choice.thing,!!this.game.eat);
           if(validation.code)throw new EatingRevalidationError(validation);
-          if(!action)throw Error('Validated eating option missing');
-          care={id:randomUUID(),pawn:q.pawn,questionId:id,action:structuredClone(action),mapId:own.eating!.mapId,untilTick:g.ticks+action.maxTicks};
+          if(!action||validation.dispatchCount===null)throw Error('Validated eating option missing');
+          care={id:randomUUID(),pawn:q.pawn,questionId:id,action:{...structuredClone(action),count:validation.dispatchCount},mapId:own.eating!.mapId,untilTick:g.ticks+action.maxTicks};
           (this.domain.selfCare??={})[care.id]=care;ch.commitment=care.id;
         }
         const m:SocialMessage={id:randomUUID(),exchangeId:id,tick:g.ticks,from:q.pawn,to:'core',fromName:ch.name,toName:'Core',text:choice.text};

@@ -21,13 +21,17 @@ class Game implements GameBridge{
  async save(n:string){this.saved.set(n,structuredClone(this.data));return {sha256:'hash'};}async verify(){}async load(n:string){this.data=structuredClone(this.saved.get(n)!);this.data.epoch=randomUUID();}
 }
 const eat={choice:'eat',thing:'berry',text:'I choose these berries.'};
-test('diagnostic: a growing suggested portion rejects an otherwise identical delayed choice',async()=>{
+test('a portion that grows while the pawn thinks still eats the chosen count (identity by thing, count at most the current portion)',async()=>{
+ // Live run: Alvin chose 12 berries; the suggested portion became 13 during inference and the
+ // choice failed. The chosen 12 is at most the current 13, so it now goes through unchanged.
  const {g,s,c}=await setup();g.portion=12;const q=await ask(c);let calls=0,offered=0;
- const result=await c.answerCoreQuestion(q,{name:'diagnostic',async answerCore(v){calls++;offered=v.pawn.eating!.options[0]!.count;g.portion=13;return eat;}});
- assert.equal(calls,1);assert.equal(offered,12);assert.equal(result.status,'failed');assert.equal(g.calls,0);
- const event=s.events().find(e=>e.event.kind==='core-answer-failed')!.event.data as any;
- assert.equal(event.eatingValidation.code,'portion-increased');assert.equal(event.eatingValidation.offeredCount,12);assert.equal(event.eatingValidation.currentCount,13);assert.equal(event.eatingValidation.checkedTick,100);
- assert.equal((await c.corePerspective() as any).eatingValidation,undefined);s.close();
+ const result=await c.answerCoreQuestion(q,{name:'grew',async answerCore(v){calls++;offered=v.pawn.eating!.options[0]!.count;g.portion=13;return eat;}});
+ assert.equal(calls,1);assert.equal(offered,12);assert.equal(result.status,'delivered');assert.equal(g.calls,1);
+ assert.equal(g.data.actions[0]!.count,12,'the chosen count, never the grown portion');assert.equal(Object.values(c.inspect().selfCare!)[0]!.action.count,12);
+ // A portion that shrank dispatches the smaller current portion: never more than the game allows now.
+ const second=await setup();second.g.portion=16;const q2=await ask(second.c);
+ assert.equal((await second.c.answerCoreQuestion(q2,{name:'shrank',async answerCore(){second.g.portion=10;return eat;}})).status,'delivered');
+ assert.equal(second.g.data.actions[0]!.count,10);s.close();second.s.close();
 });
 async function setup(){const g=new Game(),s=new Store(':memory:'),c=new Coordinator(s,g);await c.open();await c.initializeCore('Ask; no orders.');return {g,s,c};}
 async function ask(c:Coordinator){const r=await c.planCore({name:'scripted',async plan(){return {topic:null,action:{kind:'ask',pawn:'A',text:'What would help?',reason:'Ask'}};}});assert.equal(r.status,'applied');if(r.status!=='applied')throw Error();return r.questionId!;}
@@ -108,9 +112,9 @@ test('eating revalidation distinguishes policy blocks, stale views, missing opti
   ['observation-epoch',(d:any,p:any)=>{p.eating.epoch='old';}],
   ['option-not-current',(d:any,p:any)=>{p.eating.options=[];}],
   ['map-changed',(d:any,p:any)=>{p.eating.mapId=2;}],
-  ['portion-increased',(d:any,p:any)=>{p.eating.options[0].count=17;}],
  ] as const){const dd=structuredClone(d),pp=structuredClone(p);change(dd,pp);assert.equal(revalidateEating(dd,state,pp,offered,'berry',true).code,expected);}
- const smaller=structuredClone(p);smaller.eating!.options[0]!.count=15;assert.equal(revalidateEating(d,state,smaller,offered,'berry',true).code,null);
+ const smaller=structuredClone(p);smaller.eating!.options[0]!.count=15;assert.equal(revalidateEating(d,state,smaller,offered,'berry',true).code,null);assert.equal(revalidateEating(d,state,smaller,offered,'berry',true).dispatchCount,15);
+ const larger=structuredClone(p);larger.eating!.options[0]!.count=17;assert.equal(revalidateEating(d,state,larger,offered,'berry',true).code,null);assert.equal(revalidateEating(d,state,larger,offered,'berry',true).dispatchCount,offered.eating!.options[0]!.count);
  assert.equal(revalidateEating(d,state,p,offered,'berry',false).code,'bridge-unavailable');
  assert.equal(revalidateEating(d,state,p,offered,'invented',true).code,'not-offered');s.close();
 });
