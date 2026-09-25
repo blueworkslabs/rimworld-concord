@@ -34,6 +34,12 @@ export function nativeAttention(event:{kind:string;detail:string}):{next:Route;i
   const quiet=['Chitchat','DeepTalk'].includes(event.detail);
   return {next:'deliberation',interrupt:!quiet};
  }
+ // Fable (post-Gate-C item 7): need bands are native texture for pawns; the game feeds them and
+ // the deliberate eating choice comes through the core's question. Mirroring the core rule, a
+ // pawn's own Food or Rest band reaching urgent (band 0, under 20%) is deliberation, queued.
+ // The appraisal route stays defined for the day an appraiser has evidence.
+ if(event.kind==='food'||event.kind==='rest')return {next:event.detail==='0'?'deliberation':'native',interrupt:false};
+ if(event.kind==='mood')return {next:'native',interrupt:false};
  const significant=event.kind==='memory'||event.kind==='health'||event.kind==='casualty';
  return {next:route({urgent:event.kind==='health',significant,conflictsWithCommitment:false,routine:event.kind==='job'}).next,
    interrupt:significant&&!(event.kind==='memory'&&['Chitchat','DeepTalk'].includes(event.detail))};

@@ -54,11 +54,15 @@ after it arrived, because the oldest entry was always the one removed, whatever 
 | `intent-ordinary` native | 14 | 4 |
 | Both fixes | **0** | 5 |
 
-## What this does not fix
+## Decision (Fable): need bands are native texture for pawns
 
-Retained is not considered. Without an appraiser, a pawn whose backlog is only need-band
-changes still waits for a significant event before anyone looks at them; the fix only stops
-them being silently destroyed in the meantime. Whether the live runner should run an
-appraiser, or whether Food/Rest band changes should be native texture for pawns (the core
-already reads bands from shared status), is a design choice for Fable, not part of this
-fix. The Chitchat case is lane scheduling, not buffering.
+Retained is not considered: without an appraiser, need-band changes would still wait for a
+significant event. Fable chose not to add an appraiser to the live loop (no replay evidence
+behind it yet, and the grounding annotator is ahead in the queue). Pawn reflections on band
+changes were never doing much: the game feeds the pawn, and the deliberate eating choice
+comes through the core's question. So Food, Rest and Mood band changes route **native** for
+pawns. The exception mirrors the core rule: a pawn's own Food or Rest band reaching `urgent`
+(band 0) routes to **deliberation, queued, not interrupting**, so "I'm at 19%, I'm eating
+now" stays possible from the pawn's side. The appraisal route stays defined for unknown
+kinds. The Chitchat case is lane scheduling, not buffering. The replay says 0 of 17; the
+next live run will say whether that holds.
