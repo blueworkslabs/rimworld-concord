@@ -21,3 +21,18 @@ test('native structured-output dialect applies to live modes, not just offline s
  const req=codexRequest('core-answer',view);const text=JSON.stringify(req.schema);
  assert(!text.includes('"const"'));assert(!text.includes('"oneOf"'));assert(!text.includes('"uniqueItems"'));assert(text.includes('"enum"'));
 });
+
+test('native rejection survives the live error relay into the crew record without unpublished text',async()=>{
+ const {Coordinator}=await import('../src/coordinator.js'),{Store}=await import('../src/store.js'),{DecisionChannel}=await import('../src/decision-channel.js'),{CoreRejection}=await import('../src/core-planner.js'),{crewReport}=await import('../src/crew-log.js'),{encodeCrewReport}=await import('../src/lab-bridge.js');
+ const g:any={async state(){return {world:'native-rejection',epoch:'one',ticks:100,paused:true,loaded:true,pawns:[{id:'A',name:'Alvin',x:1,z:1,job:'Wait',health:1}],actions:[]};}};
+ const s=new Store(':memory:'),c=new Coordinator(s,g);await c.open();await c.initializeCore('Optional work.');
+ const f=fixture(helper({...receipt,rawText:JSON.stringify({core:{topics:[],actionTopicId:'brief',action:{kind:'ask',pawn:'A',text:'UNPUBLISHED QUESTION',reason:'UNPUBLISHED REASON'}}})}));
+ const sent:any[]=[];const channel=new DecisionChannel(async(message:any)=>{if(message.type!=='decision-request')return;try{channel.receive({type:'decision-result',id:message.id,output:await f.b.plan(message.view,new AbortController().signal)});}catch(error:any){const rejection=CoreRejection.parse(error.coreRejection);const wire={type:'decision-result',id:message.id,error:'Decision unavailable',cause:error.failureCause,coreRejection:rejection};sent.push(wire);channel.receive(wire);}});
+ try{
+  assert.equal((await c.planCore(channel)).status,'failed');assert.equal(f.b.summary().attempts,1);assert.equal(f.b.summary().rows[0]!.status,'failed');
+  assert.deepEqual(c.inspect().coreState!.failures,{total:1,causes:{'rejected: topic link':1}});
+  const encoded=JSON.parse(encodeCrewReport(crewReport(c.inspect(),100)));
+  assert.match(encoded.entryLines,/question to Alvin was rejected before publication \(topic link\)/);assert.match(encoded.observerText,/topic link 1/);
+  assert(!JSON.stringify(sent).includes('UNPUBLISHED'));assert(!JSON.stringify(encoded).includes('UNPUBLISHED'));
+ }finally{channel.close();f.close();s.close();}
+});

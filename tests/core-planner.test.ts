@@ -388,3 +388,11 @@ test('a wait after a pawn spoke to the core is never silent: the status says it 
  assert.deepEqual(c.inspect().coreState!.turns.at(-1)!.heard,['A']);
  s.close();
 });
+
+test('full capacity cannot reopen a retained closed topic through an existing-id loophole',async()=>{
+ const {c,s}=await setup();const v=await c.corePerspective();v.ongoing=true;
+ v.topics=Array.from({length:8},(_,i)=>({sourceId:'active'+i,text:'Active',status:'open' as const,proposalIds:[],selfCareIds:[],outcomes:[]}));
+ v.topics.push({sourceId:'old',text:'Closed',status:'resolved',proposalIds:[],selfCareIds:[],outcomes:[]});
+ const schema:any=coreChoiceSchema(v);assert(!schema.anyOf[0].properties.topics.items.anyOf.some((b:any)=>b.properties.sourceId.const==='old'));
+ assert.throws(()=>validateCoreChoice({topics:[{sourceId:'old',text:'Reopened',status:'open'}],actionTopicId:null,action:{kind:'wait',reason:'Wait'}},v),/capacity full/);s.close();
+});

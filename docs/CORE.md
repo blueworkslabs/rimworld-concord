@@ -143,13 +143,17 @@ whole turn before any effect.
 **Capacity-aware schema.** When eight topics are active, the choice schema offers only
 the existing topic ids: they can be updated or closed, but no new source can be added.
 The prompt says `topicCapacity.full`, and the validator rejects a new topic with "Core
-topic capacity full". A turn that can't be valid isn't expressible.
+topic capacity full". Closed topics cannot be reopened at capacity. This narrows
+expressible sources; runtime validation still enforces aggregate capacity and all
+other constraints.
 
 Statuses are `open`, `blocked`, `deferred`, `resolved` and `declined`. The last two are
 only allowed when the receipts say so (`topicClosures`). **Completion reports:** the
-core's next exchange with a pawn after its eating choice ("did you eat?" / "yes") is
-linked to that self-care receipt. Its topics can resolve once the receipt verifies the
-meal. Only that one exchange is linked, never a later unrelated question. In the live
+core explicitly selects `reportSelfCareId` on a consumption-report question, or null
+for an unrelated question. Only an unclaimed receipt belonging to that pawn is listed;
+the binding is persisted, and the answering pawn receives the public receipt context.
+Its topics can resolve once that receipt verifies the meal. Mere question order or
+prose never establishes a link, even for the first question after eating. In the live
 run, three receipted follow-ups had no permitted closure and filled the topic slots.
 
 - **resolved**: every linked offer, followed through counters and re-invitations to
@@ -262,3 +266,11 @@ paired checkpoints. On restart, checkpoint or restore, running turns and answers
 progress become failed; questions nobody has started answering stay pending. Late
 answers from a discarded timeline can't apply. Model attempts are
 counted in separate ledgers for the core and for pawns, which never rewind.
+
+Named native-backend rejections cross the operator relay as a strict, content-free
+cause/action/recipient envelope. The unpublished answer text remains in private
+receipts, never in the crew record. Both host-side and arrival-time validation feed
+the same persistent rejection counts.
+
+Answer and reflection failure totals/causes are also persisted per lane and shown in
+the observer status; a successful core turn cannot hide another lane’s failures.

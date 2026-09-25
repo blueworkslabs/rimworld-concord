@@ -7,7 +7,7 @@ import {claudeArgs} from './claude-decision.js';
 import {Decision,type Perspective} from './protocol.js';
 import {Reflection,type AttentionView} from './attention.js';
 import {ReflectionChoice,reflectionFromChoice,validateReflectionChoice} from './reflection-choice.js';
-import {CoreChoice,corePrompt,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
+import {CoreChoice,CoreRejection,coreRejectionMetadata,corePrompt,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
 import {CoreAnswerChoice} from './pawn-eating.js';
 import {SocialChoice,socialPrompt,type SocialView} from './social.js';
 import {modelPrompt} from './model-perspective.js';
@@ -60,7 +60,8 @@ export function codexRequest(mode:Mode,view:any){
 export function parseCodexChoice(mode:Mode,text:string,view:any){
  const raw=JSON.parse(text);
  if(mode==='reflection'){const c=z.object({reflection:ReflectionChoice}).strict().parse(raw).reflection;validateReflectionChoice(c,view);return reflectionFromChoice(c);}
- if(mode==='core')return validateCoreChoice(z.object({core:CoreChoice}).strict().parse(raw).core,view);
+ if(mode==='core'){try{return validateCoreChoice(z.object({core:CoreChoice}).strict().parse(raw).core,view);}
+  catch(error){throw Object.assign(error as Error,{coreRejection:coreRejectionMetadata(error,raw?.core,view)});}}
  if(mode==='decision')return z.object({decision:Decision}).strict().parse(raw).decision;
  return z.object({social:mode==='social'?SocialChoice:CoreAnswerChoice}).strict().parse(raw).social;
 }
@@ -103,7 +104,8 @@ export class CodexDecisionBackend {
    if(id)this.ledger.settle(id,signal.aborted?'cancelled':'failed',Date.now()-start,usage);
    // Surface why, per lane: a failure before any model call is still a failure.
    const cause=failureCause(error,signal.aborted,!!id);this.failures.push({mode,cause,at:new Date().toISOString()});
-   throw Object.assign(Error('Native decision failed; attempt retained; no automatic retry'),{failureCause:cause});
+   const rejection=mode==='core'?CoreRejection.safeParse((error as any)?.coreRejection):undefined;
+   throw Object.assign(Error('Native decision failed; attempt retained; no automatic retry'),{failureCause:cause,...(rejection?.success?{coreRejection:rejection.data}:{})});
   }finally{this.pending=false;}
  }
  private invoke(root:string,signal:AbortSignal):Promise<boolean>{

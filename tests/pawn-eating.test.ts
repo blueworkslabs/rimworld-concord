@@ -118,10 +118,11 @@ test('eating revalidation distinguishes policy blocks, stale views, missing opti
  assert.equal(revalidateEating(d,state,p,offered,'berry',false).code,'bridge-unavailable');
  assert.equal(revalidateEating(d,state,p,offered,'invented',true).code,'not-offered');s.close();
 });
-test('the next exchange after an eating choice is a completion report its receipt can close; later questions stay unlinked',async()=>{
+test('only an explicitly linked consumption report can close from a meal; unrelated next questions stay unlinked',async()=>{
  const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});
  const d=c.inspect(),msg=(id:string,from:string,to:string,text:string,tick:number)=>({id,exchangeId:'x',tick,from,to,fromName:from,toName:to,text});
- d.coreState!.questions.push({id:'q2',pawn:'A',text:'Did you eat?',status:'answered',messages:[msg('q2-ask','core','A','Did you eat?',150) as any,msg('q2-yes','A','core','Yes, I ate the berries.',151) as any]});
+ d.coreState!.questions.push({id:'unrelated-first',pawn:'A',text:'Can you build?',status:'answered',messages:[msg('unrelated-first-ask','core','A','Can you build?',140) as any]});
+ d.coreState!.questions.push({id:'q2',reportSelfCareId:Object.values(d.selfCare!)[0]!.id,pawn:'A',text:'Did you eat?',status:'answered',messages:[msg('q2-ask','core','A','Did you eat?',150) as any,msg('q2-yes','A','core','Yes, I ate the berries.',151) as any]});
  d.coreState!.questions.push({id:'q3',pawn:'A',text:'Can you build?',status:'answered',messages:[msg('q3-ask','core','A','Can you build?',160) as any,msg('q3-yes','A','core','Yes.',161) as any]});
  let v=coreView(d,await g.state());
  assert.throws(()=>validateCoreChoice(resolve('q2-yes'),v),/closure unsupported/,'no closure before the receipt verifies the meal');
@@ -129,6 +130,24 @@ test('the next exchange after an eating choice is a completion report its receip
  v=coreView(d,await g.state());
  for(const id of ['q2-ask','q2-yes'])validateCoreChoice(resolve(id),v);
  assert.equal(v.selfCare[0]!.reportQuestionId,'q2');
- for(const id of ['q3-ask','q3-yes'])assert.throws(()=>validateCoreChoice(resolve(id),v),/closure unsupported/,'an unrelated later question never closes');
+ for(const id of ['unrelated-first-ask','q3-ask','q3-yes'])assert.throws(()=>validateCoreChoice(resolve(id),v),/closure unsupported/,'an unrelated later question never closes');
  s.close();
+});
+
+test('typed report binding survives real question publication and cannot target another receipt or be reused',async()=>{
+ const {g,s,c}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});const first=await c.planCoreWhenDue({name:'eat question',async plan(){return {topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'Food?',reason:'Ask'}};}});if(first.status!=='applied')throw Error('Expected question');const q=first.questionId!;await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});
+ g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();g.data.ticks+=60;
+ const care=Object.values(c.inspect().selfCare!)[0]!,choice=(receipt:string|null)=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',reportSelfCareId:receipt,text:'Did you eat?',reason:'Check this meal.'}});
+ assert.throws(()=>validateCoreChoice(choice('other'),coreView(c.inspect(),g.data)),/report receipt unavailable/);
+ const result=await c.planCoreWhenDue({name:'report',async plan(){return choice(care.id);}});assert.equal(result.status,'applied');if(result.status!=='applied')throw Error('Expected report question');
+ const report=c.inspect().coreState!.questions.find(x=>x.id===result.questionId)!;assert.equal(report.reportSelfCareId,care.id);
+ const answer=await c.answerCoreQuestion(report.id,{name:'report answer',async answerCore(v){assert.equal(v.question.reportSelfCare?.id,care.id);assert.equal(v.question.reportSelfCare?.consumed,16);return {choice:'say',text:'Yes, I ate.'};}});assert.equal(answer.status,'delivered');
+ const v=await c.corePerspective();for(const m of c.inspect().coreState!.questions.find(x=>x.id===report.id)!.messages)validateCoreChoice(resolve(m.id),v);
+ assert(!v.selfCare.filter(x=>!x.reportQuestionId).some(x=>x.id===care.id));await c.checkpoint('lab-concord-report-link');await c.restore('lab-concord-report-link');assert.equal(c.inspect().coreState!.questions.find(x=>x.id===report.id)!.reportSelfCareId,care.id);assert.equal(g.calls,1);s.close();
+});
+
+test('answer revalidation failures remain visible per lane without leaking answer text',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'lost',async answerCore(){g.available=false;return {choice:'eat',thing:'berry',text:'UNPUBLISHED ANSWER'};}});
+ const {crewReport}=await import('../src/crew-log.js');const report=crewReport(c.inspect(),g.data.ticks);
+ assert.match(report.observerText!,/core-answer failures: 1 \(eating: option-not-current 1\)/);assert(!JSON.stringify(report).includes('UNPUBLISHED'));s.close();
 });
