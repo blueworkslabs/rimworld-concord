@@ -105,12 +105,15 @@ export function coreWakeState(v:WakeViewInput):CoreWakeState{
    ...v.agreements.slice(-6).map(a=>({kind:'agreement',pawn:name(a.pawn),status:a.progress.status??a.status,detail:`offer ${a.status}; ${a.progress.completed} of ${a.progress.agreed} steps completed`+(a.progress.delivered?`, ${a.progress.delivered} items delivered`:'')})),
    ...(v.nativeIntents??[]).slice(-4).map(i=>({kind:'shared stockpile haul',pawn:'crew',status:i.status,detail:intentDetail(i,name)}))]};
 }
+/** Asked in the replay's wake battery and, live, as an annotate-only hint on wakes that carry
+ * pawn messages (src/jev-annotate.ts). Same bytes in both places. */
+export const asksCoreQuestion:JevQuestion={type:'noul',instructions:{question:'Does any entry in `messagesToCore` ask the core for something (a request, a question, an offer of help, a proposal), rather than only reporting a state or an intention?',note:NOTE},
+ criteria:{true:'At least one message contains a request, question, offer or proposal directed at the core.',false:'Messages only report needs, sightings, intentions or completions.'}};
 export function coreWakeQuestions(s:CoreWakeState):Record<string,JevQuestion>{
  const q:Record<string,JevQuestion>={
   worth_turn:{type:'noul',instructions:{question:'Do `wakeCauses`, `messagesToCore` or `outcomes` contain something that needs a core decision now: work to offer, a question worth asking, a request to answer, or an open topic that can be closed or is now wrong?',note:NOTE},
    criteria:{true:'A new request, a pawn answer, a completed or failed outcome, or a change that makes an open topic closable or incorrect.',false:'Only telemetry refreshes, repeated status, or nothing that the open topics do not already say.'}},
-  asks_core:{type:'noul',instructions:{question:'Does any entry in `messagesToCore` ask the core for something (a request, a question, an offer of help, a proposal), rather than only reporting a state or an intention?',note:NOTE},
-   criteria:{true:'At least one message contains a request, question, offer or proposal directed at the core.',false:'Messages only report needs, sightings, intentions or completions.'}}
+  asks_core:asksCoreQuestion
  };
  for(const t of s.openTopics)q['topic_'+t.key]={type:'choice',instructions:{topic:{id:t.key,status:t.status,interpretation:t.interpretation},question:'Given `wakeCauses`, `messagesToCore` and `outcomes`, what do they do to `topic`?',note:NOTE},
   criteria:{resolves:'An outcome now completes what the topic was tracking.',blocks:'Something now prevents the topic from progressing.',advances:'New relevant information changes what the topic should say, without completing or blocking it.',unrelated:'Nothing new concerns this topic.'}};

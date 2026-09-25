@@ -10,14 +10,23 @@ import {retentionDeadline} from '../dist/trials/retention-policy.js';
 
 import {CoreRejection} from '../dist/src/core-planner.js';
 import {CodexDecisionBackend} from '../dist/src/codex-decision.js';
+import {JevAnnotator,appendAnnotation,jevAnnotateVersion} from '../dist/src/jev-annotate.js';
+import {TrialBudget} from '../dist/src/appraisal.js';
+import {protectedJevTransport} from '../dist/src/protected-jev.js';
 
 
-const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted'),recorded=process.argv.includes('--recorded'),nativeHaul=process.argv.includes('--native-haul'),migration=process.argv.includes('--hauling-migration');
+const config=JSON.parse(await readFile(process.argv[2],'utf8')),cold=process.argv.includes('--cold'),scripted=process.argv.includes('--scripted'),recorded=process.argv.includes('--recorded'),nativeHaul=process.argv.includes('--native-haul'),migration=process.argv.includes('--hauling-migration'),annotate=process.argv.includes('--annotate-grounding');
 
 if(!/^[a-zA-Z0-9_.@-]+$/.test(config.sshTarget)||config.sshTarget.startsWith('-')||
  !['labRoot','remoteRepo','ledger','scratchRoot','receipt','catalogPath'].every(k=>typeof config[k]==='string'&&config[k].startsWith('/')))throw Error('Invalid operator configuration');
 
-const protocol=ongoingProtocol(recorded,scripted,nativeHaul,migration),policy=protocol.policy;
+const protocol=ongoingProtocol(recorded,scripted,nativeHaul,migration,annotate),policy=protocol.policy;
+// Annotate-only grounding (docs/trials/JEV_ANNOTATE.md): scores every returned core reply after it
+// has been sent; gates nothing. The protected transport must exist before the game starts.
+const JEV_ANNOTATE_POLICY={id:jevAnnotateVersion,limitUSD:0.2,maxCalls:100};
+const jevTransport=annotate&&!scripted?protectedJevTransport():undefined;
+const jevBudget=jevTransport?new TrialBudget(config.ledger+'.jev',JEV_ANNOTATE_POLICY.limitUSD,JEV_ANNOTATE_POLICY.maxCalls,JEV_ANNOTATE_POLICY.id):undefined;
+const hostAbort=new AbortController();
 let scriptedTurn=0;
 // Native-haul rehearsal: offer the listed stockpile haul once per able pawn, accept every offer, then wait.
 const nativeMock={receipts:[],rawResponses:[],failures:[],summary:()=>({attempts:0,reservedEquivalentUSD:0}),close(){},
@@ -41,16 +50,18 @@ const remote=execFileSync('ssh',['-o','BatchMode=yes',config.sshTarget,'node -e 
 if(local!==remote)throw Error('Remote runner differs from local build');
 const marker=config.receipt+'.started';
 const runId=cold?JSON.parse(await readFile(marker,'utf8')).runId:randomUUID();
-if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,nativeHaul,migration,policy,protocol,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
+if(!cold)await writeFile(marker,JSON.stringify({runId,scripted,nativeHaul,migration,annotate,policy,protocol,at:new Date().toISOString()}),{flag:'wx',mode:0o600});
 if(cold&&JSON.stringify(JSON.parse(await readFile(marker,'utf8')).protocol)!==JSON.stringify(protocol))throw Error('Cold protocol mismatch');
-if(cold&&(JSON.parse(await readFile(marker,'utf8')).policy!==policy||JSON.parse(await readFile(marker,'utf8')).scripted!==scripted))throw Error('Cold policy mismatch');
+if(cold&&(JSON.parse(await readFile(marker,'utf8')).policy!==policy||JSON.parse(await readFile(marker,'utf8')).scripted!==scripted||!!JSON.parse(await readFile(marker,'utf8')).annotate!==annotate))throw Error('Cold policy mismatch');
 const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-ongoing-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}${recorded?' --recorded':''}${nativeHaul?' --native-haul':''}${migration?' --hauling-migration':''}`;
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
+const annotationsPath=config.receipt+'.jev-annotations.jsonl';
+const annotator=jevTransport?new JevAnnotator(jevTransport,jevBudget,e=>appendAnnotation(annotationsPath,{runId,...e})):undefined;
 const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],responses=[];
 let receipt,draining=false,failed=false,coreCount=0,pawnCount=0;const laneFailures=[];
 const send=m=>{if(!child.stdin.destroyed)child.stdin.write(JSON.stringify(m)+'\n');};
-const stopHost=()=>{failed=true;for(const c of active.values())c.abort();child.stdin.end();};process.once('SIGTERM',stopHost);process.once('SIGINT',stopHost);
+const stopHost=()=>{failed=true;hostAbort.abort();for(const c of active.values())c.abort();child.stdin.end();};process.once('SIGTERM',stopHost);process.once('SIGINT',stopHost);
 child.stderr.on('data',()=>{});child.stdin.on('error',()=>{failed=true;});
 async function handle(line){
  const m=parseTrialMessage(line);
@@ -74,7 +85,9 @@ async function handle(line){
    responses.push({id:m.id,mode:m.mode,pawn:m.view.pawn?.id??null,receivedAt:new Date().toISOString(),elapsedMs:Date.now()-start,output});
    // Preserve returned answers even if the coordinator subsequently rejects them as stale.
    await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,diagnostics:diagnostics()},null,2),{mode:0o600});
-   send({type:'decision-result',id:m.id,output});}
+   send({type:'decision-result',id:m.id,output});
+   // After the result is on the wire: annotate-only, outside the inference lane, never awaited here.
+   if(annotator&&m.mode==='core')tasks.push(annotator.annotate(m.id,m.mode,m.view,output,hostAbort.signal));}
 
   }finally{await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,diagnostics:diagnostics()},null,2),{mode:0o600});}
   });}finally{clearTimeout(cutoffTimer);}
@@ -90,8 +103,9 @@ async function handle(line){
 input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill();})));
 const timer=setTimeout(()=>{failed=true;child.kill();},protocol.wallMs+60000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
-clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);
+clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);await annotator?.drain();
 const result={at:new Date().toISOString(),hostProcessId:process.pid,priorHostProcessId:priorHost,policy,protocol,kind:(migration?'hauling-migration-':nativeHaul?'native-haul-':'')+(cold?'ongoing-cold':scripted?'ongoing-scripted':'ongoing-live'),runId,passed:!failed&&code===0&&receipt?.passed===true,
- before,after:{...summary(),jevCalls:0},diagnostics:diagnostics(),laneFailures,responses,game:receipt,
- accounting:'Native Codex subscription token usage, not API cash charges. No Jev calls. No turn ceiling or automatic rerolls.'};
-coreBackend.close();pawnBackend.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify({passed:result.passed,runId,after:result.after,rounds:receipt?.rounds?.length,error:receipt?.error}));if(!result.passed)process.exitCode=1;
+ before,after:{...summary(),jevCalls:annotator?.summary().attempted??0},diagnostics:diagnostics(),laneFailures,responses,game:receipt,
+ ...(annotator?{jev:{policy:JEV_ANNOTATE_POLICY,journal:annotationsPath,...annotator.summary(),ledger:jevBudget.summary()}}:{}),
+ accounting:annotator?'Native Codex subscription token usage for decisions, plus annotate-only Jev grounding calls over the protected route (USD, per-call reservations). Annotations gate nothing. No turn ceiling or automatic rerolls.':'Native Codex subscription token usage, not API cash charges. No Jev calls. No turn ceiling or automatic rerolls.'};
+coreBackend.close();pawnBackend.close();jevBudget?.close();await writeFile(cold?config.receipt+'.cold.json':config.receipt,JSON.stringify(result,null,2),{mode:0o600});console.log(JSON.stringify({passed:result.passed,runId,after:result.after,rounds:receipt?.rounds?.length,error:receipt?.error}));if(!result.passed)process.exitCode=1;
