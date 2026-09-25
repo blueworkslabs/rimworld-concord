@@ -1,3 +1,4 @@
+// Ordered-haul specific throughout (removed with the ordered haul).
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
