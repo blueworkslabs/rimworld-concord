@@ -137,7 +137,7 @@ export function crewReport(d:Domain,tick:number,status:import('./shared-status.j
  const core=d.coreState,schedule=core?.schedule;
  // A wait is silent in the log; the status line names what the core is waiting on.
  const lastTurn=[...(core?.turns??[])].reverse().find(t=>t.status==='applied'),firstOpen=(core?.topics??[]).find(t=>t.status==='open');
- const coreWaiting=lastTurn?.choice?.action.kind==='wait'?`Core: waiting on ${firstOpen?safe(firstOpen.text,120):'new events'}`:undefined;
+ const coreWaiting=lastTurn?.choice?.action.kind==='wait'||core?.silentWake?`Core: waiting on ${firstOpen?safe(firstOpen.text,120):'new events'}`:undefined;
  const coreState=thinking.includes('core')?'Core: thinking':coreWaiting!==undefined?coreWaiting:!core?'Core: not initialized':schedule?.config.maxAttempts!==null&&core.turns.length>=16?'Core: legacy lifetime limit reached':schedule?.blocked?'Core: '+schedule.blocked:schedule&&schedule.config.maxAttempts!==null&&schedule.attempts>=schedule.config.maxAttempts?'Core: configured allowance exhausted':schedule&&schedule.endTick!==null&&tick>=schedule.endTick?'Core: observation window ended':schedule&&schedule.lastAttemptTick!==undefined&&tick-schedule.lastAttemptTick<schedule.config.cooldownTicks?'Core: cooling down':'Core: no turn running; next call depends on operator/scheduler';
  const pendingQuestions=(core?.questions??[]).filter(q=>q.status==='pending'||q.status==='running').map(q=>`${nameForCare(d,q.pawn)}: ${q.status==='running'?'answering':'question awaiting reply'}`);
  const observerText=[coreState,...thinking.filter(id=>id!=='core'&&!!d.characters[id]).map(id=>`${nameForCare(d,id)}: thinking`),...pendingQuestions].join(' · ').slice(0,1600);

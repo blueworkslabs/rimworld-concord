@@ -29,7 +29,8 @@ const receipt:{runId:string;hold:string;unimplemented:string[];observedOnly:Reco
    // case, never counted as passed. A hold left after such an end is a finding in that case.
    observedOnly:{'nested job end inside the pickup or duplicate check':[]},
    // Game cases this runner cannot observe: recorded by the operator, never counted as passed here.
-   needsRecordedEvidence:['crew-log clock per event map across two maps (the fixture has one map) and the Show button','zone label/colour on screen while open and after retirement'],
+   needsRecordedEvidence:['the Show button and zone label/colour on screen while open and after retirement'],
+   // Clock provenance: verified on one map; multi-map deferred until the first two-map scenario exists.
    passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 let safetyStopped=false,checking=false;
@@ -461,6 +462,12 @@ try{
       const open=(state.stockpiles??[]).find(z=>z.zoneId===zoneId)?.label??'';c.data.openLabel=open;
       expect(c,open.startsWith('Shared: '),`zone label while open: ${open}`);
       await run(()=>co.inspect().proposals[offer.id]?.standing?.status!=='running',300000,()=>co.reconcile());await co.reconcile();
+      // Clock provenance (verified on one map): the event's map gives the in-game hour; an entry
+      // without map provenance, or with a map that does not exist, renders the bare tick only.
+      const clockAt=(mapId:number)=>op({op:'lab-clock-probe',untilTick:state.ticks,mapId}) as Promise<{text:string;viewedMap:number}>;
+      const known=await clockAt(view(e!.intentId)?.mapId??-2),unknown=await clockAt(-1),missing=await clockAt(987654);c.data.clock={known,unknown,missing};
+      expect(c,/^Day \d+, \d+h \(t\d+\)$/.test(known.text),`clock on the event map: ${known.text}`);
+      expect(c,unknown.text===`t${state.ticks}`&&missing.text===`t${state.ticks}`,`unknown provenance must render only the tick: ${unknown.text} / ${missing.text}`);
       const closed=(state.stockpiles??[]).find(z=>z.zoneId===zoneId)?.label??'';expect(c,closed===m.zone.label,`zone label after retirement: ${closed}`);
       const text=crewReport(co.inspect(),state.ticks).entries.map(x=>x.text);c.data.crew=text;
       expect(c,text.includes(`Offer to Beatrice: haul up to 20 wood to the ${m.zone.label}; others may help.`),'offer record missing');

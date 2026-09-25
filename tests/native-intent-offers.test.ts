@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { Coordinator } from '../src/coordinator.js';
 import { Store } from '../src/store.js';
 import { scripted } from '../src/backends.js';
-import {coreAdmission,NATIVE_INTENT_STALL_TICKS} from '../src/core-scheduler.js';
+import {coreAdmission,telemetryOnlyIdle,NATIVE_INTENT_STALL_TICKS,type CoreWake} from '../src/core-scheduler.js';
 import {corePrompt} from '../src/core-planner.js';
 import { coreView } from '../src/core-planner.js';
 import {stopTrialWork,retireUndecided} from '../src/work-trial.js';
@@ -287,4 +287,39 @@ test('terminal offer survives active inference, then lapses after failure withou
  const again=new Coordinator(store,game);await again.open();await again.reconcile();
  assert.equal(again.inspect().proposals[p.id]!.status,'lapsed');
  assert.ok(!crewReport(c.inspect(),100).entries.some(e=>e.text.includes('Pending offer withdrawn')));
+});
+
+
+test('telemetry-only wakes with nothing to offer spend no core turn (E2 turn shapes)',()=>{
+ const t=(n=1):CoreWake[]=>Array.from({length:n},(_,i)=>({sourceId:'p'+i,kind:'telemetry',value:'{}'}));
+ const none={opportunities:[],counters:[]} as any,withOffer={opportunities:[{id:'o'}],counters:[]} as any,withCounter={opportunities:[],counters:[{id:'c'}]} as any;
+ // The E2 native-haul run's 14 wakes, as recorded: kinds and whether anything was offerable.
+ const e2:[CoreWake['kind'][],boolean][]=[[['start','telemetry','telemetry','telemetry'],true],[['native-intent'],true],[['telemetry','agreement','agreement','native-intent'],false],
+  [['telemetry'],false],[['telemetry'],false],[['telemetry'],false],[['telemetry'],false],[['telemetry'],false],[['message','answer'],false],[['telemetry','self-care'],false],
+  [['telemetry','message','answer'],false],[['message','answer'],false],[['telemetry','telemetry','telemetry','message','answer'],false],[['telemetry'],false]];
+ const silent=e2.map(([kinds,offer],i)=>telemetryOnlyIdle(kinds.map((kind,j)=>({sourceId:i+':'+j,kind,value:'v'})),offer?withOffer:none)?i:-1).filter(i=>i>=0);
+ assert.deepEqual(silent,[3,4,5,6,7,13],'exactly the six telemetry-only turns');
+ assert.equal(telemetryOnlyIdle(t(2),withOffer),false,'an offer to make is a reason to think');
+ assert.equal(telemetryOnlyIdle(t(),withCounter),false,'a counter to adopt is a reason to think');
+ assert.equal(telemetryOnlyIdle([],none),false);
+});
+
+test('a silent telemetry wake consumes its bands without a turn, attempt or cooldown and shows the waiting status',async()=>{
+ const {c,game,store}=await setup(false);await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:300,windowTicks:null});
+ let calls=0;const choose={name:'scripted',async plan(){calls++;return {topics:[],actionTopicId:null,action:{kind:'wait' as const,reason:'Observe'}};}};
+ assert.equal((await c.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,1);
+ const attempts=c.inspect().coreState!.schedule!.attempts;
+ game.data.ticks=1000;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1000,food:'low',rest:'satisfied'};
+ const r=await c.planCoreWhenDue(choose);
+ assert.deepEqual(r,{status:'idle',reason:'telemetry-only'});assert.equal(calls,1,'no backend call');
+ const d=c.inspect();assert.equal(d.coreState!.schedule!.attempts,attempts,'no attempt spent');assert.equal(d.coreState!.schedule!.lastAttemptTick,0,'no cooldown started');
+ assert.equal(d.coreState!.silentWake?.tick,1000);assert.ok(store.events().some(e=>e.event.kind==='core-wake-silent'));
+ assert.match(crewReport(d,1000).observerText??'',/Core: waiting on/);
+ assert.equal(crewReport(d,1000).entries.length,crewReport(d,0).entries.length,'nothing written to the crew log');
+ // The same bands do not wake it again; a message still does.
+ game.data.ticks=1010;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1010,food:'low',rest:'satisfied'};
+ assert.deepEqual(await c.planCoreWhenDue(choose),{status:'idle',reason:'no-new-event'});
+ // A band change while something is offerable still wakes the core, and the turn clears the silent status.
+ await c.configureNativeHaul(cfg);game.data.ticks=1400;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1400,food:'urgent',rest:'satisfied'};
+ assert.equal((await c.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,2);assert.equal(c.inspect().coreState!.silentWake,undefined);
 });

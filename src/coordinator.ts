@@ -453,12 +453,19 @@ export class Coordinator {
       let causes:import('./core-scheduler.js').CoreWake[]=[];
       if(scheduled){
         const admission=coreAdmission(state.schedule!,coreView(this.domain,game));
-        if(!admission.ready)return {idle:admission.reason} as const;
+        if(!admission.ready){
+          if(admission.silent){
+            state.schedule!.consumed=admission.silent.snapshot;state.silentWake={tick:game.ticks,causes:admission.silent.causes};
+            this.commit('core-wake-silent','core',{tick:game.ticks,causes:admission.silent.causes});
+          }
+          return {idle:admission.reason} as const;
+        }
         causes=admission.causes;
         // Reserve and consume before inference. Failed calls are not retried.
         state.schedule!.attempts++;state.schedule!.lastAttemptTick=game.ticks;state.schedule!.consumed=admission.snapshot;
       }
       const controller=new AbortController(),id=randomUUID();this.pending.set('core',controller);
+      delete state.silentWake;
       state.turns.push({id,status:'running'});state.revision++;this.commit('core-started','core',{id,causes});
       return {id,controller,generation:this.generation,view:{...coreView(this.domain,game),...(scheduled?{wakeReasons:causes}:{})}};
     });

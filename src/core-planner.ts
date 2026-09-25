@@ -27,7 +27,9 @@ export const CoreChoice=z.union([
 export type CoreChoice=z.infer<typeof CoreChoice>;
 export type CoreQuestion={id:string;pawn:string;text:string;status:'pending'|'running'|'answered'|'silent'|'failed';messages:SocialMessage[];context?:string};
 export type CoreTopic={sourceId:string;text:string;status:'open'|'blocked'|'deferred'|'resolved'|'declined';proposalIds:string[];basedOnTick?:number;updatedTick?:number};
-export type CoreState={schedule?:import('./core-scheduler.js').CoreSchedule;revision:number;brief:{id:string;text:string};topics:CoreTopic[];questions:CoreQuestion[];turns:{id:string;status:'running'|'applied'|'failed';choice?:CoreChoice;proposalId?:string;questionId?:string}[]};
+export type CoreState={schedule?:import('./core-scheduler.js').CoreSchedule;
+ /** Latest wake that spent no turn (telemetry only, nothing to offer); cleared by the next turn. */
+ silentWake?:{tick:number;causes:import('./core-scheduler.js').CoreWake[]};revision:number;brief:{id:string;text:string};topics:CoreTopic[];questions:CoreQuestion[];turns:{id:string;status:'running'|'applied'|'failed';choice?:CoreChoice;proposalId?:string;questionId?:string}[]};
 export type CoreQuestionView={observedTick:number;pawn:Pawn;character:Character;question:{id:string;text:string;from:'core'}};
 export interface CoreBackend {readonly name:string;plan(view:CoreView,signal:AbortSignal):Promise<unknown>}
 export interface CoreAnswerBackend {readonly name:string;answerCore(view:CoreQuestionView,signal:AbortSignal):Promise<unknown>}

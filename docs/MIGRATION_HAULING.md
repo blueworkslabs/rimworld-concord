@@ -657,9 +657,17 @@ or reopens growing.
   - the crew record appears.
 
   This moves the handover out of `needsRecordedEvidence`.
-- **Still recorded by hand or out of reach:** cross-map clock provenance needs a second
-  map, and the fixture has one. On-screen label and colour remain recorded evidence. The
-  live #71 checks belong to the separately frozen live run.
+- **Clock provenance: verified on one map; multi-map deferred until the first two-map
+  scenario exists.** (Fable, 2026-09-25: no two-map fixture for a clock.) The bare-tick
+  fallback stays tested in the game: the legibility case's `lab-clock-probe` requires the
+  event map's in-game hour and `tN` alone for an entry without map provenance or with a map
+  that does not exist.
+- **Still recorded by hand:** on-screen label and colour. The live #71 checks belong to the
+  separately frozen live run.
+- **Before the live run (Fable's step 1):** the telemetry-only wake rule in
+  [CORE](CORE.md). A wake made only of band changes, with no opportunity and no counter,
+  spends no core turn and writes the silent status. The completion-report-to-receipt link
+  waits until after the live run.
 
 ## Gate C will measure
 

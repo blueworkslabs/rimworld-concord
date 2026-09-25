@@ -615,6 +615,12 @@ namespace Concord {
                 p.jobs.StartJob(hj,JobCondition.InterruptForced);
                 return "{"+head+",\"job\":"+startedId+",\"jobDef\":\""+startedDef+"\",\"started\":"+(p.CurJob==hj&&hj.loadID==startedId?"true":"false")+"}";
             }
+            if(r.op=="lab-clock-probe") {
+                // The crew log's heading for an entry with (or without) map provenance: the event's map,
+                // never the viewed one; unknown provenance renders the bare tick.
+                var probe=new CrewEntry {tick=r.untilTick,hasMap=r.mapId>=0,mapId=r.mapId};
+                return "{\"text\":\""+Clock.At(probe.tick,Clock.ForEntry(probe))+"\",\"viewedMap\":"+(Find.CurrentMap==null?-1:Find.CurrentMap.uniqueID)+"}";
+            }
             if(r.op=="lab-queue-count") {
                 if(p==null) throw new Exception("Unknown pawn");
                 var q=p.jobs.jobQueue.Select(j=>j.job).Where(j=>j!=null&&j.def==JobDefOf.HaulToCell).ToList();

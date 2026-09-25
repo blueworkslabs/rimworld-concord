@@ -39,7 +39,14 @@ export function coreWakeSnapshot(v:CoreView):CoreWake[]{
  return wakes;
 }
 const key=(w:CoreWake)=>w.kind+':'+w.sourceId;
-export function coreAdmission(s:CoreSchedule,v:CoreView):{ready:true;causes:CoreWake[];snapshot:Record<string,string>}|{ready:false;reason:string}{
+/** Fable (E2): a wake made only of telemetry band changes, when the core has nothing it could
+ * do about them (no opportunity to offer and no counter to adopt, so no eligible offer
+ * recipient), spends no core turn. Same decision as the silent wait, one step earlier.
+ * Question recipients do not count: they are listed on every turn and would disable the rule. */
+export function telemetryOnlyIdle(causes:CoreWake[],v:Pick<CoreView,'opportunities'|'counters'>){
+ return causes.length>0&&causes.every(w=>w.kind==='telemetry')&&v.opportunities.length===0&&v.counters.length===0;
+}
+export function coreAdmission(s:CoreSchedule,v:CoreView):{ready:true;causes:CoreWake[];snapshot:Record<string,string>}|{ready:false;reason:string;silent?:{causes:CoreWake[];snapshot:Record<string,string>}}{
  if(s.blocked)return {ready:false,reason:s.blocked};
  if(v.tick<s.startTick||s.endTick!==null&&v.tick>=s.endTick)return {ready:false,reason:'outside-window'};
  if(s.config.maxAttempts!==null&&s.attempts>=s.config.maxAttempts)return {ready:false,reason:'budget-exhausted'};
@@ -48,5 +55,8 @@ export function coreAdmission(s:CoreSchedule,v:CoreView):{ready:true;causes:Core
  if(!causes.length)return {ready:false,reason:'no-new-event'};
  // Keep prior keys: a temporarily absent observation must not re-wake later.
  // Persistent deduplication is separate from bounded prompt history.
- return {ready:true,causes,snapshot:{...s.consumed,...Object.fromEntries(wakes.map(w=>[key(w),w.value]))}};
+ const snapshot={...s.consumed,...Object.fromEntries(wakes.map(w=>[key(w),w.value]))};
+ // Consumed without a turn, attempt or cooldown: the same bands never re-wake the core.
+ if(telemetryOnlyIdle(causes,v))return {ready:false,reason:'telemetry-only',silent:{causes,snapshot}};
+ return {ready:true,causes,snapshot};
 }
