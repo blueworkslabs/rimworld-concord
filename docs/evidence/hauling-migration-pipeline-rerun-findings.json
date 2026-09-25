@@ -1,0 +1,916 @@
+{
+  "runId": "25bcdc7e-c6c3-40bc-8f95-f9659afc1e10",
+  "behaviorHead": "e436933d349942d4e1062acb2768ef4a224e8875",
+  "coldReadUnchanged": true,
+  "sourceHashes": {
+    "receipt.json": "2f71578a59dd8485e482ee9056b244aa1e39317a6232eefe61b508b2d48d45f9",
+    "receipt.json.cold.json": "2b7827bdaa7aa247a018ebf4822ee0229bff5a1f2f206cb814fe41591ec2d01b",
+    "ongoing-25bcdc7e-c6c3-40bc-8f95-f9659afc1e10.db": "1693d30a582efe710211c2b961e7b06de6d851a50ce76800e1c59b70965d36eb",
+    "prompt-size-audit.json": "3994c7a72610504f42738600b78ca45d56d47ef34991476c6b2ef11b716c84b1"
+  },
+  "core": {
+    "attempts": 15,
+    "applied": 13,
+    "asks": 10,
+    "waits": 2,
+    "proposes": 1,
+    "failures": {
+      "total": 2,
+      "causes": {
+        "context-too-large": 1,
+        "deadline": 1
+      }
+    },
+    "noTopicOrActionLinkRejections": true,
+    "timeline": [
+      {
+        "index": 0,
+        "inputTick": 97,
+        "secondsIntoRun": 1.535,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Alvin",
+        "availableActions": {
+          "build": 6,
+          "haul-zone": 2
+        },
+        "heard": []
+      },
+      {
+        "index": 1,
+        "inputTick": 1377,
+        "secondsIntoRun": 22.981,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Alvin",
+        "availableActions": {
+          "haul-zone": 2,
+          "build": 4
+        },
+        "heard": [
+          "Alvin"
+        ]
+      },
+      {
+        "index": 2,
+        "inputTick": 2483,
+        "secondsIntoRun": 41.507,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Pedro",
+        "availableActions": {
+          "build": 6,
+          "haul-zone": 2
+        },
+        "heard": []
+      },
+      {
+        "index": 3,
+        "inputTick": 4224,
+        "secondsIntoRun": 70.66,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Pedro",
+        "availableActions": {
+          "build": 4,
+          "haul-zone": 1
+        },
+        "heard": [
+          "Pedro"
+        ]
+      },
+      {
+        "index": 4,
+        "inputTick": 5836,
+        "secondsIntoRun": 97.7,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Beatrice",
+        "availableActions": {
+          "build": 4,
+          "haul-zone": 2
+        },
+        "heard": [
+          "Pedro"
+        ]
+      },
+      {
+        "index": 5,
+        "inputTick": 7275,
+        "secondsIntoRun": 121.767,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Beatrice",
+        "availableActions": {
+          "build": 4,
+          "haul-zone": 1
+        },
+        "heard": [
+          "Beatrice"
+        ]
+      },
+      {
+        "index": 6,
+        "inputTick": 8572,
+        "secondsIntoRun": 143.536,
+        "status": "applied",
+        "action": "wait",
+        "recipient": null,
+        "availableActions": {
+          "build": 6,
+          "haul-zone": 2
+        },
+        "heard": []
+      },
+      {
+        "index": 7,
+        "inputTick": 18728,
+        "secondsIntoRun": 313.938,
+        "status": "applied",
+        "action": "wait",
+        "recipient": null,
+        "availableActions": {
+          "haul-zone": 2,
+          "build": 2
+        },
+        "heard": []
+      },
+      {
+        "index": 8,
+        "inputTick": 22464,
+        "secondsIntoRun": 376.594,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Alvin",
+        "availableActions": {
+          "build": 2,
+          "haul-zone": 2
+        },
+        "heard": []
+      },
+      {
+        "index": 9,
+        "inputTick": 23712,
+        "secondsIntoRun": 397.53,
+        "status": "applied",
+        "action": "propose",
+        "recipient": null,
+        "availableActions": {
+          "haul-zone": 2
+        },
+        "heard": [
+          "Alvin"
+        ]
+      },
+      {
+        "index": 10,
+        "inputTick": 25300,
+        "secondsIntoRun": 424.168,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Pedro",
+        "availableActions": {
+          "haul-zone": 1,
+          "build": 2
+        },
+        "heard": []
+      },
+      {
+        "index": 11,
+        "inputTick": 26857,
+        "secondsIntoRun": 450.329,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Alvin",
+        "availableActions": {
+          "build": 4
+        },
+        "heard": [
+          "Pedro"
+        ]
+      },
+      {
+        "index": 12,
+        "inputTick": 28312,
+        "secondsIntoRun": 474.757,
+        "status": "applied",
+        "action": "ask",
+        "recipient": "Alvin",
+        "availableActions": {},
+        "heard": [
+          "Alvin"
+        ]
+      },
+      {
+        "index": 13,
+        "inputTick": 30061,
+        "secondsIntoRun": 504.105,
+        "status": "failed",
+        "action": null,
+        "recipient": null,
+        "availableActions": {
+          "build": 2
+        },
+        "heard": []
+      },
+      {
+        "index": 14,
+        "inputTick": 35218,
+        "secondsIntoRun": 590.823,
+        "status": "failed",
+        "action": null,
+        "recipient": null,
+        "availableActions": {},
+        "heard": []
+      }
+    ],
+    "silentWakeEvents": 0
+  },
+  "answers": {
+    "attempts": 10,
+    "delivered": 8,
+    "cancelled": 2,
+    "interrupts": [
+      {
+        "pawn": "Alvin",
+        "nativeSequence": 110,
+        "eventKind": "memory",
+        "nativeTick": 1980
+      },
+      {
+        "pawn": "Beatrice",
+        "nativeSequence": 446,
+        "eventKind": "memory",
+        "nativeTick": 7964
+      }
+    ]
+  },
+  "haul": {
+    "asked": [
+      "Beatrice"
+    ],
+    "accepted": [
+      "Beatrice"
+    ],
+    "unaskedHelpers": [
+      "Pedro"
+    ],
+    "notOffered": [
+      "Alvin"
+    ],
+    "capableNotOffered": [
+      "Pedro"
+    ],
+    "openedTick": 25017,
+    "firstDeliveryTick": 25604,
+    "completedTick": 26173,
+    "credited": 75,
+    "quota": 75,
+    "credits": {
+      "Beatrice": 40,
+      "Pedro": 35
+    },
+    "peakHolders": 2,
+    "consentViolationsRecorded": 0,
+    "overshoot": 0,
+    "escapedUnits": 0,
+    "ordinaryGrossArrivals": 60,
+    "ordinaryRemoved": 15,
+    "ordinaryNetIncrease": 45,
+    "finalStock": 120,
+    "drops": [
+      {
+        "seq": 1,
+        "tick": 25604,
+        "count": 20,
+        "escape": 0,
+        "job": 1313,
+        "kind": "participation",
+        "pawn": "Beatrice",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 2,
+        "tick": 25660,
+        "count": 20,
+        "escape": 0,
+        "job": 1303,
+        "kind": "participation",
+        "pawn": "Pedro",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 3,
+        "tick": 26000,
+        "count": 20,
+        "escape": 0,
+        "job": 1334,
+        "kind": "participation",
+        "pawn": "Beatrice",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 4,
+        "tick": 26173,
+        "count": 15,
+        "escape": 0,
+        "job": 1340,
+        "kind": "participation",
+        "pawn": "Pedro",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 5,
+        "tick": 26686,
+        "count": 5,
+        "escape": 0,
+        "job": -1,
+        "kind": "ordinary",
+        "pawn": "Pedro",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 6,
+        "tick": 26978,
+        "count": 20,
+        "escape": 0,
+        "job": -1,
+        "kind": "ordinary",
+        "pawn": "Beatrice",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 7,
+        "tick": 27493,
+        "count": 20,
+        "escape": 0,
+        "job": -1,
+        "kind": "ordinary",
+        "pawn": "Pedro",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 8,
+        "tick": 27500,
+        "count": 15,
+        "escape": 0,
+        "job": -1,
+        "kind": "removed",
+        "pawn": "unattributed",
+        "source": "reconcile",
+        "startedBeforeExclusion": false,
+        "violation": false
+      },
+      {
+        "seq": 9,
+        "tick": 27526,
+        "count": 15,
+        "escape": 0,
+        "job": -1,
+        "kind": "ordinary",
+        "pawn": "Pedro",
+        "source": "haul",
+        "startedBeforeExclusion": false,
+        "violation": false
+      }
+    ],
+    "helperRecordTick": 25716,
+    "helperVisuallyVerifiedVideoSeconds": 436,
+    "ordinaryLineTimestamp": 26707,
+    "ordinaryLineLatestQuantityEventTick": 27526,
+    "ordinaryLineOmitsRemoval": true,
+    "movementSourceOfRemoved15NotRecorded": true
+  },
+  "ageAudit": {
+    "entries": 31,
+    "required": 7,
+    "flagged": 7,
+    "unflagged": 0,
+    "rows": [
+      {
+        "key": "core-talk:aaa15ed3-fdef-446c-9024-de760f374859",
+        "inputTick": 97,
+        "publishedTick": 842,
+        "newestReceiptTick": -1,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-plan:d848bce3-2a36-40e8-8d24-295ee8f44cc8",
+        "inputTick": 97,
+        "publishedTick": 842,
+        "newestReceiptTick": -1,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:dcf87fef-8267-4e33-8e46-f18272604332",
+        "inputTick": 869,
+        "publishedTick": 1213,
+        "newestReceiptTick": -1,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:202edb95-3c78-4ccf-b84b-7864437e5e83",
+        "inputTick": 1377,
+        "publishedTick": 1794,
+        "newestReceiptTick": -1,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-plan:fd352c3a-7520-479f-b1f2-8eb7f6a43c66",
+        "inputTick": 1377,
+        "publishedTick": 1794,
+        "newestReceiptTick": -1,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:b02cfb3b-8958-46e3-a338-a2609bc08566",
+        "inputTick": 2483,
+        "publishedTick": 3235,
+        "newestReceiptTick": 1962,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-plan:0f3d8dc4-1f56-4968-945f-7792b8f32b61",
+        "inputTick": 2483,
+        "publishedTick": 3235,
+        "newestReceiptTick": 1962,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:0a945a84-e40a-4060-b440-afb326c95eb0",
+        "inputTick": 3266,
+        "publishedTick": 3643,
+        "newestReceiptTick": 1962,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:e7550e11-ec35-469b-9f70-be90f048e370",
+        "inputTick": 4224,
+        "publishedTick": 4953,
+        "newestReceiptTick": 4335,
+        "prefixRequired": true,
+        "prefixed": true
+      },
+      {
+        "key": "core-plan:57150e9c-92ed-4885-a472-ab906baba66d",
+        "inputTick": 4224,
+        "publishedTick": 4953,
+        "newestReceiptTick": 4335,
+        "prefixRequired": true,
+        "prefixed": true
+      },
+      {
+        "key": "core-talk:4fe91aba-335d-4b53-a2d2-352994556602",
+        "inputTick": 5006,
+        "publishedTick": 5371,
+        "newestReceiptTick": 4335,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:6d0a8aa4-7c3f-4621-853b-07a675a89b06",
+        "inputTick": 5836,
+        "publishedTick": 6703,
+        "newestReceiptTick": 4335,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-plan:020befbe-3bdd-49e8-9b0e-fb7cbdc63654",
+        "inputTick": 5836,
+        "publishedTick": 6703,
+        "newestReceiptTick": 4335,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:c1207c65-7ee3-4d45-8fc0-cdadc4c9605d",
+        "inputTick": 6761,
+        "publishedTick": 7163,
+        "newestReceiptTick": 4335,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:7c6b0245-7f87-4048-8df2-bb804572e8ef",
+        "inputTick": 7275,
+        "publishedTick": 7911,
+        "newestReceiptTick": 4335,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-plan:f9ff8ece-a314-431b-92da-6d6c6ce9c26c",
+        "inputTick": 7275,
+        "publishedTick": 7911,
+        "newestReceiptTick": 4335,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:68563520-2895-4d0d-af80-c6f7f8bac751",
+        "inputTick": 22464,
+        "publishedTick": 23114,
+        "newestReceiptTick": 7964,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-plan:b7d50147-2ae8-45e0-8e13-8cf636be30bb",
+        "inputTick": 22464,
+        "publishedTick": 23114,
+        "newestReceiptTick": 7964,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:f690c81f-6154-41e1-9414-28eba56ae69b",
+        "inputTick": 23140,
+        "publishedTick": 23491,
+        "newestReceiptTick": 7964,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "offer:8d6eeb65-0d45-4a42-a382-c09c4047af7f",
+        "inputTick": 23712,
+        "publishedTick": 24504,
+        "newestReceiptTick": 7964,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-plan:c0e31897-e1af-4030-af07-69ef83650ae2",
+        "inputTick": 23712,
+        "publishedTick": 24504,
+        "newestReceiptTick": 7964,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "reply:8d6eeb65-0d45-4a42-a382-c09c4047af7f",
+        "inputTick": 24555,
+        "publishedTick": 25005,
+        "newestReceiptTick": 7964,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:a59237b4-30ea-4396-9a51-36f8aa20880b",
+        "inputTick": 25300,
+        "publishedTick": 26103,
+        "newestReceiptTick": 26000,
+        "prefixRequired": true,
+        "prefixed": true
+      },
+      {
+        "key": "core-plan:d5f2f3ad-c924-46a0-abfe-7a23f88595e3",
+        "inputTick": 25300,
+        "publishedTick": 26103,
+        "newestReceiptTick": 26000,
+        "prefixRequired": true,
+        "prefixed": true
+      },
+      {
+        "key": "core-talk:aeec6c1c-4bdc-4e7d-92e4-38564a0d7f0b",
+        "inputTick": 26147,
+        "publishedTick": 26648,
+        "newestReceiptTick": 26173,
+        "prefixRequired": true,
+        "prefixed": true
+      },
+      {
+        "key": "core-talk:caefdb13-9f1b-48e6-934f-944539bd8849",
+        "inputTick": 26857,
+        "publishedTick": 27789,
+        "newestReceiptTick": 26173,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-plan:e509a90f-b53b-4620-b783-e60b36e29389",
+        "inputTick": 26857,
+        "publishedTick": 27789,
+        "newestReceiptTick": 26173,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:efd9c1db-eaa6-4cf6-8523-800b8bdbf25e",
+        "inputTick": 27829,
+        "publishedTick": 28215,
+        "newestReceiptTick": 26173,
+        "prefixRequired": false,
+        "prefixed": false
+      },
+      {
+        "key": "core-talk:34393d78-d4a3-4ecb-8816-c642648596df",
+        "inputTick": 28312,
+        "publishedTick": 29104,
+        "newestReceiptTick": 29030,
+        "prefixRequired": true,
+        "prefixed": true
+      },
+      {
+        "key": "core-plan:6d10d072-81b8-4626-8a21-aeec211f6da6",
+        "inputTick": 28312,
+        "publishedTick": 29104,
+        "newestReceiptTick": 29030,
+        "prefixRequired": true,
+        "prefixed": true
+      },
+      {
+        "key": "core-talk:5362ba23-9166-4964-9515-4a010c94999f",
+        "inputTick": 29137,
+        "publishedTick": 29574,
+        "newestReceiptTick": 29030,
+        "prefixRequired": false,
+        "prefixed": false
+      }
+    ],
+    "scope": "Published dialogue, public non-wait reasons, offer and acceptance; not semantic correctness of all prose/topics"
+  },
+  "promptSize": [
+    {
+      "index": 0,
+      "tick": 97,
+      "promptBytes": 11535,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 10134,
+        "effects": 864
+      }
+    },
+    {
+      "index": 1,
+      "tick": 1377,
+      "promptBytes": 12693,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 11292,
+        "effects": 864
+      }
+    },
+    {
+      "index": 2,
+      "tick": 2483,
+      "promptBytes": 15017,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 13616,
+        "effects": 864
+      }
+    },
+    {
+      "index": 3,
+      "tick": 4224,
+      "promptBytes": 15366,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 13965,
+        "effects": 864
+      }
+    },
+    {
+      "index": 4,
+      "tick": 5836,
+      "promptBytes": 17409,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 16008,
+        "effects": 864
+      }
+    },
+    {
+      "index": 5,
+      "tick": 7275,
+      "promptBytes": 18486,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 17085,
+        "effects": 864
+      }
+    },
+    {
+      "index": 6,
+      "tick": 8572,
+      "promptBytes": 19602,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 18201,
+        "effects": 864
+      }
+    },
+    {
+      "index": 7,
+      "tick": 18728,
+      "promptBytes": 17909,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 16508,
+        "effects": 864
+      }
+    },
+    {
+      "index": 8,
+      "tick": 22464,
+      "promptBytes": 17624,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 16223,
+        "effects": 864
+      }
+    },
+    {
+      "index": 9,
+      "tick": 23712,
+      "promptBytes": 17818,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 16417,
+        "effects": 864
+      }
+    },
+    {
+      "index": 10,
+      "tick": 25300,
+      "promptBytes": 20683,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 19282,
+        "effects": 864
+      }
+    },
+    {
+      "index": 11,
+      "tick": 26857,
+      "promptBytes": 22805,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 21404,
+        "effects": 864
+      }
+    },
+    {
+      "index": 12,
+      "tick": 28312,
+      "promptBytes": 23240,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 21839,
+        "effects": 864
+      }
+    },
+    {
+      "index": 13,
+      "tick": 30061,
+      "promptBytes": 24183,
+      "error": "Context too large",
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 22782,
+        "effects": 864
+      }
+    },
+    {
+      "index": 14,
+      "tick": 35218,
+      "promptBytes": 22955,
+      "error": null,
+      "sections": {
+        "task": 11,
+        "sourceContract": 473,
+        "perspective": 21554,
+        "effects": 864
+      }
+    }
+  ],
+  "lateOfferAnswer": "not exercised live",
+  "attentionGaps": {
+    "attentionGaps": 17,
+    "attentionGapKinds": {
+      "memory": 1,
+      "rest": 6,
+      "mood": 2,
+      "food": 5,
+      "intent-ordinary": 3
+    },
+    "laneFailures": {
+      "core-answer": {
+        "total": 2,
+        "causes": {
+          "cancelled": 2
+        }
+      }
+    }
+  },
+  "medicalAlertCause": "unresolved; native alert source not retained",
+  "stagingStopped": true,
+  "newGameplayOrModelCallsForAudit": 0,
+  "saveStockAudit": [
+    {
+      "save": "lab-concord-nh-helper-20260924",
+      "sha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+      "wood": [
+        {
+          "id": "WoodLog4074",
+          "pos": "(85, 0, 85)",
+          "count": 20
+        },
+        {
+          "id": "WoodLog4075",
+          "pos": "(73, 0, 79)",
+          "count": 20
+        },
+        {
+          "id": "WoodLog4076",
+          "pos": "(63, 0, 75)",
+          "count": 20
+        },
+        {
+          "id": "WoodLog4077",
+          "pos": "(95, 0, 85)",
+          "count": 20
+        },
+        {
+          "id": "WoodLog4078",
+          "pos": "(95, 0, 75)",
+          "count": 20
+        },
+        {
+          "id": "WoodLog4079",
+          "pos": "(63, 0, 85)",
+          "count": 20
+        }
+      ],
+      "total": 120
+    },
+    {
+      "save": "lab-concord-hm-pipeline-20260925-100819",
+      "sha256": "5d647b6e4bdee489647543ec38de090ddc4588505296b87e61bc590fd2b036af",
+      "wood": [
+        {
+          "id": "WoodLog4075",
+          "pos": "(76, 0, 85)",
+          "count": 75
+        },
+        {
+          "id": "WoodLog4076",
+          "pos": "(76, 0, 84)",
+          "count": 45
+        }
+      ],
+      "total": 120
+    }
+  ],
+  "failureCountsVisuallyVerifiedVideoSeconds": 603
+}
