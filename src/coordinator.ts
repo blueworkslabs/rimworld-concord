@@ -4,7 +4,7 @@ import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
 import {deferredOffers} from './reoffers.js';
 import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
-import {questionContext,coreView,validateCoreChoice,CoreChoice,CoreRejection,coreFailureCause,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
+import {questionContext,coreView,fitCore,validateCoreChoice,CoreChoice,CoreRejection,coreFailureCause,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
 import {SocialChoice,socialContact,type SocialBackend,type SocialView,type SocialExchange,type SocialMessage} from './social.js';
@@ -498,8 +498,10 @@ export class Coordinator {
     let timedOut=false,returned=false,raw:unknown;
     const combined=AbortSignal.any([signal,prepared.controller.signal]),timer=setTimeout(()=>{timedOut=true;prepared.controller.abort();},timeoutMs);
     try{
-      raw=await bounded(combined,()=>backend.plan(structuredClone(prepared.view),combined));returned=true;
-      const choice=validateCoreChoice(raw,prepared.view);
+      // The model is shown the trimmed copy; it is also what the channel records as the core input.
+      const shown=fitCore(prepared.view);
+      raw=await bounded(combined,()=>backend.plan(structuredClone(shown),combined));returned=true;
+      const choice=validateCoreChoice(raw,shown);
       return await this.serial(async()=>{
         combined.throwIfAborted();if(this.generation!==prepared.generation)throw Error('Stale core turn');
         const g=await this.current();combined.throwIfAborted();

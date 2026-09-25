@@ -7,7 +7,7 @@ import {claudeArgs} from './claude-decision.js';
 import {Decision,type Perspective} from './protocol.js';
 import {Reflection,type AttentionView} from './attention.js';
 import {ReflectionChoice,reflectionFromChoice,validateReflectionChoice} from './reflection-choice.js';
-import {CoreChoice,CoreRejection,coreRejectionMetadata,corePrompt,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
+import {CoreChoice,CoreRejection,coreRejectionMetadata,corePrompt,PROMPT_LIMIT,fitCore,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
 import {CoreAnswerChoice} from './pawn-eating.js';
 import {SocialChoice,socialPrompt,type SocialView} from './social.js';
 import {modelPrompt} from './model-perspective.js';
@@ -25,7 +25,7 @@ export function failureCause(error:unknown,aborted:boolean,reachedModel:boolean)
  if(aborted)return 'cancelled';
  return reachedModel&&!(error instanceof Error&&m==='Native decision unavailable')?'invalid-output':'backend';
 }
-export const PROMPT_LIMIT=24000;
+export {PROMPT_LIMIT,fitCore};
 /** Reflection perspectives are trimmed to fit, oldest first, never by raising the limit: older
  * retained experiences, memories and messages go before anything recent. The trim is recorded
  * in the view the model sees. Mutates the (already cloned) view so validation uses the same one. */
@@ -40,24 +40,10 @@ export function fitReflection(view:any,size:()=>number,limit=PROMPT_LIMIT){
  }
  return trimmed;
 }
-/** Core inputs get the same treatment: over the limit, the oldest messages, agreements,
- * questions, self-care records and requests go first, each down to a floor of recent items.
- * Topics and the offerable choices are never trimmed. The backend validates against the view it
- * showed; the coordinator re-validates against the full prepared view. */
-export function fitCore(view:any,size:()=>number,limit=PROMPT_LIMIT){
- const trimmed={messages:0,agreements:0,questions:0,selfCare:0,requests:0};
- const lists:[keyof typeof trimmed,number][]=[['messages',6],['agreements',6],['questions',4],['selfCare',4],['requests',4]];
- while(size()>limit){
-  const next=lists.find(([key,keep])=>(view[key]?.length??0)>keep);
-  if(!next)break;
-  view[next[0]].shift();trimmed[next[0]]++;view.trimmed={...trimmed,note:'Older items were left out to fit; they still happened.'};
- }
- return trimmed;
-}
 export function codexRequest(mode:Mode,view:any){
  const build=()=>JSON.stringify(mode==='core'?corePrompt(view):mode==='core-answer'?coreAnswerPrompt(view):mode==='social'?socialPrompt(view):modelPrompt(mode,view));
  if(mode==='reflection')fitReflection(view,()=>Buffer.byteLength(build()));
- if(mode==='core')fitCore(view,()=>Buffer.byteLength(build()));
+ if(mode==='core')view=fitCore(view);
  const prompt=build();
  if(Buffer.byteLength(prompt)>PROMPT_LIMIT)throw Error('Context too large');
  const args=claudeArgs(mode,view),instructions=args[args.indexOf('--system-prompt')+1]!,schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);
@@ -103,7 +89,7 @@ export class CodexDecisionBackend {
   signal.throwIfAborted();if(this.pending)throw Error('Backend busy');this.pending=true;
   let id:string|undefined,raw:any,usage:unknown=null;const start=Date.now();
   try{
-   view=structuredClone(view);const request=codexRequest(mode,view);
+   view=mode==='core'?fitCore(view as CoreView):structuredClone(view);const request=codexRequest(mode,view);
    await mkdir(this.options.scratchRoot,{recursive:true});const root=await mkdtemp(join(this.options.scratchRoot,'call-'));
    await writeFile(join(root,'request.json'),JSON.stringify(request),{mode:0o600});
    // Freeze catalog bytes for this one process; no changing routing after its preflight.

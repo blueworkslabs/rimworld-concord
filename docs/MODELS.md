@@ -140,8 +140,12 @@ perspectives that exceed the 24,000-byte prompt limit are trimmed oldest-first (
 retained experiences, then memories, then messages) and marked `trimmed` in the view.
 Core inputs get the same treatment in both lanes: the oldest messages, agreements,
 questions, self-care records and requests go first, each down to a floor of recent items.
-Topics and the offerable choices are never trimmed. The backend validates against the view
-it showed; the coordinator re-validates against the full prepared view.
+Topics and the offerable choices are never trimmed. `fitCore` returns a trimmed copy and
+never changes its input. The coordinator trims before the call, so the view sent over the
+decision channel, and recorded as the core input in evidence, is exactly what the model saw,
+`trimmed` note included. A returned choice is validated against that copy first, then
+against a fresh view at apply time. The backends call `fitCore` again as a safeguard; on an
+already-fitted view it changes nothing.
 The limit itself is never raised. The ongoing runner counts failures per lane (core,
 decision, core-answer, reflection); a success in one lane never resets another lane's
 stop streak. Native/idle/busy/cooldown results do not reset it either; only an actual

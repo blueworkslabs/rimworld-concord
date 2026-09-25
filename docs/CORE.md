@@ -76,6 +76,10 @@ stockpile hauls: an existing colony stockpile (`zoneId`) or a candidate site, on
   queue.
 - **No consumption follow-up while a meal is under way.** A pawn with a self-care
   receipt that is not yet completed, failed or interrupted is not offered a question.
+  This is deliberate and broader than meals: while that receipt is open, the core
+  cannot ask that pawn *anything*, not only about the meal. Meals are short, so this is
+  acceptable for a scene. A question to a rescuer that is blocked mid-bite is this rule,
+  not a bug.
 - **Failed and rejected core outputs are visible in the game.** Every failed attempt
   gets one cause:
   - the backend's #71 cause;

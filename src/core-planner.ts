@@ -186,6 +186,24 @@ export function validateCoreChoice(raw:unknown,v:CoreView){
  if(a.kind==='ask'&&a.reportSelfCareId&&!(v.selfCare??[]).some(c=>c.id===a.reportSelfCareId&&c.pawn===a.pawn&&!c.reportQuestionId))throw Error('Core report receipt unavailable');
  return c;
 }
+export const PROMPT_LIMIT=24000;
+/** Oversized core inputs are trimmed like reflections, never by raising the limit: the oldest
+ * messages, agreements, questions, self-care records and requests go first, each down to a floor
+ * of recent items. Topics and the offerable choices are never trimmed. Returns a trimmed COPY with
+ * a `trimmed` note; the input is untouched. The copy is what the model is shown, what is recorded
+ * as the core input, and what a returned choice is validated against first. Idempotent. */
+export function fitCore<V extends CoreView>(view:V,limit=PROMPT_LIMIT):V{
+ const shown:any=structuredClone(view),prior=shown.trimmed??{};
+ const trimmed={messages:prior.messages??0,agreements:prior.agreements??0,questions:prior.questions??0,selfCare:prior.selfCare??0,requests:prior.requests??0};
+ const lists:[keyof typeof trimmed,number][]=[['messages',6],['agreements',6],['questions',4],['selfCare',4],['requests',4]];
+ const size=()=>Buffer.byteLength(JSON.stringify(corePrompt(shown)));
+ while(size()>limit){
+  const next=lists.find(([key,keep])=>(shown[key]?.length??0)>keep);
+  if(!next)break;
+  shown[next[0]].shift();trimmed[next[0]]++;shown.trimmed={...trimmed,note:'Older items were left out to fit; they still happened.'};
+ }
+ return shown;
+}
 export function corePrompt(v:CoreView){return {task:'core-plan',sourceContract:'currentRecords are authoritative only within their stated scope and timestamp. Shared telemetry can be unknown or stale. communication is attributed testimony, not verified physical truth. plannerHistory contains fallible older interpretations, never current need readings or proof a reply is absent. Reconcile summaries against currentRecords before carrying them forward; keep uncertainty explicit. availableChoices lists eligibility, not consent or a preferred action.',
  perspective:{world:v.world,epoch:v.epoch,branch:v.branch,revision:v.revision,tick:v.tick,brief:v.brief,crew:v.crew,
  currentRecords:{asOfTick:v.tick,sharedStatus:v.sharedStatus,...(v.nativeIntents?{nativeIntents:v.nativeIntents}:{}),questions:v.questions,selfCare:v.selfCare??[],topicClosures:v.topicClosures,agreements:v.agreements.map(a=>({id:a.id,pawn:a.pawn,action:a.action,status:a.status,progress:a.progress})),...(v.foodSightings?{foodSightings:v.foodSightings,foodKnowledge:v.foodKnowledge}:{})},
