@@ -148,7 +148,7 @@ test('standalone refusal closes only the request and preserves completed work',a
 // the ordered path re-read the fresh receipt before offering or applying a replacement; the native
 // path only learns that the shared quota was met on reconciliation. Runtime fix pending; kept
 // visible here instead of hidden.
-test('a native haul met just before the core reply yields a standalone rescue, not a replacement',{todo:'native replacement does not refresh the intent before offering'},async()=>{
+test('a native haul met just before the core reply yields a standalone rescue, not a replacement',async()=>{
  const {c,p,ask,complete,store}=await nativeSetup();await ask();const r=c.core().requests()[0]!;
  try {complete();const offer=await c.core().offerRequestedRescue(r.id,rescue,'Your haul completed.');
   assert.equal(offer.replacesAgreementId,undefined);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
@@ -156,7 +156,7 @@ test('a native haul met just before the core reply yields a standalone rescue, n
 });
 
 // Distinct from pre-offer freshness: completion while an issued replacement awaits consent.
-test('issued native replacement is not reinterpreted when quota meets during its answer',{todo:'native replacement does not refresh the intent before applying acceptance'},async()=>{
+test('issued native replacement is not reinterpreted when quota meets during its answer',async()=>{
  const {c,p,ask,complete,store,calls}=await nativeSetup();
  try {
   await ask();const r=c.core().requests()[0]!,offer=await c.core().offerRequestedRescue(r.id,rescue,'Optional replacement');
@@ -165,5 +165,17 @@ test('issued native replacement is not reinterpreted when quota meets during its
   assert(answered);assert.deepEqual(calls,before);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
   assert.equal(c.inspect().proposals[offer.id]!.actionId,undefined);
   await assert.rejects(c.core().offerRequestedRescue(r.id,rescue,'Try fresh instead'));
+ } finally {store.close();}
+});
+
+test('a native replacement dispatches in the consent pass once the game confirms the exclusion',async()=>{
+ const {c,p,ask,calls,store}=await nativeSetup();
+ try {
+  await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');
+  await c.pawn('A').decide(offer.id,yes);   // no reconcile: the confirmed exclusion clears the queued one
+  assert.deepEqual(moves(calls),['move:rescue']);assert(calls.indexOf('intent:intent-exclude')<calls.indexOf('move:rescue'));
+  assert.deepEqual(c.inspect().pendingIntentExclusions??{},{});assert.equal(c.inspect().proposals[p.id]!.standing!.status,'stopped');
+  const h=Object.values(c.inspect().handovers!)[0]!;assert.equal(h.step,'dispatched');assert.equal(c.inspect().proposals[offer.id]!.actionId,h.dispatchId);
+  await c.reconcile();assert.deepEqual(moves(calls),['move:rescue'],'one dispatch under the persisted id');
  } finally {store.close();}
 });

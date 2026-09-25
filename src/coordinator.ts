@@ -820,6 +820,9 @@ export class Coordinator {
       &&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&!ch.commitment&&!ch.intention);
   }
   private refreshReceipt(p:Proposal,game:GameState) {
+    // A native haul's completion is its intent's lifecycle in the game ledger, not a job
+    // receipt: read it fresh, so a quota met just before an offer or a consent is seen.
+    if(p.action.kind==='haul-zone'){this.ingestIntents(game);return;}
     const receipt=game.actions.find(a=>a.id===p.actionId&&a.actor===p.pawn);
     if(!receipt||receipt.status==='started')return;
     this.domain.outcomes[receipt.id]=receipt;
@@ -922,6 +925,10 @@ export class Coordinator {
           catch{continue;}   // uncertain: confirmed from the game's state on the next pass
         }
         if(live&&(live.status==='open'||live.status==='pending')&&!live.excluded.includes(h.pawn))continue;
+        // The game confirms the exclusion the consent queued: the same fact, so it no longer
+        // holds the dispatch until a later flush.
+        const key=h.intentId+':'+h.pawn,queued=this.domain.pendingIntentExclusions?.[key];
+        if(queued&&live?.excluded.includes(h.pawn)){delete this.domain.pendingIntentExclusions![key];this.commit('intent-exclusion-confirmed',h.pawn,queued);}
         h.step='draining';this.commit('handover-excluded',h.pawn,h);
       }
       if(h.step==='draining'){
