@@ -18,7 +18,11 @@ clean B1 result. **Strict (a) is the migration configuration; growing (b) is par
 No third growing round is authorized by this freeze. Existing growing code/evidence
 is experimental, not cleared for deployment as the migration default. The reviewed
 receipt-only fix (`7dec73a`) is used for separate strict-only correctness checks; it
-does not reset the budget. Migration Gate C and live #71 validation remain pending.
+does not reset the budget. The [single signed live run and post-read audit](trials/HAULING_MIGRATION_LIVE.md)
+are complete: no offer reached publication, and no hauling intent opened. Receipt-age
+prefixes passed the observed checks; failure totals remained off-screen and late offer
+answers were not exercised. Migration Gate C verdict remains with Fable; no deletion
+is authorized by that diagnostic run.
 
 ## Goal
 
@@ -677,8 +681,10 @@ or reopens growing.
 
 ## Gate C will measure
 
-**Signed condition: #71's fixes must be measured live in this migration.** Their
-current verification is mock/offline only. Correlate saved input snapshot ticks,
+**Signed condition: #71's fixes must be measured live in this migration.** The
+[post-read audit](trials/HAULING_MIGRATION_LIVE.md#technical-findings--released-after-the-recording-only-read)
+records the observed results and coverage limits; the frozen acceptance criteria
+below are unchanged. Correlate saved input snapshot ticks,
 intervening receipts and publication entries, alongside request/failure diagnostics:
 
 - Every narration published stale against a newer receipt carries its as-of prefix:
