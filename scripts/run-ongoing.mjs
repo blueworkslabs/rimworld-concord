@@ -56,8 +56,8 @@ if(cold&&(JSON.parse(await readFile(marker,'utf8')).policy!==policy||JSON.parse(
 const command=`env CONCORD_TRIAL_POLICY=${quote(policy)} CONCORD_TRIAL_ID=${quote(runId)} RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-ongoing-lab.sh')} ${cold?'cold':'game'}${scripted?' --scripted':''}${recorded?' --recorded':''}${nativeHaul?' --native-haul':''}${migration?' --hauling-migration':''}`;
 const child=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env,stdio:['pipe','pipe','pipe']});
 const lane=new InferenceLane();
-const annotationsPath=config.receipt+'.jev-annotations.jsonl';
-const annotator=jevTransport?new JevAnnotator(jevTransport,jevBudget,e=>appendAnnotation(annotationsPath,{runId,...e})):undefined;
+const annotationsPath=config.receipt+'.jev-annotations.jsonl',annotationBackendIds=new Map();
+const annotator=jevTransport?new JevAnnotator(jevTransport,jevBudget,e=>appendAnnotation(annotationsPath,{runId,backendDecisionId:annotationBackendIds.get(e.decisionId),...e})):undefined;
 const input=createInterface({input:child.stdout,crlfDelay:Infinity}),active=new Map(),seen=new Set(),tasks=[],responses=[];
 let receipt,draining=false,failed=false,coreCount=0,pawnCount=0;const laneFailures=[];
 const send=m=>{if(!child.stdin.destroyed)child.stdin.write(JSON.stringify(m)+'\n');};
@@ -77,20 +77,24 @@ async function handle(line){
  try{
   const remaining=ongoingAllowance(m.notAfter);
   const cutoffTimer=setTimeout(()=>controller.abort(),remaining);
+  let completedCore;
   try {await lane.run(controller.signal,async()=>{
   try {if(isDecision){
    await writeFile(config.receipt+'.request-'+m.id+'.json',JSON.stringify({runId,mode:m.mode,view:m.view,notAfter:m.notAfter}),{flag:'wx',mode:0o600});
    ongoingAllowance(m.notAfter);controller.signal.throwIfAborted();
    const output=await (m.mode==='core'?coreBackend.plan(m.view,controller.signal):m.mode==='core-answer'?pawnBackend.answerCore(m.view,controller.signal):m.mode==='reflection'?pawnBackend.reflect(m.view,controller.signal):pawnBackend.decide(m.view,controller.signal));
-   responses.push({id:m.id,mode:m.mode,pawn:m.view.pawn?.id??null,receivedAt:new Date().toISOString(),elapsedMs:Date.now()-start,output});
+   const backendDecisionId=(m.mode==='core'?coreBackend:pawnBackend).receipts.at(-1)?.id;
+   responses.push({id:m.id,backendDecisionId,mode:m.mode,pawn:m.view.pawn?.id??null,receivedAt:new Date().toISOString(),elapsedMs:Date.now()-start,output});
    // Preserve returned answers even if the coordinator subsequently rejects them as stale.
    await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,diagnostics:diagnostics()},null,2),{mode:0o600});
    send({type:'decision-result',id:m.id,output});
-   // After the result is on the wire: annotate-only, outside the inference lane, never awaited here.
-   if(annotator&&m.mode==='core')tasks.push(annotator.annotate(m.id,m.mode,m.view,output,hostAbort.signal));}
+   if(annotator&&m.mode==='core')completedCore={output,backendDecisionId};}
 
   }finally{await writeFile(config.receipt+'.responses.json',JSON.stringify({runId,responses,diagnostics:diagnostics()},null,2),{mode:0o600});}
-  });}finally{clearTimeout(cutoffTimer);}
+  });
+  // Release the lane before even building annotation requests or reserving their budget.
+  if(completedCore){annotationBackendIds.set(m.id,completedCore.backendDecisionId);tasks.push(annotator.annotate(m.id,m.mode,m.view,completedCore.output,hostAbort.signal));}
+  }finally{clearTimeout(cutoffTimer);}
  }catch(error){
   // Failures and cancellation retain their reservations; never reroll a response. The cause
   // is content-free and travels with the result, so no lane failure hides as "unavailable".
@@ -101,9 +105,9 @@ async function handle(line){
  }finally{deadline.dispose();active.delete(m.id);}
 }
 input.on('line',line=>tasks.push(handle(line).catch(()=>{failed=true;child.kill();})));
-const timer=setTimeout(()=>{failed=true;child.kill();},protocol.wallMs+60000);
+const timer=setTimeout(()=>{failed=true;hostAbort.abort();child.kill();},protocol.wallMs+60000);
 const code=await new Promise(resolve=>{child.on('error',()=>resolve(-1));child.on('close',resolve);});
-clearTimeout(timer);input.close();for(const c of active.values())c.abort();await Promise.all(tasks);await annotator?.drain();
+clearTimeout(timer);input.close();hostAbort.abort();for(const c of active.values())c.abort();await Promise.all(tasks);await annotator?.drain();
 const result={at:new Date().toISOString(),hostProcessId:process.pid,priorHostProcessId:priorHost,policy,protocol,kind:(migration?'hauling-migration-':nativeHaul?'native-haul-':'')+(cold?'ongoing-cold':scripted?'ongoing-scripted':'ongoing-live'),runId,passed:!failed&&code===0&&receipt?.passed===true,
  before,after:{...summary(),jevCalls:annotator?.summary().attempted??0},diagnostics:diagnostics(),laneFailures,responses,game:receipt,
  ...(annotator?{jev:{policy:JEV_ANNOTATE_POLICY,journal:annotationsPath,...annotator.summary(),ledger:jevBudget.summary()}}:{}),

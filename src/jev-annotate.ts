@@ -43,16 +43,17 @@ export function annotationRequests(mode:string,view:unknown,output:unknown):{req
   catch(e){skipped.push({kind,reason:e instanceof Error?e.message:'unbuildable'});}
  };
  add('grounding',()=>jevRequest(groundingState(view as GroundingViewInput,reply.data),groundingQuestions()));
- const wake=coreWakeState(view as WakeViewInput);
- if(wake.messagesToCore.length)add('asks_core',()=>jevRequest(wake,{asks_core:asksCoreQuestion}));
+ try{const wake=coreWakeState(view as WakeViewInput);
+  if(wake.messagesToCore.length)add('asks_core',()=>jevRequest(wake,{asks_core:asksCoreQuestion}));
+ }catch(e){skipped.push({kind:'asks_core',reason:e instanceof Error?e.message:'unbuildable'});}
  return {requests,skipped};
 }
 
-export type Annotation={attemptId:string;decisionId:string;kind:AnnotationKind;requestSha256:string;at:string;
+export type Annotation={attemptId:string;decisionId:string;kind:AnnotationKind;requestSha256:string;at:string;ledgerAttemptId?:string;
  model?:string;answers?:Record<string,JevAnswer>;flags?:string[];costUSD?:number;error?:string;raw?:string};
 export type AnnotationEvent=
  |{event:'skipped';decisionId:string;kind:AnnotationKind;reason:string;at:string}
- |{event:'attempted';attemptId:string;decisionId:string;kind:AnnotationKind;requestSha256:string;at:string}
+ |{event:'attempted';attemptId:string;decisionId:string;kind:AnnotationKind;requestSha256:string;at:string;ledgerAttemptId:string}
  |({event:'received'|'result'|'failure'}&Annotation);
 
 /** Flags: every noul at or above the reporting threshold, by question key. */
@@ -65,6 +66,14 @@ const Billing=z.object({usage:z.object({cost:z.number().finite().nonnegative()})
 /** Sequential per turn, concurrent across turns, never throws out of `annotate`. */
 export class JevAnnotator{
  private inflight=new Set<Promise<unknown>>();
+ private journalFailed=false;
+ private unjournaled:AnnotationEvent[]=[];
+ private journalFailures=0;
+ private async emit(event:AnnotationEvent):Promise<boolean>{
+  try{await this.sink(event);return true;}catch{
+   this.journalFailed=true;this.journalFailures++;this.unjournaled.push(structuredClone(event));return false;
+  }
+ }
  private counts={attempted:0,answered:0,failed:0,skipped:0,costUSD:0,flagged:Object.fromEntries([...groundingCategories,'asks_core'].map(k=>[k,0])) as Record<string,number>};
  constructor(private transport:AppraisalTransport,private budget:TrialBudget,private sink:(e:AnnotationEvent)=>Promise<void>|void=()=>{},private timeoutMs=8000){
   if(!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>30000)throw Error('Invalid annotation timeout');
@@ -77,55 +86,55 @@ export class JevAnnotator{
  private async run(decisionId:string,mode:string,view:unknown,output:unknown,signal:AbortSignal):Promise<Annotation[]>{
   const out:Annotation[]=[];
   const {requests,skipped}=annotationRequests(mode,view,output);
-  for(const s of skipped){this.counts.skipped++;await this.sink({event:'skipped',decisionId,kind:s.kind,reason:s.reason,at:new Date().toISOString()});}
+  for(const s of skipped){this.counts.skipped++;await this.emit({event:'skipped',decisionId,kind:s.kind,reason:s.reason,at:new Date().toISOString()});}
   for(const r of requests){
-   const attemptId=randomUUID(),at=new Date().toISOString();
-   const base={attemptId,decisionId,kind:r.kind,requestSha256:r.sha256,at};
-   let annotation:Annotation;
+   const base={attemptId:randomUUID(),decisionId,kind:r.kind,requestSha256:r.sha256,at:new Date().toISOString()};
+   let annotation:Annotation={...base};
    try{
-    signal.throwIfAborted();this.budget.assertHealthy();
-    await this.sink({event:'attempted',...base});
-    this.counts.attempted++;
-    const id=this.budget.reserve(JEV_CALL_CEILING_USD);
-    // A referenced timer, not AbortSignal.timeout: the host must not exit with a call pending.
+    if(signal.aborted)throw Error('cancelled');
+    if(this.journalFailed)throw Error('Annotation journal unavailable');
+    this.budget.assertHealthy();
+    const id=this.budget.reserve(JEV_CALL_CEILING_USD);annotation.ledgerAttemptId=id;
+    if(!await this.emit({event:'attempted',...base,ledgerAttemptId:id}))throw Error('Annotation journal unavailable');
+    // Sink I/O may yield across cancellation. Count only actual transport invocations.
+    if(signal.aborted)throw Error('cancelled');
+    if(this.journalFailed)throw Error('Annotation journal unavailable');
+    this.budget.assertHealthy();
     const timeout=new AbortController(),timer=setTimeout(()=>timeout.abort(),this.timeoutMs);
     const bounded=AbortSignal.any([signal,timeout.signal]);
     let raw:unknown,transportError:unknown;
-    // An already-cancelled call is never handed to the transport.
-    try{if(signal.aborted)throw Error('cancelled');raw=await this.transport(r.request,bounded);}
+    try{this.counts.attempted++;raw=await this.transport(r.request,bounded);}
     catch(e){transportError=bounded.aborted?Error(signal.aborted?'cancelled':'timeout'):e;}
     finally{clearTimeout(timer);}
-    let receipt:Pick<Annotation,'raw'|'costUSD'>={};
+    let received=true;
     if(raw!==undefined){
-     receipt={raw:JSON.stringify(raw)};
-     const cost=Billing.safeParse(raw);if(cost.success)receipt.costUSD=cost.data.usage.cost;
-     // The paid response is journaled before validation or ledger settlement can throw.
-     await this.sink({event:'received',...base,...receipt});
+     annotation.raw=JSON.stringify(raw);
+     const billing=Billing.safeParse(raw);if(billing.success)annotation.costUSD=billing.data.usage.cost;
+     // Retain paid bytes even if journaling fails; fallback is saved in the run receipt.
+     received=await this.emit({event:'received',...annotation});
+     // Billing is independent of journal/answer validity; an overrun must still lock.
+     if(billing.success)this.budget.settle(id,billing.data.usage.cost);
     }
-    try{
-     if(transportError)throw transportError;
-     const billing=Billing.safeParse(raw);if(billing.success)this.budget.settle(id,billing.data.usage.cost);
-     const parsed=validateJevResponse(raw,r.request.questions);
-     annotation={...base,model:parsed.model,answers:parsed.answers,flags:flagsOf(parsed.answers),...receipt};
-    }catch(e){annotation={...base,error:e instanceof Error?e.message:'failed',...receipt};}
-   }catch(e){
-    // Budget exhausted or locked, cancelled before the call, or a sink failure: no call was made.
-    annotation={...base,error:e instanceof Error?e.message:'failed'};
-   }
-   if(annotation.error){this.counts.failed++;}else{this.counts.answered++;for(const f of annotation.flags??[])this.counts.flagged[f]=(this.counts.flagged[f]??0)+1;}
-   this.counts.costUSD+=annotation.costUSD??0;
-   try{await this.sink({event:annotation.error?'failure':'result',...annotation});}catch{/* journaled as far as possible; never surfaces */}
-   out.push(annotation);
+    if(!received)throw Error('Annotation journal unavailable');
+    if(transportError)throw transportError;
+    if(bounded.aborted)throw Error(signal.aborted?'cancelled':'timeout');
+    const parsed=validateJevResponse(raw,r.request.questions);
+    annotation={...annotation,model:parsed.model,answers:parsed.answers,flags:flagsOf(parsed.answers)};
+   }catch(e){annotation.error=e instanceof Error?e.message:'failed';}
+   if(!annotation.error&&!await this.emit({event:'result',...annotation}))annotation.error='Annotation journal unavailable';
+   if(annotation.error){this.counts.failed++;await this.emit({event:'failure',...annotation});}
+   else{this.counts.answered++;for(const f of annotation.flags??[])this.counts.flagged[f]=(this.counts.flagged[f]??0)+1;}
+   this.counts.costUSD+=annotation.costUSD??0;out.push(annotation);
   }
   return out;
  }
- summary(){return {version:jevAnnotateVersion,flagThreshold:JEV_ANNOTATE_FLAG,...structuredClone(this.counts)};}
+ summary(){return {version:jevAnnotateVersion,flagThreshold:JEV_ANNOTATE_FLAG,...structuredClone(this.counts),journalFailures:this.journalFailures,unjournaled:structuredClone(this.unjournaled)};}
  /** Wait for every in-flight annotation; used at drain and before the receipt is written. */
  async drain(){await Promise.allSettled([...this.inflight]);}
 }
 
 /** Durable append for the annotation journal (one JSON object per line). */
-export async function appendAnnotation(path:string,e:AnnotationEvent&{runId:string}){
+export async function appendAnnotation(path:string,e:AnnotationEvent&{runId:string;backendDecisionId?:string}){
  const f=await open(path,'a',0o600);
  try{await f.writeFile(JSON.stringify(e)+'\n');await f.sync();}finally{await f.close();}
  const dir=await open(dirname(path),'r');try{await dir.sync();}finally{await dir.close();}

@@ -42,15 +42,27 @@ adjudicated by hand against the recording, the way E1 and E2 were, and reported 
 - Journal `<receipt>.jev-annotations.jsonl`, durable per event: `skipped` (oversized state,
   reply not a core choice), `attempted` before the call, `received` with the paid bytes
   before validation, then `result` or `failure`. Every event carries the decision-request
-  id of the core turn, which is the backend decision id in the exported evidence, so an
-  annotation joins its input and reply exactly.
+  id of the core turn, joining the host request file and returned response. This wire
+  ID is **not** the native backend ledger ID: `backendDecisionId` explicitly links that
+  separate ID in host responses and annotation events.
 - The run receipt carries `jev`: counts (attempted, answered, failed, skipped), flags per
   category, reported cost, the ledger summary and the journal path; `after.jevCalls` is the
-  real count. The protocol records `jevCalls: "annotate-only grounding; gates nothing"`.
+  transport-invocation count (not budget denials or cancelled-before-send reservations).
+  An attempt event carries its ledger reservation ID; a reservation can remain without
+  a transport invocation. The protocol records `jevCalls: "annotate-only grounding; gates nothing"`.
+
+- A journal failure stops further annotation calls only, never decisions. Paid bytes
+  and charges already received remain in memory and billing is settled even if their
+  journal append fails; an overrun still locks the ledger. `journalFailures` and
+  `unjournaled` events are retained in the final host-private receipt. Failure to persist
+  that final receipt too is an operator evidence failure, not a claim of durable recovery.
+  Failed result appends count as failures, not successful annotations. Late paid responses
+  after cancellation retain their charge/bytes but are not scored as answers.
 
 ## Evidence rule for the first live use
 
-The journal is host-private (it contains the fitted core inputs). Sanitized export follows
+The journal and fallback receipt are host-private. Requests/inputs remain in their
+existing host evidence files; journal events contain request hashes, responses and joins. Sanitized export follows
 the E2 pattern: names only, the reply, the scores and flags, joined to the public core
 inputs by decision id. The report has three parts, in this order: Astra's counts first
 (flags per category, failures with causes, cost); a hand adjudication of every flagged

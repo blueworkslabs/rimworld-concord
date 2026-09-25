@@ -112,8 +112,62 @@ test('a sink failure on the attempt never reaches the caller and makes no call; 
  const c=aligned[0]!;const f=fake(),budget=new TrialBudget(':memory:',0.1,10,'jev-annotate-v1');
  const broken=new JevAnnotator(f.transport,budget,()=>{throw Error('disk full');});
  const out=await broken.annotate('d1','core',inputOf(c.index),c.returned);
- assert.equal(f.calls.length,0);assert.equal(out[0]!.error,'disk full');
+ assert.equal(f.calls.length,0);assert.equal(out[0]!.error,'Annotation journal unavailable');assert.equal(broken.summary().attempted,0);assert.ok(broken.summary().unjournaled.length>0);
  let resolved=false;const slow=new JevAnnotator(async(b)=>{await new Promise(r=>setTimeout(r,30));resolved=true;return f.transport(b);},budget);
  void slow.annotate('d2','core',inputOf(c.index),c.returned);
  await slow.drain();assert.equal(resolved,true);assert.equal(slow.summary().answered,1);
+});
+
+test('budget denial and cancellation during attempt journaling do not inflate actual calls',async()=>{
+ const c=aligned[0]!,view=inputOf(c.index),f=fake(),j=journal(),budget=new TrialBudget(':memory:',0.002,1,'jev-annotate-v1');
+ const a=new JevAnnotator(f.transport,budget,j.sink);
+ await a.annotate('first','core',view,c.returned);await a.annotate('denied','core',view,c.returned);
+ assert.equal(a.summary().attempted,1);assert.equal(f.calls.length,1);
+ assert.equal(j.events.filter(e=>e.event==='attempted').length,1);budget.close();
+ const ctl=new AbortController(),b=new TrialBudget(':memory:',0.01,5,'jev-annotate-v1'),noCall=fake();
+ const cancelled=new JevAnnotator(noCall.transport,b,e=>{if(e.event==='attempted')ctl.abort();});
+ const [out]=await cancelled.annotate('cancel','core',view,c.returned,ctl.signal);
+ assert.equal(out!.error,'cancelled');assert.equal(noCall.calls.length,0);assert.equal(cancelled.summary().attempted,0);
+ assert.equal(Number(b.summary()!.calls),1,'the reservation stays conservative even if no request was sent');b.close();
+});
+
+test('paid response and charge survive received/result journal faults; later annotation calls stop',async()=>{
+ const c=aligned[0]!,view=inputOf(c.index);
+ for(const brokenEvent of ['received','result'] as const){
+  const f=fake(),b=new TrialBudget(':memory:',0.02,10,'jev-annotate-v1');
+  const a=new JevAnnotator(f.transport,b,e=>{if(e.event===brokenEvent)throw Error('disk full');});
+  const [out]=await a.annotate('paid','core',view,c.returned);
+  assert.equal(out!.error,'Annotation journal unavailable');assert.equal(out!.costUSD,0.0001);assert.ok(out!.raw);
+  assert.equal(Number(b.summary()!.reportedUSD),0.0001);
+  const s=a.summary();assert.equal(s.answered,0);assert.equal(s.failed,1);assert.equal(s.costUSD,0.0001);
+  assert.equal(s.journalFailures,1);assert.equal(s.unjournaled[0]!.event,brokenEvent);
+  assert.ok('raw' in s.unjournaled[0]!&&s.unjournaled[0]!.raw);
+  await a.annotate('later','core',view,c.returned);assert.equal(f.calls.length,1);assert.equal(a.summary().attempted,1);b.close();
+ }
+});
+
+test('a journal failure cannot hide a paid overrun from the persistent budget lock',async()=>{
+ const c=aligned[0]!,b=new TrialBudget(':memory:',0.02,10,'jev-annotate-v1');
+ const f=fake({},JEV_EXPECTED_MODEL,0.003),a=new JevAnnotator(f.transport,b,e=>{if(e.event==='received')throw Error('disk full');});
+ const [out]=await a.annotate('overrun','core',inputOf(c.index),c.returned);
+ assert.equal(out!.error,'Provider cost exceeded reservation');assert.equal(out!.costUSD,0.003);
+ assert.equal(Number(b.summary()!.reportedUSD),0.003);assert.throws(()=>b.assertHealthy(),/locked/);
+ assert.ok(a.summary().unjournaled.some(e=>e.event==='received'&&e.costUSD===0.003));b.close();
+});
+
+test('a paid response returned after cancellation is retained but never scored as an answer',async()=>{
+ const c=aligned[0]!,ctl=new AbortController(),b=new TrialBudget(':memory:',0.02,10,'jev-annotate-v1'),f=fake(),j=journal();
+ const a=new JevAnnotator(async body=>{ctl.abort();return f.transport(body);},b,j.sink);
+ const [out]=await a.annotate('late','core',inputOf(c.index),c.returned,ctl.signal);
+ assert.equal(out!.error,'cancelled');assert.ok(out!.raw);assert.equal(out!.costUSD,0.0001);
+ assert.equal(a.summary().answered,0);assert.equal(a.summary().failed,1);
+ assert.deepEqual(j.events.map(e=>e.event),['attempted','received','failure']);b.close();
+});
+
+test('malformed projected input is explicitly skipped without a call',async()=>{
+ const c=aligned[0]!,b=new TrialBudget(':memory:',0.02,10,'jev-annotate-v1'),f=fake(),j=journal();
+ const a=new JevAnnotator(f.transport,b,j.sink);
+ await a.annotate('malformed','core',{},c.returned);
+ assert.equal(f.calls.length,0);assert.equal(a.summary().skipped,2);
+ assert.equal(j.events.filter(e=>e.event==='skipped').length,2);b.close();
 });
