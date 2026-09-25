@@ -79,4 +79,6 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 
 | 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O | Owner-authorized unchanged Jev retry after certificate renewal | 29 valid answers; USD 0.004345194 reported. No deferrals at 0.5; all 14 known turns consequential by frozen rule, so no unchanged-turn negatives; 31/58 topic agreement. No routing decision | [jev-replay-retry](../evidence/jev-replay-retry.json) | [Retry report](JEV_REPLAY.md#authorized-retry--2026-09-25-report-first) |
 
+| 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | D | Export native-haul public core evidence for E2 | 14 inputs / 13 returned and applied / final interrupted; privacy and pairing verified. Dry builds27requests; all13known turns still consequential by frozen rule; native-receipt projection gaps remain; zero calls | [core export](../evidence/native-haul-core-e2.json), [dry audit](../evidence/native-haul-core-e2-audit.json) | [E2 export/preflight](JEV_REPLAY.md#e2-export-and-offline-preflight--astra-2026-09-25) |
+
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.

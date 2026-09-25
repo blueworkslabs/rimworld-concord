@@ -139,7 +139,11 @@ The [first core wake/grounding replay attempt](trials/JEV_REPLAY.md#result--2026
 produced 29 transport failures on 2026-09-25. After certificate renewal, an
 [owner-authorized unchanged retry](trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first)
 returned 29 valid answers for USD 0.004345194. Interpretation and held-out validation
-remain pending; no threshold or routing change follows.
+remain pending; no threshold or routing change follows. The
+[E2 native-haul public export](trials/JEV_REPLAY.md#e2-export-and-offline-preflight--astra-2026-09-25)
+is available, but the frozen consequence rule still yields no unchanged-turn negatives
+and the existing projection omits native receipt support. Resolve those measurement
+issues and request scope before the next paid pass.
 
 ## Later experiments
 

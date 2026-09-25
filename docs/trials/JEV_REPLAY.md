@@ -279,3 +279,77 @@ need a mechanical check, not a model.
 - `asks_core` is the first Jev question with a clean offline result; it becomes the
   candidate for the first one-use wiring **after** E2, as a hint attached to the wake,
   never a gate.
+
+
+## E2 export and offline preflight — Astra, 2026-09-25
+
+**Export complete; no E2 inference run.** The [public core export](../evidence/native-haul-core-e2.json)
+contains 14 original core inputs, 13 original returned choices, 13 applied public
+outputs and the final interrupted attempt from the signed native-haul live run.
+It uses the same `live.coreInputs`, `live.coreBackendDecisions`, `live.publicAnswers`
+shape as `recorded-scene.json`, with an additional explicit pairing manifest.
+
+Each input was matched to its unique wire request by exact view hash. Wire request IDs
+match the returned response IDs; backend IDs match the accounting rows; applied
+outputs match the game rounds. The source's final backend diagnostic says `failed`,
+its ledger says `cancelled` and its game round says `interrupted`; all are preserved
+rather than silently converted into a returned choice. Thirteen choices were applied.
+
+One normalization matters: on input index 9 the production parser trimmed trailing
+whitespace from a topic. The export retains original raw text and actual published
+output separately. The current replay's exact-string matcher therefore recognizes
+**12 applied**, while the explicit receipt mapping establishes **13**. This is an
+accounting mismatch to correct before using applied/unapplied statistics, not a lost
+or rejected game choice.
+
+### Privacy and preservation
+
+Only public core snapshots/choices are exported. Pawn-private requests and reflections,
+model catalogs/instructions, raw game receipts, saves/databases and host paths remain
+private. Historical mistakes in the core's public state are deliberately not repaired
+retrospectively. Independent read-only review verified all inputs, raw choices,
+published outputs, pairing rows and the full exported schema; structured privacy
+checks also catch an injected forbidden field. All 15 private source files checked
+remain hash-unchanged. No gameplay, paid calls, routing changes or certificate work.
+
+Export SHA-256: `e43df341f63bcdd6c4253b2144206122300b7da7323266ad858fc0547f8cd4f4`.
+
+### Dry result and unresolved measurement decisions
+
+[Offline audit](../evidence/native-haul-core-e2-audit.json): 14 inputs, 13 aligned
+returned choices, one unknown. The unchanged CLI builds **27 requests: 14 wake +
+13 grounding**, not the earlier approximate 15-request/wake-only estimate. Largest
+projected state: 5,225 bytes. No requests were sent.
+
+1. **Still no unchanged-turn negatives.** All 13 known choices are consequential
+   under the frozen rule, including all seven waits. A separate digit/whitespace-only
+   comparison leaves every wait with a status change, a new topic or other text
+   changes. This is a lexical audit, **not** a semantic/substantive-change classifier.
+   It does not establish that the repeated prose contains useful new information.
+   A meaningful-change label plan must be frozen before E2 if deferral is its question;
+   do not quietly relabel after looking at paid results.
+2. **Native receipt support is absent from the current projection.** The export keeps
+   `nativeIntents`, including delivered quantities, per-pawn credit, intent status and
+   last-delivery tick. Both current Jev state builders omit that field. For example,
+   input 1 has 20 delivered, and input 2 onward has the met 75-unit intent. E2 must
+   preserve the relevant aggregate evidence, or explicitly exclude judgments that
+   require it, before paying to judge unsupported facts/completion or outcome wakes.
+3. **Wake-only versus both request kinds is not yet frozen for E2.** The existing
+   command emits both; a wake-only selection needs an explicit reviewed entry point.
+   No slots have been silently dropped, and no E2 budget has been consumed.
+
+Fable: the export is ready for design of E2, not clearance to spend on the unchanged
+projection. The original consequence rule, E1 outputs and initial transport-failed
+run remain unchanged. Certificate renewal is being handled separately by the owner
+and Codex; no Gateway restart is assumed or requested by this export.
+
+### Mechanical topic-text inspection
+
+[Length/Unicode audit](../evidence/jev-topic-text-audit.json) inspects the retained
+raw core topic strings from both scenes without changing them. Existing production
+validation already trims and limits topic text to 240 UTF-16 units. In E1 turn 10,
+the first topic is exactly at the limit and ends with U+672A and U+0938; turn 8 also
+contains U+3058. These observations support inspecting generation/truncation behavior,
+not a blanket ban on non-Latin text. Being at the limit does not prove truncation;
+Unicode/script checks cannot establish sentence completeness. No new rejection or
+language policy is implemented here.
