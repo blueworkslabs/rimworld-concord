@@ -24,7 +24,7 @@ export function planRescue(domain:Domain,game:GameState,pawn:string,action:Rescu
   if(!v||v.status!=='available'||v.epoch!==game.epoch||v.tick!==game.ticks||!Number.isInteger(v.mapId)||v.mapId<0)
     throw Error('Fresh mapped rescue observation required');
   const old=replaces?domain.proposals[replaces]:undefined,ch=domain.characters[pawn];
-  const replacing=!!(old&&old.pawn===pawn&&(old.action.kind==='haul'||old.action.kind==='haul-zone')&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
+  const replacing=!!(old&&old.pawn===pawn&&old.action.kind==='haul-zone'&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
   if(replaces&&!replacing)throw Error('Replacement agreement no longer active');
   if(Object.values(domain.proposals).some(p=>p.id!==replaces&&held(domain,p)&&
     (conflict(p,action)||(p.pawn===pawn&&p.action.kind!=='move')))||(!replacing&&(ch?.commitment||ch?.intention)))

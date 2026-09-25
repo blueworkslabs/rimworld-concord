@@ -6,10 +6,6 @@ import { HaulZone, type IntentView as NativeIntentView } from './native-intents.
 
 export const Move = z.object({kind:z.literal('move'), x:z.number().int().nonnegative(), z:z.number().int().nonnegative()}).strict();
 export type Move = z.infer<typeof Move>;
-export const Haul = z.object({kind:z.literal('haul'),thing:z.string().min(1).max(120),
-  x:z.number().int().nonnegative(),z:z.number().int().nonnegative(),count:z.number().int().min(1).max(25),
-  trips:z.number().int().min(1).max(3),maxTicks:z.number().int().min(60).max(3600)}).strict();
-export type Haul = z.infer<typeof Haul>;
 export const Rescue = z.object({kind:z.literal('rescue'),target:z.string().min(1).max(120),bed:z.string().min(1).max(120),
   x:z.number().int().nonnegative(),z:z.number().int().nonnegative(),maxTicks:z.number().int().min(60).max(3600)}).strict();
 export type Rescue = z.infer<typeof Rescue>;
@@ -20,11 +16,8 @@ export const Cook = z.object({kind:z.literal('cook'),thing:z.string().min(1).max
 export type Build=z.infer<typeof Build>;
 export type Cook=z.infer<typeof Cook>;
 export type ProductionView={epoch:string;tick:number;mapId:number;options:(Build|Cook)[];supplies:{thing:string;label:string;count:number}[]};
-export const Action = z.discriminatedUnion('kind',[Move,Haul,Rescue,Build,Cook,HaulZone]);
+export const Action = z.discriminatedUnion('kind',[Move,Rescue,Build,Cook,HaulZone]);
 export type Action = z.infer<typeof Action>;
-/** Physical quantities are observations, independent of the proposed consent bounds. */
-export type HaulSupply = {thing:string;label:string;x:number;z:number;sourceCount:number;destinationFree:number};
-export type HaulingView = {epoch:string;tick:number;mapId?:number;status:'available'|'unavailable';options:Haul[];supplies?:HaulSupply[]};
 export const Decision = z.discriminatedUnion('kind', [
   z.object({kind:z.literal('accept'),reason:z.string().min(1).max(1000)}).strict(),
   z.object({kind:z.literal('refuse'),reason:z.string().min(1).max(1000)}).strict(),
@@ -40,7 +33,7 @@ export type EatOption={thing:string;label:string;x:number;z:number;count:number;
 export type EatingView={epoch:string;tick:number;mapId:number;options:EatOption[]};
 export type EatRequest={id:string;epoch:string;actor:string;action:EatOption;mapId:number;untilTick:number};
 export type SelfCare={id:string;pawn:string;questionId:string;action:EatOption;mapId:number;untilTick:number;stopped?:boolean};
-export type Pawn = {jobId?:number;eating?:EatingView;foodObservation?:import('./food-observation.js').FoodObservation;production?:ProductionView;buildReady?:boolean;cookReady?:boolean;linkStatus?:import('./shared-status.js').LinkStatus;sharedStatus?:import('./shared-status.js').SharedStatus[];observedPeople?:{id:string;name:string}[];id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;hauling?:HaulingView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[];visibleSubjects?:{target:string;downed:boolean;inBed:boolean}[];visibleBeds?:{bed:string;x:number;z:number;medical:boolean;occupied:boolean;prisoner:boolean;slave:boolean;colonyOwned:boolean;forbidden:boolean}[]};downed?:boolean;currentBed?:string;carrying?:string;carryingCount?:number;rescue?:RescueView;rescueHandover?:RescueView|null;rescueReady?:boolean;workReady?:boolean;haulingCapable?:boolean};
+export type Pawn = {jobId?:number;eating?:EatingView;foodObservation?:import('./food-observation.js').FoodObservation;production?:ProductionView;buildReady?:boolean;cookReady?:boolean;linkStatus?:import('./shared-status.js').LinkStatus;sharedStatus?:import('./shared-status.js').SharedStatus[];observedPeople?:{id:string;name:string}[];id:string;name:string;x:number;z:number;job:string;health:number;facts?:{key:string;value:string;level:number}[];movement?:MovementView;casualties?:{epoch:string;tick:number;mapId:number;radius:number;observations:{target:string;name:string;x:number;z:number}[];visibleSubjects?:{target:string;downed:boolean;inBed:boolean}[];visibleBeds?:{bed:string;x:number;z:number;medical:boolean;occupied:boolean;prisoner:boolean;slave:boolean;colonyOwned:boolean;forbidden:boolean}[]};downed?:boolean;currentBed?:string;carrying?:string;carryingCount?:number;rescue?:RescueView;rescueHandover?:RescueView|null;rescueReady?:boolean;haulingCapable?:boolean};
 export type Receipt = {id:string;actor:string;status:Outcome;reason:string;failureCode?:string;validatedTick?:number;x:number;z:number;kind?:string;thing?:string;count?:number;delivered?:number;target?:string;bed?:string};
 export type GameState = {
   world:string;epoch:string;ticks:number;paused:boolean;loaded:boolean;manualPaused?:boolean;decisionPauses?:number;
@@ -60,7 +53,7 @@ export interface GameBridge {
   setCrewLog?(report:CrewReport):Promise<void>;
   setActivity?(activity:Activity):Promise<void>;
   setDecisionPause?(pause:DecisionPause):Promise<void>;
-  cancel?(request:{epoch:string;actor:string;id:string;kind?:'move'|'haul'|'rescue'|'build'|'cook'|'eat'}):Promise<Receipt>;
+  cancel?(request:{epoch:string;actor:string;id:string;kind?:'move'|'rescue'|'build'|'cook'|'eat'}):Promise<Receipt>;
   intent?(payload:{op:'intent-accept'|'intent-exclude'|'intent-stop'}&Record<string,unknown>):Promise<{state:GameState;receipt:unknown}>;
   eat?(request:EatRequest):Promise<Receipt>;
   move(request:ActionRequest):Promise<Receipt>;
@@ -78,7 +71,7 @@ export type Character = {messages?:SocialMessage[];outlook?:PrivateOutlook;id:st
 };
 export type AlternativeRequest = {id:string;pawn:string;agreementId:string;target:string;mapId:number;reason:string;status:'pending'|'offered'|'declined'|'closed';replyReason?:string;proposalId?:string};
 export type ReofferRequest = {id:string;pawn:string;deferredId:string;action:Action;mapId?:number;tick:number;reason:string;status:'pending'|'offered';proposalId?:string};
-export type Proposal = {reofferRequestId?:string;reoffersProposalId?:string;reofferReplyId?:string;replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'deferred'|'countered'|'withdrawn'|'lapsed';lapsed?:{intentStatus:string;answered:boolean};withdrawalReason?:string;haulMap?:number;rescueMap?:number;productionMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
+export type Proposal = {reofferRequestId?:string;reoffersProposalId?:string;reofferReplyId?:string;replacesAgreementId?:string;requestId?:string;id:string;pawn:string;action:Action;reason:string;status:'pending'|'accepted'|'refused'|'deferred'|'countered'|'withdrawn'|'lapsed';lapsed?:{intentStatus:string;answered:boolean};withdrawalReason?:string;rescueMap?:number;productionMap?:number;decision?:Decision;actionId?:string;parentId?:string;replyId?:string;round?:number;standing?:{status:'running'|'completed'|'stopped';deadline:number;steps:string[];reason?:string}};
 export type Perspective = {pawn:Pawn;character:Character;proposal:Proposal;agreementProgress?:AgreementProgress;history?:Proposal[]};
 export interface DecisionBackend {
   readonly name:string;

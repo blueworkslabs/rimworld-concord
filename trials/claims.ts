@@ -1,3 +1,4 @@
+import {legacyPawn} from './fixtures/legacy.js';
 /**
  * Offline claims prototype. Post-hoc, no coordinator route, no authority.
  *
@@ -19,7 +20,7 @@
  */
 import {z} from 'zod';
 import type {AttentionView} from '../src/attention.js';
-import type {Perspective} from '../src/protocol.js';
+import {type Perspective} from '../src/protocol.js';
 import {modelPerspective} from '../src/model-perspective.js';
 
 export const claimsScorerVersion='typed-claims-v1';
@@ -55,7 +56,7 @@ export function sourceCatalog(view:AttentionView|Perspective):Source[]{
  for(const k of ['downed','carrying','currentBed','rescueReady','workReady','job'] as const){const v=(p.pawn as any)[k];if(v!==undefined)out.push({id:`pawn.${k}`,subject:k,category:'pawn',known:true,value:v,numeric:typeof v==='number'});}
  (p.character.outlook?.notes??[]).forEach((n,i)=>out.push({id:`character.outlook.notes[${i}]`,subject:n.subject??n.kind,category:'outlook',known:true,value:n.text,numeric:false}));
  for(const x of p.character.experiences??[])out.push({id:`character.experiences.seq:${x.event.seq}`,subject:x.event.kind,category:'experience',known:true,value:x.event.detail,numeric:false});
- for(const s of p.pawn.hauling?.supplies??[]){out.push({id:`pawn.hauling.supplies.${s.thing}@${s.x},${s.z}.sourceCount`,subject:s.thing,category:'supply',known:true,value:s.sourceCount,numeric:true});out.push({id:`pawn.hauling.supplies.${s.thing}@${s.x},${s.z}.destinationFree`,subject:s.thing,category:'supply',known:true,value:s.destinationFree,numeric:true});}
+ for(const s of legacyPawn(p.pawn).hauling?.supplies??[]){out.push({id:`pawn.hauling.supplies.${s.thing}@${s.x},${s.z}.sourceCount`,subject:s.thing,category:'supply',known:true,value:s.sourceCount,numeric:true});out.push({id:`pawn.hauling.supplies.${s.thing}@${s.x},${s.z}.destinationFree`,subject:s.thing,category:'supply',known:true,value:s.destinationFree,numeric:true});}
  for(const o of p.pawn.casualties?.observations??[])out.push({id:`pawn.casualties.${o.target}`,subject:o.name,category:'casualty',known:true,value:'downed',numeric:false});
  const proposals='proposals' in p?p.proposals:[(p as Perspective).proposal];
  for(const pr of proposals){const a=pr.action as any;for(const k of ['count','trips','maxTicks','thing'])if(a?.[k]!==undefined)out.push({id:`offer.${pr.id}.${k}`,subject:k,category:'offer',known:true,value:a[k],numeric:typeof a[k]==='number'});}

@@ -19,8 +19,20 @@ import {rescueQuestionInvalid} from './decision-validity.js';
 import { nativeAttention,attentionInterrupt } from './routing.js';
 import { Store } from './store.js';
 import {rescueView,planRescue} from './rescue-planning.js';
-import {groundedPawn,haulingView,planHaul} from './haul-planning.js';
+import {groundedPawn} from './grounded-pawn.js';
 import { AttentionOptions, Reflection, bounded, coalesce, type AttentionBackend, type AppraisalBackend, type AttentionResult,type AttentionAdmission } from './attention.js';
+
+/** Old stores stay readable via Store, but retired/unknown actions are not executable state.
+ * Check before any restore, recovery or status rewrite; never reinterpret old trip counts. */
+function requireSupportedStoredActions(domain:Domain){
+ const check=(action:unknown)=>{
+  if(!Action.safeParse(action).success)throw Error('Stored action is unsupported by this coordinator; use its original version for historical replay. No automatic migration.');
+ };
+ for(const p of Object.values(domain.proposals)){
+  check(p.action);if(p.decision?.kind==='counter')check(p.decision.action);
+ }
+ for(const r of Object.values(domain.reoffers??{}))check(r.action);
+}
 
 /** Character handles bind identity in code; backend output cannot choose an actor. */
 export class Coordinator {
@@ -63,9 +75,10 @@ export class Coordinator {
   async open() {
     return this.serial(async()=>{
       if(this.pending.size)throw Error('Cannot reopen while decisions are running');
+      const previous=this.store.read();
+      if(previous)requireSupportedStoredActions(previous);
       const game=await this.game.state();
       if(!game.loaded) throw Error('No loaded game');
-      const previous=this.store.read();
       if(previous) {
         this.domain=previous;
         if(previous.epoch!==game.epoch || previous.world!==game.world) throw Error('Timeline changed: restore a paired checkpoint');
@@ -629,13 +642,6 @@ export class Coordinator {
         if(!own)throw Error('Pawn unavailable');
         return rescueView(this.domain,game,own);
       }),
-      haulingOptions:(pawn:string)=>this.serial(async()=>{
-        if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
-        const game=await this.current();
-        const own=game.pawns.find(p=>p.id===pawn);
-        if(!own) throw Error('Pawn unavailable');
-        return haulingView(this.domain,game,own);
-      }),
       movementOptions:(pawn:string)=>this.serial(async()=>{
         if(!this.domain.characters[pawn]) throw Error('Unknown pawn');
         const game=await this.current();
@@ -715,15 +721,13 @@ export class Coordinator {
     const reinvite=reofferRequestId?this.domain.reoffers?.[reofferRequestId]:undefined;
     if(reofferRequestId&&(!reinvite||reinvite.status!=='pending'||reinvite.pawn!==pawn||this.domain.proposals[reinvite.deferredId]?.status!=='deferred'||JSON.stringify(reinvite.action)!==JSON.stringify(action)))throw Error('Re-invitation unavailable');
     if(this.domain.nativeIntentOnly&&action.kind!=='haul-zone')throw Error('Native intent mode: the stockpile haul is the only proposable work');
-    if(nativeEntries(this.domain).length&&action.kind==='haul')throw Error('Native hauling replaces ordered hauling: offer a stockpile haul');
     if(action.kind==='haul-zone')planIntentOffer(nativeEntries(this.domain),game.pawns.find(x=>x.id===pawn),action,this.liveIntent(game,action.intentId));
     const productionMap=action.kind==='build'||action.kind==='cook'?planProduction(this.domain,game,pawn,action):undefined;
-    const haulMap=action.kind==='haul'?planHaul(this.domain,game,pawn,action):undefined;
     const rescueMap=action.kind==='rescue'?planRescue(this.domain,game,pawn,action,replaces):undefined;
-    const p:Proposal={id,pawn,action,reason,status:'pending',...(productionMap===undefined?{}:{productionMap}),...(reofferRequestId?{reofferRequestId,reoffersProposalId:reinvite!.deferredId}:{}),...(alternative?{requestId:alternative.id,...(replaces?{replacesAgreementId:replaces}:{})}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(haulMap===undefined?{}:{haulMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
+    const p:Proposal={id,pawn,action,reason,status:'pending',...(productionMap===undefined?{}:{productionMap}),...(reofferRequestId?{reofferRequestId,reoffersProposalId:reinvite!.deferredId}:{}),...(alternative?{requestId:alternative.id,...(replaces?{replacesAgreementId:replaces}:{})}:{}),...(rescueMap===undefined?{}:{rescueMap}),...(parent?{parentId:parent.id,round:(parent.round??0)+1}:{})};
     if(action.kind==='rescue'){const invalid=rescueQuestionInvalid(game,p);if(invalid)throw Error(invalid);}
     if(alternative){if(rescueMap!==alternative.mapId)throw Error('Request map changed');alternative.status='offered';alternative.proposalId=id;alternative.replyReason=reason;}
-    if(reinvite){if(reinvite.mapId!==(action.kind==='haul'?haulMap:action.kind==='rescue'?rescueMap:productionMap))throw Error('Re-invitation map changed');reinvite.status='offered';reinvite.proposalId=id;this.domain.proposals[reinvite.deferredId]!.reofferReplyId=id;}
+    if(reinvite){if(reinvite.mapId!==(action.kind==='rescue'?rescueMap:productionMap))throw Error('Re-invitation map changed');reinvite.status='offered';reinvite.proposalId=id;this.domain.proposals[reinvite.deferredId]!.reofferReplyId=id;}
     if(parent)parent.replyId=id;
     this.domain.proposals[id]=p;this.commit(parent?'proposal-revised':'proposed','core',p);
     return structuredClone(p);
@@ -808,11 +812,11 @@ export class Coordinator {
   }
   private replacementActive(p:Proposal):boolean {
     const old=this.domain.proposals[p.replacesAgreementId??''],r=this.domain.requests?.[p.requestId??''],ch=this.domain.characters[p.pawn];
-    return !!(old&&r&&r.pawn===p.pawn&&r.agreementId===old.id&&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&old.pawn===p.pawn&&(old.action.kind==='haul'||old.action.kind==='haul-zone')&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
+    return !!(old&&r&&r.pawn===p.pawn&&r.agreementId===old.id&&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&old.pawn===p.pawn&&old.action.kind==='haul-zone'&&old.status==='accepted'&&old.standing?.status==='running'&&ch?.intention===old.id&&(!ch.commitment||ch.commitment===old.actionId));
   }
   private completedRequestAvailable(p:Proposal):boolean {
     const r=this.domain.requests?.[p.requestId??''],old=this.domain.proposals[r?.agreementId??''],ch=this.domain.characters[p.pawn];
-    return !!(r&&old&&ch&&r.pawn===p.pawn&&old.pawn===p.pawn&&(old.action.kind==='haul'||old.action.kind==='haul-zone')&&old.status==='accepted'&&old.standing?.status==='completed'
+    return !!(r&&old&&ch&&r.pawn===p.pawn&&old.pawn===p.pawn&&old.action.kind==='haul-zone'&&old.status==='accepted'&&old.standing?.status==='completed'
       &&r.status!=='closed'&&r.status!=='declined'&&p.action.kind==='rescue'&&p.action.target===r.target&&!ch.commitment&&!ch.intention);
   }
   private refreshReceipt(p:Proposal,game:GameState) {
@@ -824,7 +828,7 @@ export class Coordinator {
   }
   private requestRescue(view:import('./attention.js').AttentionView,result:Extract<Reflection,{kind:'request_rescue'}>,fresh:GameState) {
     const old=this.domain.proposals[result.agreementId],ch=this.domain.characters[view.pawn.id]!,seen=view.pawn.casualties;
-    if(!old||old.pawn!==view.pawn.id||(old.action.kind!=='haul'&&old.action.kind!=='haul-zone')||old.standing?.status!=='running'||ch.intention!==old.id||view.intention?.id!==old.id)throw Error('Request agreement superseded');
+    if(!old||old.pawn!==view.pawn.id||old.action.kind!=='haul-zone'||old.standing?.status!=='running'||ch.intention!==old.id||view.intention?.id!==old.id)throw Error('Request agreement superseded');
     if(!seen||!seen.observations.some(t=>t.target===result.target)||Object.values(this.domain.requests??{}).some(r=>r.agreementId===old.id))throw Error('Unobserved casualty or duplicate agreement request');
     const current=fresh.pawns.find(p=>p.id===view.pawn.id)?.casualties;
     if(current?.epoch===fresh.epoch&&current.tick===fresh.ticks){
@@ -1194,7 +1198,7 @@ export class Coordinator {
       if(!admit())return;
       for(const p of Object.values(this.domain.proposals)) {
         if(!admit())return;
-        if(p.standing?.status!=='running'||(p.action.kind!=='haul'&&p.action.kind!=='cook'))continue;
+        if(p.standing?.status!=='running'||p.action.kind!=='cook')continue;
         const c=this.domain.characters[p.pawn]!;
         if(c.commitment||this.pending.has(p.pawn))continue;
         if(game.ticks>=p.standing.deadline||!workReady(p,game.pawns.find(x=>x.id===p.pawn))) {
@@ -1244,6 +1248,7 @@ export class Coordinator {
   async restore(name:string) {
     return this.serial(async()=>{
       const saved=this.store.saved(name);
+      requireSupportedStoredActions(saved.state);
       await this.game.verify(name,saved.sha256);
       this.cancelDecisions();
       // Invalidate the local binding before loading; a partial restore fails closed.

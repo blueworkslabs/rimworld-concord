@@ -15,15 +15,15 @@ export function agreementProgress(d:Domain,p:Proposal,tick:number,fresh?:Receipt
    // Completion time comes from the receipt (last credited placement), never the observation tick.
    completedTick:met?v!.lastDeliveryTick:null};
  }
- const agreed=p.action.kind==='haul'?p.action.trips:p.action.kind==='cook'?p.action.meals:1;
+ const agreed=p.action.kind==='cook'?p.action.meals:1;
  const ids=[...new Set(p.standing?.steps??(p.actionId?[p.actionId]:[]))];
  const receipts=ids.map(id=>fresh?.find(r=>r.id===id&&r.actor===p.pawn)??d.outcomes[id]).map(r=>r?.actor===p.pawn?r:undefined);
  const completed=receipts.filter(r=>r?.status==='completed').length,active=receipts.filter(r=>r?.status==='started').length;
  return {id:p.id,kind:p.action.kind,status:p.standing?.status??p.status,tick,agreed,completed,active,
   unconfirmed:receipts.filter(r=>!r).length,unsuccessful:receipts.filter(r=>r?.status==='failed'||r?.status==='interrupted').length,
   notStarted:Math.max(0,agreed-ids.length),unfulfilled:Math.max(0,agreed-completed),
-  quantityUnknown:p.action.kind==='haul'?receipts.filter(r=>r?.status==='completed'&&r.delivered===undefined).length:0,
-  delivered:p.action.kind==='haul'||p.action.kind==='cook'?receipts.reduce((n,r)=>n+(r?.status==='completed'?r.delivered??0:0),0):0};
+  quantityUnknown:0,
+  delivered:p.action.kind==='cook'?receipts.reduce((n,r)=>n+(r?.status==='completed'?r.delivered??0:0),0):0};
 }
 const safe=(s:unknown,max=1000)=>String(s??'').slice(0,max);
 /** Explicit allowlist: never copy general audit payloads or private reflections. */
@@ -39,7 +39,7 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
   if(c.entries.some(e=>e.key===key))return;
   const proposal=d.proposals[subject],care=d.selfCare?.[subject];
   const map=d.intentViews?.[subject]?.mapId??(proposal?.action.kind==='haul-zone'?d.intentViews?.[proposal.action.intentId]?.mapId:undefined)
-    ??proposal?.haulMap??proposal?.rescueMap??proposal?.productionMap??care?.mapId
+    ??proposal?.rescueMap??proposal?.productionMap??care?.mapId
     ??(kind==='native-event'?data.event?.mapId:undefined);
   const iv=kind==='intent-progress'?d.intentViews?.[subject]:undefined;
   const physicalTick=iv&&(key.startsWith('intent-met:')||key.startsWith('intent-first:'))?iv.lastDeliveryTick:
@@ -127,9 +127,8 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
   const r=data as Receipt,p=Object.values(d.proposals).find(p=>p.pawn===r.actor&&(p.actionId===r.id||p.standing?.steps.includes(r.id)));
   if(!p)return;
   if(r.status==='started'&&d.handovers?.[p.id])add('record','Game','observer',p.id,`${name(p.pawn)}'s carried trip finished; the rescue now starts.`,`handover-started:${p.id}`);
-  const delivered=r.status==='completed'&&p.action.kind==='haul'?(r.delivered===undefined?' Delivered quantity not reported.':` Delivered ${r.delivered} units.`):'';
   const rescue=r.status==='completed'&&p.action.kind==='rescue'?' Casualty placed in the agreed bed; treatment not implied.':'';
-  add('record',r.actor,'observer',p.id,`${p.action.kind}: ${r.status}.${delivered}${rescue}${p.action.kind==='cook'&&r.status==='completed'?` Produced ${r.delivered??0} simple meals; eating is separate.`:''}`,`outcome:${r.id}:${r.status}`);
+  add('record',r.actor,'observer',p.id,`${p.action.kind}: ${r.status}.${rescue}${p.action.kind==='cook'&&r.status==='completed'?` Produced ${r.delivered??0} simple meals; eating is separate.`:''}`,`outcome:${r.id}:${r.status}`);
  }
 }
 export function crewReport(d:Domain,tick:number,status:import('./shared-status.js').SharedStatus[]=[],thinking:string[]=[]):CrewReport {

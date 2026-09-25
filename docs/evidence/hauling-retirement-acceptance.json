@@ -1,0 +1,54 @@
+{
+  "behaviorCommit": "531a3e0df3fd503661414c5045bc6ba3ef9ecca7",
+  "stagingBuild": "1.6.4871 rev600",
+  "inferenceCalls": 0,
+  "passed": true,
+  "removedWireRejected": true,
+  "existingUnknownCancelRejected": true,
+  "native": {
+    "status": "met",
+    "quota": 75,
+    "delivered": 75,
+    "overshoot": 0,
+    "violations": 0,
+    "peakHolders": 2,
+    "accepted": [
+      "Thing_Human411",
+      "Thing_Human408"
+    ],
+    "byPawn": [
+      {
+        "pawn": "Thing_Human411",
+        "count": 40
+      },
+      {
+        "pawn": "Thing_Human408",
+        "count": 35
+      }
+    ]
+  },
+  "pairedRestore": true,
+  "coldRestore": {
+    "passed": true,
+    "newCoordinatorProcess": true,
+    "gameProcessRestarted": false
+  },
+  "preservation": {
+    "saveCount": 412,
+    "unchanged": true,
+    "added": [
+      "lab-concord-deletion-1790338415321.rws"
+    ],
+    "modRestored": true
+  },
+  "rawEvidenceSha256": {
+    "game-receipt.json": "c0ccaad2db205b49924e2c15aae85e9eba2fb372bc3fee7d2d328965ba82e320",
+    "cold-receipt.json": "bd363a9134da7b84b44ca95f3819ce3cba9c1bf519aace895e5687750ff04a17",
+    "preservation.json": "7b4e76ae113ecced75f50c5c4819f4d45b15972728745ab39e14d474cbd89e3e"
+  },
+  "limits": [
+    "Scripted native hauling and protocol checks; no live-model evaluation.",
+    "No new UI or recording-first assessment.",
+    "Two native replacement freshness TODOs and duplicate exclusion delay remain unresolved."
+  ]
+}

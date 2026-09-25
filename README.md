@@ -19,13 +19,13 @@ remain unchanged.
 | Capability | Native mechanics | Live-model evidence |
 |---|---|---|
 | Move to a nearby grounded cell | yes | yes |
-| Haul an exact stack (≤10 per trip as offered, ≤3 trips) | yes | yes, including core-proposed work |
+| Ordered exact-stack hauling | retired in [#80](https://github.com/blueworkslabs/rimworld-concord/pull/80) | historical evidence retained; not an executable capability |
 | Rescue a downed colonist into an exact medical bed | yes | yes, with a scripted core |
 | Build a campfire (20 wood) | yes | scripted game tests only |
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
-| Native tagged-zone haul spike | [partial scripted checks and live rehearsal](docs/trials/NATIVE_HAUL_FREEZE.md): native meal resumption, helper/overlap, scoped timing and coordinator-process cold restore | [single frozen recording complete](docs/trials/NATIVE_HAUL_LIVE.md); [receipt findings](docs/trials/NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read) available; [game-side migration approved](docs/trials/NATIVE_HAUL_GATE_C.md); three fixes block the next live run |
-| Hauling migration | [Strict fallback](docs/trials/HAULING_MIGRATION_STRICT.md): Prior strict suite 15/16; mixed-item gap and rescue now pass targeted rechecks; both matched quotas complete | Merged strict; growing parked, B1 2/2; urgent-exempt wake rule verified; [single signed ordinary-play recording](docs/trials/HAULING_MIGRATION_LIVE.md) complete; [post-read audit](docs/trials/HAULING_MIGRATION_LIVE.md#technical-findings--released-after-the-recording-only-read): three returned offers rejected, no hauling intent opened; Gate C not passed; [pipeline-corrected rerun](docs/trials/HAULING_MIGRATION_PIPELINE_RERUN.md) cold read and receipt audit complete after #77; verdict pending |
+| Native tagged-zone haul spike (historical) | [scripted and live evidence](docs/trials/NATIVE_HAUL_LIVE.md) retained | Superseded by the ordinary-play migration below |
+| Native stockpile hauling | strict holds; ordered implementation retired; [deletion check](docs/trials/HAULING_RETIREMENT.md): 75/75, two holders, paired/new-coordinator restore | [Migration Gate C passed on the game side](docs/trials/HAULING_MIGRATION_GATE_C.md); crew-side follow-ups remain; growing parked at B1 2/2 |
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not
 now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private

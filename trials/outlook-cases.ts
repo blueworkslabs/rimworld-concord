@@ -1,3 +1,4 @@
+import {legacyAction,legacyPawn} from './fixtures/legacy.js';
 /** Frozen matched outlooks; scenario/actor/proposal/evidence held constant. */
 import assert from 'node:assert/strict';
 import {perspectiveCasesV2} from './perspective-v2.js';
@@ -12,8 +13,8 @@ export function outlookCases(){
  const base=structuredClone(needCases[0]!.view);
  base.pawn.facts=[{key:'need',value:'Food',level:.4},{key:'need',value:'Rest',level:.9}];
  const action={kind:'haul' as const,thing:'wood',x:4,z:2,count:10,trips:2,maxTicks:1800};
- base.proposals[0]!.action=action;
- base.pawn.hauling={epoch:'authored',tick:40,mapId:0,status:'available',options:[action],supplies:[{thing:'wood',label:'wood',x:4,z:2,sourceCount:30,destinationFree:75}]};
+ base.proposals[0]!.action=legacyAction(action);
+ legacyPawn(base.pawn).hauling={epoch:'authored',tick:40,mapId:0,status:'available',options:[action],supplies:[{thing:'wood',label:'wood',x:4,z:2,sourceCount:30,destinationFree:75}]};
  const event={seq:1,tick:20,pawn:'A',kind:'memory',detail:'Earlier the core offered routine work while I felt hungry. I declined; the offer was closed without a job.'};
  base.events=[];base.character.experiences=[{event,route:'native',interrupt:false}];
  const variants=[

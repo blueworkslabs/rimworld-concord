@@ -1,6 +1,8 @@
 # Hauling migration: native intents by default (Gates A–C)
 
-**Status: Gate B signed by Fable on 2026-09-24 at `5942961`, with the three
+**Current status: migration Gate C passed on the game side; [verdict](trials/HAULING_MIGRATION_GATE_C.md). Ordered hauling is retired by #80 after the #79 test port. Historical gate design follows.**
+
+**Gate B signed by Fable on 2026-09-24 at `5942961`, with the three
 conditions recorded below.** Gate A is assembly-reviewed; Astra confirmed corrected
 Gate B testability with a separate B1 review. This authorizes implementation after the
 documentation merge, not a live run or a claim that the runtime measures have passed.
@@ -21,8 +23,7 @@ receipt-only fix (`7dec73a`) is used for separate strict-only correctness checks
 does not reset the budget. The [single signed live run and post-read audit](trials/HAULING_MIGRATION_LIVE.md)
 are complete: no offer reached publication, and no hauling intent opened. Receipt-age
 prefixes passed the observed checks; failure totals remained off-screen and late offer
-answers were not exercised. Migration Gate C verdict remains with Fable; no deletion
-is authorized by that diagnostic run.
+answers were not exercised. That diagnostic run did not authorize deletion. The later [pipeline rerun](trials/HAULING_MIGRATION_PIPELINE_RERUN.md) supplied the evidence for Fable’s [game-side Gate C pass](trials/HAULING_MIGRATION_GATE_C.md).
 
 ## Goal
 
@@ -134,6 +135,66 @@ must change. Different defs in one zone must never share reservations or counter
 3. They are deleted in a follow-up after the verdict, together with the 35 % needs stop
    for hauling and `Hauling.Ready` (including its wrong-tag capability check). Audit
    remaining callers; do not retain it as a safety fallback for native work.
+
+**Done after Gate C (2026-09-25), in two PRs: the test port (#79), then the deletion.**
+**Listed versus actual footprint:** the page listed four things: `Concord_Haul`, `Hauling.cs`,
+haul planning and the needs stop. The implementation initially reported 86 files; the reviewed retirement touches
+106 files, including 52 deletions. The extra footprint includes three overlooked
+core scenes, a fail-closed persisted-action boundary, fixtures-only legacy adapters,
+and preserved regression checks. More than 3,200 lines are removed.
+- **Mod:**
+  - `Hauling.cs`, the `Concord_Haul` job and the `haul` op;
+  - the pawn view's `hauling` options and `workReady`;
+  - crew-log haul labels.
+  - Ordered build/cook readiness had borrowed `Hauling.Ready`, so it keeps its own copy until
+    that migration.
+- **Coordinator:**
+  - `haul` in the action union (`LegacyHaul` remains a read-only record shape for stored
+    histories and frozen eval fixtures);
+  - planner, offers, trip stepping, `haulMap`;
+  - `haulingOptions`, the model decision schema, the pawn haul contract;
+  - replacement and reflection branches (now native-haul only);
+  - `groundedPawn` moved to its own module.
+- **Runners:**
+  - hauling acceptance, fixture and live;
+  - haul-planning acceptance;
+  - crew-log acceptance;
+  - the observer, reconsider and work live trials;
+  - the needs, social, retention and integration live scenes;
+  - the core, core-events and core-lifecycle scenes that still depended on the removed needs fixture and ordered-haul opportunities;
+  - their launchers and Python fixtures;
+  - the ordered halves of the spike and migration runners.
+
+  All of them could only run ordered hauls. Their evidence stays in `docs/evidence`.
+- **Tests:**
+  - generic tests moved to rescue or to the native haul in #79;
+  - progress and summary arithmetic moved to multi-meal cooking;
+  - ordered-only tests and launcher tests removed;
+  - a frozen model-contract case keeps its ordered-haul record, so its menu no longer
+    offers the rescue alternative. Re-authoring it on a native haul is the eval owner's
+    call.
+
+### Compatibility boundary
+
+Historical JSON/evidence is unchanged. The legacy type adapters live only in
+`trials/fixtures/legacy.ts`; the frozen `active-haul` contract case stays historical.
+A future native contract case must be authored alongside it, not replace it.
+
+The coordinator refuses to open or restore a store containing unsupported proposal,
+counter or re-invitation actions **before** recovery, status edits or game loading.
+Raw `Store` reads remain available for offline history; use the matching historical
+revision for replay. There is no automatic conversion of old ordered-haul obligations
+into native intents, nor any inference that one completed trip means a whole old
+agreement completed. Old game saves with in-flight `Concord_Haul` jobs likewise need
+their historical mod. Native-only migration checkpoints remain supported.
+
+Deploy from a clean build/install: TypeScript does not remove stale compiled files
+for deleted sources, and copying a DLL alone does not remove the old JobDef. Preserve
+historical saves and paired stores; do not overwrite them during verification.
+
+For [construction and cooking](MIGRATION_PRODUCTION.md): the ordered model is used as the generic "offerable work" in
+many tests and runners, not only in its own module. Budget the port-then-delete pair from the
+start.
 
 ## Gate A: internals questions
 

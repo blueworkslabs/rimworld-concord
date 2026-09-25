@@ -1,3 +1,4 @@
+import {legacyAction,legacyPawn} from '../trials/fixtures/legacy.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -96,7 +97,8 @@ test('withdrawal excludes in the game; quota met completes the standing and the 
 test('partial expiry stops the standing and keeps the topic open; no needs stop for native intents',async()=>{
   const {c,game}=await setup();
   const p=await c.core().propose('P',intentAction(cfg),'Stock wood');await c.pawn('P').decide(p.id,say('accept'));
-  game.data.pawns[2]!.workReady=false;game.data.ticks=100;await c.reconcile();
+  // Even a stale readiness flag in an old observation never stops native work.
+  legacyPawn(game.data.pawns[2]!).workReady=false;game.data.ticks=100;await c.reconcile();
   assert.equal(c.inspect().proposals[p.id]!.standing?.status,'running');
   Object.assign(game.data.intents![0]!,{status:'expired',delivered:20,byPawn:[{pawn:'P',count:20}]});await c.reconcile();
   const s=c.inspect().proposals[p.id]!.standing!;assert.equal(s.status,'stopped');assert.match(s.reason!,/expired at 20\/30; topic stays open/);
@@ -165,12 +167,13 @@ test('an existing ordered offer cannot dispatch across an unconfirmed native wit
 });
 
 
-test('native mode never exposes or directly admits legacy ordered hauling',async()=>{
+test('native mode never exposes or directly admits the retired ordered haul',async()=>{
   const {c,game}=await setup();
   const haul={kind:'haul' as const,thing:'Thing_WoodLog1',x:4,z:4,count:10,trips:1,maxTicks:1800};
-  game.data.pawns[0]!.hauling={epoch:'e',tick:0,mapId:0,status:'available',options:[haul],supplies:[{thing:haul.thing,label:'wood',x:4,z:4,sourceCount:30,destinationFree:75}]};
-  assert.ok(!(await c.corePerspective()).opportunities.some(o=>o.action.kind==='haul'));
-  await assert.rejects(c.core().propose('A',haul,'Old haul'),/the stockpile haul is the only proposable work/);
+  // An old observation still carrying a hauling view offers nothing: 'haul' is no longer an action.
+  legacyPawn(game.data.pawns[0]!).hauling={epoch:'e',tick:0,mapId:0,status:'available',options:[haul],supplies:[{thing:haul.thing,label:'wood',x:4,z:4,sourceCount:30,destinationFree:75}]};
+  assert.ok(!(await c.corePerspective()).opportunities.some(o=>(o.action.kind as string)==='haul'));
+  await assert.rejects(c.core().propose('A',legacyAction(haul),'Old haul'));
   await assert.rejects(c.core().propose('P',{kind:'move',x:4,z:4},'Walk over'),/the stockpile haul is the only proposable work/);
   const perspective=await c.corePerspective();
   assert.ok(perspective.opportunities.every(o=>o.action.kind==='haul-zone'));

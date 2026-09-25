@@ -1,3 +1,4 @@
+import {legacyAction,legacyPawn} from './fixtures/legacy.js';
 import {readFileSync} from 'node:fs';
 const archived=JSON.parse(readFileSync(new URL('../../trials/fixtures/speech-check-v1.json',import.meta.url),'utf8'));
 /** Authored held-constant message contrasts. No game imports or applied choices. */
@@ -9,8 +10,8 @@ export const bankVersion='concord-speech-check-v1';
 export function speechCases(){
  const base=structuredClone(perspectiveCasesV2().find(c=>c.id==='needs-full-r1')!.view);
  const action={kind:'haul' as const,thing:'wood',x:4,z:2,count:10,trips:1,maxTicks:1800};
- base.proposals[0]!.action=action;
- base.pawn.hauling={epoch:'authored',tick:40,mapId:0,status:'available',options:[action],supplies:[{thing:'wood',label:'wood',x:4,z:2,sourceCount:30,destinationFree:75}]};
+ base.proposals[0]!.action=legacyAction(action);
+ legacyPawn(base.pawn).hauling={epoch:'authored',tick:40,mapId:0,status:'available',options:[action],supplies:[{thing:'wood',label:'wood',x:4,z:2,sourceCount:30,destinationFree:75}]};
  base.pawn.casualties={epoch:'authored',tick:40,mapId:0,radius:12,observations:[],visibleSubjects:[{target:'B',downed:false,inBed:false}],visibleBeds:[]};
  const offer=base.proposals[0]!.id;
  const variants=[
