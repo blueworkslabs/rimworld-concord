@@ -141,7 +141,11 @@ export class Coordinator {
       const experiences=character.experiences??=[];
       experiences.push({event,route:next,interrupt});
       if(experiences.length>64) {
-        const evicted=experiences.shift()!;
+        // Native texture and already-considered experiences make room first (post-Gate-C
+        // item 7: job churn filled the buffer and pushed out unconsidered need changes).
+        const cursor=character.attention?.cursor??0;
+        const spare=experiences.findIndex(e=>e.route==='native'||e.event.seq<=cursor);
+        const evicted=experiences.splice(spare<0?0:spare,1)[0]!;
         if(evicted.event.seq>(character.attention?.cursor??0)&&evicted.route!=='native'){
           // Counted as a failure with its cause: an unprocessed experience was lost.
           const d=this.domain.diagnostics??={attentionGaps:0,attentionGapKinds:{}};d.attentionGaps++;d.attentionGapKinds[evicted.event.kind]=(d.attentionGapKinds[evicted.event.kind]??0)+1;

@@ -135,6 +135,15 @@ test('pump caps concurrent turns, observes while thinking and prioritizes signif
  release({kind:'continue',reason:'All right'});await pump.drain();await pump.poll();
  assert.equal(pump.status().started,1);assert.equal(c.inspect().characters.A!.attention,undefined);await pump.stop();store.close();
 });
+test('native job churn makes room before unconsidered experiences are lost (post-Gate-C item 7)',async()=>{
+ const {game,store,c}=await setup();for(let i=0;i<5;i++)game.event('need','A','band '+i);
+ for(let i=0;i<200;i++)game.event(i%2?'job-end':'job-start','A','GotoWander');
+ game.event('intent-ordinary','A','intent=x;count=5;source=Pedro');await c.observe();
+ const kept=c.inspect().characters.A!.experiences!;assert.equal(kept.length,64);
+ assert.deepEqual(kept.filter(e=>e.event.kind==='need').map(e=>e.event.detail),['band 0','band 1','band 2','band 3','band 4'],'unconsidered need changes survive the churn');
+ assert.equal(kept.at(-1)!.route,'native','ordinary intent arrivals are native texture');
+ assert.equal(store.events().filter(e=>e.event.kind==='attention-gap').length,0);store.close();
+});
 test('unconsumed bounded-history loss is explicitly audited',async()=>{
  const {game,store,c}=await setup();for(let i=0;i<70;i++)game.event();await c.observe();
  assert.equal(c.inspect().characters.A!.experiences!.length,64);
