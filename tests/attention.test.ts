@@ -1,3 +1,4 @@
+import {DecisionChannel} from '../src/decision-channel.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -309,4 +310,21 @@ test('an oversized reflection turn hands over and records the trimmed view the m
  assert.ok(seen.trimmed.memories>0);assert.equal(seen.trimmed.note,'Older items were left out to fit; they still happened.');
  assert.equal(seen.character.memories.at(-1),`memory 29 ${big}`,'newest memory kept');
  assert.deepEqual(domain.characters.A.memories.slice(0,30),stored,'the stored character is untouched');store.close();
+});
+
+test('reflection relay cannot cite evidence removed from the recorded trimmed view',async()=>{
+ const {game,store,c}=await setup(),d=(c as any).domain;
+ d.characters.A.experiences=Array.from({length:40},(_,i)=>({event:{seq:i+1,pawn:'A',tick:i+1,kind:'memory',detail:'x'.repeat(1000)},route:'deliberation',interrupt:false}));
+ d.characters.A.attention={cursor:40};d.eventCursor=40;game.data.eventSeq=40;game.event();
+ let shown:any;
+ const channel=new DecisionChannel((raw:any)=>{if(raw.type==='decision-request'){
+  shown=structuredClone(raw.view);
+  channel.receive({type:'decision-result',id:raw.id,output:{kind:'revise_outlook',reason:'Citing hidden old evidence',update:{expectedRevision:0,notes:[{kind:'concern',text:'Old thought',evidenceSeqs:[1]}]}}});
+ }});
+ try {
+  const r=await c.attend('A',channel);assert(shown);assert(shown.trimmed.experiences>0);
+  assert(!shown.character.experiences.some((e:any)=>e.event.seq===1));
+  assert.equal(r.status,'failed');assert.equal(c.inspect().characters.A!.outlook,undefined);
+  assert.equal(d.characters.A.experiences[0].event.seq,1,'stored evidence was not trimmed');
+ } finally {channel.close();store.close();}
 });

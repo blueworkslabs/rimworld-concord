@@ -1,3 +1,4 @@
+import {PROMPT_LIMIT} from './prompt-limit.js';
 import {CoreAnswerChoice,coreAnswerSchema} from './pawn-eating.js';
 import {CoreChoice,coreInstructions,coreChoiceSchema,corePrompt,fitCore,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
 import {ProviderStreamCounts,boundedCoreFormattingRecovery,providerResultMetadata,validationIssues} from './provider-diagnostics.js';
@@ -105,7 +106,7 @@ export class ClaudeDecisionBackend {
    signal.throwIfAborted();if(this.pending)throw Error('Decision backend busy');
    view=mode==='core'?fitCore(view as CoreView):mode==='reflection'?fitReflection(view as AttentionView):structuredClone(view);
    const args=claudeArgs(mode,mode==='core'?view as CoreView:mode==='reflection'?view as AttentionView:mode==='core-answer'?view as CoreQuestionView:undefined);
-   const prompt=JSON.stringify(mode==='core'?corePrompt(view as CoreView):mode==='core-answer'?coreAnswerPrompt(view as CoreQuestionView):mode==='social'?socialPrompt(view as SocialView):modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
+   const prompt=JSON.stringify(mode==='core'?corePrompt(view as CoreView):mode==='core-answer'?coreAnswerPrompt(view as CoreQuestionView):mode==='social'?socialPrompt(view as SocialView):modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>PROMPT_LIMIT)throw Error('Decision context too large');
    const authoredSize=promptAccounting(args[args.indexOf('--system-prompt')+1]!,prompt,JSON.parse(args[args.indexOf('--json-schema')+1]!));
    this.pending=true;
    // Native client reads its existing login itself. No secret/env copying or extraction.

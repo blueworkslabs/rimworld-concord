@@ -319,6 +319,7 @@ export class Coordinator {
     if(prepared.status!=='running') return {pawn,status:prepared.status,throughSeq:'throughSeq' in prepared?prepared.throughSeq:undefined};
     const combined=AbortSignal.any([signal,prepared.controller.signal]);
     const timer=setTimeout(()=>prepared.controller.abort(),config.timeoutMs);
+    let shown=prepared.view;
     try {
       const result=await bounded(combined,async()=>{
         if(!prepared.significant) {
@@ -334,7 +335,8 @@ export class Coordinator {
         combined.throwIfAborted();
         if(prepared.lease&&!prepared.lease.consume())throw Error('Reflection admission expired');
         // The model is shown the trimmed copy; it is also what the channel records as the input.
-        return Reflection.parse(await backend.reflect(fitReflection(prepared.view),combined));
+        shown=fitReflection(prepared.view);
+        return Reflection.parse(await backend.reflect(structuredClone(shown),combined));
       });
       return await this.serial(async()=>{
         combined.throwIfAborted();
@@ -352,7 +354,7 @@ export class Coordinator {
         const reflection={tick:this.observedTick,throughSeq,backend:backend.name,reason};
         if(result.kind==='revise_outlook') {
           // Validate against the frozen supplied perspective, then recheck the live revision.
-          const next=reviseOutlook(prepared.view.character,result.update,this.observedTick);
+          const next=reviseOutlook(shown.character,result.update,this.observedTick);
           if((character.outlook?.revision??0)!==result.update.expectedRevision)throw Error('Private outlook superseded');
           character.outlook=next;
           character.attention!.last={status:'continued',throughSeq,reason};
