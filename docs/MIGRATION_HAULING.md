@@ -196,6 +196,23 @@ For [construction and cooking](MIGRATION_PRODUCTION.md): the ordered model is us
 many tests and runners, not only in its own module. Budget the port-then-delete pair from the
 start.
 
+**Native replacement fixes found by the port (after #80).** The ordered path re-read the
+fresh job receipt before offering or applying a rescue replacement. For a native haul, the
+same refresh now reads the live intent ledger. A quota met just before the core replies
+yields a standalone rescue, and a quota met while the pawn answers ends the replacement
+instead of stopping completed work. Also: when the game confirms the exclusion the consent
+queued, that queue entry clears as the same fact, so the rescue dispatches in the consent
+pass, still under the persisted id. Both exclusion paths require a loaded response from
+this world and epoch before treating the acknowledgment as confirmation. Stale replies
+leave the exclusion queued and the handover undispatched until fresh reconciliation.
+
+**Verification scope ([#81](https://github.com/blueworkslabs/rimworld-concord/pull/81)):
+mock/offline-tested**, not a new game run. Both former freshness TODOs now pass, as do
+same-pass dispatch, stale world/epoch/unloaded replies, and coordinator recreation after
+confirmation interruption or a lost dispatch reply. Full suite: 408 pass, no TODOs.
+The existing game-side handover evidence remains historical; this change does not claim
+new live-model, UI or game-process-restart acceptance.
+
 ## Gate A: internals questions
 
 Checked against the pinned assembly hash above and repository `117dd87`; API

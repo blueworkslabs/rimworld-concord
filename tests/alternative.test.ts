@@ -100,7 +100,7 @@ test('maximum-length acceptance reason remains intact through bounded stop messa
 
 test('pending goal gets standalone rescue after fresh final receipt, with old completion retained and no cancellation',async()=>{
  const {c,p,calls,ask,complete,store}=await nativeSetup();assert.equal((await ask()).status,'continued');const r=c.core().requests()[0]!;
- complete();await c.reconcile(); // The ordered version read the fresh receipt without reconciling: see the todo below.
+ complete();await c.reconcile(); // Separate from the no-reconcile freshness regression below.
  const offer=await c.core().offerRequestedRescue(r.id,rescue,'Your haul completed. Rescue is separate optional work.');
  assert.equal(offer.requestId,r.id);assert.equal(offer.replacesAgreementId,undefined);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
  assert.deepEqual(moves(calls),[]);let supplied:any;
@@ -144,11 +144,8 @@ test('standalone refusal closes only the request and preserves completed work',a
  assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');assert.equal(c.core().requests()[0]!.status,'closed');assert.deepEqual(moves(calls),[]);store.close();
 });
 
-// Found by the port (native counterpart of 'fresh final-trip completion invalidates replacement'):
-// the ordered path re-read the fresh receipt before offering or applying a replacement; the native
-// path only learns that the shared quota was met on reconciliation. Runtime fix pending; kept
-// visible here instead of hidden.
-test('a native haul met just before the core reply yields a standalone rescue, not a replacement',{todo:'native replacement does not refresh the intent before offering'},async()=>{
+// Found by the port: completion must be refreshed without waiting for reconciliation.
+test('a native haul met just before the core reply yields a standalone rescue, not a replacement',async()=>{
  const {c,p,ask,complete,store}=await nativeSetup();await ask();const r=c.core().requests()[0]!;
  try {complete();const offer=await c.core().offerRequestedRescue(r.id,rescue,'Your haul completed.');
   assert.equal(offer.replacesAgreementId,undefined);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
@@ -156,7 +153,7 @@ test('a native haul met just before the core reply yields a standalone rescue, n
 });
 
 // Distinct from pre-offer freshness: completion while an issued replacement awaits consent.
-test('issued native replacement is not reinterpreted when quota meets during its answer',{todo:'native replacement does not refresh the intent before applying acceptance'},async()=>{
+test('issued native replacement is not reinterpreted when quota meets during its answer',async()=>{
  const {c,p,ask,complete,store,calls}=await nativeSetup();
  try {
   await ask();const r=c.core().requests()[0]!,offer=await c.core().offerRequestedRescue(r.id,rescue,'Optional replacement');
@@ -165,5 +162,61 @@ test('issued native replacement is not reinterpreted when quota meets during its
   assert(answered);assert.deepEqual(calls,before);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
   assert.equal(c.inspect().proposals[offer.id]!.actionId,undefined);
   await assert.rejects(c.core().offerRequestedRescue(r.id,rescue,'Try fresh instead'));
+ } finally {store.close();}
+});
+
+test('a native replacement dispatches in the consent pass once the game confirms the exclusion',async()=>{
+ const {c,p,ask,calls,store}=await nativeSetup();
+ try {
+  await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');
+  await c.pawn('A').decide(offer.id,yes);   // no reconcile: the confirmed exclusion clears the queued one
+  assertHandover(calls);
+  assert.deepEqual(c.inspect().pendingIntentExclusions??{},{});assert.equal(c.inspect().proposals[p.id]!.standing!.status,'stopped');
+  const h=Object.values(c.inspect().handovers!)[0]!;assert.equal(h.step,'dispatched');assert.equal(c.inspect().proposals[offer.id]!.actionId,h.dispatchId);
+  await c.reconcile();assert.deepEqual(moves(calls),['move:rescue'],'one dispatch under the persisted id');
+ } finally {store.close();}
+});
+
+for(const mismatch of ['epoch','world','unloaded'] as const)test(`a ${mismatch} exclusion reply cannot authorize same-pass dispatch`,async()=>{
+ const {c,ask,calls,store,game}=await nativeSetup();
+ try {
+  await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');
+  const intent=game.intent.bind(game);let replied=false;
+  game.intent=async payload=>{
+   const r=await intent(payload);
+   if(payload.op==='intent-exclude'){
+    replied=true;
+    if(mismatch==='unloaded')r.state.loaded=false;else r.state[mismatch]='other';
+   }
+   return r;
+  };
+  await c.pawn('A').decide(offer.id,yes);
+  assert(replied);assert.deepEqual(moves(calls),[],'untrusted acknowledgment cannot dispatch');
+  assert.equal(Object.keys(c.inspect().pendingIntentExclusions??{}).length,1,'uncertain exclusion stays queued');
+  assert.equal(Object.values(c.inspect().handovers!)[0]!.step,'excluding');
+  game.intent=intent;
+  await c.reconcile();assertHandover(calls);
+  await c.reconcile();assert.deepEqual(moves(calls),['move:rescue']);
+ } finally {store.close();}
+});
+
+for(const boundary of ['confirmation','dispatch'] as const)test(`replacement recovers after lost ${boundary} reply without another rescue`,async()=>{
+ const {c,ask,calls,store,game}=await nativeSetup();
+ try {
+  await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');
+  let injected=false;const commit=store.commit.bind(store),move=game.move.bind(game);
+  if(boundary==='confirmation')store.commit=(d,e)=>{
+   commit(d,e);if(e.kind==='intent-exclusion-confirmed'&&!injected){injected=true;throw Error('Lost confirmation commit reply');}
+  };
+  else game.move=async r=>{const receipt=await move(r);if(!injected){injected=true;throw Error('Lost dispatch reply');}return receipt;};
+  let failed=false;try{await c.pawn('A').decide(offer.id,yes);}catch{failed=true;}
+  assert(injected);assert.equal(failed,boundary==='confirmation');
+  assert.equal(moves(calls).length,boundary==='confirmation'?0:1);
+  const before=store.read()!,h=Object.values(before.handovers!)[0]!;
+  assert.deepEqual(before.pendingIntentExclusions,{});const dispatchId=h.dispatchId;
+  store.commit=commit;game.move=move;
+  const reopened=new Coordinator(store,game);await reopened.open();await reopened.reconcile();await reopened.reconcile();
+  assertHandover(calls);assert.equal(reopened.inspect().proposals[offer.id]!.actionId,dispatchId);
+  assert.equal(Object.values(reopened.inspect().handovers!)[0]!.step,'dispatched');
  } finally {store.close();}
 });
