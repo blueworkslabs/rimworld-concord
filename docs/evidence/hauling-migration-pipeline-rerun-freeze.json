@@ -1,0 +1,108 @@
+{
+  "setupSha256": "ac88cea172160541a20a6a280e398ae7273ac82852e77efce7736ffd064e3d4f",
+  "publicProjectionNotCanonicalInput": true,
+  "runtimeChangeAuthorizedBy": "Fable Part D 2026-09-25 09:19 UTC, six pipeline fixes then same frozen setup rerun",
+  "unchangedFromPriorFreeze": [
+    "fixture",
+    "quota",
+    "crew capabilities",
+    "installed mods",
+    "catalog",
+    "protocol",
+    "recording",
+    "restore process"
+  ],
+  "publicInputs": {
+    "behaviorHead": "e436933d349942d4e1062acb2768ef4a224e8875",
+    "runnerDigest": "38d8c3d923f9a013b13a87500db4b98a295376316805fcadef0167315bd18bed",
+    "modelCatalogSha256": "0adc8a0b86766ab7749185e8e64b816e080b48414b32ff05a6586cacb532cea7",
+    "hostNode": "v22.23.2",
+    "codexCli": "codex-cli 0.153.4",
+    "protocol": {
+      "policy": "luna-hauling-migration-v1",
+      "nativeMs": 600000,
+      "wallMs": 960000,
+      "cooldownTicks": 300,
+      "nativeIntentStallTicks": 2500,
+      "turnCap": null,
+      "pausedInference": false,
+      "model": "gpt-5.6-luna",
+      "reasoningEffort": "low",
+      "jevCalls": 0
+    },
+    "crew": {
+      "eligible": [
+        "Pedro",
+        "Beatrice"
+      ],
+      "ineligible": "Alvin",
+      "reason": "native Rancher backstory; no capability override"
+    },
+    "reservationPolicy": "strict only; growing parked B1 2/2",
+    "mode": "ordinary play; native hauling replaces ordered hauling; other capabilities retained",
+    "coldRestore": "new host and coordinator OS processes; game process stays running and reloads paired save",
+    "coverage": "Missing offers remain negative coverage, never rerolled or forced. Pawn refusals and waits are valid outcomes.",
+    "staging": {
+      "live": {
+        "save": "lab-concord-nh-helper-20260924",
+        "entries": [
+          {
+            "intentId": "33f01c4c-747a-4be0-ad3d-c996230e8bbb",
+            "thing": "WoodLog",
+            "thingLabel": "wood",
+            "label": "shared wood pile",
+            "zoneId": -1,
+            "siteId": "migration-wood",
+            "x": 76,
+            "z": 84,
+            "w": 4,
+            "h": 4,
+            "quota": 75,
+            "maxTicks": 30000,
+            "variant": "attribution",
+            "hold": "strict"
+          }
+        ]
+      },
+      "saveSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+      "assets": {
+        "game/RimWorldLinux_Data/Managed/Assembly-CSharp.dll": "082db1dd4f7f1d0b72960d7e1beead8fbfe6957200e8627f65bda0dbbe1dd8f8",
+        "game/Mods/Concord/Assemblies/Concord.dll": "0c15356f9343fc8b15b9206e6a5232ee9e6f59ab0efaad850d58027850f93d4f",
+        "game/Mods/StagingLab/Assemblies/StagingLab.dll": "b4fc528dfd10a7d020ce0219796660b579cbfcce53ff4a581f68d88ed10b040c",
+        "game/Mods/HarmonyMod/Current/Assemblies/0Harmony.dll": "353daafec180bb8e7bbe4da78f2a7cdc78067392e3a4e79dc8e7af295f2371e6",
+        "game/Mods/HarmonyMod/Current/Assemblies/HarmonyMod.dll": "408c2cd72b45da8c70c0c538b2b346c8dcbb5bded066373f6a3eb8b26615a2e7",
+        "profile/Config/ModsConfig.xml": "5a4d2ca0e621b6a9227e7f2677ca9425c4232b0d859e764823d81e81a616ea24",
+        "profile/Config/KeyPrefs.xml": "f22a77e7f45abc7599c8cdcd64308f432f1fc015ca965743fd65608baf8f7a1d",
+        "bin/lab.py": "af77f985644b4d14a162cbc9ed181b595e97cf544b7788bcbf3673f65633a7a3"
+      },
+      "node": "v22.23.2"
+    },
+    "hostFilesSha256": {
+      "scripts/run-ongoing.mjs": "2de70dd6ab57732767743fd753385e453b3e7afffe765f0d336b3b4ebbc8124c",
+      "scripts/run-codex-decision.py": "8aac12c9f0dce1316c33803939041defdfc069874d497a5814a768da247840e8",
+      "package-lock.json": "32e9d2a1846218ee20ceb919c009f383903df2dc48a165ba4144c307494a7d61"
+    },
+    "operatorConfigSha256": "eef799478953dfb01d7366040f58b59d3bf869dd3ea674a7c90735570981a0d0"
+  },
+  "rehearsal": {
+    "runId": "78fc3693-d3ae-474d-a752-2c68a3d49f3c",
+    "passed": true,
+    "pairedRestore": true,
+    "coldRestore": true,
+    "hostPids": [
+      551228,
+      551505
+    ],
+    "coordinatorPids": [
+      177061,
+      177353
+    ],
+    "modelCalls": 0,
+    "recordingSha256": "7b326f19ca8692f7ead4038f15132bf4f071ccc8ea47ee7bde76f4b930eaeb3e",
+    "recordingBytes": 1525190,
+    "nativeElapsedMs": 46206,
+    "quota": 75,
+    "delivered": 75,
+    "bothCapableOfferedAccepted": true
+  }
+}
