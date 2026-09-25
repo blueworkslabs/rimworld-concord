@@ -4,7 +4,7 @@ import {planProduction,workMap,workSteps,workReady,workKind} from './production-
 import {sharedFood,foodLines} from './food-observation.js';
 import {sharedStatus,type SharedStatus} from './shared-status.js';
 import {deferredOffers} from './reoffers.js';
-import {CoreScheduleConfig,coreAdmission} from './core-scheduler.js';
+import {CoreScheduleConfig,coreAdmission,scheduleReview} from './core-scheduler.js';
 import {questionContext,coreView,fitCore,validateCoreChoice,CoreChoice,CoreRejection,coreFailureCause,type CoreBackend,type CoreAnswerBackend,type CoreQuestionView} from './core-planner.js';
 import {observedPeople} from './observed-names.js';
 import {reviseOutlook} from './outlook.js';
@@ -492,6 +492,8 @@ export class Coordinator {
           return {idle:admission.reason} as const;
         }
         causes=admission.causes;
+        // Any real cause resets the review chain; the turn's own outcome may start a new one.
+        if(causes.some(w=>w.kind!=='review'))delete state.schedule!.review;
         // Reserve and consume before inference. Failed calls are not retried.
         state.schedule!.attempts++;state.schedule!.lastAttemptTick=game.ticks;state.schedule!.consumed=admission.snapshot;
       }
@@ -500,7 +502,8 @@ export class Coordinator {
       state.turns.push({id,status:'running'});state.revision++;this.commit('core-started','core',{id,causes});
       const view=coreView(this.domain,game);
       const heard=[...new Set(causes.filter(w=>w.kind==='message').map(w=>view.messages.find(m=>m.id===w.sourceId)?.from).filter((p):p is string=>!!p&&p!=='core'))];
-      return {id,controller,generation:this.generation,heard,view:{...view,...(scheduled?{wakeReasons:causes}:{})}};
+      const review=causes.length&&causes.every(w=>w.kind==='review')?state.schedule!.review?.step:undefined;
+      return {id,controller,generation:this.generation,heard,review,view:{...view,...(scheduled?{wakeReasons:causes}:{})}};
     });
     if('idle' in prepared)return {status:'idle' as const,reason:prepared.idle};
     let timedOut=false,returned=false,raw:unknown;
@@ -540,7 +543,8 @@ export class Coordinator {
         // (no question, no offer). Shown whatever the core chose, not only on a wait.
         const addressed=a.kind==='ask'?a.pawn:proposalId?this.domain.proposals[proposalId]?.pawn:undefined;
         const heard=prepared.heard.filter(p=>p!==addressed);
-        Object.assign(turn,{status:'applied',choice,...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{}),...(heard.length?{heard}:{})});state.revision++;
+        if(state.schedule)scheduleReview(state.schedule,{id:prepared.id,tick:g.ticks,waited:a.kind==='wait',offerable:prepared.view.opportunities.length+prepared.view.counters.length>0,...(prepared.review?{review:prepared.review}:{})});
+        Object.assign(turn,{status:'applied',choice,...(prepared.review?{review:prepared.review}:{}),...(proposalId?{proposalId}:{}),...(questionId?{questionId}:{}),...(heard.length?{heard}:{})});state.revision++;
         this.commit('core-planned','core',{id:prepared.id,kind:a.kind,reason:a.reason,...this.asOf(prepared.view.tick,g)});
         return {status:'applied' as const,proposalId,questionId,choice};
       });
