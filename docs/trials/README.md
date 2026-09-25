@@ -94,7 +94,7 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 
 | 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O | E2 native-haul replay | 27 valid; USD 0.002978598; 8 event/6 bands/0 quiet; at0.5 defer1event/0bands. Snapshot-only; no routing decision | [E2 report](../evidence/jev-replay-e2.json) | [E2 results](JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation) |
 
-| 09-25 | — | L | Frozen hauling pipeline regression on main4b4a053 | Zero attention losses; heard-message UI and open-meal gate observed; two separate first-review nudges, no full chain; three application rejections retained; paired/cold ledger restores passed | [receipt](../evidence/pipeline-regression.json) | [PIPELINE_REGRESSION](PIPELINE_REGRESSION.md) |
+| 09-25 | [#85](https://github.com/blueworkslabs/rimworld-concord/pull/85) | L | Frozen hauling pipeline regression on main `4b4a053` | Zero attention losses; heard-message UI and open-meal gate observed; two separate first-review nudges, no full chain; three application rejections retained; paired/cold ledger restores passed | [receipt](../evidence/pipeline-regression.json) | [PIPELINE_REGRESSION](PIPELINE_REGRESSION.md) |
 
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.
 
