@@ -572,13 +572,13 @@ namespace Concord {
             if(r.op=="lab-interrupt") {
                 // Forced cancellation of the pawn's current job (cleanup drops are incidental).
                 if(p==null) throw new Exception("Unknown pawn");
-                var cur=p.CurJob;
+                var cur=p.CurJob;var endedDef=cur==null?null:cur.def.defName;
                 // "idle": end without choosing a new job and clear the queue (a quiet base save;
                 // the pawn picks its next job on the next tick, as after any load).
                 bool idle=r.reason=="idle";
                 if(idle)p.jobs.ClearQueuedJobs();
                 if(cur!=null)p.jobs.EndCurrentJob(JobCondition.InterruptForced,!idle);
-                return "{\"ended\":"+(cur==null?"null":"\""+cur.def.defName+"\"")+",\"x\":"+p.Position.x+",\"z\":"+p.Position.z+"}";
+                return "{\"ended\":"+(endedDef==null?"null":"\""+endedDef+"\"")+",\"x\":"+p.Position.x+",\"z\":"+p.Position.z+"}";
             }
             if(r.op=="lab-loose") {
                 // Supply evidence: loose stacks of a def, and whether this pawn could haul them now.
