@@ -143,6 +143,17 @@ Luna's, agreement, and counterfactual avoidable calls. Include consequential eve
 that must not be missed and validate thresholds on held-out cases. Logged
 recommendations only.
 
+The [first core wake/grounding replay attempt](trials/JEV_REPLAY.md#result--2026-09-25-transport-failure-not-a-scoring-result)
+produced 29 transport failures on 2026-09-25. After certificate renewal, an
+[owner-authorized unchanged retry](trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first)
+returned 29 valid answers for USD 0.004345194. The [E2 pass](trials/JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation)
+returned 27 valid answers for USD 0.002978598 after projection/pairing review. Frozen
+labels: 8 event, 6 band-change, no quiet examples; at 0.5 defer one event and no bands.
+The report retains the completed interpretations and later wake-rule correction;
+held-out validation remains pending. No gating threshold or live wiring is introduced.
+Snapshot-only grounding cannot test inference-time arrivals or validate historical
+coordinator bookkeeping.
+
 ## Later experiments
 
 - **Standing commitments in the think tree**: a `ThinkNode` that consults cached

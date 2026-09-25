@@ -1,0 +1,196 @@
+{
+  "kind": "offline-core-topic-text-audit",
+  "modelCalls": 0,
+  "sourceTextUnchanged": true,
+  "limitUtf16Units": 240,
+  "notes": [
+    "Inspection-only annotations, not a new acceptance rule.",
+    "At the length limit does not prove truncation; non-Latin letters do not by themselves prove an error.",
+    "No transliteration, deletion or retrospective correction.",
+    "A language/script policy and complete-sentence requirement would need separate design; the existing schema already limits trimmed text to 240 UTF-16 units."
+  ],
+  "flaggedTopics": [
+    {
+      "evidence": "recorded-scene.json",
+      "turnIndex": 0,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "At tick 78, shared telemetry reports Alvin's food as low while Beatrice's and Pedro's food are satisfied. Fresh local sightings reported by Alvin, Beatrice, and Pedro include edible raw berry stacks; no usable campfire was observed. No work"
+    },
+    {
+      "evidence": "recorded-scene.json",
+      "turnIndex": 3,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "At tick 4829, shared telemetry reports Alvin and Beatrice food satisfied and Pedro food low. Edible berries are locally observed; Alvin's eating is receipt-verified complete, while Pedro's linked eating remains started with zero consumed. A"
+    },
+    {
+      "evidence": "recorded-scene.json",
+      "turnIndex": 5,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "At tick 7943, fresh shared telemetry reports Alvin and Pedro food satisfied and Beatrice food low. Alvin's 12-berry and Pedro's 11-berry eating have receipt-verified completion. No current work or cooking need is established; local berries,"
+    },
+    {
+      "evidence": "recorded-scene.json",
+      "turnIndex": 8,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [
+        {
+          "codePoint": "U+3058",
+          "unicodeName": "HIRAGANA LETTER ZI"
+        }
+      ],
+      "text": "Fresh shared telemetry reports Beatrice's food as urgent, while Alvin's and Pedro's food are low; Alvin's and Pedro's prior berry consumption is receipt-verified. Listed campfire-build opportunities are available to Alvin and Pedro, but noじ"
+    },
+    {
+      "evidence": "recorded-scene.json",
+      "turnIndex": 10,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [
+        {
+          "codePoint": "U+0938",
+          "unicodeName": "DEVANAGARI LETTER SA"
+        },
+        {
+          "codePoint": "U+672A",
+          "unicodeName": "CJK UNIFIED IDEOGRAPH-672A"
+        }
+      ],
+      "text": "Fresh shared telemetry reports Alvin and Pedro food low, while Beatrice food is satisfied; no currently eligible grounded work option is listed. Alvin and Pedro have receipt-verified berry consumption, but the broader shared-needs goal is未स"
+    },
+    {
+      "evidence": "recorded-scene.json",
+      "turnIndex": 11,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "At tick 31508, shared telemetry reports Alvin's food as urgent, Pedro's as low, and Beatrice's as satisfied. Alvin and Pedro have receipt-verified prior berry consumption. No eligible grounded work option is currently listed; observed berry"
+    },
+    {
+      "evidence": "recorded-scene.json",
+      "turnIndex": 13,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "At tick 33865, fresh shared telemetry reports Alvin and Beatrice food satisfied and Pedro food low; all three have low rest. Alvin and Pedro have receipt-verified prior berry consumption. Nearby edible berry stacks are currently observed by"
+    },
+    {
+      "evidence": "native-haul-core-e2.json",
+      "turnIndex": 0,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "Loose wood lies around the colony; a shared stockpile haul may be offered to eligible crew members. Alvin reported low food via fresh shared telemetry, while Beatrice and Pedro reported satisfied food; no work or self-care completion is yet"
+    },
+    {
+      "evidence": "native-haul-core-e2.json",
+      "turnIndex": 2,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "Loose wood remains available, and the native wood intent is met. Beatrice's linked haul completed with 35 delivered; Pedro's linked agreement was withdrawn after 40 delivered. Alvin reported low food via fresh telemetry; no self-care or new"
+    },
+    {
+      "evidence": "native-haul-core-e2.json",
+      "turnIndex": 3,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "Loose wood and stockpile space remain available. The native wood intent is met; Beatrice's linked haul completed with 35 delivered, while Pedro's linked agreement was withdrawn after 40 delivered. Fresh shared telemetry reports Alvin, Be​​​"
+    },
+    {
+      "evidence": "native-haul-core-e2.json",
+      "turnIndex": 4,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "Loose wood and stockpile space remain available. The native wood intent is met; the linked receipt records Beatrice completed hauling 35 wood, while Pedro's linked agreement was withdrawn after 40 delivered. No stockpile-haul offer is newly"
+    },
+    {
+      "evidence": "native-haul-core-e2.json",
+      "turnIndex": 6,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "Current records report loose wood and stockpile space remain available. Beatrice's linked receipt records 35 wood delivered and completed hauling; Pedro's linked receipt records 40 wood delivered before withdrawal and remains unfulfilled. A"
+    },
+    {
+      "evidence": "native-haul-core-e2.json",
+      "turnIndex": 7,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 240,
+      "atLengthLimit": true,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": false,
+      "nonLatinLetters": [],
+      "text": "Current records report loose wood and stockpile space remain available. Beatrice's linked receipt records completed hauling with 35 wood delivered; Pedro's linked receipt records withdrawn work with 40 wood delivered and one unfulfilled; no"
+    },
+    {
+      "evidence": "native-haul-core-e2.json",
+      "turnIndex": 9,
+      "topicIndex": 0,
+      "sourceId": "brief",
+      "trimmedUtf16Length": 239,
+      "atLengthLimit": false,
+      "overLengthLimit": false,
+      "hasOuterWhitespace": true,
+      "nonLatinLetters": [],
+      "text": "Loose wood and stockpile space remain available. Beatrice's receipt records 35 wood delivered; Pedro's receipt records withdrawn work with 40 wood delivered and one unfulfilled agreement. Pedro's fresh shared telemetry reports food urgent; "
+    }
+  ]
+}

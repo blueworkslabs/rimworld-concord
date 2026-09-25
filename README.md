@@ -24,6 +24,7 @@ remain unchanged.
 | Build a campfire (20 wood) | yes | scripted game tests only |
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
+| Offline Jev wake/grounding replay | no gameplay | [authorized retry: 29 valid answers](docs/trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first) and [E2 over the native-haul turns: 27 valid](docs/trials/JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation); transport failures retained; no threshold/routing decision |
 | Native tagged-zone haul spike (historical) | [scripted and live evidence](docs/trials/NATIVE_HAUL_LIVE.md) retained | Superseded by the ordinary-play migration below |
 | Native stockpile hauling | strict holds; ordered implementation retired; [deletion check](docs/trials/HAULING_RETIREMENT.md): 75/75, two holders, paired/new-coordinator restore | [Migration Gate C passed on the game side](docs/trials/HAULING_MIGRATION_GATE_C.md); crew-side follow-ups remain; growing parked at B1 2/2 |
 

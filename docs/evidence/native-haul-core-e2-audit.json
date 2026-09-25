@@ -1,0 +1,410 @@
+{
+  "kind": "native-haul-e2-export-dry-audit",
+  "callsMade": 0,
+  "inputs": 14,
+  "aligned": 13,
+  "appliedByHarness": 12,
+  "appliedByReceipt": 13,
+  "known": 13,
+  "unchangedByFrozenRule": 0,
+  "requests": {
+    "total": 27,
+    "wake": 14,
+    "grounding": 13,
+    "maxStateBytes": 5225
+  },
+  "notes": [
+    "Comparison is lexical only: digit/whitespace normalization cannot determine semantic importance.",
+    "Frozen consequence labels remain unchanged; other-text-change is not evidence of substantive new information.",
+    "Index9 raw choice has trailing topic whitespace trimmed by production CoreChoice.parse; export preserves both, current replay applied matcher reports no.",
+    "Current request projections omit nativeIntents; paid E2 requires preserving native receipt support or explicitly excluding unsupported judgments.",
+    "Current CLI builds wake plus grounding; wake-only E2 requires an explicit reviewed selection, not silent request dropping."
+  ],
+  "turns": [
+    {
+      "index": 0,
+      "tick": 90,
+      "action": "propose",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "new-topic"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "new-topic"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 1,
+      "tick": 1577,
+      "action": "propose",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "new-topic"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 2,
+      "tick": 2759,
+      "action": "wait",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "status-change"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "status-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "new-topic"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 3,
+      "tick": 5680,
+      "action": "wait",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "other-text-change"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 4,
+      "tick": 8986,
+      "action": "wait",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "status-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "other-text-change"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 5,
+      "tick": 14496,
+      "action": "wait",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "other-text-change"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 6,
+      "tick": 16355,
+      "action": "wait",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "digit-or-whitespace-only"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 7,
+      "tick": 18211,
+      "action": "ask",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "digit-or-whitespace-only"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 8,
+      "tick": 20100,
+      "action": "wait",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+          "kind": "new-topic"
+        },
+        {
+          "sourceId": "14cdf3aa-8d83-47d9-a9c0-73f5eb550331",
+          "kind": "new-topic"
+        },
+        {
+          "sourceId": "74d04037-4d39-41b0-8444-98ad31f67a3d",
+          "kind": "new-topic"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 9,
+      "tick": 21242,
+      "action": "ask",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+          "kind": "status-change"
+        },
+        {
+          "sourceId": "14cdf3aa-8d83-47d9-a9c0-73f5eb550331",
+          "kind": "status-change"
+        },
+        {
+          "sourceId": "74d04037-4d39-41b0-8444-98ad31f67a3d",
+          "kind": "status-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "digit-or-whitespace-only"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 10,
+      "tick": 22740,
+      "action": "ask",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "14cdf3aa-8d83-47d9-a9c0-73f5eb550331",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "74d04037-4d39-41b0-8444-98ad31f67a3d",
+          "kind": "other-text-change"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 11,
+      "tick": 24247,
+      "action": "ask",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "14cdf3aa-8d83-47d9-a9c0-73f5eb550331",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "74d04037-4d39-41b0-8444-98ad31f67a3d",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "ae8d86ee-1bfa-49cc-ae1f-92be3f3f32ba",
+          "kind": "new-topic"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 12,
+      "tick": 25943,
+      "action": "wait",
+      "frozenConsequential": true,
+      "changes": [
+        {
+          "sourceId": "brief",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "d0d70fe9-ea9d-4578-a50d-4705219ad168",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "ae8d86ee-1bfa-49cc-ae1f-92be3f3f32ba",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "185fa1de-d944-402b-b339-8e76d9dd0148",
+          "kind": "new-topic"
+        },
+        {
+          "sourceId": "b9de82d3-63c6-422e-813b-eed62815431a",
+          "kind": "other-text-change"
+        },
+        {
+          "sourceId": "op:4aeecf1b8ed411f9ccfb3a4f",
+          "kind": "unchanged"
+        },
+        {
+          "sourceId": "d42a5cf0-0a5d-41ef-bbea-72c811b39df6",
+          "kind": "unchanged"
+        }
+      ],
+      "allChangesDigitOrWhitespaceOnly": false
+    },
+    {
+      "index": 13,
+      "tick": 34935,
+      "action": null,
+      "frozenConsequential": null,
+      "changes": [],
+      "allChangesDigitOrWhitespaceOnly": false
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { JevAppraiser, TrialBudget } from '../src/appraisal.js';
 const view={pawn:{id:'A',name:'Ada',x:1,z:1,job:'Haul',health:1},character:{id:'A',name:'Ada',memories:[]},event:{seq:1,tick:1,pawn:'A',kind:'mood',detail:'low'}};
-const reply=(noul=0.8,cost=0.00001)=>({model:'typesafe/jev-1.13',answers:{reflect:{type:'noul',noul}},usage:{cost}});
+const reply=(noul=0.8,cost=0.00001)=>({model:'typesafe/jev-1.13-20260917',answers:{reflect:{type:'noul',noul}},usage:{cost}});
 test('decimal reservations reach the exact limit without granting another call or real overage',()=>{
  const budget=new TrialBudget(':memory:',0.3,4);
  budget.reserve(0.1);budget.reserve(0.1);budget.reserve(0.1);

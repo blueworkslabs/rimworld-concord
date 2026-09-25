@@ -27,7 +27,7 @@ test('irrelevant action rules are absent while replacement and private update ef
 });
 test('appraisal and deliberation receive the same need meanings without borrowing another perspective',async()=>{
  const budget=new TrialBudget(':memory:');const v=contractCases()[1]!.view;
- let state:any;const a=new JevAppraiser(async(body:any)=>{state=JSON.parse(body.state);return {model:'typesafe/jev-1.13',answers:{reflect:{type:'noul',noul:.2}},usage:{cost:.00001}};},budget);
+ let state:any;const a=new JevAppraiser(async(body:any)=>{state=JSON.parse(body.state);return {model:'typesafe/jev-1.13-20260917',answers:{reflect:{type:'noul',noul:.2}},usage:{cost:.00001}};},budget);
  try{const r=await a.assess({...v,event:v.events[0]!},new AbortController().signal);assert.equal(r.route,'native');assert.deepEqual(state.pawn,modelPerspective(v).pawn);}finally{budget.close();}
 });
 test('broader fixed cases repeat exactly, omit rubrics from prompts and retain valid refusal/no-change',()=>{

@@ -86,6 +86,14 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 | 09-25 | [#82](https://github.com/blueworkslabs/rimworld-concord/pull/82) | S/D | Eating regressions and recorded fitted inputs | Four eating cases and coordinator-state restore checks pass; restored game ledger unverified; core23,643/reflection23,897 bytes;416 tests; no model calls;413 original saves unchanged | [receipt](../evidence/post-gate-c-followups.json) | [Follow-ups 1–5](POST_GATE_C_FOLLOWUPS.md) |
 | 09-25 | [#83](https://github.com/blueworkslabs/rimworld-concord/pull/83) | D | Bounded reviews, urgent routing and eviction replay | 423 tests; two reviews then silence; historical losses 17 → 14 → 0 with recorded cursors fixed; no game/model run | [receipt](../evidence/attention-rewake-review.json) | [Diagnosis and review](ATTENTION_EVICTIONS.md) |
 
+| 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O (attempted) | Jev wake/grounding replay over recorded core turns | 29 transport failures, zero answers; protected-route expired certificate diagnosed; no rerolls; USD 0.058 reserved, actual charge unknown | [jev-replay](../evidence/jev-replay.json) | [JEV_REPLAY](JEV_REPLAY.md#result--2026-09-25-transport-failure-not-a-scoring-result) |
+
+| 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O | Owner-authorized unchanged Jev retry after certificate renewal | 29 valid answers; USD 0.004345194 reported. No deferrals at 0.5; all 14 known turns consequential by frozen rule, so no unchanged-turn negatives; 31/58 topic agreement. No routing decision | [jev-replay-retry](../evidence/jev-replay-retry.json) | [Retry report](JEV_REPLAY.md#authorized-retry--2026-09-25-report-first) |
+
+| 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | D | Export native-haul public core evidence for E2 | 14 inputs / 13 returned and applied / final interrupted; privacy and pairing verified. Dry builds27requests; all13known turns still consequential by frozen rule; native-receipt projection gaps remain; zero calls | [core export](../evidence/native-haul-core-e2.json), [dry audit](../evidence/native-haul-core-e2-audit.json) | [E2 export/preflight](JEV_REPLAY.md#e2-export-and-offline-preflight--astra-2026-09-25) |
+
+| 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O | E2 native-haul replay | 27 valid; USD 0.002978598; 8 event/6 bands/0 quiet; at0.5 defer1event/0bands. Snapshot-only; no routing decision | [E2 report](../evidence/jev-replay-e2.json) | [E2 results](JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation) |
+
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.
 
 ### Hauling migration Gate C — 2026-09-25
