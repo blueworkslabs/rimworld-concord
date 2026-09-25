@@ -13,8 +13,8 @@ import {coreWakeSnapshot} from '../src/core-scheduler.js';
 import {SocialChoice} from '../src/social.js';
 class Game implements GameBridge{
  data:GameState={world:'eat',epoch:'one',ticks:100,paused:true,loaded:true,pawns:[{id:'A',name:'Alvin',x:1,z:1,job:'Wait',health:1}],actions:[]};
- saved=new Map<string,GameState>();calls=0;available=true;lost=false;portion=16;
- async state(){const g=structuredClone(this.data);g.pawns[0]!.eating={epoch:g.epoch,tick:g.ticks,mapId:1,options:this.available?[{thing:'berry',label:'berries',count:this.portion,x:2,z:1,maxTicks:1800}]:[]};return g;}
+ saved=new Map<string,GameState>();calls=0;available=true;lost=false;portion=16;food='berry';
+ async state(){const g=structuredClone(this.data);g.pawns[0]!.eating={epoch:g.epoch,tick:g.ticks,mapId:1,options:this.available?[{thing:this.food,label:this.food==='berry'?'berries':this.food,count:this.portion,x:2,z:1,maxTicks:1800}]:[]};return g;}
  async move():Promise<Receipt>{throw Error('Core work dispatch must not happen');}
  async eat(r:EatRequest){this.calls++;let out=this.data.actions.find(a=>a.id===r.id);if(!out){out={id:r.id,actor:r.actor,kind:'eat',status:'started',reason:'Chosen',x:2,z:1,thing:r.action.thing,count:r.action.count,delivered:0};this.data.actions.push(out);}if(this.lost){this.lost=false;throw Error('Lost delivery');}return out;}
  async cancel(r:{id:string;actor:string}):Promise<Receipt>{const a=this.data.actions.find(a=>a.id===r.id)!;assert.equal(a.actor,r.actor);a.status='interrupted';return a;}
@@ -51,7 +51,7 @@ test('lost option, invented target, extra authority and existing commitment reje
  for(const variant of ['lost','target','actor','committed']){
   const {g,s,c}=await setup();if(variant==='committed'){const d=c.inspect();d.characters.A!.commitment='other';s.commit(d,{branch:d.branch,kind:'fixture',actor:'operator',data:{}});await c.open();}
   const q=await ask(c);let seen=0;const r=await c.answerCoreQuestion(q,{name:'bad',async answerCore(v){seen++;if(variant==='committed')assert.equal(v.pawn.eating!.options.length,0);if(variant==='lost')g.available=false;return variant==='target'?{...eat,thing:'invented'}:variant==='actor'?{...eat,actor:'B'}:eat;}});
-  assert.equal(seen,1);assert.equal(r.status,'failed');assert.equal(g.calls,0);s.close();
+  assert.equal(seen,variant==='lost'?2:1,'a lost option gets one fresh-menu deliberation');assert.equal(r.status,'failed');assert.equal(g.calls,0);s.close();
  }
 });
 test('late eating answer cannot act after paired rewind',async()=>{
@@ -146,10 +146,26 @@ test('typed report binding survives real question publication and cannot target 
  assert(!v.selfCare.filter(x=>!x.reportQuestionId).some(x=>x.id===care.id));await c.checkpoint('lab-concord-report-link');await c.restore('lab-concord-report-link');assert.equal(c.inspect().coreState!.questions.find(x=>x.id===report.id)!.reportSelfCareId,care.id);assert.equal(g.calls,1);s.close();
 });
 
-test('answer revalidation failures remain visible per lane without leaking answer text',async()=>{
- const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'lost',async answerCore(){g.available=false;return {choice:'eat',thing:'berry',text:'UNPUBLISHED ANSWER'};}});
+test('an eating answer whose food left the menu gets one fresh-menu deliberation, not a silent drop (Fable)',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);const seen:any[]=[];
+ const result=await c.answerCoreQuestion(q,{name:'requeue',async answerCore(v){seen.push(structuredClone(v));
+  if(seen.length===1){g.food='meal';return eat;}
+  return {choice:'eat',thing:'meal',text:'The berries are gone; I will eat the meal instead.'};}});
+ assert.equal(result.status,'delivered');assert.equal(seen.length,2);
+ assert.equal(seen[0].question.requeued,undefined);assert.match(seen[1].question.requeued,/no longer available/);
+ assert.deepEqual(seen[1].pawn.eating.options.map((o:any)=>o.thing),['meal'],'new input: the fresh menu');
+ assert.equal(g.data.actions[0]!.thing,'meal');assert.equal(c.inspect().coreState!.questions.find(x=>x.id===q)!.status,'answered');
+ const requeued=s.events().filter(e=>e.event.kind==='core-answer-requeued');assert.equal(requeued.length,1);assert.equal((requeued[0]!.event.data as any).eatingValidation.code,'option-not-current');
+ assert.equal(s.events().filter(e=>e.event.kind==='core-answer-failed').length,0);s.close();
+});
+
+test('answer revalidation failures remain visible per lane without leaking answer text; the requeue happens once',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);let calls=0;
+ await c.answerCoreQuestion(q,{name:'lost',async answerCore(v){calls++;if(calls===1){g.food='meal';return {choice:'eat',thing:'berry',text:'UNPUBLISHED ANSWER'};}g.available=false;return {choice:'eat',thing:'meal',text:'UNPUBLISHED ANSWER'};}});
+ assert.equal(calls,2,'one requeue, then the rejection stands');
  const {crewReport}=await import('../src/crew-log.js');const report=crewReport(c.inspect(),g.data.ticks);
- assert.match(report.observerText!,/core-answer failures: 1 \(eating: option-not-current 1\)/);assert(!JSON.stringify(report).includes('UNPUBLISHED'));s.close();
+ assert.match(report.observerText!,/core-answer failures: 1 \(eating: option-not-current 1\)/);assert(!JSON.stringify(report).includes('UNPUBLISHED'));
+ assert.equal(s.events().filter(e=>e.event.kind==='core-answer-requeued').length,1);s.close();
 });
 
 test('a consumption report answered with another meal remains claimed but cannot close from the older meal',async()=>{
