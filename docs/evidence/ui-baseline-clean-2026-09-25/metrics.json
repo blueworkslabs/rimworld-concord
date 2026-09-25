@@ -1,0 +1,47 @@
+{
+  "task": "T1 campfire and three cooking iterations",
+  "result": "pass",
+  "attempts": 1,
+  "classification": "corrected-adapter calibration; not a scored paired harness comparison",
+  "taskWallSeconds": 150.39864540100098,
+  "firstVisibleCompletionSeconds": 133.65291810035706,
+  "clicks": 13,
+  "keyCommands": 6,
+  "screenshots": 11,
+  "rejectedGameInputs": 0,
+  "drafts": 0,
+  "forcedPawnJobs": 0,
+  "toolErrors": [
+    "One screenshot view attempted before its asynchronous capture/copy completed; recovered by waiting for the same process. Included in elapsed time."
+  ],
+  "adapterStallsObserved": 0,
+  "gameResult": {
+    "initialCampfires": 0,
+    "finalCampfires": 1,
+    "campfireId": "Campfire5671",
+    "recipe": "CookMealSimple",
+    "repeatMode": "RepeatCount",
+    "remaining": 0,
+    "configurationEvidence": "s013.png shows 3x; s015.png shows 0x and Bill complete notification"
+  },
+  "taskFreezeSha256": "c64dd9b247097db1a11862bd4f414514eb7d67e33f9404c0a0eaa06822594839",
+  "adapterSha256": "3d32de42f91d82e9084955dce29e37a3eeb08830d9da9c71d17f4fe93c7f7ce2",
+  "inputSaveSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+  "endSaveSha256": "77deb9be293fbe4c30c4cd055535d5f02d9ed689544610e02d34b81ccd4dbd59",
+  "recording": {
+    "sha256": "b15e2492c0d38c21196135a4daa6b2cb5b0c0387e3103a98806a24e78b30ec46",
+    "bytes": 7943800,
+    "durationSeconds": 255.933333,
+    "duplicateFrames": 3,
+    "droppedFrames": 1,
+    "url": "https://discord.com/channels/1083662512806965308/1467116597645676546/1553134736233472173"
+  },
+  "preservation": {
+    "originalSaves": 439,
+    "allOriginalSavesUnchanged": true,
+    "modsUnchanged": true,
+    "profileRestored": true,
+    "newSaveSha256": "77deb9be293fbe4c30c4cd055535d5f02d9ed689544610e02d34b81ccd4dbd59",
+    "inputCopyUnchanged": true
+  }
+}

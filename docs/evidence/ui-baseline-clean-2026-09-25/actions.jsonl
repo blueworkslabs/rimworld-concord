@@ -1,0 +1,51 @@
+{"at": 1790366257.1777732, "kind": "record-start", "pid": 200548}
+{"at": 1790366272.0792491, "kind": "screenshot", "file": "s001.png"}
+{"at": 1790366287.307124, "kind": "click", "x": 483, "y": 594, "button": 1}
+{"at": 1790366287.6889708, "kind": "screenshot", "file": "s002.png"}
+{"at": 1790366296.7592177, "kind": "click", "x": 877, "y": 318, "button": 1}
+{"at": 1790366297.114602, "kind": "screenshot", "file": "s003.png"}
+{"at": 1790366305.7739294, "kind": "click", "x": 828, "y": 122, "button": 1}
+{"at": 1790366306.1328542, "kind": "screenshot", "file": "s004.png"}
+{"at": 1790366320.831597, "kind": "click", "x": 971, "y": 742, "button": 1}
+{"at": 1790366329.1800487, "kind": "mark", "name": "task-start"}
+{"at": 1790366329.594877, "kind": "screenshot", "file": "s005.png"}
+{"at": 1790366338.608381, "kind": "click", "x": 49, "y": 782, "button": 1}
+{"at": 1790366339.0628355, "kind": "screenshot", "file": "s006.png"}
+{"at": 1790366349.1907308, "kind": "click", "x": 144, "y": 688, "button": 1}
+{"at": 1790366349.5820515, "kind": "screenshot", "file": "s007.png"}
+{"at": 1790366362.0149229, "kind": "click", "x": 407, "y": 711, "button": 1}
+{"at": 1790366362.1989393, "kind": "click", "x": 641, "y": 419, "button": 1}
+{"at": 1790366362.2802014, "kind": "key", "keys": ["Escape"]}
+{"at": 1790366362.3802598, "kind": "key", "keys": ["Escape"]}
+{"at": 1790366362.544111, "kind": "click", "x": 153, "y": 782, "button": 1}
+{"at": 1790366362.9043758, "kind": "screenshot", "file": "s008.png"}
+{"at": 1790366377.1738777, "kind": "click", "x": 668, "y": 691, "button": 1}
+{"at": 1790366377.3521461, "kind": "click", "x": 146, "y": 783, "button": 1}
+{"at": 1790366377.446954, "kind": "key", "keys": ["3"]}
+{"at": 1790366385.5549679, "kind": "key", "keys": ["space"]}
+{"at": 1790366385.9763262, "kind": "screenshot", "file": "s009.png"}
+{"at": 1790366396.2679207, "kind": "click", "x": 640, "y": 418, "button": 1}
+{"at": 1790366396.655016, "kind": "screenshot", "file": "s010.png"}
+{"at": 1790366406.9097595, "kind": "click", "x": 395, "y": 585, "button": 1}
+{"at": 1790366407.0958006, "kind": "click", "x": 83, "y": 114, "button": 1}
+{"at": 1790366407.4717157, "kind": "screenshot", "file": "s011.png"}
+{"at": 1790366417.9665377, "kind": "click", "x": 174, "y": 130, "button": 1}
+{"at": 1790366418.3813174, "kind": "screenshot", "file": "s012.png"}
+{"at": 1790366428.4720752, "kind": "click", "x": 178, "y": 175, "button": 1}
+{"at": 1790366428.6530087, "kind": "click", "x": 178, "y": 175, "button": 1}
+{"at": 1790366428.9950783, "kind": "screenshot", "file": "s013.png"}
+{"at": 1790366439.560553, "kind": "key", "keys": ["3"]}
+{"at": 1790366451.96445, "kind": "screenshot", "file": "s014.png"}
+{"at": 1790366462.8329668, "kind": "screenshot", "file": "s015.png"}
+{"at": 1790366479.506762, "kind": "key", "keys": ["space"]}
+{"at": 1790366479.578694, "kind": "mark", "name": "task-success-ui"}
+{"at": 1790366479.6557996, "kind": "key", "keys": ["Escape"]}
+{"at": 1790366479.7460265, "kind": "key", "keys": ["Escape"]}
+{"at": 1790366480.1597865, "kind": "screenshot", "file": "s016.png"}
+{"at": 1790366491.3928406, "kind": "click", "x": 931, "y": 416, "button": 1}
+{"at": 1790366491.720403, "kind": "screenshot", "file": "s017.png"}
+{"at": 1790366503.2834065, "kind": "type", "text": "ui-baseline-finish"}
+{"at": 1790366503.4602168, "kind": "click", "x": 850, "y": 655, "button": 1}
+{"at": 1790366503.7756922, "kind": "screenshot", "file": "s018.png"}
+{"at": 1790366512.3475785, "kind": "click", "x": 929, "y": 675, "button": 1}
+{"at": 1790366527.1471515, "kind": "cleanup", "note": "UI quit stopped game/display; recorder exited on display closure; profile restored"}

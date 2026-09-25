@@ -100,3 +100,7 @@ pre-existing asthma needing tending. Crew-side follow-ups remain separate.
 ## 2026-09-25 — standard-UI harness feasibility pilot
 
 [Report](../evidence/ui-baseline-2026-09-25/REPORT.md) · [metrics](../evidence/ui-baseline-2026-09-25/metrics.json): first-attempt campfire + three cooking iterations using only standard UI, 251.903s and 20 controls. Provisional: adapter stalls retained, controller cost unavailable; not a harness comparison.
+
+## 2026-09-25 — corrected-adapter T1 UI calibration
+
+[Report](../evidence/ui-baseline-clean-2026-09-25/REPORT.md) · [metrics](../evidence/ui-baseline-clean-2026-09-25/metrics.json): 150.399s, 19 controls, 11 screenshots, no rejected game inputs. Native usage captured; subscription USD unknown; existing-context calibration, not a paired harness score. Original pilot preserved.
