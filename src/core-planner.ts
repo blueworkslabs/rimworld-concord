@@ -1,5 +1,5 @@
 import {selfCareFollowup} from './self-care-followup.js';
-import {PROMPT_LIMIT} from './prompt-limit.js';
+import {PROMPT_LIMIT,TRIM_NOTE,trimToFit} from './prompt-limit.js';
 import {productionView} from './production-planning.js';
 import {sharedFood,foodKnowledge} from './food-observation.js';
 import {sharedStatus} from './shared-status.js';
@@ -194,15 +194,9 @@ export {PROMPT_LIMIT};
  * a `trimmed` note; the input is untouched. The copy is what the model is shown, what is recorded
  * as the core input, and what a returned choice is validated against first. Idempotent. */
 export function fitCore<V extends CoreView>(view:V,limit=PROMPT_LIMIT):V{
- const shown:any=structuredClone(view),prior=shown.trimmed??{};
- const trimmed={messages:prior.messages??0,agreements:prior.agreements??0,questions:prior.questions??0,selfCare:prior.selfCare??0,requests:prior.requests??0};
- const lists:[keyof typeof trimmed,number][]=[['messages',6],['agreements',6],['questions',4],['selfCare',4],['requests',4]];
- const size=()=>Buffer.byteLength(JSON.stringify(corePrompt(shown)));
- while(size()>limit){
-  const next=lists.find(([key,keep])=>(shown[key]?.length??0)>keep);
-  if(!next)break;
-  shown[next[0]].shift();trimmed[next[0]]++;shown.trimmed={...trimmed,note:'Older items were left out to fit; they still happened.'};
- }
+ const shown:any=structuredClone(view);
+ const lists=(['messages','agreements','questions','selfCare','requests'] as const).map((k,i)=>[k,()=>shown[k],[6,6,4,4,4][i]!] as const);
+ trimToFit(lists,()=>Buffer.byteLength(JSON.stringify(corePrompt(shown))),limit,shown.trimmed??{},t=>{shown.trimmed={...t,note:TRIM_NOTE};});
  return shown;
 }
 export function corePrompt(v:CoreView){return {task:'core-plan',sourceContract:'currentRecords are authoritative only within their stated scope and timestamp. Shared telemetry can be unknown or stale. communication is attributed testimony, not verified physical truth. plannerHistory contains fallible older interpretations, never current need readings or proof a reply is absent. Reconcile summaries against currentRecords before carrying them forward; keep uncertainty explicit. availableChoices lists eligibility, not consent or a preferred action.',

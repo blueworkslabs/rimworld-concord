@@ -210,3 +210,29 @@ gate process. The migration pages stay as history.
   A token/time comparison can proceed, but “cheaper in USD” remains unproven without comparable pricing.
 - T2/T3 exact success predicates and fixtures are deferred until after T1. Assignment
   alone does not prove a pawn slept; stockpile membership alone does not prove indoors.
+
+## Implementation status: perception (Clawd, 2026-09-25)
+
+**Built, not yet run in the game.** `perceive` is a bridge op (mod `Perception.cs`, no patches):
+one snapshot per request, built on the game thread from the game's own structures, fogged
+cells excluded, written by a small JSON writer (Unity's serializer drops nested arrays).
+Sections as in the table above, plus `meta` (world, load epoch, map, tick, snapshot ID) and an
+`omitted` list stating what v1 does not export yet: transient top-left messages, home-area
+cells, and weather forecasts (not player-visible). `receipts` is empty until actions v1.
+Getters used and why they are safe to call outside the UI: `Alert.GetReport`/`GetLabel`
+(what the alert readout calls every frame; read through its private active list, no patch),
+`Letter.Label`/`ChoiceLetter.Text`, `JobDriver.GetReport`, `ThoughtHandler`'s distinct mood
+groups, `ResourceCounter.AllCountedAmounts`, `GenDate` for the clock. Staging should confirm
+none of them mutates state.
+
+On the coordinator side (`src/harness/perception.ts`): the `Snapshot` schema, `since` (things
+appeared, disappeared or changed def, position, stack, forbidden; alerts raised/cleared;
+letters; bills and zones added/removed/changed; pawn job, need band, mood band, health and
+downed; resource thresholds 1/10/25/50/100/250/500/1000 crossed; designation counts; a reset,
+never a comparison, across a world, load or map change), `look` (area around a cell or thing,
+category, capability, pawn) and `digest`. The digest uses the core's fitting loop, now shared
+as `trimToFit` (core and reflection use it unchanged): plants, filth, corpses, then far items,
+old letters, far things and each pawn's weakest thoughts go first, and it states what it left
+out and that `look` reaches it. `trials/harness-perceive.ts` captures a real snapshot, digest
+and size summary on staging; its first run replaces the synthetic test fixture and answers the
+thought-list question from real numbers.
