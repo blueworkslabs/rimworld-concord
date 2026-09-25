@@ -13,12 +13,12 @@ test('core launcher refuse an owned staging lock and direct entry points fail be
  const closed=once(owner,'close');
  try {
   const [ready]=await once(owner.stdout,'data');assert.equal(ready.toString(),'ready');
-  for(const mode of ['game','cold'])for(const launcher of ['scripts/run-core-lab.sh','scripts/run-core-events-lab.sh','scripts/run-core-lifecycle-lab.sh','scripts/run-core-followup-lab.sh','scripts/run-food-observation-lab.sh','scripts/run-native-food-lab.sh','scripts/run-pawn-eating-lab.sh','scripts/run-fresh-facts-lab.sh']){
+  for(const mode of ['game','cold'])for(const launcher of ['scripts/run-core-followup-lab.sh','scripts/run-food-observation-lab.sh','scripts/run-native-food-lab.sh','scripts/run-pawn-eating-lab.sh','scripts/run-fresh-facts-lab.sh']){
    const result=spawnSync('bash',[launcher,mode,'11111111-1111-4111-8111-111111111111'],{env,encoding:'utf8',timeout:5000});
    assert.equal(result.status,1);assert.equal(result.stdout,'');assert.equal(result.stderr,'');
   }
   const recorded=spawnSync('bash',['scripts/run-ongoing-lab.sh','game','--recorded'],{env,encoding:'utf8',timeout:5000});assert.equal(recorded.status,1);assert.equal(recorded.stdout,'');assert.equal(recorded.stderr,'');
-  for(const entry of ['core-game','core-events-game','core-lifecycle-game','core-followup-game','food-observation-game','native-food-game','pawn-eating-game','fresh-facts-game','ongoing-game']){
+  for(const entry of ['core-followup-game','food-observation-game','native-food-game','pawn-eating-game','fresh-facts-game','ongoing-game']){
    const result=spawnSync(process.execPath,['dist/trials/'+entry+'.js'],{env,encoding:'utf8',timeout:5000});
    assert.equal(result.status,1);assert.match(result.stderr,/Use (scripts\/run-core(?:-events|-lifecycle|-followup)?-lab.sh|locked food observation launcher|locked native food launcher|locked pawn eating launcher|locked fresh facts launcher|scripts\/run-ongoing-lab.sh)/);
    assert(!result.stderr.includes('Bridge timeout'));

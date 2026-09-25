@@ -31,14 +31,16 @@ namespace Concord {
                 !b.Position.Fogged(p.Map)&&RestUtility.CanUseBedNow(b,t,true)&&
                 b.GetCurOccupant(0)==null&&p.CanReach(b,PathEndMode.OnCell,Danger.None);
         }
-        public static bool Valid(Pawn p,Pawn t,Building_Bed b) {
-            return Ready(p)&&Patient(p,t)&&t.Spawned&&!t.Position.Fogged(p.Map)&&
-                p.carryTracker.CarriedThing==null&&Bed(p,t,b)&&p.CanReserve(t)&&p.CanReserve(b,1,0)&&
+        public static bool Valid(Pawn p,Pawn t,Building_Bed b,bool handover=false) {
+            // handover: read-only offerability while a tagged trip is still carrying; execution
+            // (Valid without handover) always requires empty hands.
+            return (handover||Ready(p))&&Patient(p,t)&&t.Spawned&&!t.Position.Fogged(p.Map)&&
+                (handover||p.carryTracker.CarriedThing==null)&&Bed(p,t,b)&&p.CanReserve(t)&&p.CanReserve(b,1,0)&&
                 p.CanReach(t,PathEndMode.ClosestTouch,Danger.None);
         }
-        public static string Options(Pawn p,string epoch) {
+        public static string Options(Pawn p,string epoch,bool handover=false) {
             var options=new List<RescueOption>();var observations=new List<RescueObservation>();
-            if(Ready(p)) {
+            if(handover||Ready(p)) {
                 var targets=new List<Pawn>();var beds=new List<Building_Bed>();
                 // A bounded visible square, not the global pawn/bed registry.
                 var cells=new List<IntVec3>();
@@ -52,7 +54,7 @@ namespace Concord {
                         if(t!=null&&targets.Count<8&&Patient(p,t))targets.Add(t);
                         if(b!=null&&beds.Count<12&&!beds.Contains(b))beds.Add(b);
                     }
-                foreach(var t in targets)foreach(var b in beds)if(options.Count<6&&Valid(p,t,b)) {
+                foreach(var t in targets)foreach(var b in beds)if(options.Count<6&&Valid(p,t,b,handover)) {
                     options.Add(new RescueOption {target=t.GetUniqueLoadID(),bed=b.GetUniqueLoadID(),x=b.Position.x,z=b.Position.z});
                     observations.Add(new RescueObservation {target=t.GetUniqueLoadID(),targetName=t.LabelShort,bed=b.GetUniqueLoadID(),bedLabel=b.LabelNoCount});
                 }

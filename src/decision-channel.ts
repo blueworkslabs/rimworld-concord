@@ -1,5 +1,5 @@
 import {CoreAnswerChoice} from './pawn-eating.js';
-import {CoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
+import {CoreChoice,CoreRejection,type CoreView,type CoreQuestionView} from './core-planner.js';
 import {SocialChoice,type SocialView} from './social.js';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
@@ -28,11 +28,12 @@ export class DecisionChannel {
    });
  }
  receive(raw:unknown){
-   const r=z.object({type:z.literal('decision-result'),id:z.string().uuid(),output:z.unknown().optional(),error:z.literal('Decision unavailable').optional(),cause:z.enum(['context-too-large','request-too-large','cancelled','invalid-output','backend','deadline']).optional()}).strict().parse(raw);
+   const r=z.object({type:z.literal('decision-result'),id:z.string().uuid(),output:z.unknown().optional(),error:z.literal('Decision unavailable').optional(),cause:z.enum(['context-too-large','request-too-large','cancelled','invalid-output','backend','deadline']).optional(),coreRejection:CoreRejection.optional()}).strict().parse(raw);
    const p=this.pending;if(!p||p.id!==r.id)return;
    if(r.error!==undefined&&r.output!==undefined)throw Error('Ambiguous decision result');
+   if(r.coreRejection&&(p.mode!=='core'||!r.error||r.cause!=='invalid-output'))throw Error('Invalid core rejection envelope');
    const value=r.error?undefined:(p.mode==='core'?CoreChoice:p.mode==='core-answer'?CoreAnswerChoice:p.mode==='social'?SocialChoice:p.mode==='decision'?Decision:Reflection).parse(r.output);
-   p.cleanup();this.pending=undefined;if(r.error)p.reject(Object.assign(Error(r.cause?`${r.error} (${r.cause})`:r.error),r.cause?{failureCause:r.cause}:{}));else p.resolve(value);
+   p.cleanup();this.pending=undefined;if(r.error)p.reject(Object.assign(Error(r.cause?`${r.error} (${r.cause})`:r.error),r.cause?{failureCause:r.cause}:{},r.coreRejection?{coreRejection:r.coreRejection}:{}));else p.resolve(value);
  }
  close(){
    this.closed=true;const p=this.pending;this.pending=undefined;

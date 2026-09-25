@@ -1,3 +1,4 @@
+import {DecisionChannel} from '../src/decision-channel.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -5,6 +6,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { Coordinator } from '../src/coordinator.js';
 import { Store } from '../src/store.js';
 import { AttentionPump, type AttentionBackend, type AttentionView } from '../src/attention.js';
+import { modelPrompt } from '../src/model-perspective.js';
+import { PROMPT_LIMIT } from '../src/prompt-limit.js';
 import { scripted } from '../src/backends.js';
 import type { GameBridge, GameState, ActionRequest, Receipt, Activity } from '../src/protocol.js';
 
@@ -131,6 +134,15 @@ test('pump caps concurrent turns, observes while thinking and prioritizes signif
  game.data.ticks++;await pump.poll();assert.equal(pump.status().started,1);assert.equal(game.data.paused,false);
  release({kind:'continue',reason:'All right'});await pump.drain();await pump.poll();
  assert.equal(pump.status().started,1);assert.equal(c.inspect().characters.A!.attention,undefined);await pump.stop();store.close();
+});
+test('native job churn makes room before unconsidered experiences are lost (post-Gate-C item 7)',async()=>{
+ const {game,store,c}=await setup();for(let i=0;i<5;i++)game.event('need','A','band '+i);
+ for(let i=0;i<200;i++)game.event(i%2?'job-end':'job-start','A','GotoWander');
+ game.event('intent-ordinary','A','intent=x;count=5;source=Pedro');await c.observe();
+ const kept=c.inspect().characters.A!.experiences!;assert.equal(kept.length,64);
+ assert.deepEqual(kept.filter(e=>e.event.kind==='need').map(e=>e.event.detail),['band 0','band 1','band 2','band 3','band 4'],'unconsidered need changes survive the churn');
+ assert.equal(kept.at(-1)!.route,'native','ordinary intent arrivals are native texture');
+ assert.equal(store.events().filter(e=>e.event.kind==='attention-gap').length,0);store.close();
 });
 test('unconsumed bounded-history loss is explicitly audited',async()=>{
  const {game,store,c}=await setup();for(let i=0;i<70;i++)game.event();await c.observe();
@@ -287,4 +299,50 @@ test('admission is consumed before an attempted reflection and released on failu
  const backend={name:'fail',async reflect(){calls++;throw Error('failed provider');}};
  game.event();assert.equal((await c.attend('A',backend,low,{},undefined,'model',admission)).status,'failed');assert.deepEqual([consumed,released,calls],[1,1,1]);
  permit=false;game.event();assert.equal((await c.attend('A',backend,low,{},undefined,'model',admission)).status,'failed');assert.deepEqual([consumed,released,calls],[2,2,1]);store.close();
+});
+
+test('reflection failure cause remains visible after a successful core turn and reopen',async()=>{
+ const {game,store,c}=await setup();await c.initializeCore('Optional work');game.event('memory');
+ assert.equal((await c.attend('A',{name:'oversize',async reflect(){throw Object.assign(Error('No text exported'),{failureCause:'context-too-large'});}})).status,'failed');
+ await c.planCore({name:'wait',async plan(){return {topics:[],actionTopicId:null,action:{kind:'wait',reason:'Wait'}};}});
+ const {crewReport}=await import('../src/crew-log.js');assert.match(crewReport(c.inspect(),game.data.ticks).observerText!,/reflection failures: 1 \(context-too-large 1\)/);
+ const reopened=new Coordinator(store,game);await reopened.open();assert.deepEqual(reopened.inspect().diagnostics?.laneFailures?.reflection,{total:1,causes:{'context-too-large':1}});store.close();
+});
+
+test('an oversized reflection turn hands over and records the trimmed view the model sees',async()=>{
+ const {game,store,c}=await setup();const big='x'.repeat(900);const domain=(c as any).domain;
+ domain.characters.A.memories=Array.from({length:30},(_,i)=>`memory ${i} ${big}`);
+ const stored=structuredClone(domain.characters.A.memories);let seen:any;
+ const backend={name:'record',async reflect(view:AttentionView){seen=view;return {kind:'continue',reason:'Remember this'};}};
+ game.event('memory');assert.equal((await c.attend('A',backend)).status,'continued');
+ assert.ok(Buffer.byteLength(JSON.stringify(modelPrompt('reflection',seen)))<=PROMPT_LIMIT);
+ assert.ok(seen.trimmed.memories>0);assert.equal(seen.trimmed.note,'Older items were left out to fit; they still happened.');
+ assert.equal(seen.character.memories.at(-1),`memory 29 ${big}`,'newest memory kept');
+ assert.deepEqual(domain.characters.A.memories.slice(0,30),stored,'the stored character is untouched');store.close();
+});
+
+test('reflection relay cannot cite evidence removed from the recorded trimmed view',async()=>{
+ const {game,store,c}=await setup(),d=(c as any).domain;
+ d.characters.A.experiences=Array.from({length:40},(_,i)=>({event:{seq:i+1,pawn:'A',tick:i+1,kind:'memory',detail:'x'.repeat(1000)},route:'deliberation',interrupt:false}));
+ d.characters.A.attention={cursor:40};d.eventCursor=40;game.data.eventSeq=40;game.event();
+ let shown:any;
+ const channel=new DecisionChannel((raw:any)=>{if(raw.type==='decision-request'){
+  shown=structuredClone(raw.view);
+  channel.receive({type:'decision-result',id:raw.id,output:{kind:'revise_outlook',reason:'Citing hidden old evidence',update:{expectedRevision:0,notes:[{kind:'concern',text:'Old thought',evidenceSeqs:[1]}]}}});
+ }});
+ try {
+  const r=await c.attend('A',channel);assert(shown);assert(shown.trimmed.experiences>0);
+  assert(!shown.character.experiences.some((e:any)=>e.event.seq===1));
+  assert.equal(r.status,'failed');assert.equal(c.inspect().characters.A!.outlook,undefined);
+  assert.equal(d.characters.A.experiences[0].event.seq,1,'stored evidence was not trimmed');
+ } finally {channel.close();store.close();}
+});
+
+test('queued urgent need evidence survives a later native recovery in the same batch',async()=>{
+ const {game,store,c}=await setup();game.event('food','A','0');game.event('food','A','1');
+ let shown:AttentionView|undefined;const result=await c.attend('A',{name:'capture',async reflect(view){shown=view;return {kind:'continue',reason:'The urgent band passed; continue native work'};}});
+ assert.equal(result.status,'continued');assert.ok(shown,'the backend was called');
+ assert.deepEqual(shown.events.map(e=>({kind:e.kind,detail:e.detail})),[{kind:'food',detail:'0'}]);
+ assert.ok(shown.character.experiences!.some(e=>e.event.kind==='food'&&e.event.detail==='1'&&e.route==='native'),'current recovery remains in the shown history');
+ assert.equal(c.inspect().characters.A!.attention!.cursor,2);store.close();
 });

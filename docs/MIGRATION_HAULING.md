@@ -1,12 +1,29 @@
 # Hauling migration: native intents by default (Gates A–C)
 
-**Status: Gate B signed by Fable on 2026-09-24 at `5942961`, with the three
+**Current status: migration Gate C passed on the game side; [verdict](trials/HAULING_MIGRATION_GATE_C.md). Ordered hauling is retired by #80 after the #79 test port. Historical gate design follows.**
+
+**Gate B signed by Fable on 2026-09-24 at `5942961`, with the three
 conditions recorded below.** Gate A is assembly-reviewed; Astra confirmed corrected
 Gate B testability with a separate B1 review. This authorizes implementation after the
 documentation merge, not a live run or a claim that the runtime measures have passed.
 The pinned build is RimWorld 1.6.4871 rev600, `Assembly-CSharp` prefix
 `082db1dd4f7f`. The spike and its verdict are in [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md)
 and [Gate C](trials/NATIVE_HAUL_GATE_C.md).
+
+## Operative fallback — 2026-09-25
+
+B1's two permitted fix/recheck rounds are exhausted. Round 2 (`b98d060`) failed in
+quiet-base preparation before any scenario assertions: the lab receipt read a pooled
+job's cleared definition after ending it. Failed recordings are retained. This is a
+harness failure, not a demonstrated growing-hold quota violation, but it is not a
+clean B1 result. **Strict (a) is the migration configuration; growing (b) is parked.**
+No third growing round is authorized by this freeze. Existing growing code/evidence
+is experimental, not cleared for deployment as the migration default. The reviewed
+receipt-only fix (`7dec73a`) is used for separate strict-only correctness checks; it
+does not reset the budget. The [single signed live run and post-read audit](trials/HAULING_MIGRATION_LIVE.md)
+are complete: no offer reached publication, and no hauling intent opened. Receipt-age
+prefixes passed the observed checks; failure totals remained off-screen and late offer
+answers were not exercised. That diagnostic run did not authorize deletion. The later [pipeline rerun](trials/HAULING_MIGRATION_PIPELINE_RERUN.md) supplied the evidence for Fable’s [game-side Gate C pass](trials/HAULING_MIGRATION_GATE_C.md).
 
 ## Goal
 
@@ -118,6 +135,83 @@ must change. Different defs in one zone must never share reservations or counter
 3. They are deleted in a follow-up after the verdict, together with the 35 % needs stop
    for hauling and `Hauling.Ready` (including its wrong-tag capability check). Audit
    remaining callers; do not retain it as a safety fallback for native work.
+
+**Done after Gate C (2026-09-25), in two PRs: the test port (#79), then the deletion.**
+**Listed versus actual footprint:** the page listed four things: `Concord_Haul`, `Hauling.cs`,
+haul planning and the needs stop. The implementation initially reported 86 files; the reviewed retirement touches
+106 files, including 52 deletions. The extra footprint includes three overlooked
+core scenes, a fail-closed persisted-action boundary, fixtures-only legacy adapters,
+and preserved regression checks. More than 3,200 lines are removed.
+- **Mod:**
+  - `Hauling.cs`, the `Concord_Haul` job and the `haul` op;
+  - the pawn view's `hauling` options and `workReady`;
+  - crew-log haul labels.
+  - Ordered build/cook readiness had borrowed `Hauling.Ready`, so it keeps its own copy until
+    that migration.
+- **Coordinator:**
+  - `haul` in the action union (`LegacyHaul` remains a read-only record shape for stored
+    histories and frozen eval fixtures);
+  - planner, offers, trip stepping, `haulMap`;
+  - `haulingOptions`, the model decision schema, the pawn haul contract;
+  - replacement and reflection branches (now native-haul only);
+  - `groundedPawn` moved to its own module.
+- **Runners:**
+  - hauling acceptance, fixture and live;
+  - haul-planning acceptance;
+  - crew-log acceptance;
+  - the observer, reconsider and work live trials;
+  - the needs, social, retention and integration live scenes;
+  - the core, core-events and core-lifecycle scenes that still depended on the removed needs fixture and ordered-haul opportunities;
+  - their launchers and Python fixtures;
+  - the ordered halves of the spike and migration runners.
+
+  All of them could only run ordered hauls. Their evidence stays in `docs/evidence`.
+- **Tests:**
+  - generic tests moved to rescue or to the native haul in #79;
+  - progress and summary arithmetic moved to multi-meal cooking;
+  - ordered-only tests and launcher tests removed;
+  - a frozen model-contract case keeps its ordered-haul record, so its menu no longer
+    offers the rescue alternative. Re-authoring it on a native haul is the eval owner's
+    call.
+
+### Compatibility boundary
+
+Historical JSON/evidence is unchanged. The legacy type adapters live only in
+`trials/fixtures/legacy.ts`; the frozen `active-haul` contract case stays historical.
+A future native contract case must be authored alongside it, not replace it.
+
+The coordinator refuses to open or restore a store containing unsupported proposal,
+counter or re-invitation actions **before** recovery, status edits or game loading.
+Raw `Store` reads remain available for offline history; use the matching historical
+revision for replay. There is no automatic conversion of old ordered-haul obligations
+into native intents, nor any inference that one completed trip means a whole old
+agreement completed. Old game saves with in-flight `Concord_Haul` jobs likewise need
+their historical mod. Native-only migration checkpoints remain supported.
+
+Deploy from a clean build/install: TypeScript does not remove stale compiled files
+for deleted sources, and copying a DLL alone does not remove the old JobDef. Preserve
+historical saves and paired stores; do not overwrite them during verification.
+
+For [construction and cooking](MIGRATION_PRODUCTION.md): the ordered model is used as the generic "offerable work" in
+many tests and runners, not only in its own module. Budget the port-then-delete pair from the
+start.
+
+**Native replacement fixes found by the port (after #80).** The ordered path re-read the
+fresh job receipt before offering or applying a rescue replacement. For a native haul, the
+same refresh now reads the live intent ledger. A quota met just before the core replies
+yields a standalone rescue, and a quota met while the pawn answers ends the replacement
+instead of stopping completed work. Also: when the game confirms the exclusion the consent
+queued, that queue entry clears as the same fact, so the rescue dispatches in the consent
+pass, still under the persisted id. Both exclusion paths require a loaded response from
+this world and epoch before treating the acknowledgment as confirmation. Stale replies
+leave the exclusion queued and the handover undispatched until fresh reconciliation.
+
+**Verification scope ([#81](https://github.com/blueworkslabs/rimworld-concord/pull/81)):
+mock/offline-tested**, not a new game run. Both former freshness TODOs now pass, as do
+same-pass dispatch, stale world/epoch/unloaded replies, and coordinator recreation after
+confirmation interruption or a lost dispatch reply. Full suite: 408 pass, no TODOs.
+The existing game-side handover evidence remains historical; this change does not claim
+new live-model, UI or game-process-restart acceptance.
 
 ## Gate A: internals questions
 
@@ -416,7 +510,9 @@ starting implementation ledger is round 0. Strict still must pass its migration 
 - **Expiry:**
   "Agreement expired at 20 of 30 wood (…); the topic stays open."
 - **Archive line, updated in place:**
-  "Since then: 45 wood as ordinary work (Pedro 25, Beatrice 20)."
+  "Since then: 45 wood arrived as ordinary work (Pedro 25, Beatrice 20), 15 removed."
+  Removals are shown whenever there are any. Each change moves the line to the newest
+  position with the current time.
 - **Zone label while open:** "Shared: <site or zone label> (<def>)", in a distinct
   colour. After retirement the original label and colour come back, with the material
   refreshed and the mesh dirtied (Q4). If several defs share the zone, the original
@@ -469,10 +565,206 @@ The ordered baseline must explicitly support both chosen defs with the same phys
 fixture and consent roles; if it cannot, label the unmatched portion instead of claiming
 parity. Retain invalid fixture attempts; no frozen live rerolls. The measures are below.
 
+## Implementation status (round 0)
+
+Built on `feat/hauling-migration`. **Not run in the game yet.** The B1 round ledger
+starts here at round 0; Astra keeps it.
+
+- **Mod** (`7440ecc`):
+  - (map, zone, def) lookups everywhere (B3);
+  - existing-stockpile or candidate-site tags, plain stops on zone edits, re-tag
+    generations (B2);
+  - the after-retirement archive (B4);
+  - the growing hold per intent (B1): a commit with a durable trip budget, patch 9
+    guarding every pickup, patch 10 holding the extra before the duplicate check,
+    true-up and pickup-bound detectors, whole-cargo-or-nothing retargets;
+  - label and colour while open, the clock, the "Show" button, the stockpile list in
+    state (B6);
+  - the read-only rescue handover projection (B7).
+
+  14 patched methods apply offline.
+- **Lab:** `scripts/hauling-migration-fixture.py` (B8 manifest: a mixed stockpile, a
+  candidate site, exact stacks, duplicate pairs).
+- **Coordinator** (`e60e714`):
+  - `configureNativeHauls` (list, fixed order; ordinary play vs `intentOnly`);
+  - the generalized stockpile haul;
+  - the B6 wording and silent wait;
+  - world-voice reasons;
+  - the durable rescue handover (B7).
+- **Scripted runs:** `scripts/run-hauling-migration-lab.sh [--strict] [--case=<name>]`
+  with the B1 checks, the mixed zone, the archive, zone edits, re-tagging, legibility,
+  and the matched pair (native and ordered). It runs with `--strict` for the fallback.
+  Not forced by the runner, and listed as unimplemented in its receipt:
+  - full-load retarget with insufficient destination quota;
+  - pending-extra retarget;
+  - re-target between two tagged zones;
+  - nested reserve failure and job recycling inside the duplicate check.
+
+### Review fixes (after Astra's #73 review; B1 rounds still 0/2)
+
+Fable ruled this a B2 boundary, not a B1 growing-hold fix.
+- **Hauls already on their way when the tag lands** (Fable's rule): when a stockpile is
+  tagged, every running haul whose target is in that zone and whose def matches is
+  marked `pre-tag` (saved with the intent). Those jobs are never credited, never counted
+  against the quota and never trimmed. Patches 1, 2, 9 and 10 leave them native, and a
+  retarget within the tagged zone keeps the mark. Their placements go into a "before"
+  bucket (`preTagByPawn`, drop kind `pretag`). The quota applies only to jobs admitted
+  after the tag, in both holds. Crew log, once, only when it applies: "Already on its way
+  when the agreement started: 30 wood (Pedro)." A new job after an interruption is a job
+  admitted after the tag.
+- **Rescue handover ownership:** the accepted rescue is a running standing with no step.
+  The pawn holds it as their intention once the old agreement is stopped, so it is
+  visible to conflict checks and can be withdrawn. Every handover pass stops the old
+  agreement first if it still runs, which covers a restart between consent and
+  withdrawal. The handover stops if the rescue is withdrawn or the pawn's intention
+  changes, and ownership is checked again right before dispatch. If exclusion flushing
+  fails, the handover deadline is still processed.
+- **Clock provenance:** crew-log entries convert ticks with the map of their intent,
+  otherwise with the map of the named pawn. When the map is unknown, only `tN` is shown,
+  never the viewed map. `IntentView.mapId` is exposed.
+- **Evidence:**
+  - `intent-pickup` receipts per pickup (job, cap, acquired, hold, trip);
+  - `intent-duplicate-admitted` when the duplicate check selected a second stack;
+  - per-job `jobs` (hold, trip budget, pre-tag mark) and `preTagAtStart` in the intent view;
+  - the haul def on `job-start`;
+  - the `lab-zone-count` op.
+
+  The runner uses these for:
+  - withdrawal after duplicate selection;
+  - this job's hold and budget across save/load;
+  - the refuser's third def (their own completed trips plus the zone count);
+  - exact first-pickup receipts under source mutation;
+  - a new `pretag-running-haul` case.
+
+  The matched pair now runs per frozen def and quota from the manifest's `matched`
+  (wood plus a small-stack def, native and ordered), with exact quantities and trip
+  counts. Units an ordered trip carries past the quota are labelled as unmatched. The
+  runner can't observe the in-game rescue handover, the UI clock and Show button, or
+  the on-screen label and colour. The receipt lists them under `needsRecordedEvidence`,
+  and they are never counted as passed.
+
+### Before the last B1 round (after staging round 1; rounds used 1/2)
+
+These are harness preconditions and new cases. No admission, hold or accounting rule
+changed. The mod only gained lab ops and two evidence receipts. Causes come from round 1's
+raw receipts:
+- **Quiet base.** The round-1 base save carried Beatrice's running wood haul (job 4,
+  marked pre-tag at tick 3), so every case started with pre-agreement work in flight.
+  That starved the contention case (Pedro held 25 alone) and used up the pre-tag
+  case's supply before tagging. The runner now ends every pawn's job without starting a
+  new one (`lab-interrupt` with `idle`) before saving the base. The fixture save is
+  unchanged. A tag refused because a matching job started in the same tick is retried
+  after one tick.
+- **Carried cargo plus source.** A queued job drops carried cargo before it starts on
+  4871 (`JobDef.dropThingBeforeJob`, default true). Round 1's queued job had also
+  picked a stack someone else had reserved, so it ended `QueuedNoLongerValid`.
+  `lab-start-haul` starts the job the way the game does for a pawn already carrying
+  (`keepCarryingThingOverride`), with a source this pawn can reserve. The case requires
+  the admission receipt with `carried=5`, pickups of additional units, and job delivery
+  equal to cargo plus pickups.
+- **Pre-tag.** Two phases: first the captured trip's own `job-end`, then the quota. Before
+  the quota is required, the runner reads Pedro's haulable wood (`lab-loose`) and records
+  a precondition failure if it is below the quota. The broad "did not finish" wording is
+  gone.
+- **Ordered half.** The ordered model offers only what a pawn sees in a 13×13 square,
+  source and destination both included. Round 1 had one wood offer because no pawn stood
+  near both a stack and the pile, then the model's 35 % needs stop idled both pawns. The
+  scripted core now also offers a move to a spot within 6 cells of the nearest reachable
+  stack and the pile. Moves count as core turns. It plans exact quantities (count and
+  trips never past the quota). Supply more than 12 cells from the pile is out of the
+  model's reach and is labelled (`outOfReachUnits`), not counted against parity. If the
+  reachable supply is below the quota, the case fails as unmatched by fixture. The needs
+  stop is recorded as the reason, not waited out. Wood placed in the pile by ordinary
+  opportunistic hauling during the ordered half is reported as `nativeUnitsDuringOrdered`.
+- **Retargets.** On 4871 the only `SetTarget(B)` of a haul is the native placement
+  retarget in `Toils_Haul.PlaceHauledThingInCell`. It runs after collection, where the
+  hold always equals the cargo (patch 4b trues down, patch 10 rolls back). A retarget
+  with an extra still pending is therefore not reachable. Filling the target outright
+  fails the carry toil instead, and the job ends without a retarget. `lab-target-room`
+  leaves one unit of room at the carrier's target and occupies the other pile cells. The
+  direct drop then places one unit and the game searches storage for the remainder.
+  Patch 2 now emits `intent-retarget` (from, to, job, carried, hold before, haul mode).
+  New cases:
+  - `retarget-between-tagged-zones`: the remainder moves to a second tagged pile, the
+    hold before the move equals the cargo, and credit follows placement (1 and the rest).
+  - `retarget-insufficient-destination-quota`: the second pile can't take the whole
+    remainder. The game hauls it aside (`ToCellNonStorage`), nothing enters the second
+    pile, and no hold outlives the trip.
+  - `pending-extra-destination-lost` (growing only): the reachable neighbour of a
+    pending-extra retarget. The destination is lost while Pedro walks to an admitted
+    duplicate. The job fails, the extra is never collected, and the hold is released.
+- **Observed only.** A job ending inside the native pickup or duplicate check (reserve
+  failure or pooling) emits `intent-nested-end` with any hold left behind. The runner
+  collects these in `observedOnly`. A leftover hold is a finding. They can't be forced:
+  the native check validates reservability first.
+- **Wrapper cost.** Both native matched halves time every patch call (`lab-patch-cost`)
+  and keep the totals.
+
+Round 2 is the last B1 fix/recheck round. If B1 isn't clean after it, strict ships and
+growing is parked with this evidence (Astra's handoff).
+
+### Strict acceptance work (after the fallback, 2026-09-25)
+
+Round 2's setup failure was a harness bug: the quiet-base receipt read a job's def after
+the game had pooled the job. Astra's `7dec73a` fixes it. None of the following touches B1
+or reopens growing.
+- **Strict is enforced as the configuration.** `configureNativeHauls` refuses a growing
+  hold unless `experimentalGrowing` is set, and an entry without a hold is strict. The
+  runner defaults to strict; `--experimental-growing` is the only way to run the parked
+  hold, and it clears nothing. `--strict` is still accepted and changes nothing. The mod
+  keeps its strict default.
+- **Refusing pawn, third item.** In the strict run, Pedro took all the steel after his wood
+  quota and Beatrice chose ordinary components and wood, so the check was left to chance.
+  The case now works while Beatrice's wood refusal binds (wood intent open, before any
+  tick):
+  - `lab-store-probe` runs the patched native storage search for her: steel finds the
+    pile, wood does not. Pedro's wood search is the control.
+  - `lab-haul-to-storage` starts the job the native factory builds for her steel. The
+    harness chooses only the item.
+  - The case requires an untagged `HaulToCell` start with `def=Steel`, a `Succeeded` end,
+    and a higher steel count in the pile.
+- **B7 in the game, scripted.** Running the fixture script with a `rescue` section writes
+  a separate save:
+  - the patient is anesthetized at a set cell;
+  - medical sleeping spots are added;
+  - Doctor is 0 for everyone, so no native rescue races the scripted one;
+  - stacks, pile and hauling settings are identical to the base fixture.
+
+  In `rescue-handover-in-game`, Pedro accepts the wood agreement, carries, sees the
+  patient and asks. The core offers the requested rescue, and he accepts. Authored answers
+  only. Required:
+  - consent, then the game-confirmed exclusion, then exactly one dispatch under the
+    persisted id;
+  - the carried trip ends before the rescue starts;
+  - the rescue completes with the patient in the agreed bed;
+  - the carried trip is credited to Pedro;
+  - the crew record appears.
+
+  This moves the handover out of `needsRecordedEvidence`.
+- **Clock provenance: verified on one map; multi-map deferred until the first two-map
+  scenario exists.** (Fable, 2026-09-25: no two-map fixture for a clock.) The bare-tick
+  fallback stays tested in the game: the legibility case's `lab-clock-probe` requires the
+  event map's in-game hour and `tN` alone for an entry without map provenance or with a map
+  that does not exist.
+- **Still recorded by hand:** on-screen label and colour. The live #71 checks belong to the
+  separately frozen live run.
+- **Before the live run (Fable's step 1):** the telemetry-only wake rule in
+  [CORE](CORE.md). A wake made only of band changes spends no core turn and writes the
+  silent status. The exceptions: something is offerable, or a crew member's Food or Rest
+  band worsened to `urgent`. On E2 that silences turns 3, 6 and 13 and keeps 4, 5 and 7. The completion-report-to-receipt link
+  waits until after the live run.
+
+## Gate C result
+
+**Passed on the game side, 2026-09-25.** Verdict, deletion scope and follow-ups:
+[HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md).
+
 ## Gate C will measure
 
-**Signed condition: #71's fixes must be measured live in this migration.** Their
-current verification is mock/offline only. Correlate saved input snapshot ticks,
+**Signed condition: #71's fixes must be measured live in this migration.** The
+[post-read audit](trials/HAULING_MIGRATION_LIVE.md#technical-findings--released-after-the-recording-only-read)
+records the observed results and coverage limits; the frozen acceptance criteria
+below are unchanged. Correlate saved input snapshot ticks,
 intervening receipts and publication entries, alongside request/failure diagnostics:
 
 - Every narration published stale against a newer receipt carries its as-of prefix:
@@ -508,3 +800,22 @@ eleven methods; B1 proposes three wrappers plus a durable job budget. This is Fa
 complexity observation, not permission to add more rounds or weaken bounds. Retiring
 `Hauling.cs`, `Hauling.Ready` and the hauling needs stop is this migration's deletion;
 construction and cooking should each identify their corresponding retired code.
+
+
+### Review clarification: pre-agreement ordering (2026-09-24)
+
+Fable's final rule is relative to each intent: `job.startTick < intent.createdTick`.
+It applies across retargets, including into a different tagged stockpile. Such work
+remains native, is not cancelled by exclusion, and lands in the before bucket even
+if the intent has retired. Saved per-job marks are diagnostic, not the authority.
+An existing job that starts in the very tick of an attachment has no expressible
+before/after order in that comparison: attachment leaves state unchanged and returns
+a retry-after-next-game-tick response. The next attempt uses the actual later tag tick;
+no deferred zone or cropped cargo is created. This is a same-tick serialization guard,
+not deferral for the lifetime of a busy stockpile.
+
+Crew entries persist known event-map IDs at creation. Unknown historical map identity
+stays tick-only; names and current pawn positions never reconstruct an old timezone.
+Cleanup releases immutable job IDs captured before native pooling. Pending rescue
+ownership, old-standing stop and queued exclusion are durable together, and legacy
+partial handovers recover before exposing pawn operations.

@@ -53,9 +53,44 @@ time were false by publication.
 
 One action per turn, each with a public reason (≤600 characters):
 
-**Hauling-migration guidance (signed; implement with the migration):** give a concrete
-reason in the world's voice; eligibility/consent contract boilerplate belongs in the
-structured offer record, not in the core's public sentence.
+**Public reasons are in the world's voice.** The core's sentence is a concrete reason
+("the wood by the wall is getting wet"), never an eligibility or consent disclaimer. The
+structured offer record next to it says what is offered ("Offer to Beatrice: haul up to
+30 wood to the shared wood pile by the north wall; others may help"). The core view's
+limits say so in native-haul modes.
+
+**Native hauling modes.** `configureNativeHauls(entries)` freezes the operator's list of
+stockpile hauls: an existing colony stockpile (`zoneId`) or a candidate site, one per
+(stockpile, def). The list is shown in a fixed order: label, then def, then ids.
+- **Ordinary play:** ordered hauling is replaced by these offers; rescue, construction
+  and cooking stay available.
+- **Intent-only scenes** (`{intentOnly: true}`, and the spike's frozen live harness):
+  the stockpile hauls are the only proposable work.
+- The view carries the colony `clock`.
+- A wait produces no crew-log entry; the status line reads "Core: waiting on <first
+  open topic>", cut at a word. **A wait after a pawn spoke is never silent:** when the
+  wake carried a pawn's message to the core, the line reads "Core: heard Beatrice;
+  waiting on …", even if the model chose wait. The same holds when the core acted on
+  something else: a pawn whose message produced no reply or offer to them is listed as
+  "Core: heard Pedro; no reply to them yet". Typed pawn requests are in the design
+  queue.
+- **No consumption follow-up while a meal is under way.** A pawn with a self-care
+  receipt that is not yet completed, failed or interrupted is not offered a question.
+  This is deliberate and broader than meals: while that receipt is open, the core
+  cannot ask that pawn *anything*, not only about the meal. Meals are short, so this is
+  acceptable for a scene. A question to a rescuer that is blocked mid-bite is this rule,
+  not a bug.
+- **Failed and rejected core outputs are visible in the game.** Every failed attempt
+  gets one cause:
+  - the backend's #71 cause;
+  - `deadline` or `cancelled`;
+  - or the rule that rejected a returned output before publication: topic capacity,
+    topic link, unsupported closure, unavailable choice, superseded, or invalid output.
+
+  Counts are kept in `coreState.failures`, and the status line reads "Core outputs
+  failed or rejected: N (…)". A rejected offer or question also gets a crew record
+  naming whom it was for and why, never its text. In the migration's live run, three
+  proposals were rejected this way and nothing showed on screen.
 
 | Action | Effect |
 |---|---|
@@ -106,12 +141,30 @@ filter, private-state access, new action or model escalation is added.
 
 The legacy core keeps up to 8 topics, each tied to a source it can see (the brief, a message,
 an agreement, a request, an opportunity, a re-invitation or a self-care record). A turn
-may update several topics at once; `actionTopicId` links a new offer to a topic (it
-must be null for `ask` and `wait`). Invalid updates reject the whole turn before any
-effect.
+may update several topics at once. `actionTopicId` links a new offer to an **existing**
+open, blocked or deferred topic, or it is null (always null for `ask` and `wait`). A
+topic created in the same turn can't be linked; the offer links to it next turn. The
+schema lists only those ids (`actionTopicIds` in the prompt). The legacy single-topic
+form keeps its implicit link only for an existing topic. Invalid updates reject the
+whole turn before any effect.
+
+**Capacity-aware schema.** When eight topics are active, the choice schema offers only
+the existing topic ids: they can be updated or closed, but no new source can be added.
+The prompt says `topicCapacity.full`, and the validator rejects a new topic with "Core
+topic capacity full". Closed topics cannot be reopened at capacity. This narrows
+expressible sources; runtime validation still enforces aggregate capacity and all
+other constraints.
 
 Statuses are `open`, `blocked`, `deferred`, `resolved` and `declined`. The last two are
-only allowed when the receipts say so (`topicClosures`):
+only allowed when the receipts say so (`topicClosures`). **Completion reports:** the
+core explicitly selects `reportSelfCareId` on a consumption-report question, or null
+for an unrelated question. Only an unclaimed receipt belonging to that pawn is listed;
+the binding is persisted, and the answering pawn receives the public receipt context.
+Its topics can resolve once that receipt verifies the meal. If the report answer
+chooses another meal, the report remains claimed but its messages cannot close
+from the older meal; the new eating action requires its own receipt. Mere question order or
+prose never establishes a link, even for the first question after eating. In the live
+run, three receipted follow-ups had no permitted closure and filled the topic slots.
 
 - **resolved**: every linked offer, followed through counters and re-invitations to
   its final revision, is accepted and fully completed with no active, unconfirmed or
@@ -157,7 +210,7 @@ With a schedule, the core runs only when admitted:
   cause may admit another attempt within the remaining allowance, or without a count
   ceiling in ongoing mode. Waiting is a valid success, not a non-progress failure.
 
-Wake causes are public changes only:
+Wake causes are public changes, plus the explicitly bounded review nudge:
 
 | Cause | When |
 |---|---|
@@ -168,10 +221,36 @@ Wake causes are public changes only:
 | `answer` | A question is answered, stays silent or fails |
 | `telemetry` | A pawn's Food or Rest band changes (including to `unknown`) |
 | `self-care` | Eating completes, fails or is interrupted |
+| `review` | Nothing new, after a wait with work offerable (below; at most twice per wait) |
 
-Passing time, private needs, changing opportunities, food sightings and the core's own
-prose never wake it. Consumed causes stay consumed even if the observation later
+Apart from the bounded review below, passing time, private needs, changing
+opportunities, food sightings and the core's own prose never wake it. Consumed causes stay consumed even if the observation later
 disappears.
+
+### A bounded review after a wait (post-Gate-C item 6)
+
+In the pipeline rerun the core waited at t9084 with 8 offerable choices in view and was
+not woken again until a telemetry change at t18664: 9,580 ticks with proposable work and
+no second look. Fable's rule:
+
+- **Cause `review`**, keyed to the wait turn. It is due when the last applied turn was a
+  wait, that turn's view had an opportunity or counter, **any** proposable choice is still
+  present (not necessarily the same one), and nothing else would wake the core.
+- **Chain:** the first review is due `NATIVE_INTENT_STALL_TICKS` (2,500) after the wait;
+  a review that ends in another wait earns a second at twice that (5,000); after the
+  second, silence until a real cause. Any real cause resets the chain, and that turn's
+  own wait starts it again. A silently consumed telemetry change also ends the old
+  chain without spending a turn or starting another chain. Anything but a wait ends it.
+- **Budget:** at most **two extra core turns per deliberate wait**. Reviews go through
+  ordinary admission (cooldown and, in bounded schedules, the attempt budget apply).
+- **What the core sees:** `wakeReasons` names it `review`, with "Review n of 2, a nudge
+  and not news: you waited at t… while work was offerable and nothing public has changed
+  since. Waiting remains a valid answer." Whether it offers is still its decision.
+- **What the player sees:** a review that ends in wait again writes no log entry; the
+  status line reads "Core: reviewed; still waiting on …".
+
+Applied to the rerun, this would have added reviews at about t11,600 and t16,600, with
+the pile offerable both times.
 
 ## Shared status bands
 
@@ -180,6 +259,28 @@ The shared link exposes Food and Rest as bands only: `urgent` below 20 %, `low` 
 than 120 ticks is `unknown`. The same projection goes to the core, to every pawn's
 perspective, and to the crew-log board. Bands inform; they are not consent and don't
 authorize work. Only band changes wake the core, not timestamp refreshes.
+
+**Telemetry-only wakes (Fable, final after E2).** A band turning `urgent` is the one
+telemetry change that can wake the core by itself. A wake made only of band changes
+spends no core turn unless:
+- something is offerable (a listed opportunity or a counter to adopt, i.e. an eligible
+  offer recipient); or
+- some crew member's Food or Rest band got worse and reached `urgent` since the last
+  consumed snapshot. A first or previously unknown reading that is `urgent` counts.
+
+Improving bands (urgent → low → satisfied) and lateral or sub-urgent changes never wake
+the core on their own; the core sees the current bands in every view anyway. Question
+recipients don't count as recipients: they are listed on every E2 turn.
+
+A silent wake still consumes its bands, so they don't wake the core again. No attempt is
+counted and no cooldown starts. It is recorded as `core-wake-silent`, and the status line
+reads "Core: waiting on …", as for a silent wait. Nothing goes into the crew log, and the
+next real turn clears the status. Any other cause (message, answer, agreement, request,
+self-care, native intent) still wakes the core.
+
+Replaying the E2 native-haul run's exported inputs through the admission silences turns
+3, 6 and 13. Turns 4, 5 and 7 stay awake (Alvin, Pedro, then Beatrice reaching urgent
+food). Turn 7 is where the core asked Beatrice and she chose her own meal.
 
 ## Food sightings
 
@@ -201,3 +302,11 @@ paired checkpoints. On restart, checkpoint or restore, running turns and answers
 progress become failed; questions nobody has started answering stay pending. Late
 answers from a discarded timeline can't apply. Model attempts are
 counted in separate ledgers for the core and for pawns, which never rewind.
+
+Named native-backend rejections cross the operator relay as a strict, content-free
+cause/action/recipient envelope. The unpublished answer text remains in private
+receipts, never in the crew record. Both host-side and arrival-time validation feed
+the same persistent rejection counts.
+
+Answer and reflection failure totals/causes are also persisted per lane and shown in
+the observer status; a successful core turn cannot hide another lane’s failures.

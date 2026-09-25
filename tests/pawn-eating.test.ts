@@ -21,13 +21,17 @@ class Game implements GameBridge{
  async save(n:string){this.saved.set(n,structuredClone(this.data));return {sha256:'hash'};}async verify(){}async load(n:string){this.data=structuredClone(this.saved.get(n)!);this.data.epoch=randomUUID();}
 }
 const eat={choice:'eat',thing:'berry',text:'I choose these berries.'};
-test('diagnostic: a growing suggested portion rejects an otherwise identical delayed choice',async()=>{
+test('a portion that grows while the pawn thinks still eats the chosen count (identity by thing, count at most the current portion)',async()=>{
+ // Live run: Alvin chose 12 berries; the suggested portion became 13 during inference and the
+ // choice failed. The chosen 12 is at most the current 13, so it now goes through unchanged.
  const {g,s,c}=await setup();g.portion=12;const q=await ask(c);let calls=0,offered=0;
- const result=await c.answerCoreQuestion(q,{name:'diagnostic',async answerCore(v){calls++;offered=v.pawn.eating!.options[0]!.count;g.portion=13;return eat;}});
- assert.equal(calls,1);assert.equal(offered,12);assert.equal(result.status,'failed');assert.equal(g.calls,0);
- const event=s.events().find(e=>e.event.kind==='core-answer-failed')!.event.data as any;
- assert.equal(event.eatingValidation.code,'portion-increased');assert.equal(event.eatingValidation.offeredCount,12);assert.equal(event.eatingValidation.currentCount,13);assert.equal(event.eatingValidation.checkedTick,100);
- assert.equal((await c.corePerspective() as any).eatingValidation,undefined);s.close();
+ const result=await c.answerCoreQuestion(q,{name:'grew',async answerCore(v){calls++;offered=v.pawn.eating!.options[0]!.count;g.portion=13;return eat;}});
+ assert.equal(calls,1);assert.equal(offered,12);assert.equal(result.status,'delivered');assert.equal(g.calls,1);
+ assert.equal(g.data.actions[0]!.count,12,'the chosen count, never the grown portion');assert.equal(Object.values(c.inspect().selfCare!)[0]!.action.count,12);
+ // A portion that shrank dispatches the smaller current portion: never more than the game allows now.
+ const second=await setup();second.g.portion=16;const q2=await ask(second.c);
+ assert.equal((await second.c.answerCoreQuestion(q2,{name:'shrank',async answerCore(){second.g.portion=10;return eat;}})).status,'delivered');
+ assert.equal(second.g.data.actions[0]!.count,10);s.close();second.s.close();
 });
 async function setup(){const g=new Game(),s=new Store(':memory:'),c=new Coordinator(s,g);await c.open();await c.initializeCore('Ask; no orders.');return {g,s,c};}
 async function ask(c:Coordinator){const r=await c.planCore({name:'scripted',async plan(){return {topic:null,action:{kind:'ask',pawn:'A',text:'What would help?',reason:'Ask'}};}});assert.equal(r.status,'applied');if(r.status!=='applied')throw Error();return r.questionId!;}
@@ -88,7 +92,7 @@ test('only matched positive completed eating resolves its receipt/question/reply
 });
 test('eating closure fails closed for interrupted, empty, mismatched and multiply linked receipts',async()=>{
  const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();const original=c.inspect(),care=Object.values(original.selfCare!)[0]!,world=await g.state();
- for(const patch of [{status:'interrupted'},{status:'failed'},{status:'started'},{delivered:0},{delivered:17},{delivered:1.5},{actor:'B'},{kind:'haul'},{thing:'other'},{count:25},{id:'wrong'}]){const d=structuredClone(original);Object.assign(d.outcomes[care.id]!,patch);assert.throws(()=>validateCoreChoice(resolve(care.id),coreView(d,world)),/closure unsupported/);}
+ for(const patch of [{status:'interrupted'},{status:'failed'},{status:'started'},{delivered:0},{delivered:17},{delivered:1.5},{actor:'B'},{kind:'rescue'},{thing:'other'},{count:25},{id:'wrong'}]){const d=structuredClone(original);Object.assign(d.outcomes[care.id]!,patch);assert.throws(()=>validateCoreChoice(resolve(care.id),coreView(d,world)),/closure unsupported/);}
  const d=structuredClone(original);delete d.outcomes[care.id];assert.throws(()=>validateCoreChoice(resolve(care.id),coreView(d,world)),/closure unsupported/);
  const multi=structuredClone(original);multi.selfCare!.other={...care,id:'other'};const v=coreView(multi,await g.state()),message=original.coreState!.questions[0]!.messages[0]!.id;assert.throws(()=>validateCoreChoice(resolve(message),v),/closure unsupported/);validateCoreChoice(resolve(care.id),v);s.close();
 });
@@ -108,9 +112,80 @@ test('eating revalidation distinguishes policy blocks, stale views, missing opti
   ['observation-epoch',(d:any,p:any)=>{p.eating.epoch='old';}],
   ['option-not-current',(d:any,p:any)=>{p.eating.options=[];}],
   ['map-changed',(d:any,p:any)=>{p.eating.mapId=2;}],
-  ['portion-increased',(d:any,p:any)=>{p.eating.options[0].count=17;}],
  ] as const){const dd=structuredClone(d),pp=structuredClone(p);change(dd,pp);assert.equal(revalidateEating(dd,state,pp,offered,'berry',true).code,expected);}
- const smaller=structuredClone(p);smaller.eating!.options[0]!.count=15;assert.equal(revalidateEating(d,state,smaller,offered,'berry',true).code,null);
+ const smaller=structuredClone(p);smaller.eating!.options[0]!.count=15;assert.equal(revalidateEating(d,state,smaller,offered,'berry',true).code,null);assert.equal(revalidateEating(d,state,smaller,offered,'berry',true).dispatchCount,15);
+ const larger=structuredClone(p);larger.eating!.options[0]!.count=17;assert.equal(revalidateEating(d,state,larger,offered,'berry',true).code,null);assert.equal(revalidateEating(d,state,larger,offered,'berry',true).dispatchCount,offered.eating!.options[0]!.count);
  assert.equal(revalidateEating(d,state,p,offered,'berry',false).code,'bridge-unavailable');
  assert.equal(revalidateEating(d,state,p,offered,'invented',true).code,'not-offered');s.close();
+});
+test('only an explicitly linked consumption report can close from a meal; unrelated next questions stay unlinked',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});
+ const d=c.inspect(),msg=(id:string,from:string,to:string,text:string,tick:number)=>({id,exchangeId:'x',tick,from,to,fromName:from,toName:to,text});
+ d.coreState!.questions.push({id:'unrelated-first',pawn:'A',text:'Can you build?',status:'answered',messages:[msg('unrelated-first-ask','core','A','Can you build?',140) as any]});
+ d.coreState!.questions.push({id:'q2',reportSelfCareId:Object.values(d.selfCare!)[0]!.id,pawn:'A',text:'Did you eat?',status:'answered',messages:[msg('q2-ask','core','A','Did you eat?',150) as any,msg('q2-yes','A','core','Yes, I ate the berries.',151) as any]});
+ d.coreState!.questions.push({id:'q3',pawn:'A',text:'Can you build?',status:'answered',messages:[msg('q3-ask','core','A','Can you build?',160) as any,msg('q3-yes','A','core','Yes.',161) as any]});
+ let v=coreView(d,await g.state());
+ assert.throws(()=>validateCoreChoice(resolve('q2-yes'),v),/closure unsupported/,'no closure before the receipt verifies the meal');
+ const care=Object.values(d.selfCare!)[0]!;d.outcomes[care.id]={...g.data.actions[0]!,status:'completed',delivered:16};
+ v=coreView(d,await g.state());
+ for(const id of ['q2-ask','q2-yes'])validateCoreChoice(resolve(id),v);
+ assert.equal(v.selfCare[0]!.reportQuestionId,'q2');
+ for(const id of ['unrelated-first-ask','q3-ask','q3-yes'])assert.throws(()=>validateCoreChoice(resolve(id),v),/closure unsupported/,'an unrelated later question never closes');
+ s.close();
+});
+
+test('typed report binding survives real question publication and cannot target another receipt or be reused',async()=>{
+ const {g,s,c}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});const first=await c.planCoreWhenDue({name:'eat question',async plan(){return {topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'Food?',reason:'Ask'}};}});if(first.status!=='applied')throw Error('Expected question');const q=first.questionId!;await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});
+ g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();g.data.ticks+=60;
+ const care=Object.values(c.inspect().selfCare!)[0]!,choice=(receipt:string|null)=>({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',reportSelfCareId:receipt,text:'Did you eat?',reason:'Check this meal.'}});
+ assert.throws(()=>validateCoreChoice(choice('other'),coreView(c.inspect(),g.data)),/report receipt unavailable/);
+ const result=await c.planCoreWhenDue({name:'report',async plan(){return choice(care.id);}});assert.equal(result.status,'applied');if(result.status!=='applied')throw Error('Expected report question');
+ const report=c.inspect().coreState!.questions.find(x=>x.id===result.questionId)!;assert.equal(report.reportSelfCareId,care.id);
+ const answer=await c.answerCoreQuestion(report.id,{name:'report answer',async answerCore(v){assert.equal(v.question.reportSelfCare?.id,care.id);assert.equal(v.question.reportSelfCare?.consumed,16);return {choice:'say',text:'Yes, I ate.'};}});assert.equal(answer.status,'delivered');
+ const v=await c.corePerspective();for(const m of c.inspect().coreState!.questions.find(x=>x.id===report.id)!.messages)validateCoreChoice(resolve(m.id),v);
+ assert(!v.selfCare.filter(x=>!x.reportQuestionId).some(x=>x.id===care.id));await c.checkpoint('lab-concord-report-link');await c.restore('lab-concord-report-link');assert.equal(c.inspect().coreState!.questions.find(x=>x.id===report.id)!.reportSelfCareId,care.id);assert.equal(g.calls,1);s.close();
+});
+
+test('answer revalidation failures remain visible per lane without leaking answer text',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'lost',async answerCore(){g.available=false;return {choice:'eat',thing:'berry',text:'UNPUBLISHED ANSWER'};}});
+ const {crewReport}=await import('../src/crew-log.js');const report=crewReport(c.inspect(),g.data.ticks);
+ assert.match(report.observerText!,/core-answer failures: 1 \(eating: option-not-current 1\)/);assert(!JSON.stringify(report).includes('UNPUBLISHED'));s.close();
+});
+
+test('a consumption report answered with another meal remains claimed but cannot close from the older meal',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});
+ const d=c.inspect(),care=Object.values(d.selfCare!)[0]!;
+ d.outcomes[care.id]={...g.data.actions[0]!,status:'completed',delivered:16};
+ d.coreState!.questions.push({id:'report',reportSelfCareId:care.id,pawn:'A',text:'Did you eat?',status:'answered',messages:[{id:'report-msg',exchangeId:'x',tick:150,from:'core',to:'A',fromName:'Core',toName:'Alvin',text:'Did you eat?'} as any]});
+ d.selfCare!['second']={...care,id:'second',questionId:'report'};
+ const v=coreView(d,await g.state());v.questionRecipients=['A'];assert.equal(v.selfCare.find(x=>x.id===care.id)!.reportQuestionId,'report');
+ assert.throws(()=>validateCoreChoice({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',reportSelfCareId:care.id,text:'Again?',reason:'Again'}},v),/report receipt unavailable/);
+ assert.throws(()=>validateCoreChoice(resolve('report-msg'),v),/closure unsupported/);s.close();
+});
+test('a meal memory arriving while the pawn answers is queued behind the answer, never cancelling it',async()=>{
+ for(const [detail,expected] of [['AteWithoutTable','delivered'],['Insulted','interrupted']] as const){
+  const {g,s,c}=await setup(),q=await ask(c);
+  const r=await c.answerCoreQuestion(q,{name:'meal',async answerCore(){
+   g.data.eventSeq=(g.data.eventSeq??0)+1;g.data.events=[{seq:g.data.eventSeq,pawn:'A',tick:g.data.ticks,kind:'memory',detail}];
+   await c.observe();return {choice:'say',text:'Yes, I ate the berries.'};}});
+  assert.equal(r.status,expected,detail);
+  const events=s.events().map(e=>e.event);
+  if(detail==='AteWithoutTable'){
+   assert.ok(events.some(e=>e.kind==='experience-deferred'&&/Meal memory queued/.test((e.data as any).reason)));
+   assert.ok(!events.some(e=>e.kind==='decision-interrupted'));
+   assert.equal(c.inspect().characters.A!.experiences!.at(-1)!.interrupt,false,'queued, not an interruption');
+  }else assert.ok(events.some(e=>e.kind==='decision-interrupted'),'other significant memories still interrupt');
+  s.close();
+ }
+});
+test('no consumption follow-up while the meal is under way: the pawn is askable again once the receipt settles',async()=>{
+ const {g,s,c}=await setup();await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:60,windowTicks:null});
+ const r=await c.planCoreWhenDue({name:'ask',async plan(){return {topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',text:'Are you hungry?',reason:'Ask'}};}});
+ if(r.status!=='applied'||!r.questionId)throw Error('no question');
+ assert.equal((await c.answerCoreQuestion(r.questionId,{name:'eat',async answerCore(){return eat;}})).status,'delivered');
+ g.data.ticks+=10;let v=await c.corePerspective();
+ assert.equal(g.data.actions[0]!.status,'started');assert.ok(!v.questionRecipients.includes('A'),'no follow-up while eating is started');
+ g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;g.data.ticks+=10;await c.reconcile();v=await c.corePerspective();
+ assert.ok(v.questionRecipients.includes('A'),'askable again once the receipt is completed');
+ s.close();
 });

@@ -19,13 +19,18 @@ remain unchanged.
 | Capability | Native mechanics | Live-model evidence |
 |---|---|---|
 | Move to a nearby grounded cell | yes | yes |
-| Haul an exact stack (≤10 per trip as offered, ≤3 trips) | yes | yes, including core-proposed work |
+| Ordered exact-stack hauling | retired in [#80](https://github.com/blueworkslabs/rimworld-concord/pull/80) | historical evidence retained; not an executable capability |
 | Rescue a downed colonist into an exact medical bed | yes | yes, with a scripted core |
 | Build a campfire (20 wood) | yes | scripted game tests only |
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
-| Offline Jev wake/grounding replay | no gameplay | [authorized retry: 29 valid answers](docs/trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first); initial transport failures retained, no threshold/routing decision |
-| Native tagged-zone haul spike | [partial scripted checks and live rehearsal](docs/trials/NATIVE_HAUL_FREEZE.md): native meal resumption, helper/overlap, scoped timing and coordinator-process cold restore | [single frozen recording complete](docs/trials/NATIVE_HAUL_LIVE.md); [receipt findings](docs/trials/NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read) available; [game-side migration approved](docs/trials/NATIVE_HAUL_GATE_C.md); three fixes block the next live run |
+| Offline Jev wake/grounding replay | no gameplay | [authorized retry: 29 valid answers](docs/trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first) and [E2 over the native-haul turns: 27 valid](docs/trials/JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation); transport failures retained; no threshold/routing decision |
+| Native tagged-zone haul spike (historical) | [scripted and live evidence](docs/trials/NATIVE_HAUL_LIVE.md) retained | Superseded by the ordinary-play migration below |
+| Native stockpile hauling | strict holds; ordered implementation retired; [deletion check](docs/trials/HAULING_RETIREMENT.md): 75/75, two holders, paired/new-coordinator restore | [Migration Gate C passed on the game side](docs/trials/HAULING_MIGRATION_GATE_C.md); crew-side follow-ups remain; growing parked at B1 2/2 |
+
+Post-Gate-C [follow-ups 6–7](docs/trials/ATTENTION_EVICTIONS.md) add bounded review nudges and preserve pending attention over native churn. The historical replay reproduces 17 losses and predicts 0 under the two buffer corrections with recorded cursors fixed; scheduling/routing checks are mock-only, not live acceptance.
+
+Post-Gate-C [follow-ups 1–5](docs/trials/POST_GATE_C_FOLLOWUPS.md) add archive removals, request acknowledgments, meal-answer protection and recorded trimmed inputs. Verification is explicitly split between offline checks and scripted eating; no new live-model verdict.
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not
 now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private

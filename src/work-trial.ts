@@ -1,7 +1,8 @@
 import type {Domain,Proposal} from './protocol.js';
 /** Fixed experiment policy, not a general autonomy scheduler. */
 export const WORK_TRIAL={decisions:12,appraisals:12,reflections:3,observationMs:300000,secondRoundMs:120000,maxTurns:48} as const;
-export function trialCounterSupported(p:Proposal):boolean {return p.status==='countered'&&p.decision?.kind==='counter'&&p.decision.action.kind==='haul';}
+/** No ordered work kind supports trial counter adoption since the ordered haul was retired. */
+export function trialCounterSupported(_p:Proposal):boolean {return false;}
 export function laterOfferEligible(domain:Domain,pawn:string):boolean {
  const c=domain.characters[pawn];
  if(!c||c.commitment||c.intention)return false;
@@ -51,7 +52,7 @@ export async function stopTrialWork(c:import('./coordinator.js').Coordinator){
  if(!c.inspect())return {operatorStops,errors};
  await attempt(()=>c.reconcile());
  // A native intent ends as an operator stop, never as invented pawn withdrawals.
- if(c.inspect().nativeHaul)await attempt(()=>c.stopNativeHaul());
+ if(c.inspect().nativeHaul||c.inspect().nativeHauls?.length)await attempt(()=>c.stopNativeHaul());
  for(const ch of Object.values(c.inspect().characters))if(ch.intention&&c.inspect().proposals[ch.intention]?.action.kind!=='haul-zone'){
   operatorStops.push(ch.id);await attempt(()=>c.pawn(ch.id).withdraw('Operator trial ended; not a pawn-originated choice'));
  }

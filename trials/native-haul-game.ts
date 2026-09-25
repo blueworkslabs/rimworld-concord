@@ -41,8 +41,8 @@ async function run(until:()=>boolean,ms:number){
   try{while(Date.now()<end){await poll();if(until())return true;await delay(150);}return false;}
   finally{await b.admin('pause');await poll();}
 }
-/** Like run(), with the coordinator reconciling (and, for ordered work, the scripted core
- * offering) on every poll. No model is involved: every answer is authored. */
+/** Like run(), with the coordinator reconciling on every poll. No model is involved: every
+ * answer is authored. */
 async function runWith(tick:()=>Promise<void>,until:()=>boolean,ms:number){
   const end=Math.min(deadline,Date.now()+ms);await startNative(b);
   try{while(Date.now()<end){await tick();await poll();if(until())return true;await delay(250);}return false;}
@@ -87,48 +87,7 @@ try{
   const exclude=(intentId:string,actor:string,reason:string)=>op({op:'intent-exclude',intentId,actor,reason});
   const done=(id:string)=>()=>view(id)?.status!=='open';
   /** Ordered-job model on the same save: every offer here stands for a core turn in live play. */
-  async function orderedHalf(c:Case,ms:number){
-    const {s,co}=await coordinator('ordered');
-    try{
-      c.data.zone=await op({op:'lab-plain-zone',actor:A,...cfg.area});
-      for(const p of state.pawns)await op({op:'lab-work-priority',actor:p.id,count:0});
-      let offers=0,noOption=0,offersAfterMeal=0;const from=lastSeq,startTick=state.ticks,quota=mode==='meal'?75:30;
-      const samples:{tick:number;id:string;status:string;delivered:number}[]=[];
-      const observed=new Set<string>();
-      const outcomes=()=>{const d=co.inspect(),ids=new Set(Object.values(d.proposals).filter(p=>p.pawn===A&&p.action.kind==='haul').flatMap(p=>p.standing?.steps??[]));return Object.values(d.outcomes).filter(r=>r.actor===A&&r.kind==='haul'&&ids.has(r.id));};
-      const delivered=()=>outcomes().reduce((n,r)=>n+(r.delivered??0),0);
-      const ate=()=>since(from,'ingested',A).length>0;
-      await runWith(async()=>{
-        await co.reconcile();await co.advanceIntentions();
-        for(const r of outcomes()){const key=r.id+':'+r.status;if(!observed.has(key)){observed.add(key);samples.push({tick:state.ticks,id:r.id,status:r.status,delivered:r.delivered??0});}}
-        if(delivered()>=quota)return;
-        const d=co.inspect();
-        if(Object.values(d.proposals).some(p=>p.pawn===A&&(p.status==='pending'||p.standing?.status==='running'))||d.characters[A]?.commitment)return;
-        const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===A&&o.action.kind==='haul'&&/^(?:Thing_)?WoodLog\d+$/.test(o.action.thing)&&o.action.x>=cfg.area.x&&o.action.x<cfg.area.x+cfg.area.w&&o.action.z>=cfg.area.z&&o.action.z<cfg.area.z+cfg.area.h);
-        if(!o){noOption++;return;}
-        if(o.action.kind!=='haul')throw Error('Expected wood hauling');
-        const count=Math.min(o.action.count,quota-delivered()),trips=Math.min(o.action.trips,Math.floor((quota-delivered())/count));
-        const p=await co.core().propose(A,{...o.action,count,trips},'Scripted ordered offer');offers++;if(ate())offersAfterMeal++;
-        await co.pawn(A).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
-      },()=>delivered()>=quota,ms);
-      await co.reconcile();
-      const d=co.inspect(),mine=Object.values(d.proposals).filter(p=>p.pawn===A&&p.action.kind==='haul');
-      const receipts=outcomes();
-      const starts=since(from,'job-start',A).filter(e=>e.detail.startsWith('Concord_Haul;')),meal=since(from,'ingested',A)[0],first=starts[0],afterMeal=meal&&starts.find(e=>e.seq>meal.seq),beforeMeal=meal&&starts.some(e=>e.seq<meal.seq);
-      c.data.receipts=receipts;c.data.observedOutcomes=samples;
-      expect(c,offers>0&&delivered()>0,'ordered baseline did not execute and deliver scoped wood');
-      expect(c,delivered()<=quota,`ordered baseline exceeded quota: ${delivered()}/${quota}`);
-      // A valid baseline may fall short; measure that outcome rather than requiring the old model to succeed.
-      if(mode==='meal'){expect(c,!!meal,'ordered meal baseline never ate');expect(c,!!afterMeal,'ordered meal baseline has no post-meal haul start');}
-      return {quota,quotaMet:delivered()===quota,observation:'baseline measurement, not a claim of goal completion',startTick,firstWorkTick:first?.tick??null,mealTick:meal?.tick??null,postMealWorkTick:afterMeal?.tick??null,
-        ticksToFirstWork:first?first.tick-startTick:null,ticksMealToFirstWork:meal&&afterMeal?afterMeal.tick-meal.tick:null,
-        resumedEarlierWork:!!beforeMeal&&!!afterMeal,ticksMealToResume:beforeMeal&&meal&&afterMeal?afterMeal.tick-meal.tick:null,offers,offersAfterMeal,pollsWithoutGroundedOption:noOption,ate:ate(),
-        delivered:delivered(),
-        staleRejections:receipts.filter(r=>r.status==='failed').map(r=>r.reason),
-        stops:mine.filter(p=>p.standing?.status==='stopped').map(p=>p.standing!.reason),
-        estimatedCoreOfferTurnsIfLive:offers,actualModelCalls:0};
-    }finally{s.close();}
-  }
+
 
   if(mode==='main'){
     await scenario('stale-lab-command',base,async c=>{
@@ -275,7 +234,7 @@ try{
         const setup={intentId:randomUUID(),area:cfg.area,quota:30,maxTicks:30000,variant:'exclusive' as const},alvin=pawn('Alvin').id;
         await co.configureNativeHaul(setup);
         const v=await co.corePerspective();c.data.initialOpportunities=v.opportunities;
-        expect(c,!v.opportunities.some(o=>o.pawn===alvin&&(o.action.kind==='haul-zone'||o.action.kind==='haul')),'Alvin was offered hauling');
+        expect(c,!v.opportunities.some(o=>o.pawn===alvin&&o.action.kind==='haul-zone'),'Alvin was offered hauling');
         expect(c,v.availability.some(a=>a.pawn===alvin&&/cannot do hauling/.test(a.status)),'no visible not-offered reason for the core');
         let refused=false;try{await co.core().propose(alvin,intentAction(setup),'Scripted offer');}catch(e){refused=/Not offered: cannot do hauling/.test(String(e));}
         expect(c,refused,'direct offer to Alvin was not refused');
@@ -387,12 +346,7 @@ try{
       c.data.workOptions={runs,totalMicros:runs.map((r:any)=>r.totalMicros)};
       expect(c,runs.every((r:any)=>r.pawns.length===3),'work-options did not cover all three pawns');
     });
-    await scenario('ordered-main',base,async c=>{
-      // Matched ordered-job half for stale rejections: the same area as an ordinary stockpile,
-      // native Hauling off for everyone so only ordered jobs haul, the scripted core offering
-      // Pedro every grounded haul it sees. Same wall-clock budget as the native variants.
-      c.data.result=await orderedHalf(c,240000);
-    });
+
     await scenario('quota-immutability-only',base,async c=>{
       // Only native quota immutability; model counter/adoption transitions are deferred.
       const id=randomUUID();await accept(id,A,{quota:20});
@@ -448,11 +402,7 @@ try{
       if(leftMs>0&&!done(id)())await run(done(id),leftMs);
       const end=invariants(c,id);c.data.completion={observedMs:Date.now()-observationStart,endTick:state.ticks,quotaMet:end?.status==='met',delivered:end?.delivered,quota:end?.quota};
     });
-    await scenario('ordered-meal',base,async c=>{
-      // Matched ordered-job half: same calibrated start state (Pedro's Food 0.13). The ordered model stops
-      // work below 0.35 and never resumes an agreement; every restart needs a new offer.
-      c.data.result=await orderedHalf(c,600000);
-    });
+
   }
   receipt.passed=receipt.eventGaps===0&&receipt.cases.length>0&&receipt.cases.every(c=>c.passed);
 }catch(e){receipt.error=String(e);}

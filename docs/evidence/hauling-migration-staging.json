@@ -1,0 +1,932 @@
+{
+  "date": "2026-09-24",
+  "runtimeHead": "a372804",
+  "reviewedHarnessHead": "c5028b4",
+  "pinnedGame": "1.6.4871 rev600",
+  "modSHA256": "3ef0710b4699917da61f2aa8dd25442010f4fb71dfb6ace8537f0e5da2488225",
+  "characterModelCalls": 0,
+  "liveRun": false,
+  "b1FixRoundsUsed": 1,
+  "b1FixRoundLimit": 2,
+  "cleared": false,
+  "fixture": {
+    "fixture": "hauling-migration-v1",
+    "stacks": [
+      {
+        "def": "WoodLog",
+        "x": 85,
+        "z": 85,
+        "count": 10,
+        "id": "WoodLog4074"
+      },
+      {
+        "def": "WoodLog",
+        "x": 89,
+        "z": 85,
+        "count": 20,
+        "id": "WoodLog4075"
+      },
+      {
+        "def": "WoodLog",
+        "x": 73,
+        "z": 79,
+        "count": 20,
+        "id": "WoodLog4076"
+      },
+      {
+        "def": "WoodLog",
+        "x": 67,
+        "z": 79,
+        "count": 20,
+        "id": "WoodLog4077"
+      },
+      {
+        "def": "WoodLog",
+        "x": 95,
+        "z": 75,
+        "count": 20,
+        "id": "WoodLog4078"
+      },
+      {
+        "def": "WoodLog",
+        "x": 63,
+        "z": 85,
+        "count": 20,
+        "id": "WoodLog4079"
+      },
+      {
+        "def": "ComponentIndustrial",
+        "x": 85,
+        "z": 89,
+        "count": 20,
+        "id": "ComponentIndustrial4080"
+      },
+      {
+        "def": "ComponentIndustrial",
+        "x": 89,
+        "z": 89,
+        "count": 20,
+        "id": "ComponentIndustrial4081"
+      },
+      {
+        "def": "ComponentIndustrial",
+        "x": 73,
+        "z": 83,
+        "count": 20,
+        "id": "ComponentIndustrial4082"
+      },
+      {
+        "def": "ComponentIndustrial",
+        "x": 67,
+        "z": 83,
+        "count": 20,
+        "id": "ComponentIndustrial4083"
+      },
+      {
+        "def": "Steel",
+        "x": 73,
+        "z": 75,
+        "count": 15,
+        "id": "Steel4084"
+      },
+      {
+        "def": "Steel",
+        "x": 67,
+        "z": 75,
+        "count": 15,
+        "id": "Steel4085"
+      }
+    ],
+    "zone": {
+      "id": 950,
+      "label": "north wall pile",
+      "x": 76,
+      "z": 84,
+      "w": 4,
+      "h": 4,
+      "allow": [
+        "WoodLog",
+        "ComponentIndustrial",
+        "Steel"
+      ]
+    },
+    "site": {
+      "id": "east-site",
+      "label": "east shed",
+      "x": 92,
+      "z": 88,
+      "w": 3,
+      "h": 3
+    },
+    "removedStockpiles": [
+      "900",
+      "901"
+    ],
+    "duplicatePairs": [
+      [
+        "WoodLog4074",
+        "WoodLog4075"
+      ],
+      [
+        "WoodLog4076",
+        "WoodLog4077"
+      ],
+      [
+        "WoodLog4077",
+        "WoodLog4079"
+      ],
+      [
+        "ComponentIndustrial4080",
+        "ComponentIndustrial4081"
+      ],
+      [
+        "ComponentIndustrial4082",
+        "ComponentIndustrial4083"
+      ],
+      [
+        "Steel4084",
+        "Steel4085"
+      ]
+    ],
+    "matched": [
+      {
+        "def": "WoodLog",
+        "quota": 30
+      },
+      {
+        "def": "ComponentIndustrial",
+        "quota": 60
+      }
+    ],
+    "priorities": {
+      "Human405": {
+        "Firefighter": 3,
+        "Patient": 3,
+        "PatientBedRest": 3,
+        "BasicWorker": 3,
+        "Handling": 3,
+        "Hunting": 3,
+        "Construction": 3,
+        "Art": 3,
+        "Hauling": 3,
+        "Childcare": 3,
+        "Fishing": 3
+      },
+      "Human408": {
+        "Firefighter": 3,
+        "Patient": 3,
+        "PatientBedRest": 3,
+        "BasicWorker": 3,
+        "Cooking": 3,
+        "Construction": 3,
+        "Growing": 3,
+        "Mining": 3,
+        "PlantCutting": 3,
+        "Hauling": 3,
+        "Cleaning": 3,
+        "Childcare": 3
+      },
+      "Human411": {
+        "Patient": 3,
+        "Doctor": 3,
+        "PatientBedRest": 3,
+        "BasicWorker": 3,
+        "Warden": 3,
+        "Smithing": 3,
+        "Tailoring": 3,
+        "Crafting": 3,
+        "Hauling": 3,
+        "Cleaning": 3,
+        "Research": 3,
+        "Childcare": 3
+      }
+    },
+    "nativeSelfCare": true,
+    "note": "Freeze defs, quantities, positions, quotas and observation budgets before any run; Astra confirms trip counts in a dry run"
+  },
+  "cases": [
+    {
+      "runId": "a1edfb13-7032-45a4-b167-7149c171e8b5",
+      "at": "2026-09-24T21:51:30.384Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round0",
+      "name": "duplicate-within-budget",
+      "passed": false,
+      "findings": [
+        "expected 30 met, got 0 open",
+        "no duplicate pickup observed with duplicate geometry (growing hold)"
+      ],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": [],
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "open",
+          "delivered": 0,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 0,
+          "creditedByPawn": {},
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "b5ecf416-68c0-4f25-bbbc-d1e2b652db53",
+      "at": "2026-09-24T21:59:54.149Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "duplicate-within-budget",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": [
+        30
+      ],
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "met",
+          "delivered": 30,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 30
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "f69eed4e-4947-454e-8e21-256eb0fdfb46",
+      "at": "2026-09-24T22:00:32.853Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "zero-extra",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 10,
+          "status": "met",
+          "delivered": 10,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 10
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "517b7d1d-9184-4143-b0fd-5f4d5e367bd8",
+      "at": "2026-09-24T22:00:51.000Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "source-grows",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "met",
+          "delivered": 30,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 30
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "6d2b9bee-2523-44c0-9a10-b1f1fb0f09f2",
+      "at": "2026-09-24T22:01:12.221Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "source-shrinks",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "met",
+          "delivered": 30,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 23,
+            "Beatrice": 7
+          },
+          "beforeByPawn": {
+            "Beatrice": 60
+          },
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "c037a016-918e-4ce7-90d6-6e31c42bc6b4",
+      "at": "2026-09-24T22:02:01.779Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "withdraw-after-duplicate-selection",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "open",
+          "delivered": 10,
+          "reserved": 20,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 10
+          },
+          "beforeByPawn": {
+            "Beatrice": 60
+          },
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "86d74c34-61c7-467c-af28-37707530b75d",
+      "at": "2026-09-24T22:02:38.895Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "two-pawns-last-units",
+      "passed": false,
+      "findings": [
+        "no overlapping reservation holders: contention not exercised"
+      ],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 25,
+          "status": "met",
+          "delivered": 25,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 25
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "1f0f9a0a-7fe7-4bce-9951-2bf6d30648a1",
+      "at": "2026-09-24T22:03:09.331Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "carried-cargo-plus-source",
+      "passed": false,
+      "findings": [
+        "positive cargo and linked queued-job admission were not established",
+        "queued job did not deliver existing cargo plus additional source"
+      ],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "met",
+          "delivered": 30,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 30
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "b7ee997a-e1ed-48b8-a171-a0cfa294ba3c",
+      "at": "2026-09-24T22:03:57.346Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "save-load-mid-growth",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "met",
+          "delivered": 30,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 30
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "8f800c06-7eda-4099-b165-2cfb8ce856fe",
+      "at": "2026-09-24T22:04:23.043Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "mixed-zone-independent",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 20,
+          "status": "met",
+          "delivered": 20,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 20
+          },
+          "beforeByPawn": {
+            "Beatrice": 60
+          },
+          "ordinaryByPawn": {}
+        },
+        {
+          "def": "ComponentIndustrial",
+          "quota": 10,
+          "status": "met",
+          "delivered": 10,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 10
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {
+            "Pedro": 50,
+            "Beatrice": 20
+          }
+        }
+      ]
+    },
+    {
+      "runId": "87e9f212-7207-4568-b403-c86a5946998f",
+      "at": "2026-09-24T22:05:05.348Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "pretag-running-haul",
+      "passed": false,
+      "findings": [
+        "pre-tag trip did not finish within the observation window",
+        "quota after pre-tag work: 0 open, overshoot 0"
+      ],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 10,
+          "status": "open",
+          "delivered": 0,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 0,
+          "creditedByPawn": {},
+          "beforeByPawn": {
+            "Beatrice": 20
+          },
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "5581de5b-21f0-4b82-ad86-7052217834d0",
+      "at": "2026-09-24T22:09:56.000Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "archive-after-retirement",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 10,
+          "status": "met",
+          "delivered": 10,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 10
+          },
+          "beforeByPawn": {
+            "Beatrice": 60
+          },
+          "ordinaryByPawn": {
+            "Beatrice": 15
+          }
+        }
+      ]
+    },
+    {
+      "runId": "c71e4724-381f-43bb-a42f-6a7e68c6c322",
+      "at": "2026-09-24T22:10:38.431Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "zone-edits",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "stopped",
+          "delivered": 0,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 0,
+          "creditedByPawn": {},
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "54ca13d7-4fae-440d-9371-b1548cbdee4a",
+      "at": "2026-09-24T22:10:52.949Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "retag-new-generation",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 5,
+          "status": "met",
+          "delivered": 5,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 5
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        },
+        {
+          "def": "WoodLog",
+          "quota": 5,
+          "status": "open",
+          "delivered": 0,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 0,
+          "creditedByPawn": {},
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "0bba2ad4-c04d-4598-b42b-1949451be0d1",
+      "at": "2026-09-24T22:11:10.989Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "legibility",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 20,
+          "status": "met",
+          "delivered": 20,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 20
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "dfdca2e4-3215-4ea9-9a8c-ab0285d1cf21",
+      "at": "2026-09-24T22:11:33.853Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "matched-native-WoodLog",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": {
+        "model": "native",
+        "hold": "growing",
+        "def": "WoodLog",
+        "quota": 30,
+        "delivered": 30,
+        "trips": 1,
+        "unitsPerTrip": [
+          30
+        ],
+        "ticks": 374,
+        "ticksPerUnit": 12.466666666666667
+      },
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "met",
+          "delivered": 30,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 30
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "bd5d3e3c-674f-4097-8fe5-c34147df5837",
+      "at": "2026-09-24T22:11:54.001Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "matched-native-ComponentIndustrial",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": {
+        "model": "native",
+        "hold": "growing",
+        "def": "ComponentIndustrial",
+        "quota": 60,
+        "delivered": 60,
+        "trips": 2,
+        "unitsPerTrip": [
+          40,
+          20
+        ],
+        "ticks": 1179,
+        "ticksPerUnit": 19.65
+      },
+      "trips": null,
+      "intents": [
+        {
+          "def": "ComponentIndustrial",
+          "quota": 60,
+          "status": "met",
+          "delivered": 60,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 60
+          },
+          "beforeByPawn": {},
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "2562428e-3f26-4113-9ba0-7652461dd42a",
+      "at": "2026-09-24T22:12:27.760Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "matched-ordered-WoodLog",
+      "passed": false,
+      "findings": [
+        "ordered baseline delivered 10 of 30 WoodLog from 1 offers; not a passing comparison"
+      ],
+      "eventGaps": 0,
+      "matched": {
+        "model": "ordered",
+        "def": "WoodLog",
+        "quota": 30,
+        "delivered": 10,
+        "unmatchedUnits": 0,
+        "trips": 1,
+        "offers": 1,
+        "ticks": 17943,
+        "ticksPerUnit": 1794.3,
+        "estimatedCoreTurnsIfLive": 1
+      },
+      "trips": null,
+      "intents": []
+    },
+    {
+      "runId": "d621ac15-24ea-49b4-ac99-c80debf59138",
+      "at": "2026-09-24T22:18:22.338Z",
+      "hold": "growing",
+      "fixture": "lab-concord-hm-round1",
+      "name": "matched-ordered-ComponentIndustrial",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": {
+        "model": "ordered",
+        "def": "ComponentIndustrial",
+        "quota": 60,
+        "delivered": 60,
+        "unmatchedUnits": 0,
+        "trips": 6,
+        "offers": 3,
+        "ticks": 2875,
+        "ticksPerUnit": 47.916666666666664,
+        "estimatedCoreTurnsIfLive": 3
+      },
+      "trips": null,
+      "intents": []
+    },
+    {
+      "runId": "4aef35d2-8252-4e77-a30f-12abf15d7f88",
+      "at": "2026-09-24T22:21:00.119Z",
+      "hold": "strict",
+      "fixture": "lab-concord-hm-round1",
+      "name": "duplicate-within-budget",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": [
+        10,
+        20
+      ],
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 30,
+          "status": "met",
+          "delivered": 30,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 10,
+            "Beatrice": 20
+          },
+          "beforeByPawn": {
+            "Beatrice": 60
+          },
+          "ordinaryByPawn": {}
+        }
+      ]
+    },
+    {
+      "runId": "ee393364-e442-4fed-89dc-108a004954bf",
+      "at": "2026-09-24T22:21:43.495Z",
+      "hold": "strict",
+      "fixture": "lab-concord-hm-round1",
+      "name": "legibility",
+      "passed": true,
+      "findings": [],
+      "eventGaps": 0,
+      "matched": null,
+      "trips": null,
+      "intents": [
+        {
+          "def": "WoodLog",
+          "quota": 20,
+          "status": "met",
+          "delivered": 20,
+          "reserved": 0,
+          "overshoot": 0,
+          "violations": 0,
+          "peakHolders": 1,
+          "creditedByPawn": {
+            "Pedro": 10,
+            "Beatrice": 10
+          },
+          "beforeByPawn": {
+            "Beatrice": 60
+          },
+          "ordinaryByPawn": {}
+        }
+      ]
+    }
+  ],
+  "preservation": {
+    "existingSavesChecked": 352,
+    "existingSavesChanged": 0,
+    "original285Unchanged": true,
+    "recordingCount": 21,
+    "recordingSHA256": {
+      "zero-extra-1790287231206.mp4": "85f5def11169e03749b013fe5268109d0e0626f5613387ed64acdf477bb83bb4",
+      "matched-ordered-WoodLog-1790287946128.mp4": "112892257cbebfc443561480e1c6fb730206f6d411c4e9f7a5a2984fa62377d8",
+      "duplicate-within-budget-1790287192529.mp4": "74094b967d2cfc0513713d0cf4e86c571ea927623377eec73832f5ac09fd98ca",
+      "matched-ordered-ComponentIndustrial-1790288300656.mp4": "370d3e4a2d1dfba459de4f2264164dcb34947c79833d003642be7a4c715f8a0b",
+      "zone-edits-1790287836881.mp4": "2448119ec49d9b62e3a87d69bc935bc8bf7a08c672b211a442074a8dfb64b9b3",
+      "strict-duplicate-within-budget-1790288458433.mp4": "321e4335181041648144e2905303753bb7376ad0997027b2385b7d94b79ddfb3",
+      "carried-cargo-plus-source-1790287387695.mp4": "8c0e54b2e0fe04f9e8dbca48c60318df43065f2cb635952939e58a98f2ff3c59",
+      "source-grows-1790287249343.mp4": "07808f3ac0624208060bc484a7daeaa9881809cdd3947e6a95f627b31f82d6e8",
+      "duplicate-within-budget-1790286688733.mp4": "a1d38955b05b6d86560d0f5ef0259cdb1cfbb6a5f59c074c149f97e89b4a1657",
+      "mixed-zone-independent-1790287461406.mp4": "e671617a9079f179ba646f807f6d7e446753c3658a9812ad5ab8297152d9b045",
+      "retag-new-generation-1790287851277.mp4": "012cea771576ab5436779efbcec1efd7f2c0f3d272bff1cb947e95c3f19c890f",
+      "save-load-mid-growth-1790287435785.mp4": "0fe48b6120bb0bc67a70a716071efb0c8d5051e9f755f901e50d883a3392c123",
+      "pretag-running-haul-1790287503605.mp4": "8948d9b254a469bfa6d1ad997f204ba42cccf85d98dae69f0e6534f59801295a",
+      "source-shrinks-1790287270551.mp4": "20909e9301a7edee74888ee4cae9e33b9c48ad46e7275f56e9f2e66adcdf6142",
+      "two-pawns-last-units-1790287357244.mp4": "408b156c1799ce0ead649a3163f9b894f4350cd877ffc5616482aa3f5300f7d3",
+      "matched-native-ComponentIndustrial-1790287912361.mp4": "ca39b2f8a063aa90891c8bbfa7f7b5c7b48bcd6a51d463b5284f84b634a5cee5",
+      "legibility-1790287869340.mp4": "72527b08e7efa1ef17465f00a62033531d0bae09eadbbc3ba9f93cc822845f17",
+      "matched-native-WoodLog-1790287892205.mp4": "0f144ac6fce971bbbe3c85135963e4e7ee4008de1fbc60aae85e134c6ffd6a51",
+      "strict-legibility-1790288501836.mp4": "cef3430336754f91ad6232d19dd35f95c2d60d9fc5d3ea5b2666d6369314e12e",
+      "withdraw-after-duplicate-selection-1790287320207.mp4": "55a03cbb7e05369c2f71a0699f85e401160df3d4f0b4d7c6c140f811ee57c844",
+      "archive-after-retirement-1790287794459.mp4": "3acea6c600528f8d5cd1483e0f75068d1253950943b279645a573ee401f24467"
+    }
+  },
+  "limits": [
+    "Four round-1 growing-run checks failed: contention, carried cargo, dedicated pretag completion, ordered wood.",
+    "Required retarget/nested branches not implemented in runner.",
+    "No recorded rescue handover or cross-map clock test.",
+    "Show-button click and displayed clock/record wording inspected in retained post-run stills, not counted as a live test.",
+    "No runtime verification of #71 live inference paths.",
+    "No total Harmony/wrapper overhead conclusion from these runs."
+  ]
+}

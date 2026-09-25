@@ -1,0 +1,195 @@
+{
+  "kind": "scripted ordinary-play rehearsal, not live-model evidence",
+  "revision": "d84232d",
+  "mergedRevision": "ba2ee7ae3e30f51c46c747ae296c6964ca1e07e5",
+  "tests": {
+    "passed": 412,
+    "earlierFailure": "Prior full run hit the known helper-cancellation test (Inference pending); retained privately. Corrected-tree full run passed."
+  },
+  "review": "Independent final urgent-rule and ordinary-play harness reviews clear; raw reports private",
+  "exactE2Replay": {
+    "silent": [
+      3,
+      6,
+      13
+    ],
+    "urgentPreserved": [
+      4,
+      5,
+      7
+    ],
+    "projection": "Exact retained public inputs, sequential consumed snapshots through real admission; no counterfactual downstream history claim"
+  },
+  "runId": "37e9e209-8622-45e6-825d-477578877e43",
+  "passed": true,
+  "nativeElapsedMs": 46230,
+  "samples": 27,
+  "pausedSamples": 0,
+  "modelCalls": 0,
+  "authoredCoreChoices": 4,
+  "coreAttempts": 4,
+  "pawnAttempts": 2,
+  "initialOpportunityKinds": [
+    "build",
+    "haul-zone"
+  ],
+  "offerCoverage": {
+    "missing": [],
+    "offered": [
+      {
+        "id": "92a02ad0-9a3e-49cc-8b24-28da349e02c5",
+        "pawn": "Thing_Human408",
+        "status": "accepted"
+      },
+      {
+        "id": "ea45251f-7d77-4dba-9f3e-0da476482519",
+        "pawn": "Thing_Human411",
+        "status": "accepted"
+      }
+    ],
+    "complete": true
+  },
+  "finalIntents": [
+    {
+      "intentId": "33f01c4c-747a-4be0-ad3d-c996230e8bbb",
+      "thingDef": "WoodLog",
+      "variant": "attribution",
+      "hold": "strict",
+      "status": "met",
+      "quota": 75,
+      "delivered": 75,
+      "overshoot": 0,
+      "violations": 0,
+      "accepted": [
+        "Thing_Human408",
+        "Thing_Human411"
+      ],
+      "excluded": [],
+      "byPawn": [
+        {
+          "pawn": "Thing_Human408",
+          "count": 55
+        },
+        {
+          "pawn": "Thing_Human411",
+          "count": 20
+        }
+      ],
+      "unattributed": 0,
+      "removed": 0,
+      "reserved": 0,
+      "lastDeliveryTick": 1439
+    }
+  ],
+  "wakes": [
+    {
+      "tick": 84,
+      "causes": [
+        {
+          "sourceId": "brief",
+          "kind": "start",
+          "value": "initial"
+        },
+        {
+          "sourceId": "Thing_Human405",
+          "kind": "telemetry",
+          "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+        },
+        {
+          "sourceId": "Thing_Human408",
+          "kind": "telemetry",
+          "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+        },
+        {
+          "sourceId": "Thing_Human411",
+          "kind": "telemetry",
+          "value": "{\"food\":\"satisfied\",\"rest\":\"satisfied\"}"
+        }
+      ]
+    },
+    {
+      "tick": 623,
+      "causes": [
+        {
+          "sourceId": "33f01c4c-747a-4be0-ad3d-c996230e8bbb:first-delivery",
+          "kind": "native-intent",
+          "value": "delivered"
+        }
+      ]
+    },
+    {
+      "tick": 1492,
+      "causes": [
+        {
+          "sourceId": "33f01c4c-747a-4be0-ad3d-c996230e8bbb:lifecycle",
+          "kind": "native-intent",
+          "value": "met"
+        }
+      ]
+    },
+    {
+      "tick": 1889,
+      "causes": [
+        {
+          "sourceId": "Thing_Human411",
+          "kind": "telemetry",
+          "value": "{\"food\":\"low\",\"rest\":\"satisfied\"}"
+        },
+        {
+          "sourceId": "92a02ad0-9a3e-49cc-8b24-28da349e02c5",
+          "kind": "agreement",
+          "value": "{\"status\":\"completed\",\"completed\":1,\"unsuccessful\":0,\"delivered\":55}"
+        },
+        {
+          "sourceId": "ea45251f-7d77-4dba-9f3e-0da476482519",
+          "kind": "agreement",
+          "value": "{\"status\":\"completed\",\"completed\":1,\"unsuccessful\":0,\"delivered\":20}"
+        }
+      ]
+    }
+  ],
+  "laneFailures": {},
+  "attentionGaps": {
+    "attentionGaps": 0,
+    "attentionGapKinds": {}
+  },
+  "pairedRestore": true,
+  "coldRestore": {
+    "passed": true,
+    "hostProcessIds": [
+      463583,
+      463886
+    ],
+    "coordinatorProcessIds": [
+      173662,
+      173942
+    ],
+    "compared": "Restored actual game intent ledger to retained checkpoint; native haul entries and ordinary-play mode also compared",
+    "gameProcessRestarted": false,
+    "checkpointLifecycle": "met"
+  },
+  "recording": {
+    "sha256": "d19da2f853745f3e422e56167d42d201643e7ae75f49f0f7c2a08fb1cb2c3d3a",
+    "durationSeconds": 49.333333,
+    "width": 1280,
+    "height": 800,
+    "fps": 15,
+    "frames": "740",
+    "verifiedRemoteCopy": true
+  },
+  "screenshots": {
+    "ongoing-37e9e209-8622-45e6-825d-477578877e43-final.png": "43d7e0713db48729206e245e1b679d5ecd042b5fb0719212c7b1fdf969ffc936",
+    "ongoing-37e9e209-8622-45e6-825d-477578877e43-initial.png": "3d4afa5d0adbb382f420d3056c5c26046ccfba1de696da67cacfa5094810dd11",
+    "ongoing-37e9e209-8622-45e6-825d-477578877e43-midpoint.png": "052858ffb25bd3e6dc27a3562a5082739658c4c4f9ac279e609be716b6b1de21"
+  },
+  "originalSavesUnchanged": 405,
+  "stagingStopped": true,
+  "limits": [
+    "Authored haul offers/answers only; other work listed (construction observed), not exercised here. Rescue/cooking remain available when prerequisites hold.",
+    "No live-model routing or decision evidence.",
+    "Silent bookkeeping and urgent transitions mock/offline tested, not isolated in this short recording; final band change co-occurred with agreement closures.",
+    "First-delivery and terminal wakes observed; quiet-period stall not reached in this completed-quota rehearsal.",
+    "Terminal ledger cold restore; open-cargo restore remains earlier scripted evidence.",
+    "On-screen labels/Show retain earlier acceptance; no new Show click in this rehearsal."
+  ]
+}

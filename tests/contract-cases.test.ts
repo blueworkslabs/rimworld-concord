@@ -8,7 +8,10 @@ test('five authored cases expose their intended alternatives without preferring 
  const cases=contractCases();assert.equal(cases.length,5);
  assert.deepEqual(cases.map(c=>reflectionChoices(c.view).map(x=>x.choice)),[
  ['keep_current_activity'],['keep_current_activity','revise_private_outlook'],
- ['keep_current_activity','revise_private_outlook','withdraw_current_agreement','request_rescue_alternative'],
+ // The 'active' case is frozen with a retired ordered-haul agreement (a legacy record). A rescue
+ // alternative is offered only for a native stockpile haul now, so this frozen case no longer
+ // lists it; re-authoring the case on a native haul is a separate decision for the eval owner.
+ ['keep_current_activity','revise_private_outlook','withdraw_current_agreement'],
  ['keep_current_activity','revise_private_outlook','answer_pending_proposal'],['keep_current_activity','revise_private_outlook']]);
  for(const c of cases)assert.equal(checkContractResult(c.id,{reflection:{choice:'keep_current_activity',reason:'No change'}}).choice,'keep_current_activity');
  const id=cases[3]!.view.proposals[0]!.id;

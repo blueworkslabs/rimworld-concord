@@ -30,7 +30,7 @@ const accept=scripted({kind:'accept',reason:'I choose to help'});
 
 test('core has no execution handle; pawn acceptance executes once; counterpart cannot decide',async()=>{
   const {c,game}=await setup();
-  assert.deepEqual(Object.keys(c.core()),['rescueOptions','haulingOptions','movementOptions','requests','declineRequest','offerAlternative','offerRequestedRescue','inbox','propose','withdrawOffer','revise']);
+  assert.deepEqual(Object.keys(c.core()),['rescueOptions','movementOptions','requests','declineRequest','offerAlternative','offerRequestedRescue','inbox','propose','withdrawOffer','revise']);
   const id=randomUUID();const p=await c.core().propose('A',move,'Help',id);
   await assert.rejects(c.pawn('B').decide(p.id,accept),/belong/);
   await c.pawn('A').decide(p.id,accept);
@@ -125,14 +125,14 @@ test('indicator has bounded lifetime and clears on refusal and inference timeout
 
 test('appraisal uses only the owner perspective, cannot downgrade significant events or command jobs',async()=>{
  const {c,game}=await setup();
- game.data.events=[{seq:1,tick:30,pawn:'A',kind:'mood',detail:'low'}, {seq:2,tick:30,pawn:'B',kind:'memory',detail:'private'}];game.data.eventSeq=2;
+ game.data.events=[{seq:1,tick:30,pawn:'A',kind:'need',detail:'low'}, {seq:2,tick:30,pawn:'B',kind:'memory',detail:'private'}];game.data.eventSeq=2;
  const backend={name:'appraiser',async assess(view:unknown){assert(!JSON.stringify(view).includes('private'));return {reflectionScore:0.8};}};
  assert.equal((await c.appraise('A',1,backend,new AbortController().signal)).route,'deliberation');
  await assert.rejects(c.appraise('B',2,backend,new AbortController().signal),/eligible/);
  assert.equal(game.moves,0);
 });
 test('late appraisal cannot change a restored character',async()=>{
- const {c,game}=await setup();game.data.events=[{seq:1,tick:1,pawn:'A',kind:'mood',detail:'low'}];game.data.eventSeq=1;
+ const {c,game}=await setup();game.data.events=[{seq:1,tick:1,pawn:'A',kind:'need',detail:'low'}];game.data.eventSeq=1;
  await c.observe();await c.checkpoint('lab-concord-appraisal');
  let release!:(v:unknown)=>void;
  const p=c.appraise('A',1,{name:'slow',assess:()=>new Promise(r=>release=r)},new AbortController().signal);

@@ -1,8 +1,13 @@
 import {Action,type Build,type Cook,type Domain,type GameState,type Pawn,type Proposal} from './protocol.js';
-export const workMap=(p:Proposal)=>p.action.kind==='rescue'?p.rescueMap:p.action.kind==='haul'?p.haulMap:p.productionMap;
-export const workSteps=(p:Proposal)=>p.action.kind==='haul'?p.action.trips:p.action.kind==='cook'?p.action.meals:1;
-export const workReady=(p:Proposal,own?:Pawn)=>p.action.kind==='rescue'?own?.rescueReady:p.action.kind==='build'?own?.buildReady:p.action.kind==='cook'?own?.cookReady:own?.workReady;
-export const workKind=(p:Proposal)=>p.action.kind==='move'||p.action.kind==='haul-zone'?'haul':p.action.kind;
+export const workMap=(p:Proposal)=>p.action.kind==='rescue'?p.rescueMap:p.productionMap;
+export const workSteps=(p:Proposal)=>p.action.kind==='cook'?p.action.meals:1;
+export const workReady=(p:Proposal,own?:Pawn)=>p.action.kind==='rescue'?own?.rescueReady:p.action.kind==='build'?own?.buildReady:p.action.kind==='cook'?own?.cookReady:false;
+/** The cancel kind of an ordered action. Moves have their own; a native intent has no ordered
+ * action and is never cancelled through the bridge. */
+export const workKind=(p:Proposal):'move'|'rescue'|'build'|'cook'=>{
+  if(p.action.kind==='haul-zone')throw Error('Native intents are not cancelled as ordered work');
+  return p.action.kind;
+};
 export function held(d:Domain){return Object.values(d.proposals).filter(p=>p.status==='pending'||p.standing?.status==='running'||!!p.actionId&&d.characters[p.pawn]?.commitment===p.actionId);}
 export function productionConflict(p:Proposal,a:Build|Cook,mapId:number){
  const b=p.action;

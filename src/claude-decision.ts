@@ -1,5 +1,6 @@
+import {PROMPT_LIMIT} from './prompt-limit.js';
 import {CoreAnswerChoice,coreAnswerSchema} from './pawn-eating.js';
-import {CoreChoice,coreInstructions,coreChoiceSchema,corePrompt,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
+import {CoreChoice,coreInstructions,coreChoiceSchema,corePrompt,fitCore,coreAnswerPrompt,validateCoreChoice,type CoreView,type CoreQuestionView} from './core-planner.js';
 import {ProviderStreamCounts,boundedCoreFormattingRecovery,providerResultMetadata,validationIssues} from './provider-diagnostics.js';
 import { spawn,execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -10,7 +11,7 @@ import { Decision,type Perspective } from './protocol.js';
 import { type AttentionView,Reflection } from './attention.js';
 import {ReflectionChoice,reflectionChoiceSchema,reflectionFromChoice,validateReflectionChoice} from './reflection-choice.js';
 import {decisionTrials,type DecisionTrial} from './decision-trials.js';
-import {pawnInstructions,modelPrompt} from './model-perspective.js';
+import {pawnInstructions,modelPrompt,fitReflection} from './model-perspective.js';
 import {promptAccounting} from './prompt-accounting.js';
 import { TrialBudget } from './appraisal.js';
 import {SocialChoice,socialChoiceSchema,socialPrompt,type SocialView} from './social.js';
@@ -21,8 +22,8 @@ const moveAction={type:'object',additionalProperties:false,required:['kind','x',
 const rescueAction={type:'object',additionalProperties:false,required:['kind','target','bed','x','z','maxTicks'],properties:{kind:{const:'rescue'},target:{type:'string',minLength:1,maxLength:120},bed:{type:'string',minLength:1,maxLength:120},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},maxTicks:{type:'integer',minimum:60,maximum:3600}}};
 const productionActions=['build','cook'].map(kind=>({type:'object',additionalProperties:false,required:['kind','thing','x','z','maxTicks',...(kind==='cook'?['target','count','meals']:[])],properties:{kind:{const:kind},thing:{type:'string',minLength:1,maxLength:120},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},maxTicks:{type:'integer',minimum:60,maximum:kind==='cook'?7200:3600},...(kind==='cook'?{target:{type:'string',minLength:1,maxLength:120},count:{type:'integer',minimum:1,maximum:75},meals:{type:'integer',minimum:1,maximum:3}}:{})}}));
 // Native intent counters name the same shared stockpile haul (the quota is the negotiable part).
-const haulZoneAction={type:'object',additionalProperties:false,required:['kind','intentId','thing','x','z','w','h','quota','maxTicks','variant'],properties:{kind:{const:'haul-zone'},intentId:{type:'string',minLength:36,maxLength:36},thing:{const:'WoodLog'},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},w:{type:'integer',minimum:1,maximum:8},h:{type:'integer',minimum:1,maximum:8},quota:{type:'integer',minimum:1,maximum:75},maxTicks:{type:'integer',minimum:600,maximum:60000},variant:{type:'string',enum:['exclusive','attribution']}}};
-const action={oneOf:[moveAction,rescueAction,...productionActions,haulZoneAction,{type:'object',additionalProperties:false,required:['kind','thing','x','z','count','trips','maxTicks'],properties:{kind:{const:'haul'},thing:{type:'string',minLength:1,maxLength:120},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},count:{type:'integer',minimum:1,maximum:25},trips:{type:'integer',minimum:1,maximum:3},maxTicks:{type:'integer',minimum:60,maximum:3600}}}]};
+const haulZoneAction={type:'object',additionalProperties:false,required:['kind','intentId','thing','x','z','w','h','quota','maxTicks','variant','label','zoneId','hold'],properties:{kind:{const:'haul-zone'},intentId:{type:'string',minLength:36,maxLength:36},thing:{type:'string',pattern:'^[A-Za-z0-9_]{1,60}$'},x:{type:'integer',minimum:0},z:{type:'integer',minimum:0},w:{type:'integer',minimum:1,maximum:64},h:{type:'integer',minimum:1,maximum:64},quota:{type:'integer',minimum:1,maximum:75},maxTicks:{type:'integer',minimum:600,maximum:60000},variant:{enum:['exclusive','attribution']},label:{type:'string',minLength:1,maxLength:60},zoneId:{type:'integer',minimum:-1},hold:{enum:['strict','growing']}}};
+const action={oneOf:[moveAction,rescueAction,...productionActions,haulZoneAction]};
 const decision={oneOf:[...['accept','refuse','defer'].map(kind=>({type:'object',additionalProperties:false,required:['kind','reason'],properties:{kind:{const:kind},reason:{type:'string',minLength:1,maxLength:1000}}})),
  {type:'object',additionalProperties:false,required:['kind','reason','action'],properties:{kind:{const:'counter'},reason:{type:'string',minLength:1,maxLength:1000},action}}]};
 
@@ -103,9 +104,9 @@ export class ClaudeDecisionBackend {
  async answerCore(view:CoreQuestionView,signal:AbortSignal){if(view.pawn.id!==view.character.id||view.question.from!=='core')throw Error('Question ownership mismatch');return CoreAnswerChoice.parse(await this.run('core-answer',view,signal));}
  private async run(mode:'decision'|'reflection'|'social'|'core'|'core-answer',view:unknown,signal:AbortSignal) {
    signal.throwIfAborted();if(this.pending)throw Error('Decision backend busy');
-   view=structuredClone(view);
+   view=mode==='core'?fitCore(view as CoreView):mode==='reflection'?fitReflection(view as AttentionView):structuredClone(view);
    const args=claudeArgs(mode,mode==='core'?view as CoreView:mode==='reflection'?view as AttentionView:mode==='core-answer'?view as CoreQuestionView:undefined);
-   const prompt=JSON.stringify(mode==='core'?corePrompt(view as CoreView):mode==='core-answer'?coreAnswerPrompt(view as CoreQuestionView):mode==='social'?socialPrompt(view as SocialView):modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
+   const prompt=JSON.stringify(mode==='core'?corePrompt(view as CoreView):mode==='core-answer'?coreAnswerPrompt(view as CoreQuestionView):mode==='social'?socialPrompt(view as SocialView):modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>PROMPT_LIMIT)throw Error('Decision context too large');
    const authoredSize=promptAccounting(args[args.indexOf('--system-prompt')+1]!,prompt,JSON.parse(args[args.indexOf('--json-schema')+1]!));
    this.pending=true;
    // Native client reads its existing login itself. No secret/env copying or extraction.

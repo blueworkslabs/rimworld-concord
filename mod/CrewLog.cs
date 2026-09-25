@@ -4,7 +4,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 namespace Concord {
- [Serializable] public class CrewEntry { public int seq,tick;public string kind,actor,recipient,subject,text,key; }
+ [Serializable] public class CrewEntry { public int seq,tick,mapId;public bool hasMap;public string kind,actor,recipient,subject,text,key; }
  [Serializable] public class AgreementProgress { public string id,kind,status;public int tick,agreed,completed,active,unconfirmed,unsuccessful,notStarted,unfulfilled,delivered,quantityUnknown; }
  [Serializable] public class CrewAgreement { public string pawn,name;public AgreementProgress progress; }
  [Serializable] public class CrewReport { public string world,epoch,branch;public int revision,tick;public CrewEntry[] entries;public CrewAgreement[] agreements;public SharedStatus[] sharedStatus;public string waiting,foodText,observerText,topicText; }
@@ -63,7 +63,7 @@ namespace Concord {
   private CrewEntry[] heldEntries;private string heldEpoch;
   private static string ActivityLabel(Pawn pawn){
    if(pawn==null)return "not on this map";if(pawn.CurJobDef==null)return "idle";
-   switch(pawn.CurJobDef.defName){case "Concord_Eat":return "eating chosen food";case "Concord_Haul":return "agreed hauling";case "Concord_Rescue":return "agreed rescue";case "Concord_Cook":return "agreed cooking";case "Concord_BuildMaterials":return "delivering building materials";case "Concord_BuildFinish":return "agreed construction";case "Wait_Wander":case "GotoWander":return "wandering";case "Ingest":return "native eating";case "LayDown":return "resting";case "Wait":case "Wait_MaintainPosture":return "waiting";default:return "other native activity";}
+   switch(pawn.CurJobDef.defName){case "Concord_Eat":return "eating chosen food";case "Concord_Rescue":return "agreed rescue";case "Concord_Cook":return "agreed cooking";case "Concord_BuildMaterials":return "delivering building materials";case "Concord_BuildFinish":return "agreed construction";case "Wait_Wander":case "GotoWander":return "wandering";case "Ingest":return "native eating";case "LayDown":return "resting";case "Wait":case "Wait_MaintainPosture":return "waiting";default:return "other native activity";}
   }
   public override Vector2 InitialSize {get{return new Vector2(420,Math.Min(670,UI.screenHeight-100));}}
   public override void DoWindowContents(Rect rect){
@@ -102,7 +102,7 @@ namespace Concord {
     if(topics){string board="Core-authored topic board\n"+(String.IsNullOrEmpty(r.topicText)?"No topics reported.":r.topicText);float h=Text.CalcHeight(board,width);Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(h,area.height)));Widgets.Label(new Rect(0,0,width,h),board);Widgets.EndScrollView();}
     else{
      var entries=(heldEntries??r.entries).Reverse().ToArray();
-     Func<CrewEntry,string> heading=e=>(e.kind=="message"?e.actor+" → "+e.recipient:e.actor+" · RECORD")+" · t"+e.tick;
+     Func<CrewEntry,string> heading=e=>(e.kind=="message"?e.actor+" → "+e.recipient:e.actor+" · RECORD")+" · "+Clock.At(e.tick,Clock.ForEntry(e));
      float total=entries.Sum(e=>Text.CalcHeight(heading(e),width)+Text.CalcHeight(e.text,width)+14);
      Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(total,area.height)));float ey=0;
      foreach(var e in entries){float hh=Text.CalcHeight(heading(e),width),th=Text.CalcHeight(e.text,width);GUI.color=e.kind=="message"?new Color(1f,.8f,.45f):new Color(.65f,.85f,1f);Widgets.Label(new Rect(0,ey,width,hh),heading(e));GUI.color=Color.white;Widgets.Label(new Rect(0,ey+hh,width,th),e.text);ey+=hh+th+14;}
@@ -127,7 +127,7 @@ namespace Concord {
     float y=0;
     foreach(var a in r.agreements){var p=a.progress;
      Widgets.Label(new Rect(0,y,workView.width,25),a.name+" · "+p.kind+" · "+p.status+" — "+p.completed+" / "+p.agreed+" completed");
-     Widgets.Label(new Rect(0,y+25,workView.width,32),"Active "+p.active+" · Unconfirmed "+p.unconfirmed+" · Unsuccessful "+p.unsuccessful+" · Not started "+p.notStarted+" · Unfulfilled "+p.unfulfilled+(p.kind=="haul"?" · Delivered "+p.delivered+" confirmed units"+(p.quantityUnknown>0?" · Unknown quantities "+p.quantityUnknown:""):""));y+=62;
+     Widgets.Label(new Rect(0,y+25,workView.width,32),"Active "+p.active+" · Unconfirmed "+p.unconfirmed+" · Unsuccessful "+p.unsuccessful+" · Not started "+p.notStarted+" · Unfulfilled "+p.unfulfilled);y+=62;
     }
     Widgets.EndScrollView();
     if(Widgets.ButtonText(new Rect(0,296,110,28),"All")){filter="all";logScroll=Vector2.zero;}
@@ -145,7 +145,9 @@ namespace Concord {
     y=0;
     foreach(var e in entries){
      GUI.color=e.kind=="message"?new Color(1f,.8f,.45f):new Color(.65f,.85f,1f);
-     Widgets.Label(new Rect(0,y,width,25),(e.kind=="message"?"MESSAGE  ":"RECORD  ")+e.actor+(e.kind=="message"?" → "+e.recipient:"")+"  · tick "+e.tick);GUI.color=Color.white;
+     Widgets.Label(new Rect(0,y,width-90,25),(e.kind=="message"?"MESSAGE  ":"RECORD  ")+e.actor+(e.kind=="message"?" → "+e.recipient:"")+"  · "+Clock.At(e.tick,Clock.ForEntry(e)));GUI.color=Color.white;
+     Zone_Stockpile shown;
+     if(ShowZone.Available(e.subject,out shown)){if(shown==null)Widgets.Label(new Rect(width-150,y,150,25),"no longer on the map");else if(Widgets.ButtonText(new Rect(width-80,y,80,24),"Show"))ShowZone.Jump(shown);}
      float h=Text.CalcHeight(e.text,width);Widgets.Label(new Rect(0,y+26,width,h),e.text);y+=36+h;
     }
     Widgets.EndScrollView();

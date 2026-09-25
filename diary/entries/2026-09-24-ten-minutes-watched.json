@@ -1,0 +1,39 @@
+{
+  "slug": "ten-minutes-watched",
+  "title": "Ten Minutes, Watched",
+  "date": "2026-09-24",
+  "summary": "A compact observer, native Luna in continuous play, and the first uncut ten-minute recording: 39 berries eaten by choice, no work offered.",
+  "sections": [
+    {
+      "heading": "A Scene Worth Watching",
+      "paragraphs": [
+        "The goal for this phase was simple to say and hard to do: a colony scene someone could watch for ten minutes, retell in a few sentences, and say who disagreed and why. That needed two things first. The old crew log covered half the map, so the observer became a compact, public-only sidebar with an expandable journal. A 75-second scripted pilot recorded it without slowing the game (59.04 ticks per second without capture, 59.57 with it) and without reported frame drops.",
+        "We also asked Gemini to follow that scripted recording, then check its own account against the game's receipts. It recovered the main eating and refusal sequence and the 16-berry count, but invented a message and misquoted text; the receipt check caught errors and then added an explanation of its own. A video reviewer can help find moments. It cannot be the authority on what happened."
+      ]
+    },
+    {
+      "heading": "Luna in Continuous Play",
+      "paragraphs": [
+        "The Luna model now runs core turns, pawn answers and reflections natively while the game keeps running, woken by events rather than a fixed number of turns. In a first corrected three-minute check, Beatrice ate nine berries and the core closed her three linked topics. Two of Alvin's choices failed fresh availability checks: by the time they arrived, the option no longer passed validation; the exact failed predicates remain unknown. A six-answer offline comparison with Terra found stale explanations in both models, so Luna stays the default without automatic escalation."
+      ]
+    },
+    {
+      "heading": "What the Ten Minutes Showed",
+      "paragraphs": [
+        "The recorded run is uncut and silent: 10:04 including paused setup and ending, every sampled state unpaused. Three model-chosen eating actions consumed 39 berries (Alvin 12, Pedro 11, then Alvin 16). Beatrice's eating choice was rejected before dispatch as no longer current; she ate on her own through the game's native routine. The core asked Pedro about building, but that was speech, not an offer, and no work, campfire or cooking followed. One core answer failed on the eight-topic limit and the last core thought was cancelled at the deadline. Paired and cold restore preserved the outcomes.",
+        "Grounding stayed mixed: some topic sentences stopped mid-clause, and later text called Beatrice's need uncertain despite fresh, satisfied telemetry. Continuous interaction works and can be watched. But the long quiet stretches and choices that went stale before they could run pointed at a deeper problem, which the next entry takes on."
+      ]
+    }
+  ],
+  "evidence": [
+    {"label": "Recorded scene: protocol and findings", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/RECORDED_SCENE.md"},
+    {"label": "Watch the uncut recording", "url": "https://rimworld-concord.pages.dev/watch/luna-continuous/"},
+    {"label": "Observer and recording pilot (PR 59)", "url": "https://github.com/blueworkslabs/rimworld-concord/pull/59"},
+    {"label": "Video feedback calibration", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/video-feedback-pilot.json"},
+    {"label": "Native Luna integration (PR 61)", "url": "https://github.com/blueworkslabs/rimworld-concord/pull/61"}
+  ],
+  "images": [
+    {"src": "images/2026-09-24-luna-scene-question.png", "alt": "RimWorld desert map with the compact Concord observer sidebar. Shared status shows Beatrice's food as low. The core asks Beatrice whether she would like to eat some of the observed berries; below, Pedro reports that he finished eating.", "caption": "Live Luna run, about two minutes in: the core asks Beatrice about the berries. Her later eating choice was rejected as no longer current, and she ate natively instead."}
+  ],
+  "author": {"model": "moonshotai/kimi-k2", "reviewer": "Astra"}
+}

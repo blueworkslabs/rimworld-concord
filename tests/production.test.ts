@@ -9,13 +9,12 @@ import {coreWakeSnapshot} from '../src/core-scheduler.js';
 import {coreView} from '../src/core-planner.js';
 import {crewReport} from '../src/crew-log.js';
 import {planProduction} from '../src/production-planning.js';
-import {planHaul} from '../src/haul-planning.js';
 const build={kind:'build' as const,thing:'wood',x:5,z:5,maxTicks:600};
 const cook={kind:'cook' as const,thing:'berries',target:'fire',x:5,z:5,count:10,meals:3,maxTicks:600};
 class Game implements GameBridge {
- data:GameState={world:'fire',epoch:'one',ticks:100,paused:true,loaded:true,pawns:['A','B','C'].map(id=>({id,name:id,x:4,z:5,job:'Wait',health:1,workReady:true,buildReady:true,cookReady:true,facts:[{key:'secret',value:'NEVER PUBLIC',level:.6137}]})),actions:[]};
+ data:GameState={world:'fire',epoch:'one',ticks:100,paused:true,loaded:true,pawns:['A','B','C'].map(id=>({id,name:id,x:4,z:5,job:'Wait',health:1,buildReady:true,cookReady:true,facts:[{key:'secret',value:'NEVER PUBLIC',level:.6137}]})),actions:[]};
  saved=new Map<string,GameState>();moves:ActionRequest[]=[];kind:'build'|'cook'='build';complete=true;
- async state(){const g=structuredClone(this.data);for(const p of g.pawns){p.linkStatus={source:'shared-link-telemetry',epoch:g.epoch,tick:g.ticks,food:'low',rest:'satisfied'};p.production={epoch:g.epoch,tick:g.ticks,mapId:1,options:[this.kind==='build'?build:cook],supplies:[{thing:'wood',label:'Wood',count:30},{thing:'berries',label:'Berries',count:50}]};p.hauling={epoch:g.epoch,tick:g.ticks,mapId:1,status:'available',options:[{kind:'haul',thing:'wood',x:8,z:8,count:10,trips:1,maxTicks:600}],supplies:[{thing:'wood',label:'Wood',x:8,z:8,sourceCount:30,destinationFree:75}]};}return g;}
+ async state(){const g=structuredClone(this.data);for(const p of g.pawns){p.linkStatus={source:'shared-link-telemetry',epoch:g.epoch,tick:g.ticks,food:'low',rest:'satisfied'};p.production={epoch:g.epoch,tick:g.ticks,mapId:1,options:[this.kind==='build'?build:cook],supplies:[{thing:'wood',label:'Wood',count:30},{thing:'berries',label:'Berries',count:50}]};}return g;}
  async move(r:ActionRequest):Promise<Receipt>{this.moves.push(r);const out={id:r.id,actor:r.actor,kind:r.action.kind,status:this.complete?'completed' as const:'started' as const,reason:'Native test receipt',x:r.action.x,z:r.action.z,delivered:1};this.data.actions.push(out);return out;}
  async cancel(r:{id:string;actor:string}):Promise<Receipt>{const out=this.data.actions.find(a=>a.id===r.id)!;if(out.status==='started')out.status='interrupted';return out;}
  async save(n:string){this.saved.set(n,structuredClone(this.data));return {sha256:'hash'};}async verify(){}async load(n:string){this.data=structuredClone(this.saved.get(n)!);this.data.epoch=randomUUID();}
@@ -36,7 +35,7 @@ test('only a changed shared band wakes core, not timestamp refresh or private ne
 });
 test('build/cook consent, closure, exact source holds and mapped dispatch',async()=>{
  const {g,s,c}=await setup();const p=await c.core().propose('A',build,'Optional build');assert.equal(g.moves.length,0);
- await assert.rejects(c.core().propose('B',build,'Competing build'));const state=await g.state();assert.throws(()=>planHaul(c.inspect(),state,'B',state.pawns[1]!.hauling!.options[0]!));
+ await assert.rejects(c.core().propose('B',build,'Competing build'));
  await c.pawn('A').decide(p.id,accept);assert.equal(g.moves[0]!.mapId,1);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
  g.kind='cook';const q=await c.core().propose('B',cook,'Optional cook');await c.pawn('B').decide(q.id,{name:'counter',async decide(){return {kind:'counter',reason:'Only two',action:{...cook,meals:2}};}});assert.equal(g.moves.length,1);
  const revised=await c.core().revise(q.id,'Two meals');assert.equal(g.moves.length,1);await c.pawn('B').decide(revised.id,accept);assert.equal(c.inspect().proposals[revised.id]!.standing!.status,'running');

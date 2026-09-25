@@ -1,0 +1,99 @@
+{
+  "date": "2026-09-25",
+  "reviewedHead": "4a52059",
+  "tests": 409,
+  "wakeVerification": "mock-tested; not live-verified",
+  "direction": "offer-only recipient interpretation pending Fable; no merge/live clearance",
+  "suppressedOriginalInputs": [
+    {
+      "inputIndex": 3,
+      "tick": 5680,
+      "questionRecipients": 3,
+      "returnedAction": "wait"
+    },
+    {
+      "inputIndex": 4,
+      "tick": 8986,
+      "questionRecipients": 3,
+      "returnedAction": "wait"
+    },
+    {
+      "inputIndex": 5,
+      "tick": 14496,
+      "questionRecipients": 3,
+      "returnedAction": "wait"
+    },
+    {
+      "inputIndex": 6,
+      "tick": 16355,
+      "questionRecipients": 3,
+      "returnedAction": "wait"
+    },
+    {
+      "inputIndex": 7,
+      "tick": 18211,
+      "questionRecipients": 3,
+      "returnedAction": "ask"
+    },
+    {
+      "inputIndex": 13,
+      "tick": 34935,
+      "questionRecipients": 2,
+      "returnedAction": "cancelled"
+    }
+  ],
+  "replayLimit": "Applies predicate to original fixed inputs; not a counterfactual live trajectory, since suppressing the question would change later answers and wakes.",
+  "clock": {
+    "receipt": "hauling-migration-strict-42de7ddf-bc11-4078-a738-73ad4dba75c9.json",
+    "sha256": "f522ce8100176f53e523995818376d6cbb99d8ba41f13601a4d9d932a0d0d8ff",
+    "passed": true,
+    "findings": [],
+    "eventGaps": 0,
+    "observations": {
+      "known": [
+        {
+          "tick": 0,
+          "text": "Day 1, 6h (t0)",
+          "nativeHour": 6,
+          "viewedMap": 0
+        },
+        {
+          "tick": 2500,
+          "text": "Day 1, 7h (t2500)",
+          "nativeHour": 7,
+          "viewedMap": 0
+        },
+        {
+          "tick": 60000,
+          "text": "Day 2, 6h (t60000)",
+          "nativeHour": 6,
+          "viewedMap": 0
+        }
+      ],
+      "unknown": {
+        "text": "t291",
+        "nativeHour": -1,
+        "viewedMap": 0
+      },
+      "missing": {
+        "text": "t291",
+        "nativeHour": -1,
+        "viewedMap": 0
+      },
+      "probeTick": 291
+    },
+    "scope": "verified on one map; multi-map deferred until the first two-map scenario exists; native-hour consistency, not independent proof of GenDate"
+  },
+  "preservation": {
+    "preexisting": 403,
+    "changed": [],
+    "recordings": {
+      "strict-legibility-1790322674487.mp4": "610ef6b453891f44a74b7193fdfaebe0bb67c4236fa12511529120fc6e72f79b"
+    },
+    "game": "inactive",
+    "display": "inactive"
+  },
+  "inferenceCalls": 0,
+  "b1FixRoundsUsed": 2,
+  "growing": "parked; not run"
+}

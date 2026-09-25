@@ -50,7 +50,7 @@
 .who svg{width:34px;height:34px;color:var(--amber);margin-bottom:.4rem}
 
 /* Principles */
-.pillars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;counter-reset:p}
+.pillars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;counter-reset:p}
 .pillar{position:relative;padding:1.2rem 1.2rem 1.25rem;background:var(--steel-800);border:1px solid var(--steel-700);border-radius:2px}
 .pillar::before{counter-increment:p;content:"0" counter(p);display:block;font-variant-numeric:tabular-nums;font-weight:700;color:var(--amber);font-size:.85rem;margin-bottom:.35rem}
 .pillar h3{margin:0 0 .45rem;font-size:1.12rem}
@@ -150,11 +150,11 @@
 @media (max-width:900px){
   .lead,.two,.dive{grid-template-columns:1fr}
   .dive:nth-of-type(even) .dive-text{order:0}
-  .cast,.research{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .pillars,.latest,.future{grid-template-columns:1fr}
+  .cast,.research,.pillars{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .latest,.future{grid-template-columns:1fr}
 }
 @media (max-width:560px){
-  .cast,.research{grid-template-columns:1fr}
+  .cast,.research,.pillars{grid-template-columns:1fr}
   .beats li{grid-template-columns:1fr;gap:.2rem}
   .scope{font-size:.84rem}
   .scope th,.scope td{padding:.45rem .5rem}

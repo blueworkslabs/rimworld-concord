@@ -18,6 +18,11 @@ Code: `src/social.ts`, `src/outlook.ts`, `src/observed-names.ts`, `src/reoffers.
 | Own offers, agreements and progress | yes | no | yes | yes | yes |
 | Nearby grounded options | own shortlist | no | as opportunities | no | yes |
 | Local food sightings | own | no | everyone's | yes | yes |
+| In-game clock (day and hour) | yes | yes | yes | yes | yes |
+| Colony stockpiles (label, location) | yes | yes | yes | yes | yes |
+
+The clock and the colony's stockpiles are colony-public: the clock is the shared sky,
+and a stockpile exists because someone placed it ([MIGRATION_HAULING](MIGRATION_HAULING.md)).
 
 "Operator" means `inspect()` and the audit log. None of it reaches a model.
 

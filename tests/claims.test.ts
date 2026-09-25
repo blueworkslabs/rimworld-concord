@@ -1,3 +1,4 @@
+import {legacyPawn} from '../trials/fixtures/legacy.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {scoreClaims,scoreClaim,sourceCatalog,bandOf,Claims} from '../trials/claims.js';
@@ -127,13 +128,13 @@ test('reviewer-encoded examples from retained evidence produce the expected verd
 
 
 test('supply references include destination identity and are independent of list order',()=>{
- const v=protect();const first=v.pawn.hauling!.supplies![0]!;
- v.pawn.hauling!.supplies!.push({...first,x:5,z:2,destinationFree:10});
+ const v=protect();const legacy=legacyPawn(v.pawn);const first=legacy.hauling!.supplies![0]!;
+ legacy.hauling!.supplies!.push({...first,x:5,z:2,destinationFree:10});
  const claim=fact('the second destination has capacity 10','pawn.hauling.supplies.wood@5,2.destinationFree',{op:'eq',value:10});
  for(let i=0;i<2;i++){
   const catalog=sourceCatalog(v);assert.equal(new Set(catalog.map(s=>s.id)).size,catalog.length);
   const r=scoreClaims([claim],v).claims[0]!;assert.equal(r.verdict,'supported');assert.equal(r.reference,10);
-  v.pawn.hauling!.supplies!.reverse();
+  legacy.hauling!.supplies!.reverse();
  }
 });
 

@@ -1,3 +1,4 @@
+import {legacyAction,legacyPawn} from '../trials/fixtures/legacy.js';
 /** Authored, frozen offline cases; no connection to a coordinator or game. */
 import {modelPrompt} from './model-perspective.js';
 import type {AttentionView} from './attention.js';
@@ -5,11 +6,11 @@ import {claudeArgs} from './claude-decision.js';
 import {reflectionChoices,ReflectionChoice,validateReflectionChoice} from './reflection-choice.js';
 const agreement='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',offer='bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb';
 const casualty={seq:1,tick:10,pawn:'A',kind:'casualty' as const,subject:'B',detail:'Locally observed Bea downed at 3,2; cause and urgency unknown'};
-function quiet():AttentionView{return {pawn:{id:'A',name:'Ari',x:2,z:2,job:'Wait',health:1,workReady:true,rescueReady:true,downed:false,facts:[{key:'need',value:'Food',level:.9},{key:'need',value:'Rest',level:.9}]},character:{id:'A',name:'Ari',memories:[]},events:[],proposals:[]};}
+function quiet():AttentionView{return {pawn:legacyPawn({id:'A',name:'Ari',x:2,z:2,job:'Wait',health:1,workReady:true,rescueReady:true,downed:false,facts:[{key:'need',value:'Food',level:.9},{key:'need',value:'Rest',level:.9}]}),character:{id:'A',name:'Ari',memories:[]},events:[],proposals:[]};}
 function noticed():AttentionView{const v=quiet();v.events=[casualty];v.character.experiences=[{event:casualty,route:'deliberation',interrupt:true}];v.pawn.casualties={epoch:'fixture',tick:10,mapId:0,radius:12,observations:[{target:'B',name:'Bea',x:3,z:2}],visibleSubjects:[{target:'B',downed:true,inBed:false}],visibleBeds:[]};return v;}
 export function contractCases(){
  const active=noticed();active.character.intention=agreement;active.pawn.job='Concord_Haul';
- active.intention={id:agreement,pawn:'A',reason:'Move nearby steel',status:'accepted',action:{kind:'haul',thing:'steel',x:4,z:2,count:10,trips:3,maxTicks:600},standing:{status:'running',deadline:610,steps:[]}};
+ active.intention={id:agreement,pawn:'A',reason:'Move nearby steel',status:'accepted',action:legacyAction({kind:'haul',thing:'steel',x:4,z:2,count:10,trips:3,maxTicks:600}),standing:{status:'running',deadline:610,steps:[]}};
  const pending=noticed();const rescue={kind:'rescue' as const,target:'B',bed:'medical-bed',x:4,z:3,maxTicks:600};
  pending.proposals=[{id:offer,pawn:'A',reason:'Optional rescue of Bea to this bed; you may refuse or counter',status:'pending',action:rescue}];
  pending.pawn.rescue={epoch:'fixture',tick:10,mapId:0,status:'available',options:[rescue],observations:[{target:'B',targetName:'Bea',bed:'medical-bed',bedLabel:'medical bed'}]};

@@ -12,7 +12,14 @@ namespace Concord {
  public static class Production {
   public static ThingDef Campfire {get{return DefDatabase<ThingDef>.GetNamed("Campfire");}}
   public static RecipeDef Recipe {get{return DefDatabase<RecipeDef>.GetNamed("CookMealSimple");}}
-  public static bool Ready(Pawn p,string kind){return Hauling.Ready(p)&&!p.WorkTypeIsDisabled(kind=="build"?WorkTypeDefOf.Construction:DefDatabase<WorkTypeDef>.GetNamed("Cooking"));}
+  // Ordered build/cook readiness, unchanged by the hauling deletion: the checks formerly borrowed
+  // from Hauling.Ready (including its 35 % needs stop) stay here until construction and cooking
+  // migrate to native blueprints and bills.
+  public static bool Ready(Pawn p,string kind){
+   return Movement.Available(p)&&!p.WorkTagIsDisabled(WorkTags.Hauling)&&p.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation)&&
+    (p.needs.food==null||p.needs.food.CurLevelPercentage>=0.35f)&&(p.needs.rest==null||p.needs.rest.CurLevelPercentage>=0.35f)&&
+    !p.WorkTypeIsDisabled(kind=="build"?WorkTypeDefOf.Construction:DefDatabase<WorkTypeDef>.GetNamed("Cooking"));
+  }
   public static ActionRecord Record(Pawn p,Job j){return Current.Game.GetComponent<WorldState>().actions.FirstOrDefault(a=>a.actor==p.GetUniqueLoadID()&&a.jobId==j.loadID);}
   public static bool Active(Pawn p,Job j){var a=Record(p,j);return a!=null&&a.status=="started"&&Ready(p,a.kind)&&Find.TickManager.TicksGame<a.untilTick;}
   public static Thing FindThing(Map map,string id){return map.listerThings.AllThings.FirstOrDefault(t=>t.GetUniqueLoadID()==id);}
