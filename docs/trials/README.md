@@ -105,3 +105,7 @@ pre-existing asthma needing tending. Crew-side follow-ups remain separate.
 
 [Recorded read-only capture](../evidence/perception-2026-09-25/README.md): paired paused
 wire receipts, full snapshot/digest and size counts. Not a benchmark or model run.
+
+## 2026-09-25 — corrected-adapter T1 UI calibration
+
+[Report](../evidence/ui-baseline-clean-2026-09-25/REPORT.md) · [metrics](../evidence/ui-baseline-clean-2026-09-25/metrics.json): 150.399s, 19 controls, 11 screenshots, no rejected game inputs. Native usage captured; subscription USD unknown; existing-context calibration, not a paired harness score. Original pilot preserved.
