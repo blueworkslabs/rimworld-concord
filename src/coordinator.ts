@@ -609,7 +609,8 @@ export class Coordinator {
       if(attempt>0||combined.aborted||!(error instanceof EatingRevalidationError)||error.validation.code!=='option-not-current')throw error;
       const next=await this.serial(async()=>{
         if(this.generation!==prepared.generation)return undefined;
-        const g=await this.current();this.ingest(g);const q=this.domain.coreState!.questions.find(q=>q.id===id)!;const own=g.pawns.find(p=>p.id===q.pawn);
+        combined.throwIfAborted();
+        const g=await this.current();this.ingest(g);combined.throwIfAborted();const q=this.domain.coreState!.questions.find(q=>q.id===id)!;const own=g.pawns.find(p=>p.id===q.pawn);
         if(q.status!=='running'||!own||own.downed)return undefined;
         this.commit('core-answer-requeued',q.pawn,{id,cause:'eating: option-not-current',eatingValidation:error.validation});
         return this.questionView(q,g,own,'The food you chose is no longer available. This is the current menu; choose again, say something, or stay silent.');

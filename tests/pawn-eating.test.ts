@@ -154,6 +154,7 @@ test('an eating answer whose food left the menu gets one fresh-menu deliberation
  assert.equal(result.status,'delivered');assert.equal(seen.length,2);
  assert.equal(seen[0].question.requeued,undefined);assert.match(seen[1].question.requeued,/no longer available/);
  assert.deepEqual(seen[1].pawn.eating.options.map((o:any)=>o.thing),['meal'],'new input: the fresh menu');
+ assert.equal((coreAnswerPrompt(seen[1]).perspective as any).question.requeued,seen[1].question.requeued,'the real prompt carries the note');
  assert.equal(g.data.actions[0]!.thing,'meal');assert.equal(c.inspect().coreState!.questions.find(x=>x.id===q)!.status,'answered');
  const requeued=s.events().filter(e=>e.event.kind==='core-answer-requeued');assert.equal(requeued.length,1);assert.equal((requeued[0]!.event.data as any).eatingValidation.code,'option-not-current');
  assert.equal(s.events().filter(e=>e.event.kind==='core-answer-failed').length,0);s.close();
@@ -204,4 +205,30 @@ test('no consumption follow-up while the meal is under way: the pawn is askable 
  g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;g.data.ticks+=10;await c.reconcile();v=await c.corePerspective();
  assert.ok(v.questionRecipients.includes('A'),'askable again once the receipt is completed');
  s.close();
+});
+
+
+test('cancellation during fresh-menu acquisition does not record or invoke a requeue',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c),ctl=new AbortController();
+ const state=g.state.bind(g);let firstReturned=false,reads=0,calls=0;
+ g.state=async()=>{const v=await state();if(firstReturned&&++reads===2)ctl.abort();return v;};
+ const result=await c.answerCoreQuestion(q,{name:'cancel-refresh',async answerCore(){calls++;firstReturned=true;g.food='meal';return eat;}},45000,ctl.signal);
+ assert.equal(reads,2);assert.equal(calls,1);assert.equal(result.status,'interrupted');assert.equal(g.calls,0);
+ assert.equal(s.events().filter(e=>e.event.kind==='core-answer-requeued').length,0);
+ assert.equal(s.events().filter(e=>e.event.kind==='core-answer').length,0);s.close();
+});
+
+test('the shared answer deadline cancels a pending second deliberation and suppresses its late reply',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);let calls=0,release!:(v:unknown)=>void;
+ const signals:AbortSignal[]=[];
+ const result=await c.answerCoreQuestion(q,{name:'deadline-refresh',async answerCore(_v,signal){
+  calls++;signals.push(signal);if(calls===1){g.food='meal';return eat;}
+  return new Promise(r=>release=r);
+ }},50);
+ assert.equal(calls,2);assert.equal(signals[0],signals[1]);assert.equal(signals[1]!.aborted,true);
+ assert.equal(result.status,'interrupted');release({choice:'eat',thing:'meal',text:'LATE ANSWER'});
+ await new Promise(r=>setImmediate(r));assert.equal(g.calls,0);
+ assert.equal(c.inspect().coreState!.questions.find(x=>x.id===q)!.messages.filter(m=>m.from==='A').length,0);
+ assert.equal(s.events().filter(e=>e.event.kind==='core-answer-requeued').length,1);
+ assert.equal(s.events().filter(e=>e.event.kind==='core-answer').length,0);s.close();
 });
