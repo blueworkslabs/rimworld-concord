@@ -202,3 +202,80 @@ its reservations are not erased or described as this retry's actual spend.
 Original [failed-run evidence](../evidence/jev-replay.json) remains intact. Raw responses,
 attempt journal and separate ledger are preserved privately. **No threshold or routing
 change follows.** Fable owns the interpretation and next experiment proposal.
+
+## Interpretation and next experiment — Fable, 2026-09-25
+
+Written after the retry report above, against the inputs and returned choices in
+`docs/evidence/recorded-scene.json`. Hand adjudication, not new inference.
+
+### Wake gating: the sample cannot answer the question
+
+All 14 known turns are consequential under the frozen rule, and they stay consequential
+under a stricter offline recount that ignores digit-only rewording: every one of the
+five `wait` turns still added at least one new topic (turn 5 the failed Beatrice
+question, turn 7 her request, turn 10 Alvin's "not now", turn 12 three new topics).
+This core was busy; the recorded scene simply contains no turn that changed nothing.
+Jev's `worth_turn` agrees: 12 of 14 scored ≥ 0.87, and the two lowest (0.54, 0.65) are
+the two turns with the least content (the initial wake and the first telemetry-only
+wake). Consistent, and uninformative about deferral.
+
+`asks_core` is the clean result: 0.05–0.10 on every turn before any pawn asked for
+anything, 0.85–0.93 from turn 7 on, where Beatrice's message says "Please help locate
+available food". One question, one flip, at the right place.
+
+**Next experiment (E2):** replay wake gating over the native-haul live run
+([NATIVE_HAUL_LIVE](NATIVE_HAUL_LIVE.md)), the run with seven `wait` turns and six
+near-duplicate "nothing to propose" messages. Its public core inputs are not yet in
+evidence; export them in the same shape as `recorded-scene.json` (private receipts stay
+private), then run the unchanged harness: ~15 wake requests, under USD 0.01. The
+consequence rule stays as frozen; the report gains a reword-only versus substantive
+split so a busy sample is visible as such. No threshold is chosen until E2 has
+unchanged-turn negatives.
+
+### Topic bookkeeping: the disagreement is a coordinator finding
+
+Jev predicted `resolves` 28 times against six recorded closures and caught all six. Of
+the 22 disagreements, **18 are the same two topics** (`ff7099ac`, `1804036f`: "Pedro
+reported finishing the berries… this communication topic remains open because no
+closure record is listed"), judged resolvable with 0.74–0.92 confidence on nine
+consecutive turns. In every one of those turns the topic was **not closable by code**
+(`topicClosures` empty, not linked to a self-care record) because the message that
+sourced it ("I finished eating the berries") is not among the receipt's `sourceIds`,
+which hold only the question and its answer. The core was right by its rules and the
+rules had no way to close a topic whose reported outcome a receipt already verifies.
+This is the "lingering follow-up" gap named in [RECORDED_SCENE](../RECORDED_SCENE.md).
+
+**Next step (coordinator, not Jev):** a closure path for a message-sourced topic whose
+reported completion a later receipt verifies: link completion reports to the self-care
+or agreement record they report on, or add an `acknowledged` closure for speech that
+carries no obligation. Design item for the hauling migration's topic-closure work.
+Jev's role here was diagnostic; it does not need to be wired to deliver this.
+
+### Grounding: weak signal, right places, annotate only
+
+At 0.5, `unsupported_fact` flagged four replies; adjudicated against their inputs:
+
+- Turns 10 (0.65) and 11 (0.56): the topic says Beatrice's "present need and access
+  remain uncertain" while fresh telemetry reports her food satisfied. That is the one
+  narration error found by hand in this run. Correct flags.
+- Turns 2 (0.50) and 5 (0.54): every statement traces to telemetry, sightings, receipts
+  or question status. False positives at the boundary.
+- `observation_time_as_event_time` 0.70 on turn 5 reacts to "At tick 7943, fresh
+  telemetry reports…", which is observation time used as observation time. Borderline;
+  the pattern that later drifted, not yet the drift.
+- The other four categories never exceed 0.40 and the replies contain none of those
+  errors. Correct silence.
+
+Nothing reaches 0.8. As a guardrail this is an annotator, not a gate, which is what the
+plan said. Precision at 0.5 on this sample: two true, two borderline-false, from four.
+The truncated and multilingual topic fragments (turn 10) are not a grounding class and
+need a mechanical check, not a model.
+
+### Decisions
+
+- No threshold, no wiring. Unchanged.
+- E2 (native-haul inputs) is the next paid pass; it needs the export first.
+- The two-topic closure gap goes to the coordinator design queue.
+- `asks_core` is the first Jev question with a clean offline result; it becomes the
+  candidate for the first one-use wiring **after** E2, as a hint attached to the wake,
+  never a gate.
