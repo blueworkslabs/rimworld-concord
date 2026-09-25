@@ -11,6 +11,11 @@ layout manifest:
    "matched":[{"def":"WoodLog","quota":30},{"def":"ComponentIndustrial","quota":..}]}
 `matched` freezes the B8 pair: one wood quota and one small-stack-def quota, each ≤75 and
 covered by the manifest's loose stacks of that def; both halves run with exactly these.
+Optional "rescue":{"target":"Thing_Human…","patientCell":{"x":..,"z":..},"beds":[{"x":..,"z":..},..]}
+writes a SEPARATE save for the in-game B7 handover case (run the script again with it):
+the target is anesthetized at the cell, medical sleeping spots are added (as
+scripts/rescue-fixture.py does), and Doctor is 0 for everyone so no native rescue races the
+scripted one. Stacks, zone and hauling settings are identical to the base fixture.
 The zone is the "existing colony stockpile" the core may tag per def (mixed, several
 allowed defs); the site is an operator-declared candidate site (data, not a zone).
 Every stockpile that could accept one of the fixture's defs is removed first, and every
@@ -24,6 +29,8 @@ src,ref,dst,layout=sys.argv[1:5];layout=json.loads(layout)
 WORK=['Firefighter','Patient','Doctor','PatientBedRest','BasicWorker','Warden','Handling','Cooking','Hunting','Construction','Growing','Mining','PlantCutting','Smithing','Tailoring','Art','Crafting','Hauling','Cleaning','Research','Childcare','Fishing']
 HAULING=WORK.index('Hauling')
 zoneSpec,site,stacks=layout['zone'],layout.get('site'),layout['stacks']
+rescue=layout.get('rescue')
+assert rescue is None or (rescue['target'].startswith('Thing_') and len(rescue['beds'])>=1),'rescue needs a target id and at least one bed'
 defs=sorted({s['def'] for s in stacks}|set(zoneSpec['allow']))
 assert 1<=zoneSpec['w']*zoneSpec['h']<=64 and (site is None or 1<=site['w']*site['h']<=64)
 assert all(1<=s['count'] for s in stacks)
@@ -43,6 +50,7 @@ for p in pawns:
     assert len(vals)==len(refVals)==len(WORK),'work type count differs from the pinned build'
     for v,rv in zip(vals,refVals):v.text=rv.text
     vals[HAULING].text='3'
+    if rescue:vals[WORK.index('Doctor')].text='0'
     priorities[p.findtext('id')]={w:int(v.text) for w,v in zip(WORK,vals) if v.text!='0'}
 
 # No storage that could accept a fixture def, except the manifest's own mixed zone.
@@ -95,7 +103,25 @@ for d in zoneSpec['allow']:E.SubElement(allow,'li').text=d
 # Duplicate-pickup geometry: partial same-def stacks within the native 8-cell radius.
 pairs=[(a['id'],b['id']) for i,a in enumerate(made) for b in made[i+1:]
        if a['def']==b['def'] and (a['x']-b['x'])**2+(a['z']-b['z'])**2<=64]
+def setval(parent,key,value):
+    node=parent.find(key)
+    if node is None:node=E.SubElement(parent,key)
+    node.attrib.pop('IsNull',None);node.text=str(value);return node
+if rescue:
+    target=next(p for p in pawns if 'Thing_'+p.findtext('id')==rescue['target'])
+    health=target.find('healthTracker');setval(health,'healthState','Down')
+    h=E.SubElement(health.find('hediffSet/hediffs'),'li',{'Class':'HediffWithComps'})
+    for k,v in [('loadID','990001'),('def','Anesthetic'),('severity','1'),('ageTicks','0'),('ticksToDisappear','90000'),('disappearsAfterTicks','90000')]:setval(h,k,v)
+    pc=rescue['patientCell'];assert (pc['x'],pc['z']) not in zoneCells;setval(target,'pos',f"({pc['x']}, 0, {pc['z']})")
+    for i,pos in enumerate(rescue['beds']):
+        cell=f"({pos['x']}, 0, {pos['z']})";assert cell not in occupied and (pos['x'],pos['z']) not in zoneCells,'bed cell occupied '+cell
+        bed=E.SubElement(things,'thing',{'Class':'Building_Bed'})
+        for k,v in [('def','SleepingSpot'),('id',f'SleepingSpot{990001+i}'),('map','0'),('pos',cell),('rot','0'),('faction',target.findtext('faction')),('medical','True'),('alreadySetDefaultMed','True')]:setval(bed,k,v)
+    uid=r.find('.//uniqueIDsManager')
+    for key in ['nextThingID','nextHediffID']:
+        n=uid.find(key) if uid is not None else None
+        if n is not None:n.text=str(max(int(n.text),990010))
 with open(dst,'xb') as out:r.write(out,encoding='utf-8',xml_declaration=True)
 print(json.dumps({'fixture':'hauling-migration-v1','stacks':made,'zone':zoneSpec,'site':site,'removedStockpiles':removedZones,
-    'duplicatePairs':pairs,'matched':matched,'priorities':priorities,'nativeSelfCare':True,
+    'duplicatePairs':pairs,'matched':matched,'rescue':rescue,'priorities':priorities,'nativeSelfCare':True,
     'note':'Freeze defs, quantities, positions, quotas and observation budgets before any run; Astra confirms trip counts in a dry run'}))

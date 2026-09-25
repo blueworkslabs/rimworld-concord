@@ -619,6 +619,48 @@ raw receipts:
 Round 2 is the last B1 fix/recheck round. If B1 isn't clean after it, strict ships and
 growing is parked with this evidence (Astra's handoff).
 
+### Strict acceptance work (after the fallback, 2026-09-25)
+
+Round 2's setup failure was a harness bug: the quiet-base receipt read a job's def after
+the game had pooled the job. Astra's `7dec73a` fixes it. None of the following touches B1
+or reopens growing.
+- **Strict is enforced as the configuration.** `configureNativeHauls` refuses a growing
+  hold unless `experimentalGrowing` is set, and an entry without a hold is strict. The
+  runner defaults to strict; `--experimental-growing` is the only way to run the parked
+  hold, and it clears nothing. `--strict` is still accepted and changes nothing. The mod
+  keeps its strict default.
+- **Refusing pawn, third item.** In the strict run, Pedro took all the steel after his wood
+  quota and Beatrice chose ordinary components and wood, so the check was left to chance.
+  The case now works while Beatrice's wood refusal binds (wood intent open, before any
+  tick):
+  - `lab-store-probe` runs the patched native storage search for her: steel finds the
+    pile, wood does not. Pedro's wood search is the control.
+  - `lab-haul-to-storage` starts the job the native factory builds for her steel. The
+    harness chooses only the item.
+  - The case requires an untagged `HaulToCell` start with `def=Steel`, a `Succeeded` end,
+    and a higher steel count in the pile.
+- **B7 in the game, scripted.** Running the fixture script with a `rescue` section writes
+  a separate save:
+  - the patient is anesthetized at a set cell;
+  - medical sleeping spots are added;
+  - Doctor is 0 for everyone, so no native rescue races the scripted one;
+  - stacks, pile and hauling settings are identical to the base fixture.
+
+  In `rescue-handover-in-game`, Pedro accepts the wood agreement, carries, sees the
+  patient and asks. The core offers the requested rescue, and he accepts. Authored answers
+  only. Required:
+  - consent, then the game-confirmed exclusion, then exactly one dispatch under the
+    persisted id;
+  - the carried trip ends before the rescue starts;
+  - the rescue completes with the patient in the agreed bed;
+  - the carried trip is credited to Pedro;
+  - the crew record appears.
+
+  This moves the handover out of `needsRecordedEvidence`.
+- **Still recorded by hand or out of reach:** cross-map clock provenance needs a second
+  map, and the fixture has one. On-screen label and colour remain recorded evidence. The
+  live #71 checks belong to the separately frozen live run.
+
 ## Gate C will measure
 
 **Signed condition: #71's fixes must be measured live in this migration.** Their

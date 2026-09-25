@@ -16,7 +16,9 @@ import {startNative} from './native-run.js';
 if(process.env.CONCORD_HAULING_MIGRATION_LOCKED!=='1')throw Error('Exclusive lab lock required');
 const root=new URL('../..',import.meta.url).pathname;
 const only=process.argv.find(a=>a.startsWith('--case='))?.slice(7);
-const hold=process.argv.includes('--strict')?'strict':'growing';
+// Strict is the migration configuration (B1 2/2 used). Growing runs only as an explicit,
+// experimental re-check; it cannot clear anything. --strict is accepted for old commands.
+const hold=process.argv.includes('--experimental-growing')?'growing':'strict';
 const deadline=Date.now()+2400000;
 let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
@@ -27,7 +29,7 @@ const receipt:{runId:string;hold:string;unimplemented:string[];observedOnly:Reco
    // case, never counted as passed. A hold left after such an end is a finding in that case.
    observedOnly:{'nested job end inside the pickup or duplicate check':[]},
    // Game cases this runner cannot observe: recorded by the operator, never counted as passed here.
-   needsRecordedEvidence:['rescue handover in the game (consent, exclusion, drained cargo, one dispatch)','crew-log clock per event map and the Show button','zone label/colour on screen while open and after retirement'],
+   needsRecordedEvidence:['crew-log clock per event map across two maps (the fixture has one map) and the Show button','zone label/colour on screen while open and after retirement'],
    passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
 let events:NativeEvent[]=[],lastSeq=0,state:GameState;
 let safetyStopped=false,checking=false;
@@ -296,14 +298,26 @@ try{
     const count=async(def:string)=>Number((await op({op:'lab-zone-count',zoneId,thing:def})).count);
     const thirdBefore=await count(third);
     await accept(w,P,{quota:20});await accept(k,B,{thing:'ComponentIndustrial',quota:10});await exclude(w,B,'refuse');
-    // Beatrice's own untagged trips of the third def, ended normally.
-    const thirdJobs=()=>kinds('job-start',B).filter(e=>field(e,'def')===third&&!field(e,'intent')).map(e=>Number(field(e,'job')));
-    const thirdDone=()=>thirdJobs().some(j=>kinds('job-end',B).some(e=>Number(field(e,'job'))===j&&/Succeeded/.test(e.detail)));
-    await run(()=>done(w)()&&done(k)()&&thirdDone(),360000);
+    // Round 1 and the strict run left this to chance: Pedro took all the steel after his wood,
+    // Beatrice chose ordinary components and wood. So, while her wood refusal binds (the wood
+    // intent open, before any tick): the patched native storage search for Beatrice admits the
+    // third def to this pile and refuses wood (Pedro's wood search is the control); then her
+    // third-def trip starts from the native factory's job and must store here.
+    const probe=async(who:string,def:string)=>await op({op:'lab-store-probe',actor:who,thing:def}) as {found:boolean;zoneId:number;thing:string};
+    const probes={thirdForRefuser:await probe(B,third),woodForRefuser:await probe(B,'WoodLog'),woodForPedro:await probe(P,'WoodLog')};c.data.probes=probes;
+    expect(c,probes.thirdForRefuser.found&&probes.thirdForRefuser.zoneId===zoneId,`the refuser's ${third} search did not find the pile: ${JSON.stringify(probes.thirdForRefuser)}`);
+    expect(c,probes.woodForRefuser.zoneId!==zoneId,`the refuser's wood search found the tagged pile: ${JSON.stringify(probes.woodForRefuser)}`);
+    expect(c,probes.woodForPedro.found&&probes.woodForPedro.zoneId===zoneId,`control failed: Pedro's wood search did not find the pile: ${JSON.stringify(probes.woodForPedro)}`);
+    expect(c,view(w)?.status==='open'&&!!view(w)?.excluded.includes(B),'the wood refusal was not binding at the third-def trip');
+    const started=await op({op:'lab-haul-to-storage',actor:B,thing:third}) as {job:number;started:boolean;zoneId:number;jobDef:string};c.data.thirdTrip=started;
+    const thirdEnd=()=>kinds('job-end',B).find(e=>Number(field(e,'job'))===started.job);
+    await run(()=>done(w)()&&done(k)()&&!!thirdEnd(),360000);
     const vw=invariants(c,w),vk=invariants(c,k);if(!vw||!vk)return;
     expect(c,vw.status==='met'&&vw.delivered===20&&vk.status==='met'&&vk.delivered===10,'both item quotas must complete');
-    const thirdAfter=await count(third);c.data.third={def:third,before:thirdBefore,after:thirdAfter,jobs:thirdJobs()};
-    expect(c,thirdDone()&&thirdAfter>thirdBefore,`the wood refuser did not store ${third}: jobs ${thirdJobs().join(',')}, zone ${thirdBefore} -> ${thirdAfter}`);
+    const thirdStart=kinds('job-start',B).find(e=>Number(field(e,'job'))===started.job);
+    const thirdAfter=await count(third);c.data.third={def:third,before:thirdBefore,after:thirdAfter,start:thirdStart?.detail,end:thirdEnd()?.detail};
+    expect(c,started.started&&started.jobDef==='HaulToCell'&&started.zoneId===zoneId&&field(thirdStart,'def')===third&&!field(thirdStart,'intent'),`the refuser's ${third} trip did not start untagged into the pile: ${JSON.stringify(started)} ${thirdStart?.detail??''}`);
+    expect(c,/Succeeded/.test(thirdEnd()?.detail??'')&&thirdAfter>thirdBefore,`the wood refuser did not store ${third}: ${thirdEnd()?.detail??'no job-end'}, zone ${thirdBefore} -> ${thirdAfter}`);
     expect(c,vw.byPawn.every(p=>p.pawn!==B),'refusing pawn credited on wood');
     expect(c,vk.drops.every(d=>d.kind!=='incidental'||d.source!=='haul'),'component intent recorded wood or steel');
     const zoneStock=(state.stockpiles??[]).find(z=>z.zoneId===zoneId);c.data.zone=zoneStock;
@@ -364,13 +378,66 @@ try{
     expect(c,view(b2)?.status==='open','re-tag did not open a new generation');
   });
 
+  // --- B7 in the game: a carrying native agreement replaced by a rescue. Separate fixture save
+  // (fixture script with `rescue`): the patient is anesthetized, Doctor is 0 for everyone.
+  // Authored answers only: Pedro asks, the core offers the requested rescue, Pedro accepts.
+  let rescueBase:string|undefined;
+  if(f.rescueSave&&m.rescue&&(!only||only==='rescue-handover-in-game')){
+    await b.load(f.rescueSave);await b.admin('pause');await poll();
+    for(const p of state!.pawns)await op({op:'lab-interrupt',actor:p.id,reason:'idle'});
+    rescueBase='lab-concord-hm-rescue-base-'+Date.now();await b.save(rescueBase);
+  }
+  await scenario('rescue-handover-in-game',rescueBase??base,async c=>{
+    if(!rescueBase){c.findings.push('precondition: no rescue fixture save (run the fixture script with `rescue`, set rescueSave)');return;}
+    const target=m.rescue.target as string;
+    if(!state.pawns.find(x=>x.id===target)?.downed){c.findings.push('precondition: the fixture patient is not downed');return;}
+    const s=new Store(root+`/.runtime/hauling-migration-rescue-${runId}.db`),co=new Coordinator(s,b);
+    try{
+      await co.open();await co.initializeCore('Scripted core for the rescue handover; every answer is authored.');
+      const [e]=await co.configureNativeHauls([{intentId:randomUUID(),thing:'WoodLog',thingLabel:'wood',label:m.zone.label,zoneId,quota:30,maxTicks:30000,variant:'attribution',hold}],{experimentalGrowing:hold==='growing'});
+      const haul=await co.core().propose(P,intentAction(e!),'The wood by the wall is getting wet.');
+      await co.pawn(P).decide(haul.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+      // Pedro carries on a tagged trip and has seen the patient.
+      const saw=()=>events.some(x=>x.pawn===P&&x.kind==='casualty'&&x.subject===target);
+      const carrying=()=>pawn('Pedro').job==='HaulToCell'&&(pawn('Pedro').carryingCount??0)>0;
+      if(!await run(()=>saw()&&carrying(),180000,()=>co.reconcile().then(()=>{}))){c.findings.push(`precondition: no carrying tagged trip with a sighting of the patient (sighted ${saw()}, carrying ${carrying()})`);return;}
+      const tripJob=pawn('Pedro').jobId!,cargo=pawn('Pedro').carryingCount??0;c.data.trip={job:tripJob,cargo};
+      await co.attend(P,{name:'scripted',async reflect(){return {kind:'request_rescue',agreementId:haul.id,target,reason:'Someone is down near the pile; can I help?'};}});
+      const request=co.core().requests().find(r=>r.pawn===P&&r.agreementId===haul.id&&r.status==='pending');
+      if(!request){c.findings.push('the carrying pawn could not raise a rescue request');return;}
+      await poll();const option=pawn('Pedro').rescueHandover?.options?.find(o=>o.target===target);c.data.option=option;
+      if(!option){c.findings.push('no rescue option in the handover projection while carrying');return;}
+      const offer=await co.core().offerRequestedRescue(request.id,option,'They need a bed.');
+      await co.pawn(P).decide(offer.id,scripted({kind:'accept',reason:'Authored acceptance'}));
+      const h=()=>Object.values(co.inspect().handovers??{}).find(x=>x.proposalId===offer.id);
+      const outcome=()=>{const id=h()?.dispatchId;return id?co.inspect().outcomes[id]:undefined;};
+      await run(()=>h()?.step==='stopped'||(!!outcome()&&outcome()!.status!=='started'),240000,()=>co.reconcile().then(()=>{}));
+      await co.reconcile();await poll();
+      const handover=h();c.data.handover=handover;c.data.outcome=outcome();
+      const steps=s.events().map(x=>x.event).filter(x=>['replacement-consented','handover-started','handover-owned','intention-stopped','handover-excluded','handover-dispatching','handover-stopped'].includes(x.kind)).map(x=>x.kind);c.data.steps=steps;
+      const tripEnd=kinds('job-end',P).find(x=>Number(field(x,'job'))===tripJob);c.data.tripEnd=tripEnd;
+      const dispatched=(state.actions??[]).filter(a=>a.id===handover?.dispatchId);
+      const rescueStart=events.find(x=>x.pawn===P&&x.kind==='job-start'&&!/HaulToCell/.test(x.detail)&&x.tick>=(tripEnd?.tick??Infinity)&&/Rescue|Concord/i.test(x.detail));
+      expect(c,handover?.step==='dispatched','handover did not reach dispatch: '+JSON.stringify(handover));
+      expect(c,steps.indexOf('handover-excluded')>steps.indexOf('replacement-consented')&&steps.indexOf('handover-dispatching')>steps.indexOf('handover-excluded')&&steps.filter(k=>k==='handover-dispatching').length===1,'handover steps out of order or repeated: '+steps.join(' > '));
+      expect(c,!!view(e!.intentId)?.excluded.includes(P),'Pedro is not excluded from the wood agreement in the game');
+      expect(c,!!tripEnd&&(!rescueStart||rescueStart.tick>=tripEnd.tick),'the rescue started before the carried trip ended');
+      expect(c,dispatched.length===1,`expected one rescue action under the persisted id, got ${dispatched.length}`);
+      expect(c,outcome()?.status==='completed'&&pawn(state.pawns.find(x=>x.id===target)!.name).currentBed===option.bed,`rescue ${outcome()?.status??'missing'}; patient bed ${state.pawns.find(x=>x.id===target)?.currentBed}`);
+      const v=invariants(c,e!.intentId);
+      if(v)expect(c,v.drops.filter(d=>d.job===tripJob&&d.kind==='participation').every(d=>d.pawn===P),'the carried trip was credited to someone else');
+      const text=crewReport(co.inspect(),state.ticks).entries.map(x=>x.text);c.data.crew=text;
+      expect(c,text.some(t=>/rescue now starts/.test(t)),'no crew record of the rescue starting');
+    }finally{s.close();}
+  });
+
   // --- B6: presentation while open, restored after retirement; offer record via the coordinator.
   await scenario('legibility',base,async c=>{
     const s=new Store(root+`/.runtime/hauling-migration-${runId}.db`),co=new Coordinator(s,b);
     try{
       await co.open();await co.initializeCore('Scripted core for the hauling migration; every answer is authored.');
       const entry:Partial<NativeHaulEntry>={intentId:randomUUID(),thing:'WoodLog',thingLabel:'wood',label:m.zone.label,zoneId,quota:20,maxTicks:30000,variant:'attribution',hold};
-      const [e]=await co.configureNativeHauls([entry]);
+      const [e]=await co.configureNativeHauls([entry],{experimentalGrowing:hold==='growing'});
       const offer=await co.core().propose(B,intentAction(e!),'The wood by the wall is getting wet.');
       await co.pawn(B).decide(offer.id,scripted({kind:'accept',reason:'Authored acceptance'}));await poll();
       const open=(state.stockpiles??[]).find(z=>z.zoneId===zoneId)?.label??'';c.data.openLabel=open;

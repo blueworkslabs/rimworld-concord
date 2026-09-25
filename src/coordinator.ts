@@ -555,7 +555,7 @@ export class Coordinator {
   /** Migration (B2/B5): freeze the operator's list of stockpile hauls. Existing-stockpile
    * entries take their rectangle from the game's stockpile list; each (zone or site, def) is
    * at most one entry. */
-  configureNativeHauls(raw:unknown[],options:{intentOnly?:boolean}={}){return this.serial(async()=>{
+  configureNativeHauls(raw:unknown[],options:{intentOnly?:boolean;experimentalGrowing?:boolean}={}){return this.serial(async()=>{
     const game=await this.current();
     if(!this.game.intent)throw Error('Native intent bridge unavailable');
     const entries=raw.map(r=>{
@@ -563,6 +563,8 @@ export class Coordinator {
       if(typeof e.zoneId==='number'&&e.zoneId>=0&&!zone)throw Error('Unknown stockpile '+e.zoneId);
       return NativeHaulEntry.parse(zone?{...e,x:zone.x,z:zone.z,w:zone.w,h:zone.h}:e);
     });
+    // The growing hold is parked after B1's two rounds: only an explicit experiment may use it.
+    if(entries.some(e=>e.hold==='growing')&&!options.experimentalGrowing)throw Error('Growing hold is parked; strict is the migration configuration');
     const keys=entries.map(e=>`${e.zoneId>=0?'zone:'+e.zoneId:'site:'+e.siteId}:${e.thing}`);
     if(new Set(keys).size!==keys.length||new Set(entries.map(e=>e.intentId)).size!==entries.length)throw Error('Duplicate stockpile haul entries');
     const frozen=orderedEntries(entries);

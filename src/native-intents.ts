@@ -102,7 +102,9 @@ export const NativeHaulEntry = z.object({intentId:z.string().uuid(),thing:ThingD
   /** How the item is named in speech ("wood"); the def name stays in records. */
   thingLabel:z.string().trim().min(1).max(40).optional(),
   zoneId:z.number().int().min(-1),siteId:z.string().max(60).optional(),...Area,quota:z.number().int().min(1).max(75),
-  maxTicks:z.number().int().min(600).max(60000),variant:z.enum(['exclusive','attribution']),hold:z.enum(['strict','growing'])}).strict()
+  maxTicks:z.number().int().min(600).max(60000),variant:z.enum(['exclusive','attribution']),
+  /** Strict is the migration configuration (B1 2/2 used); growing is parked and experimental. */
+  hold:z.enum(['strict','growing']).default('strict')}).strict()
   .refine(e=>e.zoneId>=0||e.w*e.h<=64,'A candidate site is at most 64 cells');
 export type NativeHaulEntry = z.infer<typeof NativeHaulEntry>;
 export function fromLegacy(c:NativeHaulConfig):NativeHaulEntry{

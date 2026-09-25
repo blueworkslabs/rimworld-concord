@@ -594,6 +594,26 @@ namespace Concord {
                 int carriedTotal=lmap.mapPawns.AllPawnsSpawned.Sum(w=>w.carryTracker!=null&&w.carryTracker.CarriedThing!=null&&w.carryTracker.CarriedThing.def==ldef?w.carryTracker.CarriedThing.stackCount:0);
                 return "{\"spawned\":"+spawned+",\"carried\":"+carriedTotal+",\"stacks\":["+String.Join(",",rows)+"]}";
             }
+            if(r.op=="lab-store-probe"||r.op=="lab-haul-to-storage") {
+                // The patched native storage search for this pawn and the nearest loose stack of a
+                // def (StoreUtility.TryFindBestBetterStoreCellFor runs patch 1). The haul variant
+                // starts the job the native factory builds for it (HaulAIUtility.HaulToStorageJob),
+                // so only the choice of item is the harness's.
+                if(p==null) throw new Exception("Unknown pawn");
+                var sdef=DefDatabase<ThingDef>.GetNamedSilentFail(r.thing);
+                if(sdef==null) throw new Exception("Unknown def");
+                var st=p.Map.listerThings.ThingsOfDef(sdef).Where(t=>t.Spawned&&!t.IsInValidStorage()&&!t.IsForbidden(p)&&p.CanReserve(t)&&p.CanReach(t,PathEndMode.ClosestTouch,Danger.Deadly))
+                    .OrderBy(t=>(t.Position-p.Position).LengthHorizontalSquared).FirstOrDefault();
+                if(st==null) throw new Exception("No reservable loose "+sdef.defName);
+                IntVec3 found;bool ok=StoreUtility.TryFindBestBetterStoreCellFor(st,p,p.Map,StoragePriority.Unstored,p.Faction,out found,true);
+                var fz=ok?p.Map.zoneManager.ZoneAt(found):null;
+                string head="\"thing\":\""+st.GetUniqueLoadID()+"\",\"found\":"+(ok?"true":"false")+",\"zoneId\":"+(fz==null?-1:fz.ID);
+                if(r.op=="lab-store-probe") return "{"+head+"}";
+                var hj=HaulAIUtility.HaulToStorageJob(p,st,false);
+                if(hj==null) throw new Exception("Native factory built no haul job");
+                p.jobs.StartJob(hj,JobCondition.InterruptForced);
+                return "{"+head+",\"job\":"+hj.loadID+",\"jobDef\":\""+hj.def.defName+"\",\"started\":"+(p.CurJob==hj?"true":"false")+"}";
+            }
             if(r.op=="lab-queue-count") {
                 if(p==null) throw new Exception("Unknown pawn");
                 var q=p.jobs.jobQueue.Select(j=>j.job).Where(j=>j!=null&&j.def==JobDefOf.HaulToCell).ToList();

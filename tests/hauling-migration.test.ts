@@ -38,7 +38,7 @@ class MigGame implements GameBridge {
   }
   async save(){return {sha256:'hash'};}async load(){}async verify(){}
 }
-const wood=(o:Partial<NativeHaulEntry>={})=>({intentId:randomUUID(),thing:'WoodLog',thingLabel:'wood',label:'shared wood pile by the north wall',zoneId:950,quota:30,maxTicks:30000,variant:'attribution',hold:'growing',...o});
+const wood=(o:Partial<NativeHaulEntry>={})=>({intentId:randomUUID(),thing:'WoodLog',thingLabel:'wood',label:'shared wood pile by the north wall',zoneId:950,quota:30,maxTicks:30000,variant:'attribution',hold:'strict',...o});
 const comps=(o:Partial<NativeHaulEntry>={})=>({intentId:randomUUID(),thing:'ComponentIndustrial',thingLabel:'components',label:'east shed',zoneId:-1,siteId:'east-site',x:90,z:84,w:3,h:3,quota:20,maxTicks:30000,variant:'attribution',hold:'strict',...o});
 async function setup(entries:any[],intentOnly=false){const game=new MigGame(),c=new Coordinator(new Store(':memory:'),game);await c.open();await c.initializeCore('Keep the colony stocked.');const frozen=await c.configureNativeHauls(entries,{intentOnly});return {game,c,frozen};}
 const say=(kind:'accept'|'refuse'|'defer',reason='because')=>scripted({kind,reason});
@@ -71,7 +71,7 @@ test('the offer record says what is offered; helpers are labelled; retirement an
   const e=wood();const {c,game}=await setup([e]);
   const b=await c.core().propose('B',intentAction(c.inspect().nativeHauls![0]!),'The wood by the wall is getting wet.');
   await c.pawn('B').decide(b.id,say('accept'));
-  assert.deepEqual(game.ops.at(-1),{op:'intent-accept',epoch:'e',intentId:e.intentId,actor:'B',thing:'WoodLog',x:76,z:84,w:4,h:4,quota:30,maxTicks:30000,variant:'attribution',zoneId:950,label:e.label,hold:'growing'});
+  assert.deepEqual(game.ops.at(-1),{op:'intent-accept',epoch:'e',intentId:e.intentId,actor:'B',thing:'WoodLog',x:76,z:84,w:4,h:4,quota:30,maxTicks:30000,variant:'attribution',zoneId:950,label:e.label,hold:'strict'});
   const v=game.data.intents![0]!;
   Object.assign(v,{delivered:20,remaining:10,byPawn:[{pawn:'P',count:20}],lastDeliveryTick:40});game.data.ticks=50;await c.reconcile();
   Object.assign(v,{status:'met',delivered:30,remaining:0,byPawn:[{pawn:'P',count:20},{pawn:'B',count:10}],lastDeliveryTick:90,archiveOpen:true});game.data.ticks=100;await c.reconcile();
@@ -293,4 +293,13 @@ for(const initiallyHauling of [false,true])test(`handover drains only its captur
   }
   await c.reconcile();
   assert.equal(game.moves.length,1,'empty pawn is not held by an unrelated current job');
+});
+
+test('strict is the migration configuration; the parked growing hold needs an explicit experiment',async()=>{
+  const game=new MigGame(),c=new Coordinator(new Store(':memory:'),game);await c.open();await c.initializeCore('Keep the colony stocked.');
+  await assert.rejects(c.configureNativeHauls([wood({hold:'growing'})]),/Growing hold is parked/);
+  const {hold:_omitted,...noHold}=wood();
+  const [e]=await c.configureNativeHauls([noHold]);assert.equal(e!.hold,'strict','an entry without a hold is strict');
+  const other=new Coordinator(new Store(':memory:'),game);await other.open();
+  const [g]=await other.configureNativeHauls([wood({hold:'growing'})],{experimentalGrowing:true});assert.equal(g!.hold,'growing');
 });
