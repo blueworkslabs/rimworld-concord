@@ -1,5 +1,7 @@
 # Hauling migration — recorded scripted review
 
+**Historical round-1 report.** See [final round / strict fallback](HAULING_MIGRATION_STRICT.md) for the current disposition; original failures below remain preserved.
+
 2026-09-24 · [PR #73](https://github.com/blueworkslabs/rimworld-concord/pull/73) ·
 [sanitized receipts and recording hashes](../evidence/hauling-migration-staging.json).
 

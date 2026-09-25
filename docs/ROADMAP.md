@@ -40,7 +40,7 @@ failures exposed missing native core wake integration and remain retained. Fable
 75-unit helper-layout setup and the [single frozen live recording](trials/NATIVE_HAUL_LIVE.md)
 is complete. The recording-only read is complete; [receipt-backed findings](trials/NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read) expose offer bookkeeping, stale narration and attention failures. Fable [approved game-side migration](trials/NATIVE_HAUL_GATE_C.md); three fixes block the next live run, and rare boundary checks remain. The options-menu measurement is a WoodLog-only subset.
 
-The hauling migration implementation is [in pre-staging review](trials/HAULING_MIGRATION_REVIEW.md). Existing-trip admission, pending rescue ownership, event-map clocks and branch coverage block deployment; no migration game run has started.
+The hauling migration uses the signed [strict fallback](trials/HAULING_MIGRATION_STRICT.md): growing exhausted its two fix/recheck rounds without a clean result. Strict passed 15/16 scripted checks and both matched quotas; refusing-pawn mixed-item coverage, rescue gameplay, cross-map clock evidence and #71 live validation remain. No migration Gate C approval.
 
 ## Next phase: work with RimWorld's planner
 

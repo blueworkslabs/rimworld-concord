@@ -8,6 +8,18 @@ The pinned build is RimWorld 1.6.4871 rev600, `Assembly-CSharp` prefix
 `082db1dd4f7f`. The spike and its verdict are in [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md)
 and [Gate C](trials/NATIVE_HAUL_GATE_C.md).
 
+## Operative fallback — 2026-09-25
+
+B1's two permitted fix/recheck rounds are exhausted. Round 2 (`b98d060`) failed in
+quiet-base preparation before any scenario assertions: the lab receipt read a pooled
+job's cleared definition after ending it. Failed recordings are retained. This is a
+harness failure, not a demonstrated growing-hold quota violation, but it is not a
+clean B1 result. **Strict (a) is the migration configuration; growing (b) is parked.**
+No third growing round is authorized by this freeze. Existing growing code/evidence
+is experimental, not cleared for deployment as the migration default. The reviewed
+receipt-only fix (`7dec73a`) is used for separate strict-only correctness checks; it
+does not reset the budget. Migration Gate C and live #71 validation remain pending.
+
 ## Goal
 
 Hauling agreements become native intents in ordinary play, not only in the frozen

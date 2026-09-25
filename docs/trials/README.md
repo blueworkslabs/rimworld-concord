@@ -78,3 +78,5 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 | 09-24 | [#73](https://github.com/blueworkslabs/rimworld-concord/pull/73) | D | Hauling migration pre-staging review | 397 tests and pinned compilation; admission/handover/clock/coverage blockers; no game run, B1 0/2 | Private revision-linked review and check receipts | [Review disposition](HAULING_MIGRATION_REVIEW.md) |
 
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.
+
+| 09-25 | [#73](https://github.com/blueworkslabs/rimworld-concord/pull/73) | S | Final B1 round and strict fallback | Growing parked after setup failure, B1 2/2; strict15/16, matched30wood/60components both halves; mixed-item coverage missing; 377 saves unchanged | [strict evidence](../evidence/hauling-migration-strict-fallback.json) | [strict report](HAULING_MIGRATION_STRICT.md) |
