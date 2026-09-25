@@ -227,8 +227,11 @@ try{
     });
     if(!activeWork)throw Error('precondition: no active worked frame to cancel');
     const beforeCancel=(await site(f.site.x,f.site.z)).find(t=>t.kind==='frame')!;
+    const cancellingJob=await jobOf(P);
+    if(cancellingJob.current?.def!=='FinishFrame'||cancellingJob.current.segments<1||!beforeCancel||
+      (beforeCancel.workDone??0)-workOf(view(id4)!)<=0.01)throw Error('precondition: no unsettled current-frame work at paused cancellation');
     await op({op:'lab-build-destroy',intentId:id4,reason:'Cancel'});await poll();const v4=view(id4)!;
-    c.data.activeFrameCancel={before:beforeCancel,after:v4};
+    c.data.activeFrameCancel={before:beforeCancel,job:cancellingJob,after:v4};
     expect(c,v4.status==='stopped'&&/cancelled/.test(v4.stopReason??''),'active frame cancellation failed');
     expect(c,Math.abs(workOf(v4)-(beforeCancel.workDone??0))<0.01,'active-frame accrued work lost or duplicated');reconcile(c,v4);
   });
