@@ -1,7 +1,7 @@
+import {legacyAction,legacyPawn} from '../trials/fixtures/legacy.js';
 /** Authored, frozen offline cases; no connection to a coordinator or game. */
 import {modelPrompt} from './model-perspective.js';
 import type {AttentionView} from './attention.js';
-import {legacyAction,legacyPawn} from './protocol.js';
 import {claudeArgs} from './claude-decision.js';
 import {reflectionChoices,ReflectionChoice,validateReflectionChoice} from './reflection-choice.js';
 const agreement='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',offer='bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb';

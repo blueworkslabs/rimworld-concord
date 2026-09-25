@@ -223,12 +223,12 @@ namespace Concord
             return aNew;
         }
         private static ActionRecord Cancel(Request r) {
+            if(!new[]{"move","rescue","build","cook","eat"}.Contains(r.cancelKind))throw new Exception("Unknown work kind");
             var w=World();if(r.epoch!=w.epoch)throw new Exception("Stale timeline");w.Reconcile();
             var a=w.actions.FirstOrDefault(x=>x.id==r.actionId);
             Guid parsed;if(!Guid.TryParse(r.actionId,out parsed))throw new Exception("Action ID must be UUID");
             // Cancellation tombstone also covers a dispatch which never reached the game.
             if(a==null) {
-                if(!new[]{"move","rescue","build","cook","eat"}.Contains(r.cancelKind))throw new Exception("Unknown work kind");
                 a=new ActionRecord {id=r.actionId,actor=r.actor,kind=r.cancelKind,status="interrupted",reason="Withdrawn before dispatch"};w.actions.Add(a);
             }
             if(a.actor!=r.actor||(a.kind!="move"&&a.kind!="rescue"&&a.kind!="build"&&a.kind!="cook"&&a.kind!="eat"))throw new Exception("No owned work action");

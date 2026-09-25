@@ -1,5 +1,5 @@
+import {legacyPawn} from '../trials/fixtures/legacy.js';
 import {test} from 'node:test';
-import {legacyPawn} from '../src/protocol.js';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {mkdtempSync,mkdirSync,existsSync} from 'node:fs';

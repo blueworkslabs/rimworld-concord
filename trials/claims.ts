@@ -1,3 +1,4 @@
+import {legacyPawn} from './fixtures/legacy.js';
 /**
  * Offline claims prototype. Post-hoc, no coordinator route, no authority.
  *
@@ -19,7 +20,7 @@
  */
 import {z} from 'zod';
 import type {AttentionView} from '../src/attention.js';
-import {legacyPawn,type Perspective} from '../src/protocol.js';
+import {type Perspective} from '../src/protocol.js';
 import {modelPerspective} from '../src/model-perspective.js';
 
 export const claimsScorerVersion='typed-claims-v1';

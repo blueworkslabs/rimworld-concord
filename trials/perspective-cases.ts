@@ -1,4 +1,4 @@
-import {legacyAction,legacyPawn} from '../src/protocol.js';
+import {legacyAction,legacyPawn} from './fixtures/legacy.js';
 import {contractCases,codexSchema} from '../src/contract-cases.js';
 import {claudeArgs} from '../src/claude-decision.js';
 import {modelPrompt,pawnInstructions} from '../src/model-perspective.js';

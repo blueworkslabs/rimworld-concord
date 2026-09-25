@@ -1,4 +1,4 @@
-import {legacyAction,legacyPawn} from '../src/protocol.js';
+import {legacyAction,legacyPawn} from './fixtures/legacy.js';
 /** Frozen matched outlooks; scenario/actor/proposal/evidence held constant. */
 import assert from 'node:assert/strict';
 import {perspectiveCasesV2} from './perspective-v2.js';

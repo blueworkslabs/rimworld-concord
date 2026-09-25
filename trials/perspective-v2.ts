@@ -1,4 +1,4 @@
-import {legacyPawn} from '../src/protocol.js';
+import {legacyPawn} from './fixtures/legacy.js';
 /** Corrected authored bank; v1 and its actual answers remain immutable. */
 import assert from 'node:assert/strict';
 import {perspectiveCases} from './perspective-cases.js';

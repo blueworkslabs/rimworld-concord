@@ -1,4 +1,4 @@
-import {legacyAction,legacyPawn} from '../src/protocol.js';
+import {legacyAction,legacyPawn} from './fixtures/legacy.js';
 import {readFileSync} from 'node:fs';
 const archived=JSON.parse(readFileSync(new URL('../../trials/fixtures/speech-check-v1.json',import.meta.url),'utf8'));
 /** Authored held-constant message contrasts. No game imports or applied choices. */

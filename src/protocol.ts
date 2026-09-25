@@ -6,18 +6,6 @@ import { HaulZone, type IntentView as NativeIntentView } from './native-intents.
 
 export const Move = z.object({kind:z.literal('move'), x:z.number().int().nonnegative(), z:z.number().int().nonnegative()}).strict();
 export type Move = z.infer<typeof Move>;
-/** Retired ordered haul (Gate C, 2026-09-25): a read-only legacy record shape for stored
- * histories and frozen model-eval fixtures. Never offered, planned or dispatched: it is not an
- * Action. */
-export type LegacyHaul = {kind:'haul';thing:string;x:number;z:number;count:number;trips:number;maxTicks:number};
-/** Frozen model-eval fixtures only: the hauling view and readiness flag those historical pawn
- * perspectives carried. The mod no longer sends them. */
-export type LegacyPawnFields = {hauling?:{epoch:string;tick:number;mapId?:number;status:'available'|'unavailable';options:LegacyHaul[];
-  supplies?:{thing:string;label:string;x:number;z:number;sourceCount:number;destinationFree:number}[]};workReady?:boolean};
-/** Frozen fixtures only: a retired ordered-haul record placed where an old perspective held an action. */
-export const legacyAction=(a:LegacyHaul)=>a as unknown as Action;
-/** Frozen fixtures only: read or author the legacy pawn fields of a historical perspective. */
-export const legacyPawn=<T extends Pawn>(p:T)=>p as T&LegacyPawnFields;
 export const Rescue = z.object({kind:z.literal('rescue'),target:z.string().min(1).max(120),bed:z.string().min(1).max(120),
   x:z.number().int().nonnegative(),z:z.number().int().nonnegative(),maxTicks:z.number().int().min(60).max(3600)}).strict();
 export type Rescue = z.infer<typeof Rescue>;

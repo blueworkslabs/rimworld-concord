@@ -1,5 +1,5 @@
+import {legacyPawn} from '../trials/fixtures/legacy.js';
 import {test} from 'node:test';
-import {legacyPawn} from '../src/protocol.js';
 import assert from 'node:assert/strict';
 import {scoreClaims,scoreClaim,sourceCatalog,bandOf,Claims} from '../trials/claims.js';
 import {claimExamples} from '../trials/claims-examples.js';

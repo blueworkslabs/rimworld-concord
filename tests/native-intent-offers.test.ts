@@ -1,5 +1,5 @@
+import {legacyAction,legacyPawn} from '../trials/fixtures/legacy.js';
 import { test } from 'node:test';
-import {legacyAction,legacyPawn} from '../src/protocol.js';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { Coordinator } from '../src/coordinator.js';

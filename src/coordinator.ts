@@ -22,6 +22,18 @@ import {rescueView,planRescue} from './rescue-planning.js';
 import {groundedPawn} from './grounded-pawn.js';
 import { AttentionOptions, Reflection, bounded, coalesce, type AttentionBackend, type AppraisalBackend, type AttentionResult,type AttentionAdmission } from './attention.js';
 
+/** Old stores stay readable via Store, but retired/unknown actions are not executable state.
+ * Check before any restore, recovery or status rewrite; never reinterpret old trip counts. */
+function requireSupportedStoredActions(domain:Domain){
+ const check=(action:unknown)=>{
+  if(!Action.safeParse(action).success)throw Error('Stored action is unsupported by this coordinator; use its original version for historical replay. No automatic migration.');
+ };
+ for(const p of Object.values(domain.proposals)){
+  check(p.action);if(p.decision?.kind==='counter')check(p.decision.action);
+ }
+ for(const r of Object.values(domain.reoffers??{}))check(r.action);
+}
+
 /** Character handles bind identity in code; backend output cannot choose an actor. */
 export class Coordinator {
   private domain!:Domain;
@@ -63,9 +75,10 @@ export class Coordinator {
   async open() {
     return this.serial(async()=>{
       if(this.pending.size)throw Error('Cannot reopen while decisions are running');
+      const previous=this.store.read();
+      if(previous)requireSupportedStoredActions(previous);
       const game=await this.game.state();
       if(!game.loaded) throw Error('No loaded game');
-      const previous=this.store.read();
       if(previous) {
         this.domain=previous;
         if(previous.epoch!==game.epoch || previous.world!==game.world) throw Error('Timeline changed: restore a paired checkpoint');
@@ -1235,6 +1248,7 @@ export class Coordinator {
   async restore(name:string) {
     return this.serial(async()=>{
       const saved=this.store.saved(name);
+      requireSupportedStoredActions(saved.state);
       await this.game.verify(name,saved.sha256);
       this.cancelDecisions();
       // Invalidate the local binding before loading; a partial restore fails closed.
