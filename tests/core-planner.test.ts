@@ -47,7 +47,9 @@ test('opportunity lost while core thinks is rejected without an offer',async()=>
  const {c,s,g}=await setup();const r=await c.planCore(planner(v=>{const out=offer(v);g.available=false;return out;}));assert.equal(r.status,'failed');assert.deepEqual(c.inspect().proposals,{});assert.equal(g.moves,0);s.close();
 });
 test('planner state and addressed answers survive save/restore; late old-timeline response cannot apply',async()=>{
- const {c,s}=await setup();await c.checkpoint('lab-concord-core-before');const r=await c.planCore(planner(offer));if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;await c.pawn(p.pawn).decide(p.id,{name:'accept',async decide(){return {kind:'accept',reason:'Yes'};}});await c.reconcile();await c.checkpoint('lab-concord-core-after');const state=c.inspect().coreState;
+ const {c,s}=await setup();await c.checkpoint('lab-concord-core-before');
+ assert.equal((await c.planCore(planner(()=>({topics:[{sourceId:'brief',text:'Move useful supplies',status:'open'}],actionTopicId:null,action:{kind:'wait',reason:'Note'}})))).status,'applied');
+ const r=await c.planCore(planner(offer));if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;await c.pawn(p.pawn).decide(p.id,{name:'accept',async decide(){return {kind:'accept',reason:'Yes'};}});await c.reconcile();await c.checkpoint('lab-concord-core-after');const state=c.inspect().coreState;
  await c.restore('lab-concord-core-after');assert.deepEqual(c.inspect().coreState,state);assert.equal((await c.corePerspective()).topics[0]!.outcomes[0]!.status,'completed');await c.restore('lab-concord-core-before');assert.equal(c.inspect().coreState!.topics.length,0);
  let enter!:()=>void,release!:(v:unknown)=>void;const entered=new Promise<void>(r=>enter=r);const turn=c.planCore({name:'late',async plan(){enter();return new Promise(r=>release=r);}});await entered;await c.restore('lab-concord-core-before');release(wait);assert.equal((await turn).status,'interrupted');assert.equal(c.inspect().coreState!.turns.length,0);s.close();
 });
@@ -182,10 +184,13 @@ test('terminal movement receipts wake the core even without a standing agreement
  }
 });
 
-const multiOffer=(v:CoreView,pawn:string)=>{const op=v.opportunities.find(o=>o.pawn===pawn)!;return {topics:[{sourceId:op.id,text:'Optional supplies',status:'open'}],actionTopicId:op.id,action:{kind:'propose',opportunityId:op.id,reason:'Optional haul'}};};
+// Offers link only to a topic that already exists: note it in one turn, offer linked in the next.
+const noteTopic=(v:CoreView,pawn:string)=>{const op=v.opportunities.find(o=>o.pawn===pawn)!;return {topics:[{sourceId:op.id,text:'Optional supplies',status:'open'}],actionTopicId:null,action:{kind:'wait',reason:'Note the need first'}};};
+const multiOffer=(v:CoreView,pawn:string)=>{const op=v.opportunities.find(o=>o.pawn===pawn)!,existing=v.topics.some(t=>t.sourceId===op.id);return {topics:existing?[]:[{sourceId:op.id,text:'Optional supplies',status:'open'}],actionTopicId:existing?op.id:null,action:{kind:'propose',opportunityId:op.id,reason:'Optional haul'}};};
+const linkedOffer=async(c:Coordinator,pawn:string)=>{assert.equal((await c.planCore(planner(v=>noteTopic(v,pawn)))).status,'applied');return c.planCore(planner(v=>multiOffer(v,pawn)));};
 test('one turn closes multiple earlier topics only against completed linked receipts',async()=>{
  const {c,s,g}=await setup();
- for(const pawn of ['A','B']){const r=await c.planCore(planner(v=>multiOffer(v,pawn)));assert.equal(r.status,'applied');if(r.status!=='applied')throw Error();await c.pawn(pawn).decide(r.proposalId!,{name:'yes',async decide(){return {kind:'accept',reason:'One trip'};}});await c.reconcile();}
+ for(const pawn of ['A','B']){const r=await linkedOffer(c,pawn);assert.equal(r.status,'applied');if(r.status!=='applied')throw Error();await c.pawn(pawn).decide(r.proposalId!,{name:'yes',async decide(){return {kind:'accept',reason:'One trip'};}});await c.reconcile();}
  const view=await c.corePerspective();assert.equal(view.topics.length,2);assert(view.topicClosures.filter(t=>t.sourceId.startsWith('op:')).every(t=>t.statuses.includes('resolved')));
  const close={topics:view.topics.map(t=>({sourceId:t.sourceId,text:'Linked work completed',status:'resolved'})),actionTopicId:null,action:wait.action};
  assert.equal((await c.planCore(planner(()=>close))).status,'applied');assert.deepEqual(c.inspect().coreState!.topics.map(t=>t.status),['resolved','resolved']);assert.equal(g.moves,2);
@@ -193,7 +198,7 @@ test('one turn closes multiple earlier topics only against completed linked rece
  const schema:any=coreChoiceSchema(await c.corePerspective());assert(schema.anyOf.every((b:any)=>b.required.includes('topics')&&!b.required.includes('topic')&&b.properties.topics.maxItems===8));s.close();
 });
 test('topic closure distinguishes refusal from completion and never guesses from prose or unknown links',async()=>{
- const {c,s}=await setup();const r=await c.planCore(planner(v=>multiOffer(v,'A')));if(r.status!=='applied')throw Error();const t=(await c.corePerspective()).topics[0]!;
+ const {c,s}=await setup();const r=await linkedOffer(c,'A');if(r.status!=='applied')throw Error();const t=(await c.corePerspective()).topics[0]!;
  const update=(status:string)=>({topics:[{sourceId:t.sourceId,text:'I claim it is done',status}],actionTopicId:null,action:wait.action});
  assert.equal((await c.planCore(planner(()=>update('resolved')))).status,'failed');
  await c.pawn('A').decide(r.proposalId!,{name:'no',async decide(){return {kind:'refuse',reason:'No thanks'};}});
@@ -208,10 +213,14 @@ test('batch validation is atomic; duplicates, ninth topics and closed action lin
  for(const choice of [{topics:[t,t],actionTopicId:null,action:wait.action},{topics:[t],actionTopicId:'unknown',action:multiOffer(v,'A').action},{topics:[{...t,status:'resolved'}],actionTopicId:'brief',action:multiOffer(v,'A').action}])assert.equal((await c.planCore(planner(()=>choice))).status,'failed');
  assert.equal(c.inspect().coreState!.topics.length,0);assert.equal(Object.keys(c.inspect().proposals).length,0);assert.equal(g.moves,0);
  const d=c.inspect();d.coreState!.topics=Array.from({length:8},(_,i)=>({sourceId:'old'+i,text:'old',status:'open',proposalIds:[]}));
- const full=coreView(d,await g.state());assert.throws(()=>validateCoreChoice(multiOffer(full,'A'),full),/limit/);s.close();
+ const full=coreView(d,await g.state());assert.throws(()=>validateCoreChoice(multiOffer(full,'A'),full),/capacity full/);
+ // At capacity a new topic is not even expressible, and the prompt says so; existing topics can still be updated.
+ const schema:any=coreChoiceSchema(full);const ids=schema.anyOf[0].properties.topics.items.anyOf.map((b:any)=>b.properties.sourceId.const);
+ assert.deepEqual(ids,full.topics.map(t=>t.sourceId));assert.equal(corePrompt(full).perspective.availableChoices.topicCapacity.full,true);
+ validateCoreChoice({topics:[{sourceId:'old0',text:'still open',status:'blocked'}],actionTopicId:'old0',action:multiOffer(full,'A').action},full);s.close();
 });
 test('counter lineage closes its topic from the accepted revision, not from the superseded offer',async()=>{
- const {c,s}=await setup();const r=await c.planCore(planner(v=>multiOffer(v,'A')));if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;
+ const {c,s}=await setup();const r=await linkedOffer(c,'A');if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;
  await c.pawn('A').decide(p.id,{name:'counter',async decide(){return {kind:'counter',reason:'Smaller',action:{...p.action,count:5}};}});
  const topic=c.inspect().coreState!.topics[0]!;
  const revised=await c.planCore(planner(()=>({topics:[],actionTopicId:topic.sourceId,action:{kind:'adopt_counter',proposalId:p.id,reason:'Fresh consent'}})));if(revised.status!=='applied')throw Error();
@@ -221,6 +230,7 @@ test('counter lineage closes its topic from the accepted revision, not from the 
 });
 test('pawn-authored re-invitation wakes once, survives restart, and still needs fresh consent',async()=>{
  const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:4,cooldownTicks:60,windowTicks:3600});
+ // The first offer creates its topic unlinked; the fresh re-offer links to it (it exists by then).
  const r=await c.planCoreWhenDue(planner(v=>multiOffer(v,'A')));if(r.status!=='applied')throw Error();const id=r.proposalId!;
  await c.pawn('A').decide(id,{name:'later',async decide(){return {kind:'defer',reason:'Not now'};}});g.data.ticks+=60;await c.planCoreWhenDue(planner(()=>wait));
  g.data.ticks+=500;g.data.pawns[0]!.facts![0]!.level=1;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');
@@ -230,13 +240,13 @@ test('pawn-authored re-invitation wakes once, survives restart, and still needs 
  await assert.rejects(c.pawn('A').requestReoffer(id,'Again'));
  await c.checkpoint('lab-concord-reoffer');await c.restore('lab-concord-reoffer');assert.equal(c.inspect().reoffers![request.id]!.status,'pending');
  const reopened=new Coordinator(s,g);await reopened.open();assert.deepEqual(reopened.inspect().reoffers,c.inspect().reoffers);
- let wakes:any;const offer=await reopened.planCoreWhenDue(planner(v=>{wakes=(v as any).wakeReasons;return {topics:[],actionTopicId:null,action:{kind:'propose',opportunityId:v.opportunities.find(o=>o.reofferRequestId===request.id)!.id,reason:'One fresh offer, no assumed consent'}};}));assert.equal(offer.status,'applied');if(offer.status!=='applied')throw Error();assert(wakes.some((w:any)=>w.sourceId===request.id));assert.equal(g.moves,0);
+ let wakes:any;const offer=await reopened.planCoreWhenDue(planner(v=>{wakes=(v as any).wakeReasons;return {topics:[],actionTopicId:v.topics[0]!.sourceId,action:{kind:'propose',opportunityId:v.opportunities.find(o=>o.reofferRequestId===request.id)!.id,reason:'One fresh offer, no assumed consent'}};}));assert.equal(offer.status,'applied');if(offer.status!=='applied')throw Error();assert(wakes.some((w:any)=>w.sourceId===request.id));assert.equal(g.moves,0);
  assert.equal(reopened.inspect().reoffers![request.id]!.status,'offered');g.data.ticks+=60;assert.equal((await reopened.planCoreWhenDue(planner(()=>wait))).status,'idle');
  await reopened.pawn('A').decide(offer.proposalId!,{name:'still-no',async decide(){return {kind:'refuse',reason:'I reconsidered; no'};}});assert.equal(g.moves,0);assert(!(await reopened.corePerspective()).opportunities.some(o=>o.pawn==='A'));assert((await reopened.corePerspective()).topicClosures.find(t=>t.sourceId===reopened.inspect().coreState!.topics[0]!.sourceId)!.statuses.includes('declined'));
  assert(crewReport(reopened.inspect(),g.data.ticks).entries.some(e=>e.text.startsWith('Request one fresh offer:')));s.close();
 });
 test('re-invitation is grounded to the exact deferred work and discarded by rewind',async()=>{
- const {c,s,g}=await setup();const r=await c.planCore(planner(v=>multiOffer(v,'A')));if(r.status!=='applied')throw Error();await c.pawn('A').decide(r.proposalId!,{name:'later',async decide(){return {kind:'defer',reason:'Later'};}});
+ const {c,s,g}=await setup();const r=await linkedOffer(c,'A');if(r.status!=='applied')throw Error();await c.pawn('A').decide(r.proposalId!,{name:'later',async decide(){return {kind:'defer',reason:'Later'};}});
  await c.checkpoint('lab-concord-before-reoffer');const request=await c.pawn('A').requestReoffer(r.proposalId!,'One new offer please');
  const v=await c.corePerspective(),op=v.opportunities.find(o=>o.reofferRequestId===request.id)!;assert(op);g.available=false;
  assert.equal((await c.planCore(planner(()=>({topics:[],actionTopicId:null,action:{kind:'propose',opportunityId:op.id,reason:'Stale'}})))).status,'failed');assert.equal(c.inspect().reoffers![request.id]!.status,'pending');assert.equal(g.moves,0);
@@ -244,7 +254,7 @@ test('re-invitation is grounded to the exact deferred work and discarded by rewi
 });
 test('reflection exposes only own eligible defer IDs and communicates an explicit re-invitation',async()=>{
  const {c,s,g}=await setup();const {reflectionChoices,reflectionChoiceSchema,validateReflectionChoice,reflectionFromChoice}=await import('../src/reflection-choice.js');
- const r=await c.planCore(planner(v=>multiOffer(v,'A')));if(r.status!=='applied')throw Error();const id=r.proposalId!;await c.pawn('A').decide(id,{name:'later',async decide(){return {kind:'defer',reason:'Not now'};}});
+ const r=await linkedOffer(c,'A');if(r.status!=='applied')throw Error();const id=r.proposalId!;await c.pawn('A').decide(id,{name:'later',async decide(){return {kind:'defer',reason:'Not now'};}});
  g.data.events=[{seq:1,tick:g.data.ticks,pawn:'A',kind:'health',subject:'change',detail:'An own experience'}];g.data.eventSeq=1;let seen:any;
  const result=await c.attend('A',{name:'deliberate-request',async reflect(v){seen=v;const choice={choice:'request_fresh_offer' as const,proposalId:id,reason:'I would consider that offer again'};validateReflectionChoice(choice,v);return reflectionFromChoice(choice);}},undefined,{cooldownTicks:0});
  assert.equal(result.status,'continued');assert.equal(g.moves,0);assert(seen);assert.deepEqual(reflectionChoices(seen).find(x=>x.choice==='request_fresh_offer')!.proposalIds,[id]);
@@ -263,7 +273,12 @@ test('core provider branches prohibit offer links on questions and waiting',asyn
   assert.throws(()=>validateCoreChoice(output,v),/Only offers link/);
   assert.doesNotThrow(()=>validateCoreChoice({...output,actionTopicId:null},v));
  }
- const offer=schema.anyOf.find((b:any)=>b.properties.action.properties.kind.const==='propose');assert(offer);assert(offer.properties.actionTopicId.anyOf.some((b:any)=>b.enum?.includes('brief')));s.close();
+ // Offers link only to an existing open topic: none exists yet, so only null; a same-turn topic fails closed.
+ let offer=schema.anyOf.find((b:any)=>b.properties.action.properties.kind.const==='propose');assert(offer);assert.deepEqual(offer.properties.actionTopicId,{type:'null'});
+ assert.throws(()=>validateCoreChoice({topics:[{sourceId:'brief',text:'Shared need',status:'open'}],actionTopicId:'brief',action:{kind:'propose',opportunityId:v.opportunities[0]!.id,reason:'Go'}},v),/existing open action topic/);
+ assert.equal((await c.planCore(planner(()=>({topics:[{sourceId:'brief',text:'Shared need',status:'open'}],actionTopicId:null,action:{kind:'wait',reason:'Note'}})))).status,'applied');
+ const next=await c.corePerspective();offer=(coreChoiceSchema(next) as any).anyOf.find((b:any)=>b.properties.action.properties.kind.const==='propose');
+ assert(offer.properties.actionTopicId.anyOf.some((b:any)=>b.enum?.includes('brief')));validateCoreChoice({topics:[],actionTopicId:'brief',action:{kind:'propose',opportunityId:next.opportunities[0]!.id,reason:'Go'}},next);s.close();
 });
 
 test('naming another pawn in a core reply never changes delivery or forwards to them',async()=>{
