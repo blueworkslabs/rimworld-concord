@@ -27,6 +27,8 @@ remain unchanged.
 | Native tagged-zone haul spike (historical) | [scripted and live evidence](docs/trials/NATIVE_HAUL_LIVE.md) retained | Superseded by the ordinary-play migration below |
 | Native stockpile hauling | strict holds; ordered implementation retired; [deletion check](docs/trials/HAULING_RETIREMENT.md): 75/75, two holders, paired/new-coordinator restore | [Migration Gate C passed on the game side](docs/trials/HAULING_MIGRATION_GATE_C.md); crew-side follow-ups remain; growing parked at B1 2/2 |
 
+Post-Gate-C [follow-ups 6–7](docs/trials/ATTENTION_EVICTIONS.md) add bounded review nudges and preserve pending attention over native churn. The historical replay reproduces 17 losses and predicts 0 under the two buffer corrections with recorded cursors fixed; scheduling/routing checks are mock-only, not live acceptance.
+
 Post-Gate-C [follow-ups 1–5](docs/trials/POST_GATE_C_FOLLOWUPS.md) add archive removals, request acknowledgments, meal-answer protection and recorded trimmed inputs. Verification is explicitly split between offline checks and scripted eating; no new live-model verdict.
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not

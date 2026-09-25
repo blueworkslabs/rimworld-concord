@@ -210,7 +210,7 @@ With a schedule, the core runs only when admitted:
   cause may admit another attempt within the remaining allowance, or without a count
   ceiling in ongoing mode. Waiting is a valid success, not a non-progress failure.
 
-Wake causes are public changes only:
+Wake causes are public changes, plus the explicitly bounded review nudge:
 
 | Cause | When |
 |---|---|
@@ -221,10 +221,36 @@ Wake causes are public changes only:
 | `answer` | A question is answered, stays silent or fails |
 | `telemetry` | A pawn's Food or Rest band changes (including to `unknown`) |
 | `self-care` | Eating completes, fails or is interrupted |
+| `review` | Nothing new, after a wait with work offerable (below; at most twice per wait) |
 
-Passing time, private needs, changing opportunities, food sightings and the core's own
-prose never wake it. Consumed causes stay consumed even if the observation later
+Apart from the bounded review below, passing time, private needs, changing
+opportunities, food sightings and the core's own prose never wake it. Consumed causes stay consumed even if the observation later
 disappears.
+
+### A bounded review after a wait (post-Gate-C item 6)
+
+In the pipeline rerun the core waited at t9084 with 8 offerable choices in view and was
+not woken again until a telemetry change at t18664: 9,580 ticks with proposable work and
+no second look. Fable's rule:
+
+- **Cause `review`**, keyed to the wait turn. It is due when the last applied turn was a
+  wait, that turn's view had an opportunity or counter, **any** proposable choice is still
+  present (not necessarily the same one), and nothing else would wake the core.
+- **Chain:** the first review is due `NATIVE_INTENT_STALL_TICKS` (2,500) after the wait;
+  a review that ends in another wait earns a second at twice that (5,000); after the
+  second, silence until a real cause. Any real cause resets the chain, and that turn's
+  own wait starts it again. A silently consumed telemetry change also ends the old
+  chain without spending a turn or starting another chain. Anything but a wait ends it.
+- **Budget:** at most **two extra core turns per deliberate wait**. Reviews go through
+  ordinary admission (cooldown and, in bounded schedules, the attempt budget apply).
+- **What the core sees:** `wakeReasons` names it `review`, with "Review n of 2, a nudge
+  and not news: you waited at t… while work was offerable and nothing public has changed
+  since. Waiting remains a valid answer." Whether it offers is still its decision.
+- **What the player sees:** a review that ends in wait again writes no log entry; the
+  status line reads "Core: reviewed; still waiting on …".
+
+Applied to the rerun, this would have added reviews at about t11,600 and t16,600, with
+the pile offerable both times.
 
 ## Shared status bands
 

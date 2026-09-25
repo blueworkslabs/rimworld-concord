@@ -42,7 +42,10 @@ ingest.
 | Event | Route | Interrupts a pending thought? |
 |---|---|---|
 | Job change | native | no |
-| Food, Rest, Mood band | appraisal | no |
+| Food, Rest, Mood band change | native (Fable, post-Gate-C item 7: the game feeds the pawn; the deliberate eating choice comes through the core's question) | no |
+| A pawn's own Food or Rest band reaching `urgent` (band 0, under 20%) | deliberation | no, queued for the next turn |
+| `intent-ordinary` (an ordinary arrival at a tagged zone) | native; the archive line reports it | no |
+| Any other kind without an entry | appraisal (kept defined for the day an appraiser has evidence) | no |
 | Health change | deliberation | yes |
 | `casualty` | deliberation | yes |
 | `casualty-recovered` | native | no |
@@ -58,6 +61,10 @@ The core has one telemetry rule of its own (details in [CORE](CORE.md)):
 | Band changes while an opportunity or a counter is offerable | yes |
 | Improving or lateral band changes on their own | never |
 | Any message, answer, agreement, request, self-care or native-intent cause | yes, as before |
+| `review`: nothing new, but the core waited with work offerable 2,500 (then 5,000) ticks ago | yes, at most twice per deliberate wait |
+
+A queued urgent need event is not coalesced away by a later native recovery; the
+recovery remains in the shown history, without being a new reflection trigger.
 
 An appraisal score of 0.5 or more sends an event on to deliberation; a lower score
 leaves it to native behaviour, with no pause and no badge.
@@ -100,7 +107,9 @@ histories. The allowed replies are listed in [MODELS](MODELS.md#reflection-choic
 each is rechecked against a fresh ingest before it applies. A pawn keeps its last 16
 reflections.
 
-**Lost experiences are failures.** When the 64-entry experience buffer evicts an
+**Lost experiences are failures.** On overflow the 64-entry experience buffer evicts the
+oldest native or already-considered experience first, so job churn cannot push out
+unconsidered changes ([diagnosis](trials/ATTENTION_EVICTIONS.md)). When it must evict an
 unprocessed, non-native experience, the coordinator counts it in
 `diagnostics.attentionGaps` (by kind) as well as the `attention-gap` audit record. The
 ongoing runner reports the count, so a harness pass is never mistaken for clean

@@ -135,6 +135,15 @@ test('pump caps concurrent turns, observes while thinking and prioritizes signif
  release({kind:'continue',reason:'All right'});await pump.drain();await pump.poll();
  assert.equal(pump.status().started,1);assert.equal(c.inspect().characters.A!.attention,undefined);await pump.stop();store.close();
 });
+test('native job churn makes room before unconsidered experiences are lost (post-Gate-C item 7)',async()=>{
+ const {game,store,c}=await setup();for(let i=0;i<5;i++)game.event('need','A','band '+i);
+ for(let i=0;i<200;i++)game.event(i%2?'job-end':'job-start','A','GotoWander');
+ game.event('intent-ordinary','A','intent=x;count=5;source=Pedro');await c.observe();
+ const kept=c.inspect().characters.A!.experiences!;assert.equal(kept.length,64);
+ assert.deepEqual(kept.filter(e=>e.event.kind==='need').map(e=>e.event.detail),['band 0','band 1','band 2','band 3','band 4'],'unconsidered need changes survive the churn');
+ assert.equal(kept.at(-1)!.route,'native','ordinary intent arrivals are native texture');
+ assert.equal(store.events().filter(e=>e.event.kind==='attention-gap').length,0);store.close();
+});
 test('unconsumed bounded-history loss is explicitly audited',async()=>{
  const {game,store,c}=await setup();for(let i=0;i<70;i++)game.event();await c.observe();
  assert.equal(c.inspect().characters.A!.experiences!.length,64);
@@ -327,4 +336,13 @@ test('reflection relay cannot cite evidence removed from the recorded trimmed vi
   assert.equal(r.status,'failed');assert.equal(c.inspect().characters.A!.outlook,undefined);
   assert.equal(d.characters.A.experiences[0].event.seq,1,'stored evidence was not trimmed');
  } finally {channel.close();store.close();}
+});
+
+test('queued urgent need evidence survives a later native recovery in the same batch',async()=>{
+ const {game,store,c}=await setup();game.event('food','A','0');game.event('food','A','1');
+ let shown:AttentionView|undefined;const result=await c.attend('A',{name:'capture',async reflect(view){shown=view;return {kind:'continue',reason:'The urgent band passed; continue native work'};}});
+ assert.equal(result.status,'continued');assert.ok(shown,'the backend was called');
+ assert.deepEqual(shown.events.map(e=>({kind:e.kind,detail:e.detail})),[{kind:'food',detail:'0'}]);
+ assert.ok(shown.character.experiences!.some(e=>e.event.kind==='food'&&e.event.detail==='1'&&e.route==='native'),'current recovery remains in the shown history');
+ assert.equal(c.inspect().characters.A!.attention!.cursor,2);store.close();
 });

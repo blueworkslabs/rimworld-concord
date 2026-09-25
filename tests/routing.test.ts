@@ -16,3 +16,12 @@ test('observed recovery remains native attention and does not interrupt unrelate
  assert.deepEqual(nativeAttention({kind:'casualty-recovered',detail:'No longer downed'}),{next:'native',interrupt:false});
  assert.deepEqual(nativeAttention({kind:'casualty',detail:'Downed'}),{next:'deliberation',interrupt:true});
 });
+
+test('need bands are native texture for pawns; a Food or Rest band reaching urgent is queued deliberation (item 7)',()=>{
+ for(const kind of ['food','rest','mood'])for(const detail of ['1','2','3','4'])assert.deepEqual(nativeAttention({kind,detail}),{next:'native',interrupt:false});
+ assert.deepEqual(nativeAttention({kind:'food',detail:'0'}),{next:'deliberation',interrupt:false});
+ assert.deepEqual(nativeAttention({kind:'rest',detail:'0'}),{next:'deliberation',interrupt:false});
+ assert.deepEqual(nativeAttention({kind:'mood',detail:'0'}),{next:'native',interrupt:false});
+ assert.deepEqual(nativeAttention({kind:'intent-ordinary',detail:'intent=x;count=5'}),{next:'native',interrupt:false});
+ assert.equal(nativeAttention({kind:'something-new',detail:''}).next,'appraisal','the appraisal route stays defined for unknown kinds');
+});

@@ -1,0 +1,104 @@
+{
+  "date": "2026-09-25",
+  "pr": 83,
+  "behaviorCommit": "78e54775a01583bdb8d7d5757fd778d81bf484b3",
+  "kind": "offline scripted checks and historical audit replay",
+  "gameRuns": 0,
+  "providerCalls": 0,
+  "tests": {
+    "passed": 423,
+    "failed": 0,
+    "todo": 0
+  },
+  "historicalReplay": {
+    "sourceRun": "25bcdc7e-c6c3-40bc-8f95-f9659afc1e10",
+    "privateReadonlyBackupSha256": "9db063b2d0bb97402ee2986b977e7651f979d4b6a380471fd56350d35c3d21be",
+    "actualAuditedGaps": 17,
+    "actualAuditedGapKinds": {
+      "memory": 1,
+      "rest": 6,
+      "mood": 2,
+      "food": 5,
+      "intent-ordinary": 3
+    },
+    "routeCounts": {
+      "Thing_Human405": {
+        "native": 563,
+        "appraisal": 14,
+        "deliberation": 5
+      },
+      "Thing_Human408": {
+        "native": 569,
+        "appraisal": 11,
+        "deliberation": 9
+      },
+      "Thing_Human411": {
+        "native": 538,
+        "appraisal": 13,
+        "deliberation": 6
+      }
+    },
+    "result": {
+      "asRun": {
+        "lost": 17,
+        "byKind": {
+          "memory": 1,
+          "rest": 6,
+          "mood": 2,
+          "food": 5,
+          "intent-ordinary": 3
+        },
+        "maxWaitingPerPawn": 4
+      },
+      "ordinaryNative": {
+        "lost": 14,
+        "byKind": {
+          "memory": 1,
+          "rest": 6,
+          "mood": 2,
+          "food": 5
+        },
+        "maxWaitingPerPawn": 4
+      },
+      "bothFixes": {
+        "lost": 0,
+        "byKind": {},
+        "maxWaitingPerPawn": 5
+      }
+    },
+    "fixedRecordedCursors": true,
+    "includesNewNeedBandRouting": false
+  },
+  "reviewChain": {
+    "initialWaitTick": 100,
+    "reviewTicks": [
+      2600,
+      7600
+    ],
+    "secondReviewNotYetDue": [
+      5100,
+      7599
+    ],
+    "idleAfterSecond": [
+      10100,
+      12600,
+      20000,
+      60000
+    ],
+    "realTelemetryWaitTick": 60000,
+    "newFirstReviewTick": 62500
+  },
+  "reviewRegressions": {
+    "silentTelemetryRetiresOldReview": true,
+    "queuedUrgentEvidenceSurvivesNativeRecovery": true,
+    "pendingReviewSurvivesCoordinatorReopen": true,
+    "boundedAttemptBudgetHonored": true,
+    "failedReviewNotRetriedAfterReopen": true
+  },
+  "limits": [
+    "Mock/offline scheduling and routing; no real-game or live-model acceptance.",
+    "Replay fixes recorded cursor movements and tests only ordinary-native plus native/considered-first eviction; it does not predict revised attention scheduling or thoughts.",
+    "Urgent exception covers own Food/Rest band0, matching the core; Mood remains native.",
+    "Existing historical evidence and fixtures unchanged."
+  ]
+}

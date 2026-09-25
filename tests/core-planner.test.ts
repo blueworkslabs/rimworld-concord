@@ -463,3 +463,57 @@ test('a coordinator core turn sends and records the trimmed view the model sees'
  assert.ok(Buffer.byteLength(JSON.stringify(corePrompt(recorded)))<=PROMPT_LIMIT);assert.ok(recorded.trimmed.messages>0);assert.equal(recorded.messages.at(-1).id,'m29');
  channel.receive({type:'decision-result',id:requests[0].id,output:wait});assert.equal((await turn).status,'applied');s.close();
 });
+
+test('a deliberate wait with proposable work earns two reviews, 2,500 then 5,000 ticks, then silence until a real cause (item 6)',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ const reasons:any[]=[];const waiter=planner(v=>{reasons.push((v as any).wakeReasons);assert.ok(v.opportunities.length>0);return wait;});
+ const due=async(tick:number)=>{g.data.ticks=tick;return (await c.planCoreWhenDue(waiter)).status;};
+ assert.equal(await due(100),'applied');assert.equal(reasons.at(-1)[0].kind,'start');
+ assert.equal(await due(2599),'idle');
+ assert.equal(await due(2600),'applied');assert.deepEqual(reasons.at(-1).map((w:any)=>w.kind),['review']);assert.match(reasons.at(-1)[0].value,/^Review 1 of 2, a nudge and not news: you waited at t100/);
+ assert.match(crewReport(c.inspect(),2600).observerText??'',/^Core: reviewed; still waiting on /);
+ assert.equal(await due(5100),'idle','the second review waits twice as long');
+ assert.equal(await due(7599),'idle');
+ assert.equal(await due(7600),'applied');assert.match(reasons.at(-1)[0].value,/^Review 2 of 2, .*waited at t2600/);
+ for(const t of [10100,12600,20000,60000])assert.equal(await due(t),'idle','the chain stops at two');
+ assert.equal(c.inspect().coreState!.schedule!.review,undefined);assert.equal(reasons.length,3);
+ // A real cause resets the chain: a fresh telemetry band with work offerable wakes the core, its wait starts review 1 again.
+ const fresh=(tick:number)=>{g.data.pawns[0]!.linkStatus={source:'shared-link-telemetry',epoch:g.data.epoch,tick,food:'low',rest:'satisfied'};};
+ fresh(60000);assert.equal(await due(60000),'applied');assert.deepEqual(reasons.at(-1).map((w:any)=>w.kind),['telemetry']);
+ assert.equal(c.inspect().coreState!.schedule!.review!.step,1);
+ fresh(62500);assert.equal(await due(62500),'applied');assert.match(reasons.at(-1)[0].value,/^Review 1 of 2, .*waited at t60000/);
+ s.close();
+});
+
+test('no review when nothing was offerable at the wait',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ g.available=false;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');
+ assert.equal(c.inspect().coreState!.schedule!.review,undefined,'nothing was offerable at the wait');
+ g.available=true;g.data.ticks=100000;assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');s.close();
+});
+
+test('silent telemetry ends an old review chain even when work later returns',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');
+ assert.equal(c.inspect().coreState!.schedule!.review!.dueTick,2600);
+ g.available=false;g.data.ticks=1000;g.data.pawns[0]!.linkStatus={source:'shared-link-telemetry',epoch:g.data.epoch,tick:1000,food:'low',rest:'satisfied'};
+ const silent=await c.planCoreWhenDue(planner(()=>{throw Error('silent telemetry must not spend');}));
+ assert.equal(silent.status,'idle');if(silent.status==='idle')assert.equal(silent.reason,'telemetry-only');
+ assert.equal(c.inspect().coreState!.schedule!.review,undefined);
+ g.available=true;g.data.ticks=2600;g.data.pawns[0]!.linkStatus!.tick=2600;
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'idle');assert.equal(c.inspect().coreState!.schedule!.attempts,1);s.close();
+});
+
+test('review admission survives reopen and respects budget; failed reviews are not retried',async()=>{
+ const {c,s,g}=await setup();await c.configureCoreSchedule({maxAttempts:2,windowTicks:10000,cooldownTicks:60});
+ assert.equal((await c.planCoreWhenDue(planner(()=>wait))).status,'applied');
+ const reopened=new Coordinator(s,g);await reopened.open();g.data.ticks=2600;
+ assert.equal((await reopened.planCoreWhenDue(planner(()=>wait))).status,'applied');
+ g.data.ticks=7600;const blocked=await reopened.planCoreWhenDue(planner(()=>wait));
+ assert.equal(blocked.status,'idle');if(blocked.status==='idle')assert.equal(blocked.reason,'budget-exhausted');s.close();
+ const f=await setup();await f.c.configureCoreSchedule({maxAttempts:null,windowTicks:null,cooldownTicks:60});
+ assert.equal((await f.c.planCoreWhenDue(planner(()=>wait))).status,'applied');f.g.data.ticks=2600;
+ assert.equal((await f.c.planCoreWhenDue(planner(()=>{throw Error('provider failed');}))).status,'failed');
+ const recovery=new Coordinator(f.s,f.g);await recovery.open();f.g.data.ticks=10000;
+ assert.equal((await recovery.planCoreWhenDue(planner(()=>wait))).status,'idle');assert.equal(recovery.inspect().coreState!.schedule!.attempts,2);f.s.close();
+});
