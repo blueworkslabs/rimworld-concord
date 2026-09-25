@@ -118,7 +118,8 @@
           "restored": true
         }
       ]
-    }
+    },
+    "restoreScope": "Runner checks restored coordinator state after game loads; independent restored game-ledger agreement and mismatch rejection are unverified."
   },
   "preservation": {
     "originalSaveCount": 413,
@@ -137,6 +138,7 @@
     "No provider/model calls or video/UI acceptance.",
     "Pending meal-memory/answer collision, archive and heard lines are mock-tested, not newly demonstrated in-game.",
     "Cold restore restarts coordinator only; game stays up.",
-    "Re-wake design and attention eviction diagnosis remain separate."
+    "Re-wake design and attention eviction diagnosis remain separate.",
+    "Paired/cold runner assertions do not independently verify restored game ledger; cached coordinator outcomes can survive a missing game action."
   ]
 }

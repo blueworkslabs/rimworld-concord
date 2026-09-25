@@ -34,8 +34,10 @@ All four cases passed on the controlled historical eating fixture: speech alone
 created no action and consumed nothing; typed eating completed **16 berries**
 (225 → 209); pawn stop and operator cleanup each interrupted with zero consumed.
 Only completed eating permitted exact self-care topic closure; broader food closure
-was rejected in every case. Paired restores and a separate coordinator-process cold
-check passed for all four cases.
+was rejected in every case. The runner’s paired-load and separate coordinator-process
+cold checks passed for all four cases, comparing restored coordinator state. They do
+not independently establish restored game-ledger agreement or reject a deliberately
+mismatched game ledger; that restore boundary remains unverified by this runner.
 
 All **413 pre-existing saves** are unchanged; nine new fixture/checkpoint saves are
 retained. The previous complete mod is restored and game/display are stopped.
