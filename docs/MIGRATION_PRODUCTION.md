@@ -507,41 +507,66 @@ game code is reproduced. Everything here is design, not a proven patch; P4 is th
 - Each carrier key (footprint key, or bill load ID plus bench) has a monotonic
   **generation**. Tagging opens generation *n*; retiring closes it; a later intent at the
   same key is *n+1*.
-- A saved **job ownership record** belongs to one generation: job load ID, pawn, intent,
-  generation, kind (delivery, work or bill), provenance (P5.5), admission tick, the
-  work baseline (work jobs), and a per-job deposit counter.
+- A saved **job record** holds job load ID, pawn, provenance (P5.5) and a deposit
+  counter. Its **carrier-scoped ownership segments** hold carrier key, intent,
+  generation, kind (delivery, work or bill), admission tick and work baseline. One
+  delivery job may have several segments: two tagged destinations must not share one
+  job-global intent owner. Bind/recheck the actual destination's segment at selection,
+  conversion and transfer; a successful blueprint/frame transition updates that
+  segment's carrier ID without changing its intent or generation.
 - Every receipt carries (intent, generation, physical occurrence ID). The occurrence IDs:
   - delivery: (job load ID, destination thing ID, deposit counter);
   - work: (job load ID, settlement number);
   - iteration: (bill load ID, per-bill iteration counter).
   Counters live in the saved ownership state, so a restore rolls them back with the game
   and a replayed event produces the same ID.
-- **One owner per physical effect.** When a receipt is formed, the job's ownership record
-  decides: the open intent that owns the job, else the retired record's "ordinary since",
-  else nothing. No iteration is ever both.
+- **One owner per physical effect.** Resolve the segment for the actual carrier and
+  generation, never the job's first target or another destination. It selects active
+  agreement credit, that carrier's applicable ordinary-work watch, or uncredited
+  ordinary work. Never both active credit and archived "ordinary since". Pre-tag and
+  refused-player exceptions below remain uncredited even while an intent is open.
+  Retiring one segment does not close another site's segment on the same job; re-tagging
+  cannot silently move an old segment into the new generation.
 - **Jobs begun before tagging.** At tag admission, every current and queued job touching the
   carrier gets an ownership record with provenance `pre-tag` and a baseline taken at that
-  moment (`workDone`, container per-def contents, iteration in progress). A pre-tag job's
-  effects stay ordinary work until that job ends: no credit, no violation. The pawn's next
-  job is admitted normally. A consent change still interrupts it (P5.3).
+  moment (`workDone`, container per-def contents, iteration in progress). Mark only the
+  affected carrier segment pre-tag, not every later destination of that job. Its effects
+  stay uncredited ordinary work until that job ends; this is an accounting boundary,
+  **not a consent exemption**. Apply P5.3 at attachment for already-excluded pawns before
+  acknowledging the tag, and at subsequent consent changes. Blocked attempts are not
+  violations; any actual prohibited post-exclusion contribution is a violation even
+  from a pre-tag job. The pawn's next job is admitted normally.
 - **Saving.** Ownership, generation, counters and exclusions are saved in `WorldState`,
   inside the game save. The call-scoped contexts (transition, ingredient snapshot, player
   order) are never saved: saves happen between ticks, never inside these calls.
 - **Restore.** A paired or cold restore (signature C3) restores both sides to the same
   point; the coordinator never keeps receipts past it. After load, the world component
   re-checks each pawn's restored current job under P5.2(a), because restored jobs do not
-  pass through `StartJob`.
+  pass through `StartJob`. Keep the saved work baseline and settlement counters on this
+  recheck; do not reset progress as though a new job had started. Recheck queued entries
+  too, without granting player provenance from `playerForced` alone.
 - **Release.** At termination (met, failed, stopped or expired), open ownership records
   settle (P5.4), exclusions and filters for that generation are released, and only the
-  "since then" watch remains.
+  "since then" watch remains. Close only the terminating carrier's segments, retaining
+  job counters and other carriers' ownership. Capture the ordinary-work boundary before
+  further effects so the terminal contribution cannot be counted again.
 
 **P5.2 Admission points.** Each point rejects only an excluded pawn (refused, deferred or
 withdrew) whose job provenance is not a player order. Everything else passes unchanged.
 - **(a) Job start:** `Pawn_JobTracker.StartJob` prefix, for any job whose targets or
   destination queue touch a tagged carrier or whose bill is tagged. This covers new jobs,
   queued jobs (`fromQueue`), paused jobs resuming, and restored jobs through the post-load
-  check. A rejected start ends as incompletable before the first toil and is recorded as
-  `rejectedStart`, never a violation.
+  check. At this prefix the incoming candidate is not yet `curJob`: snapshot its ID,
+  skip the original start, extract its queued wrapper if still present, and run queued
+  cleanup with pooling disabled (or clear its reservations directly if already dequeued).
+  Release its saved ownership segments and record `rejectedStart`, not an invented
+  completed/incompletable job. Do not call `EndCurrentJob` on an unrelated current job,
+  mutate the rejected candidate, or return it to the pool: callers/menu closures can
+  still reference it. Once unreferenced it may be garbage-collected. Preserve unrelated
+  current work. If idle, let the next native job-tracker tick seek work; never recursively
+  schedule from this rejection. An incoming reference equal to the current job uses the
+  current-job exclusion sweep instead of candidate disposal. The post-load path likewise
+  sweeps real current jobs, rather than treating them as unstarted candidates.
 - **(b) Queued destinations:** `Toils_Haul.TryGetNextDestinationFromQueue` postfix. A tagged
   destination for an excluded, non-player job yields "no next destination", so the chain
   ends and the cargo stays with the pawn under native rules. Filters alone miss this,
@@ -557,9 +582,14 @@ withdrew) whose job provenance is not a player order. Everything else passes unc
   in P5.3.
 
 **P5.3 Withdrawal and refusal sweep.** This runs synchronously in the mod when an exclusion
-is applied. The mod acknowledges to the coordinator only after the sweep, as hauling's
-exclude confirmation does. Player-provenance jobs are never swept.
-- **Queued jobs:** jobs touching the carrier are removed from the pawn's queue.
+is applied (and at attachment with existing exclusions). Publish exclusions first,
+then remove queued candidates, then interrupt matching current jobs with
+`startNewJob: false`; acknowledge only after all affected pawns are reconciled.
+This avoids native synchronous job finding halfway through the sweep. The ordinary
+scheduler may seek work afterward through the same admission guards. Player-provenance
+jobs are never swept.
+- **Queued jobs:** extract matching entries and run their native queued-job cleanup,
+  releasing reservations and saved segments, not just removing list elements.
 - **Current delivery:** ended (`InterruptForced`) whether or not the pawn is carrying.
   Cargo follows native cleanup: it is dropped or kept, never deposited. Unlike a hauling
   trip, a delivery to a tagged site after withdrawal is a prohibited contribution, so it
@@ -567,8 +597,13 @@ exclude confirmation does. Player-provenance jobs are never swept.
 - **Current finish-frame job:** ended. Its work settles at cleanup and stands (C2).
 - **Current `DoBill` job:** ended. No iteration. Ingredients already hauled stay where the
   game leaves them and are noted only if observed.
-- **Cleanup effects:** ending with `InterruptForced` runs no further toil, so cleanup cannot
-  deposit, complete or produce. Our settlement only reads.
+- **Cleanup effects:** `InterruptForced` still runs driver/toil finish actions and native
+  carry cleanup; it is not a general no-effects guarantee. The inspected delivery,
+  finish-frame and simple-meal drivers perform transfer/build/production in their normal
+  actions, not those cleanup actions. Keep effect guards active through cleanup, settle
+  work before the driver is cleared, and record observed cargo disposition. Acceptance
+  must show no tagged-container deposit, completion or iteration from this interruption;
+  an ordinary ground drop is not agreement delivery. Our settlement only reads.
 
 **P5.4 The three captures named in P2.**
 - **Ingredient snapshot.**
@@ -577,26 +612,41 @@ exclude confirmation does. Player-provenance jobs are never swept.
   - Inside it, a postfix on the private `Toils_Recipe.CalculateIngredients(Job, Pawn)`
     records each returned thing's def and `stackCount`. This point is after the portion
     `SplitOff` and before `ConsumeIngredients`, in the same action.
-  - The `Bill_Production.Notify_IterationCompleted` prefix, inside the context, turns the
-    snapshot into the pending iteration.
+  - A successful-return postfix on `Toils_Recipe.ConsumeIngredients` marks consumption
+    complete for this captured list. The snapshot proves selected quantities until then;
+    a thrown/partial consume must not turn all selected units into consumed units.
+  - The `Bill_Production.Notify_IterationCompleted` prefix binds the pending iteration
+    to this job and bill; its successful-return postfix marks the iteration complete.
+    Entering the callback alone is not completion: its body also invokes recipe hooks.
   - The `RecordsUtility.Notify_BillDone(billDoer, products)` prefix, inside the same context
     and matched by job load ID rather than pawn alone, adds product defs and counts as they
-    are at that moment, before storage. It then commits the one receipt.
-  - If the action throws or never reaches `Notify_BillDone`, the wrapper's finally commits
-    "products: not recorded", provided the iteration completed. Outside the context the
-    snapshot is discarded: `CalculateIngredients` also serves the unfinished-thing path,
-    which simple meals do not use.
+    are at that moment, before storage. It commits the one completed receipt only when
+    both successful-return markers exist, using a context-local committed flag to dedup.
+  - In `finally`, a completed but not-yet-committed iteration gets one receipt with
+    "products: not recorded". A failure before completion gets a partial/error record,
+    not iteration credit: retain selected quantities separately, consumed quantities only
+    when proved (otherwise "not recorded"), and do not invent a refund or undo native
+    repeat-count changes. Clear context and snapshots on every exit. The capture applies
+    only to the signed simple-meal path; `CalculateIngredients` also serves unfinished
+    things, outside this scope.
 - **Successor identity.**
   - Prefixes on `Blueprint.TryReplaceWithSolidThing` and `Frame.CompleteConstruction` open a
     transition context: map, key, generation, predecessor ID, expected successor def (frame
     def, or `entityDefToBuild`).
   - While the context is open:
     - the predecessor's nested `Destroy` is deferred from the removal classifier;
-    - a `GenSpawn.Spawn` postfix collects spawns on that map of the expected def at the key's
-      position and rotation.
-  - Exactly one candidate is required. For conversion, the method's out `createdThing` must
-    be that candidate. The postfix then commits the stage with the successor's ID.
-  - Zero or several candidates means `failed: successor not observed`. We never pick a
+    - a `GenSpawn.Spawn` successful-return postfix collects actual spawned objects on
+      that map of the expected def at the key's position and rotation. Deduplicate by
+      object identity if forwarded overloads are patched; repeated callbacks for one
+      object are not multiple successors.
+  - Exactly one distinct, still-spawned candidate is required. Conversion must return
+    true and its out `createdThing` must be that candidate; frame completion must return
+    normally with the predecessor removed. Only then commit the successor's stage/ID.
+  - A conversion returning false with the original blueprint still intact (for example
+    a blocking thing) leaves the intent open at `blueprint`, with no identity transfer.
+    This failed pawn job is not a failed building. Zero/ambiguous successors **after real
+    predecessor removal** yield `failed: successor not observed`. No removal and no
+    qualified successor retain the old stage with a diagnostic. Never pick an unrelated
     same-def occupant by footprint.
   - A Harmony finalizer closes the context on exceptions and reconciles any real removal.
   - `FailConstruction` opens a failure context. Its nested destroy and the fresh ordinary
@@ -615,19 +665,38 @@ exclude confirmation does. Player-provenance jobs are never swept.
 
 **P5.5 Player-order provenance.** `playerForced` alone is not trusted. `TryTakeOrderedJob`
 sets it for every ordered job, including engine and coordinator paths.
-- **Player menu order:** a scoped context around `FloatMenuOption.Chosen`. A job started
-  through `TryTakeOrderedJob` inside it is saved as `player` by job load ID.
-- **Player prioritization:** `JobGiver_Work`'s prioritized branch (`priorityWork` set, returned
-  job `playerForced`) is marked `player` at that point.
-- **Mod-issued jobs** (those with our action record) are never `player`.
-- **Any other `playerForced` job is ordinary** and goes through admission.
-- **Bills:** `Bill.PawnAllowedToStartAnew` has no forced argument. Our patch therefore consults
-  the player-order context rather than rejecting everywhere, so the approved player path
-  through `WorkGiver_DoBill` (called with `forced` inside the menu context) passes and
-  ordinary scans do not.
-- Effects of `player` jobs are recorded "ordered by the player (had refused)": no credit, no
-  helper label, not a violation. An iteration still decrements the native repeat count, as
-  P1 records.
+- **Menu eligibility, before selection:** wrap the synchronous
+  `FloatMenuOptionProvider_WorkGivers.GetWorkGiverOption` call in a pawn/target/work-giver
+  scoped **preview** context (prefix/finalizer), including `ShouldSkip`, `HasJobOnThing`
+  and `JobOnThing`. The native method constructs the candidate before `Chosen`, so a
+  Chosen-only exception would hide the refused bill before the player could select it.
+  The preview suppresses only Concord's exclusion filter, never native capability,
+  restriction, forbidden or reachability checks. Merely opening a menu grants no job
+  ownership, reservations of our own, or saved player authority. Scope the synchronous
+  method, not an iterator factory whose body executes after return.
+- **Actual player order:** a separate scoped `FloatMenuOption.Chosen` context stamps the
+  specific job passed through `TryTakeOrderedJob` as `player`, saved by job load ID.
+  Admission still validates the candidate's current carrier/generation; a previewed but
+  unchosen candidate gets no exception if later submitted by a non-player path.
+- **Player prioritization:** save a priority-order token (pawn, map, work giver, cell,
+  order generation) when `TryTakeOrderedJobPrioritizedWork` succeeds inside that Chosen
+  context. Before predicates execute, wrap `JobGiver_Work.GiverTryGiveJobPrioritized`
+  only when it matches that token and the pawn's current `priorityWork`. Mark its returned
+  candidate player-provenance before `StartJob`. Do not scope the whole
+  `TryIssueJobPackage`: its fallback ordinary scan must remain excluded. Clear the token
+  when priority work clears/replaces or no longer matches; restore it with its saved
+  order identity. A bare priority field or returned `playerForced` is not enough.
+- **Mod-issued jobs** (those with our action record) are never `player`. Any other
+  `playerForced` job is ordinary and goes through admission.
+- **Bills:** `PawnAllowedToStartAnew` has no forced argument. Consult the matching menu
+  preview or authenticated priority-probe context for candidate checks; consult the
+  saved job provenance at admission/effects. Do not equate a scanner's `forced` argument
+  with player authority, nor broaden ordinary scans after either context exits.
+- The signed refused-player exception is carrier-specific: effects on a carrier whose
+  exclusion is overridden read "ordered by the player (had refused)", with no credit,
+  helper label or violation. Do not falsely add "had refused" to other player jobs or
+  bypass native eligibility. An uncredited iteration still decrements native repeat
+  count, as P1 records.
 
 ### P4. Scripted cases per carrier (lab, before any scene)
 
@@ -659,10 +728,16 @@ sets it for every ordered job, including engine and coordinator paths.
     nominal full refund is not a substitute for observed placed units.
 13. Player-forced delivery and construction after refusal: see the signed added case below.
 14. Successful blueprint/frame replacements each survive nested removal with exactly
-    one stage transition; failed/aborted replacements do not falsely complete or retag.
+    one stage transition (including forwarded spawn callbacks). A blocking thing makes
+    conversion return false without removal: intent stays open at blueprint, then can
+    convert after unblocking. Removed predecessors with absent/ambiguous successors fail;
+    failed/aborted replacements never falsely complete or retag.
 15. Tag with current/queued ordinary delivery or work; then refuse/withdraw while
     carrying, mid-work and after a nearby destination queue was built. Enforce the
     specified admission/cleanup disposition with no post-withdrawal credit or effect.
+    Include already-excluded attachment, incoming-candidate rejection with an unrelated
+    current job, pre-reserved queue entries and cleanup-triggered scheduling; no leaked
+    reservation, wrong-job termination or reentrant prohibited start.
 16. One job deposits into two independently tagged sites through the reused toil:
     both physical deposits count once at their own destination, including after restore.
 17. Same-def replacement or a later intent at the same footprint never inherits an
@@ -687,6 +762,9 @@ sets it for every ordered job, including engine and coordinator paths.
 11. Consume a selected partial ingredient stack: the receipt records its nonzero
     consumed quantity, not the larger source stack or destroyed references' zero.
     Merge/drop products after production; produced units remain exact without claiming storage.
+    Inject failure during consumption and inside iteration notification: selected is not
+    automatically consumed, callback entry is not completed, and partial failure gets no
+    iteration credit or duplicate fallback receipt.
 12. Tag with a current/queued bill job, then refuse/withdraw during ingredient hauling
     and recipe work. Enforce the specified admission/cleanup boundary before prohibited
     effects, without widening the player's bill restrictions.
@@ -766,7 +844,11 @@ them before Gate C is entered.
 - **Construction 13.** A refusing pawn is force-ordered by the player to deliver to, then
   to build, the tagged site: the work happens, the record reads "ordered by the player
   (had refused)", no credit, no helper label, no violation counted.
-- **Cooking 10.** A refusing cook is force-ordered onto the tagged bill: one iteration
+- **Cooking 10.** A refusing cook is force-ordered onto the tagged bill: first prove the
+  real player menu exposes the eligible option before selection. An unchosen preview
+  and a non-player `playerForced` submission must not bypass ordinary exclusion; a
+  selected order and its authenticated priority continuation must pass, including restore.
+  Then one iteration
   happens, recorded the same way, not counted toward the quota. For a core-added
   quota-2 bill, follow it with one credited iteration: native repeat count is 0,
   credited count is 1, and the intent is not falsely met or the bill silently refilled.
