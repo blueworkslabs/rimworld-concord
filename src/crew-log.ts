@@ -30,9 +30,11 @@ const safe=(s:unknown,max=1000)=>String(s??'').slice(0,max);
 export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:number) {
  const c=d.crew??={revision:0,nextSeq:0,entries:[]};c.revision++;
  const name=(id:string)=>id==='core'?'Core':safe(d.characters[id]?.name??id,80);
- // Updated in place (B6 archive line): same entry, newest text.
+ // Updated in place (B6 archive line): one entry, newest text. A changed total refreshes its
+ // time and moves it to the newest position, so the heading is when it was last updated.
  const upsert=(type:CrewEntry['kind'],from:string,to:string,subject:string,text:string,key:string)=>{
-  const e=c.entries.find(e=>e.key===key);if(e){e.text=safe(text);return;}
+  const e=c.entries.find(e=>e.key===key);
+  if(e){if(e.text!==safe(text)){e.text=safe(text);e.tick=tick;e.seq=++c.nextSeq;c.entries=[...c.entries.filter(x=>x!==e),e];}return;}
   add(type,from,to,subject,text,key);
  };
  const add=(type:CrewEntry['kind'],from:string,to:string,subject:string,text:string,key:string)=>{
@@ -77,8 +79,13 @@ export function recordCrew(d:Domain,kind:string,actor:string,data:any,tick:numbe
    const who=[...new Set(before.map(j=>name(j.pawn)))].join(', '),total=before.reduce((a,j)=>a+Math.max(0,Number(j.planned)||0),0);
    add('record','Game','observer',data.intentId,`Already on its way when the agreement started: ${total} ${item} (${who}).`,`intent-pretag:${data.intentId}`);
   }
-  const ordinary=Object.entries(data.ordinaryByPawn??{}),since=ordinary.reduce((a,[,n])=>a+Number(n),0)+Number(data.ordinaryUnattributed??0);
-  if(since>0)upsert('record','Game','observer',data.intentId,`Since then: ${since} ${item} as ordinary work (${[...ordinary.map(([p,n])=>`${name(p)} ${Number(n)}`),...(data.ordinaryUnattributed?[`unattributed ${Number(data.ordinaryUnattributed)}`]:[])].join(', ')}).`,`intent-since:${data.intentId}`);
+  // Arrivals are gross; removals are shown beside them, so the pile's count reconciles
+  // (credited + arrived - removed), e.g. 75 + 60 - 15 = 120.
+  const ordinary=Object.entries(data.ordinaryByPawn??{}),since=ordinary.reduce((a,[,n])=>a+Number(n),0)+Number(data.ordinaryUnattributed??0),removed=Math.max(0,Number(data.ordinaryRemoved??0));
+  if(since>0||removed>0){
+   const who=[...ordinary.map(([p,n])=>`${name(p)} ${Number(n)}`),...(data.ordinaryUnattributed?[`unattributed ${Number(data.ordinaryUnattributed)}`]:[])].join(', ');
+   upsert('record','Game','observer',data.intentId,`Since then: ${since} ${item} arrived as ordinary work${who?` (${who})`:''}${removed?`, ${removed} removed`:''}.`,`intent-since:${data.intentId}`);
+  }
   for(let n=data.previousFinishedAfterExclusion+1;n<=data.finishedAfterExclusion;n++)
    add('record','Game','observer',data.intentId,'Finished a trip started before withdrawing; credited to the carrier, not a new agreement.',`intent-finished-before:${data.intentId}:${n}`);
   if(data.status!==data.previousStatus&&['met','expired','stopped'].includes(data.status)){

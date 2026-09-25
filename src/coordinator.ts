@@ -1061,7 +1061,7 @@ export class Coordinator {
       this.commit('intent-progress','Game',{intentId:v.intentId,status:v.status,previousStatus:old?.status,previousDelivered:old?.delivered??0,
         previousFinishedAfterExclusion:old?.finishedAfterExclusion??0,finishedAfterExclusion:v.finishedAfterExclusion,...intentProgress(v),
         thingLabel:v.thingLabel??entry?.thingLabel??v.thingDef,label:entry?.label??v.label??'stockpile',asked,stopReason:v.stopReason??null,
-        ordinaryByPawn:Object.fromEntries((v.ordinaryByPawn??[]).map(p=>[p.pawn,p.count])),ordinaryUnattributed:v.ordinaryUnattributed??0,
+        ordinaryByPawn:Object.fromEntries((v.ordinaryByPawn??[]).map(p=>[p.pawn,p.count])),ordinaryUnattributed:v.ordinaryUnattributed??0,ordinaryRemoved:v.ordinaryRemoved??0,
         preTagAtStart:(v.preTagAtStart??[]).map(j=>({pawn:j.pawn,planned:j.planned})),preTagByPawn:Object.fromEntries((v.preTagByPawn??[]).map(p=>[p.pawn,p.count]))});
       }
       if(v.status==='open'||v.status==='pending')continue;
