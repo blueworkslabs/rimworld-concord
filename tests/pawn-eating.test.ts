@@ -114,3 +114,17 @@ test('eating revalidation distinguishes policy blocks, stale views, missing opti
  assert.equal(revalidateEating(d,state,p,offered,'berry',false).code,'bridge-unavailable');
  assert.equal(revalidateEating(d,state,p,offered,'invented',true).code,'not-offered');s.close();
 });
+test('the next exchange after an eating choice is a completion report its receipt can close; later questions stay unlinked',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});
+ const d=c.inspect(),msg=(id:string,from:string,to:string,text:string,tick:number)=>({id,exchangeId:'x',tick,from,to,fromName:from,toName:to,text});
+ d.coreState!.questions.push({id:'q2',pawn:'A',text:'Did you eat?',status:'answered',messages:[msg('q2-ask','core','A','Did you eat?',150) as any,msg('q2-yes','A','core','Yes, I ate the berries.',151) as any]});
+ d.coreState!.questions.push({id:'q3',pawn:'A',text:'Can you build?',status:'answered',messages:[msg('q3-ask','core','A','Can you build?',160) as any,msg('q3-yes','A','core','Yes.',161) as any]});
+ let v=coreView(d,await g.state());
+ assert.throws(()=>validateCoreChoice(resolve('q2-yes'),v),/closure unsupported/,'no closure before the receipt verifies the meal');
+ const care=Object.values(d.selfCare!)[0]!;d.outcomes[care.id]={...g.data.actions[0]!,status:'completed',delivered:16};
+ v=coreView(d,await g.state());
+ for(const id of ['q2-ask','q2-yes'])validateCoreChoice(resolve(id),v);
+ assert.equal(v.selfCare[0]!.reportQuestionId,'q2');
+ for(const id of ['q3-ask','q3-yes'])assert.throws(()=>validateCoreChoice(resolve(id),v),/closure unsupported/,'an unrelated later question never closes');
+ s.close();
+});
