@@ -9,7 +9,7 @@ export type FoodObservation=z.infer<typeof FoodObservation>;
 /** Allowlist strips any future private fields; no fallback to omniscient inventory. */
 export function foodObservation(g:GameState,p:Pawn):FoodObservation|undefined{
  const s=FoodObservation.safeParse(p.foodObservation);if(!s.success)return;
- const v=s.data;if(v.epoch!==g.epoch||v.tick>g.ticks||g.ticks-v.tick>120||v.mapId!==(p.production?.mapId??p.hauling?.mapId))return;
+ const v=s.data;if(v.epoch!==g.epoch||v.tick>g.ticks||g.ticks-v.tick>120||v.mapId!==(p.production?.mapId??p.rescue?.mapId??p.casualties?.mapId))return;
  if(new Set(v.items.map(x=>x.thing)).size!==v.items.length||new Set(v.campfires.map(x=>x.thing)).size!==v.campfires.length)return;
  return v;
 }

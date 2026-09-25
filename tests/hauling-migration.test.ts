@@ -1,4 +1,5 @@
 import { test } from 'node:test';
+import {legacyAction} from '../src/protocol.js';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { Coordinator } from '../src/coordinator.js';
@@ -60,7 +61,8 @@ test('stockpile hauls come from existing stockpiles or candidate sites, frozen i
 
 test('ordinary play keeps other work; only ordered hauling is replaced; intent-only scenes admit nothing else',async()=>{
   const {c}=await setup([wood()]);
-  await assert.rejects(c.core().propose('P',{kind:'haul',thing:'t',x:1,z:1,count:5,trips:1,maxTicks:600},'Old haul'),/replaces ordered hauling/);
+  // The ordered haul is retired: it is not an action at all.
+  await assert.rejects(c.core().propose('P',legacyAction({kind:'haul',thing:'t',x:1,z:1,count:5,trips:1,maxTicks:600}),'Old haul'));
   const p=await c.core().propose('P',{kind:'move',x:4,z:4},'Walk over');assert.equal(p.action.kind,'move');
   const only=await setup([wood()],true);
   await assert.rejects(only.c.core().propose('P',{kind:'move',x:4,z:4},'Walk over'),/only proposable work/);

@@ -9,13 +9,12 @@ import {coreWakeSnapshot} from '../src/core-scheduler.js';
 import {coreView} from '../src/core-planner.js';
 import {crewReport} from '../src/crew-log.js';
 import {planProduction} from '../src/production-planning.js';
-import {planHaul} from '../src/haul-planning.js';
 const build={kind:'build' as const,thing:'wood',x:5,z:5,maxTicks:600};
 const cook={kind:'cook' as const,thing:'berries',target:'fire',x:5,z:5,count:10,meals:3,maxTicks:600};
 class Game implements GameBridge {
- data:GameState={world:'fire',epoch:'one',ticks:100,paused:true,loaded:true,pawns:['A','B','C'].map(id=>({id,name:id,x:4,z:5,job:'Wait',health:1,workReady:true,buildReady:true,cookReady:true,facts:[{key:'secret',value:'NEVER PUBLIC',level:.6137}]})),actions:[]};
+ data:GameState={world:'fire',epoch:'one',ticks:100,paused:true,loaded:true,pawns:['A','B','C'].map(id=>({id,name:id,x:4,z:5,job:'Wait',health:1,buildReady:true,cookReady:true,facts:[{key:'secret',value:'NEVER PUBLIC',level:.6137}]})),actions:[]};
  saved=new Map<string,GameState>();moves:ActionRequest[]=[];kind:'build'|'cook'='build';complete=true;
- async state(){const g=structuredClone(this.data);for(const p of g.pawns){p.linkStatus={source:'shared-link-telemetry',epoch:g.epoch,tick:g.ticks,food:'low',rest:'satisfied'};p.production={epoch:g.epoch,tick:g.ticks,mapId:1,options:[this.kind==='build'?build:cook],supplies:[{thing:'wood',label:'Wood',count:30},{thing:'berries',label:'Berries',count:50}]};p.hauling={epoch:g.epoch,tick:g.ticks,mapId:1,status:'available',options:[{kind:'haul',thing:'wood',x:8,z:8,count:10,trips:1,maxTicks:600}],supplies:[{thing:'wood',label:'Wood',x:8,z:8,sourceCount:30,destinationFree:75}]};}return g;}
+ async state(){const g=structuredClone(this.data);for(const p of g.pawns){p.linkStatus={source:'shared-link-telemetry',epoch:g.epoch,tick:g.ticks,food:'low',rest:'satisfied'};p.production={epoch:g.epoch,tick:g.ticks,mapId:1,options:[this.kind==='build'?build:cook],supplies:[{thing:'wood',label:'Wood',count:30},{thing:'berries',label:'Berries',count:50}]};}return g;}
  async move(r:ActionRequest):Promise<Receipt>{this.moves.push(r);const out={id:r.id,actor:r.actor,kind:r.action.kind,status:this.complete?'completed' as const:'started' as const,reason:'Native test receipt',x:r.action.x,z:r.action.z,delivered:1};this.data.actions.push(out);return out;}
  async cancel(r:{id:string;actor:string}):Promise<Receipt>{const out=this.data.actions.find(a=>a.id===r.id)!;if(out.status==='started')out.status='interrupted';return out;}
  async save(n:string){this.saved.set(n,structuredClone(this.data));return {sha256:'hash'};}async verify(){}async load(n:string){this.data=structuredClone(this.saved.get(n)!);this.data.epoch=randomUUID();}
@@ -33,11 +32,6 @@ test('only a changed shared band wakes core, not timestamp refresh or private ne
  const {g,s,c}=await setup();const a=await g.state(),d=c.inspect(),before=coreWakeSnapshot(coreView(d,a));
  g.data.ticks++;g.data.pawns[0]!.facts![0]!.level=.99;const b=await g.state();assert.deepEqual(coreWakeSnapshot(coreView(d,b)),before);
  b.pawns[0]!.linkStatus!.food='urgent';assert.notDeepEqual(coreWakeSnapshot(coreView(d,b)),before);s.close();
-});
-// Ordered-haul specific (removed with the ordered haul): a held build source refuses an ordered haul of it.
-test('an ordered haul cannot take a source held by a pending build',async()=>{
- const {g,s,c}=await setup();await c.core().propose('A',build,'Optional build');
- const state=await g.state();assert.throws(()=>planHaul(c.inspect(),state,'B',state.pawns[1]!.hauling!.options[0]!));s.close();
 });
 test('build/cook consent, closure, exact source holds and mapped dispatch',async()=>{
  const {g,s,c}=await setup();const p=await c.core().propose('A',build,'Optional build');assert.equal(g.moves.length,0);

@@ -6,19 +6,19 @@ import {Coordinator} from '../src/coordinator.js';
 import {Store} from '../src/store.js';
 import {scripted} from '../src/backends.js';
 import type {Domain,Proposal,GameState,ActionRequest} from '../src/protocol.js';
-const haul={kind:'haul' as const,thing:'steel',x:4,z:5,count:10,trips:3,maxTicks:600};
-// Generic public offer for the crew-log privacy/retention checks; the trip-progress check keeps the ordered haul.
+// Multi-step ordered work for the progress arithmetic (formerly ordered-haul trips).
+const cook={kind:'cook' as const,thing:'berries',target:'fire',x:4,z:5,count:10,meals:3,maxTicks:600};
+// Generic public offer for the crew-log privacy/retention checks.
 const rescue={kind:'rescue' as const,target:'X',bed:'bed',x:4,z:5,maxTicks:600};
 function fixture(action:Proposal['action']=rescue){
  const p:Proposal={id:'p',pawn:'A',action,reason:'Public offer',status:'accepted',actionId:'two',standing:{status:'stopped',deadline:600,steps:['one','two']}};
  const d:Domain={schema:1,world:'w',epoch:'e',branch:'b',characters:{A:{id:'A',name:'Ada',memories:['PRIVATE'],reflections:[{tick:1,throughSeq:1,backend:'mock',reason:'PRIVATE'}]}},proposals:{p},outcomes:{one:{id:'one',actor:'A',status:'completed',reason:'native',x:4,z:5,delivered:10},two:{id:'two',actor:'A',status:'started',reason:'native',x:4,z:5}}};if(action.kind==='rescue'){p.actionId='one';p.standing!.steps=['one'];delete d.outcomes.two;delete d.outcomes.one!.delivered;}return {d,p};
 }
-test('progress separates completed, active, unknown, unsuccessful and never-started trips',()=>{
- const {d,p}=fixture(haul);let r=agreementProgress(d,p,10);assert.deepEqual([r.completed,r.active,r.notStarted,r.unfulfilled,r.delivered],[1,1,1,2,10]);assert.equal(r.status,'stopped');
+test('progress separates completed, active, unknown, unsuccessful and never-started steps',()=>{
+ const {d,p}=fixture(cook);d.outcomes.one!.delivered=1;let r=agreementProgress(d,p,10);assert.deepEqual([r.completed,r.active,r.notStarted,r.unfulfilled,r.delivered],[1,1,1,2,1]);assert.equal(r.status,'stopped');
  delete d.outcomes.two;r=agreementProgress(d,p,10);assert.equal(r.unconfirmed,1);assert.equal(r.active,0);
  d.outcomes.two={id:'two',actor:'A',status:'interrupted',reason:'stopped',x:4,z:5};r=agreementProgress(d,p,10);assert.equal(r.unsuccessful,1);assert.equal(r.completed,1);
- const fresh=[{...d.outcomes.two,status:'completed' as const,delivered:10}];r=agreementProgress(d,p,20,fresh);assert.equal(r.completed,2);assert.equal(r.delivered,20);assert.equal(r.unfulfilled,1);
- delete d.outcomes.one!.delivered;r=agreementProgress(d,p,20);assert.equal(r.quantityUnknown,1);recordCrew(d,'action-outcome','A',d.outcomes.one,20);assert.match(d.crew!.entries[0]!.text,/quantity not reported/);
+ const fresh=[{...d.outcomes.two,status:'completed' as const,delivered:1}];r=agreementProgress(d,p,20,fresh);assert.equal(r.completed,2);assert.equal(r.delivered,2);assert.equal(r.unfulfilled,1);
 });
 test('crew log records deliberate replies but never promotes private reflections or stop reasons',()=>{
  const {d,p}=fixture();recordCrew(d,'proposed','core',p,1);recordCrew(d,'attention-reflected','A',{reason:'PRIVATE'},2);

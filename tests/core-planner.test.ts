@@ -14,12 +14,10 @@ class Game implements GameBridge {
  data:GameState={world:'core',epoch:'one',ticks:100,paused:true,loaded:true,pawns:['A','B'].map((id,i)=>({id,name:id,x:i,z:1,job:'Wait',health:1,downed:false,facts:[{key:'need',value:'Food',level:.9}]})),actions:[]};
  saved=new Map<string,GameState>();moves=0;available=true;
  /** Generic offerable work is an ordered rescue: each pawn sees its own patient and two beds
-  * when beds=2 (the second is the counter alternative). 'haul' keeps the ordered-haul view for the
-  * haul-specific checks that go with the ordered haul's deletion. */
- work:'rescue'|'haul'='rescue';beds=1;
+  * when beds=2 (the second is the counter alternative). */
+ beds=1;
  async state(){const g=structuredClone(this.data);for(const p of g.pawns){const x=10+(p.id==='A'?0:1);
-  if(this.work==='haul')p.hauling={epoch:g.epoch,tick:g.ticks,mapId:1,status:'available',options:this.available?[{kind:'haul',thing:'wood'+p.id,x,z:1,count:10,trips:1,maxTicks:600}]:[],supplies:[{thing:'wood'+p.id,label:'Wood',x,z:1,sourceCount:20,destinationFree:75}]};
-  else{p.rescueReady=true;const bed=(n:number)=>({kind:'rescue' as const,target:'X'+p.id,bed:'bed'+p.id+n,x,z:n,maxTicks:600});
+  {p.rescueReady=true;const bed=(n:number)=>({kind:'rescue' as const,target:'X'+p.id,bed:'bed'+p.id+n,x,z:n,maxTicks:600});
    p.rescue={epoch:g.epoch,tick:g.ticks,mapId:1,status:'available',options:this.available?Array.from({length:this.beds},(_,i)=>bed(i+1)):[],observations:this.available?Array.from({length:this.beds},(_,i)=>i+1).map(n=>({target:'X'+p.id,targetName:'Patient '+p.id,bed:'bed'+p.id+n,bedLabel:'Bed '+n})):[]};}
  }return g;}
  async cancel(r:{epoch:string;actor:string;id:string;kind?:string}):Promise<Receipt>{const prior=this.data.actions.find(a=>a.id===r.id);if(prior)return prior;const out={id:r.id,actor:r.actor,status:'interrupted' as const,reason:'Cancelled',x:0,z:0};this.data.actions.push(out);return out;}
@@ -118,12 +116,6 @@ test('defer is available through the provider and reflection contracts; attribut
  const args=claudeArgs('decision');const schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);assert(schema.properties.decision.oneOf.some((x:any)=>x.properties.kind.const==='defer'));
  assert.equal(parseClaudeResult({type:'result',subtype:'success',is_error:false,total_cost_usd:0,structured_output:{decision:{kind:'defer',reason:'Not now'}},modelUsage:{[CLAUDE_MODEL]:{}},num_turns:1},'decision').output.kind,'defer');
  const v=await c.corePerspective();assert(v.opportunities.length);assert(v.opportunities.every(o=>o.pawn!==p.pawn),'the deferring pawn gets no ordinary offer');
- s.close();
-});
-// Ordered-haul specific (removed with the ordered haul): haul opportunities carry their observed supply.
-test('ordered haul opportunities carry their observed supply',async()=>{
- const {c,s,g}=await setup();g.work='haul';
- const v=await c.corePerspective();assert(v.opportunities.length);for(const o of v.opportunities){assert.equal(o.action.kind,'haul');if(o.action.kind==='haul')assert.equal(o.supply?.sourceThingId,o.action.thing);assert.equal(o.supply?.label,'Wood');}
  s.close();
 });
 test('event scheduler coalesces terminal outcomes, waits through cooldown and does not wake on polling or its own thoughts',async()=>{

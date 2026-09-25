@@ -480,83 +480,12 @@ try{
     }finally{s.close();}
   });
 
-  // --- B8 matched pair, per frozen def and quota (manifest `matched`): the ordered model on the
-  // same save and stockpile, native Hauling off (as the ordered model always ran), the scripted
-  // core offering every grounded haul of that def; then the native half with the same quota.
+  // --- B8 matched pair, native half, per frozen def and quota (manifest `matched`). The ordered
+  // half was retired with the ordered haul after Gate C; its recorded results stay in docs/evidence.
   const matched:{def:string;quota:number}[]=m.matched??[];
   if(!matched.some(x=>x.def==='WoodLog')||!matched.some(x=>x.def!=='WoodLog'))
     await scenario('matched-precondition',base,async c=>{c.findings.push('precondition: the manifest must freeze a wood and a small-stack-def matched quota');});
   for(const {def,quota} of matched){
-    await scenario('matched-ordered-'+def,base,async c=>{
-      const s=new Store(root+`/.runtime/hauling-migration-ordered-${def}-${runId}.db`),co=new Coordinator(s,b);
-      try{
-        await co.open();await co.initializeCore('Scripted core for the ordered baseline; every answer is authored.');
-        for(const p of state.pawns)await op({op:'lab-work-priority',actor:p.id,count:0});
-        const z=(state.stockpiles??[]).find(x=>x.zoneId===zoneId)!,start=state.ticks;
-        const inZone=(x:number,zz:number)=>x>=z.x&&x<z.x+z.w&&zz>=z.z&&zz<z.z+z.h;
-        // The ordered model sees a 13x13 square around the pawn: an option needs the source and a
-        // stockpile cell both within 6 cells (Chebyshev). Stacks farther than 12 from the pile are
-        // out of its reach whatever the core does; they are labelled, not counted against parity.
-        const nearest=(x:number,zz:number)=>({x:Math.min(Math.max(x,z.x),z.x+z.w-1),z:Math.min(Math.max(zz,z.z),z.z+z.h-1)});
-        const gap=(x:number,zz:number)=>{const n=nearest(x,zz);return Math.max(Math.abs(n.x-x),Math.abs(n.z-zz));};
-        const supplyAt=async(who:string)=>(await loose(def,who)).filter(t=>!t.forbidden&&t.reachable);
-        const initial=await supplyAt(P);
-        const reachable=initial.filter(t=>gap(t.x,t.z)<=12),outOfReach=initial.filter(t=>gap(t.x,t.z)>12);
-        const zoneBefore=Number((await op({op:'lab-zone-count',zoneId,thing:def})).count);
-        c.data.orderedSupply={reachable:reachable.reduce((n,t)=>n+t.count,0),outOfReach:outOfReach.map(t=>({x:t.x,z:t.z,count:t.count}))};
-        if(reachable.reduce((n,t)=>n+t.count,0)<quota){c.findings.push(`precondition: the ordered model can reach ${reachable.reduce((n,t)=>n+t.count,0)} ${def}, quota ${quota}; unmatched by fixture`);return;}
-        const ours=new Set<string>(),hauls=new Set<string>();let offers=0,moves=0,idleSince=-1,stop='';
-        const tries=new Map<string,number>();
-        const outcomes=()=>Object.values(co.inspect().outcomes);
-        const track=()=>{for(const p of Object.values(co.inspect().proposals))if(hauls.has(p.id))for(const step of p.standing?.steps??[])ours.add(step);};
-        const delivered=()=>outcomes().filter(r=>r.kind==='haul'&&ours.has(r.id)&&r.status==='completed').reduce((n,r)=>n+(r.delivered??0),0);
-        /** Units still coming from running ordered agreements: planned minus completed steps. */
-        const inFlight=()=>Object.values(co.inspect().proposals).filter(p=>hauls.has(p.id)&&p.standing?.status==='running'&&p.action.kind==='haul').reduce((n,p)=>{
-          const a=p.action as {count:number;trips:number},done=(p.standing?.steps??[]).map(id=>co.inspect().outcomes[id]).filter(r=>r?.status==='completed').reduce((k,r)=>k+(r!.delivered??0),0);
-          return n+Math.max(0,a.count*a.trips-done);},0);
-        await run(()=>delivered()>=quota||!!stop,300000,async()=>{
-          await co.reconcile();await co.advanceIntentions();track();const d=co.inspect();
-          const busy=(who:string)=>Object.values(d.proposals).some(p=>p.pawn===who&&(p.status==='pending'||p.standing?.status==='running'))||!!d.characters[who]?.commitment;
-          // The ordered model's own 35 % needs stop: record it instead of waiting out the budget.
-          const ready=[P,B].filter(w=>state.pawns.find(x=>x.id===w)?.workReady);
-          if(!ready.length&&![P,B].some(busy)){if(idleSince<0)idleSince=state.ticks;else if(state.ticks-idleSince>2500)stop='ordered needs stop: no capable pawn ready for 2500 ticks';}else idleSince=-1;
-          for(const who of ready){
-            if(busy(who))continue;
-            const need=quota-delivered()-inFlight();if(need<=0)break;
-            const o=(await co.corePerspective()).opportunities.find(o=>o.pawn===who&&o.action.kind==='haul'&&new RegExp(def).test(o.action.thing)&&inZone(o.action.x,o.action.z));
-            if(o&&o.action.kind==='haul'){
-              // Exact quantity: never plan past the quota.
-              const count=Math.min(o.action.count,need),trips=Math.max(1,Math.min(o.action.trips,Math.floor(need/count)));
-              try{
-                const p=await co.core().propose(who,{...o.action,count,trips},'Scripted ordered offer');offers++;hauls.add(p.id);
-                await co.pawn(who).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));track();
-              }catch(e){((c.data.orderedErrors??=[]) as string[]).push('haul: '+String(e).slice(0,200));}
-              continue;
-            }
-            // No option in view: move to a spot seeing both the nearest reachable stack and the pile.
-            const here=state.pawns.find(x=>x.id===who)!;
-            const stack=(await supplyAt(who)).filter(t=>gap(t.x,t.z)<=12&&(tries.get(t.thing)??0)<2&&t.reservable!==false)
-              .sort((u,v)=>Math.max(Math.abs(u.x-here.x),Math.abs(u.z-here.z))-Math.max(Math.abs(v.x-here.x),Math.abs(v.z-here.z)))[0];
-            if(!stack)continue;
-            const n=nearest(stack.x,stack.z),spot={x:Math.round((stack.x+n.x)/2),z:Math.round((stack.z+n.z)/2)};
-            tries.set(stack.thing,(tries.get(stack.thing)??0)+1);
-            try{
-              const p=await co.core().propose(who,{kind:'move',...spot},'Scripted ordered move toward the pile');moves++;
-              await co.pawn(who).decide(p.id,scripted({kind:'accept',reason:'Authored acceptance'}));
-            }catch(e){((c.data.orderedErrors??=[]) as string[]).push('move: '+String(e).slice(0,200));}
-          }
-          for(const p of Object.values(co.inspect().proposals))if(hauls.has(p.id))for(const step of p.standing?.steps??[])ours.add(step);
-          if(!stop&&delivered()+inFlight()<quota&&!(await supplyAt(P)).some(t=>gap(t.x,t.z)<=12&&(tries.get(t.thing)??0)<2)&&![P,B].some(busy))stop='no reachable supply left for the ordered model';
-        });
-        for(const p of Object.values(co.inspect().proposals))if(hauls.has(p.id))for(const step of p.standing?.steps??[])ours.add(step);
-        const units=delivered(),trips=outcomes().filter(r=>r.kind==='haul'&&ours.has(r.id)).length;
-        // Wood moved into the pile by ordinary (opportunistic) hauling during this half is not the ordered model's.
-        const zoneAfter=Number((await op({op:'lab-zone-count',zoneId,thing:def})).count);
-        expect(c,offers>0&&units===quota&&inFlight()===0,`ordered baseline delivered ${units} of ${quota} ${def} from ${offers} offers and ${moves} moves${stop?'; '+stop:''}; not a passing comparison`);
-        c.data.matched={model:'ordered',def,quota,delivered:units,trips,offers,moves,stop:stop||null,ticks:state.ticks-start,ticksPerUnit:units?(state.ticks-start)/units:null,
-          estimatedCoreTurnsIfLive:offers+moves,nativeUnitsDuringOrdered:Math.max(0,zoneAfter-zoneBefore-units),outOfReachUnits:outOfReach.reduce((n,t)=>n+t.count,0)};
-      }finally{s.close();}
-    });
     await scenario('matched-native-'+def,base,async c=>{
       await op({op:'lab-patch-cost',count:1});   // time every patch call in this half (wrapper cost)
       const id=randomUUID(),start=state.ticks;await accept(id,P,{thing:def,quota});await accept(id,B,{thing:def,quota});await run(done(id),300000);

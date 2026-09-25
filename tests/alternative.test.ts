@@ -6,27 +6,8 @@ import {scripted} from '../src/backends.js';
 import type {GameState,ActionRequest,Receipt} from '../src/protocol.js';
 import {randomUUID} from 'node:crypto';
 import {intentAction} from '../src/native-intents.js';
-const haul={kind:'haul' as const,thing:'steel',x:4,z:5,count:10,trips:3,maxTicks:600};
 const rescue={kind:'rescue' as const,target:'B',bed:'bed',x:6,z:7,maxTicks:600};
 const yes=scripted({kind:'accept',reason:'I consent'});
-async function setup(trips=3){
- const data:GameState={world:'w',epoch:'e',ticks:10,loaded:true,paused:false,actions:[],pawns:[{id:'A',name:'Ada',x:1,z:1,job:'Concord_Haul',health:1,workReady:true,rescueReady:true,
- hauling:{epoch:'e',tick:10,mapId:1,status:'available',options:[haul],supplies:[{thing:'steel',label:'Steel',x:4,z:5,sourceCount:75,destinationFree:75}]},
- rescue:{epoch:'e',tick:10,mapId:1,status:'available',options:[rescue],observations:[]},
- casualties:{epoch:'e',tick:10,mapId:1,radius:12,observations:[{target:'B',name:'Bee',x:3,z:3}],visibleSubjects:[{target:'B',downed:true,inBed:false}]}}]};
- const calls:string[]=[],saves=new Map<string,GameState>();let cancelMode='ok';
- const game={async state(){return structuredClone(data);},async move(r:ActionRequest){calls.push('move:'+r.action.kind);const receipt:Receipt={id:r.id,actor:r.actor,status:'started',reason:'native',x:r.action.x,z:r.action.z};data.actions.push(receipt);return structuredClone(receipt);},async cancel(r:{id:string;actor:string}){
-  calls.push('cancel');if(cancelMode==='slow')await new Promise(r=>setTimeout(r,100));const a=data.actions.find(a=>a.id===r.id)!;
-  if(cancelMode==='wrong')return {...a,id:'wrong',status:'interrupted' as const};
-  if(cancelMode==='started')return structuredClone(a);
-  a.status=cancelMode==='completed'?'completed':'interrupted';if(cancelMode==='lost')throw Error('lost cancellation reply');
-  if(cancelMode==='recovered')data.pawns[0]!.casualties!.visibleSubjects![0]!.downed=false;
-  return structuredClone(a);
- },async save(n:string){saves.set(n,structuredClone(data));return {sha256:'hash'};},async verify(){},async load(n:string){Object.assign(data,structuredClone(saves.get(n)!));data.epoch+='new';for(const p of data.pawns){p.hauling!.epoch=data.epoch;p.rescue!.epoch=data.epoch;p.casualties!.epoch=data.epoch;}}};
- const store=new Store(':memory:'),c=new Coordinator(store,game);await c.open();const p=await c.core().propose('A',{...haul,trips},'Haul');await c.pawn('A').decide(p.id,yes);
- const ask=async(target='B')=>{data.eventSeq=(data.eventSeq??0)+1;data.events=[{seq:data.eventSeq,pawn:'A',tick:10,kind:'casualty',detail:'Locally down',subject:'B'}];return c.attend('A',{name:'ask',async reflect(){return {kind:'request_rescue',agreementId:p.id,target,reason:'Could we discuss helping Bee?'};}});};
- return {data,c,store,game,p,calls,ask,cancel:(m:string)=>{cancelMode=m;}};
-}
 /** The request lifecycle on a native stockpile haul (the ordered haul is retired): the running
  * agreement is a haul-zone intent; completion is the intent meeting its quota; a replacement
  * goes through the B7 handover (exclusion confirmed, empty hands, one dispatch). */
@@ -98,16 +79,6 @@ test('replacement acceptance stops old job before starting new one and persists 
  assert.equal(c.inspect().characters.A!.intention,p.id);await c.pawn('A').decide(offer.id,yes);await c.reconcile();assertHandover(calls);
  assert.equal(c.inspect().proposals[p.id]!.standing!.status,'stopped');assert.equal(c.inspect().characters.A!.intention,offer.id);assert.equal(c.core().requests()[0]!.status,'closed');store.close();
 });
-// Ordered-haul specific (removed with the ordered haul): stopping an ordered job before a replacement.
-test('uncertain cancellation or newly recovered patient never starts replacement, including reopen',async()=>{
- for(const failure of ['lost','started','wrong','recovered']){
-  const {c,p,ask,calls,cancel,game,store}=await setup();await ask();const r=c.core().requests()[0]!,offer=await c.core().offerAlternative(r.id,rescue,'Replace?');cancel(failure);
-  await assert.rejects(c.pawn('A').decide(offer.id,yes));assert(!calls.includes('move:rescue'));const saved=c.inspect().proposals[offer.id]!;
-  assert.equal(saved.decision?.kind,'accept');assert.equal(saved.actionId,undefined);assert.equal(saved.standing!.status,'stopped');
-  cancel('ok');const reopened=new Coordinator(store,game);await reopened.open();await reopened.reconcile();await reopened.advanceIntentions();
-  assert(!calls.includes('move:rescue'));assert.equal(reopened.inspect().proposals[p.id]!.standing!.status,'stopped');store.close();
- }
-});
 test('request survives quiescent paired restore, and core sees only deliberately communicated fields',async()=>{
  const {c,ask,complete,store}=await nativeSetup();await ask();const r=c.core().requests()[0]!;complete();await c.reconcile();
  await c.checkpoint('lab-concord-request');await c.restore('lab-concord-request');assert.deepEqual(c.core().requests()[0],r);
@@ -122,29 +93,6 @@ test('late replacement reply after pawn withdrawal cannot change work',async()=>
  assert.equal(c.inspect().proposals[p.id]!.standing!.reason,'Separate pawn withdrawal');assert.deepEqual(moves(calls),[]);store.close();
 });
 
-// Ordered-haul specific (removed with the ordered haul): stopping an ordered job before a replacement.
-test('timeout during cancellation preserves stop but never dispatches replacement',async()=>{
- const {c,ask,calls,cancel,store}=await setup();await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');cancel('slow');
- await assert.rejects(c.pawn('A').decide(offer.id,yes,30));assert.deepEqual(calls,['move:haul','cancel']);assert.equal(c.inspect().proposals[offer.id]!.actionId,undefined);store.close();
-});
-// Ordered-haul specific (removed with the ordered haul): stopping an ordered job before a replacement.
-test('a late old-job receipt cannot clear the replacement commitment',async()=>{
- const {c,ask,data,store}=await setup();await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');await c.pawn('A').decide(offer.id,yes);
- data.actions[0]!.reason='Updated old receipt';await c.reconcile();assert.equal(c.inspect().characters.A!.commitment,c.inspect().proposals[offer.id]!.actionId);assert.equal(c.inspect().characters.A!.intention,offer.id);store.close();
-});
-
-// Ordered-haul specific (removed with the ordered haul): stopping an ordered job before a replacement.
-test('fresh final-trip completion invalidates replacement before cancellation',async()=>{
- const {c,p,ask,data,calls,store}=await setup(1);await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');
- let ran=false;await assert.rejects(c.pawn('A').decide(offer.id,{name:'finish',async decide(){ran=true;data.actions[0]!.status='completed';return {kind:'accept',reason:'Help'};}}));
- assert(ran);assert.deepEqual(calls,['move:haul']);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');assert.equal(c.inspect().proposals[offer.id]!.actionId,undefined);store.close();
-});
-// Ordered-haul specific (removed with the ordered haul): stopping an ordered job before a replacement.
-test('completion returned by cancellation records finished haul and never dispatches replacement',async()=>{
- const {c,p,ask,cancel,calls,game,store}=await setup(1);await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');cancel('completed');
- await assert.rejects(c.pawn('A').decide(offer.id,yes));assert.deepEqual(calls,['move:haul','cancel']);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
- const reopened=new Coordinator(store,game);await reopened.open();await reopened.advanceIntentions();assert(!calls.includes('move:rescue'));store.close();
-});
 test('maximum-length acceptance reason remains intact through bounded stop message',async()=>{
  const {c,ask,calls,store}=await nativeSetup();await ask();const offer=await c.core().offerAlternative(c.core().requests()[0]!.id,rescue,'Replace?');const reason='x'.repeat(1000);
  const result=await c.pawn('A').decide(offer.id,scripted({kind:'accept',reason}));await c.reconcile();assert.equal(result.decision!.reason,reason);assert.deepEqual(moves(calls),['move:rescue']);store.close();
@@ -161,13 +109,6 @@ test('pending goal gets standalone rescue after fresh final receipt, with old co
  assert.deepEqual(moves(calls),['move:rescue']);assert(!calls.includes('cancel'));assert.equal(c.core().requests()[0]!.status,'closed');store.close();
 });
 
-// Ordered baseline retained until retirement; native counterpart below exposes the same race.
-test('goal reply while original work runs remains a replacement; an issued replacement is never reinterpreted',async()=>{
- const {c,p,data,ask,calls,store}=await setup(1);await ask();const r=c.core().requests()[0]!;
- const offer=await c.core().offerRequestedRescue(r.id,rescue,'Optional replacement');assert.equal(offer.replacesAgreementId,p.id);
- data.actions[0]!.status='completed';await assert.rejects(c.pawn('A').decide(offer.id,yes));
- await assert.rejects(c.core().offerRequestedRescue(r.id,rescue,'Try fresh instead'));assert.deepEqual(calls,['move:haul']);store.close();
-});
 test('declined or closed goals and stopped origins cannot become new offers',async()=>{
  for(const mode of ['declined','stopped','closed']){
   const {c,ask,complete,store,calls}=await nativeSetup();await ask();const r=c.core().requests()[0]!;

@@ -20,9 +20,6 @@ test('native restore comparison and reflection guard detect private leaks and wo
 });
 test('historical interpretation bank remains unchanged by equal-menu native verification',()=>{
  assert.equal(interpretationCases()[0]!.reflection.character.experiences?.length??0,0);
- const host=readFileSync('scripts/run-retention-game.mjs','utf8');
- assert(host.indexOf("'.request-'")<host.indexOf("const output=await"));
- assert(host.includes("['decision','reflection']"));
 });
 import {retentionDeadline} from '../trials/retention-policy.js';
 import {setTimeout as wait} from 'node:timers/promises';

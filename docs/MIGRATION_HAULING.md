@@ -135,6 +135,45 @@ must change. Different defs in one zone must never share reservations or counter
    for hauling and `Hauling.Ready` (including its wrong-tag capability check). Audit
    remaining callers; do not retain it as a safety fallback for native work.
 
+**Done after Gate C (2026-09-25), in two PRs: the test port (#79), then the deletion.**
+**Listed versus actual footprint:** the page listed four things: `Concord_Haul`, `Hauling.cs`,
+haul planning and the needs stop. The ordered haul actually touched 86 files: 44 deleted,
+42 modified, about 2,850 lines removed.
+- **Mod:**
+  - `Hauling.cs`, the `Concord_Haul` job and the `haul` op;
+  - the pawn view's `hauling` options and `workReady`;
+  - crew-log haul labels.
+  - Ordered build/cook readiness had borrowed `Hauling.Ready`, so it keeps its own copy until
+    that migration.
+- **Coordinator:**
+  - `haul` in the action union (`LegacyHaul` remains a read-only record shape for stored
+    histories and frozen eval fixtures);
+  - planner, offers, trip stepping, `haulMap`;
+  - `haulingOptions`, the model decision schema, the pawn haul contract;
+  - replacement and reflection branches (now native-haul only);
+  - `groundedPawn` moved to its own module.
+- **Runners:**
+  - hauling acceptance, fixture and live;
+  - haul-planning acceptance;
+  - crew-log acceptance;
+  - the observer, reconsider and work live trials;
+  - the needs, social, retention and integration live scenes;
+  - their launchers and Python fixtures;
+  - the ordered halves of the spike and migration runners.
+
+  All of them could only run ordered hauls. Their evidence stays in `docs/evidence`.
+- **Tests:**
+  - generic tests moved to rescue or to the native haul in #79;
+  - progress and summary arithmetic moved to multi-meal cooking;
+  - ordered-only tests and launcher tests removed;
+  - a frozen model-contract case keeps its ordered-haul record, so its menu no longer
+    offers the rescue alternative. Re-authoring it on a native haul is the eval owner's
+    call.
+
+For construction and cooking: the ordered model is used as the generic "offerable work" in
+many tests and runners, not only in its own module. Budget the port-then-delete pair from the
+start.
+
 ## Gate A: internals questions
 
 Checked against the pinned assembly hash above and repository `117dd87`; API

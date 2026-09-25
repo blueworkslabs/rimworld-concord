@@ -20,7 +20,6 @@ jobs:
       - run: node --test scripts/review-video.test.mjs
       - run: node --check scripts/run-jev-game.mjs
       - run: node --check scripts/run-claude-game.mjs
-      - run: node --check scripts/run-work-game.mjs
       - run: node diary/build.mjs --check
       - run: node diary/build.mjs
       - run: bash -n scripts/build-mod.sh scripts/run-lab.sh scripts/run-attention-lab.sh scripts/run-native-haul-lab.sh scripts/run-hauling-migration-lab.sh

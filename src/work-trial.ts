@@ -1,7 +1,8 @@
 import type {Domain,Proposal} from './protocol.js';
 /** Fixed experiment policy, not a general autonomy scheduler. */
 export const WORK_TRIAL={decisions:12,appraisals:12,reflections:3,observationMs:300000,secondRoundMs:120000,maxTurns:48} as const;
-export function trialCounterSupported(p:Proposal):boolean {return p.status==='countered'&&p.decision?.kind==='counter'&&p.decision.action.kind==='haul';}
+/** No ordered work kind supports trial counter adoption since the ordered haul was retired. */
+export function trialCounterSupported(_p:Proposal):boolean {return false;}
 export function laterOfferEligible(domain:Domain,pawn:string):boolean {
  const c=domain.characters[pawn];
  if(!c||c.commitment||c.intention)return false;

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {foodObservation,sharedFood,foodLines,type FoodObservation} from '../src/food-observation.js';
 import {coreView} from '../src/core-planner.js';
 import {coreWakeSnapshot} from '../src/core-scheduler.js';
-import {groundedPawn} from '../src/haul-planning.js';
+import {groundedPawn} from '../src/grounded-pawn.js';
 import type {Domain,GameState,Pawn} from '../src/protocol.js';
 const sight:FoodObservation={source:'shared-local-sighting',epoch:'epoch',tick:200,mapId:1,radius:12,truncated:false,
  items:[{thing:'berries',label:'Berries',x:1,z:2,count:75,nutritionGiving:true,simpleMealIngredientCount:10,forbidden:true}],campfires:[]};

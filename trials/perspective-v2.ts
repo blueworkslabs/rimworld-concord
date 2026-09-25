@@ -1,3 +1,4 @@
+import {legacyPawn} from '../src/protocol.js';
 /** Corrected authored bank; v1 and its actual answers remain immutable. */
 import assert from 'node:assert/strict';
 import {perspectiveCases} from './perspective-cases.js';
@@ -8,7 +9,7 @@ import {codexSchema} from '../src/contract-cases.js';
 export const bankVersion='concord-perspective-v2';
 // Bank-specific consistency, not a replacement for native capability checks.
 export function checkNeedsFixture(view:AttentionView,condition:'full'|'low'|'unknown'){
- const p=view.pawn;
+ const p=legacyPawn(view.pawn);
  if(condition==='unknown'){
   assert.equal(p.workReady,undefined);assert.equal(p.rescueReady,undefined);
   assert.equal(p.hauling,undefined);assert.equal(p.rescue,undefined);
@@ -26,9 +27,9 @@ export function perspectiveCasesV2(){return perspectiveCases().map(original=>{
  const c=structuredClone(original);
  if(c.caseId.startsWith('needs-')){
   const condition=c.caseId.slice(6) as 'full'|'low'|'unknown';
-  delete c.view.pawn.hauling;delete c.view.pawn.rescue;
-  if(condition==='unknown'){delete c.view.pawn.workReady;delete c.view.pawn.rescueReady;}
-  else {c.view.pawn.workReady=condition==='full';c.view.pawn.rescueReady=condition==='full';}
+  const pawn=legacyPawn(c.view.pawn);delete pawn.hauling;delete pawn.rescue;
+  if(condition==='unknown'){delete pawn.workReady;delete pawn.rescueReady;}
+  else {pawn.workReady=condition==='full';pawn.rescueReady=condition==='full';}
   checkNeedsFixture(c.view,condition);
  }
  return c;

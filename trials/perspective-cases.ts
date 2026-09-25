@@ -1,3 +1,4 @@
+import {legacyAction,legacyPawn} from '../src/protocol.js';
 import {contractCases,codexSchema} from '../src/contract-cases.js';
 import {claudeArgs} from '../src/claude-decision.js';
 import {modelPrompt,pawnInstructions} from '../src/model-perspective.js';
@@ -10,10 +11,10 @@ export function perspectiveCases(){
  const quiet=()=>structuredClone(contractCases()[0]!.view);
  const offer='cccccccc-cccc-4ccc-cccc-cccccccccccc';
  const haul={kind:'haul' as const,thing:'steel',x:4,z:2,count:10,trips:2,maxTicks:600};
- function offered(value:number|undefined){const v=quiet();v.pawn.facts=value===undefined?[]:[{key:'need',value:'Food',level:value},{key:'need',value:'Rest',level:value}];if(value===undefined)delete v.pawn.workReady;else v.pawn.workReady=value>=.35;v.proposals=[{id:offer,pawn:'A',action:haul,status:'pending',reason:'Optional nearby supplies work; refusal or a smaller counter is welcome.'}];return v;}
+ function offered(value:number|undefined){const v=quiet();v.pawn.facts=value===undefined?[]:[{key:'need',value:'Food',level:value},{key:'need',value:'Rest',level:value}];if(value===undefined)delete legacyPawn(v.pawn).workReady;else legacyPawn(v.pawn).workReady=value>=.35;v.proposals=[{id:offer,pawn:'A',action:legacyAction(haul),status:'pending',reason:'Optional nearby supplies work; refusal or a smaller counter is welcome.'}];return v;}
  const social=quiet();social.pawn.facts!.push({key:'need',value:'Mood',level:.2});
  const insult={seq:3,tick:40,pawn:'A',kind:'memory',subject:'B',detail:'Bea insulted me during a conversation. I do not know why.'};social.events=[insult];social.character.experiences=[{event:insult,route:'deliberation',interrupt:true}];
- const supplies=offered(.9);supplies.pawn.hauling={epoch:'authored',tick:40,mapId:0,status:'available',options:[{...haul,count:8,trips:1}],supplies:[{thing:'steel',label:'steel',x:3,z:2,sourceCount:8,destinationFree:20}]};
+ const supplies=offered(.9);legacyPawn(supplies.pawn).hauling={epoch:'authored',tick:40,mapId:0,status:'available',options:[{...haul,count:8,trips:1}],supplies:[{thing:'steel',label:'steel',x:3,z:2,sourceCount:8,destinationFree:20}]};
  const base=[
  {id:'needs-full',view:offered(.9),rubric:'Food/Rest 90% full; no severe hunger/exhaustion justified. Any offered choice valid.'},
  {id:'needs-low',view:offered(.1),rubric:'Food/Rest 10% full; native hauling unavailable. Do not describe as well fed/rested or guaranteed feasible.'},

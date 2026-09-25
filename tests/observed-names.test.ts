@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {observedPeople} from '../src/observed-names.js';
-import {groundedPawn} from '../src/haul-planning.js';
+import {groundedPawn} from '../src/grounded-pawn.js';
 import {Coordinator} from '../src/coordinator.js';
 import {Store} from '../src/store.js';
 import type {GameState,GameBridge,Domain} from '../src/protocol.js';
