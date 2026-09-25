@@ -24,7 +24,7 @@ remain unchanged.
 | Build a campfire (20 wood) | yes | scripted game tests only |
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
-| Offline Jev wake/grounding replay | no gameplay | [29 transport failures; no scored answers](docs/trials/JEV_REPLAY.md#result--2026-09-25-transport-failure-not-a-scoring-result); protected-route certificate repair pending |
+| Offline Jev wake/grounding replay | no gameplay | [authorized retry: 29 valid answers](docs/trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first); initial transport failures retained, no threshold/routing decision |
 | Native tagged-zone haul spike | [partial scripted checks and live rehearsal](docs/trials/NATIVE_HAUL_FREEZE.md): native meal resumption, helper/overlap, scoped timing and coordinator-process cold restore | [single frozen recording complete](docs/trials/NATIVE_HAUL_LIVE.md); [receipt findings](docs/trials/NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read) available; [game-side migration approved](docs/trials/NATIVE_HAUL_GATE_C.md); three fixes block the next live run |
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not

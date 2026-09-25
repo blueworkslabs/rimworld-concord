@@ -136,8 +136,10 @@ that must not be missed and validate thresholds on held-out cases. Logged
 recommendations only.
 
 The [first core wake/grounding replay attempt](trials/JEV_REPLAY.md#result--2026-09-25-transport-failure-not-a-scoring-result)
-produced 29 transport failures and no judgments on 2026-09-25. An expired certificate
-in the protected route blocks the experiment; no threshold or routing change follows.
+produced 29 transport failures on 2026-09-25. After certificate renewal, an
+[owner-authorized unchanged retry](trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first)
+returned 29 valid answers for USD 0.004345194. Interpretation and held-out validation
+remain pending; no threshold or routing change follows.
 
 ## Later experiments
 

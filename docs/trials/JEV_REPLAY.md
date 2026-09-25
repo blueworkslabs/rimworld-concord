@@ -1,6 +1,6 @@
 # Jev offline replay — protocol `jev-replay-v2`
 
-**Status: reviewed; the single 2026-09-25 pass failed at transport (29 failures, no answers).** Owner: Fable. Reviewer:
+**Status: reviewed; owner-authorized retry completed with 29 valid answers after certificate renewal. The initial transport-failed run remains preserved.** Owner: Fable. Reviewer:
 Astra. This is the "Jev, offline" track from [ROADMAP](../ROADMAP.md#in-parallel-jev-offline),
 reordered after the [native-haul live run](NATIVE_HAUL_GATE_C.md): core wake gating
 first, prose grounding second. Nothing here changes routing, receipts, consent or the
@@ -161,3 +161,44 @@ needed before another pass; the old run will not be overwritten or resumed.
 Fable's interpretation is pending; there are no Jev judgment numbers to interpret
 from this attempt. Hauling PR #73, its remaining B1 round, and stopped staging are
 unchanged.
+
+
+## Authorized retry — 2026-09-25 (report first)
+
+After certificate renewal, the owner explicitly authorized one unchanged retry.
+Protected non-inference authentication returned HTTP 200 and no injected certificate
+was expired. All **29 request bodies**, evidence and request hashes match the first
+run. No code, model pin, question or threshold changed. A new run directory and
+ledger were used; the failed run and its USD 0.058 reservations remain unchanged.
+
+The retry ran at **05:16:52–05:17:05 UTC** and returned **29/29 valid answers**, zero
+failures. Every response reports **`typesafe/jev-1.13-20260917`**. Provider-reported
+cost: **USD 0.004345194**; new-run reservations: USD 0.058 against the same USD 0.0725
+local allowance (within the newly authorized USD 0.08 bound). There were no
+within-run retries and no gameplay. The initial run's actual charges remain unknown;
+its reservations are not erased or described as this retry's actual spend.
+
+### Measurements
+
+- **Wake:** 15 answers; the cancelled source turn remains unknown and excluded from
+  the curve. At thresholds 0.3, 0.4 and 0.5, none of 14 known turns would be deferred.
+  At 0.6 / 0.7 / 0.8 / 0.9, respectively 1 / 2 / 2 / 8 turns would be deferred, all
+  labelled consequential by the frozen source-truth rule; avoidable counts are zero.
+- **Important denominator limit:** all 14 known source turns count as consequential
+  under the rule (non-wait action, new topic, or any open-topic status/text change).
+  This sample has **zero unchanged-turn negatives**, even though five actions were
+  `wait`. It cannot establish how well wake gating recognizes genuinely avoidable
+  turns. The definition and thresholds were not altered after observing scores.
+- **Topics:** 31/58 exact agreement with recorded core updates (53.45%). Jev predicted
+  28 closures; the core recorded six, and all six were among Jev's predictions.
+  The other 22 predictions are disagreements, not independently established errors.
+- **Grounding, threshold 0.5:** unsupported fact flagged on four replies (zero-based
+  turns 2, 5, 10, 11); observation-time-as-event-time on one (turn 5). Other categories
+  flagged none. At threshold 0.8, no category flagged a reply. Each category scored
+  14 replies. These are model judgments awaiting human evidence adjudication, not a
+  measured false-positive rate or correctness verdict.
+
+[Full sanitized retry report and hashes](../evidence/jev-replay-retry.json).
+Original [failed-run evidence](../evidence/jev-replay.json) remains intact. Raw responses,
+attempt journal and separate ledger are preserved privately. **No threshold or routing
+change follows.** Fable owns the interpretation and next experiment proposal.

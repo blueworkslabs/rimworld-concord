@@ -77,4 +77,6 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 
 | 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O (attempted) | Jev wake/grounding replay over recorded core turns | 29 transport failures, zero answers; protected-route expired certificate diagnosed; no rerolls; USD 0.058 reserved, actual charge unknown | [jev-replay](../evidence/jev-replay.json) | [JEV_REPLAY](JEV_REPLAY.md#result--2026-09-25-transport-failure-not-a-scoring-result) |
 
+| 09-25 | [#74](https://github.com/blueworkslabs/rimworld-concord/pull/74) | O | Owner-authorized unchanged Jev retry after certificate renewal | 29 valid answers; USD 0.004345194 reported. No deferrals at 0.5; all 14 known turns consequential by frozen rule, so no unchanged-turn negatives; 31/58 topic agreement. No routing decision | [jev-replay-retry](../evidence/jev-replay-retry.json) | [Retry report](JEV_REPLAY.md#authorized-retry--2026-09-25-report-first) |
+
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.
