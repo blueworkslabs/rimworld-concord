@@ -213,6 +213,7 @@ therefore need explicit entries before they are emitted:
 | `ingested` (eater, def, count, nutrition) | `Thing.Ingested` | native; feeds self-care receipts | no |
 | `interaction` (initiator, recipient, def) | `TryInteractWith` postfix | Chitchat and DeepTalk queued as today; others by def | only as the matching memory rules say |
 | `downed` | `MakeDowned` | deliberation (like `casualty`) | yes |
+| `intent-ordinary` (an ordinary arrival at a tagged zone) | `NativeIntents` ledger | native; feeds the archive line | no |
 | `seized` (drafted, mental break, constant-tree job) | the handlers above | native, recorded for receipts | no (the pawn can't act anyway) |
 
 Only `haul-delivered`, `ingested`, `downed` and linked job ends should wake the core
