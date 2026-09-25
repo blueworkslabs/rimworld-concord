@@ -138,6 +138,10 @@ asks one `reflect` question, and the serialized perspective is at most 16,000 by
 decision-result wire message. This includes failures before any model call. Reflection
 perspectives that exceed the 24,000-byte prompt limit are trimmed oldest-first (older
 retained experiences, then memories, then messages) and marked `trimmed` in the view.
+Core inputs get the same treatment in both lanes: the oldest messages, agreements,
+questions, self-care records and requests go first, each down to a floor of recent items.
+Topics and the offerable choices are never trimmed. The backend validates against the view
+it showed; the coordinator re-validates against the full prepared view.
 The limit itself is never raised. The ongoing runner counts failures per lane (core,
 decision, core-answer, reflection); a success in one lane never resets another lane's
 stop streak. Native/idle/busy/cooldown results do not reset it either; only an actual

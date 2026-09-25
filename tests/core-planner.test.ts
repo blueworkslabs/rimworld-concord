@@ -1,5 +1,5 @@
 import {codexSchema} from '../src/contract-cases.js';
-import {codexRequest} from '../src/codex-decision.js';
+import {codexRequest,fitCore,PROMPT_LIMIT} from '../src/codex-decision.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -333,7 +333,9 @@ test('Luna core schema references preserve all choice constraints while fitting 
  const req=codexRequest('core',v),original=JSON.parse(claudeArgs('core',v)[claudeArgs('core',v).indexOf('--json-schema')+1]!);
  const expanded=structuredClone(req.schema);for(const b of expanded.properties.core.anyOf)b.properties.topics.items=expanded.$defs.coreTopicUpdate;delete expanded.$defs;
  assert.deepEqual(expanded,codexSchema(original));assert(Buffer.byteLength(JSON.stringify(req))<64000);
- v.messages[0]!.text='x'.repeat(25000);assert.throws(()=>codexRequest('core',v),/too large/);s.close();
+ // An old oversized message is trimmed away; a recent one inside the kept floor still fails.
+ const old=structuredClone(v);old.messages[0]!.text='x'.repeat(25000);assert.doesNotThrow(()=>codexRequest('core',old));
+ v.messages.at(-1)!.text='x'.repeat(25000);assert.throws(()=>codexRequest('core',v),/too large/);s.close();
 });
 
 test('topic dates are based on the supplied snapshot, not refreshed by reading or unrelated turns',async()=>{
@@ -433,5 +435,21 @@ test('a turn that answers the pawn who spoke clears the heard status',async()=>{
  await c.answerCoreQuestion(q.questionId,{name:'plea',async answerCore(){return {choice:'say',text:'Please help me.'};}});
  g.data.ticks+=60;assert.equal((await c.planCoreWhenDue(planner(v=>({topics:[],actionTopicId:null,action:{kind:'propose',opportunityId:v.opportunities.find(o=>o.pawn==='A')!.id,reason:'An offer to you'}})))).status,'applied');
  assert.equal(c.inspect().coreState!.turns.at(-1)!.heard,undefined);assert.doesNotMatch(crewReport(c.inspect(),g.data.ticks).observerText??'',/heard/);
+ s.close();
+});
+
+test('an oversized core input is trimmed oldest first; topics and choices stay, the model is told',async()=>{
+ const {g,s,c}=await setup();const full=coreView(c.inspect(),await g.state());const big='x'.repeat(900);
+ const view:any=structuredClone(full);view.messages=Array.from({length:30},(_,i)=>({id:'m'+i,tick:i,from:'A',to:'core',text:`message ${i} ${big}`,evidence:'attributed-speech'}));
+ const size=()=>Buffer.byteLength(JSON.stringify(corePrompt(view)));assert.ok(size()>PROMPT_LIMIT);
+ const trimmed=fitCore(view,size);
+ assert.ok(size()<=PROMPT_LIMIT);assert.ok(trimmed.messages>0);assert.equal(view.messages.at(-1).id,'m29','newest message kept');
+ assert.deepEqual(view.topics,full.topics);assert.deepEqual(view.opportunities,full.opportunities);
+ assert.equal(corePrompt(view).perspective.trimmed.note,'Older items were left out to fit; they still happened.');
+ // The choice built from the trimmed view still validates against the full prepared view.
+ assert.doesNotThrow(()=>validateCoreChoice(offer(view),full));
+ // Both lanes fit before the size check.
+ const again:any=structuredClone(view);delete again.trimmed;again.messages=structuredClone(view.messages);for(let i=0;i<10;i++)again.messages.unshift({...view.messages[0],id:'old'+i});
+ assert.doesNotThrow(()=>codexRequest('core',again));assert.ok(again.trimmed.messages>=10);
  s.close();
 });

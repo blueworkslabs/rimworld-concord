@@ -70,8 +70,12 @@ stockpile hauls: an existing colony stockpile (`zoneId`) or a candidate site, on
 - A wait produces no crew-log entry; the status line reads "Core: waiting on <first
   open topic>", cut at a word. **A wait after a pawn spoke is never silent:** when the
   wake carried a pawn's message to the core, the line reads "Core: heard Beatrice;
-  waiting on …", even if the model chose wait. Typed pawn requests are in the design
+  waiting on …", even if the model chose wait. The same holds when the core acted on
+  something else: a pawn whose message produced no reply or offer to them is listed as
+  "Core: heard Pedro; no reply to them yet". Typed pawn requests are in the design
   queue.
+- **No consumption follow-up while a meal is under way.** A pawn with a self-care
+  receipt that is not yet completed, failed or interrupted is not offered a question.
 - **Failed and rejected core outputs are visible in the game.** Every failed attempt
   gets one cause:
   - the backend's #71 cause;

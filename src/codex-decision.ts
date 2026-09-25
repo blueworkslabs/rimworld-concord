@@ -40,9 +40,24 @@ export function fitReflection(view:any,size:()=>number,limit=PROMPT_LIMIT){
  }
  return trimmed;
 }
+/** Core inputs get the same treatment: over the limit, the oldest messages, agreements,
+ * questions, self-care records and requests go first, each down to a floor of recent items.
+ * Topics and the offerable choices are never trimmed. The backend validates against the view it
+ * showed; the coordinator re-validates against the full prepared view. */
+export function fitCore(view:any,size:()=>number,limit=PROMPT_LIMIT){
+ const trimmed={messages:0,agreements:0,questions:0,selfCare:0,requests:0};
+ const lists:[keyof typeof trimmed,number][]=[['messages',6],['agreements',6],['questions',4],['selfCare',4],['requests',4]];
+ while(size()>limit){
+  const next=lists.find(([key,keep])=>(view[key]?.length??0)>keep);
+  if(!next)break;
+  view[next[0]].shift();trimmed[next[0]]++;view.trimmed={...trimmed,note:'Older items were left out to fit; they still happened.'};
+ }
+ return trimmed;
+}
 export function codexRequest(mode:Mode,view:any){
  const build=()=>JSON.stringify(mode==='core'?corePrompt(view):mode==='core-answer'?coreAnswerPrompt(view):mode==='social'?socialPrompt(view):modelPrompt(mode,view));
  if(mode==='reflection')fitReflection(view,()=>Buffer.byteLength(build()));
+ if(mode==='core')fitCore(view,()=>Buffer.byteLength(build()));
  const prompt=build();
  if(Buffer.byteLength(prompt)>PROMPT_LIMIT)throw Error('Context too large');
  const args=claudeArgs(mode,view),instructions=args[args.indexOf('--system-prompt')+1]!,schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);
