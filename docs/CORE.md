@@ -226,6 +226,34 @@ Passing time, private needs, changing opportunities, food sightings and the core
 prose never wake it. Consumed causes stay consumed even if the observation later
 disappears.
 
+### Design, proposed (post-Gate-C item 6): a bounded review after a wait
+
+**Not implemented; awaiting Fable's decision.** In the pipeline rerun the core waited
+at t9084 with 8 offerable choices in view and was not woken again until a telemetry
+change at t18664: **9,580 ticks** with proposable work and no second look. Its wait at
+t19806 (4 offerable) was followed by a telemetry wake 2,607 ticks later.
+
+Proposal:
+
+- **New cause `review`**, keyed to the wait turn (`review:<turnId>`, value
+  `after-wait`). It is due when the last applied turn was a wait, that turn's view had at
+  least one opportunity or counter, the current view still has one, no other cause has
+  been admitted since, and `REVIEW_TICKS` have passed since the wait was applied.
+- **Bounded:** each wait earns at most one review. A review that ends in another wait
+  earns one more at twice the interval; after two consecutive review-only waits, no
+  further review until any other cause is admitted. That is at most two extra turns per
+  quiet stretch, and any real cause resets the chain.
+- **Interval:** `REVIEW_TICKS` = 2,500, the same as the native-intent stall threshold
+  (about one in-game hour). In the rerun this would have added turns at about t11,600
+  and t16,600, before the telemetry wake at t18,664.
+- **Ordinary admission:** it counts as an attempt (cooldown and budget apply) and is
+  never a telemetry wake, so `telemetryOnlyIdle` does not apply. `wakeReasons` names it
+  ("review after your wait at t…; nothing public changed"). Waiting remains a valid
+  answer; the review invites no pressure to act.
+
+Open for Fable: the interval, the chain limit (2), doubling versus a fixed interval, and
+whether a review needs the *same* offerable choice to still be present or any choice.
+
 ## Shared status bands
 
 The shared link exposes Food and Rest as bands only: `urgent` below 20 %, `low` below
