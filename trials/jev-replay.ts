@@ -105,7 +105,7 @@ export function buildRequests(cases:ReplayCase[]):ReplayRequest[]{
 }
 
 export type ReplayAnswer={attemptId:string;kind:'wake'|'grounding';index:number;requestSha256:string;at:string;model?:string;answers?:Record<string,JevAnswer>;costUSD?:number;error?:string;raw?:string};
-export type AttemptEvent={event:'attempted';attemptId:string;kind:'wake'|'grounding';index:number;requestSha256:string;at:string}|({event:'result'|'failure'}&ReplayAnswer);
+export type AttemptEvent={event:'attempted';attemptId:string;kind:'wake'|'grounding';index:number;requestSha256:string;at:string}|({event:'received'|'result'|'failure'}&ReplayAnswer);
 /** One reservation per call, settled from the provider's receipt; failures keep their reservation.
  * The sink receives every attempt before its call and every outcome after, so an interruption
  * never loses a paid answer. Each slot runs at most once. */
@@ -119,20 +119,30 @@ export async function runReplay(requests:ReplayRequest[],transport:AppraisalTran
   const id=budget.reserve(JEV_CALL_CEILING_USD);
   const bounded=AbortSignal.any([signal,AbortSignal.timeout(timeoutMs)]);
   let raw:unknown;
+  let receipt:Pick<ReplayAnswer,'raw'|'costUSD'>={};
+  let transportError:unknown;
+  try{raw=await transport(r.request,bounded);}catch(e){transportError=e;}
+  if(raw!==undefined){
+   receipt={raw:JSON.stringify(raw)};
+   const cost=z.object({usage:z.object({cost:z.number().finite().nonnegative()})}).safeParse(raw);
+   if(cost.success)receipt.costUSD=cost.data.usage.cost;
+   // Preserve the complete paid response before validation or ledger settlement can throw.
+   await sink({event:'received',attemptId,kind:r.kind,index:r.index,requestSha256:r.sha256,at,...receipt});
+  }
+  let answer:ReplayAnswer;
   try{
-   raw=await transport(r.request,bounded);
+   if(transportError)throw transportError;
    const billing=z.object({usage:z.object({cost:z.number().finite().nonnegative()})}).safeParse(raw);
    if(billing.success)budget.settle(id,billing.data.usage.cost);
    const parsed=validateJevResponse(raw,r.request.questions);
-   const answer:ReplayAnswer={attemptId,kind:r.kind,index:r.index,requestSha256:r.sha256,at,model:parsed.model,answers:parsed.answers,...(billing.success?{costUSD:billing.data.usage.cost}:{})};
-   out.push(answer);await sink({event:'result',...answer});
+   answer={attemptId,kind:r.kind,index:r.index,requestSha256:r.sha256,at,model:parsed.model,answers:parsed.answers,...receipt};
   }catch(e){
    // Keep whatever came back: a paid answer that failed the contract is still evidence.
-   const kept=raw===undefined?{}:{raw:JSON.stringify(raw).slice(0,8000)};
-   const answer:ReplayAnswer={attemptId,kind:r.kind,index:r.index,requestSha256:r.sha256,at,error:e instanceof Error?e.message:'failed',...kept};
-   out.push(answer);await sink({event:'failure',...answer});
-   if(/locked|exhausted/.test(answer.error!))break;
+   answer={attemptId,kind:r.kind,index:r.index,requestSha256:r.sha256,at,error:e instanceof Error?e.message:'failed',...receipt};
   }
+  // Persistence errors abort: never confuse them with a provider failure and continue.
+  await sink({event:answer.error?'failure':'result',...answer});out.push(answer);
+  budget.assertHealthy();
  }
  return out;
 }

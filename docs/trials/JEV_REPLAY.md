@@ -1,6 +1,6 @@
 # Jev offline replay — protocol `jev-replay-v2`
 
-**Status: harness built and mock-tested; no live replay yet.** Owner: Fable. Reviewer:
+**Status: harness corrected and mock-tested; no live replay yet.** Owner: Fable. Reviewer:
 Astra. This is the "Jev, offline" track from [ROADMAP](../ROADMAP.md#in-parallel-jev-offline),
 reordered after the [native-haul live run](NATIVE_HAUL_GATE_C.md): core wake gating
 first, prose grounding second. Nothing here changes routing, receipts, consent or the
@@ -42,7 +42,7 @@ kept), pawn ids replaced by names:
 **Grounding**, one request per aligned returned choice, state = the reply beside the
 records and communication it was given, **including the supporting facts the core may
 cite**: food sightings (observer, item, count, forbidden), listed options, question
-status, agreements with offer status *and* work status, delivered quantity with unit,
+status and eligible recipients, all supplied public testimony, agreements with offer status *and* work status, delivered quantity with unit,
 and receipt-backed `completedTick` where present. Claim classes that cannot be checked
 from this projection are listed under `unscored` and must not count as unsupported.
 Seven nouls: `unsupported_fact`, `completion_without_receipt`, `speaks_for_other`,
@@ -57,7 +57,9 @@ question says so.
 Frozen and validated per call: model exactly `typesafe/jev-1.13-20260917` (the version
 in retained evidence), exactly the asked question keys, the asked answer types, choice
 labels among the listed options with probabilities covering them and summing to one.
-A paid answer that fails the contract is kept verbatim as a failure, never scored.
+Every received JSON response is preserved in full before validation or billing settlement.
+A paid answer that fails the contract is kept as a failure, never scored; its reported
+cost remains in the report.
 The live appraiser in `src/appraisal.ts` now uses the same exact pin.
 
 ## Ground truth and measures
@@ -89,10 +91,19 @@ then validated on a held-out evidence file before anything is wired.
   cannot be reopened for a second pass.
 - A live run **owns its output directory**: `run.json` binds a run id to the evidence
   hash, the request-list hash, the model alias, the expected version and the call
-  count; a second `--live` in the same directory is refused.
-- `attempts.jsonl` receives every attempt **before** its call and every result or
-  failure **after**, so an interruption, budget stop or pricing lock never loses a
-  paid answer. Each slot runs at most once. An interrupted run still writes its report.
+  count; ownership is claimed atomically before writing input artifacts; concurrent or second
+  `--live` calls in the same directory are refused. Dry runs cannot overwrite owned inputs.
+- `attempts.jsonl` receives every attempt **before** its call and the
+  received response and validated result or failure **after**. Each append is flushed;
+  full raw responses survive validation errors and pricing locks. Each slot runs at
+  most once. Unfinished attempts remain explicit, unscored, and are never retried.
+  Hard termination may leave billing unknown; `--report` recovers complete journal
+  lines and marks an incomplete final line, without new calls.
+- Reports verify the evidence, request bodies, model and per-attempt identities against
+  the original run. Mismatched inputs are rejected before any retained file is changed.
+- Hard upper bound: 32 calls and USD 0.08 allowance; this 29-request pass reserves
+  USD 0.058, with a USD 0.0725 local allowance. Reservations are conservative accounting,
+  not a provider-enforced charge cap.
 - Protected Gateway transport only (`src/protected-jev.ts`); no plaintext credential,
   no retries.
 

@@ -92,7 +92,7 @@ test('replay persists every attempt before its call and every outcome after, kee
  const transport=async(body:unknown)=>{calls++;assert.equal(events.filter(e=>e.event==='attempted').length,calls,'attempted is persisted before the call');
   if(calls===2)throw Error('offline');if(calls===3)return fake(0.5,'typesafe/jev-9')(body);return fake()(body);};
  const answers=await runReplay(requests,transport,budget,new AbortController().signal,e=>{events.push(e);});
- assert.equal(answers.length,3);assert.equal(events.length,6);
+ assert.equal(answers.length,3);assert.equal(events.length,8);
  assert.equal(answers[1]!.error,'offline');assert.equal(answers[1]!.raw,undefined);
  assert.match(answers[2]!.error!,/Unexpected Jev model/);assert.ok(answers[2]!.raw!.includes('jev-9'),'a paid but non-conforming answer is kept verbatim');
  const s=budget.summary()!;assert.equal(s.calls,3);assert.equal(Number(s.reservedUSD).toFixed(3),'0.006');
@@ -124,4 +124,31 @@ test('question builders keep speech as evidence and enumerate only supplied topi
  const msg=q['message_m0']!;assert.equal(msg.type,'choice');
  if(msg.type==='choice')assert.deepEqual(Object.keys(msg.criteria).sort(),['new','none','t0']);
  assert.equal(Object.keys(groundingQuestions()).length,7);
+});
+
+
+test('paid invalid and overrun responses retain full bytes and billed cost before stopping',async()=>{
+ const requests=buildRequests(loadCases(evidence)).slice(0,2);
+ const budget=new TrialBudget(':memory:',0.08,29,'jev-replay-v2');
+ const raw={model:'wrong',answers:{},usage:{cost:0.001},extra:'x'.repeat(10000)};
+ const a=await runReplay(requests.slice(0,1),async()=>raw,budget,new AbortController().signal);
+ assert.equal(a[0]!.raw,JSON.stringify(raw));assert.equal(report([],a).reportedCostUSD,0.001);
+ budget.close();
+ const over=new TrialBudget(':memory:',0.08,29,'jev-replay-v2');const events:AttemptEvent[]=[];let calls=0;
+ await assert.rejects(runReplay(requests,async()=>{calls++;return {...raw,usage:{cost:0.003}};},over,new AbortController().signal,e=>{events.push(e);}),/locked/);
+ assert.equal(calls,1);assert.equal(events[1]!.event,'received');assert.equal(events[2]!.event,'failure');
+ assert.equal(report([],events.filter((e):e is Extract<AttemptEvent,{event:'failure'|'result'}>=>e.event==='failure')).reportedCostUSD,0.003);
+ over.close();
+});
+
+test('grounding keeps all supplied testimony and question eligibility, without truncating claims',()=>{
+ const cases=loadCases(evidence);
+ const v=evidence.live.coreInputs.filter((i:any)=>i.mode==='core');
+ for(const c of cases.filter(c=>c.grounding)){
+  assert.equal(c.grounding!.communication.length,v[c.index].view.messages.length);
+  assert.equal(c.grounding!.reply.action.reason,c.returned!.action.reason);
+  assert.equal(c.grounding!.records.questionRecipients.length,v[c.index].view.questionRecipients.length);
+ }
+ assert.deepEqual(cases[9]!.grounding!.records.questionRecipients,['Alvin']);
+ assert.ok(cases[13]!.grounding!.communication.some(m=>m.from==='Pedro'&&/finish/i.test(m.text)));
 });

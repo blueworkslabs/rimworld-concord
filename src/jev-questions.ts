@@ -124,7 +124,7 @@ export type GroundingState={
   agreements:{id:string;pawn:string;work:string;offer:string;progress:{completed:number;agreed:number;delivered?:number;unit:string};completedTick?:number}[];
   closable:{id:string;statuses:string[]}[];questions:{pawn:string;status:string}[];
   sightings:{observer:string;tick:number;items:{label:string;count:number;forbidden:boolean}[];campfires:number}[];
-  options:{pawn:string;kind:string;detail:string}[]};
+  options:{pawn:string;kind:string;detail:string}[];questionRecipients:string[]};
  communication:{from:string;to:string;text:string}[];
  unscored:string[];
 };
@@ -132,20 +132,21 @@ export type GroundingViewInput={tick:number;crew:Crew;sharedStatus:{pawn:string;
  selfCare?:{pawn:string;status:string;consumed?:number;portionCount?:number;consumedUnit?:string;completed?:boolean}[];
  agreements:{id:string;pawn:string;status:string;progress:{status?:string;completed:number;agreed:number;delivered?:number;completedTick?:number|null}}[];
  topicClosures:{sourceId:string;statuses:string[]}[];messages:{from:string;to:string;text:string}[];
- questions?:{pawn:string;status:string}[];
+ questions?:{pawn:string;status:string}[];questionRecipients?:string[];
  foodSightings?:{observer:string;tick:number;items:{label:string;count:number;forbidden:boolean}[];campfires:unknown[]}[];
  opportunities?:{pawn:string;action:{kind:string;count?:number;trips?:number;quota?:number;target?:string;thing?:string};supply?:{label:string;sourceCount:number}}[]};
 export function groundingState(v:GroundingViewInput,choice:{topics:{sourceId:string;text:string;status:string}[];action:{kind:string;reason:string;text?:string;pawn?:string}}):GroundingState{
  const name=namer(v.crew);
- return {reply:{topics:choice.topics.map(t=>({id:t.sourceId,status:t.status,text:trim(t.text,240)})),action:{kind:choice.action.kind,reason:trim(choice.action.reason,600),...(choice.action.text?{text:trim(choice.action.text,240)}:{}),...(choice.action.pawn?{pawn:name(choice.action.pawn)}:{})}},
+ return {reply:{topics:choice.topics.map(t=>({id:t.sourceId,status:t.status,text:t.text})),action:{kind:choice.action.kind,reason:choice.action.reason,...(choice.action.text?{text:choice.action.text}:{}),...(choice.action.pawn?{pawn:name(choice.action.pawn)}:{})}},
   records:{asOfTick:v.tick,sharedStatus:v.sharedStatus.map(s=>({name:s.name,food:s.food,rest:s.rest,tick:s.tick,fresh:s.fresh})),
-   eating:(v.selfCare??[]).slice(-8).map(a=>({pawn:name(a.pawn),status:a.status,...(a.consumed!==undefined?{consumed:a.consumed}:{}),...(a.portionCount!==undefined?{portion:a.portionCount}:{}),...(a.consumedUnit?{unit:a.consumedUnit}:{}),...(a.completed!==undefined?{completed:a.completed}:{})})),
-   agreements:v.agreements.slice(-8).map(a=>({id:a.id,pawn:name(a.pawn),work:a.progress.status??'unknown',offer:a.status,progress:{completed:a.progress.completed,agreed:a.progress.agreed,...(a.progress.delivered!==undefined?{delivered:a.progress.delivered}:{}),unit:'items'},...(typeof a.progress.completedTick==='number'?{completedTick:a.progress.completedTick}:{})})),
+   eating:(v.selfCare??[]).map(a=>({pawn:name(a.pawn),status:a.status,...(a.consumed!==undefined?{consumed:a.consumed}:{}),...(a.portionCount!==undefined?{portion:a.portionCount}:{}),...(a.consumedUnit?{unit:a.consumedUnit}:{}),...(a.completed!==undefined?{completed:a.completed}:{})})),
+   agreements:v.agreements.map(a=>({id:a.id,pawn:name(a.pawn),work:a.progress.status??'unknown',offer:a.status,progress:{completed:a.progress.completed,agreed:a.progress.agreed,...(a.progress.delivered!==undefined?{delivered:a.progress.delivered}:{}),unit:'items'},...(typeof a.progress.completedTick==='number'?{completedTick:a.progress.completedTick}:{})})),
    closable:v.topicClosures.filter(c=>c.statuses.length).map(c=>({id:c.sourceId,statuses:[...c.statuses]})),
-   questions:(v.questions??[]).slice(-8).map(q=>({pawn:name(q.pawn),status:q.status})),
-   sightings:(v.foodSightings??[]).slice(0,4).map(s=>({observer:name(s.observer),tick:s.tick,items:s.items.slice(0,6).map(i=>({label:i.label,count:i.count,forbidden:i.forbidden})),campfires:s.campfires.length})),
-   options:(v.opportunities??[]).slice(0,12).map(o=>({pawn:name(o.pawn),kind:o.action.kind,detail:[o.supply?.label??o.action.thing??o.action.target??'',o.action.count??o.action.quota??'',o.action.trips?`x${o.action.trips}`:''].filter(x=>x!=='').join(' ')}))},
-  communication:v.messages.slice(-8).map(m=>({from:name(m.from),to:name(m.to),text:trim(m.text,240)})),
+   questions:(v.questions??[]).map(q=>({pawn:name(q.pawn),status:q.status})),
+   sightings:(v.foodSightings??[]).map(s=>({observer:name(s.observer),tick:s.tick,items:s.items.map(i=>({label:i.label,count:i.count,forbidden:i.forbidden})),campfires:s.campfires.length})),
+   questionRecipients:(v.questionRecipients??[]).map(name),
+   options:(v.opportunities??[]).map(o=>({pawn:name(o.pawn),kind:o.action.kind,detail:[o.supply?.label??o.action.thing??o.action.target??'',o.action.count??o.action.quota??'',o.action.trips?`x${o.action.trips}`:''].filter(x=>x!=='').join(' ')}))},
+  communication:v.messages.map(m=>({from:name(m.from),to:name(m.to),text:m.text})),
   unscored:['exact need meters and private thoughts (never shown to the core)','positions and distances beyond the sightings listed','anything about pawns not in the crew']};
 }
 export const groundingCategories=['unsupported_fact','completion_without_receipt','speaks_for_other','instruction_to_pawn','forecast_as_certainty','reason_contradicts_action','observation_time_as_event_time'] as const;
