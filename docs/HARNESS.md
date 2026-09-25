@@ -73,6 +73,15 @@ that the model saw every field. Player-visible scope excludes unrevealed map con
 and hidden future events. Export on the game thread from one coherent state; inspect
 UI getters for side effects rather than assuming every getter is read-only.
 
+**Requirements from the first capture (2026-09-25, #92):** alerts are evaluated from the
+readout's full alert list with `GetReport()` at snapshot time, never from the
+incrementally filled active list, so the first read after load already shows the
+player's to-do list; the digest has its own byte budget (about 14 KB) below the prompt
+limit, leaving room for instructions, task, history and receipts; loose items and
+plants appear in the digest aggregated by def (label, total, stacks, rough location),
+with individual stacks left to `look`. Every colonist's full thought list stays in the
+digest: all twelve groups of the fixture fit in under 500 bytes.
+
 **Diff (`since`)**: things appeared, disappeared or changed def or position; alerts
 raised or cleared; letters arrived; bills or zones changed; pawn job, need band, health
 or mood changed; resources crossed a threshold. Computed from two snapshots; no engine
@@ -138,7 +147,12 @@ Same save, same task, same model, same timing rules, three arms:
 | model cost | input/cached/output tokens per controller run; actual billed USD when provided, otherwise null with reason; any priced estimate separately labelled |
 | stalls | adapter or transport stalls, reported separately, never subtracted silently |
 
-**Rules.** No rerolls; failed runs are retained; the recording and its hash are kept as
+**Rules.** Both arms start from an identical, clean controller context: the same
+model alias, the same task text, no history from any earlier run of the task. Model
+cost is reported as the token triplet (uncached input, cached input, output) plus the
+call count; billed USD is recorded only where the route reports it, never estimated.
+Astra's 2026-09-25 runs are calibration, not scored arms, because their context held
+the project session. No rerolls; failed runs are retained; the recording and its hash are kept as
 today; the same task spec and checker for both arms; three runs per arm per task once
 the harness exists, one until then. Publish every run plus completion rate and timing/cost summaries, including failures.
 Prefer task success first; compare speed/cost among successful runs without hiding failed
@@ -210,41 +224,12 @@ prompt fitting, the Jev grounding annotator (a narration checker fits a harness)
 (#89 on hold; its bridge and blueprint placement code is reused by action 1), and the
 gate process. The migration pages stay as history.
 
-## Open questions
+## Open questions, resolved 2026-09-25
 
-- Whether the digest should include the full thought list per pawn or the mood total
-  with the top three thoughts; decide from prompt size on the first fixture.
-- Capture controller token usage on the actual route; subscription access may not expose
-  per-run billed USD. Never call unknown cost zero or switch billing routes to obtain a number.
-  A token/time comparison can proceed, but “cheaper in USD” remains unproven without comparable pricing.
-- T2/T3 exact success predicates and fixtures are deferred until after T1. Assignment
-  alone does not prove a pawn slept; stockpile membership alone does not prove indoors.
-
-## Implementation status: perception (Clawd, 2026-09-25)
-
-**Scripted-captured on staging; not a paired benchmark.** [Evidence](evidence/perception-2026-09-25/README.md): two paused raw receipts round-trip unchanged, 325,064-byte snapshot and 23,946-byte digest. All 12 mood thought groups fit. Empty alert/bill/zone/threat sections remain runtime-unexercised. `perceive` is a bridge op (mod `Perception.cs`, no patches):
-one snapshot per request, built on the game thread from the game's own structures, fogged
-cells excluded, written by a small JSON writer (Unity's serializer drops nested arrays).
-Sections as in the table above, plus `meta` (world, load epoch, map, tick, snapshot ID) and an
-`omitted` list stating what v1 does not export yet: transient top-left messages, home-area
-cells, and weather forecasts (not player-visible). `receipts` is empty until actions v1.
-Getters used and why they are safe to call outside the UI: `Alert.GetReport`/`GetLabel`
-(what the alert readout calls every frame; read through its private active list, no patch),
-`Letter.Label`/`ChoiceLetter.Text`, `JobDriver.GetReport`, `ThoughtHandler`'s distinct mood
-groups, `ResourceCounter.AllCountedAmounts`, `GenDate` for the clock. These may refresh UI/thought caches; they must not reconcile jobs or issue gameplay actions.
-The perception response bypasses legacy `StateJson` reconciliation, including rejected reads.
-Paused capture checks exported state stability, not the absence of every internal cache write.
-
-On the coordinator side (`src/harness/perception.ts`): the `Snapshot` schema, `since` (things
-appeared, disappeared or changed def, position, stack, forbidden; alerts raised/cleared;
-letters; bills and zones added/removed/changed; pawn job, need band, mood band, health and
-downed; resource thresholds 1/10/25/50/100/250/500/1000 crossed; designation counts; a reset,
-never a comparison, across a world, load or map change), `look` (area around a cell or thing,
-category, capability, pawn, or named section) and `digest`. The digest uses the core's fitting loop, now shared
-as `trimToFit` (core and reflection use it unchanged): plants, filth, corpses, then far items,
-old letters, far things, zone geometry and each pawn's weakest thoughts go first, and it states what it left
-out and that `look` reaches it. `trials/harness-perceive.ts` captures a real snapshot, digest
-and size summary on staging; its first run supplements the synthetic fixture with actual wire round-trip evidence and
-answers the thought-list question from real numbers. Hidden/invisible enemies are excluded;
-bill worker restrictions and skill ranges are exported. Zone changes compare contents and
-settings, not just their counts; pawn changes include job targets and individual injuries.
+- **Thoughts in the digest:** the full list per pawn. The first capture measured all
+  twelve mood-thought groups at 493 bytes; trimming would save nothing.
+- **UI-arm cost:** the token triplet and call count, captured per run, same for both
+  arms; no USD on the subscription route and none invented. Fresh controller context
+  per scored run (see Benchmark rules).
+- **T2's bed:** the game's own bed assignment, read by the checker, with "slept in a bed
+  tonight" as a second column. Assignment is what a player can see and set.
