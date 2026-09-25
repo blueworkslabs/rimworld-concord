@@ -246,10 +246,11 @@ namespace Concord
             next=Time.realtimeSinceStartup+0.1f;
             var path=Root+"/request.json";
             if(!File.Exists(path)) return;
-            var response=new Response(); string receipt="null";
+            var response=new Response(); string receipt="null"; bool perceptionOnly=false;
             try {
                 var payload=File.ReadAllText(path); File.Delete(path);
                 var r=JsonUtility.FromJson<Request>(payload); response.id=r.id;
+                perceptionOnly=r.op=="perceive"; // Even rejected reads must not run legacy job reconciliation.
                 if(r.op=="move"||r.op=="rescue"||r.op=="build"||r.op=="cook"||r.op=="eat") receipt=JsonUtility.ToJson(Move(r));
                 else if(r.op=="crew-log") {var w=World();CrewLog.Set(w,r.epoch,r.crewJson);}
                 else if(r.op=="cancel") receipt=JsonUtility.ToJson(Cancel(r));
@@ -260,6 +261,12 @@ namespace Concord
                     else if(r.op=="intent-exclude")s.Exclude(r);
                     else {var i=s.ById(r.intentId);if(i==null) throw new Exception("Unknown intent");s.Retire(i,"stopped");}
                     receipt=s.Json();
+                }
+                else if(r.op=="perceive") {
+                    // Harness perception (docs/HARNESS.md): read-only snapshot of the player's picture.
+                    var w=World();if(!String.IsNullOrEmpty(r.epoch)&&r.epoch!=w.epoch) throw new Exception("Stale timeline");
+                    if(Find.CurrentMap==null) throw new Exception("No map loaded");
+                    receipt=Perception.Snapshot(w);
                 }
                 else if(r.op.StartsWith("lab-")) {var w=World();if(r.epoch!=w.epoch) throw new Exception("Stale timeline");receipt=IntentState.Get().Lab(r);}
                 else if(r.op=="decision-pause") {World();DecisionPauses.Set(r.epoch,r.actor,r.leaseId,r.ttlMs);}
@@ -275,7 +282,7 @@ namespace Concord
                 else if(r.op!="state") throw new Exception("Unsupported domain operation");
                 response.ok=true;
             } catch(Exception e) {response.error=e.Message;}
-            try {Atomic(Root+"/response.json",JsonUtility.ToJson(response).TrimEnd('}')+",\"receipt\":"+receipt+",\"state\":"+StateJson()+"}");}
+            try {Atomic(Root+"/response.json",JsonUtility.ToJson(response).TrimEnd('}')+",\"receipt\":"+receipt+",\"state\":"+(perceptionOnly?"null":StateJson())+"}");}
             catch(Exception e) {Log.Error("[Concord] "+e);}
         }
     }

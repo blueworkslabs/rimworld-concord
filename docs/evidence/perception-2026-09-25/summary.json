@@ -1,0 +1,83 @@
+{
+  "runId": "4fb03f88-ea0e-4f55-923a-4f778e57e915",
+  "save": "lab-concord-nh-helper-20260924",
+  "at": "2026-09-25T20:36:24.864Z",
+  "perceiveMs": 391,
+  "fullBytes": 325064,
+  "digestBytes": 23946,
+  "digestFitted": {
+    "omitted": {
+      "plants": 136,
+      "filth": 921,
+      "items": 485,
+      "things": 445
+    },
+    "fits": true,
+    "note": "State was omitted to fit. Use look (by area, category, capability, pawn or section) to retrieve it."
+  },
+  "counts": {
+    "things": 2072,
+    "byKind": {
+      "item": 505,
+      "plant": 136,
+      "filth": 921,
+      "building": 510
+    },
+    "alerts": 0,
+    "letters": 0,
+    "zones": 0,
+    "bills": 0,
+    "designations": 0,
+    "pawns": 3,
+    "threats": 0,
+    "thoughtsPerPawn": [
+      {
+        "name": "Alvin",
+        "thoughts": 5,
+        "bytes": 206
+      },
+      {
+        "name": "Beatrice",
+        "thoughts": 4,
+        "bytes": 165
+      },
+      {
+        "name": "Pedro",
+        "thoughts": 3,
+        "bytes": 122
+      }
+    ]
+  },
+  "pausedDiff": {
+    "reset": false,
+    "fromTick": 2,
+    "toTick": 2,
+    "things": {
+      "appeared": [],
+      "disappeared": [],
+      "changed": []
+    },
+    "alerts": {
+      "raised": [],
+      "cleared": []
+    },
+    "letters": [],
+    "bills": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "zones": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "pawns": [],
+    "resources": [],
+    "designations": {
+      "added": 0,
+      "removed": 0
+    }
+  },
+  "sha256": "4149c1c34e11e219edc8754a669ee785203ece1cb4ab8e54fb797363d7b3a249"
+}
