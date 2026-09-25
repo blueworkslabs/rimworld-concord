@@ -370,6 +370,9 @@ try{
     await b.load(base);await b.admin('pause');await poll();
     const id4=randomUUID();await open(id4,P);await open(id4,B);await prio(P,0,0);
     await run(()=>state.pawns.find(p=>p.id===P)?.job!=null,20000);
+    // The unrelated job is now paused. Ordinary scanner admission requires its work type
+    // enabled; enable it before creating the candidate, without letting a scan start it.
+    await prio(P,1,1);
     await op({op:'lab-build-queue',intentId:id4,actor:P});const q0=await jobOf(P);c.data.queuedCandidate=q0;
     expect(c,(q0.queued as {segments:number;def:string}[]).some(q=>q.def==='HaulToContainer'),'precondition: no queued candidate');
     await exclude(id4,P,'No');const q1=await jobOf(P);c.data.afterQueuedExclusion=q1;
