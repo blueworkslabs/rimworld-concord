@@ -4,6 +4,15 @@ Forward-looking only; past results are in [HISTORY](HISTORY.md) and the
 [trial ledger](trials/README.md). Direction agreed with the project owner and team on
 2026-09-24.
 
+## Phase reset, 2026-09-25: the agent harness
+
+The next phase is the [agent harness](HARNESS.md): perceive and run the colony through
+a read-only snapshot with diffs and queries, and act through the player's own controls
+minus draft, measured against an agent playing the standard UI on the same save and
+tasks. The construction and cooking migration below is on hold (its bridge work is
+reused); Gates A–C are retired for this phase and the benchmark table is the gate.
+Consent, offers and refusals are kept as phase 2.
+
 ## Where we are
 
 The "watchable scene" phase delivered the tools and a first recorded trial, not yet
