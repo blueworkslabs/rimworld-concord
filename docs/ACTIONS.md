@@ -198,7 +198,11 @@ Admission checks and their limits are unchanged. A failed eating revalidation re
 an operator-audit `eatingValidation` object on `core-answer-failed`: first failed
 coordinator gate, selected ID, offered/check/observation ticks, map IDs and offered/
 current portion counts. Examples include an existing commitment, stale observation,
-changed map, increased portion or option no longer on the eligible shortlist.
+changed map or option no longer on the eligible shortlist. An eat choice is identified by
+its thing. The dispatched count is the chosen count, and at most the current portion (the
+smaller of the two). A portion that grows while the pawn thinks no longer fails the
+choice; one that shrinks dispatches the smaller current portion. The mod rejects only
+counts above its current portion.
 `option-not-current` does **not** explain why native option generation omitted it.
 Earlier schema failures, cancellations or a question no longer being answerable keep
 their existing errors. This diagnostic is not added to a character's public core perspective.

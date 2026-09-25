@@ -68,7 +68,21 @@ stockpile hauls: an existing colony stockpile (`zoneId`) or a candidate site, on
   the stockpile hauls are the only proposable work.
 - The view carries the colony `clock`.
 - A wait produces no crew-log entry; the status line reads "Core: waiting on <first
-  open topic>".
+  open topic>", cut at a word. **A wait after a pawn spoke is never silent:** when the
+  wake carried a pawn's message to the core, the line reads "Core: heard Beatrice;
+  waiting on …", even if the model chose wait. Typed pawn requests are in the design
+  queue.
+- **Failed and rejected core outputs are visible in the game.** Every failed attempt
+  gets one cause:
+  - the backend's #71 cause;
+  - `deadline` or `cancelled`;
+  - or the rule that rejected a returned output before publication: topic capacity,
+    topic link, unsupported closure, unavailable choice, superseded, or invalid output.
+
+  Counts are kept in `coreState.failures`, and the status line reads "Core outputs
+  failed or rejected: N (…)". A rejected offer or question also gets a crew record
+  naming whom it was for and why, never its text. In the migration's live run, three
+  proposals were rejected this way and nothing showed on screen.
 
 | Action | Effect |
 |---|---|
@@ -119,12 +133,24 @@ filter, private-state access, new action or model escalation is added.
 
 The legacy core keeps up to 8 topics, each tied to a source it can see (the brief, a message,
 an agreement, a request, an opportunity, a re-invitation or a self-care record). A turn
-may update several topics at once; `actionTopicId` links a new offer to a topic (it
-must be null for `ask` and `wait`). Invalid updates reject the whole turn before any
-effect.
+may update several topics at once. `actionTopicId` links a new offer to an **existing**
+open, blocked or deferred topic, or it is null (always null for `ask` and `wait`). A
+topic created in the same turn can't be linked; the offer links to it next turn. The
+schema lists only those ids (`actionTopicIds` in the prompt). The legacy single-topic
+form keeps its implicit link only for an existing topic. Invalid updates reject the
+whole turn before any effect.
+
+**Capacity-aware schema.** When eight topics are active, the choice schema offers only
+the existing topic ids: they can be updated or closed, but no new source can be added.
+The prompt says `topicCapacity.full`, and the validator rejects a new topic with "Core
+topic capacity full". A turn that can't be valid isn't expressible.
 
 Statuses are `open`, `blocked`, `deferred`, `resolved` and `declined`. The last two are
-only allowed when the receipts say so (`topicClosures`):
+only allowed when the receipts say so (`topicClosures`). **Completion reports:** the
+core's next exchange with a pawn after its eating choice ("did you eat?" / "yes") is
+linked to that self-care receipt. Its topics can resolve once the receipt verifies the
+meal. Only that one exchange is linked, never a later unrelated question. In the live
+run, three receipted follow-ups had no permitted closure and filled the topic slots.
 
 - **resolved**: every linked offer, followed through counters and re-invitations to
   its final revision, is accepted and fully completed with no active, unconfirmed or
