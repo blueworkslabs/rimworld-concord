@@ -63,7 +63,7 @@ namespace Concord {
   private CrewEntry[] heldEntries;private string heldEpoch;
   private static string ActivityLabel(Pawn pawn){
    if(pawn==null)return "not on this map";if(pawn.CurJobDef==null)return "idle";
-   switch(pawn.CurJobDef.defName){case "Concord_Eat":return "eating chosen food";case "Concord_Haul":return "agreed hauling";case "Concord_Rescue":return "agreed rescue";case "Concord_Cook":return "agreed cooking";case "Concord_BuildMaterials":return "delivering building materials";case "Concord_BuildFinish":return "agreed construction";case "Wait_Wander":case "GotoWander":return "wandering";case "Ingest":return "native eating";case "LayDown":return "resting";case "Wait":case "Wait_MaintainPosture":return "waiting";default:return "other native activity";}
+   switch(pawn.CurJobDef.defName){case "Concord_Eat":return "eating chosen food";case "Concord_Rescue":return "agreed rescue";case "Concord_Cook":return "agreed cooking";case "Concord_BuildMaterials":return "delivering building materials";case "Concord_BuildFinish":return "agreed construction";case "Wait_Wander":case "GotoWander":return "wandering";case "Ingest":return "native eating";case "LayDown":return "resting";case "Wait":case "Wait_MaintainPosture":return "waiting";default:return "other native activity";}
   }
   public override Vector2 InitialSize {get{return new Vector2(420,Math.Min(670,UI.screenHeight-100));}}
   public override void DoWindowContents(Rect rect){
@@ -127,7 +127,7 @@ namespace Concord {
     float y=0;
     foreach(var a in r.agreements){var p=a.progress;
      Widgets.Label(new Rect(0,y,workView.width,25),a.name+" · "+p.kind+" · "+p.status+" — "+p.completed+" / "+p.agreed+" completed");
-     Widgets.Label(new Rect(0,y+25,workView.width,32),"Active "+p.active+" · Unconfirmed "+p.unconfirmed+" · Unsuccessful "+p.unsuccessful+" · Not started "+p.notStarted+" · Unfulfilled "+p.unfulfilled+(p.kind=="haul"?" · Delivered "+p.delivered+" confirmed units"+(p.quantityUnknown>0?" · Unknown quantities "+p.quantityUnknown:""):""));y+=62;
+     Widgets.Label(new Rect(0,y+25,workView.width,32),"Active "+p.active+" · Unconfirmed "+p.unconfirmed+" · Unsuccessful "+p.unsuccessful+" · Not started "+p.notStarted+" · Unfulfilled "+p.unfulfilled);y+=62;
     }
     Widgets.EndScrollView();
     if(Widgets.ButtonText(new Rect(0,296,110,28),"All")){filter="all";logScroll=Vector2.zero;}
