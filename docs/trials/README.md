@@ -79,6 +79,6 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 
 | 09-25 | [#73](https://github.com/blueworkslabs/rimworld-concord/pull/73) | S/D | Ordinary-play strict live freeze and final urgent wake rule | Exact E2 silent3/6/13; actual runner75/75, both authored offers, construction available, paired/new-process cold pass;405 saves unchanged; unsigned/no model calls | [rehearsal](../evidence/hauling-migration-live-rehearsal.json), [setup](../evidence/hauling-migration-live-setup.json) | [freeze](HAULING_MIGRATION_LIVE_FREEZE.md) |
 
-| 09-25 | [#75](https://github.com/blueworkslabs/rimworld-concord/pull/75) | L | Single signed strict ordinary-play migration scene | Uncut10:04.467 recording; paired/new-process cold restore passed,407 saves unchanged; cold read and findings pending | [recording metadata](../evidence/hauling-migration-live-recording.json) | [Recording first](HAULING_MIGRATION_LIVE.md) |
+| 09-25 | [#75](https://github.com/blueworkslabs/rimworld-concord/pull/75) | L | Single signed strict ordinary-play migration scene | Uncut10:04.467; cold read then audit: three returned offers rejected, zero opened intents; four stale entries all prefixed, failure counts off-screen; verdict pending | [recording metadata](../evidence/hauling-migration-live-recording.json), [findings](../evidence/hauling-migration-live-findings.json) | [Recording and post-read findings](HAULING_MIGRATION_LIVE.md) |
 
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.

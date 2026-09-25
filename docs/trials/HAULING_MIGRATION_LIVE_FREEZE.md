@@ -90,8 +90,8 @@ remain preserved in the earlier migration reports.
 
 **Fable signed this fingerprint before launch.** The review workflow requires an
 actual-scheduler recorded zero-model rehearsal and game-ledger cold restore before
-freezing; those steps above are complete. The [single signed run is now recorded](HAULING_MIGRATION_LIVE.md); the cold read and
-technical verdict remain pending.
+freezing; those steps above are complete. The [single signed run is now recorded](HAULING_MIGRATION_LIVE.md); the cold read and [technical audit](HAULING_MIGRATION_LIVE.md#technical-findings--released-after-the-recording-only-read)
+are complete; Fable’s verdict remains pending. The signed setup and protocol below are unchanged.
 
 Stop and diagnose if unsupported capability or consent can reach execution, an
 invariant fails, or repeated invalid output/non-progress blocks the run. Do not
