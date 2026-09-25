@@ -16,7 +16,7 @@ import { randomUUID } from 'node:crypto';
 import { Decision, Action, type Domain, type GameBridge, type DecisionBackend, type GameState, type Proposal,type AlternativeRequest } from './protocol.js';
 import type { AppraisalView } from './appraisal.js';
 import {rescueQuestionInvalid} from './decision-validity.js';
-import { nativeAttention,attentionInterrupt } from './routing.js';
+import { nativeAttention,attentionInterrupt,isFoodMemory } from './routing.js';
 import { Store } from './store.js';
 import {rescueView,planRescue} from './rescue-planning.js';
 import {groundedPawn} from './grounded-pawn.js';
@@ -132,7 +132,11 @@ export class Coordinator {
       const event={...rawEvent,...(subject?{subjectName:subject.name}:{})};
       const character=this.domain.characters[event.pawn];
       if(!character) continue;
-      const {next,interrupt}=nativeAttention(event);
+      const routed=nativeAttention(event),next=routed.next;
+      // A pawn's own meal memory never cancels its answer to the core (often about that meal):
+      // while an answer is pending it is queued behind it instead of interrupting.
+      const answering=!!this.domain.coreState?.questions.some(q=>q.pawn===event.pawn&&q.status==='running');
+      const foodQueued=routed.interrupt&&answering&&isFoodMemory(event),interrupt=routed.interrupt&&!foodQueued;
       const experiences=character.experiences??=[];
       experiences.push({event,route:next,interrupt});
       if(experiences.length>64) {
@@ -148,7 +152,8 @@ export class Coordinator {
         if(interrupt){
           this.commit('decision-interrupted',event.pawn,{seq:event.seq,kind:event.kind,reason:'New interrupting experience'});
           pending.abort(Error('New interrupting experience'));
-        }else if(event.kind==='memory')this.commit('experience-deferred',event.pawn,{seq:event.seq,kind:event.kind,detail:event.detail,reason:'Conversation queued behind current thought'});
+        }else if(foodQueued)this.commit('experience-deferred',event.pawn,{seq:event.seq,kind:event.kind,detail:event.detail,reason:'Meal memory queued behind the pawn\'s answer'});
+        else if(event.kind==='memory')this.commit('experience-deferred',event.pawn,{seq:event.seq,kind:event.kind,detail:event.detail,reason:'Conversation queued behind current thought'});
       }
       this.domain.eventCursor=event.seq;
       this.commit('native-event',event.pawn,{event,route:next});

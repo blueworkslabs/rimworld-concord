@@ -39,6 +39,9 @@ export function nativeAttention(event:{kind:string;detail:string}):{next:Route;i
    interrupt:significant&&!(event.kind==='memory'&&['Chitchat','DeepTalk'].includes(event.detail))};
 }
 
+/** A memory about eating (RimWorld thought defs Ate…, e.g. AteWithoutTable). */
+export const isFoodMemory=(event:{kind:string;detail:string})=>event.kind==='memory'&&/^Ate[A-Z]/.test(event.detail);
+
 /** Stored event routing is historical evidence; current quiet-memory policy also
  * applies to attention restored from before that policy was introduced. */
 export function attentionInterrupt(e:{event:{kind:string;detail:string};interrupt?:boolean}):boolean {

@@ -162,3 +162,19 @@ test('a consumption report answered with another meal remains claimed but cannot
  assert.throws(()=>validateCoreChoice({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',reportSelfCareId:care.id,text:'Again?',reason:'Again'}},v),/report receipt unavailable/);
  assert.throws(()=>validateCoreChoice(resolve('report-msg'),v),/closure unsupported/);s.close();
 });
+test('a meal memory arriving while the pawn answers is queued behind the answer, never cancelling it',async()=>{
+ for(const [detail,expected] of [['AteWithoutTable','delivered'],['Insulted','interrupted']] as const){
+  const {g,s,c}=await setup(),q=await ask(c);
+  const r=await c.answerCoreQuestion(q,{name:'meal',async answerCore(){
+   g.data.eventSeq=(g.data.eventSeq??0)+1;g.data.events=[{seq:g.data.eventSeq,pawn:'A',tick:g.data.ticks,kind:'memory',detail}];
+   await c.observe();return {choice:'say',text:'Yes, I ate the berries.'};}});
+  assert.equal(r.status,expected,detail);
+  const events=s.events().map(e=>e.event);
+  if(detail==='AteWithoutTable'){
+   assert.ok(events.some(e=>e.kind==='experience-deferred'&&/Meal memory queued/.test((e.data as any).reason)));
+   assert.ok(!events.some(e=>e.kind==='decision-interrupted'));
+   assert.equal(c.inspect().characters.A!.experiences!.at(-1)!.interrupt,false,'queued, not an interruption');
+  }else assert.ok(events.some(e=>e.kind==='decision-interrupted'),'other significant memories still interrupt');
+  s.close();
+ }
+});
