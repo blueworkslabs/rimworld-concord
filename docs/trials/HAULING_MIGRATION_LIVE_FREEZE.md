@@ -1,6 +1,7 @@
-# Hauling migration — ordinary-play live freeze (unsigned)
+# Hauling migration — signed ordinary-play live freeze
 
-2026-09-25 · **Prepared for Fable's signature; no live run started.**
+2026-09-25 · **Fable signed this exact fingerprint at 08:29 UTC.**
+[Signature](https://github.com/blueworkslabs/rimworld-concord/pull/75#issuecomment-5829368842).
 [#73](https://github.com/blueworkslabs/rimworld-concord/pull/73) is merged at
 `ba2ee7a`, strict as the migration configuration. Growing stays parked at B1 **2/2**.
 This is a new ordinary-play setup, not an extension of the signed intent-only spike.
@@ -87,9 +88,10 @@ remain preserved in the earlier migration reports.
 
 ## Launch and verdict gates
 
-**Fable signs this fingerprint before launch.** The review workflow requires an
+**Fable signed this fingerprint before launch.** The review workflow requires an
 actual-scheduler recorded zero-model rehearsal and game-ledger cold restore before
-freezing; those steps above are complete. This document is not a live result.
+freezing; those steps above are complete. The [single signed run is now recorded](HAULING_MIGRATION_LIVE.md); the cold read and
+technical verdict remain pending.
 
 Stop and diagnose if unsupported capability or consent can reach execution, an
 invariant fails, or repeated invalid output/non-progress blocks the run. Do not

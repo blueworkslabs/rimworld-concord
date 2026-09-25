@@ -1,0 +1,47 @@
+{
+  "kind": "uncut live recording and preservation only; findings withheld pending Fable cold read",
+  "runId": "45687b73-2a7c-47d9-a515-b49c2bc62898",
+  "setupSha256": "1f23ad7e7e780ec42f428db456f058f38d8423d2b12279bedf3e77d6b1d82445",
+  "signedAt": "2026-09-25T08:29:35Z",
+  "signedComment": "https://github.com/blueworkslabs/rimworld-concord/pull/75#issuecomment-5829368842",
+  "behaviorHead": "ba2ee7ae3e30f51c46c747ae296c6964ca1e07e5",
+  "policy": "luna-hauling-migration-v1",
+  "recording": {
+    "path": "diary/assets/recordings/hauling-migration-live-2026-09-25.mp4",
+    "sha256": "b2c281ab7ecff69afb98546d341ca42f0daa3eb3cfd54292d060e4c8523b1368",
+    "bytes": 14228095,
+    "durationSeconds": 604.466667,
+    "width": 1280,
+    "height": 800,
+    "frameRate": "15/1",
+    "decodedFrames": 9067,
+    "duplicateFrames": 1,
+    "droppedFrames": 0,
+    "audioStreams": 0,
+    "remoteCopyVerified": true,
+    "uncut": true
+  },
+  "nativeElapsedMs": 601262,
+  "sampleCount": 372,
+  "pausedSamples": 0,
+  "pairedRestore": true,
+  "coldRestore": {
+    "passed": true,
+    "hostProcessIds": [
+      465544,
+      483892
+    ],
+    "coordinatorProcessIds": [
+      174913,
+      175707
+    ],
+    "actualGameLedgerCompared": true,
+    "gameProcessRestarted": false,
+    "additionalInference": false
+  },
+  "originalSavesUnchanged": 407,
+  "stagingStopped": true,
+  "rerolls": 0,
+  "technicalFindings": "retained privately; publish only after Fable recording-only read",
+  "gateC": "pending"
+}
