@@ -151,3 +151,14 @@ test('answer revalidation failures remain visible per lane without leaking answe
  const {crewReport}=await import('../src/crew-log.js');const report=crewReport(c.inspect(),g.data.ticks);
  assert.match(report.observerText!,/core-answer failures: 1 \(eating: option-not-current 1\)/);assert(!JSON.stringify(report).includes('UNPUBLISHED'));s.close();
 });
+
+test('a consumption report answered with another meal remains claimed but cannot close from the older meal',async()=>{
+ const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});
+ const d=c.inspect(),care=Object.values(d.selfCare!)[0]!;
+ d.outcomes[care.id]={...g.data.actions[0]!,status:'completed',delivered:16};
+ d.coreState!.questions.push({id:'report',reportSelfCareId:care.id,pawn:'A',text:'Did you eat?',status:'answered',messages:[{id:'report-msg',exchangeId:'x',tick:150,from:'core',to:'A',fromName:'Core',toName:'Alvin',text:'Did you eat?'} as any]});
+ d.selfCare!['second']={...care,id:'second',questionId:'report'};
+ const v=coreView(d,await g.state());v.questionRecipients=['A'];assert.equal(v.selfCare.find(x=>x.id===care.id)!.reportQuestionId,'report');
+ assert.throws(()=>validateCoreChoice({topics:[],actionTopicId:null,action:{kind:'ask',pawn:'A',reportSelfCareId:care.id,text:'Again?',reason:'Again'}},v),/report receipt unavailable/);
+ assert.throws(()=>validateCoreChoice(resolve('report-msg'),v),/closure unsupported/);s.close();
+});

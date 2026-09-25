@@ -518,8 +518,8 @@ export class Coordinator {
         const cause=coreFailureCause(error,{cancelled:signal.aborted,deadline:timedOut,returned});
         const f=state.failures??={total:0,causes:{}};f.total++;f.causes[cause]=(f.causes[cause]??0)+1;
         const parsed=CoreChoice.safeParse(raw),rejection=CoreRejection.safeParse((error as any)?.coreRejection),a=parsed.success?parsed.data.action:undefined;
-        const pawn=a?.kind==='propose'?prepared.view.opportunities.find(o=>o.id===a.opportunityId)?.pawn:a?.kind==='adopt_counter'?prepared.view.counters.find(p=>p.id===a.proposalId)?.pawn:a?.kind==='ask'?a.pawn:undefined;
-        this.commit('core-failed','core',{id:prepared.id,error:String(error).slice(0,300),cause,...(a?{action:{kind:a.kind,...(pawn?{pawn}:{})}}:rejection.success&&rejection.data.action?{action:rejection.data.action}:{})});}});
+        const pawn=a?.kind==='propose'?prepared.view.opportunities.find(o=>o.id===a.opportunityId)?.pawn:a?.kind==='adopt_counter'?prepared.view.counters.find(p=>p.id===a.proposalId)?.pawn:a?.kind==='ask'&&prepared.view.crew.some(p=>p.id===a.pawn)?a.pawn:undefined;
+        this.commit('core-failed','core',{id:prepared.id,error:String(error).slice(0,300),cause,...(a?{action:{kind:a.kind,...(pawn?{pawn}:{})}}:rejection.success&&rejection.data.action?{action:{kind:rejection.data.action.kind,...(prepared.view.crew.some(p=>p.id===rejection.data.action?.pawn)?{pawn:rejection.data.action.pawn}:{})}}:{})});}});
       return {status:combined.aborted?'interrupted' as const:'failed' as const};
     }finally{clearTimeout(timer);if(this.pending.get('core')===prepared.controller)this.pending.delete('core');await this.serial(async()=>{});}
   }

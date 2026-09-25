@@ -152,7 +152,9 @@ only allowed when the receipts say so (`topicClosures`). **Completion reports:**
 core explicitly selects `reportSelfCareId` on a consumption-report question, or null
 for an unrelated question. Only an unclaimed receipt belonging to that pawn is listed;
 the binding is persisted, and the answering pawn receives the public receipt context.
-Its topics can resolve once that receipt verifies the meal. Mere question order or
+Its topics can resolve once that receipt verifies the meal. If the report answer
+chooses another meal, the report remains claimed but its messages cannot close
+from the older meal; the new eating action requires its own receipt. Mere question order or
 prose never establishes a link, even for the first question after eating. In the live
 run, three receipted follow-ups had no permitted closure and filled the topic slots.
 

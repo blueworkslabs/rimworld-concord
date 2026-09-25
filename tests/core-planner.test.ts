@@ -391,8 +391,18 @@ test('a wait after a pawn spoke to the core is never silent: the status says it 
 
 test('full capacity cannot reopen a retained closed topic through an existing-id loophole',async()=>{
  const {c,s}=await setup();const v=await c.corePerspective();v.ongoing=true;
- v.topics=Array.from({length:8},(_,i)=>({sourceId:'active'+i,text:'Active',status:'open' as const,proposalIds:[],selfCareIds:[],outcomes:[]}));
- v.topics.push({sourceId:'old',text:'Closed',status:'resolved',proposalIds:[],selfCareIds:[],outcomes:[]});
+ v.topics=Array.from({length:8},(_,i)=>({sourceId:'active'+i,text:'Active',status:'open' as const,basedOnTick:null,updatedTick:null,proposalIds:[],selfCareIds:[],outcomes:[]}));
+ v.topics.push({sourceId:'old',text:'Closed',status:'resolved',basedOnTick:null,updatedTick:null,proposalIds:[],selfCareIds:[],outcomes:[]});
  const schema:any=coreChoiceSchema(v);assert(!schema.anyOf[0].properties.topics.items.anyOf.some((b:any)=>b.properties.sourceId.const==='old'));
  assert.throws(()=>validateCoreChoice({topics:[{sourceId:'old',text:'Reopened',status:'open'}],actionTopicId:null,action:{kind:'wait',reason:'Wait'}},v),/capacity full/);s.close();
 });
+
+ test('bounded closed capacity produces a valid empty-update schema',async()=>{
+ const {c,s}=await setup(),v=await c.corePerspective();v.ongoing=false;
+ v.topics=Array.from({length:8},(_,i)=>({sourceId:'closed'+i,text:'Closed',status:'resolved' as const,basedOnTick:null,updatedTick:null,proposalIds:[],selfCareIds:[],outcomes:[]}));
+ const schema:any=coreChoiceSchema(v);assert.equal(schema.anyOf[0].properties.topics.maxItems,0);assert.equal(JSON.stringify(schema).includes('"anyOf":[]'),false);s.close();
+ });
+ test('rejection recipients must be grounded even for direct and metadata backend errors',async()=>{
+ for(const metadata of [false,true]){const {c,s,g}=await setup();const result=await c.planCore({name:'invalid recipient',async plan(){if(metadata)throw Object.assign(Error('Rejected'),{failureCause:'invalid-output',coreRejection:{cause:'unavailable choice',action:{kind:'ask',pawn:'UNPUBLISHED PRIVATE DIAGNOSTIC'}}});return {topics:[],actionTopicId:null,action:{kind:'ask',pawn:'UNPUBLISHED PRIVATE DIAGNOSTIC',text:'Unknown?',reason:'Unknown'}};}});
+ assert.equal(result.status,'failed');const report=crewReport(c.inspect(),g.data.ticks);assert(!JSON.stringify(report).includes('UNPUBLISHED PRIVATE DIAGNOSTIC'));s.close();}
+ });
