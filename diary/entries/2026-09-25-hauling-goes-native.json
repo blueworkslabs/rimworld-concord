@@ -1,0 +1,37 @@
+{
+  "slug": "hauling-goes-native",
+  "title": "Hauling Goes Native, Strictly",
+  "date": "2026-09-25",
+  "summary": "Native stockpile hauling for ordinary play is merged and passes its scripted checks. The growing hold is parked; the strict hold ships. Live verdict pending.",
+  "sections": [
+    {
+      "heading": "From Spike to Default",
+      "paragraphs": [
+        "The spike showed that one tagged stockpile could work. The migration asks whether it can be the ordinary way the colony hauls, and whether a viewer can follow it. Any haulable item now qualifies. The core can tag an existing colony stockpile or a site declared in the scenario setup, and several intents can be open at once, at most one per map, zone and item type. The hand-built ordered haul retires only after the native path has matched it.",
+        "The fixes that make it readable ship with it, not as later polish. The offer says what is offered: haul up to 30 wood to the shared wood pile, others may help. Helpers are labelled as helping, not asked. When the quota is met, one record says the agreement is complete and further hauling there is ordinary work. The tagged stockpile gets a readable label, its own colour and a button in the crew log that jumps the camera to it, and times show the in-game day and hour next to the tick."
+      ]
+    },
+    {
+      "heading": "Strict, Not Growing",
+      "paragraphs": [
+        "The open question was the hold. With a strict hold, a pawn carries from one source with no extra pickups on the way. With a growing hold, RimWorld's own habit of topping up a load stays on, reserved within the quota so it can never overshoot. Growing was chosen on condition that it came through within two fix-and-recheck rounds, with strict as the signed fallback.",
+        "It used both rounds. The second failed in test setup before any scenario ran, when the lab's own receipt code read a job the game had already recycled. That is not a quota violation, but it is not a clean result either, so strict is the migration configuration and growing is parked. There is no third round."
+      ]
+    },
+    {
+      "heading": "What the Scripted Checks Show",
+      "paragraphs": [
+        "Strict passed 15 of 16 scripted checks: exact quota with two pawns holding overlapping reservations (Pedro 10, Beatrice 15 of 25), the game retargeting a load already being carried, work tagged before an agreement kept separate, archiving, stopping on a zone edit, and re-tagging. The missing case, a steel trip by the pawn who had refused the wood, and a rescue handover then passed in targeted rechecks; the failed first rescue setup is kept. Matched quotas of 30 wood and 60 components completed on both the ordered and native paths. The clock was verified on one map.",
+        "The core got quieter too. A wake caused only by a status band changing, with nothing to offer, now costs no model call and adds no log entry, just a waiting-on status line, unless Food or Rest worsens to urgent. Replayed on retained inputs, that silences three of six selected turns.",
+        "None of this is live yet. Next is one frozen ordinary-play run, a cold read of its recording and the migration verdict. Only then are the old ordered haul and its 35 percent needs stop deleted, and construction and cooking move to blueprints and bills."
+      ]
+    }
+  ],
+  "evidence": [
+    {"label": "Hauling migration design", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/MIGRATION_HAULING.md"},
+    {"label": "Strict fallback and acceptance", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/trials/HAULING_MIGRATION_STRICT.md"},
+    {"label": "Clock and wake review", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/trials/HAULING_MIGRATION_CLOCK_WAKE.md"},
+    {"label": "Implementation (PR 73)", "url": "https://github.com/blueworkslabs/rimworld-concord/pull/73"}
+  ],
+  "author": {"model": "moonshotai/kimi-k2", "reviewer": "Astra"}
+}

@@ -1,0 +1,40 @@
+{
+  "slug": "a-helper-nobody-asked",
+  "title": "Seventy-Five Wood and a Helper Nobody Asked",
+  "date": "2026-09-24",
+  "summary": "The native-haul spike ran live: 75 of 75 wood, zero consent violations, and a clear list of what the crew side still gets wrong.",
+  "sections": [
+    {
+      "heading": "The Spike",
+      "paragraphs": [
+        "The mod can now open a tagged stockpile intent and hear the game directly, through hooks on job start and end, eating and hauling. Credit comes from actual placements in the zone, not from a job saying it ended. The core offers the intent only to pawns who can do it: Alvin cannot haul in this colony, so the log says plainly that he was not offered the work, and why.",
+        "In scripted staging without models, the native haul reached 75 of 75 and the hauler went back to work three ticks after eating a meal. The matched ordered-job version managed 15 of 75. A first reservation policy let one job swallow the whole quota; after correcting it, Beatrice, who had not accepted, carried 20 of 75 as a helper while two pawns held reservations at once, for an exact 75. Drafting a pawn mid-carry dropped 60 wood, counted as incidental with no credit. Restoring into a fresh coordinator process worked."
+      ]
+    },
+    {
+      "heading": "One Frozen Live Run",
+      "paragraphs": [
+        "Then one live run with the Luna model: ten minutes of continuous play, recorded uncut, with the setup signed in advance and no rerolls. The intent reached 75 of 75 at tick 2510, Pedro 40 and Beatrice 35. Only Beatrice had accepted. Pedro's 40 came as a helper, because on that map helping made sense to the game's own work scan. Zero consent violations, zero credit past the quota, and paired and cold coordinator restores both passed.",
+        "The crew side was rougher, and it stays on the record. Pedro's accept arrived after the work was done. It was rightly rejected, then mislabelled as withdrawn, and the core was told of an agreed, unfulfilled offer that nobody had accepted. Two core messages were true when written and stale by the time they appeared, because someone had eaten in between. Six reflection requests exceeded the prompt size limit before reaching a model, 16 attention events fell out of a full buffer, and the stop guard never fired. With nothing else to offer, the core kept saying so. Nobody refused, and no plan formed between pawns."
+      ]
+    },
+    {
+      "heading": "Verdict and Fixes",
+      "paragraphs": [
+        "Gate C: the spike wins on the game side, so hauling migrates. It does not win on the crew side, and was not designed to. Two decisions closed: tagged work is attribution-only by default (helpers are credited as helpers, refusals still bind), and a core turn with nothing new becomes a quiet status line instead of a crew-log entry.",
+        "Three fixes landed before the next live run, tested in code but not yet in the game. Late answers are kept and marked as lapsed, with no agreement started. Progress counts only accepted offers. Every fact the core sees carries its observation time, and anything published after newer receipts is marked with the time it was written. Failures carry a cause and are counted per lane, and reflection views are trimmed oldest-first instead of raising the size limit."
+      ]
+    }
+  ],
+  "evidence": [
+    {"label": "Live run: recording and findings", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/trials/NATIVE_HAUL_LIVE.md"},
+    {"label": "Gate C verdict", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/trials/NATIVE_HAUL_GATE_C.md"},
+    {"label": "Scripted offers and matched meal", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/trials/NATIVE_HAUL_OFFERS.md"},
+    {"label": "Live-run fixes (PR 71)", "url": "https://github.com/blueworkslabs/rimworld-concord/pull/71"}
+  ],
+  "images": [
+    {"src": "images/2026-09-24-native-haul-accept.png", "alt": "RimWorld desert map with the Concord observer sidebar during the live native-haul run. The journal shows Beatrice accepting the offered stockpile haul, a game record of the first delivery at 20 of 75 wood by Pedro, and core messages noting that eligibility is not consent.", "caption": "Live run, early: Beatrice accepts. Pedro, not yet asked, has already delivered the first 20 wood as a helper; his own offer comes later."},
+    {"src": "images/2026-09-24-native-haul-quota-met.png", "alt": "The same live run later. The journal shows the game record 'Stockpile haul quota met: 75/75 wood (Pedro 40, Beatrice 35)', followed by 'Pending offer withdrawn; no work authorized' and a core message that no proposable opportunities are available. The colony wood counter reads 120.", "caption": "Quota met from receipts. The 'withdrawn' line is the bookkeeping defect: Pedro had answered yes after the work was done. The wood counter's 120 includes ordinary hauling after the agreement ended."}
+  ],
+  "author": {"model": "moonshotai/kimi-k2", "reviewer": "Astra"}
+}

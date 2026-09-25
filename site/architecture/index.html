@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Architecture · RimWorld Concord</title>
-<meta name="description" content="How RimWorld Concord works: the consent loop, knowledge boundaries, isolated model minds, an event-driven core, timeline safety and what's still missing.">
+<meta name="description" content="How RimWorld Concord works: the consent loop, native intents on RimWorld's own planner, knowledge boundaries, isolated model minds, an event-driven core, timeline safety and what's still missing.">
 <meta name="color-scheme" content="dark">
 <meta property="og:title" content="How RimWorld Concord works">
 <meta property="og:description" content="Consent below the model layer, private minds, an event-driven core and a game that stays the ground truth.">
@@ -38,6 +38,7 @@
     <li><a href="#map">System map</a></li>
     <li><a href="#consent">Consent loop</a></li>
     <li><a href="#knowledge">Who knows what</a></li>
+    <li><a href="#intents">Native intents</a></li>
     <li><a href="#minds">Model minds</a></li>
     <li><a href="#attention">Attention &amp; time</a></li>
     <li><a href="#core">The core</a></li>
@@ -53,7 +54,7 @@
   <figure class="diagram" aria-labelledby="map-cap">
     <svg viewBox="0 0 1000 600" role="img" aria-labelledby="map-title map-desc">
       <title id="map-title">Concord architecture</title>
-      <desc id="map-desc">Model minds at the top receive perspectives and return validated choices. The TypeScript coordinator with SQLite handles perspectives, consent, attention, the core scheduler and checkpoints. A lab bridge connects it to the C# Concord mod inside RimWorld, which executes native jobs and returns receipts.</desc>
+      <desc id="map-desc">Model minds at the top receive perspectives and return validated choices. The TypeScript coordinator with SQLite handles perspectives, consent and agreements, attention, the core scheduler and checkpoints. A lab bridge connects it to the C# Concord mod inside RimWorld, which opens tagged native intents, runs the remaining ordered jobs, hooks game events and returns receipts. RimWorld's own work givers, zones and reservations carry out the intents.</desc>
       <defs>
         <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7C8894"/></marker>
       </defs>
@@ -63,15 +64,15 @@
         <rect x="20" y="40" width="228" height="78" rx="3" fill="#1E252C" stroke="#E3A33A"/>
         <text x="34" y="66" font-weight="700">Colonist minds</text>
         <text x="34" y="87" fill="#B4B0A6" font-size="12.5">one isolated call per decision</text>
-        <text x="34" y="105" fill="#B4B0A6" font-size="12.5">Claude Sonnet 4.6 · Luna offline</text>
+        <text x="34" y="105" fill="#B4B0A6" font-size="12.5">Luna in continuous play · Claude</text>
         <rect x="264" y="40" width="228" height="78" rx="3" fill="#1E252C" stroke="#E3A33A"/>
         <text x="278" y="66" font-weight="700">Core planner</text>
         <text x="278" y="87" fill="#B4B0A6" font-size="12.5">propose · counter · ask · wait</text>
-        <text x="278" y="105" fill="#B4B0A6" font-size="12.5">same isolated route, own budget</text>
+        <text x="278" y="105" fill="#B4B0A6" font-size="12.5">silent when nothing has changed</text>
         <rect x="508" y="40" width="228" height="78" rx="3" fill="#1E252C" stroke="#7C8894"/>
         <text x="522" y="66" font-weight="700">Fast appraisal</text>
         <text x="522" y="87" fill="#B4B0A6" font-size="12.5">Jev: is this worth a thought?</text>
-        <text x="522" y="105" fill="#B4B0A6" font-size="12.5">optional, tested live</text>
+        <text x="522" y="105" fill="#B4B0A6" font-size="12.5">optional; offline replay next</text>
         <rect x="752" y="40" width="228" height="78" rx="3" fill="#1E252C" stroke="#7C8894" stroke-dasharray="5 4"/>
         <text x="766" y="66" font-weight="700">Scripted backends</text>
         <text x="766" y="87" fill="#B4B0A6" font-size="12.5">deterministic regression</text>
@@ -96,14 +97,14 @@
         <text x="284" y="250" font-weight="700">Consent &amp; agreements</text>
         <text x="284" y="272" fill="#B4B0A6" font-size="12.5">identity-bound decisions</text>
         <text x="284" y="291" fill="#B4B0A6" font-size="12.5">counters → fresh offers</text>
-        <text x="284" y="310" fill="#B4B0A6" font-size="12.5">standing agreements</text>
-        <text x="284" y="329" fill="#B4B0A6" font-size="12.5">withdrawal, replacement</text>
+        <text x="284" y="310" fill="#B4B0A6" font-size="12.5">intents: quota, helper credit</text>
+        <text x="284" y="329" fill="#B4B0A6" font-size="12.5">withdrawal, late answers lapse</text>
         <rect x="504" y="224" width="220" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
         <text x="518" y="250" font-weight="700">Attention &amp; scheduling</text>
         <text x="518" y="272" fill="#B4B0A6" font-size="12.5">event routing per pawn</text>
         <text x="518" y="291" fill="#B4B0A6" font-size="12.5">coalescing, pacing</text>
         <text x="518" y="310" fill="#B4B0A6" font-size="12.5">event-driven core wake</text>
-        <text x="518" y="329" fill="#B4B0A6" font-size="12.5">budgets per trial</text>
+        <text x="518" y="329" fill="#B4B0A6" font-size="12.5">failures counted per lane</text>
         <rect x="738" y="224" width="226" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
         <text x="752" y="250" font-weight="700">State &amp; checkpoints</text>
         <text x="752" y="272" fill="#B4B0A6" font-size="12.5">characters, outlooks, audit</text>
@@ -114,8 +115,8 @@
       <!-- bridge -->
       <line x1="300" y1="368" x2="300" y2="418" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
       <line x1="700" y1="418" x2="700" y2="368" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
-      <text x="312" y="398" fill="#B4B0A6" font-size="12.5">actions (with IDs)</text>
-      <text x="486" y="398" fill="#B4B0A6" font-size="12.5">observations, events, receipts</text>
+      <text x="312" y="398" fill="#B4B0A6" font-size="12.5">intents + actions (with IDs)</text>
+      <text x="712" y="398" fill="#B4B0A6" font-size="12.5">hooked events, receipts (with ticks)</text>
       <!-- Mod -->
       <rect x="20" y="426" width="960" height="104" rx="4" fill="#161B20" stroke="#8FBF5A"/>
       <text x="36" y="452" fill="#8FBF5A" font-size="15" font-weight="700" letter-spacing="1">CONCORD MOD · C# inside RimWorld</text>
@@ -123,15 +124,16 @@
         <rect x="36" y="464" width="180" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
         <text x="48" y="494">Action bridge + ledger</text>
         <rect x="226" y="464" width="180" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="238" y="494">Awareness + status</text>
+        <text x="238" y="494">Harmony event hooks</text>
         <rect x="416" y="464" width="180" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="428" y="494">Crew log panel</text>
-        <rect x="606" y="464" width="358" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="618" y="494">Move · Haul · Rescue · Build · Cook · Eat</text>
+        <text x="428" y="494">Observer + crew log</text>
+        <rect x="606" y="464" width="358" height="50" rx="3" fill="#1E252C" stroke="#8FBF5A"/>
+        <text x="618" y="485" font-weight="700">Native intents: tagged stockpiles, quota</text>
+        <text x="618" y="504" fill="#B4B0A6" font-size="12">ordered baseline: move · rescue · build · cook · eat</text>
       </g>
       <!-- RimWorld -->
       <rect x="20" y="546" width="960" height="44" rx="4" fill="#3A3024" stroke="#8A7456"/>
-      <text x="36" y="574" fill="#E7E3D9" font-size="14"><tspan font-weight="700" fill="#E3A33A">RIMWORLD</tspan>  native jobs, needs, pathing, skills, social memories, storyteller</text>
+      <text x="36" y="574" fill="#E7E3D9" font-size="14"><tspan font-weight="700" fill="#E3A33A">RIMWORLD</tspan>  work givers, zones, reservations, native jobs, needs, pathing, storyteller</text>
     </svg>
     <figcaption id="map-cap" class="legend">
       <span><i class="lg-amber"></i>decides or proposes</span><span><i class="lg-blue"></i>enforces and remembers</span><span><i class="lg-green"></i>executes and observes</span><span><i class="lg-sand"></i>the game, unchanged</span>
@@ -146,8 +148,9 @@
     <span class="eyebrow">01 · Consent loop</span>
     <h3>Offers, answers, fresh consent</h3>
     <p>The core never touches a colonist. It creates a <strong>proposal</strong> bound to one pawn, and only that pawn's decision handle can answer it: <strong>accept, refuse, counter</strong> or <strong>not now</strong>. Anything else, like a forged actor or an extra field, is rejected before it reaches the game.</p>
-    <p>A counter executes nothing. If the core adopts it, it comes back as a revised offer that needs a <strong>fresh yes</strong>, with at most two revisions per thread. Hauling agreements can cover up to three trips and stop on low needs, failure, expiry or withdrawal. Replacing running work needs its own consent, and the old job has to be confirmed stopped first.</p>
-    <p class="files">src/coordinator.ts · src/protocol.ts · mod/Hauling.cs · mod/Rescue.cs · mod/Production.cs</p>
+    <p>A counter executes nothing. If the core adopts it, it comes back as a revised offer that needs a <strong>fresh yes</strong>, with at most two revisions per thread. Replacing running work needs its own consent, and the old job has to be confirmed stopped first. An answer that arrives after the work is already done <strong>lapses</strong>: it is kept as given, but starts nothing.</p>
+    <p>What an agreement turns into is changing. The older <em>ordered</em> model issues one hand-built job per trip and stops on low needs; it remains the regression baseline for rescue, building and cooking. Hauling now runs as a <a href="#intents">native intent</a>.</p>
+    <p class="files">src/coordinator.ts · src/protocol.ts · src/native-intents.ts · mod/NativeIntents.cs · mod/Rescue.cs · mod/Production.cs</p>
   </div>
   <figure class="anim window">
     <video data-loop controls loop muted playsinline preload="metadata" poster="../media/consent-loop.jpg" width="1280" height="720" aria-label="Animation of the consent loop: offer, counter, revised offer, acceptance, native job and receipt.">
@@ -162,7 +165,8 @@
     <span class="eyebrow">02 · Knowledge boundaries</span>
     <h3>Who knows what</h3>
     <p>Each mind gets a <strong>scoped perspective</strong>; the core uses an explicit allowlist rather than receiving pawn or character state wholesale. A colonist sees its own traits, skills, exact needs, surviving memories, its own history and a private outlook of up to four revisable notes, each tied to its own experiences.</p>
-    <p>The core receives <strong>explicitly shared information</strong>: addressed messages, agreement receipts, grounded opportunities, attributed local food/campfire sightings, and shared-link Food/Rest telemetry (urgent, low, satisfied, unknown) with a timestamp. Telemetry is not a visual observation. Stale readings become <em>unknown</em>, never zero.</p>
+    <p>The core receives <strong>explicitly shared information</strong>: addressed messages, agreement receipts, grounded opportunities, attributed local food/campfire sightings, and shared-link Food/Rest telemetry (urgent, low, satisfied, unknown) with a timestamp. Telemetry is not a visual observation. Stale readings become <em>unknown</em>, never zero, and every fact carries the tick it was observed.</p>
+    <p>What the colony has <strong>built</strong> (stockpiles, blueprints, bills) is colony-public, because someone placed it on the map. Loose things stay attributed sightings: a native work scan seeing the whole map is not permission to put unobserved resources in a model's menu.</p>
   </div>
   <figure class="anim window">
     <video data-loop controls loop muted playsinline preload="metadata" poster="../media/who-knows-what.jpg" width="1280" height="720" aria-label="Animation: Alvin's exact food level stays private while a coarse band moves to the shared link; his private outlook is locked; messages and records appear in the crew log.">
@@ -185,19 +189,99 @@
       <tr><td>Messages addressed to them</td><td class="y">yes</td><td class="p">participants only</td><td class="p">if addressed</td><td class="y">yes</td></tr>
       <tr><td>Agreement progress (receipts)</td><td class="y">own</td><td class="n">no</td><td class="y">yes</td><td class="y">yes</td></tr>
       <tr><td>Local food/campfire sightings</td><td class="y">own sightings</td><td class="n">not automatically</td><td class="y">attributed shared list</td><td class="y">Supplies tab</td></tr>
+      <tr><td>Tagged stockpiles (native intents)</td><td class="y">named in offers</td><td class="p">on the map</td><td class="y">its own intents</td><td class="y">labelled on the map</td></tr>
       <tr><td>Nearby grounded opportunities</td><td class="y">own shortlist</td><td class="n">no</td><td class="y">bounded list</td><td class="n">no</td></tr>
     </tbody>
   </table></div>
+</section>
+
+<section class="block" aria-label="Native intents">
+
+<article class="dive" id="intents">
+  <div class="dive-text">
+    <span class="eyebrow">03 · Native intents</span>
+    <h3>Steer the planner, don't drive the pawn</h3>
+    <p>RimWorld already has an intent layer: the player's controls. Stockpile zones, blueprints, bills and designations are state on the map, and pawns fulfil them through their own <strong>work givers</strong>, in between eating and sleeping. Concord now uses that layer. An accepted haul becomes a <strong>stockpile tagged with its agreement</strong> and a quota ("up to 30 wood"), not a stream of orders.</p>
+    <p>Harmony hooks report job starts and ends, eating and actual placements. <strong>Credit comes from placements</strong>, per pawn: credited plus reserved never exceeds the quota, and anything else that lands in the zone is counted as incidental, never hidden. The tag sits on the zone, not the wood. A pawn who refused or deferred never does the tagged work; anyone else who pitches in is labelled <em>helping, not asked</em>. When the quota is met, one record retires the agreement and the zone becomes an ordinary stockpile.</p>
+    <p>The core never sets work priorities, and a pawn who can't do a kind of work is visibly not offered it. The loads are <strong>strict</strong>: one source per trip, no extra pickups on the way; a growing hold is parked after it failed to come through two fix rounds cleanly.</p>
+    <p class="files">mod/NativeIntents.cs · mod/IntentPatches.cs · src/native-intents.ts · docs/NATIVE_INTENTS.md · docs/MIGRATION_HAULING.md</p>
+  </div>
+  <figure class="anim window">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/native-intent.jpg" width="1280" height="720" aria-label="Animation: before, the core issued one hand-built job per trip, and a haul that stopped for hunger never resumed. Now the core offers a shared haul of up to 75 wood only to pawns who can haul; Alvin is shown as not offered. Beatrice accepts, and the agreement becomes a tagged stockpile on the map. Beatrice and Pedro, helping before he was asked, fill it through RimWorld's own work givers, around a meal. A quota ledger fills to 75 (Beatrice 35, Pedro 40) and one record retires the agreement.">
+      <source src="../media/native-intent.mp4" type="video/mp4">
+    </video>
+    <figcaption><b>The intent is state on the map. Receipts decide the credit.</b></figcaption>
+  </figure>
+</article>
+
+  <figure class="diagram" aria-labelledby="life-cap">
+    <svg viewBox="0 0 1000 300" role="img" aria-labelledby="life-title life-desc">
+      <title id="life-title">The life of a native haul intent</title>
+      <desc id="life-desc">An offer goes only to pawns who can do the work. A fresh acceptance opens a stockpile tagged with the agreement and a quota. Refusal or not-now means that pawn never does the tagged work; an answer after the work is done lapses and starts nothing. While the stockpile is open, a quota ledger credits placements per pawn, agreed pawns and unasked helpers separately, and never lets credited plus reserved exceed the quota. Meals and sleep interrupt, but the intent stays on the map and work resumes through the game's work givers. Once the quota is met from placement receipts, one record retires the agreement and the zone becomes an ordinary stockpile.</desc>
+      <defs>
+        <marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7C8894"/></marker>
+      </defs>
+      <g font-size="14" fill="#E7E3D9">
+        <rect x="20" y="30" width="160" height="66" rx="3" fill="#1E252C" stroke="#E3A33A"/>
+        <text x="34" y="56" font-weight="700">Offered</text>
+        <text x="34" y="78" fill="#B4B0A6" font-size="12">to pawns who can do it</text>
+        <rect x="220" y="30" width="160" height="66" rx="3" fill="#1E252C" stroke="#E3A33A"/>
+        <text x="234" y="56" font-weight="700">Accepted</text>
+        <text x="234" y="78" fill="#B4B0A6" font-size="12">fresh yes, one pawn</text>
+        <rect x="420" y="30" width="160" height="66" rx="3" fill="#1E252C" stroke="#8FBF5A"/>
+        <text x="434" y="56" font-weight="700">Tagged stockpile</text>
+        <text x="434" y="78" fill="#B4B0A6" font-size="12">open · "up to 75 wood"</text>
+        <rect x="620" y="30" width="160" height="66" rx="3" fill="#1E252C" stroke="#8DB9E8"/>
+        <text x="634" y="56" font-weight="700">Quota met</text>
+        <text x="634" y="78" fill="#B4B0A6" font-size="12">from placements</text>
+        <rect x="820" y="30" width="160" height="66" rx="3" fill="#1E252C" stroke="#46525E"/>
+        <text x="834" y="56" font-weight="700">Retired</text>
+        <text x="834" y="78" fill="#B4B0A6" font-size="12">ordinary stockpile</text>
+      </g>
+      <g stroke="#7C8894" stroke-width="2">
+        <line x1="182" y1="63" x2="216" y2="63" marker-end="url(#ah2)"/>
+        <line x1="382" y1="63" x2="416" y2="63" marker-end="url(#ah2)"/>
+        <line x1="582" y1="63" x2="616" y2="63" marker-end="url(#ah2)"/>
+        <line x1="782" y1="63" x2="816" y2="63" marker-end="url(#ah2)"/>
+        <line x1="100" y1="98" x2="100" y2="130" marker-end="url(#ah2)"/>
+        <line x1="500" y1="98" x2="500" y2="130" marker-end="url(#ah2)"/>
+        <path d="M900,132 V118 H560 V101" fill="none" marker-end="url(#ah2)" stroke-dasharray="4 4"/>
+      </g>
+      <g font-size="12.5">
+        <rect x="20" y="134" width="360" height="40" rx="3" fill="#161B20" stroke="#D8614F"/>
+        <text x="34" y="159" fill="#E7E3D9"><tspan font-weight="700" fill="#D8614F">refuse · not now</tspan>  never does the tagged work</text>
+        <rect x="20" y="186" width="360" height="40" rx="3" fill="#161B20" stroke="#46525E"/>
+        <text x="34" y="211" fill="#E7E3D9"><tspan font-weight="700" fill="#B4B0A6">yes after the work is done</tspan>  lapses, starts nothing</text>
+        <rect x="400" y="134" width="400" height="118" rx="3" fill="#161B20" stroke="#8DB9E8"/>
+        <text x="414" y="157" fill="#8DB9E8" font-weight="700" letter-spacing="1">QUOTA LEDGER</text>
+        <text x="414" y="180" fill="#E7E3D9">credited + reserved ≤ quota, credit per pawn</text>
+        <text x="414" y="201" fill="#E7E3D9">Beatrice 35 <tspan fill="#B4B0A6">· agreed</tspan><tspan x="580">Pedro 40 </tspan><tspan fill="#B4B0A6">· helping, not asked</tspan></text>
+        <text x="414" y="222" fill="#B4B0A6">other placements in the zone: incidental, counted</text>
+        <text x="414" y="241" fill="#B4B0A6">the tag is on the zone, not on the wood</text>
+        <rect x="820" y="134" width="160" height="118" rx="3" fill="#161B20" stroke="#8FBF5A"/>
+        <text x="834" y="157" fill="#8FBF5A" font-weight="700" letter-spacing="1">MEALS, SLEEP</text>
+        <text x="834" y="180" fill="#E7E3D9">the intent stays</text>
+        <text x="834" y="199" fill="#E7E3D9">on the map; work</text>
+        <text x="834" y="218" fill="#E7E3D9">resumes natively</text>
+        <text x="834" y="241" fill="#B4B0A6" font-size="11.5">scripted: 3 ticks after</text>
+      </g>
+      <text x="20" y="286" fill="#B4B0A6" font-size="12.5">Credit split from the first live native haul, 24 Sep 2026. Only Beatrice had agreed; Pedro's offer arrived after he had started helping.</text>
+    </svg>
+    <figcaption id="life-cap" class="legend">
+      <span><i class="lg-amber"></i>decided by a pawn</span><span><i class="lg-blue"></i>enforced from receipts</span><span><i class="lg-green"></i>carried out by the game</span>
+    </figcaption>
+  </figure>
+
 </section>
 
 <section class="block" aria-label="More deep dives">
 
 <article class="dive" id="minds">
   <div class="dive-text">
-    <span class="eyebrow">03 · Model minds</span>
+    <span class="eyebrow">04 · Model minds</span>
     <h3>Small views, real menus, no tools</h3>
     <p>A decision is one bounded call. The model gets its perspective, where every need says what its scale means, plus a <strong>menu of executable choices</strong> with their effects spelled out. Contextual schemas constrain choices and supplied IDs where supported; runtime validation still checks every reply. Counterproposal actions have additional execution-time checks. Shared instructions are supplemented by relevant action and knowledge contracts.</p>
-    <p>The Claude route runs with <strong>no tools, no MCP servers, no plugins</strong>, and checks that at start-up before every call. Every trial has a durable attempt ledger and no rerolls. Failures keep their reserved attempt and a bounded diagnostic stage. Backends are swappable: scripted, Claude, Luna (offline contract checks so far) and Jev for fast appraisal.</p>
+    <p>The Claude route runs with <strong>no tools, no MCP servers, no plugins</strong>, and checks that at start-up before every call. Every trial has a durable attempt ledger and no rerolls. Failures keep their reserved attempt and a bounded diagnostic stage. Backends are swappable: scripted, Claude, Luna (now the core and pawn model in continuous play) and Jev for fast appraisal. A failed request records its cause, including prompts that are too large before any model is called.</p>
     <p class="files">src/model-perspective.ts · src/reflection-choice.ts · src/claude-decision.ts · src/decision-trials.ts</p>
   </div>
   <div class="crewlog">
@@ -209,10 +293,10 @@
 
 <article class="dive" id="attention">
   <div class="dive-text">
-    <span class="eyebrow">04 · Attention and time</span>
+    <span class="eyebrow">05 · Attention and time</span>
     <h3>Three speeds of thought</h3>
     <p>In continuous mode, <strong>native habits</strong> such as eating, sleeping and ordinary jobs can continue while a colonist deliberates, with a thinking badge over their head. Explicit inference pauses stop simulation. <strong>Fast appraisal</strong> decides whether an event deserves a thought. <strong>Deliberation</strong> handles negotiation, reconsideration and planning.</p>
-    <p>Native events are archived and routed only to the pawn who experienced them. Repeated signals coalesce, health events bypass cooldowns, and mundane chatter waits instead of cancelling a thought in progress. Reflection pacing spreads a fixed allowance over the observation window. Play is continuous by default; pausing at decisions is an explicit test mode.</p>
+    <p>Native events are archived and routed only to the pawn who experienced them. Repeated signals coalesce, health events bypass cooldowns, and mundane chatter waits instead of cancelling a thought in progress. Reflection pacing spreads thinking over the observation window. Failures are counted <strong>per lane</strong> (core, decisions, answers, reflections), so a success in one lane can't hide repeated failures in another, and oversized reflection views are trimmed oldest-first rather than raising the limit. Play is continuous by default; pausing at decisions is an explicit test mode.</p>
     <p class="files">src/routing.ts · src/attention.ts · src/reflection-pacing.ts · mod/Awareness.cs · mod/DecisionPause.cs</p>
   </div>
   <figure class="window">
@@ -223,23 +307,23 @@
 
 <article class="dive" id="core">
   <div class="dive-text">
-    <span class="eyebrow">05 · The core</span>
+    <span class="eyebrow">06 · The core</span>
     <h3>A planner that waits to be needed</h3>
     <p>Each core turn picks one of four moves: <strong>propose</strong> a listed opportunity, <strong>adopt</strong> a counter for fresh consent, <strong>ask</strong> one pawn one question, or <strong>wait</strong>. It keeps up to eight sourced topics marked open, blocked, deferred, resolved or declined. "Resolved" requires completed linked work, so its prose can't close a topic that the receipts don't close.</p>
-    <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, band changes. Idle time and private needs don't wake it. Every turn spends from a fixed budget with a cooldown. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
+    <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, something new to offer. A shared status band changing on its own is handled <strong>silently</strong>, with no model call and no crew-log entry, just a "waiting on…" status line, unless Food or Rest worsens to urgent. Idle time and private needs never wake it, and a wait never writes to the log. Messages published after newer receipts carry an "as of" mark. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
     <p class="files">src/core-planner.ts · src/core-scheduler.ts · mod/SharedStatus.cs</p>
   </div>
   <figure class="anim window">
-    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of events. Completed work, a not-now reply and a received answer wake the core and spend its turn budget; passing time and private need changes do not.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of game events. A finished haul, a not-now answer, a Rest band turning urgent and a request for work each wake the core. A Food band changing on its own is consumed silently and only updates a 'waiting on' status line; idle time and private needs never call the core, and a wait never adds a crew-log entry.">
       <source src="../media/core-wakes.mp4" type="video/mp4">
     </video>
-    <figcaption><b>Public changes wake it; everything else is quiet.</b></figcaption>
+    <figcaption><b>Public changes wake it. Status-only changes wait quietly, unless someone turns urgent.</b></figcaption>
   </figure>
 </article>
 
 <article class="dive" id="timeline">
   <div class="dive-text">
-    <span class="eyebrow">06 · Timeline safety</span>
+    <span class="eyebrow">07 · Timeline safety</span>
     <h3>Saves, reloads and slow thoughts</h3>
     <p>Model calls take seconds; players save, load and rewind. Every loaded game gets a fresh <strong>epoch</strong>, so an answer from before a reload can't act in the new timeline. Each accepted action gets an ID <strong>before</strong> dispatch, and the game's saved ledger makes a duplicate a no-op.</p>
     <p><strong>Paired checkpoints</strong> save the paused game, hash it and store the matching character state together. Restoring checks the hash and forks the timeline. Gameplay reports distinguish paired restore from a <strong>cold restore</strong>: a full process restart, with retained results and no extra model calls. Some experiments left restore gaps; offline checks do not demonstrate native persistence.</p>
@@ -255,11 +339,12 @@
 
 <article class="dive" id="evidence">
   <div class="dive-text">
-    <span class="eyebrow">07 · Evidence culture</span>
+    <span class="eyebrow">08 · Evidence culture</span>
     <h3>Every claim has a receipt</h3>
     <ul>
       <li><strong>Scripted game tests</strong> for every mechanic, including refusal, withdrawal and restore.</li>
-      <li><strong>Frozen live trials</strong> with a fixed call budget decided up front, no rerolls, failures kept.</li>
+      <li><strong>Frozen live trials</strong>, setup signed up front, no rerolls, failures kept, recorded uncut and read cold before any technical findings are released.</li>
+      <li><strong>Three gates per migration</strong>: an internals note from the game's own assemblies, a signed design before code, and a verdict after runs.</li>
       <li><strong>Offline snapshot banks</strong>: the same situation, varied one thing at a time, across models.</li>
       <li><strong>Offline typed-claims prototype</strong> that distinguishes submitted facts, forecasts and preferences; it is not a production truth checker.</li>
       <li><strong>Independent code review</strong> on every nontrivial PR and fact-checked diary entries for selected milestones.</li>
@@ -268,9 +353,9 @@
     <p class="files">docs/EVALUATION.md · docs/trials/ · docs/evidence/</p>
   </div>
   <figure class="window">
-    <div class="window-bar"><b>Concord · crew log</b><span>first live core</span></div>
-    <img src="../images/2026-09-23-core-question.png" alt="The Concord crew log showing receipt-based progress for three hauling agreements and the core asking Alvin why his second haul stopped." width="1280" height="800" loading="lazy">
-    <figcaption>Receipt-based progress on top, addressed messages below: the core asks why a haul stopped before deciding anything.</figcaption>
+    <div class="window-bar"><b>Concord · observer</b><span>live native haul · 24 Sep 2026</span></div>
+    <img src="../images/2026-09-24-native-haul-quota-met.png" alt="The Concord observer during the live native-haul run. The journal shows the game record 'Stockpile haul quota met: 75/75 wood (Pedro 40, Beatrice 35)', then 'Pending offer withdrawn; no work authorized', then a core message that nothing can be proposed. The colony wood counter reads 120." width="1280" height="800" loading="lazy">
+    <figcaption>The quota closes from placement receipts. The "withdrawn" line below it is a real defect, kept on the record: Pedro had said yes after the work was done. The 120 wood includes ordinary hauling after the agreement retired.</figcaption>
   </figure>
 </article>
 
@@ -279,41 +364,41 @@
 <section class="block" id="status" aria-labelledby="status-h">
   <span class="eyebrow">Research tree</span>
   <h2 id="status-h">What's built, what's next</h2>
-  <p class="sub">Status as of 23 September 2026. "Verified slice" means bounded evidence for the named capability, not proven long-run reliability. Labels are qualitative, not completion percentages.</p>
+  <p class="sub">Status as of 25 September 2026. "Verified slice" means bounded evidence for the named capability, not proven long-run reliability. Labels are qualitative, not completion percentages.</p>
   <p class="research-key"><span><span class="node done"></span>verified slice</span><span><span class="node part"></span>partly there</span><span><span class="node next"></span>not started</span></p>
   <div class="research">
     <div class="tier">
       <h3>Foundation</h3>
-      <div class="node done"><b>Consent protocol</b><span>identity-bound proposals, accept / refuse / counter / not now</span></div>
+      <div class="node done"><b>Consent protocol</b><span>identity-bound proposals, accept / refuse / counter / not now; late answers lapse</span></div>
       <div class="node done"><b>State &amp; audit</b><span>SQLite characters, commitments, ordered audit trail</span></div>
-      <div class="node done"><b>Timeline safety</b><span>epochs, action ledger, paired and cold restore</span></div>
-      <div class="node done"><b>Isolated model route</b><span>tool-free calls, budgets, no rerolls</span></div>
-      <div class="node done"><b>Crew log panel</b><span>messages, records and observations, never thoughts</span></div>
+      <div class="node done"><b>Timeline safety</b><span>epochs, action ledger, paired and new-process cold restore</span></div>
+      <div class="node done"><b>Isolated model route</b><span>tool-free calls, no rerolls, failures counted per lane</span></div>
+      <div class="node done"><b>Observer &amp; recordings</b><span>compact public sidebar, uncut ten-minute recordings</span></div>
     </div>
     <div class="tier">
-      <h3>Colonist minds</h3>
+      <h3>Minds &amp; core</h3>
       <div class="node done"><b>Self-perspectives</b><span>traits, skills, needs, memories, relations</span></div>
-      <div class="node done"><b>Event awareness</b><span>per-pawn routing, coalescing, interruptions</span></div>
-      <div class="node done"><b>Reflection pacing</b><span>thinking spread across the window</span></div>
       <div class="node done"><b>Private outlook</b><span>up to four revisable, sourced notes</span></div>
+      <div class="node done"><b>Live core</b><span>event-driven; asks, follows up, waits silently</span></div>
+      <div class="node done"><b>Luna in continuous play</b><span>core, answers and reflections without a turn cap; grounding mixed</span></div>
       <div class="node part"><b>Social exchange</b><span>messages work and persist; pawn-to-pawn proposals don't exist yet</span></div>
+      <div class="node part"><b>Grounded narration</b><span>observation ages and "as of" marks built; stale prose still seen live</span></div>
     </div>
     <div class="tier">
-      <h3>Colony work</h3>
-      <div class="node done"><b>Movement</b><span>nearby grounded destinations</span></div>
-      <div class="node done"><b>Hauling</b><span>exact stacks, up to three trips</span></div>
-      <div class="node done"><b>Rescue</b><span>one casualty to one medical bed</span></div>
+      <h3>Game side</h3>
+      <div class="node done"><b>Harmony event hooks</b><span>job start/end, eating, placements</span></div>
+      <div class="node done"><b>Native haul spike</b><span>live: 75/75, zero consent violations, unasked helper credited</span></div>
+      <div class="node part"><b>Hauling migration</b><span>merged, strict hold, scripted checks pass; live verdict pending</span></div>
       <div class="node done"><b>Pawn-owned eating</b><span>chosen by the pawn, never ordered; live-verified</span></div>
-      <div class="node part"><b>Campfire &amp; cooking</b><span>works in scripted tests; not yet reached in a live run</span></div>
-      <div class="node next"><b>Wider actions</b><span>building, treatment, defence, work priorities</span></div>
+      <div class="node part"><b>Ordered baseline</b><span>move, rescue, build, cook: working, to be replaced one at a time</span></div>
+      <div class="node next"><b>Build &amp; cook natively</b><span>blueprints and bills, then rescue through the native job</span></div>
     </div>
     <div class="tier">
-      <h3>Core &amp; beyond</h3>
-      <div class="node done"><b>Live core v1</b><span>event-driven, budgeted, asks and follows up</span></div>
-      <div class="node done"><b>Shared status bands</b><span>coarse Food/Rest for core, peers and board</span></div>
+      <h3>Beyond</h3>
       <div class="node part"><b>Multi-step plans</b><span>need → build → cook, live, with refusals possible</span></div>
-      <div class="node part"><b>Cheaper models</b><span>Luna passes offline contract checks; not a game backend yet</span></div>
-      <div class="node part"><b>Real-time play</b><span>continuous trials exist; sustained useful live-core planning remains unproven</span></div>
+      <div class="node part"><b>A scene worth watching</b><span>continuous ten-minute runs; no plan between colonists yet</span></div>
+      <div class="node next"><b>Standing commitments</b><span>a think-tree node that prefers agreed work, no model call per tick</span></div>
+      <div class="node next"><b>More work from the game</b><span>mining, growing, treatment, defence via work givers</span></div>
       <div class="node next"><b>Human contact</b><span>core suggestions, letters, comms console</span></div>
       <div class="node next"><b>Gravship campaign</b><span>mechanoid pursuit, quests, installer</span></div>
     </div>
@@ -323,8 +408,9 @@
 <section class="block" aria-labelledby="missing-h">
   <h2 id="missing-h">Known gaps, stated plainly</h2>
   <div class="caveat">
-    <p><strong>The live build-and-cook chain remains unproved.</strong> In the first campfire runs, 23 of 24 core outputs were rejected by an interface mismatch. After that was fixed, and provider formatting failures were diagnosed and bounded, bounded live trials show the core asking, waiting for receipts and closing follow-ups: colonists chose to eat and the core closed those topics. But no live run has yet produced a build or cooking offer.</p>
-    <p><strong>Most live trials pause the game during model calls</strong> to keep them measurable. Continuous pawn trials have succeeded, and the third campfire trial ran the live core unpaused. Its eight core outputs were rejected, so it proves continued simulation during inference—not useful live planning.</p>
+    <p><strong>The live build-and-cook chain remains unproved.</strong> Live runs show the core asking, waiting for receipts and closing follow-ups, colonists choosing to eat, and one native haul carried to its quota. No live run has yet produced a build or cooking offer; those move to blueprints and bills next.</p>
+    <p><strong>The native side won on the game, not yet on the crew.</strong> In the live native haul nobody refused, no plan formed between colonists, the three voices sounded alike, and a late yes was mislabelled as a withdrawal. The fixes (lapsed answers, observation ages, per-lane failure counts) are merged and scripted-tested, not yet exercised live.</p>
+    <p><strong>Hauling runs strict.</strong> The growing hold, which would keep RimWorld's extra pickups within the quota, is parked after its two fix rounds; the in-game clock is verified on one map only.</p>
     <p><strong>Character continuity is early.</strong> Outlooks form, persist and show up in later reasoning. Whether they add up to stable personalities over a long game is an open question.</p>
     <p><strong>It's a lab harness, not a player download.</strong> The mod only activates in a configured lab environment.</p>
   </div>
