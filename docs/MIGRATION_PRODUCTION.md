@@ -1,11 +1,11 @@
 # Construction and cooking migration: native blueprints and bills (Gate A)
 
-**Status: Gate A signed by Fable on 2026-09-25, with the eleven decisions recorded
-under "Direction"; the five Gate B entry items are checked (below).** A Gate B freeze
-draft follows for Fable; Gate B and Gate C (staging verdict) are not signed. This authorizes the
-design work for the freeze, not implementation of runtime behaviour, a live run or
-deletion of the ordered path. The pinned build is RimWorld 1.6.4871
-(`Assembly-CSharp` prefix `082db1dd4f7f`), the same as the hauling migration.
+**Status: Gate B signed by Fable on 2026-09-25 at `e6ae274`, with the five answers and
+six conditions recorded under "Gate B signature".** Gate A was signed the same day (the
+eleven decisions under "Direction"; the five entry items are checked below). This
+authorizes implementation and the scripted trials after the documentation merge, not a
+live run, a scene freeze or deletion of the ordered path. Gate C (staging verdict) is not
+signed.
 
 ## Goal
 
@@ -479,6 +479,67 @@ into a plan; mechanism evidence is the scripted cases above.
 4. If the leavings of a failed or cancelled frame cannot be observed reliably:
    "not recorded" (decision 10), or a narrow hook on the leavings spawn.
 5. Construction deadline: one deadline for the whole build, or per stage.
+
+## Gate B signature (Fable, 2026-09-25, at `e6ae274`)
+
+The freeze above is signed as written, with the five answers and the conditions below.
+Conditions are part of the freeze; the implementation and the scripted cases must meet
+them before Gate C is entered.
+
+### The five answers
+
+1. **Refusal binds the pawn's own work scan, not the player's orders.** The three filter
+   points act when the work giver scans (`forced == false`). A player's forced order on a
+   tagged site or bill goes through, because the player's authority is native and the
+   agreement is between the core and the pawn. What that pawn then does is recorded as
+   **"ordered by the player (had refused)"**: no agreement credit, no helper label, and
+   **not a violation**. The violation measure counts only work the pawn's own scan let
+   through. Two scripted cases are added for it (construction 13, cooking 10).
+2. **A suspended tagged bill stays `open` with the note**, deadline running, the same
+   way a forbidden blueprint or frame does. Only deletion stops it.
+3. **Core-added bills get their repeat count set to the quota.** The bench then stops
+   at the agreed number on its own, and our counter still decides `met`. A tagged
+   existing bill is never modified.
+4. **"Not recorded" first; no leavings hook for Gate C.** Case 6 shows whether the
+   before/after reading in P2 sees the refund. If it does not, the record says "returned:
+   not recorded". A narrow hook on the leavings spawn is added only if a reader of the
+   scene asks for the number.
+5. **One deadline for the whole build.** Stages are ours, not the game's, and the player
+   cannot see them; at expiry the record names the stage reached, as P1 already says.
+
+### Conditions
+
+- **C1. Work shares are measured per job, not per tick.** The `Frame.workDone` delta is
+  read when a finish-frame job on a tagged frame starts, ends or is interrupted, and
+  credited to that job's pawn. No per-tick patch. Patch cost is measured as it was for
+  hauling and reported with the scripted evidence.
+- **C2. Withdrawal after work began does not stop the intent.** "All accepted pawns
+  withdrew" stops the intent only before any delivery or iteration. After that the intent
+  stays open to the deadline, helpers may finish, the withdrawal is recorded with its
+  reason, and credited work stands, as in hauling.
+- **C3. Cold restores run in a new coordinator process**, paired with a same-process
+  restore, for construction case 9 and cooking case 8, as the hauling retirement did.
+  Stage, IDs, counters and receipts must match exactly with no double counting.
+- **C4. The readiness debt is paid in the implementation PR**, not after: the borrowed
+  Hauling work-tag gate and the 35 % stop leave with the ordered build and cook, and
+  capability comes from the Construction and Cooking work types' own disabled state.
+  The retirement follows the hauling sequence: test-port PR, then deletion PR, only
+  after Gate C.
+- **C5. Every legibility text in the "Legibility" section ships with the migration**,
+  including the forced-order and suspended/forbidden notes above, and the failure record
+  with its refund line. Cells and IDs stay in the record, never in speech.
+- **C6. The scene freeze is a separate document** (as `HAULING_MIGRATION_LIVE_FREEZE`
+  was): frozen save and setup with SHA-256, the operator-declared candidate site, the
+  materials on the map, the runtime commit, and the annotate-only grounding flag on. I
+  sign that before the live run; nothing here authorizes one.
+
+### Added scripted cases
+
+- **Construction 13.** A refusing pawn is force-ordered by the player to deliver to, then
+  to build, the tagged site: the work happens, the record reads "ordered by the player
+  (had refused)", no credit, no helper label, no violation counted.
+- **Cooking 10.** A refusing cook is force-ordered onto the tagged bill: one iteration
+  happens, recorded the same way, not counted toward the quota.
 
 ## Gate A open decisions (as posed; decided under "Direction")
 
