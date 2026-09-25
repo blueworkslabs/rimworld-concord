@@ -77,4 +77,6 @@ Every trial so far, oldest first. **Kind**: L = live model in the real game, S =
 | 09-25 | [#73](https://github.com/blueworkslabs/rimworld-concord/pull/73) | S | Strict mixed-item/refuser and rescue acceptance | Both targeted cases pass; first rescue setup failure retained; 395 saves unchanged | [acceptance evidence](../evidence/hauling-migration-strict-acceptance.json) | [follow-up](HAULING_MIGRATION_STRICT.md#strict-acceptance-follow-up) |
 | 09-25 | [#73](https://github.com/blueworkslabs/rimworld-concord/pull/73) | S/D | One-map clock and telemetry-only wake rule | Clock/strict legibility passed; wake mock/offline verified, recipient policy pending; 403 saves unchanged | [clock/wake evidence](../evidence/hauling-migration-clock-wake.json) | [review](HAULING_MIGRATION_CLOCK_WAKE.md) |
 
+| 09-25 | [#73](https://github.com/blueworkslabs/rimworld-concord/pull/73) | S/D | Ordinary-play strict live freeze and final urgent wake rule | Exact E2 silent3/6/13; actual runner75/75, both authored offers, construction available, paired/new-process cold pass;405 saves unchanged; unsigned/no model calls | [rehearsal](../evidence/hauling-migration-live-rehearsal.json), [setup](../evidence/hauling-migration-live-setup.json) | [freeze](HAULING_MIGRATION_LIVE_FREEZE.md) |
+
 New trials: add a row here in the same PR, with sanitized evidence in `docs/evidence/`.

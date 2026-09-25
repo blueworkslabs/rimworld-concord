@@ -25,7 +25,7 @@ remain unchanged.
 | Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
 | Eat, chosen by the pawn itself | yes | yes |
 | Native tagged-zone haul spike | [partial scripted checks and live rehearsal](docs/trials/NATIVE_HAUL_FREEZE.md): native meal resumption, helper/overlap, scoped timing and coordinator-process cold restore | [single frozen recording complete](docs/trials/NATIVE_HAUL_LIVE.md); [receipt findings](docs/trials/NATIVE_HAUL_LIVE.md#technical-findings--released-after-the-recording-only-read) available; [game-side migration approved](docs/trials/NATIVE_HAUL_GATE_C.md); three fixes block the next live run |
-| Hauling migration | [Strict fallback](docs/trials/HAULING_MIGRATION_STRICT.md): Prior strict suite 15/16; mixed-item gap and rescue now pass targeted rechecks; both matched quotas complete | Growing parked, B1 2/2; one-map clock verified; wake-recipient policy and live/UI gates remain |
+| Hauling migration | [Strict fallback](docs/trials/HAULING_MIGRATION_STRICT.md): Prior strict suite 15/16; mixed-item gap and rescue now pass targeted rechecks; both matched quotas complete | Merged strict; growing parked, B1 2/2; urgent-exempt wake rule verified; [ordinary-play rehearsal/freeze](docs/trials/HAULING_MIGRATION_LIVE_FREEZE.md) ready for signature; no live migration verdict |
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not
 now" replies, pawn-originated requests, addressed pawn-to-pawn speech, private
