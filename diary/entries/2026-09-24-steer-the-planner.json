@@ -1,0 +1,35 @@
+{
+  "slug": "steer-the-planner",
+  "title": "Steer the Planner, Don't Drive the Pawn",
+  "date": "2026-09-24",
+  "summary": "A change of direction: agreed work becomes a tagged stockpile, blueprint or bill that pawns fulfil through RimWorld's own work givers.",
+  "sections": [
+    {
+      "heading": "Two Planners, One Pawn",
+      "paragraphs": [
+        "After the ten-minute scene, a review of the mod came to an uncomfortable conclusion: Concord was driving its pawns. Every capability was a hand-built scanner, validator and custom job, issued the way a player's right-click order is, with a 30-tick diff standing in for perception and no hooks into the game's own events.",
+        "That left two planners in charge of one pawn, and the runs showed the seams. Eating choices went stale before they could run (the exact causes are still unknown). A haul stopped when Food dropped below 35 percent, and after the meal the agreement was simply over. Contracts named an exact stack, cell and count, valid at one tick of a game running 60 ticks a second, while a decision takes seconds to a minute. And every new kind of work meant new C#, new TypeScript, new receipts and new docs, in a game that already has on the order of a hundred work givers."
+      ]
+    },
+    {
+      "heading": "Native Intents",
+      "paragraphs": [
+        "The new direction: stop driving pawns and steer RimWorld's own planner. An accepted proposal becomes a native intent, such as a stockpile zone, a blueprint, a bill or a designation, tagged with its agreement. Pawns carry it out through their normal work givers, in between eating and sleeping, and the intent survives interruptions because it is state on the map.",
+        "Consent does not loosen. A pawn that refused or deferred is excluded from new work under that agreement. A trip already under way before the tag stays ordinary work, not consent or agreement credit. Pawns who were never asked may pitch in, and they are credited as helpers, not as having agreed. Work priorities belong to each pawn and the core never sets them. What the colony has built, like stockpiles, blueprints and bills, counts as colony-public knowledge; loose items stay sightings. Consent, receipts as truth, privacy, the core, attention and checkpoints all stay where they were."
+      ]
+    },
+    {
+      "heading": "Three Gates for Each Migration",
+      "paragraphs": [
+        "Each step passes three gates: an internals note, a signed one-page design, then a verdict after runs. For Gate A, the team studied the owned RimWorld 1.6 assemblies privately (decompiled code is never committed) and wrote down where hunger can and cannot interrupt a haul, where haul destinations are chosen, how to keep a refusing pawn off tagged work, what can take a pawn over mid-agreement, and how new event kinds are routed so the first live run is not a storm of wake-ups. Harmony, the patching library, was not yet installed in the lab and became a declared dependency.",
+        "Gate B signed the spike: one agreement to haul wood into a new tagged stockpile. The tag sits on the zone, not the wood. The quota is per intent and credit is per pawn; counted deliveries must never exceed the quota, and any escape is reported, never quietly clamped. Consent violations must be zero. At this point it was a plan, approved but not yet run."
+      ]
+    }
+  ],
+  "evidence": [
+    {"label": "Native intents direction", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/NATIVE_INTENTS.md"},
+    {"label": "Gate A: RimWorld internals note (PR 66)", "url": "https://github.com/blueworkslabs/rimworld-concord/pull/66"},
+    {"label": "Gate B: spike design", "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/SPIKE_NATIVE_HAUL.md"}
+  ],
+  "author": {"model": "moonshotai/kimi-k2", "reviewer": "Astra"}
+}
