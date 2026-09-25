@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { Coordinator } from '../src/coordinator.js';
 import { Store } from '../src/store.js';
 import { scripted } from '../src/backends.js';
-import {coreAdmission,NATIVE_INTENT_STALL_TICKS} from '../src/core-scheduler.js';
+import {coreAdmission,coreSchedulerDue,telemetryOnlyIdle,NATIVE_INTENT_STALL_TICKS,type CoreWake} from '../src/core-scheduler.js';
 import {corePrompt} from '../src/core-planner.js';
 import { coreView } from '../src/core-planner.js';
 import {stopTrialWork,retireUndecided} from '../src/work-trial.js';
@@ -90,7 +90,7 @@ test('withdrawal excludes in the game; quota met completes the standing and the 
   const text=crewReport(d,900).entries.map(e=>e.text);
   assert.ok(text.includes('Stockpile haul: first delivery, 10/30 wood (Beatrice 10).'));
   assert.ok(text.includes('Finished a trip started before withdrawing; credited to the carrier, not a new agreement.'));
-  assert.ok(text.includes('Stockpile haul quota met: 30/30 wood (Beatrice 10, Pedro 20).'));
+  assert.ok(text.includes('Agreement complete: 30 of 30 wood (Beatrice 10, Pedro 20). Further hauling here is ordinary work.'));
 });
 
 test('partial expiry stops the standing and keeps the topic open; no needs stop for native intents',async()=>{
@@ -174,7 +174,8 @@ test('native mode never exposes or directly admits legacy ordered hauling',async
   await assert.rejects(c.core().propose('P',{kind:'move',x:4,z:4},'Walk over'),/the stockpile haul is the only proposable work/);
   const perspective=await c.corePerspective();
   assert.ok(perspective.opportunities.every(o=>o.action.kind==='haul-zone'));
-  assert.match(perspective.limits,/Only the listed shared stockpile haul may be proposed/);
+  assert.match(perspective.limits,/Only the listed shared stockpile hauls may be proposed/);
+  assert.match(perspective.limits,/never an eligibility or consent disclaimer/);
   assert.ok(!perspective.limits.includes('Only listed campfire'));
   for(const action of [{kind:'rescue',target:'X',bed:'Y',x:4,z:4,maxTicks:900},{kind:'build',thing:'X',x:4,z:4,maxTicks:900},{kind:'cook',thing:'X',target:'Y',x:4,z:4,count:1,meals:1,maxTicks:900}] as Action[])
     await assert.rejects(c.core().propose('P',action,'Unlisted work'),/the stockpile haul is the only proposable work/);
@@ -286,4 +287,80 @@ test('terminal offer survives active inference, then lapses after failure withou
  const again=new Coordinator(store,game);await again.open();await again.reconcile();
  assert.equal(again.inspect().proposals[p.id]!.status,'lapsed');
  assert.ok(!crewReport(c.inspect(),100).entries.some(e=>e.text.includes('Pending offer withdrawn')));
+});
+
+
+test('telemetry-only wakes spend no core turn unless something is offerable or a band worsens to urgent (E2 replay)',()=>{
+ // The E2 native-haul run's 14 core inputs, as exported (#74): offerable counts, non-telemetry
+ // causes, and each crew member's shared Food/Rest bands. Replayed in order through the real
+ // admission, carrying the consumed snapshot forward (silent wakes consume too).
+ const e2:[number,number,boolean,string][]=[[90,2,true,'low satisfied|satisfied satisfied|satisfied satisfied'],[1577,1,true,'low satisfied|satisfied satisfied|satisfied satisfied'],
+  [2759,0,true,'low satisfied|satisfied satisfied|low satisfied'],[5680,0,false,'low satisfied|low satisfied|low satisfied'],[8986,0,false,'urgent satisfied|low satisfied|low satisfied'],
+  [14496,0,false,'urgent satisfied|low satisfied|urgent satisfied'],[16355,0,false,'satisfied satisfied|low satisfied|urgent satisfied'],[18211,0,false,'satisfied satisfied|urgent satisfied|urgent satisfied'],
+  [20100,0,true,'satisfied satisfied|urgent satisfied|urgent satisfied'],[21242,0,true,'satisfied satisfied|satisfied satisfied|urgent satisfied'],[22740,0,true,'satisfied satisfied|satisfied satisfied|satisfied satisfied'],
+  [24247,0,true,'satisfied satisfied|satisfied satisfied|satisfied satisfied'],[25943,0,true,'satisfied low|satisfied low|satisfied low'],[34935,0,false,'low low|satisfied low|satisfied low']];
+ const schedule:any={config:{maxAttempts:null,cooldownTicks:60,windowTicks:null},startTick:0,endTick:null,attempts:0,consumed:{}};
+ const silent:number[]=[];
+ e2.forEach(([tick,offers,other,bands],i)=>{
+  const sharedStatus=bands.split('|').map((b,k)=>{const [food,rest]=b.split(' ');return {pawn:'p'+k,food,rest};});
+  const v:any={tick,brief:{id:'brief'},sharedStatus,selfCare:[],agreements:[],nativeIntents:[],requests:[],reoffers:[],questions:[],counters:[],
+   opportunities:Array.from({length:offers},(_,k)=>({id:'o'+k})),messages:other?[{id:'m'+i,to:'core',from:'p0',text:'news'}]:[]};
+  const a=coreAdmission(schedule,v);
+  if(a.ready){schedule.attempts++;schedule.lastAttemptTick=tick;schedule.consumed=a.snapshot;}
+  else if(a.silent){schedule.consumed=a.silent.snapshot;silent.push(i);}
+  else assert.fail(`turn ${i} did not wake at all: ${a.reason}`);
+ });
+ assert.deepEqual(silent,[3,6,13],'turns 4, 5 and 7 (a band worsening to urgent) stay awake');
+ const t=(value:string):CoreWake[]=>[{sourceId:'p0',kind:'telemetry',value}];
+ const none={opportunities:[],counters:[]} as any;
+ const band=(food:string,rest='satisfied')=>JSON.stringify({food,rest});
+ assert.equal(telemetryOnlyIdle(t(band('urgent')),none,{'telemetry:p0':band('low')}),false,'low -> urgent wakes');
+ assert.equal(telemetryOnlyIdle(t(band('satisfied','urgent')),none,{'telemetry:p0':band('satisfied','low')}),false,'rest reaching urgent wakes');
+ assert.equal(telemetryOnlyIdle(t(band('urgent')),none,{}),false,'a first reading that is urgent wakes');
+ assert.equal(telemetryOnlyIdle(t(band('urgent','low')),none,{'telemetry:p0':band('urgent')}),true,'still urgent, other band worsening short of urgent: silent');
+ assert.equal(telemetryOnlyIdle(t(band('low')),none,{'telemetry:p0':band('urgent')}),true,'improving never wakes on its own');
+ assert.equal(telemetryOnlyIdle(t(band('low')),none,{'telemetry:p0':band('satisfied')}),true,'worsening short of urgent stays silent');
+ assert.equal(telemetryOnlyIdle(t(band('low')),{opportunities:[{id:'o'}],counters:[]} as any,{}),false,'an offer to make is a reason to think');
+ assert.equal(telemetryOnlyIdle(t(band('low')),{opportunities:[],counters:[{id:'c'}]} as any,{}),false,'a counter to adopt is a reason to think');
+ assert.equal(telemetryOnlyIdle([],none),false);
+});
+
+test('a silent telemetry wake consumes its bands without a turn, attempt or cooldown and shows the waiting status',async()=>{
+ const {c,game,store}=await setup(false);await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:300,windowTicks:null});
+ let calls=0;const choose={name:'scripted',async plan(){calls++;return {topics:[],actionTopicId:null,action:calls===1?{kind:'ask' as const,pawn:'A',text:'What would help?',reason:'Ask'}:{kind:'wait' as const,reason:'Observe'}};}};
+ const initial=await c.planCoreWhenDue(choose);assert.equal(initial.status,'applied');assert.equal(calls,1);
+ if(initial.status!=='applied'||!initial.questionId)throw Error('missing initial question');
+ const entriesBefore=crewReport(c.inspect(),0).entries;
+ assert.doesNotMatch(crewReport(c.inspect(),0).observerText??'',/Core: waiting on/);
+ const attempts=c.inspect().coreState!.schedule!.attempts;
+ game.data.ticks=1000;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1000,food:'low',rest:'satisfied'};
+ const due=coreSchedulerDue(c.inspect().coreState!.schedule!,await c.corePerspective());
+ assert.equal(due,true,'ongoing driver must run silent bookkeeping, not just ready inference');
+ const r=due?await c.planCoreWhenDue(choose):undefined;
+ assert.deepEqual(r,{status:'idle',reason:'telemetry-only'});assert.equal(calls,1,'no backend call');
+ const d=c.inspect();assert.equal(d.coreState!.schedule!.attempts,attempts,'no attempt spent');assert.equal(d.coreState!.schedule!.lastAttemptTick,0,'no cooldown started');
+ assert.equal(d.coreState!.silentWake?.tick,1000);assert.ok(store.events().some(e=>e.event.kind==='core-wake-silent'));
+ assert.match(crewReport(d,1000).observerText??'',/Core: waiting on/);
+ assert.deepEqual(crewReport(d,1000).entries,entriesBefore,'nothing written to the crew log');
+ const reopened=new Coordinator(store,game);await reopened.open();
+ assert.deepEqual(reopened.inspect().coreState!.schedule,d.coreState!.schedule,'consumption and allowance persist');
+ assert.deepEqual(reopened.inspect().coreState!.silentWake,d.coreState!.silentWake);
+ assert.equal(coreSchedulerDue(reopened.inspect().coreState!.schedule!,await reopened.corePerspective()),false,'driver does not reschedule consumed silence');
+ // The same bands do not wake it again; a message still does.
+ game.data.ticks=1010;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1010,food:'low',rest:'satisfied'};
+ assert.deepEqual(await reopened.planCoreWhenDue(choose),{status:'idle',reason:'no-new-event'});
+ let answers=0;assert.equal((await reopened.answerCoreQuestion(initial.questionId,{name:'scripted',async answerCore(){answers++;return {choice:'say',text:'I am fine.'};}})).status,'delivered');assert.equal(answers,1);
+ assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,2,'message/answer wakes without a new offer');
+ assert.equal(reopened.inspect().coreState!.silentWake,undefined);
+ // With nothing offerable, a band worsening to urgent is the one telemetry change that wakes it alone.
+ assert.equal((await reopened.corePerspective()).opportunities.length,0);
+ game.data.ticks=1400;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1400,food:'urgent',rest:'satisfied'};
+ assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,3,'urgent wakes the core');
+ game.data.ticks=1800;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1800,food:'low',rest:'satisfied'};
+ assert.deepEqual(await reopened.planCoreWhenDue(choose),{status:'idle',reason:'telemetry-only'},'recovery does not wake it');
+ game.data.ticks=1810;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1810,food:'low',rest:'low'};
+ assert.deepEqual(await reopened.planCoreWhenDue(choose),{status:'idle',reason:'telemetry-only'},'worsening short of urgent stays silent');
+ // A band change while something is offerable still wakes the core, and the turn clears the silent status.
+ await reopened.configureNativeHaul(cfg);game.data.ticks=2200;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:2200,food:'satisfied',rest:'low'};
+ assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,4);assert.equal(reopened.inspect().coreState!.silentWake,undefined);
 });

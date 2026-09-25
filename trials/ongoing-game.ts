@@ -16,17 +16,18 @@ import {DecisionChannel} from '../src/decision-channel.js';
 import {stopTrialWork,retireUndecided,workSummary} from '../src/work-trial.js';
 import {NeedsRunGuard,needsOutput} from './needs-policy.js';
 import {socialCleanup} from './social-cleanup.js';
-import {coreAdmission} from '../src/core-scheduler.js';
+import {coreSchedulerDue} from '../src/core-scheduler.js';
 
 
 import {retainedDomain} from './retention-policy.js';
 import {randomUUID} from 'node:crypto';
 import {nativeSceneCrew,nativeOfferCoverage,assertNativeLedger,assertNativeRestore} from './native-haul-live.js';
+import {MigrationLiveSetup,migrationBrief,migrationCoverage,assertMigrationMenu} from './ongoing-migration.js';
 import {IntentView,invariantFindings,progress as intentProgress,NativeHaulConfig} from '../src/native-intents.js';
 if(process.env.CONCORD_ONGOING_LOCKED!=='1')throw Error('Use scripts/run-ongoing-lab.sh game|cold');
 const root=new URL('../..',import.meta.url).pathname,cold=process.argv.includes('--cold');
-const scripted=process.argv.includes('--scripted'),recorded=process.argv.includes('--recorded'),nativeHaul=process.argv.includes('--native-haul');
-const P=ongoingProtocol(recorded,scripted,nativeHaul),policy=P.policy;
+const scripted=process.argv.includes('--scripted'),recorded=process.argv.includes('--recorded'),nativeHaul=process.argv.includes('--native-haul'),migration=process.argv.includes('--hauling-migration');
+const P=ongoingProtocol(recorded,scripted,nativeHaul,migration),policy=P.policy;
 if(process.env.CONCORD_TRIAL_POLICY!==policy)throw Error('Protocol mismatch');
 const pausedInference=false;let operationDeadline=Date.now()+P.wallMs;const b=new LabBridge(undefined,()=>operationDeadline);
 const runId=process.env.CONCORD_TRIAL_ID;
@@ -35,7 +36,7 @@ const run=runId;
 const receiptPath=root+'/.runtime/ongoing-'+run+'-'+(cold?'cold':'game')+'.json';
 await writeFile(receiptPath,JSON.stringify({runId,policy,scripted,recorded,status:'started'}),{flag:'wx'});
 let recorder:Awaited<ReturnType<typeof startSceneRecording>>|undefined;
-const receipt:any={passed:false,processId:process.pid,runId,policy,mode:(nativeHaul?'native-haul-':'')+(scripted?'scripted-continuous':'live-continuous'),run,recorded,nativeHaul,protocol:P,views:[],rounds:[],samples:[]};
+const receipt:any={passed:false,processId:process.pid,runId,policy,mode:(migration?'hauling-migration-':nativeHaul?'native-haul-':'')+(scripted?'scripted-continuous':'live-continuous'),run,recorded,nativeHaul,migration,protocol:P,views:[],rounds:[],samples:[]};
 let active:Promise<void>|undefined;
 let checkpointRecorded=false;
 const guard=new NeedsRunGuard(),controller=new AbortController(),end=operationDeadline;
@@ -65,14 +66,15 @@ try{
   const saved=JSON.parse(await readFile(root+'/.runtime/ongoing-'+run+'-latest.json','utf8'));assert.equal(saved.runId,runId);assert.equal(saved.mode,receipt.mode);assert.equal(saved.policy??'luna-ongoing-v1',policy);receipt.verifiesFailedRun=saved.failed;
   s=new Store(saved.db);c=new Coordinator(s,b);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);receipt.coldRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
   // Native-haul cold restore is a new coordinator process: the frozen intent and its ledger view survive.
-  if(nativeHaul){assert(saved.coordinatorProcessId&&saved.coordinatorProcessId!==process.pid,'Cold restore requires a different coordinator process');receipt.savedCoordinatorProcessId=saved.coordinatorProcessId;assert.deepEqual(c.inspect().nativeHaul,saved.domain.nativeHaul);assert.deepEqual(c.inspect().intentViews,saved.domain.intentViews);receipt.nativeHaul={coldIntents:assertNativeRestore(await b.state(),saved.domain)};}
+  if(nativeHaul||migration){assert(saved.coordinatorProcessId&&saved.coordinatorProcessId!==process.pid,'Cold restore requires a different coordinator process');receipt.savedCoordinatorProcessId=saved.coordinatorProcessId;assert.deepEqual(c.inspect().nativeHaul,saved.domain.nativeHaul);assert.deepEqual(c.inspect().nativeHauls,saved.domain.nativeHauls);assert.equal(c.inspect().nativeIntentOnly,saved.domain.nativeIntentOnly);assert.deepEqual(c.inspect().intentViews,saved.domain.intentViews);receipt[migration?'migration':'nativeHaul']={coldIntents:assertNativeRestore(await b.state(),saved.domain)};}
  }else{
   // Native haul: the frozen live entry (save, candidate area, quota, expiry) is part of the hashed setup.
+  const migrationSetup=migration?MigrationLiveSetup.parse(JSON.parse(await readFile(root+'/.runtime/hauling-migration-live.json','utf8'))):undefined;
   const live=nativeHaul?JSON.parse(await readFile(root+'/.runtime/native-haul-fixture.json','utf8')).live:undefined;
   if(nativeHaul&&(!live||typeof live.save!=='string'||live.variant!=='attribution'))throw Error('Frozen attribution-only native-haul live entry required');
-  const f=nativeHaul?{name:live.save}:JSON.parse(await readFile(root+'/.runtime/campfire-fixture.json','utf8'));await b.load(f.name);guard.check();await b.admin('pause');guard.check();
+  const f=migration?{name:migrationSetup!.save}:nativeHaul?{name:live.save}:JSON.parse(await readFile(root+'/.runtime/campfire-fixture.json','utf8'));await b.load(f.name);guard.check();await b.admin('pause');guard.check();
   db=root+'/.runtime/ongoing-'+runId+'.db';s=new Store(db);c=new Coordinator(s,b);await c.open();
-  await c.initializeCore(nativeHaul?'Loose wood lies around the colony and there is room for a stockpile. You can offer the shared stockpile haul to crew members who can haul, ask, or wait. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan.':
+  await c.initializeCore(migration?migrationBrief:nativeHaul?'Loose wood lies around the colony and there is room for a stockpile. You can offer the shared stockpile haul to crew members who can haul, ask, or wait. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan.':
    'Consider the crew’s shared bodily needs and local supplies. You can ask, propose useful work or wait. Campfire construction and cooking are separate optional capabilities; eating raw food is a legitimate alternative. Alvin, Beatrice and Pedro have equal standing, with no assigned roles or required responses. Respect refusal and deferral. Follow up on actual outcomes; no requirement to keep people busy or finish a particular plan.');
   if(nativeHaul){
    // Intent-only: once configured, the core can list and propose nothing but this intent.
@@ -81,6 +83,13 @@ try{
    assert(v.opportunities.every(o=>o.action.kind==='haul-zone'),'Native live run must list only the stockpile haul');
    assert.deepEqual(v.opportunities.map(o=>o.pawn).sort(),[...receipt.nativeHaul.crew.eligible].sort(),'Both capable pawns must initially be offerable');
    assert(receipt.nativeHaul.notOffered.some((a:any)=>a.pawn===receipt.nativeHaul.crew.ineligible),'Alvin incapability must be visible');
+  }
+  if(migration){
+   const entries=await c.configureNativeHauls(migrationSetup!.entries,{intentOnly:false});
+   const crew=nativeSceneCrew(await b.state()),v=await c.corePerspective();
+   assertMigrationMenu(v,entries,crew.eligible);
+   assert(v.availability.some(a=>a.pawn===crew.ineligible&&/cannot do hauling/.test(a.status)),'Alvin incapability must remain visible');
+   receipt.migration={setup:migrationSetup,entries,crew,initialOpportunities:v.opportunities};
   }
   receipt.initial=await b.state();assert(receipt.initial.pawns.every((p:any)=>!p.downed));receipt.initialPerspective=await c.corePerspective();
   if(recorded){const exec=promisify(execFile);await exec('xdotool',['mousemove','700','460','click','--repeat','2','--delay','100','4'],{env:{...process.env,DISPLAY:':91',XAUTHORITY:'/run/rimworld-lab-display/Xauthority'},timeout:5000});}
@@ -100,7 +109,7 @@ try{
    if(taskError)throw taskError;
    recorder?.check();guard.check();await c.reconcile();guard.check();
    await c.advanceIntentions(()=>!guard.stopped&&nativeRemaining()>0);guard.check();
-   const state=await b.state();if(nativeHaul)assertNativeLedger(state,receipt.nativeHaul.config.intentId);guard.sample(state.paused,state.ticks,startTick);
+   const state=await b.state();if(nativeHaul)assertNativeLedger(state,receipt.nativeHaul.config.intentId);if(migration)for(const e of receipt.migration.entries)assertNativeLedger(state,e.intentId);guard.sample(state.paused,state.ticks,startTick);
    receipt.samples.push({unixMs:Date.now(),tick:state.ticks,paused:state.paused,pawns:state.pawns.map(p=>({id:p.id,job:p.job,food:p.facts?.find(f=>f.key==='need'&&f.value==='Food')?.level}))});
    if(!midpointCaptured&&nativeRemaining()<=nativeLimit/2){midpointCaptured=true;await capture('midpoint');}
    const view=await c.corePerspective();guard.check();
@@ -108,10 +117,10 @@ try{
    const schedule=c.inspect().coreState!.schedule!;
    if(schedule.blocked)throw Error(schedule.blocked);
    const candidates=scripted?[]:c.attentionCandidates({cooldownTicks:300,timeoutMs:110000},false);
-   if(!active&&(candidates.length&&lastRole==='core'||candidates.length&&!coreAdmission(schedule,view).ready)){
+   if(!active&&(candidates.length&&lastRole==='core'||candidates.length&&!coreSchedulerDue(schedule,view))){
     lastRole='pawn';inferenceDeadline=Math.min(end,Date.now()+Math.min(110000,nativeRemaining()));
     launch(async()=>{const result=await c!.attend(candidates[0]!,channel,undefined,{cooldownTicks:300,timeoutMs:Math.max(1,Math.min(110000,Math.floor(nativeRemaining())))},controller.signal);receipt.attention.push(result);note(result.status,'reflection');});
-   }else if(!active&&coreAdmission(schedule,view).ready){
+   }else if(!active&&coreSchedulerDue(schedule,view)){
     lastRole='core';inferenceDeadline=Math.min(end,Date.now()+Math.min(110000,nativeRemaining()));
     launch(async()=>{
      const decisionMs=()=>Math.max(1,Math.min(110000,Math.floor(nativeRemaining())));
@@ -135,9 +144,9 @@ try{
   // Harness pass is not clean cognition: lost experiences and per-lane failures are reported.
   receipt.attentionGaps=c.inspect().diagnostics??{attentionGaps:0,attentionGapKinds:{}};
   receipt.failures=receipt.rounds.filter((r:any)=>!['applied','idle'].includes(r.result.status)||r.pawnError||r.answer&&!['delivered','silent'].includes(r.answer.status));
-  if(scripted&&!nativeHaul){assert.equal(receipt.rounds[0]?.answer?.status,'delivered');assert.equal(receipt.rounds[1]?.result?.status,'applied');assert.equal(c.inspect().coreState?.turns[1]?.choice?.action.kind,'wait');assert.equal(Object.keys(c.inspect().proposals).length,0);}
-  if(scripted&&!nativeHaul){const care=Object.values(c.inspect().selfCare??{});assert.equal(care.length,1);const result=c.inspect().outcomes[care[0]!.id];assert.equal(result?.status,'completed');assert((result?.delivered??0)>0,'scripted choice must consume food before cleanup');assert.equal(receipt.beforeCleanup.outcomes[care[0]!.id]?.status,'completed');}
-  if(scripted&&!nativeHaul){const care=Object.values(c.inspect().selfCare!)[0]!;assert.equal(c.inspect().coreState!.topics.find(t=>t.sourceId===care.id)?.status,'resolved');assert.equal(c.inspect().coreState!.topics.find(t=>t.sourceId==='brief')?.status,'open');}
+  if(scripted&&!nativeHaul&&!migration){assert.equal(receipt.rounds[0]?.answer?.status,'delivered');assert.equal(receipt.rounds[1]?.result?.status,'applied');assert.equal(c.inspect().coreState?.turns[1]?.choice?.action.kind,'wait');assert.equal(Object.keys(c.inspect().proposals).length,0);}
+  if(scripted&&!nativeHaul&&!migration){const care=Object.values(c.inspect().selfCare??{});assert.equal(care.length,1);const result=c.inspect().outcomes[care[0]!.id];assert.equal(result?.status,'completed');assert((result?.delivered??0)>0,'scripted choice must consume food before cleanup');assert.equal(receipt.beforeCleanup.outcomes[care[0]!.id]?.status,'completed');}
+  if(scripted&&!nativeHaul&&!migration){const care=Object.values(c.inspect().selfCare!)[0]!;assert.equal(c.inspect().coreState!.topics.find(t=>t.sourceId===care.id)?.status,'resolved');assert.equal(c.inspect().coreState!.topics.find(t=>t.sourceId==='brief')?.status,'open');}
   if(nativeHaul){
    // Ledger evidence before cleanup: the operator stop comes after this snapshot.
    const intents=(receipt.final.intents??[]).map((i:unknown)=>IntentView.parse(i)),mine=intents.find((i:IntentView)=>i.intentId===receipt.nativeHaul.config.intentId);
@@ -148,7 +157,18 @@ try{
    if(scripted)assert.deepEqual([...(mine?.accepted??[])].sort(),[...receipt.nativeHaul.crew.eligible].sort(),'Scripted rehearsal must accept both authored offers');
    if(mine)assert.deepEqual(receipt.nativeHaul.findings,[],'Consent violations or quota escapes: stop and diagnose');
   }
-  const saved=await save(!receipt.inferencePassed);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);if(nativeHaul)receipt.nativeHaul.pairedIntents=assertNativeRestore(await b.state(),saved.domain);receipt.pairedRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
+  if(migration){
+   const d=receipt.beforeCleanup;
+   receipt.migration.coverage=migrationCoverage(d,receipt.migration.entries,receipt.migration.crew.eligible);
+   receipt.migration.final=receipt.final.intents;
+   receipt.migration.wakes=receipt.views.filter((v:any)=>v.mode==='core').map((v:any)=>({tick:v.view.tick,causes:v.view.wakeReasons}));
+   if(scripted){
+    assert.deepEqual(receipt.migration.coverage.missing,[],'Rehearsal must offer both capable pawns; preserve a failed setup');
+    for(const e of receipt.migration.entries){const live=receipt.final.intents?.find((i:any)=>i.intentId===e.intentId);assert.deepEqual([...(live?.accepted??[])].sort(),[...receipt.migration.crew.eligible].sort(),'Both authored acceptances must reach the game');}
+   }
+   for(const e of receipt.migration.entries)assertNativeLedger(receipt.final,e.intentId);
+  }
+  const saved=await save(!receipt.inferencePassed);await c.restore(saved.checkpoint);guard.check();retainedDomain(c.inspect(),saved.domain);assert.deepEqual(c.inspect().coreState,saved.domain.coreState);if(nativeHaul||migration){const actual=assertNativeRestore(await b.state(),saved.domain);if(nativeHaul)receipt.nativeHaul.pairedIntents=actual;else receipt.migration.pairedIntents=actual;}receipt.pairedRestore=true;receipt.coreState=c.inspect().coreState;receipt.report=(await b.state()).crewLog;
  }
  guard.check();receipt.passed=cold||receipt.inferencePassed===true;if(!receipt.passed)process.exitCode=1;
 }catch(e){receipt.error=String(e);process.exitCode=1;}

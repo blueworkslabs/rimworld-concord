@@ -13,3 +13,11 @@ test('native-haul live run keeps the recorded scene timing under its own policy'
  assert.deepEqual({...live,policy:scene.policy},scene);assert.equal(dry.nativeMs,45000);
  assert.throws(()=>ongoingProtocol(false,false,true),/recorded/);
 });
+
+test('ordinary migration is recorded and isolated from the frozen intent-only spike',()=>{
+ const live=ongoingProtocol(true,false,false,true);
+ assert.equal(live.policy,'luna-hauling-migration-v1');assert.equal(live.nativeMs,600000);
+ assert.equal(ongoingProtocol(true,true,false,true).nativeMs,45000);
+ assert.throws(()=>ongoingProtocol(false,false,false,true),/recorded/);
+ assert.throws(()=>ongoingProtocol(true,false,true,true),/one hauling protocol/);
+});

@@ -1,0 +1,930 @@
+{
+  "kind": "hauling-migration-final-round-and-strict-fallback",
+  "date": "2026-09-25",
+  "reviewedRound2": "b98d060",
+  "reviewedStrict": "7dec73a",
+  "b1FixRoundsUsed": 2,
+  "b1FixRoundsMaximum": 2,
+  "growingDisposition": "parked; no third growing round",
+  "migrationMode": "strict",
+  "round2": {
+    "setupFailures": [
+      {
+        "receipt": "hauling-migration-growing-3f1726c5-dd7b-41f0-b559-d7bee00d304d.json",
+        "sha256": "70039484a0ffaba3abdb02e63eb6eb62347cdd73e773a79b6092a12bd7bb651c",
+        "at": "2026-09-25T06:18:32.765Z",
+        "casesReached": 0,
+        "error": "Error: Object reference not set to an instance of an object"
+      },
+      {
+        "receipt": "hauling-migration-growing-7c863186-912d-424b-ae19-a31a2b6c2262.json",
+        "sha256": "33907c42ab5e95deccbef1fde3f2c0a57640be727d05fafc4ca5155a128e291c",
+        "at": "2026-09-25T06:19:10.585Z",
+        "casesReached": 0,
+        "error": "Error: Object reference not set to an instance of an object"
+      },
+      {
+        "receipt": "hauling-migration-growing-ef5bb31e-1e12-4735-b8a6-2661a5867022.json",
+        "sha256": "5cd687d42f0c1f256f2f3e97ab5acc5387ba7feeb870d05a6e3fa3d401d05502",
+        "at": "2026-09-25T06:18:56.385Z",
+        "casesReached": 0,
+        "error": "Error: Object reference not set to an instance of an object"
+      },
+      {
+        "receipt": "hauling-migration-growing-8e1585f0-621f-45b0-b180-8fd718f52021.json",
+        "sha256": "4b967badec8515330551fbcf9b6386a066a1cdc8b8657772736ca091958468fe",
+        "at": "2026-09-25T06:18:49.258Z",
+        "casesReached": 0,
+        "error": "Error: Object reference not set to an instance of an object"
+      },
+      {
+        "receipt": "hauling-migration-growing-9e7203ea-7f2c-4a21-bb5f-fcacc0bf6ee9.json",
+        "sha256": "3783f1f9332d8df2e7caf68a9729178105b6c1f3cd910bffb3d1d4ce48ab1e2c",
+        "at": "2026-09-25T06:18:42.126Z",
+        "casesReached": 0,
+        "error": "Error: Object reference not set to an instance of an object"
+      },
+      {
+        "receipt": "hauling-migration-growing-98b369b4-2eec-4190-a395-1b9bea6b5790.json",
+        "sha256": "d2c24d49d8e9e4137992e53c439255dc7d56aa0389dbd93ca10f5ebb1427d051",
+        "at": "2026-09-25T06:19:03.375Z",
+        "casesReached": 0,
+        "error": "Error: Object reference not set to an instance of an object"
+      }
+    ],
+    "scenarioAssertionsReached": 0
+  },
+  "strict": {
+    "passed": 15,
+    "total": 16,
+    "cases": [
+      {
+        "name": "archive-after-retirement",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-06499a81-eae0-4070-af1b-18cc5e295194.json",
+        "receiptSha256": "fa8142aeb5e0c51ab927bb32af4ca0afaa07d0c7d44f9b54c97c0d4e030a0938",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "intents": []
+      },
+      {
+        "name": "carried-cargo-plus-source",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-3ff7bdb7-820d-43ea-8d1b-e0b7f30f62c5.json",
+        "receiptSha256": "ee7f0dcf27afe7337ffff1d538a33d3f8235096044a251fee10c504e97da377d",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "deliveredByJob": 10,
+        "extraPicked": 5,
+        "intents": [
+          {
+            "intentId": "42738e1f-f95a-49c5-a2a6-d0b37790fb11",
+            "thingDef": "WoodLog",
+            "status": "met",
+            "quota": 30,
+            "delivered": 30,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human408",
+                "count": 20
+              },
+              {
+                "pawn": "Thing_Human411",
+                "count": 10
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "duplicate-within-budget",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-03f73cce-6cb0-47fe-a9d0-ce1c7d853bc9.json",
+        "receiptSha256": "5e3e8657a16ab9abf49aab2df2fa94dbdcfbde6bfd32b37b2efceee204a47b68",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "intents": [
+          {
+            "intentId": "14b571e7-3038-408c-a32c-038680fbc667",
+            "thingDef": "WoodLog",
+            "status": "met",
+            "quota": 30,
+            "delivered": 30,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human408",
+                "count": 20
+              },
+              {
+                "pawn": "Thing_Human411",
+                "count": 10
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "legibility",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-9330dee2-2f8f-48f0-8dc4-0f351e8713c7.json",
+        "receiptSha256": "4275ec4a872c63587530ee4b7b2c690675d2cb3e066a6a5d1abc15dafe3feb0b",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "intents": [
+          {
+            "intentId": "35905cd1-0274-42b6-b41c-1193a96e8975",
+            "thingDef": "WoodLog",
+            "status": "met",
+            "quota": 20,
+            "delivered": 20,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human408",
+                "count": 10
+              },
+              {
+                "pawn": "Thing_Human411",
+                "count": 10
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "matched-native-ComponentIndustrial",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-05ba2def-e81f-41a8-90a0-5ac71c85653a.json",
+        "receiptSha256": "96d30f8404c7128c63fab26ed273eac3c9db17d78a3ea15796d6084a5f6226bf",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "matched": {
+          "model": "native",
+          "hold": "strict",
+          "def": "ComponentIndustrial",
+          "quota": 60,
+          "delivered": 60,
+          "trips": 3,
+          "unitsPerTrip": [
+            20,
+            20,
+            20
+          ],
+          "ticks": 959,
+          "ticksPerUnit": 15.983333333333333
+        },
+        "patchCost": {
+          "timing": true,
+          "patches": [
+            {
+              "patch": "1 StoreSearch",
+              "calls": 44,
+              "micros": 193.5
+            },
+            {
+              "patch": "2 Job.SetTarget",
+              "calls": 11,
+              "micros": 2.5
+            },
+            {
+              "patch": "3 HaulToCellStorageJob",
+              "calls": 22,
+              "micros": 139
+            },
+            {
+              "patch": "3b TryMakePreToilReservations",
+              "calls": 14,
+              "micros": 241.2
+            },
+            {
+              "patch": "4 TryDropCarriedThing",
+              "calls": 10,
+              "micros": 76.1
+            },
+            {
+              "patch": "4 TryDropCarriedThing(count)",
+              "calls": 0,
+              "micros": 0
+            },
+            {
+              "patch": "5 Notify_ReceivedThing",
+              "calls": 4,
+              "micros": 1.3
+            },
+            {
+              "patch": "6 StartJob",
+              "calls": 59,
+              "micros": 1682.5
+            },
+            {
+              "patch": "6 CleanupCurrentJob",
+              "calls": 102,
+              "micros": 1953.6
+            },
+            {
+              "patch": "7 Ingested",
+              "calls": 0,
+              "micros": 0
+            },
+            {
+              "patch": "8 TryInteractWith",
+              "calls": 0,
+              "micros": 0
+            },
+            {
+              "patch": "4 placement accounting callback",
+              "calls": 5,
+              "micros": 232.4
+            },
+            {
+              "patch": "4b TryStartCarry",
+              "calls": 8,
+              "micros": 108.3
+            },
+            {
+              "patch": "9 pickup guard",
+              "calls": 8,
+              "micros": 145.6
+            },
+            {
+              "patch": "10 duplicate guard",
+              "calls": 8,
+              "micros": 59.2
+            }
+          ]
+        },
+        "intents": [
+          {
+            "intentId": "3ec29f1f-304e-46a8-b9e3-b88758d2da3b",
+            "thingDef": "ComponentIndustrial",
+            "status": "met",
+            "quota": 60,
+            "delivered": 60,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 40
+              },
+              {
+                "pawn": "Thing_Human408",
+                "count": 20
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "matched-native-WoodLog",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-05e66c61-9800-4613-8102-447694adea78.json",
+        "receiptSha256": "76168c575936dbbeed10293c555c3de67eaf1647184e73ce0fb4ca32ffad8bf5",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "matched": {
+          "model": "native",
+          "hold": "strict",
+          "def": "WoodLog",
+          "quota": 30,
+          "delivered": 30,
+          "trips": 2,
+          "unitsPerTrip": [
+            20,
+            10
+          ],
+          "ticks": 252,
+          "ticksPerUnit": 8.4
+        },
+        "patchCost": {
+          "timing": true,
+          "patches": [
+            {
+              "patch": "1 StoreSearch",
+              "calls": 29,
+              "micros": 100.9
+            },
+            {
+              "patch": "2 Job.SetTarget",
+              "calls": 2,
+              "micros": 0.5
+            },
+            {
+              "patch": "3 HaulToCellStorageJob",
+              "calls": 12,
+              "micros": 55.7
+            },
+            {
+              "patch": "3b TryMakePreToilReservations",
+              "calls": 8,
+              "micros": 91.2
+            },
+            {
+              "patch": "4 TryDropCarriedThing",
+              "calls": 4,
+              "micros": 39.1
+            },
+            {
+              "patch": "4 TryDropCarriedThing(count)",
+              "calls": 0,
+              "micros": 0
+            },
+            {
+              "patch": "5 Notify_ReceivedThing",
+              "calls": 2,
+              "micros": 1.4
+            },
+            {
+              "patch": "6 StartJob",
+              "calls": 18,
+              "micros": 357.7
+            },
+            {
+              "patch": "6 CleanupCurrentJob",
+              "calls": 20,
+              "micros": 2465.2
+            },
+            {
+              "patch": "7 Ingested",
+              "calls": 0,
+              "micros": 0
+            },
+            {
+              "patch": "8 TryInteractWith",
+              "calls": 0,
+              "micros": 0
+            },
+            {
+              "patch": "4 placement accounting callback",
+              "calls": 2,
+              "micros": 135.4
+            },
+            {
+              "patch": "4b TryStartCarry",
+              "calls": 2,
+              "micros": 33.6
+            },
+            {
+              "patch": "9 pickup guard",
+              "calls": 2,
+              "micros": 37.7
+            },
+            {
+              "patch": "10 duplicate guard",
+              "calls": 2,
+              "micros": 17.5
+            }
+          ]
+        },
+        "intents": [
+          {
+            "intentId": "e2535376-c05f-4fb4-9ea7-f2b6658e62f0",
+            "thingDef": "WoodLog",
+            "status": "met",
+            "quota": 30,
+            "delivered": 30,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human408",
+                "count": 20
+              },
+              {
+                "pawn": "Thing_Human411",
+                "count": 10
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "matched-ordered-ComponentIndustrial",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-6cc69744-8422-40bb-8edf-8fe0a44f609d.json",
+        "receiptSha256": "436783f4bf48fa7687b381ce9a2e3167a89614f82999397c51d780be1a1b0396",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "matched": {
+          "model": "ordered",
+          "def": "ComponentIndustrial",
+          "quota": 60,
+          "delivered": 60,
+          "trips": 6,
+          "offers": 3,
+          "moves": 2,
+          "stop": null,
+          "ticks": 1942,
+          "ticksPerUnit": 32.36666666666667,
+          "estimatedCoreTurnsIfLive": 5,
+          "nativeUnitsDuringOrdered": 0,
+          "outOfReachUnits": 0
+        },
+        "intents": []
+      },
+      {
+        "name": "matched-ordered-WoodLog",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-6ad1ad0e-911a-4697-bd5f-3d7b7b8d99bd.json",
+        "receiptSha256": "550bfeea092c2a6a25f5753c9b5a3a7da9c8809324430260bb1eec07a4f3ee2b",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "matched": {
+          "model": "ordered",
+          "def": "WoodLog",
+          "quota": 30,
+          "delivered": 30,
+          "trips": 3,
+          "offers": 2,
+          "moves": 0,
+          "stop": null,
+          "ticks": 897,
+          "ticksPerUnit": 29.9,
+          "estimatedCoreTurnsIfLive": 2,
+          "nativeUnitsDuringOrdered": 0,
+          "outOfReachUnits": 40
+        },
+        "intents": []
+      },
+      {
+        "name": "mixed-zone-independent",
+        "passed": false,
+        "findings": [
+          "the wood refuser did not store Steel: jobs , zone 0 -> 30"
+        ],
+        "receipt": "hauling-migration-strict-11527118-6a66-4c88-989d-1fb745ec45a3.json",
+        "receiptSha256": "60be7dd79ae395363c59e32599a09200c33d958242d563593e68b25feb296f19",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "third": {
+          "def": "Steel",
+          "before": 0,
+          "after": 30,
+          "jobs": []
+        },
+        "intents": [
+          {
+            "intentId": "b1a5f6cb-b217-4299-aa4f-733ed21c0b77",
+            "thingDef": "WoodLog",
+            "status": "met",
+            "quota": 20,
+            "delivered": 20,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 20
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 50
+              },
+              {
+                "pawn": "Thing_Human408",
+                "count": 40
+              }
+            ]
+          },
+          {
+            "intentId": "15e47be2-ca88-48fb-af92-75741930004d",
+            "thingDef": "ComponentIndustrial",
+            "status": "met",
+            "quota": 10,
+            "delivered": 10,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human408",
+                "count": 10
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": [
+              {
+                "pawn": "Thing_Human408",
+                "count": 70
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "pretag-running-haul",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-8628b2fc-1892-40af-a15a-1d8134961454.json",
+        "receiptSha256": "28e60c02ddebf91334b82ae8a29925b905d97cfa3f034af57703486c8517bc54",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "before": 60,
+        "carriedAtTag": 20,
+        "intents": [
+          {
+            "intentId": "12bc00f4-a316-4664-9e10-a1a293f9a59a",
+            "thingDef": "WoodLog",
+            "status": "met",
+            "quota": 10,
+            "delivered": 10,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 10
+              }
+            ],
+            "preTagByPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 30
+              },
+              {
+                "pawn": "Thing_Human408",
+                "count": 60
+              }
+            ],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "retag-new-generation",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-a2489285-ec8e-4b08-9718-53ca074d68a8.json",
+        "receiptSha256": "53f58132d60ffd8909843f872fbc2363e73192e01b96e8244c09a03fb382b126",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "intents": []
+      },
+      {
+        "name": "retarget-between-tagged-zones",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-fdc606f9-387f-4a53-9b3d-776dbd89c007.json",
+        "receiptSha256": "820c468b99137ff31c3116af61b776183debcafaaf32f0bf1f4e84628253137c",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "placed": {
+          "first": 1,
+          "second": 9
+        },
+        "retarget": "from=e50bc4ac-cc1a-485f-b21d-21145ac6f419;to=43989531-120a-4987-b07f-0d83e455cd7c;job=6;carried=9;holdBefore=9;mode=ToCellStorage",
+        "intents": [
+          {
+            "intentId": "e50bc4ac-cc1a-485f-b21d-21145ac6f419",
+            "thingDef": "WoodLog",
+            "status": "open",
+            "quota": 30,
+            "delivered": 1,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 1
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          },
+          {
+            "intentId": "43989531-120a-4987-b07f-0d83e455cd7c",
+            "thingDef": "WoodLog",
+            "status": "open",
+            "quota": 30,
+            "delivered": 9,
+            "overshoot": 0,
+            "reserved": 20,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 9
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "retarget-insufficient-destination-quota",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-12cdb804-5b3b-427a-8cf4-9deab6ecb74d.json",
+        "receiptSha256": "286d15d6de35d0fe89be0a813f084a9156dec3c3a857c5c6557c11062ca220b3",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "retargets": [
+          "from=78b2e0bc-b1a3-4383-a581-7fb767797c83;to=;job=6;carried=9;holdBefore=9;mode=ToCellStorage"
+        ],
+        "intents": [
+          {
+            "intentId": "78b2e0bc-b1a3-4383-a581-7fb767797c83",
+            "thingDef": "WoodLog",
+            "status": "open",
+            "quota": 30,
+            "delivered": 1,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 1
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          },
+          {
+            "intentId": "2c019692-645a-4e1f-bfaa-79d97c579f99",
+            "thingDef": "WoodLog",
+            "status": "open",
+            "quota": 1,
+            "delivered": 0,
+            "overshoot": 0,
+            "reserved": 1,
+            "byPawn": [],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "two-pawns-last-units",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-ae9c397b-7152-4082-9fd0-49cf434a15d7.json",
+        "receiptSha256": "ecca1493be80a45174acdaa22a84fe9f72be436d2f0e8b99db664f0aeeef1841",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "byPawn": [
+          {
+            "pawn": "Thing_Human408",
+            "count": 15
+          },
+          {
+            "pawn": "Thing_Human411",
+            "count": 10
+          }
+        ],
+        "peakHolders": 2,
+        "intents": [
+          {
+            "intentId": "7691f403-17b5-4332-990f-67f920f44e35",
+            "thingDef": "WoodLog",
+            "status": "met",
+            "quota": 25,
+            "delivered": 25,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human408",
+                "count": 15
+              },
+              {
+                "pawn": "Thing_Human411",
+                "count": 10
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "zero-extra",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-bea42f76-3ce6-4737-bd57-ed73b43e1643.json",
+        "receiptSha256": "8056d348bcaa78ec19ddaac00fd46780311ec261d3839bd64830a7bf7ec50044",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "intents": [
+          {
+            "intentId": "8b1a6447-471d-4a56-982c-1e078b49cd02",
+            "thingDef": "WoodLog",
+            "status": "met",
+            "quota": 10,
+            "delivered": 10,
+            "overshoot": 0,
+            "reserved": 0,
+            "byPawn": [
+              {
+                "pawn": "Thing_Human411",
+                "count": 10
+              }
+            ],
+            "preTagByPawn": [],
+            "ordinaryByPawn": []
+          }
+        ]
+      },
+      {
+        "name": "zone-edits",
+        "passed": true,
+        "findings": [],
+        "receipt": "hauling-migration-strict-31901576-dc3d-4120-b3f7-a1ddd2703791.json",
+        "receiptSha256": "a0b4df6793c052f2c39df20e3ff844fb024f6b611cdf42990c7ef5e23b6230a4",
+        "eventGaps": 0,
+        "observedOnly": {
+          "nested job end inside the pickup or duplicate check": []
+        },
+        "needsRecordedEvidence": [
+          "rescue handover in the game (consent, exclusion, drained cargo, one dispatch)",
+          "crew-log clock per event map and the Show button",
+          "zone label/colour on screen while open and after retirement"
+        ],
+        "detectorEvents": [],
+        "intents": []
+      }
+    ]
+  },
+  "modelsCalled": 0,
+  "preservation": {
+    "allSaveCount": 377,
+    "unchanged": 377,
+    "changed": [],
+    "mediaHashes": {
+      "hauling-migration-20260925-round2/duplicate-within-budget-1790317111200.mp4": "002d8a93d12cd97ba93b4fd50e890e2044e50861cd17bb3202d51005e04fd6ae",
+      "hauling-migration-20260925-round2/source-shrinks-1790317134733.mp4": "f5eeb8614742e0a1bf662d6d4e2bfcfa2b555037dba021aa8057f8e2522c1b4a",
+      "hauling-migration-20260925-round2/two-pawns-last-units-1790317148923.mp4": "93d59e05623837760e5b213c0a79a047950af47023c765ad3884741dc53dc1dc",
+      "hauling-migration-20260925-round2/source-grows-1790317127675.mp4": "edf82103b68e1d877c61c40e2e9789e990c32b3502fea96a622062b50dd58001",
+      "hauling-migration-20260925-round2/withdraw-after-duplicate-selection-1790317141746.mp4": "35f694724c7be45be81a7a0c8c5f112ca81b9009193f58d8693e1d231733669d",
+      "hauling-migration-20260925-round2/zero-extra-1790317120475.mp4": "ec1bcd308186064d3f76df032221e1a6e3a060cd3c40d99cea7c7a2b0651cc92",
+      "hauling-migration-20260925-strict/strict-matched-native-ComponentIndustrial-1790318021709.mp4": "2a7e94ef7b95478ce2e2a3765d532a34938b588936de59d2c8a2db06eab1b0ca",
+      "hauling-migration-20260925-strict/strict-mixed-zone-independent-1790317482309.mp4": "d0662fd6a2d6dc5c732dd1909e7fcea2c2ed7bee83d4779f192fe2f0db384fdf",
+      "hauling-migration-20260925-strict/strict-two-pawns-last-units-1790317401851.mp4": "41cd09265db93ecda145712ef3eb402d3cf9314d2b1142254d19b25a4ea62704",
+      "hauling-migration-20260925-strict/strict-zero-extra-1790317383935.mp4": "903093f667afd575e40c0276033713da60da3acd9eafe644bce08ec94cb85cba",
+      "hauling-migration-20260925-strict/strict-matched-ordered-WoodLog-1790318052327.mp4": "06e2767eecb00846cdd4ffb86b94088e6eb7a78f297cd173e818692de77ec9f1",
+      "hauling-migration-20260925-strict/strict-matched-native-WoodLog-1790318003325.mp4": "6004e501bdbff3d1221721857b925555dfd6c62863dff6c016d0a9e72ad9b1b6",
+      "hauling-migration-20260925-strict/strict-retag-new-generation-1790317962903.mp4": "14804810102e184fd781f35bafc0eb65898b6715b3e8133f784650d3cfcd56c9",
+      "hauling-migration-20260925-strict/strict-pretag-running-haul-1790317865123.mp4": "69dfa8dd12d560670c3a82156c44991a1863c1f98e541e59d9afd0b093ca0be9",
+      "hauling-migration-20260925-strict/strict-zone-edits-1790317948234.mp4": "90f04c0723d19c8874b255236372d11977991b531ab2a3e0b34155459d233065",
+      "hauling-migration-20260925-strict/strict-legibility-1790317981151.mp4": "4927677571825351232fb0e817da60e1cf52b7a85b9e6a7cc38871f42662d739",
+      "hauling-migration-20260925-strict/strict-duplicate-within-budget-1790317363701.mp4": "925d14759a0c14ee48e5d67fe42d19debeef6cfa7959aaecf0d8d4d66615cc40",
+      "hauling-migration-20260925-strict/strict-archive-after-retirement-1790317917702.mp4": "5329a35867a7232e994128cc3e15647963a48443cce90740c120f5d163c8a45f",
+      "hauling-migration-20260925-strict/strict-matched-ordered-ComponentIndustrial-1790318082285.mp4": "5f1ed24760011b5a65772ba8eae8a61018c7b6c410bcb59debd2522141c814b8",
+      "hauling-migration-20260925-strict/strict-retarget-between-tagged-zones-1790317437494.mp4": "31b9f352a6c451bb229232aa7130ad8c38df10a2478f7e73684ffd34d32921ad",
+      "hauling-migration-20260925-strict/strict-retarget-insufficient-destination-quota-1790317462370.mp4": "9ba500a96580f846e6b7de5364ee61dd04cec70eca70c8fbe82a9f6c485c79c2",
+      "hauling-migration-20260925-strict/strict-carried-cargo-plus-source-1790317419803.mp4": "9bb146362359cf8815f5c6d848c9dbb76937f3e9320b95a09fe85c6e7717c0fe"
+    },
+    "gameService": "inactive"
+  },
+  "recordingsLocallyHashVerified": 22,
+  "limitations": [
+    "Strict-only findings do not clear growing wrappers.",
+    "Nested growing callback termination remains unobserved.",
+    "Rescue handover gameplay, event-map clock and #71 live measures remain pending.",
+    "No Gate C approval or live run."
+  ]
+}

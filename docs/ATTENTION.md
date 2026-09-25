@@ -49,6 +49,16 @@ ingest.
 | Memory `Chitchat`, `DeepTalk` | deliberation | no, queued for the next turn |
 | Any other new memory | deliberation | yes |
 
+The core has one telemetry rule of its own (details in [CORE](CORE.md)):
+
+| Core wake cause | Core turn? |
+|---|---|
+| Only shared Food/Rest band changes, nothing offerable, no band worsened to `urgent` | no: bands consumed, silent status, no attempt or cooldown |
+| A crew member's Food or Rest band got worse and reached `urgent` | yes, even with nothing to offer |
+| Band changes while an opportunity or a counter is offerable | yes |
+| Improving or lateral band changes on their own | never |
+| Any message, answer, agreement, request, self-care or native-intent cause | yes, as before |
+
 An appraisal score of 0.5 or more sends an event on to deliberation; a lower score
 leaves it to native behaviour, with no pause and no badge.
 
