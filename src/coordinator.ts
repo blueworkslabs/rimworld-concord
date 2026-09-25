@@ -921,7 +921,9 @@ export class Coordinator {
       if(h.step==='excluding'){
         let live=this.liveIntent(game,h.intentId);
         if(live&&(live.status==='open'||live.status==='pending')&&!live.excluded.includes(h.pawn)){
-          try{const r=await this.game.intent!({op:'intent-exclude',epoch:this.domain.epoch,intentId:h.intentId,actor:h.pawn,reason:'withdraw'});game=r.state;live=this.liveIntent(game,h.intentId);}
+          try{const r=await this.game.intent!({op:'intent-exclude',epoch:this.domain.epoch,intentId:h.intentId,actor:h.pawn,reason:'withdraw'});
+            if(!r.state.loaded||r.state.epoch!==this.domain.epoch||r.state.world!==this.domain.world)throw Error('Stale intent exclusion response');
+            game=r.state;live=this.liveIntent(game,h.intentId);}
           catch{continue;}   // uncertain: confirmed from the game's state on the next pass
         }
         if(live&&(live.status==='open'||live.status==='pending')&&!live.excluded.includes(h.pawn))continue;
@@ -988,7 +990,7 @@ export class Coordinator {
   private async flushIntentExclusions(){
     for(const [key,pending] of Object.entries(this.domain.pendingIntentExclusions??{})){
       const r=await this.game.intent!({op:'intent-exclude',epoch:this.domain.epoch,...pending});
-      if(r.state.epoch!==this.domain.epoch||r.state.world!==this.domain.world)throw Error('Stale intent exclusion response');
+      if(!r.state.loaded||r.state.epoch!==this.domain.epoch||r.state.world!==this.domain.world)throw Error('Stale intent exclusion response');
       if(!this.liveIntent(r.state,pending.intentId)?.excluded.includes(pending.actor))throw Error('Intent exclusion unconfirmed');
       delete this.domain.pendingIntentExclusions![key];
       this.commit('intent-exclusion-confirmed',pending.actor,pending);this.ingestIntents(r.state);
