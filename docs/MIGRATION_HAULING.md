@@ -139,7 +139,7 @@ must change. Different defs in one zone must never share reservations or counter
 **Done after Gate C (2026-09-25), in two PRs: the test port (#79), then the deletion.**
 **Listed versus actual footprint:** the page listed four things: `Concord_Haul`, `Hauling.cs`,
 haul planning and the needs stop. The implementation initially reported 86 files; the reviewed retirement touches
-102 files, including 52 deletions. The extra footprint includes three overlooked
+106 files, including 52 deletions. The extra footprint includes three overlooked
 core scenes, a fail-closed persisted-action boundary, fixtures-only legacy adapters,
 and preserved regression checks. More than 3,200 lines are removed.
 - **Mod:**
