@@ -674,6 +674,11 @@ or reopens growing.
   band worsened to `urgent`. On E2 that silences turns 3, 6 and 13 and keeps 4, 5 and 7. The completion-report-to-receipt link
   waits until after the live run.
 
+## Gate C result
+
+**Passed on the game side, 2026-09-25.** Verdict, deletion scope and follow-ups:
+[HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md).
+
 ## Gate C will measure
 
 **Signed condition: #71's fixes must be measured live in this migration.** The
