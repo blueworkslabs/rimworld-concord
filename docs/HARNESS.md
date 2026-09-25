@@ -248,3 +248,20 @@ and size summary on staging; its first run supplements the synthetic fixture wit
 answers the thought-list question from real numbers. Hidden/invisible enemies are excluded;
 bill worker restrictions and skill ranges are exported. Zone changes compare contents and
 settings, not just their counts; pawn changes include job targets and individual injuries.
+
+**After the first capture (Fable's two fixes and the aggregation).**
+- *Alerts:* the readout fills its active list over UI frames (24 slices) and not before tick
+  600, so a snapshot right after a load saw none. The exporter now evaluates every registered
+  alert's `GetReport()` at snapshot time (no `Recalculate`, so the readout's cache is untouched),
+  plus any quest, precept or scenario alert already active; storyteller-disabled alerts stay off;
+  targets in fog are dropped. Staging should confirm "Need colonist beds" and "Medical treatment
+  needed" appear on the first read of the T1 save.
+- *Digest budget:* `DIGEST_LIMIT` = 14,000 bytes, leaving the rest of the 24,000-byte prompt for
+  instructions, task, history and receipts.
+- *Aggregation:* loose items, plants, filth, corpses and unowned structures (natural rock, ruins)
+  are grouped by def with total, stacks, forbidden count, centre and bounding box; the player's
+  buildings, blueprints, frames, beds and workbenches stay individual; pawns take a compact form
+  (every need and thought, skills with passions, non-zero work priorities, disabled work, schedule
+  as runs). `look` by def, category, area or pawn returns the individual entries. On the retained
+  staging capture the digest is 10.9 KB with nothing omitted (325 KB snapshot; pawns 2.8 KB,
+  items 2.7 KB, structures 3.1 KB).
