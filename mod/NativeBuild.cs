@@ -131,7 +131,8 @@ namespace Concord {
         public BuildRecord Record(BuildIntent i,BuildRecord r) {
             r.seq=++seq;r.tick=Find.TickManager.TicksGame;r.generation=i.generation;
             if(r.occurrence!=null&&i.records.Any(x=>x.occurrence==r.occurrence))return null;
-            i.records.Add(r);if(i.records.Count>128)i.records.RemoveAt(0);return r;
+            // Durable accounting/dedup history must not be evicted with the 32-line display tail.
+            i.records.Add(r);return r;
         }
 
         // ---- consent -------------------------------------------------------------------------
@@ -213,6 +214,11 @@ namespace Concord {
         }
         public void End(BuildIntent i,string status,string reason,Pawn p=null) {
             if(!i.Open)return;
+            // Close the accounting boundary before removing lookup/ownership. Accrued work stands.
+            var frame=Carrier(i) as Frame;
+            if(frame!=null)foreach(var pawn in frame.Map.mapPawns.AllPawnsSpawned)
+                if(pawn.CurJob!=null&&pawn.CurJob.def==JobDefOf.FinishFrame&&pawn.CurJob.targetA.Thing==frame)
+                    Settle(pawn,pawn.CurJob,frame,"intent ending");
             i.status=status;i.stopReason=reason;
             foreach(var bj in jobs.Values)foreach(var s in bj.segments.Where(s=>s.intentId==i.intentId&&s.generation==i.generation))s.open=false;
             if(status=="built"){i.watchFate=true;i.fate="standing";}
@@ -261,13 +267,14 @@ namespace Concord {
             if(!String.IsNullOrEmpty(r.target)) {
                 // An existing colony blueprint (colony-public, placed by someone).
                 carrier=map.listerThings.AllThings.FirstOrDefault(t=>t.GetUniqueLoadID()==r.target);
-                var bp=carrier as Blueprint_Build;
-                if(bp==null||bp.Destroyed||bp.Faction!=Faction.OfPlayer)throw new Exception("Not a colony blueprint");
-                def=bp.def.entityDefToBuild as ThingDef;rot=bp.Rotation;
+                if(!(carrier is Blueprint_Build)&&!(carrier is Frame))throw new Exception("Not a colony blueprint or frame");
+                if(carrier.Destroyed||carrier.Faction!=Faction.OfPlayer)throw new Exception("Not a colony blueprint or frame");
+                def=carrier.def.entityDefToBuild as ThingDef;rot=carrier.Rotation;
             } else {
                 // Operator-declared candidate site: the site must be clear; our placement never wipes.
                 def=DefDatabase<ThingDef>.GetNamedSilentFail(r.thing);rot=new Rot4(r.count);
                 if(def==null||def.blueprintDef==null)throw new Exception("Unknown buildable def");
+                if(!BuildDefs.Allowed(def))throw new Exception("Def not in the configured list");
                 var cell=new IntVec3(r.x,0,r.z);
                 if(!cell.InBounds(map))throw new Exception("Site out of bounds");
                 var ok=GenConstruct.CanPlaceBlueprintAt(def,cell,rot,map);
@@ -306,9 +313,14 @@ namespace Concord {
         public BuildIntent Exclude(Request r) {
             var i=ById(r.intentId);
             if(i==null){i=new BuildIntent{intentId=r.intentId,status="pending"};intents.Add(i);}
+            var p=WorldState.FindActor(r.actor);
+            // Settle work under its pre-change role before publishing exclusion and interrupting.
+            if(i.Open&&p!=null&&p.CurJob!=null&&p.CurJob.def==JobDefOf.FinishFrame) {
+                var frame=p.CurJob.targetA.Thing as Frame;
+                if(frame!=null&&frame.thingIDNumber==i.thingId)Settle(p,p.CurJob,frame,"before exclusion");
+            }
             if(!i.excluded.Contains(r.actor)){i.excluded.Add(r.actor);i.excludedTicks.Add(Find.TickManager.TicksGame);}
             bool wasAccepted=i.accepted.Remove(r.actor);
-            var p=WorldState.FindActor(r.actor);
             if(i.Open) {
                 Record(i,new BuildRecord{kind="withdrawal",pawn=r.actor,text=(wasAccepted?"withdrew":"refused")+(String.IsNullOrEmpty(r.reason)?"":": "+r.reason)});
                 Sweep(i,p);

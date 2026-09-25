@@ -21,7 +21,10 @@ import {BuildView} from '../src/native-build.js';
 import {startNative} from './native-run.js';
 if(process.env.CONCORD_NATIVE_CONSTRUCTION_LOCKED!=='1')throw Error('Exclusive lab lock required');
 const root=new URL('../..',import.meta.url).pathname;
-const only=process.argv.find(a=>a.startsWith('--case='))?.slice(7);
+const caseNames=['1-accept-build','2-helper-delivers','3-refusal-ordinary','4-nearby-untagged','5-shared-work','6-forced-failure','7-cancel','8-different-def','9-restore','10-fate','11-forbid','12-replace','13-forced-after-refusal','14-transitions','15-withdraw-in-flight','16-two-sites','17-generations'];
+const args=process.argv.slice(2);
+const only=args[0]?.slice(7);
+if(args.length>1||(args.length===1&&(!args[0]!.startsWith('--case=')||!caseNames.includes(only!))))throw Error('Unknown construction case');
 const deadline=Date.now()+3600000;
 let opDeadline=deadline;const b=new LabBridge(undefined,()=>opDeadline);
 type Case={name:string;passed:boolean;findings:string[];data:Record<string,unknown>};
@@ -33,11 +36,12 @@ const receipt:{runId:string;unimplemented:string[];observedOnly:Record<string,un
     // Case 7's exact refunds: no leavings hook for Gate C (signature answer 4); the record says "not recorded".
     'exact returned units on cancel/failure (answer 4: "returned: not recorded")',
    ],observedOnly:{},passed:false,inferenceCalls:0,cases:[],eventGaps:0,at:new Date().toISOString()};
-let events:NativeEvent[]=[],lastSeq=0,state:GameState;
+let events:NativeEvent[]=[],lastSeq=0,eventEpoch:string|undefined,state:GameState;
 const persist=()=>writeFile(root+`/.runtime/native-construction-${runId}.json`,JSON.stringify(receipt,null,2));
 
 async function poll(){
   state=await b.state();
+  if(eventEpoch!==state.epoch){lastSeq=0;eventEpoch=state.epoch;}
   const fresh=(state.events??[]).filter(e=>e.seq>lastSeq);
   if(fresh.length&&fresh[0]!.seq>lastSeq+1&&lastSeq>0)receipt.eventGaps++;
   events.push(...fresh);if(fresh.length)lastSeq=fresh[fresh.length-1]!.seq;
@@ -71,10 +75,10 @@ async function scenario(name:string,base:string,body:(c:Case)=>Promise<void>){
 function expect(c:Case,ok:boolean,finding:string){if(!ok)c.findings.push(finding);}
 const total=(v:BuildView,role?:string,pawnId?:string)=>v.delivered.filter(d=>(!role||d.role===role)&&(!pawnId||d.pawn===pawnId)).reduce((n,d)=>n+d.count,0);
 const workOf=(v:BuildView,pawnId?:string,role?:string)=>v.work.filter(w=>(!pawnId||w.pawn===pawnId)&&(!role||w.role===role)).reduce((n,w)=>n+w.work,0);
-/** No receipt line may belong to a pawn who is excluded unless it is forced or pre-tag. */
+/** Historical accepted work stands after withdrawal. Check recorded violations, not current
+ * exclusion membership against all past shares; case 15 checks effects after the boundary. */
 function consent(c:Case,v:BuildView){
-  for(const r of [...v.delivered,...v.work])if(v.excluded.includes(r.pawn)&&!['forced','pretag'].includes(r.role))c.findings.push(`excluded pawn credited or violating: ${r.pawn} ${r.role}`);
-  expect(c,v.violations===0,`violations: ${v.violations}`);
+  expect(c,v.violations===0&&!v.delivered.some(r=>r.role==='violation')&&!v.work.some(r=>r.role==='violation'),`violations: ${v.violations}`);
 }
 
 try{
@@ -179,8 +183,9 @@ try{
       expect(c,JSON.stringify(same)===JSON.stringify(before),`${label}: same-process restore changed the intent`);
       const {stdout}=await promisify(execFile)(process.execPath,[root+'/dist/trials/native-construction-restore.js',name,id],{env:process.env,timeout:120000});
       const cold=JSON.parse(stdout.trim().split('\n').pop()!);
+      expect(c,Number.isInteger(cold.pid)&&cold.pid!==process.pid,`${label}: restore did not use a new process`);
       expect(c,JSON.stringify(cold.view)===JSON.stringify(before),`${label}: new-process restore changed the intent`);
-      await b.load(name);await b.admin('pause');await poll();(c.data.restores??=[] as unknown[]) as unknown[];(c.data.restores as unknown[]).push({label,name,before});
+      await b.load(name);await b.admin('pause');await poll();(c.data.restores??=[] as unknown[]) as unknown[];(c.data.restores as unknown[]).push({label,name,before,same,cold,parentPid:process.pid});
     };
     await checkpoint('blueprint');
     await prio(P,1,1);await run(()=>view(id)?.stage==='frame'&&total(view(id)!)>0,240000);await checkpoint('frame');
@@ -216,6 +221,7 @@ try{
     await run(()=>total(view(id)!,'forced',B)>=cost||view(id)?.stage==='frame'&&total(view(id)!)>=cost,240000);
     const w=await op({op:'lab-build-forced',intentId:id,actor:B,reason:'work'});c.data.workJob=w;
     await run(ended(id),240000);const v=view(id)!;
+    expect(c,v.status==='built'&&v.finisher===B,'forced construction did not finish');
     expect(c,total(v,'forced',B)>0&&workOf(v,B,'forced')>0,'forced delivery or work missing');
     expect(c,!v.delivered.some(r=>r.pawn===B&&r.role!=='forced')&&!v.work.some(r=>r.pawn===B&&r.role!=='forced'),'Beatrice credited or labelled');
     expect(c,v.violations===0,'forced work counted as a violation');
@@ -227,6 +233,7 @@ try{
     expect(c,v.status==='built',`expected built after unblocking, got ${v.status}`);
     expect(c,kinds('build-stage').filter(e=>field(e,'stage')==='frame').length===1&&kinds('build-stage').filter(e=>field(e,'stage')==='built').length===1,'expected exactly one frame and one built transition');
     c.data.conversionNotes=v.records.filter(r=>/conversion did not happen/.test(r.text));
+    expect(c,(c.data.conversionNotes as unknown[]).length>0,'unexercised: no blocked false-return conversion observed');
   });
   // 15. Withdrawal in flight: carrying toward the site; and an already-excluded pawn at attachment.
   await scenario('15-withdraw-in-flight',base,async c=>{
@@ -234,7 +241,7 @@ try{
     const carrying=async()=>{const j=await jobOf(P);return j.current?.def==='HaulToContainer'&&j.carrying>0;};
     let seen=false;await run(()=>seen,180000,async()=>{seen=await carrying();});
     if(!seen)throw Error('precondition: Pedro never carried toward the site');
-    const tick=state.ticks;await exclude(id,P,'Changed my mind');const j=await jobOf(P);c.data.afterExclude=j;
+    await exclude(id,P,'Changed my mind');const tick=state.ticks;const j=await jobOf(P);c.data.afterExclude=j;
     expect(c,j.current?.def!=='HaulToContainer'||j.current.segments===0,'the delivery kept running');
     await run(()=>false,15000);const v=view(id)!;
     expect(c,!v.records.some(r=>r.kind==='delivery'&&r.pawn===P&&r.tick>=tick),'a post-withdrawal deposit happened');consent(c,v);
@@ -256,15 +263,18 @@ try{
     expect(c,JSON.stringify([view(a),view(b2)])===JSON.stringify(before),'restore changed either site');
     const jobsA=new Set(view(a)!.records.filter(r=>r.kind==='delivery').map(r=>r.occurrence.split(':')[1])),jobsB=new Set(view(b2)!.records.filter(r=>r.kind==='delivery').map(r=>r.occurrence.split(':')[1]));
     c.data.sharedJobs=[...jobsA].filter(j=>jobsB.has(j));
-    if(!(c.data.sharedJobs as unknown[]).length)(receipt.observedOnly['16: one job serving both sites']??=[]).push({note:'no single job filled both sites this run'});
+    expect(c,(c.data.sharedJobs as unknown[]).length>0,'unexercised: no single job filled both sites');
+    expect(c,total(view(a)!)>0&&total(view(b2)!)>0,'unexercised: missing delivery to one site');
     for(const v of [view(a)!,view(b2)!]){const occ=v.records.map(r=>r.occurrence).filter(Boolean);expect(c,new Set(occ).size===occ.length,'duplicate occurrence at '+v.intentId);}
   });
   // 17. Generations: a later intent at the same key never inherits; pre-tag work stays uncredited.
   await scenario('17-generations',base,async c=>{
     const bp=(await op({op:'lab-build-blueprint',actor:B,thing:'Campfire',x:f.site.x,z:f.site.z})).blueprint as string;await prio(B,0,1);
     let on=false;await run(()=>on,180000,async()=>{const jb=await jobOf(B);on=jb.current?.def==='HaulToContainer';});
+    expect(c,on,'precondition: Beatrice never began a pre-tag delivery');
     const id=randomUUID();await open(id,P,{target:bp,x:undefined,z:undefined});
     await run(()=>total(view(id)!)>0,120000);const v1=view(id)!;
+    expect(c,total(v1,'pretag',B)>0,'unexercised: no pre-tag delivery observed');
     expect(c,v1.delivered.filter(d=>d.pawn===B).every(d=>d.role==='pretag'),'pre-tag delivery was credited');
     await op({op:'build-stop',intentId:id,reason:'Scripted stop'});
     const id2=randomUUID();const cur=(await site(f.site.x,f.site.z)).find(t=>t.kind==='frame'||t.kind==='blueprint');
