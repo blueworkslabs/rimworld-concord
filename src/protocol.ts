@@ -60,7 +60,7 @@ export interface GameBridge {
   setCrewLog?(report:CrewReport):Promise<void>;
   setActivity?(activity:Activity):Promise<void>;
   setDecisionPause?(pause:DecisionPause):Promise<void>;
-  cancel?(request:{epoch:string;actor:string;id:string;kind?:'haul'|'rescue'|'build'|'cook'|'eat'}):Promise<Receipt>;
+  cancel?(request:{epoch:string;actor:string;id:string;kind?:'move'|'haul'|'rescue'|'build'|'cook'|'eat'}):Promise<Receipt>;
   intent?(payload:{op:'intent-accept'|'intent-exclude'|'intent-stop'}&Record<string,unknown>):Promise<{state:GameState;receipt:unknown}>;
   eat?(request:EatRequest):Promise<Receipt>;
   move(request:ActionRequest):Promise<Receipt>;

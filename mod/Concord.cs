@@ -239,8 +239,8 @@ namespace Concord
             var a=w.actions.FirstOrDefault(x=>x.id==r.actionId);
             Guid parsed;if(!Guid.TryParse(r.actionId,out parsed))throw new Exception("Action ID must be UUID");
             // Cancellation tombstone also covers a dispatch which never reached the game.
-            if(a==null) {a=new ActionRecord {id=r.actionId,actor=r.actor,kind=new[]{"rescue","build","cook","eat"}.Contains(r.cancelKind)?r.cancelKind:"haul",status="interrupted",reason="Withdrawn before dispatch"};w.actions.Add(a);}
-            if(a.actor!=r.actor||(a.kind!="haul"&&a.kind!="rescue"&&a.kind!="build"&&a.kind!="cook"&&a.kind!="eat"))throw new Exception("No owned work action");
+            if(a==null) {a=new ActionRecord {id=r.actionId,actor=r.actor,kind=new[]{"move","rescue","build","cook","eat"}.Contains(r.cancelKind)?r.cancelKind:"haul",status="interrupted",reason="Withdrawn before dispatch"};w.actions.Add(a);}
+            if(a.actor!=r.actor||(a.kind!="move"&&a.kind!="haul"&&a.kind!="rescue"&&a.kind!="build"&&a.kind!="cook"&&a.kind!="eat"))throw new Exception("No owned work action");
             if(a.status=="started") {
                 a.status="interrupted";a.reason=a.kind=="eat"?"Eating action cancelled; no further consumption authorized":"Pawn withdrew work commitment";
                 var p=WorldState.FindActor(r.actor);

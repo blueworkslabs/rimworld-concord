@@ -92,7 +92,7 @@ test('only matched positive completed eating resolves its receipt/question/reply
 });
 test('eating closure fails closed for interrupted, empty, mismatched and multiply linked receipts',async()=>{
  const {g,s,c}=await setup(),q=await ask(c);await c.answerCoreQuestion(q,{name:'eat',async answerCore(){return eat;}});g.data.actions[0]!.status='completed';g.data.actions[0]!.delivered=16;await c.reconcile();const original=c.inspect(),care=Object.values(original.selfCare!)[0]!,world=await g.state();
- for(const patch of [{status:'interrupted'},{status:'failed'},{status:'started'},{delivered:0},{delivered:17},{delivered:1.5},{actor:'B'},{kind:'haul'},{thing:'other'},{count:25},{id:'wrong'}]){const d=structuredClone(original);Object.assign(d.outcomes[care.id]!,patch);assert.throws(()=>validateCoreChoice(resolve(care.id),coreView(d,world)),/closure unsupported/);}
+ for(const patch of [{status:'interrupted'},{status:'failed'},{status:'started'},{delivered:0},{delivered:17},{delivered:1.5},{actor:'B'},{kind:'rescue'},{thing:'other'},{count:25},{id:'wrong'}]){const d=structuredClone(original);Object.assign(d.outcomes[care.id]!,patch);assert.throws(()=>validateCoreChoice(resolve(care.id),coreView(d,world)),/closure unsupported/);}
  const d=structuredClone(original);delete d.outcomes[care.id];assert.throws(()=>validateCoreChoice(resolve(care.id),coreView(d,world)),/closure unsupported/);
  const multi=structuredClone(original);multi.selfCare!.other={...care,id:'other'};const v=coreView(multi,await g.state()),message=original.coreState!.questions[0]!.messages[0]!.id;assert.throws(()=>validateCoreChoice(resolve(message),v),/closure unsupported/);validateCoreChoice(resolve(care.id),v);s.close();
 });

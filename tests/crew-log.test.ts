@@ -7,12 +7,14 @@ import {Store} from '../src/store.js';
 import {scripted} from '../src/backends.js';
 import type {Domain,Proposal,GameState,ActionRequest} from '../src/protocol.js';
 const haul={kind:'haul' as const,thing:'steel',x:4,z:5,count:10,trips:3,maxTicks:600};
-function fixture(){
- const p:Proposal={id:'p',pawn:'A',action:haul,reason:'Public offer',status:'accepted',actionId:'two',standing:{status:'stopped',deadline:600,steps:['one','two']}};
- const d:Domain={schema:1,world:'w',epoch:'e',branch:'b',characters:{A:{id:'A',name:'Ada',memories:['PRIVATE'],reflections:[{tick:1,throughSeq:1,backend:'mock',reason:'PRIVATE'}]}},proposals:{p},outcomes:{one:{id:'one',actor:'A',status:'completed',reason:'native',x:4,z:5,delivered:10},two:{id:'two',actor:'A',status:'started',reason:'native',x:4,z:5}}};return {d,p};
+// Generic public offer for the crew-log privacy/retention checks; the trip-progress check keeps the ordered haul.
+const rescue={kind:'rescue' as const,target:'X',bed:'bed',x:4,z:5,maxTicks:600};
+function fixture(action:Proposal['action']=rescue){
+ const p:Proposal={id:'p',pawn:'A',action,reason:'Public offer',status:'accepted',actionId:'two',standing:{status:'stopped',deadline:600,steps:['one','two']}};
+ const d:Domain={schema:1,world:'w',epoch:'e',branch:'b',characters:{A:{id:'A',name:'Ada',memories:['PRIVATE'],reflections:[{tick:1,throughSeq:1,backend:'mock',reason:'PRIVATE'}]}},proposals:{p},outcomes:{one:{id:'one',actor:'A',status:'completed',reason:'native',x:4,z:5,delivered:10},two:{id:'two',actor:'A',status:'started',reason:'native',x:4,z:5}}};if(action.kind==='rescue'){p.actionId='one';p.standing!.steps=['one'];delete d.outcomes.two;delete d.outcomes.one!.delivered;}return {d,p};
 }
 test('progress separates completed, active, unknown, unsuccessful and never-started trips',()=>{
- const {d,p}=fixture();let r=agreementProgress(d,p,10);assert.deepEqual([r.completed,r.active,r.notStarted,r.unfulfilled,r.delivered],[1,1,1,2,10]);assert.equal(r.status,'stopped');
+ const {d,p}=fixture(haul);let r=agreementProgress(d,p,10);assert.deepEqual([r.completed,r.active,r.notStarted,r.unfulfilled,r.delivered],[1,1,1,2,10]);assert.equal(r.status,'stopped');
  delete d.outcomes.two;r=agreementProgress(d,p,10);assert.equal(r.unconfirmed,1);assert.equal(r.active,0);
  d.outcomes.two={id:'two',actor:'A',status:'interrupted',reason:'stopped',x:4,z:5};r=agreementProgress(d,p,10);assert.equal(r.unsuccessful,1);assert.equal(r.completed,1);
  const fresh=[{...d.outcomes.two,status:'completed' as const,delivered:10}];r=agreementProgress(d,p,20,fresh);assert.equal(r.completed,2);assert.equal(r.delivered,20);assert.equal(r.unfulfilled,1);
@@ -25,7 +27,8 @@ test('crew log records deliberate replies but never promotes private reflections
  recordCrew(d,'action-outcome','A',d.outcomes.one,5);recordCrew(d,'action-outcome','A',d.outcomes.one,6);
  assert.equal(d.crew!.entries.length,4);assert.equal(d.crew!.entries.filter(e=>e.kind==='message').length,2);
  assert(d.crew!.entries.some(e=>e.text==='accept: My work is wrapped up'));assert(!d.crew!.entries.some(e=>e.text.includes('PRIVATE')));
- const report=crewReport(d,10);assert.equal(report.agreements[0]!.progress.completed,1);assert.equal(report.agreements[0]!.progress.unfulfilled,2);
+ // A rescue agrees one step (trip arithmetic is the ordered-haul check above).
+ const report=crewReport(d,10);assert.equal(report.agreements[0]!.progress.completed,1);assert.equal(report.agreements[0]!.progress.unfulfilled,0);
 });
 test('retention is bounded and display projection excludes injected private extension fields',()=>{
  const {d,p}=fixture();for(let i=0;i<140;i++)recordCrew(d,'proposed','core',{...p,id:String(i)},i);

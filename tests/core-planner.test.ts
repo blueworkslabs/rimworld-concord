@@ -13,7 +13,15 @@ import type {ActionRequest,GameBridge,GameState,Receipt} from '../src/protocol.j
 class Game implements GameBridge {
  data:GameState={world:'core',epoch:'one',ticks:100,paused:true,loaded:true,pawns:['A','B'].map((id,i)=>({id,name:id,x:i,z:1,job:'Wait',health:1,downed:false,facts:[{key:'need',value:'Food',level:.9}]})),actions:[]};
  saved=new Map<string,GameState>();moves=0;available=true;
- async state(){const g=structuredClone(this.data);for(const p of g.pawns)p.hauling={epoch:g.epoch,tick:g.ticks,mapId:1,status:'available',options:this.available?[{kind:'haul',thing:'wood'+p.id,x:10+(p.id==='A'?0:1),z:1,count:10,trips:1,maxTicks:600}]:[],supplies:[{thing:'wood'+p.id,label:'Wood',x:10+(p.id==='A'?0:1),z:1,sourceCount:20,destinationFree:75}]};return g;}
+ /** Generic offerable work is an ordered rescue: each pawn sees its own patient and two beds
+  * when beds=2 (the second is the counter alternative). 'haul' keeps the ordered-haul view for the
+  * haul-specific checks that go with the ordered haul's deletion. */
+ work:'rescue'|'haul'='rescue';beds=1;
+ async state(){const g=structuredClone(this.data);for(const p of g.pawns){const x=10+(p.id==='A'?0:1);
+  if(this.work==='haul')p.hauling={epoch:g.epoch,tick:g.ticks,mapId:1,status:'available',options:this.available?[{kind:'haul',thing:'wood'+p.id,x,z:1,count:10,trips:1,maxTicks:600}]:[],supplies:[{thing:'wood'+p.id,label:'Wood',x,z:1,sourceCount:20,destinationFree:75}]};
+  else{p.rescueReady=true;const bed=(n:number)=>({kind:'rescue' as const,target:'X'+p.id,bed:'bed'+p.id+n,x,z:n,maxTicks:600});
+   p.rescue={epoch:g.epoch,tick:g.ticks,mapId:1,status:'available',options:this.available?Array.from({length:this.beds},(_,i)=>bed(i+1)):[],observations:this.available?Array.from({length:this.beds},(_,i)=>i+1).map(n=>({target:'X'+p.id,targetName:'Patient '+p.id,bed:'bed'+p.id+n,bedLabel:'Bed '+n})):[]};}
+ }return g;}
  async cancel(r:{epoch:string;actor:string;id:string;kind?:string}):Promise<Receipt>{const prior=this.data.actions.find(a=>a.id===r.id);if(prior)return prior;const out={id:r.id,actor:r.actor,status:'interrupted' as const,reason:'Cancelled',x:0,z:0};this.data.actions.push(out);return out;}
  async save(n:string){this.saved.set(n,structuredClone(this.data));return {sha256:'hash'};}async verify(){}async load(n:string){this.data=structuredClone(this.saved.get(n)!);this.data.epoch=randomUUID();}
  async move(r:ActionRequest):Promise<Receipt>{this.moves++;const out={id:r.id,actor:r.actor,status:'completed' as const,reason:'Delivered',x:r.action.x,z:r.action.z,delivered:10};this.data.actions.push(out);return out;}
@@ -27,11 +35,13 @@ test('core projection excludes pawn secrets, private speech and operator diagnos
  const v=coreView(d,await g.state());assert.deepEqual(v.crew,[{id:'A',name:'A'},{id:'B',name:'B'}]);assert.deepEqual(v.messages,[]);assert.equal((v as any).characters,undefined);assert.equal((v as any).pawns,undefined);assert.equal((v.crew[0] as any).memories,undefined);assert.equal((v.crew[0] as any).privateTest,undefined);assert.equal((v as any).crewLog,undefined);assert.equal(v.opportunities.length,2);s.close();
 });
 test('core proposal executes nothing; refusal cannot be retried and counter needs fresh consent',async()=>{
- const {g,s,c}=await setup();let calls=0;const result=await c.planCore(planner(v=>{calls++;return offer(v);}));assert.equal(result.status,'applied');assert.equal(calls,1);assert.equal(g.moves,0);if(result.status!=='applied')throw Error();const p=c.inspect().proposals[result.proposalId!]!;
+ const {g,s,c}=await setup();g.beds=2;let calls=0;const result=await c.planCore(planner(v=>{calls++;return offer(v);}));assert.equal(result.status,'applied');assert.equal(calls,1);assert.equal(g.moves,0);if(result.status!=='applied')throw Error();const p=c.inspect().proposals[result.proposalId!]!;
  await c.pawn(p.pawn).decide(p.id,{name:'refuse',async decide(){return {kind:'refuse',reason:'No thanks'};}});const v=await c.corePerspective();assert(!v.opportunities.some(o=>o.pawn===p.pawn));assert.equal(g.moves,0);
  const r=await c.planCore(planner(offer));if(r.status!=='applied')throw Error();const q=c.inspect().proposals[r.proposalId!]!;
- await c.pawn(q.pawn).decide(q.id,{name:'counter',async decide(){return {kind:'counter',reason:'Less',action:{...q.action,count:5}};}});
- const adopted=await c.planCore(planner(v=>({topic:null,action:{kind:'adopt_counter',proposalId:v.counters[0]!.id,reason:'Would five units suit you?'}})));assert.equal(adopted.status,'applied');assert.equal(g.moves,0);if(adopted.status!=='applied')throw Error();assert.equal(c.inspect().proposals[adopted.proposalId!]!.status,'pending');s.close();
+ // The pawn's second observed bed (its opportunities are held while the offer is pending).
+ const alternative={...q.action,bed:'bed'+q.pawn+'2',z:2};
+ await c.pawn(q.pawn).decide(q.id,{name:'counter',async decide(){return {kind:'counter',reason:'The other bed',action:alternative};}});
+ const adopted=await c.planCore(planner(v=>({topic:null,action:{kind:'adopt_counter',proposalId:v.counters[0]!.id,reason:'Would the other bed suit you?'}})));assert.equal(adopted.status,'applied');assert.equal(g.moves,0);if(adopted.status!=='applied')throw Error();assert.equal(c.inspect().proposals[adopted.proposalId!]!.status,'pending');s.close();
 });
 test('one addressed question, voluntary answer, no belief or consent, no private leakage',async()=>{
  const {g,s,c}=await setup();const r=await c.planCore(planner(()=>({topic:{sourceId:'brief',text:'Clarify needs before work',status:'open'},action:{kind:'ask',pawn:'A',text:'What would help?',reason:'Ask before proposing.'}})));if(r.status!=='applied')throw Error();assert.equal(g.moves,0);assert.equal(c.inspect().characters.B!.messages,undefined);
@@ -107,6 +117,12 @@ test('defer is available through the provider and reflection contracts; attribut
  assert(prompt.executableChoices.some((x:any)=>x.choice==='defer'));
  const args=claudeArgs('decision');const schema=JSON.parse(args[args.indexOf('--json-schema')+1]!);assert(schema.properties.decision.oneOf.some((x:any)=>x.properties.kind.const==='defer'));
  assert.equal(parseClaudeResult({type:'result',subtype:'success',is_error:false,total_cost_usd:0,structured_output:{decision:{kind:'defer',reason:'Not now'}},modelUsage:{[CLAUDE_MODEL]:{}},num_turns:1},'decision').output.kind,'defer');
+ const v=await c.corePerspective();assert(v.opportunities.length);assert(v.opportunities.every(o=>o.pawn!==p.pawn),'the deferring pawn gets no ordinary offer');
+ s.close();
+});
+// Ordered-haul specific (removed with the ordered haul): haul opportunities carry their observed supply.
+test('ordered haul opportunities carry their observed supply',async()=>{
+ const {c,s,g}=await setup();g.work='haul';
  const v=await c.corePerspective();assert(v.opportunities.length);for(const o of v.opportunities){assert.equal(o.action.kind,'haul');if(o.action.kind==='haul')assert.equal(o.supply?.sourceThingId,o.action.thing);assert.equal(o.supply?.label,'Wood');}
  s.close();
 });
@@ -220,8 +236,8 @@ test('batch validation is atomic; duplicates, ninth topics and closed action lin
  validateCoreChoice({topics:[{sourceId:'old0',text:'still open',status:'blocked'}],actionTopicId:'old0',action:multiOffer(full,'A').action},full);s.close();
 });
 test('counter lineage closes its topic from the accepted revision, not from the superseded offer',async()=>{
- const {c,s}=await setup();const r=await linkedOffer(c,'A');if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;
- await c.pawn('A').decide(p.id,{name:'counter',async decide(){return {kind:'counter',reason:'Smaller',action:{...p.action,count:5}};}});
+ const {c,s,g}=await setup();g.beds=2;const r=await linkedOffer(c,'A');if(r.status!=='applied')throw Error();const p=c.inspect().proposals[r.proposalId!]!;
+ await c.pawn('A').decide(p.id,{name:'counter',async decide(){return {kind:'counter',reason:'The other bed',action:{...p.action,bed:'bedA2',z:2}};}});
  const topic=c.inspect().coreState!.topics[0]!;
  const revised=await c.planCore(planner(()=>({topics:[],actionTopicId:topic.sourceId,action:{kind:'adopt_counter',proposalId:p.id,reason:'Fresh consent'}})));if(revised.status!=='applied')throw Error();
  assert(!(await c.corePerspective()).topicClosures.find(t=>t.sourceId===topic.sourceId)!.statuses.length);
