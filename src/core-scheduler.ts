@@ -42,7 +42,8 @@ const key=(w:CoreWake)=>w.kind+':'+w.sourceId;
 /** Fable (E2): a wake made only of telemetry band changes, when the core has nothing it could
  * do about them (no opportunity to offer and no counter to adopt, so no eligible offer
  * recipient), spends no core turn. Same decision as the silent wait, one step earlier.
- * Question recipients do not count: they are listed on every turn and would disable the rule. */
+ * Question recipients do not count under this proposed offer-only interpretation. In the
+ * retained E2 sample they appear on every turn; that is not a runtime invariant. */
 export function telemetryOnlyIdle(causes:CoreWake[],v:Pick<CoreView,'opportunities'|'counters'>){
  return causes.length>0&&causes.every(w=>w.kind==='telemetry')&&v.opportunities.length===0&&v.counters.length===0;
 }

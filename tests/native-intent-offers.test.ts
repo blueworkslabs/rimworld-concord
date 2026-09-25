@@ -306,8 +306,11 @@ test('telemetry-only wakes with nothing to offer spend no core turn (E2 turn sha
 
 test('a silent telemetry wake consumes its bands without a turn, attempt or cooldown and shows the waiting status',async()=>{
  const {c,game,store}=await setup(false);await c.configureCoreSchedule({maxAttempts:null,cooldownTicks:300,windowTicks:null});
- let calls=0;const choose={name:'scripted',async plan(){calls++;return {topics:[],actionTopicId:null,action:{kind:'wait' as const,reason:'Observe'}};}};
- assert.equal((await c.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,1);
+ let calls=0;const choose={name:'scripted',async plan(){calls++;return {topics:[],actionTopicId:null,action:calls===1?{kind:'ask' as const,pawn:'A',text:'What would help?',reason:'Ask'}:{kind:'wait' as const,reason:'Observe'}};}};
+ const initial=await c.planCoreWhenDue(choose);assert.equal(initial.status,'applied');assert.equal(calls,1);
+ if(initial.status!=='applied'||!initial.questionId)throw Error('missing initial question');
+ const entriesBefore=crewReport(c.inspect(),0).entries;
+ assert.doesNotMatch(crewReport(c.inspect(),0).observerText??'',/Core: waiting on/);
  const attempts=c.inspect().coreState!.schedule!.attempts;
  game.data.ticks=1000;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1000,food:'low',rest:'satisfied'};
  const r=await c.planCoreWhenDue(choose);
@@ -315,11 +318,17 @@ test('a silent telemetry wake consumes its bands without a turn, attempt or cool
  const d=c.inspect();assert.equal(d.coreState!.schedule!.attempts,attempts,'no attempt spent');assert.equal(d.coreState!.schedule!.lastAttemptTick,0,'no cooldown started');
  assert.equal(d.coreState!.silentWake?.tick,1000);assert.ok(store.events().some(e=>e.event.kind==='core-wake-silent'));
  assert.match(crewReport(d,1000).observerText??'',/Core: waiting on/);
- assert.equal(crewReport(d,1000).entries.length,crewReport(d,0).entries.length,'nothing written to the crew log');
+ assert.deepEqual(crewReport(d,1000).entries,entriesBefore,'nothing written to the crew log');
+ const reopened=new Coordinator(store,game);await reopened.open();
+ assert.deepEqual(reopened.inspect().coreState!.schedule,d.coreState!.schedule,'consumption and allowance persist');
+ assert.deepEqual(reopened.inspect().coreState!.silentWake,d.coreState!.silentWake);
  // The same bands do not wake it again; a message still does.
  game.data.ticks=1010;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1010,food:'low',rest:'satisfied'};
- assert.deepEqual(await c.planCoreWhenDue(choose),{status:'idle',reason:'no-new-event'});
+ assert.deepEqual(await reopened.planCoreWhenDue(choose),{status:'idle',reason:'no-new-event'});
+ let answers=0;assert.equal((await reopened.answerCoreQuestion(initial.questionId,{name:'scripted',async answerCore(){answers++;return {choice:'say',text:'I am fine.'};}})).status,'delivered');assert.equal(answers,1);
+ assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,2,'message/answer wakes without a new offer');
+ assert.equal(reopened.inspect().coreState!.silentWake,undefined);
  // A band change while something is offerable still wakes the core, and the turn clears the silent status.
- await c.configureNativeHaul(cfg);game.data.ticks=1400;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1400,food:'urgent',rest:'satisfied'};
- assert.equal((await c.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,2);assert.equal(c.inspect().coreState!.silentWake,undefined);
+ await reopened.configureNativeHaul(cfg);game.data.ticks=1400;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1400,food:'urgent',rest:'satisfied'};
+ assert.equal((await reopened.planCoreWhenDue(choose)).status,'applied');assert.equal(calls,3);assert.equal(reopened.inspect().coreState!.silentWake,undefined);
 });

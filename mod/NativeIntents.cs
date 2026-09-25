@@ -619,7 +619,9 @@ namespace Concord {
                 // The crew log's heading for an entry with (or without) map provenance: the event's map,
                 // never the viewed one; unknown provenance renders the bare tick.
                 var probe=new CrewEntry {tick=r.untilTick,hasMap=r.mapId>=0,mapId=r.mapId};
-                return "{\"text\":\""+Clock.At(probe.tick,Clock.ForEntry(probe))+"\",\"viewedMap\":"+(Find.CurrentMap==null?-1:Find.CurrentMap.uniqueID)+"}";
+                var referenceMap=Find.Maps.FirstOrDefault(m=>m.uniqueID==r.mapId);
+                int referenceHour=referenceMap==null?-1:GenDate.HourOfDay(GenDate.TickGameToAbs(r.untilTick),Find.WorldGrid.LongLatOf(referenceMap.Tile).x);
+                return "{\"text\":\""+Clock.At(probe.tick,Clock.ForEntry(probe))+"\",\"nativeHour\":"+referenceHour+",\"viewedMap\":"+(Find.CurrentMap==null?-1:Find.CurrentMap.uniqueID)+"}";
             }
             if(r.op=="lab-queue-count") {
                 if(p==null) throw new Exception("Unknown pawn");

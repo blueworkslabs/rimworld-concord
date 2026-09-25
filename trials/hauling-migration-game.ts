@@ -464,10 +464,14 @@ try{
       await run(()=>co.inspect().proposals[offer.id]?.standing?.status!=='running',300000,()=>co.reconcile());await co.reconcile();
       // Clock provenance (verified on one map): the event's map gives the in-game hour; an entry
       // without map provenance, or with a map that does not exist, renders the bare tick only.
-      const clockAt=(mapId:number)=>op({op:'lab-clock-probe',untilTick:state.ticks,mapId}) as Promise<{text:string;viewedMap:number}>;
-      const known=await clockAt(view(e!.intentId)?.mapId??-2),unknown=await clockAt(-1),missing=await clockAt(987654);c.data.clock={known,unknown,missing};
-      expect(c,/^Day \d+, \d+h \(t\d+\)$/.test(known.text),`clock on the event map: ${known.text}`);
-      expect(c,unknown.text===`t${state.ticks}`&&missing.text===`t${state.ticks}`,`unknown provenance must render only the tick: ${unknown.text} / ${missing.text}`);
+      const probeTick=state.ticks,mapId=view(e!.intentId)?.mapId??-2;
+      const clockAt=(mapId:number,tick:number)=>op({op:'lab-clock-probe',untilTick:tick,mapId}) as Promise<{text:string;nativeHour:number;viewedMap:number}>;
+      const known=[];for(const tick of [0,2500,60000]){
+        const result=await clockAt(mapId,tick);known.push({tick,...result});
+        expect(c,result.nativeHour>=0&&result.nativeHour<24&&result.text===`Day ${Math.floor(tick/60000)+1}, ${result.nativeHour}h (t${tick})`,`clock disagrees with native event-map reference: ${JSON.stringify(result)} at ${tick}`);
+      }
+      const unknown=await clockAt(-1,probeTick),missing=await clockAt(987654,probeTick);c.data.clock={known,unknown,missing,probeTick};
+      expect(c,unknown.text===`t${probeTick}`&&missing.text===`t${probeTick}`,`unknown provenance must render only the tick: ${unknown.text} / ${missing.text}`);
       const closed=(state.stockpiles??[]).find(z=>z.zoneId===zoneId)?.label??'';expect(c,closed===m.zone.label,`zone label after retirement: ${closed}`);
       const text=crewReport(co.inspect(),state.ticks).entries.map(x=>x.text);c.data.crew=text;
       expect(c,text.includes(`Offer to Beatrice: haul up to 20 wood to the ${m.zone.label}; others may help.`),'offer record missing');

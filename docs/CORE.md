@@ -194,17 +194,22 @@ than 120 ticks is `unknown`. The same projection goes to the core, to every pawn
 perspective, and to the crew-log board. Bands inform; they are not consent and don't
 authorize work. Only band changes wake the core, not timestamp refreshes.
 
-**Telemetry-only wakes (Fable, after E2).** A wake whose only causes are band changes spends
+**Telemetry-only wakes (implementation proposed after E2).** A wake whose only causes are band changes spends
 no core turn when the core has nothing it could act on: no listed opportunity and no counter
 to adopt, so no eligible offer recipient. The bands are consumed, so they don't wake the
 core again. No attempt is counted and no cooldown starts. The event is recorded as
 `core-wake-silent`, and the status line reads "Core: waiting on …", as for a silent wait.
 Nothing is written to the crew log. The next real turn clears the status. Any other cause
 (message, answer, agreement, request, self-care, native intent) still wakes the core, and so
-does a band change while something is offerable. Question recipients don't count: they are
-listed on every turn, and counting them would disable the rule. On the E2 native-haul run
+does a band change while something is offerable. This implementation excludes question
+recipients. In the retained E2 sample they are available on every turn, so counting them
+would suppress none of this sample; in general that list can be empty. On the E2 native-haul run
 this silences exactly the six telemetry-only wakes (turns 3–7 and 13). That includes
-turn 7, where the core asked a question.
+turn 7, where the core asked a question. Exact exported inputs classify the suppressed
+set as four waits, one ask and one cancelled attempt, not six waits.
+**Direction pending:** the implementation interprets "eligible recipient" as an offer
+recipient, excluding available question recipients. Fable must resolve this before
+merge/live; these measurements do not establish that the question was dispensable.
 
 ## Food sightings
 
