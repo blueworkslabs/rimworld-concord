@@ -1,0 +1,16 @@
+{
+  "taskId": "T1-ui-clean-20260925",
+  "task": "Build one campfire and finish a new Do X times: 3 Cook simple meal bill",
+  "startingSaveSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+  "adapterSha256": "3d32de42f91d82e9084955dce29e37a3eeb08830d9da9c71d17f4fe93c7f7ce2",
+  "timeoutSeconds": 1200,
+  "attempts": 1,
+  "observations": "screenshots only, no bridge/save/code queries during task",
+  "actions": "mouse/key, no draft or forced jobs",
+  "pauseSpeed": "pause and speeds 1-3 allowed",
+  "timer": "from first ready colony screenshot request until controller reports success, verified offline afterward; setup and save/quit excluded",
+  "usage": "native token_count records bounded by start/end; input includes cached input; report reasoning subset separately; actual billed USD unavailable on subscription route",
+  "controller": "openai/gpt-6-astra; current interactive project context; prior pilot experience retained",
+  "scope": "corrected-adapter calibration, not yet a fresh-context paired comparison",
+  "check": "initial no campfire; final campfire and newly added CookMealSimple RepeatCount bill at 0; UI record proves count3 configuration; consuming meals afterward allowed"
+}

@@ -173,6 +173,15 @@ The 12 screenshots exclude one initial observation. [Original report and metrics
 remain unchanged. This is a data point, not the frozen baseline. The frozen baseline needs the corrected
 adapter, cost capture, and the same save and task spec the harness arm will use.
 
+## Corrected-adapter calibration
+
+[Recorded T1 calibration](evidence/ui-baseline-clean-2026-09-25/REPORT.md): **2m30s,
+19 controls, 11 screenshots, zero rejected game inputs**. Save/task/adapter hashes
+frozen, native token usage captured; actual subscription USD unavailable. The existing
+long project context makes this calibration rather than a fresh-context scored arm.
+The paired comparison still requires identical clean controller contexts and the
+shared checker. Original pilot remains above; no harness advantage has been measured.
+
 ## Sequence and ownership
 
 1. **This page reviewed and merged** (Fable owns the definition; the team edits).
