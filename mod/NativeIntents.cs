@@ -145,6 +145,8 @@ namespace Concord {
         }
     }
     public class IntentState : GameComponent {
+        // Operator measurement mode survives map loads; -1 queries without patch mutation.
+        private static int labPatchMode=1;
         public List<HaulIntent> intents=new List<HaulIntent>();
         public int dropSeq;
         // Lab-only fault injection: the next tagged job skips admission (escape detector check).
@@ -535,10 +537,12 @@ namespace Concord {
             if(r.op=="lab-patches"){
                 // 0 all patches off (vanilla), 1 all on, 2 all on except Job.SetTarget. Measurement only.
                 var h=Bootstrap.harmony;if(h==null)throw new Exception("Harmony unavailable");
+                if(r.count==-1)return "{\"mode\":"+labPatchMode+",\"patchedMethods\":"+h.GetPatchedMethods().Count()+"}";
+                if(r.count<0||r.count>2)throw new Exception("Unknown patch mode");
                 h.UnpatchAll(h.Id);
                 if(r.count>=1)h.PatchAll(typeof(Bootstrap).Assembly);
                 if(r.count==2)h.Unpatch(HarmonyLib.AccessTools.Method(typeof(Job),nameof(Job.SetTarget)),HarmonyLib.HarmonyPatchType.All,h.Id);
-                return "{\"mode\":"+r.count+",\"patchedMethods\":"+h.GetPatchedMethods().Count()+"}";
+                labPatchMode=r.count;return "{\"mode\":"+r.count+",\"patchedMethods\":"+h.GetPatchedMethods().Count()+"}";
             }
             if(r.op=="lab-bench-settarget") return SetTargetBenchmark.Measure(Math.Max(1000,Math.Min(r.count,200000)));
             if(r.op=="lab-work-options") return WorkOptions.Measure(Math.Max(1,Math.Min(r.count,10)));

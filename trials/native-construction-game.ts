@@ -218,6 +218,19 @@ try{
     const id3=await partial();await op({op:'lab-build-deconstruct-order',intentId:id3});await poll();const v3=view(id3)!;c.data.frameDeconstruct=v3;
     expect(c,v3.status==='stopped'&&/deconstructed by the player's order; held 7 WoodLog/.test(v3.stopReason??''),`frame deconstruct: ${v3.status} ${v3.stopReason}`);
     expect(c,!/replaced/.test(v3.stopReason??''),'ordinary deconstruction labelled as replacement');
+    // Regression: remove an actively worked frame without first interrupting its job.
+    await b.load(base);await b.admin('pause');await poll();
+    const id4=randomUUID();await open(id4,P);await prio(P,1,1);
+    let activeWork=false;await run(()=>activeWork,240000,async()=>{
+      const j=await jobOf(P);const frame=(await site(f.site.x,f.site.z)).find(t=>t.kind==='frame');
+      activeWork=j.current?.def==='FinishFrame'&&(frame?.workDone??0)>0;
+    });
+    if(!activeWork)throw Error('precondition: no active worked frame to cancel');
+    const beforeCancel=(await site(f.site.x,f.site.z)).find(t=>t.kind==='frame')!;
+    await op({op:'lab-build-destroy',intentId:id4,reason:'Cancel'});await poll();const v4=view(id4)!;
+    c.data.activeFrameCancel={before:beforeCancel,after:v4};
+    expect(c,v4.status==='stopped'&&/cancelled/.test(v4.stopReason??''),'active frame cancellation failed');
+    expect(c,Math.abs(workOf(v4)-(beforeCancel.workDone??0))<0.01,'active-frame accrued work lost or duplicated');reconcile(c,v4);
   });
   // 8. A different def appears on the footprint: failed, no re-tag.
   await scenario('8-different-def',base,async c=>{
@@ -410,6 +423,9 @@ try{
   });
   // 18. Policy-independent untagged baseline; each arm reloads the same quiet save.
   await scenario('18-patch-cost',base,async c=>{
+    const incoming=await op({op:'lab-patches',count:-1});
+    if(![0,1,2].includes(incoming.mode))throw Error('Unknown incoming patch mode');
+    c.data.incomingPatchMode=incoming;
     const arm=async(mode:number)=>{
       await b.load(base);await b.admin('pause');await poll();
       if((state.buildIntents??[]).some(i=>i.status==='open'))throw Error('throughput requires an untagged baseline');
@@ -419,7 +435,7 @@ try{
       finally {await b.admin('pause');}
     };
     try{c.data.arms=[await arm(1),await arm(0),await arm(1),await arm(0)];}
-    finally{await op({op:'lab-patches',count:1});}
+    finally{const restored=await op({op:'lab-patches',count:incoming.mode});c.data.restoredPatchMode=restored;if(restored.mode!==incoming.mode||restored.patchedMethods!==incoming.patchedMethods)throw Error('Patch configuration restoration mismatch');}
     receipt.patchCost={...(receipt.patchCost as object??{}),throughput:c.data.arms,note:'quiet untagged baseline restored before each arm; all-Concord versus detached-Concord patches (other mods remain); capped/noisy throughput is inconclusive, not a colony slowdown or tagged-handler cost'};
   });
   receipt.passed=receipt.cases.length>0&&receipt.cases.every(c=>c.passed);
