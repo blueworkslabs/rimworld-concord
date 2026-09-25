@@ -405,10 +405,12 @@ try{
       const haul=await co.core().propose(P,intentAction(e!),'The wood by the wall is getting wet.');
       await co.pawn(P).decide(haul.id,scripted({kind:'accept',reason:'Authored acceptance'}));
       // Pedro carries on a tagged trip and has seen the patient.
-      const saw=()=>events.some(x=>x.pawn===P&&x.kind==='casualty'&&x.subject===target);
+      // The fixture can establish a sighting before the case's event cursor. Require the
+      // current pawn-local observation, not a second edge event that need never recur.
+      const saw=()=>!!pawn('Pedro').casualties?.observations.some(x=>x.target===target)&&!!pawn('Pedro').casualties?.visibleSubjects?.some(x=>x.target===target&&x.downed&&!x.inBed);
       const carrying=()=>settled(e!.intentId)&&!jobOf(e!.intentId,pawn('Pedro').jobId!)?.preTag&&kinds('job-start',P).some(x=>Number(field(x,'job'))===pawn('Pedro').jobId&&field(x,'intent')===e!.intentId&&field(x,'def')==='WoodLog');
       if(!await run(()=>saw()&&carrying(),180000,()=>co.reconcile().then(()=>{}))){c.findings.push(`precondition: no carrying tagged trip with a sighting of the patient (sighted ${saw()}, carrying ${carrying()})`);return;}
-      const tripJob=pawn('Pedro').jobId!,cargo=pawn('Pedro').carryingCount??0;c.data.trip={job:tripJob,cargo,hold:jobOf(e!.intentId,tripJob)};
+      const tripJob=pawn('Pedro').jobId!,cargo=pawn('Pedro').carryingCount??0;c.data.trip={job:tripJob,cargo,hold:jobOf(e!.intentId,tripJob),sighting:pawn('Pedro').casualties};
       await co.attend(P,{name:'scripted',async reflect(){return {kind:'request_rescue',agreementId:haul.id,target,reason:'Someone is down near the pile; can I help?'};}});
       const request=co.core().requests().find(r=>r.pawn===P&&r.agreementId===haul.id&&r.status==='pending');
       if(!request){c.findings.push('the carrying pawn could not raise a rescue request');return;}
