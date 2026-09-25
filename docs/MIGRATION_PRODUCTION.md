@@ -1,9 +1,10 @@
 # Construction and cooking migration: native blueprints and bills (Gate A)
 
-**Status: Gate A draft for Fable's review, 2026-09-25.** Design and staging gates are
-not signed. Nothing here authorizes implementation, a live run or deletion of the
-ordered path. The questions below are listed, not solved; where a direction is
-suggested it is marked as a proposal. The pinned build is RimWorld 1.6.4871
+**Status: Gate A signed by Fable on 2026-09-25, with the eleven decisions recorded
+under "Direction" and five verification items carried into Gate B entry.** Gate B
+(design freeze) and Gate C (staging verdict) are not signed. This authorizes the
+design work for the freeze, not implementation of runtime behaviour, a live run or
+deletion of the ordered path. The pinned build is RimWorld 1.6.4871
 (`Assembly-CSharp` prefix `082db1dd4f7f`), the same as the hauling migration.
 
 ## Goal
@@ -29,6 +30,69 @@ for construction, and a **bill** on a workbench for cooking.
 - **Retirement writes one record** and the carrier becomes ordinary afterwards; a
   "since then" line reports what happened to it as ordinary play.
 - **Growing hold stays parked.** Nothing here reopens B1.
+
+## Direction (Fable, 2026-09-25; Gate A signed, Gate B not)
+
+Decisions on the eleven open questions below, in their order. The rule behind most of
+them is the hauling rule: record what the game can prove, keep the tag on the carrier,
+and let a failure be an event rather than something the tag quietly survives.
+
+1. **Build tag identity: the footprint key, as proposed.** (map, footprint cells,
+   build def, rotation, placement generation), with the current thing ID recorded at
+   each stage. The tag moves at exactly the two replacement points (C1) and nowhere
+   else. A thing of a different def appearing on the footprint fails the intent; it
+   does not re-tag. The key and the stage record must survive save and cold restore.
+2. **"Built by" is not a title we award.** The completion record names the finisher
+   (the only native fact, C4) and lists every contribution: material units delivered
+   per pawn, construction work contributed per pawn. Work shares are ours, measured as
+   the change in the frame's saved work while a pawn's finish-frame job holds the
+   reservation. Delivery alone is participation and is credited; whoever contributes
+   without being the accepting pawn is a helper, labelled on first credit, as in
+   hauling. Refusal binds for delivery and for construction work alike.
+3. **Construction "since then" is the building's fate only.** Standing, destroyed or
+   deconstructed, with the clock time. Later use is out: a cooking agreement at that
+   campfire writes its own record.
+4. **Cooking "since then" is (a): ordinary cooking at the same bench.** Same hook as
+   the credited iterations, robust across stack merges and splits (K3). The meals'
+   fate is not tracked per unit; eating already has its own receipts and stays a
+   self-care choice.
+5. **Carriers: both sources.** Existing colony blueprints and bills, core-placed
+   blueprints at operator-declared candidate sites, and core-added bills on existing
+   colony benches, mirroring the stockpile rule. The core never chooses free cells and
+   never builds a bench inside a cooking intent.
+6. **Refusal enforcement: the narrow work-giver filter, extended to all three.**
+   Delivery under both its Construction and Hauling registrations (C3), construction
+   work, and bill work through a narrow patch on the bill start check keyed by tagged
+   load ID (K4). Not the native pawn restriction: it is exclusive, which contradicts
+   attribution-only, and it rewrites the player's bill (K5).
+7. **A failed construction stops the intent as failed.** The record says so, with the
+   refund the game made. The fresh blueprint the game respawns is ordinary work; the
+   core may offer it again with fresh consent. No automatic retry, the same rule the
+   hauling migration applies to breaks and expiry.
+8. **Quotas: one building per build intent; bill repeat count 1 to 3 for Gate C.** The
+   intent's counter is ours (K5); the design must not depend on the bound.
+9. **Defs for Gate C: campfire and simple meal only.** The list is configuration and
+   can widen after the scene; the scene measures two things, not a catalogue.
+10. **Failure accounting reports only what a receipt proves.** A failed construction
+    records materials returned and lost as the game refunded them; an interrupted bill
+    records no iteration and notes ingredients left at the bench only when the game
+    left them. Where a hook cannot see a quantity the line says "not recorded"; no
+    estimates.
+11. **One Gate C scene for both, in two stages.** The campfire is the precondition for
+    the meals, and the core named "campfire or cooking later" as its own reason in the
+    hauling rerun. The scene is the first chance to see a plan across two agreements.
+    Mechanism evidence stays per carrier in scripted trials, so the live read has one
+    thing to judge: whether the core strings them.
+
+**Carried into Gate B entry (verify before the freeze, on staging, no decompiled code
+in the repo):** the simple-meal and campfire recipe XML (unfinished thing, K6); whether
+blueprint and frame defs carry the forbid comp (C5); who assigns a cloned or pasted
+bill's ID and that a clone never inherits a tag (K1); the destroy mode when a
+blueprint is wiped by placing over it (C6); and map-event subscription lifetime.
+
+**Readiness debt is paid in this migration**, as the page says: the borrowed Hauling
+work-tag gate and the 35 % stop leave with the ordered path, and capability comes from
+the Construction and Cooking work types' own disabled state.
 
 ## The four questions, per carrier
 
