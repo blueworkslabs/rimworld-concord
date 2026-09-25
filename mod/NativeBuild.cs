@@ -14,7 +14,7 @@ namespace Concord {
 
     /** One receipt line. kind: delivery, work, finish, pretag, forced, rejected, violation, note,
      *  withdrawal, ending, fate. role: accepted, helper, pretag, forced (had refused). */
-    public class BuildRecord : IExposable {
+    [Serializable] public class BuildRecord : IExposable {
         public int seq,tick,generation,count=0;public float work;
         public string kind,pawn,role,def,occurrence,text;
         public void ExposeData() {
@@ -81,7 +81,9 @@ namespace Concord {
     [Serializable] public class BuildView {
         public string intentId,status,stage,def,label,siteId,stopReason,finisher,note,fate,held;
         public int mapId,x,z,rot,generation,thingId,createdTick,untilTick,fateTick,violations,rejectedStarts;
-        public string[] accepted,excluded;public BuildShare[] delivered,work;public BuildRecord[] records;
+        public string[] accepted,excluded;
+        [NonSerialized] public BuildShare[] delivered,work;
+        [NonSerialized] public BuildRecord[] records;
     }
 
     /** Transient scoped transition (never saved: saves happen between ticks, not inside calls). */
@@ -381,7 +383,16 @@ namespace Concord {
         }
 
         public string Json() {
-            return "["+String.Join(",",intents.Select(i=>JsonUtility.ToJson(View(i))).ToArray())+"]";
+            // Unity's runtime serializer omits nested custom-object arrays in this assembly. Emit
+            // each receipt/share explicitly, as the existing hauling view does; never default
+            // a missing ledger to zero on the TypeScript side.
+            return "["+String.Join(",",intents.Select(i=>{
+                var v=View(i);
+                return JsonUtility.ToJson(v).TrimEnd('}')+",\"delivered\":["+
+                    String.Join(",",v.delivered.Select(d=>JsonUtility.ToJson(d)).ToArray())+"],\"work\":["+
+                    String.Join(",",v.work.Select(w=>JsonUtility.ToJson(w)).ToArray())+"],\"records\":["+
+                    String.Join(",",v.records.Select(r=>JsonUtility.ToJson(r)).ToArray())+"]}";
+            }).ToArray())+"]";
         }
         public static BuildView View(BuildIntent i) {
             var delivered=i.records.Where(r=>r.kind=="delivery").GroupBy(r=>r.pawn+"|"+r.role+"|"+r.def).Select(g=>new BuildShare{pawn=g.First().pawn,role=g.First().role,def=g.First().def,count=g.Sum(r=>r.count)}).ToArray();

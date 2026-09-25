@@ -975,7 +975,12 @@ From a full-assembly search of the pinned decompile (private, outside the reposi
 Thirteen patched methods; the cooking slice has seven left under the twenty ceiling. Every
 patch checks the static `BuildState.Active` flag (O(1)) before any other work; the global
 paths add only a job-def or dictionary check. Costs are measured on staging with
-`lab-build-cost` (case 1 enables timing); none is claimed yet.
+`lab-build-cost` (case 1 enables timing and resets it in `finally`); none is claimed yet.
+The current counters are **partial instrumentation, not full per-patch overhead**:
+B1/B2/B4 and B9/B10/B12 time prefixes but omit postfix/finalizer work; B8 includes
+its original native deposit action; `active` counts describe the global flag, not
+necessarily a tagged-handler hit. Keep ledger costs pending until scoped comparable
+measurements cover the omitted work. The runner retains these limitations with the raw values.
 
 | # | Method | Kind | Does work when | Cost |
 |---|---|---|---|---|

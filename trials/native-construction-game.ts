@@ -45,6 +45,10 @@ async function poll(){
   const fresh=(state.events??[]).filter(e=>e.seq>lastSeq);
   if(fresh.length&&fresh[0]!.seq>lastSeq+1&&lastSeq>0)receipt.eventGaps++;
   events.push(...fresh);if(fresh.length)lastSeq=fresh[fresh.length-1]!.seq;
+  for(const v of state.buildIntents??[]) {
+    if(v.violations>0||v.delivered?.some(r=>r.role==='violation')||v.work?.some(r=>r.role==='violation'))
+      throw Error('construction consent violation: '+v.intentId);
+  }
   return state;
 }
 const view=(id:string)=>{const v=(state.buildIntents??[]).find(i=>i.intentId===id);return v?BuildView.parse(v):undefined;};
@@ -71,6 +75,7 @@ async function scenario(name:string,base:string,body:(c:Case)=>Promise<void>){
     c.passed=c.findings.length===0;await persist();
   }
   console.error(`${c.passed?'PASS':'FAIL'} ${name} ${c.findings.join('; ')}`);
+  if(!c.passed)throw Error('Stopped after failed construction case: '+name);
 }
 function expect(c:Case,ok:boolean,finding:string){if(!ok)c.findings.push(finding);}
 const total=(v:BuildView,role?:string,pawnId?:string)=>v.delivered.filter(d=>(!role||d.role===role)&&(!pawnId||d.pawn===pawnId)).reduce((n,d)=>n+d.count,0);
@@ -100,6 +105,7 @@ try{
   // 1. The accepting pawn delivers and builds (plus the patch-cost measurement for the ledger).
   await scenario('1-accept-build',base,async c=>{
     await op({op:'lab-build-cost',count:1});
+    try {
     const id=randomUUID();await prio(P,1,1);await open(id,P);
     await run(ended(id),300000);const v=view(id)!;
     expect(c,v.status==='built'&&v.stage==='built',`expected built, got ${v.status}/${v.stage}`);
@@ -107,7 +113,13 @@ try{
     expect(c,workOf(v,P,'accepted')>0,'no accepted work recorded');
     expect(c,v.finisher===P,`finisher ${v.finisher}`);
     expect(c,kinds('build-stage').filter(e=>field(e,'stage')==='frame').length===1,'expected exactly one frame transition');
-    consent(c,v);receipt.patchCost=await op({op:'lab-build-cost',count:2});
+    consent(c,v);
+    } finally {
+      try { receipt.patchCost={scope:'incomplete handler-body instrumentation; not total patch overhead',
+        limitations:['prefix-only for B1/B2/B4/B9/B10/B12; postfix/finalizer excluded','B8 includes the original native deposit action','active counts use the global Active flag, not tagged-handler hits'],
+        values:await op({op:'lab-build-cost',count:2})}; }
+      finally { await op({op:'lab-build-cost',count:0}); }
+    }
   });
   // 2. An unasked pawn delivers: credited as a helper.
   await scenario('2-helper-delivers',base,async c=>{
@@ -120,11 +132,19 @@ try{
   });
   // 3. Ordinary work: refusers never deliver or build (Construction-enabled, and Hauling-only).
   await scenario('3-refusal-ordinary',base,async c=>{
-    const id=randomUUID();await open(id,P);await exclude(id,B,'Not now');await exclude(id,A,'No');
-    await prio(B,1,1);await prio(A,0,1);await prio(P,1,1);
-    await run(ended(id),300000);const v=view(id)!;
-    expect(c,!v.delivered.some(d=>d.pawn===B||d.pawn===A)&&!v.work.some(w=>w.pawn===B||w.pawn===A),'a refuser contributed');
-    expect(c,v.status==='built',`expected built, got ${v.status}`);consent(c,v);c.data.rejectedStarts=v.rejectedStarts;
+    // Alvin cannot haul in the unchanged fixture. Use the capable refuser in two
+    // independent halves; do not interpret a disabled work type as refusal enforcement.
+    c.data.halves=[];
+    for(const construction of [1,0]) {
+      if(construction===0){await b.load(base);await b.admin('pause');await poll();}
+      const id=randomUUID();await open(id,P);await exclude(id,B,'Not now');
+      const enabled=await prio(B,construction,1);
+      if(enabled.construction!==construction||enabled.hauling!==1)throw Error('precondition: refuser cannot perform the selected work');
+      await prio(P,1,1);await run(ended(id),300000);const v=view(id)!;
+      expect(c,!v.delivered.some(d=>d.pawn===B)&&!v.work.some(w=>w.pawn===B),'a refuser contributed');
+      expect(c,v.status==='built',`expected built, got ${v.status}`);consent(c,v);
+      (c.data.halves as unknown[]).push({construction,hauling:1,refuser:B,view:v});
+    }
   });
   // 4. An untagged blueprint within 8 cells: a refuser's delivery there never fills the tagged one.
   await scenario('4-nearby-untagged',base,async c=>{
@@ -164,6 +184,7 @@ try{
     await b.load(base);await b.admin('pause');await poll();
     const id2=randomUUID();await prio(P,1,1);await open(id2,P);
     await run(()=>view(id2)?.stage==='frame'&&total(view(id2)!)>0,240000);await prio(P,0,0);await op({op:'lab-interrupt',actor:P,reason:'idle'});
+    expect(c,total(view(id2)!)>0&&total(view(id2)!)<cost,'unexercised: frame was not partially supplied');
     await op({op:'lab-build-destroy',intentId:id2,reason:'Cancel'});await poll();const v2=view(id2)!;c.data.frameCancel=v2;
     expect(c,v2.status==='stopped'&&/held .*WoodLog.*returned: not recorded/.test(v2.stopReason??''),`frame cancel: ${v2.status} ${v2.stopReason}`);
   });
@@ -178,7 +199,7 @@ try{
   await scenario('9-restore',base,async c=>{
     const id=randomUUID();await open(id,P);await poll();
     const checkpoint=async(label:string)=>{
-      const before=view(id)!;const name=`lab-concord-nc-${label}-`+Date.now();await b.save(name);
+      const before=view(id)!;if(before.stage!==label||before.status!=='open')throw Error(`${label}: checkpoint precondition not reached (${before.status}/${before.stage})`);const name=`lab-concord-nc-${label}-`+Date.now();await b.save(name);
       await b.load(name);await b.admin('pause');await poll();const same=view(id)!;
       expect(c,JSON.stringify(same)===JSON.stringify(before),`${label}: same-process restore changed the intent`);
       const {stdout}=await promisify(execFile)(process.execPath,[root+'/dist/trials/native-construction-restore.js',name,id],{env:process.env,timeout:120000});
@@ -237,12 +258,15 @@ try{
   });
   // 15. Withdrawal in flight: carrying toward the site; and an already-excluded pawn at attachment.
   await scenario('15-withdraw-in-flight',base,async c=>{
-    const id=randomUUID();await prio(P,0,1);await open(id,P);await prio(B,1,0);
+    const id=randomUUID();await prio(P,0,1);await open(id,P);await open(id,B);
+    // Beatrice stays idle but keeps the intent open after Pedro withdraws, so the
+    // check cannot confuse ordinary post-retirement work with consent enforcement.
     const carrying=async()=>{const j=await jobOf(P);return j.current?.def==='HaulToContainer'&&j.carrying>0;};
     let seen=false;await run(()=>seen,180000,async()=>{seen=await carrying();});
     if(!seen)throw Error('precondition: Pedro never carried toward the site');
     await exclude(id,P,'Changed my mind');const tick=state.ticks;const j=await jobOf(P);c.data.afterExclude=j;
-    expect(c,j.current?.def!=='HaulToContainer'||j.current.segments===0,'the delivery kept running');
+    expect(c,view(id)?.status==='open','precondition: withdrawal retired the intent');
+    expect(c,j.current?.def!=='HaulToContainer','the delivery kept running');
     await run(()=>false,15000);const v=view(id)!;
     expect(c,!v.records.some(r=>r.kind==='delivery'&&r.pawn===P&&r.tick>=tick),'a post-withdrawal deposit happened');consent(c,v);
     // Already-excluded attachment: Beatrice delivers to an untagged blueprint, is excluded, then the tag lands.
