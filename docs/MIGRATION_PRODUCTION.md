@@ -127,8 +127,8 @@ differently, because a built thing and a cooked meal are not a pile.
   the tagged frame is successfully spawned and matched (C7/P1), not merely a same-def
   occupant. Construction failure/removal is **failed**, player cancellation/replacement
   is **stopped**, and the deadline is **expired**, as distinguished in P1.
-  A refused pawn delivering or building
-  on it counts as a violation, as in hauling.
+  A refused pawn's ordinary delivery or construction counts as a violation. Explicit
+  player-forced work instead uses the signed no-credit/no-violation exception.
 - **What "since then" means.** Nothing more arrives at a finished building. The
   decided analogue is **its fate only**, updated in place: "Since then: still standing"
   or "deconstructed at 14:00". Later cooking has its own record (decision 3).
@@ -423,6 +423,10 @@ the repository.
   so ordinary cooks can do it. **Decided:** its repeat count is set to the quota
   so the bench stops at the agreed number; a tagged existing bill is never modified
   (K5). Our counter decides `met` in both cases.
+- A player-forced refused iteration still decrements native repeat count, but earns
+  zero intent credit. Thus a quota-2 bill can reach native repeat count 0 with only
+  one credited iteration. Record that shortfall honestly and leave the unmet intent
+  to its lifecycle/deadline; do not fabricate `met` or silently replenish the bill.
 - After retirement the bench is watched for "since then": every later completed
   ordinary cooking iteration at that bench is recorded per pawn (decision 4).
 - Reconcile saved load ID and bench membership on load; a missing bill is not replaced
@@ -499,8 +503,9 @@ must distinguish that context without broadening ordinary scans.
 1. The accepting pawn delivers and builds: delivery and work credited, finisher named,
    `built`.
 2. An unasked pawn delivers: credited and labelled as a helper on first credit.
-3. A refusing pawn with Construction enabled never delivers to or works on the tagged
-   site; a refusing pawn with only Hauling enabled never delivers (both registrations).
+3. In ordinary work, a refusing pawn with Construction enabled never delivers to or
+   works on the tagged site; a refusing pawn with only Hauling enabled never delivers
+   (both registrations). Player-forced work is covered separately in case 13.
 4. An untagged blueprint within 8 cells of the tagged one: a refusing pawn's delivery to
    the untagged one never fills the tagged one.
 5. Work shared: the acceptor is interrupted mid-frame, a helper finishes; work shares sum
@@ -534,8 +539,8 @@ must distinguish that context without broadening ordinary scans.
 **Cooking (simple meal at the campfire):**
 1. A core-added bill, quota 2, cooked by the acceptor: two iteration receipts, `met`.
 2. A helper cook completes one iteration: credited and labelled.
-3. A refusing cook never starts the tagged bill but still cooks an untagged bill at the
-   same bench.
+3. In ordinary work, a refusing cook never starts the tagged bill but still cooks an
+   eligible untagged bill at the same bench. Player-forced work is case 10.
 4. A tagged existing player bill set to "forever": our counter reaches the quota, the
    bill's own settings are unchanged, and later iterations appear in "since then".
 5. Delete or clear the tagged bill: `stopped`, including after restore. Suspension
@@ -630,7 +635,9 @@ them before Gate C is entered.
   to build, the tagged site: the work happens, the record reads "ordered by the player
   (had refused)", no credit, no helper label, no violation counted.
 - **Cooking 10.** A refusing cook is force-ordered onto the tagged bill: one iteration
-  happens, recorded the same way, not counted toward the quota.
+  happens, recorded the same way, not counted toward the quota. For a core-added
+  quota-2 bill, follow it with one credited iteration: native repeat count is 0,
+  credited count is 1, and the intent is not falsely met or the bill silently refilled.
 
 ## Gate A open decisions (as posed; decided under "Direction")
 
