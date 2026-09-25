@@ -96,3 +96,7 @@ New trials: add a row here in the same PR, with sanitized evidence in `docs/evid
 [Verdict and deletion sequence](HAULING_MIGRATION_GATE_C.md): game-side pass; generic
 test port before runtime deletion. Medical-alert inspection identifies Beatrice's
 pre-existing asthma needing tending. Crew-side follow-ups remain separate.
+
+## 2026-09-25 — standard-UI harness feasibility pilot
+
+[Report](../evidence/ui-baseline-2026-09-25/REPORT.md) · [metrics](../evidence/ui-baseline-2026-09-25/metrics.json): first-attempt campfire + three cooking iterations using only standard UI, 251.903s and 20 controls. Provisional: adapter stalls retained, controller cost unavailable; not a harness comparison.

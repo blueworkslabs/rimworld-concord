@@ -1,0 +1,60 @@
+{
+  "task": "Build one campfire and finish a Do X times: 3 Cook simple meal bill",
+  "result": "pass",
+  "attempts": 1,
+  "gameVersion": "1.6.4871 rev600",
+  "controller": "GPT-6 Astra, existing project context",
+  "taskStartEpoch": 1790364664.3589978,
+  "taskEndEpoch": 1790364916.2620823,
+  "wallSeconds": 251.90308451652527,
+  "firstObservedSuccessSeconds": 235.85118913650513,
+  "inputs": {
+    "click": 14,
+    "key": 6,
+    "screenshot": 12
+  },
+  "totalControlCommands": 20,
+  "initialScreenshotsOutsideTimer": 1,
+  "rejectedPlacements": 1,
+  "draftCommands": 0,
+  "forcedPawnJobCommands": 0,
+  "taskTokens": null,
+  "taskCostUsd": null,
+  "extraCharacterModelCalls": 0,
+  "costNote": "Primary controller inference was used; per-task tokens and cost were not isolated. Null does not mean zero.",
+  "postRunCheck": {
+    "initialCampfires": 0,
+    "finalCampfires": 1,
+    "id": "Campfire5668",
+    "recipe": "CookMealSimple",
+    "repeatMode": "RepeatCount",
+    "remaining": 0,
+    "remainingNote": "Omitted repeatCount is zero under the pinned game serializer; UI also visibly reached 0x."
+  },
+  "recording": {
+    "file": "ui-baseline.mp4",
+    "sha256": "776d0c60e75499e3d05c4eba8d7c358fe44d31cf0c40078ffad870ca9951f243",
+    "durationSeconds": 433.333333,
+    "bytes": 11328346,
+    "fps": 15,
+    "duplicateFrames": 3,
+    "droppedFrames": 1,
+    "message": "https://discord.com/channels/1083662512806965308/1467116597645676546/1553129335798501606"
+  },
+  "inputSaveSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+  "finalSaveSha256": "e13f2a651a34e6dfa231bc2f8dba073a88bc455474d6e995fa78f769f3714b24",
+  "preservation": {
+    "originalSaves": 439,
+    "allOriginalSavesUnchanged": true,
+    "modsUnchanged": true,
+    "profileRestored": true,
+    "newSaveSha256": "e13f2a651a34e6dfa231bc2f8dba073a88bc455474d6e995fa78f769f3714b24",
+    "inputCopyUnchanged": true
+  },
+  "limits": [
+    "Standard UI on existing modded staging installation, not an unmodded-vanilla comparison.",
+    "Existing helper fixture and project-familiar controller; one bounded task, not general colony competence.",
+    "Two approximately 16-second input-adapter waits and an adapter repair are included, not intrinsic UI cost.",
+    "No paired harness arm or attributable controller token/cost measurement."
+  ]
+}

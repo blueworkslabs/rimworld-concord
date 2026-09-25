@@ -1,5 +1,8 @@
 # Documentation
 
+For the current harness phase, start with [HARNESS](HARNESS.md); its phase-specific
+input/action rules supersede the older story-layer contracts below, not their historical evidence.
+
 Start with the [project README](../README.md), then [VISION](VISION.md) and
 [ARCHITECTURE](ARCHITECTURE.md). The topic documents are the current contracts: if
 code and a contract disagree, one of them is a bug.
