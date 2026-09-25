@@ -119,6 +119,12 @@ node dist/trials/run-jev-replay.js docs/evidence/recorded-scene.json --out .runt
 Dry first, always. Sanitized results go to `docs/evidence/jev-replay.json` with a
 ledger row when the pass has run.
 
+## Live wiring
+
+Decision 1 below is implemented as [annotate-only grounding](JEV_ANNOTATE.md): the same
+grounding request, byte for byte, over each returned core reply of a live run, journaled
+and gating nothing. Its first exercise is the construction and cooking scene.
+
 ## Not decided by this replay
 
 Which use, if any, gets wired; where thresholds sit; whether the native TypeSafe
