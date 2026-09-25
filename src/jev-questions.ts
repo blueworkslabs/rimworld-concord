@@ -88,7 +88,7 @@ export type CoreWakeState={
 export type WakeViewInput={tick:number;brief:{text:string};crew:Crew;topics:{sourceId:string;text:string;status:string}[];
  wakeReasons?:{kind:string;sourceId:string;value:string}[];messages:{id:string;from:string;to:string;text:string}[];
  selfCare?:{pawn:string;status:string;consumed?:number;portionCount?:number;consumedUnit?:string}[];
- agreements:{id:string;pawn:string;status:string;progress:{status?:string;completed:number;agreed:number;delivered?:number}}[];
+ agreements:{id:string;pawn:string;status:string;reply?:{kind:string;reason?:string};replyEvidence?:string;progress:{status?:string;completed:number;agreed:number;delivered?:number}}[];
  nativeIntents?:NativeIntentInput[]};
 /** Aggregate receipt evidence for a shared native intent (stockpile haul), as the core sees it. */
 export type NativeIntentInput={thingDef:string;status:string;delivered:number;quota:number;overshoot?:number;incidental?:number;byPawn:Record<string,number>;accepted:string[];excluded:string[];lastDeliveryTick:number};
@@ -124,19 +124,19 @@ export function coreWakeQuestions(s:CoreWakeState):Record<string,JevQuestion>{
  * in typed summary form, so their absence is never scored as the core's error. */
 export type GroundingState={
  reply:{topics:{id:string;status:string;text:string}[];action:{kind:string;reason:string;text?:string;pawn?:string}};
- records:{asOfTick:number;sharedStatus:{name:string;food:string;rest:string;tick:number;fresh:boolean}[];
+ records:{asOfTick:number;brief:string;availability:{pawn:string;status:string}[];sharedStatus:{name:string;food:string;rest:string;tick:number;fresh:boolean}[];
   eating:{pawn:string;status:string;consumed?:number;portion?:number;unit?:string;completed?:boolean}[];
-  agreements:{id:string;pawn:string;work:string;offer:string;progress:{completed:number;agreed:number;delivered?:number;unit:string};completedTick?:number}[];
+  agreements:{id:string;pawn:string;work:string;offer:string;reply?:{kind:string;reason?:string};replyEvidence?:string;progress:{completed:number;agreed:number;delivered?:number;unfulfilled?:number;unit:string};completedTick?:number}[];
   closable:{id:string;statuses:string[]}[];questions:{pawn:string;status:string}[];
   sightings:{observer:string;tick:number;items:{label:string;count:number;forbidden:boolean}[];campfires:number}[];
   options:{pawn:string;kind:string;detail:string}[];questionRecipients:string[];
-  sharedHauls:{item:string;status:string;delivered:number;quota:number;byPawn:Record<string,number>;accepted:string[];declined:string[];lastDeliveryTick:number;beyondQuota?:number}[]};
+  sharedHauls:{item:string;status:string;delivered:number;quota:number;byPawn:Record<string,number>;accepted:string[];excluded:string[];lastDeliveryTick:number;beyondQuota?:number}[]};
  communication:{from:string;to:string;text:string}[];
  unscored:string[];
 };
-export type GroundingViewInput={tick:number;crew:Crew;sharedStatus:{pawn:string;name:string;food:string;rest:string;tick:number;fresh:boolean}[];
+export type GroundingViewInput={tick:number;crew:Crew;brief?:{text:string};availability?:{pawn:string;status:string}[];sharedStatus:{pawn:string;name:string;food:string;rest:string;tick:number;fresh:boolean}[];
  selfCare?:{pawn:string;status:string;consumed?:number;portionCount?:number;consumedUnit?:string;completed?:boolean}[];
- agreements:{id:string;pawn:string;status:string;progress:{status?:string;completed:number;agreed:number;delivered?:number;completedTick?:number|null}}[];
+ agreements:{id:string;pawn:string;status:string;reply?:{kind:string;reason?:string};replyEvidence?:string;progress:{status?:string;completed:number;agreed:number;delivered?:number;unfulfilled?:number;completedTick?:number|null}}[];
  topicClosures:{sourceId:string;statuses:string[]}[];messages:{from:string;to:string;text:string}[];
  questions?:{pawn:string;status:string}[];questionRecipients?:string[];
  foodSightings?:{observer:string;tick:number;items:{label:string;count:number;forbidden:boolean}[];campfires:unknown[]}[];
@@ -145,15 +145,15 @@ export type GroundingViewInput={tick:number;crew:Crew;sharedStatus:{pawn:string;
 export function groundingState(v:GroundingViewInput,choice:{topics:{sourceId:string;text:string;status:string}[];action:{kind:string;reason:string;text?:string;pawn?:string}}):GroundingState{
  const name=namer(v.crew);
  return {reply:{topics:choice.topics.map(t=>({id:t.sourceId,status:t.status,text:t.text})),action:{kind:choice.action.kind,reason:choice.action.reason,...(choice.action.text?{text:choice.action.text}:{}),...(choice.action.pawn?{pawn:name(choice.action.pawn)}:{})}},
-  records:{asOfTick:v.tick,sharedStatus:v.sharedStatus.map(s=>({name:s.name,food:s.food,rest:s.rest,tick:s.tick,fresh:s.fresh})),
+  records:{asOfTick:v.tick,brief:v.brief?.text??'',availability:(v.availability??[]).map(a=>({pawn:name(a.pawn),status:a.status})),sharedStatus:v.sharedStatus.map(s=>({name:s.name,food:s.food,rest:s.rest,tick:s.tick,fresh:s.fresh})),
    eating:(v.selfCare??[]).map(a=>({pawn:name(a.pawn),status:a.status,...(a.consumed!==undefined?{consumed:a.consumed}:{}),...(a.portionCount!==undefined?{portion:a.portionCount}:{}),...(a.consumedUnit?{unit:a.consumedUnit}:{}),...(a.completed!==undefined?{completed:a.completed}:{})})),
-   agreements:v.agreements.map(a=>({id:a.id,pawn:name(a.pawn),work:a.progress.status??'unknown',offer:a.status,progress:{completed:a.progress.completed,agreed:a.progress.agreed,...(a.progress.delivered!==undefined?{delivered:a.progress.delivered}:{}),unit:'items'},...(typeof a.progress.completedTick==='number'?{completedTick:a.progress.completedTick}:{})})),
+   agreements:v.agreements.map(a=>({id:a.id,pawn:name(a.pawn),work:a.progress.status??'unknown',offer:a.status,...(a.reply?{reply:{kind:a.reply.kind,...(a.reply.reason?{reason:a.reply.reason}:{})}}:{}),...(a.replyEvidence?{replyEvidence:a.replyEvidence}:{}),progress:{completed:a.progress.completed,agreed:a.progress.agreed,...(a.progress.delivered!==undefined?{delivered:a.progress.delivered}:{}),...(a.progress.unfulfilled!==undefined?{unfulfilled:a.progress.unfulfilled}:{}),unit:'items'},...(typeof a.progress.completedTick==='number'?{completedTick:a.progress.completedTick}:{})})),
    closable:v.topicClosures.filter(c=>c.statuses.length).map(c=>({id:c.sourceId,statuses:[...c.statuses]})),
    questions:(v.questions??[]).map(q=>({pawn:name(q.pawn),status:q.status})),
    sightings:(v.foodSightings??[]).map(s=>({observer:name(s.observer),tick:s.tick,items:s.items.map(i=>({label:i.label,count:i.count,forbidden:i.forbidden})),campfires:s.campfires.length})),
    questionRecipients:(v.questionRecipients??[]).map(name),
    options:(v.opportunities??[]).map(o=>({pawn:name(o.pawn),kind:o.action.kind,detail:[o.supply?.label??o.action.thing??o.action.target??'',o.action.count??o.action.quota??'',o.action.trips?`x${o.action.trips}`:''].filter(x=>x!=='').join(' ')})),
-   sharedHauls:(v.nativeIntents??[]).map(i=>({item:i.thingDef,status:i.status,delivered:i.delivered,quota:i.quota,byPawn:Object.fromEntries(Object.entries(i.byPawn).map(([p,n])=>[name(p),n])),accepted:i.accepted.map(name),declined:i.excluded.map(name),lastDeliveryTick:i.lastDeliveryTick,...(i.overshoot?{beyondQuota:i.overshoot}:{})}))},
+   sharedHauls:(v.nativeIntents??[]).map(i=>({item:i.thingDef,status:i.status,delivered:i.delivered,quota:i.quota,byPawn:Object.fromEntries(Object.entries(i.byPawn).map(([p,n])=>[name(p),n])),accepted:i.accepted.map(name),excluded:i.excluded.map(name),lastDeliveryTick:i.lastDeliveryTick,...(i.overshoot?{beyondQuota:i.overshoot}:{})}))},
   communication:v.messages.map(m=>({from:name(m.from),to:name(m.to),text:m.text})),
   unscored:['exact need meters and private thoughts (never shown to the core)','positions and distances beyond the sightings listed','anything about pawns not in the crew']};
 }
@@ -164,7 +164,7 @@ export function groundingQuestions():Record<GroundingCategory,JevQuestion>{
  return {
   unsupported_fact:noul('Does `reply` state, as a current fact, something that `records` (including `sightings`, `options`, `questions` and `sharedHauls`) and `communication` do not contain?','The reply asserts a need level, quantity, location, capability or event that nothing supplied establishes.','Every factual statement in the reply traces to a record, a sighting, a listed option or attributed speech, or is explicitly marked as reported by someone.'),
   completion_without_receipt:noul('Does `reply` assert that work, a shared haul or eating is completed, verified or resolved where `records` show no completed work status, no met shared haul, or no completed eating for it?','The reply treats something as done that the records list as pending, started, unknown or absent.','Completion claims match a completed record, or the reply says the outcome is not yet confirmed.'),
-  speaks_for_other:noul('Does `reply` attribute consent, a promise, a refusal or a decision to a pawn that `communication` does not show that pawn making?','The reply says a pawn agreed, promised, refused or decided without a message from that pawn saying so.','Attributions match what the pawns actually said, or are marked as the core\'s own interpretation.'),
+  speaks_for_other:noul('Does `reply` attribute consent, a promise, a refusal or a decision to a pawn without support in `communication`, an attributed agreement reply, or the shared haul participation records? Helper delivery alone is not consent; exclusion or a withdrawn offer alone is not a pawn refusal.','The reply says a pawn agreed, promised, refused or decided without testimony or an explicit participation record establishing it.','Attributions match attributed replies, communication or explicit accepted records (exclusion alone does not establish refusal), or are marked as the core\'s own interpretation.'),
   instruction_to_pawn:noul('Does the reply\'s `action.text` or `action.reason` contain an order or instruction addressed to a pawn, rather than an offer, a question or an explanation?','Imperative wording that tells a pawn what to do.','Offers, questions, explanations and waiting only.'),
   forecast_as_certainty:noul('Does `reply` state a future outcome as certain?','A prediction is phrased as a settled fact ("will be full", "will finish").','Predictions are hedged, conditional or absent.'),
   reason_contradicts_action:noul('Does `reply.action.reason` contradict `reply.action.kind`?','The reason argues for a different action than the one chosen, or against acting while acting.','The reason supports the chosen action.'),

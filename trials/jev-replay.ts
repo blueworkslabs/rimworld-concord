@@ -83,7 +83,7 @@ export function loadCases(evidence:unknown):ReplayCase[]{
   pairing:z.array(z.object({inputIndex:z.number().int(),roundStatus:z.string(),backendDecisionId:z.string().optional()})).optional()}).parse(evidence);
  const live=parsedEvidence.live,manifest=new Map((parsedEvidence.pairing??[]).map(p=>[p.inputIndex,p]));
  const inputs=live.coreInputs.filter(i=>i.mode==='core'),decisions=live.coreBackendDecisions.filter(d=>!d.mode||d.mode==='core');
- if(manifest.size&&manifest.size!==inputs.length)throw Error(`Pairing manifest covers ${manifest.size} of ${inputs.length} inputs`);
+ if(parsedEvidence.pairing&&(parsedEvidence.pairing.length!==inputs.length||manifest.size!==inputs.length||inputs.some((_,index)=>!manifest.has(index))))throw Error(`Pairing manifest covers ${manifest.size} of ${inputs.length} inputs; exact unique indices required`);
  if(inputs.length!==decisions.length)throw Error(`Cannot pair ${inputs.length} core inputs with ${decisions.length} core decisions; a pairing manifest is required`);
  const published=new Map<string,number>();
  for(const a of live.publicAnswers.filter(a=>a.mode==='core')){const p=Choice.safeParse(a.output);if(p.success){const k=canonical(p.data);published.set(k,(published.get(k)??0)+1);}}
@@ -181,7 +181,7 @@ export type ReplayReport=ReturnType<typeof report>;
 export function report(cases:ReplayCase[],answers:ReplayAnswer[]){
  const wake=new Map(answers.filter(a=>a.kind==='wake'&&!a.error).map(a=>[a.index,a]));
  const grounding=new Map(answers.filter(a=>a.kind==='grounding'&&!a.error).map(a=>[a.index,a]));
- const turns=cases.map(c=>{const a=wake.get(c.index);return {index:c.index,tick:c.tick,novelty:c.novelty,alignment:c.alignment,applied:c.applied,actualAction:c.returned?.action.kind??null,actualConsequential:c.actualConsequential,newTopics:c.newTopics.length,
+ const turns=cases.map(c=>{const a=wake.get(c.index);return {index:c.index,tick:c.tick,novelty:c.novelty,alignment:c.alignment,applied:c.applied,...(c.appliedMismatch?{appliedMismatch:c.appliedMismatch}:{}),actualAction:c.returned?.action.kind??null,actualConsequential:c.actualConsequential,newTopics:c.newTopics.length,
   worthTurn:noul(a?.answers,'worth_turn'),asksCore:noul(a?.answers,'asks_core'),
   topics:c.wake.openTopics.map(t=>({key:t.key,id:t.id,actual:c.actualConsequential===null?null:c.actualTopics[t.key]??null,jev:pick(a?.answers,'topic_'+t.key)})),
   messages:c.wake.messagesToCore.map(m=>({key:m.key,jev:pick(a?.answers,'message_'+m.key)}))};});

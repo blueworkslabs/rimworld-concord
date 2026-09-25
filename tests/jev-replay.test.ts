@@ -189,3 +189,22 @@ test('report splits deferrals by input novelty over every scored wake, independe
  assert.equal(at05.scored,13,'the cancelled turn has novelty but no output-rule ground truth');
  assert.equal(r.unknown.appliedMismatch,0);
 });
+
+ test('E2 supporting brief, eligibility, unfulfilled counts and attributed consent survive projection',()=>{
+ const cs=loadCases(e2),g=cs[6]!.grounding!;
+ assert.equal(g.records.brief,e2.live.coreInputs[6].view.brief.text);
+ assert.ok(g.records.availability.some(a=>a.pawn==='Alvin'&&a.status.includes('cannot do hauling')));
+ assert.equal(g.records.agreements.find(a=>a.pawn==='Pedro')!.progress.unfulfilled,1);
+ assert.equal(g.records.agreements.find(a=>a.pawn==='Pedro')!.reply,undefined);
+ const b=cs[1]!.grounding!.records.agreements.find(a=>a.pawn==='Beatrice')!;
+ assert.equal(b.reply?.kind,'accept');assert.equal(b.replyEvidence,'attributed-speech');
+ assert.equal(b.reply?.reason,e2.live.coreInputs[1].view.agreements[0].reply.reason);
+ });
+ test('manifest rejects duplicate and out-of-range indices and report exposes exact mismatches',()=>{
+ const changed=structuredClone(e2);changed.pairing[0].inputIndex=99;
+ assert.throws(()=>loadCases(changed),/exact unique indices/);
+ const duplicate=structuredClone(e2);duplicate.pairing.push(duplicate.pairing[0]);
+ assert.throws(()=>loadCases(duplicate),/exact unique indices/);
+ const mismatch=structuredClone(e2);mismatch.pairing[0].roundStatus='not-applied';
+ const cs=loadCases(mismatch);assert.deepEqual(report(cs,[]).wake.turns[0]!.appliedMismatch,{manifest:'no',harness:'yes'});
+ });
