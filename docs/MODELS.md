@@ -138,6 +138,9 @@ asks one `reflect` question, and the serialized perspective is at most 16,000 by
 decision-result wire message. This includes failures before any model call. Reflection
 perspectives that exceed the 24,000-byte prompt limit are trimmed oldest-first (older
 retained experiences, then memories, then messages) and marked `trimmed` in the view.
+`fitReflection` returns a trimmed copy. The coordinator trims before the handoff, so the
+recorded reflection input is what the model saw. Both backends refit as a no-op safeguard;
+before this, only the Codex lane trimmed and evidence kept the untrimmed input.
 Core inputs get the same treatment in both lanes: the oldest messages, agreements,
 questions, self-care records and requests go first, each down to a floor of recent items.
 Topics and the offerable choices are never trimmed. `fitCore` returns a trimmed copy and

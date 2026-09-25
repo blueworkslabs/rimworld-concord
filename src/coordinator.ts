@@ -1,3 +1,4 @@
+import {fitReflection} from './model-perspective.js';
 import {CoreAnswerChoice,EatingRevalidationError,revalidateEating,eatingOptions} from './pawn-eating.js';
 import {planProduction,workMap,workSteps,workReady,workKind} from './production-planning.js';
 import {sharedFood,foodLines} from './food-observation.js';
@@ -332,7 +333,8 @@ export class Coordinator {
         try {await this.game.setActivity?.(prepared.activity);} catch { /* cognition can proceed without UI */ }
         combined.throwIfAborted();
         if(prepared.lease&&!prepared.lease.consume())throw Error('Reflection admission expired');
-        return Reflection.parse(await backend.reflect(prepared.view,combined));
+        // The model is shown the trimmed copy; it is also what the channel records as the input.
+        return Reflection.parse(await backend.reflect(fitReflection(prepared.view),combined));
       });
       return await this.serial(async()=>{
         combined.throwIfAborted();

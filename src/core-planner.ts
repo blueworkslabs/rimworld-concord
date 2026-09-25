@@ -1,4 +1,5 @@
 import {selfCareFollowup} from './self-care-followup.js';
+import {PROMPT_LIMIT} from './prompt-limit.js';
 import {productionView} from './production-planning.js';
 import {sharedFood,foodKnowledge} from './food-observation.js';
 import {sharedStatus} from './shared-status.js';
@@ -186,7 +187,7 @@ export function validateCoreChoice(raw:unknown,v:CoreView){
  if(a.kind==='ask'&&a.reportSelfCareId&&!(v.selfCare??[]).some(c=>c.id===a.reportSelfCareId&&c.pawn===a.pawn&&!c.reportQuestionId))throw Error('Core report receipt unavailable');
  return c;
 }
-export const PROMPT_LIMIT=24000;
+export {PROMPT_LIMIT};
 /** Oversized core inputs are trimmed like reflections, never by raising the limit: the oldest
  * messages, agreements, questions, self-care records and requests go first, each down to a floor
  * of recent items. Topics and the offerable choices are never trimmed. Returns a trimmed COPY with

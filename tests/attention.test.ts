@@ -5,6 +5,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { Coordinator } from '../src/coordinator.js';
 import { Store } from '../src/store.js';
 import { AttentionPump, type AttentionBackend, type AttentionView } from '../src/attention.js';
+import { modelPrompt } from '../src/model-perspective.js';
+import { PROMPT_LIMIT } from '../src/prompt-limit.js';
 import { scripted } from '../src/backends.js';
 import type { GameBridge, GameState, ActionRequest, Receipt, Activity } from '../src/protocol.js';
 
@@ -295,4 +297,16 @@ test('reflection failure cause remains visible after a successful core turn and 
  await c.planCore({name:'wait',async plan(){return {topics:[],actionTopicId:null,action:{kind:'wait',reason:'Wait'}};}});
  const {crewReport}=await import('../src/crew-log.js');assert.match(crewReport(c.inspect(),game.data.ticks).observerText!,/reflection failures: 1 \(context-too-large 1\)/);
  const reopened=new Coordinator(store,game);await reopened.open();assert.deepEqual(reopened.inspect().diagnostics?.laneFailures?.reflection,{total:1,causes:{'context-too-large':1}});store.close();
+});
+
+test('an oversized reflection turn hands over and records the trimmed view the model sees',async()=>{
+ const {game,store,c}=await setup();const big='x'.repeat(900);const domain=(c as any).domain;
+ domain.characters.A.memories=Array.from({length:30},(_,i)=>`memory ${i} ${big}`);
+ const stored=structuredClone(domain.characters.A.memories);let seen:any;
+ const backend={name:'record',async reflect(view:AttentionView){seen=view;return {kind:'continue',reason:'Remember this'};}};
+ game.event('memory');assert.equal((await c.attend('A',backend)).status,'continued');
+ assert.ok(Buffer.byteLength(JSON.stringify(modelPrompt('reflection',seen)))<=PROMPT_LIMIT);
+ assert.ok(seen.trimmed.memories>0);assert.equal(seen.trimmed.note,'Older items were left out to fit; they still happened.');
+ assert.equal(seen.character.memories.at(-1),`memory 29 ${big}`,'newest memory kept');
+ assert.deepEqual(domain.characters.A.memories.slice(0,30),stored,'the stored character is untouched');store.close();
 });

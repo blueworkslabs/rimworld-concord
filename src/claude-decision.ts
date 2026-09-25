@@ -10,7 +10,7 @@ import { Decision,type Perspective } from './protocol.js';
 import { type AttentionView,Reflection } from './attention.js';
 import {ReflectionChoice,reflectionChoiceSchema,reflectionFromChoice,validateReflectionChoice} from './reflection-choice.js';
 import {decisionTrials,type DecisionTrial} from './decision-trials.js';
-import {pawnInstructions,modelPrompt} from './model-perspective.js';
+import {pawnInstructions,modelPrompt,fitReflection} from './model-perspective.js';
 import {promptAccounting} from './prompt-accounting.js';
 import { TrialBudget } from './appraisal.js';
 import {SocialChoice,socialChoiceSchema,socialPrompt,type SocialView} from './social.js';
@@ -103,7 +103,7 @@ export class ClaudeDecisionBackend {
  async answerCore(view:CoreQuestionView,signal:AbortSignal){if(view.pawn.id!==view.character.id||view.question.from!=='core')throw Error('Question ownership mismatch');return CoreAnswerChoice.parse(await this.run('core-answer',view,signal));}
  private async run(mode:'decision'|'reflection'|'social'|'core'|'core-answer',view:unknown,signal:AbortSignal) {
    signal.throwIfAborted();if(this.pending)throw Error('Decision backend busy');
-   view=mode==='core'?fitCore(view as CoreView):structuredClone(view);
+   view=mode==='core'?fitCore(view as CoreView):mode==='reflection'?fitReflection(view as AttentionView):structuredClone(view);
    const args=claudeArgs(mode,mode==='core'?view as CoreView:mode==='reflection'?view as AttentionView:mode==='core-answer'?view as CoreQuestionView:undefined);
    const prompt=JSON.stringify(mode==='core'?corePrompt(view as CoreView):mode==='core-answer'?coreAnswerPrompt(view as CoreQuestionView):mode==='social'?socialPrompt(view as SocialView):modelPrompt(mode,view as Perspective|AttentionView));if(Buffer.byteLength(prompt)>24000)throw Error('Decision context too large');
    const authoredSize=promptAccounting(args[args.indexOf('--system-prompt')+1]!,prompt,JSON.parse(args[args.indexOf('--json-schema')+1]!));
