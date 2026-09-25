@@ -68,3 +68,10 @@ export function coreAdmission(s:CoreSchedule,v:CoreView):{ready:true;causes:Core
  if(telemetryOnlyIdle(causes,v,s.consumed))return {ready:false,reason:'telemetry-only',silent:{causes,snapshot}};
  return {ready:true,causes,snapshot};
 }
+
+/** Driver work includes consuming a silent wake. `ready` alone means model admission,
+ * not whether the coordinator has scheduler bookkeeping to perform. */
+export function coreSchedulerDue(s:CoreSchedule,v:CoreView){
+ const admission=coreAdmission(s,v);
+ return admission.ready||!!admission.silent;
+}

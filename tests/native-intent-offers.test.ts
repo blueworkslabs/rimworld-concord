@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { Coordinator } from '../src/coordinator.js';
 import { Store } from '../src/store.js';
 import { scripted } from '../src/backends.js';
-import {coreAdmission,telemetryOnlyIdle,NATIVE_INTENT_STALL_TICKS,type CoreWake} from '../src/core-scheduler.js';
+import {coreAdmission,coreSchedulerDue,telemetryOnlyIdle,NATIVE_INTENT_STALL_TICKS,type CoreWake} from '../src/core-scheduler.js';
 import {corePrompt} from '../src/core-planner.js';
 import { coreView } from '../src/core-planner.js';
 import {stopTrialWork,retireUndecided} from '../src/work-trial.js';
@@ -334,7 +334,9 @@ test('a silent telemetry wake consumes its bands without a turn, attempt or cool
  assert.doesNotMatch(crewReport(c.inspect(),0).observerText??'',/Core: waiting on/);
  const attempts=c.inspect().coreState!.schedule!.attempts;
  game.data.ticks=1000;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1000,food:'low',rest:'satisfied'};
- const r=await c.planCoreWhenDue(choose);
+ const due=coreSchedulerDue(c.inspect().coreState!.schedule!,await c.corePerspective());
+ assert.equal(due,true,'ongoing driver must run silent bookkeeping, not just ready inference');
+ const r=due?await c.planCoreWhenDue(choose):undefined;
  assert.deepEqual(r,{status:'idle',reason:'telemetry-only'});assert.equal(calls,1,'no backend call');
  const d=c.inspect();assert.equal(d.coreState!.schedule!.attempts,attempts,'no attempt spent');assert.equal(d.coreState!.schedule!.lastAttemptTick,0,'no cooldown started');
  assert.equal(d.coreState!.silentWake?.tick,1000);assert.ok(store.events().some(e=>e.event.kind==='core-wake-silent'));
@@ -343,6 +345,7 @@ test('a silent telemetry wake consumes its bands without a turn, attempt or cool
  const reopened=new Coordinator(store,game);await reopened.open();
  assert.deepEqual(reopened.inspect().coreState!.schedule,d.coreState!.schedule,'consumption and allowance persist');
  assert.deepEqual(reopened.inspect().coreState!.silentWake,d.coreState!.silentWake);
+ assert.equal(coreSchedulerDue(reopened.inspect().coreState!.schedule!,await reopened.corePerspective()),false,'driver does not reschedule consumed silence');
  // The same bands do not wake it again; a message still does.
  game.data.ticks=1010;game.data.pawns[1]!.linkStatus={source:'shared-link-telemetry',epoch:'e',tick:1010,food:'low',rest:'satisfied'};
  assert.deepEqual(await reopened.planCoreWhenDue(choose),{status:'idle',reason:'no-new-event'});
