@@ -855,6 +855,52 @@ them before Gate C is entered.
   quota-2 bill, follow it with one credited iteration: native repeat count is 0,
   credited count is 1, and the intent is not falsely met or the bill silently refilled.
 
+## Gate B amendment (Fable, 2026-09-25, after the merge at `593c904`)
+
+The policy is unchanged and the P5 boundaries stand where they carry the consent
+guarantee (P5.1 ownership and generation, P5.2 admission, P5.3 the sweep). Three parts
+of P5 record more than the game hands us and cost more patches than the guarantee
+needs. They are trimmed before implementation. The hauling migration patched eleven
+methods; the trims below keep this migration near that footprint and keep every hot-path
+patch to an O(1) check.
+
+1. **Player-order provenance is the scanner's `forced` argument, in scope.** A job
+   created inside a work giver's `JobOnThing(pawn, thing, forced: true)` call is stamped
+   `forced` on its job record at creation; nothing else is consulted. P5.5's float-menu
+   preview context, `Chosen` context and priority-order tokens are dropped. The record
+   text becomes **"forced by an order (had refused)"**, because the argument proves an
+   order, not who gave it; the cost of a rare non-player forced call being labelled this
+   way is a wording error, uncredited either way, never a consent error. Entry check
+   before the construction PR: which callers pass `forced: true` in 1.6.4871 (the float
+   menu, prioritized work, and any other), one line each.
+2. **The bill filter is scoped through `WorkGiver_DoBill.JobOnThing`.** Its `forced`
+   argument opens the scope; `Bill.PawnAllowedToStartAnew` reads that scope and rejects
+   an excluded pawn only when the scope says ordinary. No patch on menu construction.
+   The player's menu path and the prioritized path pass `forced: true` through the same
+   call, which answers the eligibility-before-selection finding without a preview.
+3. **Ingredient quantities are "not recorded" for Gate C.** The iteration receipt takes
+   the doer and the ingredient defs from `Notify_IterationCompleted` and the product
+   defs and counts from `Notify_BillDone`; consumed counts are not reconstructed. The
+   `CalculateIngredients` and `ConsumeIngredients` patches and the call-scoped snapshot
+   are dropped. Cooking case 11 reduces to: product counts exact; a failure injected at
+   iteration notification earns no iteration and no duplicate receipt. No legibility
+   text needs an ingredient count.
+4. **Successor identity: the conversion uses the out `createdThing`;** only frame
+   completion keeps the scoped spawn collector and finalizer. The removal classifier
+   ignoring the predecessor's nested destroy inside that scope is a read-side rule, not
+   an engine change, and stays.
+5. **Patch ledger and ceiling.** The implementation PRs list every patched method with
+   its kind (prefix, postfix, finalizer, wrap), the condition under which it does work,
+   and its measured per-call cost, as the spike did. Ceiling for both carriers together:
+   **twenty patched methods**; anything beyond needs a line saying which scripted case
+   fails without it. `StartJob`, `CleanupCurrentJob`, `GenSpawn.Spawn` and
+   `Thing.Destroy` are global paths: their patches must be a static flag or dictionary
+   lookup before any other work.
+6. **Slices.** Scripted cases ship with their carrier: the construction PR carries the
+   17 construction cases and the cooking PR the 13 cooking cases, each with paired and
+   new-process cold restores (C3). The coordinator PR carries offers, wakes, legibility
+   texts (C5) and the readiness debt (C4). No separate trials PR.
+
 ## Gate A open decisions (as posed; decided under "Direction")
 
 1. **Build tag identity** across blueprint → frame → building: the footprint key
