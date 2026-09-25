@@ -944,7 +944,8 @@ patch's inactive fast path to an O(1) check; applicable work still needs measure
 
 ## Construction implementation (slice 1): caller inventory and patch ledger
 
-**Status: implemented, not yet run in the game.** Mod: `mod/NativeBuild.cs` (state, ops, lab
+**Status: implemented and partially scripted-tested; full acceptance pending.**
+[Recorded results and limitations](trials/NATIVE_CONSTRUCTION_REVIEW.md). Mod: `mod/NativeBuild.cs` (state, ops, lab
 ops) and `mod/NativeBuildPatches.cs` (patches). Coordinator types: `src/native-build.ts`.
 Scripted cases: `trials/native-construction-game.ts` (1–17) with the new-process restore in
 `trials/native-construction-restore.ts`, run by `scripts/run-native-construction-lab.sh`. Offers,
@@ -987,23 +988,26 @@ not complete overhead measurements, and nested timings must not be summed as exc
 cost. Case `18-patch-cost` alternates all-Concord versus detached-Concord patches on the
 same **untagged quiet save**, restored before each arm; other mods remain installed.
 Capped/noisy throughput is inconclusive, not a colony slowdown or tagged-handler cost.
-Costs stay pending until scoped runs report.
+Second-review case 1 reports the following **single-build body totals**, not stable
+per-call costs or total Harmony overhead. Zero-call paths stay unmeasured. See the
+[scripted review](trials/NATIVE_CONSTRUCTION_REVIEW.md#timing-interpretation) for
+scope and the capped/inconclusive quiet comparison.
 
 | # | Method | Kind | Does work when | Cost |
 |---|---|---|---|---|
-| B1 | `WorkGiver_ConstructDeliverResourcesToBlueprints.JobOnThing` | prefix + postfix | a tagged target: excluded pawn on an ordinary scan gets no job; a forced call's returned job is stamped | pending |
-| B2 | `WorkGiver_ConstructDeliverResourcesToFrames.JobOnThing` | prefix + postfix | as B1 | pending |
-| B3 | `WorkGiver_ConstructDeliverResources.IsNewValidNearbyNeeder` | postfix | a tagged nearby needer for an excluded pawn (emits `build-nearby-filtered` as evidence) | pending |
-| B4 | `WorkGiver_ConstructFinishFrames.JobOnThing` | prefix + postfix | as B1, for construction work | pending |
-| B5 | `Pawn_JobTracker.StartJob` (global; hauling also patches it) | prefix | a `HaulToContainer`/`FinishFrame` job touching a tagged carrier: admission, segments, work baseline | pending |
-| B6 | `Pawn_JobTracker.CleanupCurrentJob` (global; hauling also patches it) | prefix | a `FinishFrame` job on a tagged frame: settle work | pending |
-| B7 | `Toils_Haul.TryGetNextDestinationFromQueue` | postfix | a tagged next destination for an excluded, unforced job | pending |
-| B8 | `Toils_Haul.DepositHauledThingInContainer` | postfix installing an `initAction` wrapper | wrapper, per deposit into a tagged frame: consent recheck, per-def delta | pending (wrapper) |
-| B9 | `Blueprint.TryReplaceWithSolidThing` | prefix + postfix + finalizer | a tagged blueprint: consent recheck, transition scope, `createdThing` validation | pending |
-| B10 | `Frame.CompleteConstruction` | prefix + postfix + finalizer | a tagged frame: settle the finisher, spawn-collector scope, successor validation | pending |
-| B11 | `GenSpawn.Spawn(Thing, IntVec3, Map, Rot4, WipeMode, bool, bool)` (global; every overload forwards here) | postfix | inside a completion scope (successor collection), or while a player removal of a tagged carrier is pending (a blueprint spawning on its footprint means replacement) | pending |
-| B12 | `Frame.FailConstruction` | prefix + postfix + finalizer | a tagged frame: settle the worker, record what it held | pending |
-| B13 | `Thing.Destroy` (global) | prefix | a tagged carrier or watched building (dictionary lookup) | pending |
+| B1 | `WorkGiver_ConstructDeliverResourcesToBlueprints.JobOnThing` | prefix + postfix | a tagged target: excluded pawn on an ordinary scan gets no job; a forced call's returned job is stamped | 21.3 µs / 1 call |
+| B2 | `WorkGiver_ConstructDeliverResourcesToFrames.JobOnThing` | prefix + postfix | as B1 | unmeasured (0 calls) |
+| B3 | `WorkGiver_ConstructDeliverResources.IsNewValidNearbyNeeder` | postfix | a tagged nearby needer for an excluded pawn (emits `build-nearby-filtered` as evidence) | unmeasured (0 calls) |
+| B4 | `WorkGiver_ConstructFinishFrames.JobOnThing` | prefix + postfix | as B1, for construction work | 13.4 µs / 2 calls |
+| B5 | `Pawn_JobTracker.StartJob` (global; hauling also patches it) | prefix | a `HaulToContainer`/`FinishFrame` job touching a tagged carrier: admission, segments, work baseline | 111.9 µs / 56 calls (2 applicable) |
+| B6 | `Pawn_JobTracker.CleanupCurrentJob` (global; hauling also patches it) | prefix | a `FinishFrame` job on a tagged frame: settle work | 37.4 µs / 48 calls (0 applicable) |
+| B7 | `Toils_Haul.TryGetNextDestinationFromQueue` | postfix | a tagged next destination for an excluded, unforced job | unmeasured (0 calls) |
+| B8 | `Toils_Haul.DepositHauledThingInContainer` | postfix installing an `initAction` wrapper | wrapper, per deposit into a tagged frame: consent recheck, per-def delta | 32.5 µs wrapper / 1; 7.0 µs factory / 1; native 101.1 µs separate |
+| B9 | `Blueprint.TryReplaceWithSolidThing` | prefix + postfix + finalizer | a tagged blueprint: consent recheck, transition scope, `createdThing` validation | 50.0 µs / 1 call |
+| B10 | `Frame.CompleteConstruction` | prefix + postfix + finalizer | a tagged frame: settle the finisher, spawn-collector scope, successor validation | 1162.9 µs / 1 call |
+| B11 | `GenSpawn.Spawn(Thing, IntVec3, Map, Rot4, WipeMode, bool, bool)` (global; every overload forwards here) | postfix | inside a completion scope (successor collection), or while a player removal of a tagged carrier is pending (a blueprint spawning on its footprint means replacement) | 47.8 µs / 3 calls (1 applicable) |
+| B12 | `Frame.FailConstruction` | prefix + postfix + finalizer | a tagged frame: settle the worker, record what it held | unmeasured (0 calls) |
+| B13 | `Thing.Destroy` (global) | prefix | a tagged carrier or watched building (dictionary lookup) | 32.9 µs / 3 calls (2 applicable) |
 
 Implementation choices within the signed design, for review:
 
@@ -1012,18 +1016,22 @@ Implementation choices within the signed design, for review:
   blueprint intact. B8 explicitly rejects excluded **frame** deposits; it does not
   handle a remaining blueprint as a frame. The original blueprint path has no resource
   container, but the broader denied-conversion cleanup still needs scripted evidence.
-- **Removal attribution without a designator patch (fixes the review blocker).** The destroy
+- **Removal attribution without a designator patch (partially verified).** The destroy
   mode alone cannot tell a player's replacement from an ordinary deconstruction: the
   deconstruct designator removes frames with Deconstruct, and the build designator may cancel
   a replace-tag-matching frame first and then wipe with Deconstruct before placing its own
-  blueprint. So a Cancel or Deconstruct removal of an open carrier is held **pending** for the
-  rest of that call. If a blueprint spawns on the footprint while it is pending (B11, which
+  blueprint. A Cancel or Deconstruct removal of an open carrier is held **pending** until
+  the next frame update or state export. This is a temporal window, not an authenticated
+  designator-call scope. If a blueprint spawns on the footprint while it is pending (B11, which
   already watches `GenSpawn.Spawn`), the ending is **"replaced by the player"**. Otherwise the
   next frame update (or the next state export, whichever comes first) records **"cancelled by
   the player"** (Cancel) or **"deconstructed by the player's order"** (Deconstruct). Vanish is
   **"removed"** (failed) and any other mode **"destroyed"** (failed). Frames add "held …;
   returned: not recorded". Case 7 exercises cancel and the real deconstruct designator on a
-  rationed, partially filled frame; case 12 the real build designator. No new patch: 13 remain.
+  rationed, partially filled frame and passed. Case 12 attempted the real build designator,
+  but native occupancy rejected Stool over Campfire; Campfire has no matching replacement
+  tags, so replacement is unexercised and needs a scope/fixture disposition. No new patch:
+  13 remain. The overlapping-spawn rule is not proven general player provenance.
 - **Polled facts.** Expiry, the forbidden note, a different occupant on the footprint and a
   building that leaves its place without being destroyed are checked every 60 ticks.
 - **Forced stamps** are saved by job load ID and dropped 600 ticks after the job exists nowhere.
