@@ -429,3 +429,78 @@ or held-out routing validation. Fable owns human adjudication; #74 remains draft
 
 Full responses/journal/ledger stay private. Prior failed run, E1 retry and E2 export
 remain intact. No new game run or routing changes were part of this replay.
+
+## E2 interpretation and decisions — Fable, 2026-09-25
+
+Hand adjudication against `native-haul-core-e2.json` and `jev-replay-e2.json`. No new
+inference. Astra's prose correction stands: the six band-change inputs are four waits,
+one ask and the cancelled attempt.
+
+### Grounding: the first one-to-one hit on a known error class
+
+`observation_time_as_event_time` flagged eight replies (turns 2–9, 0.52–0.75). Every
+one of them contains "Beatrice's accepted haul completed at tick N with 35 delivered"
+with N equal to the *current snapshot tick* (2759, 5680, 8986, 14496, 16355, 18211,
+20100, 21242) while the receipt's completion was tick 2510. That is the drifting
+completion timestamp found by hand in [NATIVE_HAUL_LIVE](NATIVE_HAUL_LIVE.md). The
+five unflagged returned turns (0, 1, 10, 11, 12) contain no "at tick" phrase at all.
+On this sample: 8 of 8 drifting replies flagged, 0 of 5 clean replies flagged. Nothing
+reached 0.8, so the "hold" threshold would have caught none; the "annotate" threshold
+caught all.
+
+`unsupported_fact` reached 0.5 once (turn 2), on the sentence "Pedro's linked agreement
+was withdrawn after 40 delivered". That sentence restates the false `agreed: 1,
+unfulfilled: 1` projection the core was given, so from the core's inputs it is
+supported; the flag is a boundary case and the defect is upstream (fixed in #71). The
+other five categories stayed under 0.3 and the replies contain none of those errors.
+
+Snapshot-only inputs cannot judge the two stale-on-arrival narrations (Astra's limit is
+correct); those are the as-of prefix's job. Division of labour confirmed: mechanical
+prefix for staleness, Jev for narrated misuse of time inside a reply.
+
+### Wake gating: `worth_turn` does not separate news from no-news
+
+Band-change turns scored 0.51–0.87 (mean 0.69), event turns 0.38–0.90 (mean 0.78
+without the initial turn). Any threshold that defers the five "nothing to propose"
+waits (≥ 0.74) also defers the initial proposal (0.38), the second proposal (0.74) and
+the wait after Beatrice's eating report (0.74). The question is answered honestly by
+the model: "Alvin's food is urgent" *is* a change that makes an open topic incorrect,
+so it says a turn is worth taking. What the core actually lacked on those turns was any
+proposable option or eligible question, and that is not a semantic judgment.
+
+**Decision: `worth_turn` is dropped as a wiring candidate.** Wake gating returns to
+code: a telemetry-only wake with no proposable opportunity, no counter and no eligible
+question recipient should not spend a core turn; it writes the silent "waiting on…"
+status. That rule would have removed the six duplicate turns without any model call.
+Coordinator design item for the hauling migration's scheduler work.
+
+### `asks_core`: clean on both samples
+
+E1: 0.05–0.10 until Beatrice's "please help locate available food", then 0.85–0.93.
+E2: 0.05–0.09 throughout, and no message in that run asks the core for anything
+(reports, an acceptance, an "I am eating now"). Two samples, no false positive, one
+true flip at the right message.
+
+### Topic closure: confidence is the axis
+
+Fifteen predicted closures, five actual, all five caught. At confidence ≥ 0.9 there are
+four predictions and all four are actual closures; the fifth actual closure sat at
+0.47. The over-predictions are the brief topic and Pedro's withdrawn topic at 0.23–0.65.
+Together with E1, where the confident over-predictions were the un-closable lingering
+topics, this stays a diagnostic, not a wiring candidate; the closure gap is a
+coordinator fix.
+
+### Decisions
+
+1. **First one-use wiring, proposed for after the hauling migration's next live run:**
+   run the seven grounding nouls on every core reply *before publication*, attach any
+   flag ≥ 0.5 to the crew-log entry as an operator-only annotation, log the scores,
+   block nothing. About USD 0.0001 per turn. The next recorded scene is the held-out
+   set: flags versus hand adjudication, reported like E1 and E2. `asks_core` rides along
+   as a logged hint on wakes that carry messages, also annotate-only.
+2. `worth_turn` is retired; the wake-gating rule above goes to the coordinator queue.
+3. Topic closure stays diagnostic; the message-to-receipt linking gap stands from E1.
+4. No threshold is frozen for gating anywhere. The annotate threshold 0.5 is the
+   reporting threshold, not a decision threshold.
+5. #74 should merge as evidence (harness, E1, E2, interpretations). Wiring is its own
+   PR with its own gates.
