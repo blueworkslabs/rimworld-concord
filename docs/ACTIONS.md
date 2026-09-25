@@ -210,7 +210,9 @@ deliberation, within the same deadline: a fresh question view with the current m
 the note "The food you chose is no longer available…". This is new input, not a reroll;
 the pawn may choose again, say something or stay silent. The audit records
 `core-answer-requeued` with the validation. A second rejection stands and is recorded as
-`core-answer-failed`. No other rejection code is requeued.
+`core-answer-failed`. No other rejection code is requeued. The rejected first answer
+is never published; only a successfully applied answer appears. Cancellation during
+the fresh-state read cannot record a requeue or start a second call.
 Earlier schema failures, cancellations or a question no longer being answerable keep
 their existing errors. This diagnostic is not added to a character's public core perspective.
 
