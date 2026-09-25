@@ -149,7 +149,8 @@ produced 29 transport failures on 2026-09-25. After certificate renewal, an
 returned 29 valid answers for USD 0.004345194. The [E2 pass](trials/JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation)
 returned 27 valid answers for USD 0.002978598 after projection/pairing review. Frozen
 labels: 8 event, 6 band-change, no quiet examples; at 0.5 defer one event and no bands.
-Human adjudication and held-out validation remain pending; no threshold/routing change.
+The report retains the completed interpretations and later wake-rule correction;
+held-out validation remains pending. No gating threshold or live wiring is introduced.
 Snapshot-only grounding cannot test inference-time arrivals or validate historical
 coordinator bookkeeping.
 

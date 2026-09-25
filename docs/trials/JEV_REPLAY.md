@@ -1,6 +1,6 @@
-# Jev offline replay — protocol `jev-replay-v2`
+# Jev offline replay — retained protocols v2 and v3
 
-**Status: reviewed; owner-authorized retry completed with 29 valid answers after certificate renewal. The initial transport-failed run remains preserved.** Owner: Fable. Reviewer:
+**Status: E1 retry (29 valid answers) and E2 (27 valid answers) are complete, with interpretations retained below. The initial transport-failed run remains preserved. Harness v3 and these results merge as evidence only: no live wiring or gating threshold is introduced.** Owner: Fable. Reviewer:
 Astra. This is the "Jev, offline" track from [ROADMAP](../ROADMAP.md#in-parallel-jev-offline),
 reordered after the [native-haul live run](NATIVE_HAUL_GATE_C.md): core wake gating
 first, prose grounding second. Nothing here changes routing, receipts, consent or the
@@ -460,6 +460,10 @@ prefix for staleness, Jev for narrated misuse of time inside a reply.
 
 ### Wake gating: `worth_turn` does not separate news from no-news
 
+> Historical interpretation, superseded in part by the merge-time correction below.
+> The quoted six-turn suppression and missing-question-recipient claims were incorrect;
+> the frozen scores and original results are unchanged.
+
 Band-change turns scored 0.51–0.87 (mean 0.69), event turns 0.38–0.90 (mean 0.78
 without the initial turn). Any threshold that defers the five "nothing to propose"
 waits (≥ 0.74) also defers the initial proposal (0.38), the second proposal (0.74) and
@@ -504,3 +508,30 @@ coordinator fix.
    reporting threshold, not a decision threshold.
 5. #74 should merge as evidence (harness, E1, E2, interpretations). Wiring is its own
    PR with its own gates.
+
+## Merge-time correction — after #73 and #83, 2026-09-25
+
+The wake-gating paragraph above is retained as interpretation history, not the current
+scheduler contract. Every E2 input has a nonempty `questionRecipients` list. Therefore
+its proposed conjunction—no opportunity, no counter **and no question recipient**—would
+suppress **zero** of those turns, not six. The six band-change inputs (3–7 and 13) are
+four waits, one food question and one cancelled attempt; they are not six duplicate waits.
+
+The final mechanical rule in [CORE](../CORE.md#wake-ups), implemented in #73, does not
+count question recipients as offerable work and exempts worsening Food/Rest bands
+reaching urgent. Applied to E2, inputs **3, 6 and 13** go silent; **4, 5 and 7** stay awake,
+preserving the urgent food-question opportunity. #83 additionally provides the bounded
+review nudge after a deliberate wait; it is not a Jev threshold decision.
+
+`worth_turn` remains retired as a wiring candidate. Grounding and `asks_core` annotations
+are a separate, prospective wiring PR for the construction/cooking scene after the
+pipeline regression. This evidence PR neither enables them nor changes a live threshold.
+
+
+### Final evidence review
+
+After merging main through #83, the clean suite passes **442 tests**. Independent
+review validates all **56** retained successful responses against their saved question
+contracts and confirms the retained run-artifact and export-source hashes. E1/E2 dry
+builds invoke no provider; the E2 request hash and report reproduce. Earlier E1
+projections remain versioned history, not silently regenerated as v3 inputs.
