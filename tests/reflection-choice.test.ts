@@ -4,7 +4,8 @@ import {ReflectionChoice,reflectionChoices,reflectionFromChoice,validateReflecti
 import {claudeArgs,parseClaudeResult,CLAUDE_MODEL} from '../src/claude-decision.js';
 import type {AttentionView} from '../src/attention.js';
 const id='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',other='bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb';
-export function choiceView():AttentionView{return {pawn:{id:'A',name:'Ada',x:1,z:1,job:'Concord_Haul',health:1},character:{id:'A',name:'Ada',memories:[],intention:id},events:[],proposals:[],intention:{id,pawn:'A',reason:'Supply work',status:'accepted',action:{kind:'haul',thing:'steel',x:4,z:5,count:10,trips:3,maxTicks:600},standing:{status:'running',deadline:600,steps:[]}}};}
+// The running agreement a pawn reflects on is a native stockpile haul (the ordered haul is retired).
+export function choiceView():AttentionView{return {pawn:{id:'A',name:'Ada',x:1,z:1,job:'HaulToCell',health:1},character:{id:'A',name:'Ada',memories:[],intention:id},events:[],proposals:[],intention:{id,pawn:'A',reason:'Supply work',status:'accepted',action:{kind:'haul-zone',intentId:'cccccccc-cccc-4ccc-cccc-cccccccccccc',thing:'Steel',x:4,z:5,w:2,h:2,quota:30,maxTicks:30000,variant:'attribution',label:'steel pile',zoneId:950,hold:'strict'},standing:{status:'running',deadline:600,steps:[]}}};}
 test('explicit reflection choices preserve effect and never reinterpret contradictory prose',()=>{
  const view=choiceView();
  const keep=ReflectionChoice.parse({choice:'keep_current_activity',reason:'I will withdraw and rescue instead'});

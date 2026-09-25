@@ -34,9 +34,14 @@ test('only a changed shared band wakes core, not timestamp refresh or private ne
  g.data.ticks++;g.data.pawns[0]!.facts![0]!.level=.99;const b=await g.state();assert.deepEqual(coreWakeSnapshot(coreView(d,b)),before);
  b.pawns[0]!.linkStatus!.food='urgent';assert.notDeepEqual(coreWakeSnapshot(coreView(d,b)),before);s.close();
 });
+// Ordered-haul specific (removed with the ordered haul): a held build source refuses an ordered haul of it.
+test('an ordered haul cannot take a source held by a pending build',async()=>{
+ const {g,s,c}=await setup();await c.core().propose('A',build,'Optional build');
+ const state=await g.state();assert.throws(()=>planHaul(c.inspect(),state,'B',state.pawns[1]!.hauling!.options[0]!));s.close();
+});
 test('build/cook consent, closure, exact source holds and mapped dispatch',async()=>{
  const {g,s,c}=await setup();const p=await c.core().propose('A',build,'Optional build');assert.equal(g.moves.length,0);
- await assert.rejects(c.core().propose('B',build,'Competing build'));const state=await g.state();assert.throws(()=>planHaul(c.inspect(),state,'B',state.pawns[1]!.hauling!.options[0]!));
+ await assert.rejects(c.core().propose('B',build,'Competing build'));
  await c.pawn('A').decide(p.id,accept);assert.equal(g.moves[0]!.mapId,1);assert.equal(c.inspect().proposals[p.id]!.standing!.status,'completed');
  g.kind='cook';const q=await c.core().propose('B',cook,'Optional cook');await c.pawn('B').decide(q.id,{name:'counter',async decide(){return {kind:'counter',reason:'Only two',action:{...cook,meals:2}};}});assert.equal(g.moves.length,1);
  const revised=await c.core().revise(q.id,'Two meals');assert.equal(g.moves.length,1);await c.pawn('B').decide(revised.id,accept);assert.equal(c.inspect().proposals[revised.id]!.standing!.status,'running');
