@@ -1,8 +1,9 @@
 # The agent harness: play RimWorld better than through the human UI
 
 **Status: phase definition, Fable, 2026-09-25, agreed with the owner in #secret-lab.**
-This replaces the construction and cooking migration as the next phase. Nothing here is
-built; the baseline below is Astra's UI-only pilot and is provisional until frozen.
+This replaces the construction and cooking migration as the next phase. Read-only perception
+is implemented and has a [bounded staging capture](evidence/perception-2026-09-25/README.md);
+actions and the matched benchmark are in progress. The UI runs below are calibration, not scored arms.
 
 ## The goal, in one sentence
 
@@ -65,7 +66,7 @@ the core is linked to each pawn (lore) and because the player can open the needs
 | `threats` | player-visible hostiles and warnings, not hidden storyteller plans or fogged enemies; animals nearby with danger |
 | `receipts` | outcomes of harness actions since the last read (see Actions) |
 
-Sizes: the snapshot is complete and kept in the record; the model is shown a digest
+Sizes: the full exported snapshot is kept in the record (v1 coverage gaps are explicit); the model is shown a digest
 (fitted like today's core input, oldest and least relevant trimmed first) plus the diff.
 Retain the full snapshot and the exact model-visible digest/query responses as separate
 artifacts. Mark omissions and provide `look` access; a full snapshot is not evidence
@@ -79,8 +80,10 @@ incrementally filled active list, so the first read after load already shows the
 player's to-do list; the digest has its own byte budget (about 14 KB) below the prompt
 limit, leaving room for instructions, task, history and receipts; loose items and
 plants appear in the digest aggregated by def (label, total, stacks, rough location),
-with individual stacks left to `look`. Every colonist's full thought list stays in the
-digest: all twelve groups of the fixture fit in under 500 bytes.
+with individual stacks left to `look`. Every colonist's exported mood-thought groups stay in the
+digest: all twelve groups of the fixture fit in under 500 bytes. If required fields alone exceed
+the budget, report that the digest does not fit; never silently drop thoughts or exceed
+the final prompt budget.
 
 **Diff (`since`)**: things appeared, disappeared or changed def or position; alerts
 raised or cleared; letters arrived; bills or zones changed; pawn job, need band, health
@@ -148,9 +151,10 @@ Same save, same task, same model, same timing rules, three arms:
 | stalls | adapter or transport stalls, reported separately, never subtracted silently |
 
 **Rules.** Both arms start from an identical, clean controller context: the same
-model alias, the same task text, no history from any earlier run of the task. Model
+model revision and reasoning settings, the same task text, no history from any earlier run of the task. Model
 cost is reported as the token triplet (uncached input, cached input, output) plus the
-call count; billed USD is recorded only where the route reports it, never estimated.
+call count; billed USD is recorded only where the route reports it; any separate priced estimate
+must be labelled as an estimate, never as a bill.
 Astra's 2026-09-25 runs are calibration, not scored arms, because their context held
 the project session. No rerolls; failed runs are retained; the recording and its hash are kept as
 today; the same task spec and checker for both arms; three runs per arm per task once
@@ -165,7 +169,7 @@ an agent cannot generate that arm.
 
 **Automation.** Scripted save per task, a task spec file, a checker script reading the
 state, the recording pipeline, the run receipt with hashes. Existing lab components can be reused, but the matched benchmark runner, checker and
-UI usage capture are not yet established. A hidden checker must not feed structured
+matched UI usage capture are not yet established. A hidden checker must not feed structured
 state or hints to the UI controller. Record checker overhead separately.
 
 ## Task set v1
@@ -173,7 +177,7 @@ state or hints to the UI controller. Record checker overhead separately.
 | Task | Start | Done when | Notes |
 |---|---|---|---|
 | T1 campfire and meals | the pilot save | one campfire built; a newly configured three-iteration simple-meal bill completed (consumption afterward is allowed) | Astra's UI pilot is the first UI data point |
-| T2 fed and in bed | three colonists, evening, raw food on the map, no beds | provisional: fed and using suitable beds by 22h; exact food/bed predicates must be frozen before this task runs | needs beds designated and built; tests priorities and time pressure |
+| T2 fed and in bed | three colonists, evening, raw food on the map, no beds | provisional: fed with suitable beds assigned by 22h; actual sleeping reported separately; exact food/bed predicates frozen before running | needs beds designated and built; tests priorities and time pressure |
 | T3 wood inside | 120 wood loose, fixed disclosed deadline | provisional: 75 wood moved into the specified indoor stockpile before the deadline; initial contents and cells frozen | the hauling scene, as a task |
 | T4 (later) | a raid warning | no colonist downed at the end of the raid | after v1 |
 
@@ -227,7 +231,7 @@ gate process. The migration pages stay as history.
 ## Open questions, resolved 2026-09-25
 
 - **Thoughts in the digest:** the full list per pawn. The first capture measured all
-  twelve mood-thought groups at 493 bytes; trimming would save nothing.
+  twelve mood-thought groups at 493 bytes; trimming is unnecessary for this fixture.
 - **UI-arm cost:** the token triplet and call count, captured per run, same for both
   arms; no USD on the subscription route and none invented. Fresh controller context
   per scored run (see Benchmark rules).
