@@ -607,9 +607,10 @@ Checked locally:
 - `scripts/test-mod-phrases.sh` runs the wording under mono (local only: it needs the built mod);
 - TS tests cover the schemas and the digest stripping.
 
-Not yet checked in a live game. A staging check is needed for:
-- the messages in a recording;
-- a repeat request ID showing nothing new;
-- a save/load keeping the lines without re-showing them.
+Recorded scripted/UI acceptance was performed jointly with [#104](https://github.com/blueworkslabs/rimworld-concord/pull/104):
+paused/running native messages, both journal layouts, distinct identical-worded requests,
+same-ID replay and saved receipt/message preservation. The initial warning-bearing run
+and corrected verification are retained in #104's evidence publication. Zero model calls;
+this is not a sealed viewer-legibility verdict.
 
 The legibility read (four of five sealed actions) needs Fable's rubric and a frozen run.
