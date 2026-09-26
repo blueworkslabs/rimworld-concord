@@ -318,3 +318,39 @@ The scripted trial separates its T1 start/configuration/completion observations 
 post-task paused API checks and a same-game-process save/load receipt check. It records
 all commands/receipts incrementally and retains failures. Those extra checks are plumbing
 evidence, not a scored harness arm or a claim of fresh-process restore.
+
+## Implementation status: the matched benchmark runner (Clawd, 2026-09-26)
+
+**Built, not yet run.** `scripts/run-benchmark.sh --arm=harness|ui --task=T1 --save=lab-...
+--model=<alias> [--reasoning=low|medium|high] [--ui-server=/abs/adapter.json]` runs one scored
+attempt (`trials/benchmark-run.ts`):
+
+- **Same controller, fresh context, both arms.** `codex exec --json --ephemeral
+  --ignore-user-config`, an empty working directory, every built-in tool disabled (shell, exec,
+  browser, computer use, image tools, plugins, apps, multi-agent, memories, goals, and the
+  deferred MCP tool search), the same model and reasoning setting, the same task text
+  (`benchmark/tasks/T1.json`, hashed into the receipt) and time limit. The only difference is
+  the MCP server registered as `arm`.
+- **Harness arm server** (`trials/harness-mcp-server.ts`, `src/harness/mcp.ts`): `observe`
+  (digest plus what changed since the previous observe, and recent receipts), `look`, `act`,
+  `time` (pause, play, speed 1–3) and `report_done`. Actions carry the latest observation's
+  world/load/map, so a stale command is refused.
+- **UI arm server contract** (Astra's frozen adapter, wrapped): a stdio MCP server given by a
+  JSON file `{command, args, env?}`; it must provide a `report_done` tool, must not read the
+  bridge, saves or code, and must append one line per call to `$CONCORD_BENCH_CALL_LOG` in the
+  shared format `{at, tool, kind: observation|input|control|done|error, ok, bytes, detail?}`
+  (screenshot = observation; click or key = input; pause/speed = control; a rejected or
+  corrected input = error).
+- **Hidden checker, same for both arms.** The runner loads the frozen save (paused, SHA-256
+  recorded), takes the start snapshot itself, and after `report_done`, controller exit or the
+  time limit, pauses and takes the end snapshot; `checkT1` reads only those two. Checker reads
+  are timed separately (`checkerOverheadMs`) and are outside the task timer.
+- **Receipt** (`.runtime/bench-<task>-<arm>-<run>/receipt.json`, with the call log, the
+  controller's event stream, and both snapshots): outcome (done, timeout, controller-exit),
+  controller start to end, first call and done times, counts (inputs, observations, controls,
+  errors, calls, observed bytes), tokens summed from the controller's `turn.completed` usage
+  (input, cached input, uncached input, output, reasoning; billed USD null with the reason),
+  the checker result, controller version and argument hash, and hashes of the logs. Stalls are
+  an empty list until an adapter reports them; nothing is subtracted.
+- No rerolls: every run is retained. Arm order alternation and the save reset per run are the
+  operator's schedule; each run reloads the save itself.
