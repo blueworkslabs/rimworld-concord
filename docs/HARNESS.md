@@ -423,40 +423,53 @@ with JSON lines on stdio.
   channel. The env values are the game host's paths, sent by the game-side runner and
   single-quoted. `exec` keeps the server the session's process-group leader, so `registerArm` and
   `stopArm` work unchanged on the game host.
-- **EOF exit.** Both arm servers `process.exit(0)` when stdin ends, so closing the ssh session
-  (the controller exiting or being killed) is the shutdown. On the game host, `stopArm` still
-  stops the arm first.
+- **EOF exit.** Both arm servers terminate their registered process group on stdin EOF/error or
+  transport signals, including an in-flight tool and its same-group children; they do not
+  drain queued calls after EOF. On the game host, `stopArm` still stops the arm first.
 - **Lock scope.** `scripts/run-benchmark-pair.sh` (game host) takes the lab lock
   `$RIMWORLD_LAB_ROOT/concord/coordinator.lock` once and runs both arms of the pair under it. Each
   run is `trials/benchmark-run.ts --controller=host`, which keeps its game-side duties: save check
   and load, hidden start/configured/end snapshots, the recording, the timer, the call journal and
   the receipt. The recorder is the existing one on the game host. Arm servers and
   `benchmark-run` refuse to start unless the lock is held (`assertLabLockHeld`: a non-blocking
-  `flock` that succeeds means nobody holds it). The controller proof holds its scratch lab's lock.
+  `flock` must return contention, not success or an operational error). The controller proof holds its scratch lab's lock.
 - **Controller host.** `node dist/trials/benchmark-host.js /abs/config.json --order=harness,ui
   --task=T1 --save=… --model=… --reasoning=… --ui-server=/abs/on/game/host.json
-  (--controller-proof=/abs.json | --rehearsal=true)`, with config `{sshTarget, remoteRepo, labRoot}`.
+  (--controller-proof=/abs.json | --rehearsal=true)`, with config `{sshTarget, remoteRepo, labRoot, display, xauthority, label?}`.
+  Display and Xauthority are game-host settings; `label` defaults to `unscored`.
   Steps:
   1. Check the controller proof against this host's controller.
   2. Require the game host's build (`dist/src`, `dist/trials`, the pair script and `T1.json`) to
      hash identically to the local build.
   3. Start the pair script over ssh.
   4. For each `ready`: check the arm order, model, reasoning, task hash and rehearsal flag; run the
-     pre-launch check with the remote arm (outside the timer); spawn the controller; reply
-     `launched`.
+     pre-launch check with the remote arm (outside the timer), cleaning up on the game host;
+     reply `prepared`, await game-host `start`, then spawn the controller and reply `launched`.
   5. Relay each controller event line, then `controller-exit`.
-  6. On `stop`, kill the controller.
+  6. On `stop`, abort pending launch work and kill the controller. Channel closure or an
+     operator stop also cancels preflight, so it cannot spawn a controller afterward.
   Receipts come back over the wire and are also kept on the game host.
-- **Wire** (`src/harness/controller-wire.ts`). From the game host: `ready`, `stop`, `receipt`,
-  `setup-failed`. From the controller host: `launched`, `launch-failed`, `controller-event`,
+- **Wire** (`src/harness/controller-wire.ts`). From the game host: `ready`, `start`, `stop`, `receipt`.
+  From the controller host: `prepared`, `launched`, `launch-failed`, `controller-event`,
   `controller-exit`. Every message carries the `runId`. Lines that are not wire messages are kept
   aside and never acted on. If the channel closes mid-run, the game side stops the run.
-- **Timing.** The timer starts when `launched` arrives, and ssh latency is inside it for both arms
-  alike. Bytes per call are journalled on the game host as before. Receipts record
+- **Timing.** The timer starts on the game host immediately before sending permission to start.
+  The controller host cannot spawn before receiving it, so SSH latency is included without
+  subtracting timestamps from different machines. Bytes per call are journalled on the game host as before. Receipts record
   `controllerHost: "remote"`.
 
 Evidence so far (local): unit tests cover the command's shell round trip (quotes, `$`, backticks
 and spaces survive), target and repo validation, lock refusal, the EOF exit and the wire. A
 pre-launch check drove both arms through the ssh-shaped command (a local shim in place of ssh) and
 compared them with the local arms: no findings, identical tool and context hashes, no arm process
-left behind. The first real run through staging is the pair itself.
+left behind. Actual SSH scripted and real-controller attempt evidence is linked below; authenticated gameplay remains unverified.
+
+### Native controller readiness (2026-09-26)
+
+Before real local/cross-host execution, the launcher requires an existing native ChatGPT
+login in its own environment (`codex login status`). Logged-out and API-key modes fail
+before game access; this benchmark never changes billing routes automatically. This
+check is necessary but does not prove provider access. Local-recorder isolation proofs
+verify tools/context only and must not be presented as authentication verification.
+The [first actual SSH pair](evidence/benchmark-ssh-2026-09-26/README.md) records this limit:
+scripted lifecycle passed, while both real controllers failed authentication before input.

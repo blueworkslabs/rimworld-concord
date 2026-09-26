@@ -1,0 +1,269 @@
+{
+  "runtimeRevision": "e9d877e",
+  "postRunLoginGateRevision": "5aebad5",
+  "realPairClassification": "unscored real-controller rehearsal attempt; both arms authentication-failed",
+  "attemptsPerArm": 1,
+  "realPairOrder": [
+    "harness",
+    "ui"
+  ],
+  "realPairLimitSecondsPerArm": 1200,
+  "actualBilledUsd": null,
+  "preservation": {
+    "saveCount": 440,
+    "unchanged": true,
+    "added": [],
+    "modRestored": true,
+    "gameStopped": true,
+    "displayStopped": true,
+    "allSixRegisteredArmProcessesGone": true
+  },
+  "runs": [
+    {
+      "runId": "eb014014-402f-48eb-a2db-92b22b28a5e9",
+      "arm": "harness",
+      "label": "scripted-ssh-lifecycle",
+      "rehearsal": true,
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "outcome": "done",
+      "failure": null,
+      "controllerExit": 0,
+      "counts": {
+        "inputs": 13,
+        "observations": 10,
+        "controls": 3,
+        "calls": 24,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 157343
+      },
+      "tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "turns": 1,
+        "complete": true,
+        "malformedEvents": 0,
+        "actualBilledUsd": null,
+        "reason": "Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries."
+      },
+      "checker": {
+        "task": "T1",
+        "completed": true,
+        "evidence": {
+          "campfires": [
+            5668
+          ],
+          "configuredBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "completedBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "mealsCookedSinceStart": 3,
+          "startTick": 2,
+          "configuredTick": 908,
+          "endTick": 7889,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": []
+      },
+      "verifiedCompletion": false,
+      "hashes": {
+        "calls": "ecbdbf082725d1413935c9da44725c3de0eecb3e1f7f59658e710f4ce443a51f",
+        "events": "3607c5084184e5ad8c86e8a6d9be973589a9e2b4dffac80c1ec1f2f6cf80a738",
+        "recording": "fd20e6f4b5b19cdfc3e7ed895183ac51b3bbc149e9d8a6cac9b668afccc57957"
+      },
+      "recordingSeconds": 28.866667,
+      "audit": "scripted lifecycle only"
+    },
+    {
+      "runId": "ffc69c83-f691-4b21-a297-55380f6fa488",
+      "arm": "harness",
+      "label": "real-controller-rehearsal-pair-1",
+      "rehearsal": false,
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "outcome": "controller-exit",
+      "failure": null,
+      "controllerExit": 1,
+      "counts": {
+        "inputs": 0,
+        "observations": 0,
+        "controls": 0,
+        "calls": 0,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 0
+      },
+      "tokens": {
+        "input_tokens": null,
+        "cached_input_tokens": null,
+        "uncached_input_tokens": null,
+        "output_tokens": null,
+        "reasoning_output_tokens": null,
+        "turns": 0,
+        "complete": false,
+        "malformedEvents": 0,
+        "actualBilledUsd": null,
+        "reason": "Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries."
+      },
+      "checker": {
+        "task": "T1",
+        "completed": false,
+        "evidence": {
+          "campfires": [],
+          "configuredBills": [],
+          "completedBills": [],
+          "mealsCookedSinceStart": 0,
+          "startTick": 2,
+          "configuredTick": null,
+          "endTick": 2,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": [
+          "no campfire built during the run",
+          "no observed new three-iteration simple-meal bill on the new campfire",
+          "only 0 meals cooked since the start"
+        ]
+      },
+      "verifiedCompletion": false,
+      "hashes": {
+        "calls": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "events": "efdfc7ce1a2c8f5cdb509a65e3845519ff9d9b75a32bcb37b64b86afec974d19",
+        "recording": "475445c27bd4665122dc0e2d87700d7f436f41ea3af31197d324d63287da8cca"
+      },
+      "recordingSeconds": 18.466667,
+      "audit": "authentication failure before any game tool call; not scored"
+    },
+    {
+      "runId": "19115733-52af-404b-a44a-82ee6675b2bb",
+      "arm": "ui",
+      "label": "scripted-ssh-lifecycle",
+      "rehearsal": true,
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "outcome": "done",
+      "failure": null,
+      "controllerExit": 0,
+      "counts": {
+        "inputs": 5,
+        "observations": 5,
+        "controls": 4,
+        "calls": 11,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 7187751
+      },
+      "tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "turns": 1,
+        "complete": true,
+        "malformedEvents": 0,
+        "actualBilledUsd": null,
+        "reason": "Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries."
+      },
+      "checker": {
+        "task": "T1",
+        "completed": false,
+        "evidence": {
+          "campfires": [],
+          "configuredBills": [],
+          "completedBills": [],
+          "mealsCookedSinceStart": 0,
+          "startTick": 2,
+          "configuredTick": null,
+          "endTick": 899,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": [
+          "no campfire built during the run",
+          "no observed new three-iteration simple-meal bill on the new campfire",
+          "only 0 meals cooked since the start"
+        ]
+      },
+      "verifiedCompletion": false,
+      "hashes": {
+        "calls": "9e86682580363ddcfa13d0223a29c14f1e7738c5c12253d422fb59646ff0a381",
+        "events": "e6cc119ce9a3ff23b57a6d0f53ac80ae6f4e2243b6690b0a15ff637cee87feee",
+        "recording": "42890c17b5a9bad0f0906cecef1e36718e2371a8a14af965e1bf6d6e9377d4c1"
+      },
+      "recordingSeconds": 10.6,
+      "audit": "scripted lifecycle only"
+    },
+    {
+      "runId": "271779ec-fb3a-40b1-91a6-4d92bf4a433e",
+      "arm": "ui",
+      "label": "real-controller-rehearsal-pair-1",
+      "rehearsal": false,
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "outcome": "controller-exit",
+      "failure": null,
+      "controllerExit": 1,
+      "counts": {
+        "inputs": 0,
+        "observations": 0,
+        "controls": 0,
+        "calls": 0,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 0
+      },
+      "tokens": {
+        "input_tokens": null,
+        "cached_input_tokens": null,
+        "uncached_input_tokens": null,
+        "output_tokens": null,
+        "reasoning_output_tokens": null,
+        "turns": 0,
+        "complete": false,
+        "malformedEvents": 0,
+        "actualBilledUsd": null,
+        "reason": "Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries."
+      },
+      "checker": {
+        "task": "T1",
+        "completed": false,
+        "evidence": {
+          "campfires": [],
+          "configuredBills": [],
+          "completedBills": [],
+          "mealsCookedSinceStart": 0,
+          "startTick": 2,
+          "configuredTick": null,
+          "endTick": 2,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": [
+          "no campfire built during the run",
+          "no observed new three-iteration simple-meal bill on the new campfire",
+          "only 0 meals cooked since the start"
+        ]
+      },
+      "verifiedCompletion": false,
+      "hashes": {
+        "calls": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "events": "0cf3b27baa16bc2b3902bed17f677d012b2cdd5d0de6ee63aea34f725759efba",
+        "recording": "64e944c61270925662cad015cfdf5cfabd4e9ecfaea01150011f5c70a8e205d4"
+      },
+      "recordingSeconds": 17.666667,
+      "audit": "authentication failure before any game tool call; not scored"
+    }
+  ]
+}

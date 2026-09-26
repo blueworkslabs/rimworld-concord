@@ -119,3 +119,7 @@ wire receipts, full snapshot/digest and size counts. Not a benchmark or model ru
 [Report](../evidence/harness-actions-2026-09-26/README.md) · [summary](../evidence/harness-actions-2026-09-26/summary.json): fixed-script campfire + three-iteration bill, paused API checks and same-game-process save/load passed. 467 tests; all 439 original saves unchanged, one checkpoint retained. Zero model calls; no scored comparison.
 
 | 09-26 | [#96](https://github.com/blueworkslabs/rimworld-concord/pull/96) | D + S | Controller isolation and benchmark lifecycle | Local-recorder proof passed; initial harness failure retained; corrected scripted T1 and UI/speed rehearsal passed. No real-controller pair; cross-host transport outstanding. | [summary](../evidence/benchmark-lifecycle-2026-09-26/summary.json) | [report](../evidence/benchmark-lifecycle-2026-09-26/README.md) |
+
+## 2026-09-26 — actual SSH benchmark lifecycle and first controller pair
+
+[Report](../evidence/benchmark-ssh-2026-09-26/README.md) · [summary](../evidence/benchmark-ssh-2026-09-26/summary.json): scripted harness T1 and UI controls passed over SSH. First real-controller pair retained: both arms failed authentication before tool calls, no usage or answers, no scored comparison. All 440 saves unchanged; staging stopped.
