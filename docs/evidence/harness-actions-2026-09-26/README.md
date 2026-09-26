@@ -8,10 +8,11 @@ The unchanged T1 starting save had no bills or completed campfire. Native constr
 
 The checker combines these observations with the fixed-script input audit. Native RimWorld has no per-bill completed-iteration counter: this is **not an edit-proof universal checker**. Both future benchmark arms require the same hidden configuration checkpoint and audit; ambiguous progress stays unverified.
 
-## Additional checks, after T1 and while paused
+## Additional scripted checks
 
-- Stale load identity refused with sequence zero; occupied placement returned the native game refusal.
+- Before completion: occupied placement returned the native game refusal.
 - Blueprint retry with the same ID and changed payload returned the original receipt, without another blueprint.
+- After completion, while paused: stale load identity refused with sequence zero.
 - Distinct stockpile/growing zones created through native validation. Invalid compound settings left zone state unchanged; empty allowed list meant Disallow all.
 - Count-only bill edit applied; unsupported Forever/count edit refused; test bill deleted.
 - Schedule/allowed-area commands accepted (existing setting/unrestricted: not proof of a changed restriction). Forbid toggled and restored with state checks.
