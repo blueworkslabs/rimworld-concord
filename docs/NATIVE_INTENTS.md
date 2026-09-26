@@ -1,5 +1,7 @@
 # Working with RimWorld's planner
 
+**Historical direction note (2026-09-24), not current implementation status.** Native hauling subsequently merged and the ordered hauling runtime retired. The [phase-2 plan](PHASE2.md) and [roadmap](ROADMAP.md) now govern the player harness and later core/consent integration; the description below is retained as history.
+
 **Status: agreed direction, not implemented.** This describes where the game side of
 Concord is heading and how we get there. The current behaviour is still the
 ordered-job model in [ACTIONS](ACTIONS.md). Based on Fable's review of `mod/` after the

@@ -39,7 +39,7 @@ namespace Concord {
     public class HarnessRefusal : Exception {public readonly string source;public HarnessRefusal(string reason,string source="harness"):base(reason){this.source=source;}}
 
     public static class HarnessActions {
-        static readonly string[] Kinds={"place_blueprint","designate","zone","bill","bill_edit","bill_delete","work_priority","schedule","forbid","allow_area"};
+        static readonly string[] Kinds={"place_blueprint","designate","zone","bill","bill_edit","bill_delete","work_priority","schedule","forbid","allow_area","assign_bed"};
         static Map Map{get{return Verse.Find.CurrentMap;}}
         static Thing ThingById(int id){var t=Map.listerThings.AllThings.FirstOrDefault(x=>x.thingIDNumber==id);if(t==null||t.Position.Fogged(Map)||(t is Pawn&&((Pawn)t).IsHiddenFromPlayer()))throw new HarnessRefusal("no visible thing with that id","harness");return t;}
         static Pawn Colonist(int id){var p=Map.mapPawns.FreeColonistsSpawned.FirstOrDefault(x=>x.thingIDNumber==id);if(p==null)throw new HarnessRefusal("no colonist with that id","harness");return p;}
@@ -210,6 +210,32 @@ namespace Concord {
                 if(before==after)receipt.detail="no change";
                 receipt.narration=Phrase.Core((after?"forbade the "+t.LabelShort:"allowed the "+t.LabelShort+" to be used")+(before==after?" (no change: it already was)":" "+HarnessNarration.Where(t.Position,t)));
                 return t.thingIDNumber+(after?":forbidden":":allowed");
+            }
+            case "assign_bed": {
+                // The bed's owner dialog, one row: same candidates, same checks, same native assignment.
+                var bed=ThingById(r.thingId) as Building_Bed;if(bed==null)throw new HarnessRefusal("not a bed","harness");
+                if(bed.def==ThingDefOf.DeathrestCasket)throw new HarnessRefusal("deathrest caskets use separate ownership; ordinary beds only","harness");
+                var p=Colonist(r.pawnId);
+                if(bed.Faction!=Faction.OfPlayer)throw new HarnessRefusal("not a colony bed","harness");
+                if(!bed.def.building.bed_humanlike)throw new HarnessRefusal("an animal bed takes no colonist owner");
+                if(bed.Medical)throw new HarnessRefusal("a medical bed has no owners");
+                if(bed.ForPrisoners)throw new HarnessRefusal("a prisoner bed takes no colonist owner");
+                var comp=bed.CompAssignableToPawn;if(comp==null)throw new HarnessRefusal("this bed takes no owner");
+                receipt.look=bed;
+                if(bed.OwnersForReading.Contains(p)){receipt.detail="no change";receipt.narration=Phrase.Core("left "+p.LabelShort+" assigned to the "+bed.LabelShort+" (no change: already an owner)");return bed.thingIDNumber+":"+p.thingIDNumber;}
+                Game(comp.CanAssignTo(p),"cannot assign that colonist to this bed");
+                if(!Verse.Find.IdeoManager.classicMode&&comp.IdeoligionForbids(p))throw new HarnessRefusal("IdeoligionForbids".Translate().ToString().StripTags(),"game");
+                var ownersBefore=bed.OwnersForReading.ToList();var previous=p.ownership.OwnedBed;
+                comp.TryAssignPawn(p);
+                // Read back: the native claim releases the pawn's old bed and, on a full bed, its last owner.
+                if(p.ownership.OwnedBed!=bed||!bed.OwnersForReading.Contains(p))throw new InvalidOperationException("bed ownership did not change");
+                var displaced=ownersBefore.Where(o=>!bed.OwnersForReading.Contains(o)).ToList();
+                receipt.detail="owners: "+String.Join(", ",bed.OwnersForReading.Select(o=>o.LabelShort).ToArray())+
+                    (displaced.Count>0?"; displaced: "+String.Join(", ",displaced.Select(o=>o.LabelShort).ToArray()):"")+(previous!=null&&previous!=bed?"; released bed "+previous.thingIDNumber:"");
+                receipt.narration=Phrase.Core("assigned "+p.LabelShort+" to the "+bed.LabelShort+" "+HarnessNarration.Where(bed.Position,bed)+
+                    (displaced.Count>0?"; "+Phrase.List(displaced.Select(o=>o.LabelShort).ToList())+(displaced.Count==1?" no longer owns it":" no longer own it"):"")+
+                    (previous!=null&&previous!=bed?"; "+p.LabelShort+" is no longer assigned to the previous "+previous.LabelShort:""));
+                return bed.thingIDNumber+":"+p.thingIDNumber;
             }
             case "allow_area": {
                 var p=Colonist(r.thingId);Area area=null;

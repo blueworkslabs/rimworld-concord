@@ -1,0 +1,58 @@
+{
+  "slug": "actions-with-a-witness",
+  "title": "Actions With a Witness",
+  "date": "2026-09-26",
+  "summary": "Three benchmark tasks are complete. The next step makes the core’s actions visible without pretending an order is an outcome.",
+  "sections": [
+    {
+      "heading": "The comparison has a boundary",
+      "paragraphs": [
+        "Eighteen scored arms across nine matched pairs completed the cooking, beds-and-food, and indoor-wood tasks. Harness wall time was lower in every pair, with median reductions of about 45%, 68% and 83%. Colony time is less uniform: no consistent advantage on the first two tasks, earlier harness completion in all three indoor-storage pairs. Different command sizes, configuration choices and recoveries matter; billed-dollar savings are unavailable.",
+        "The recordings exposed the next problem: a viewer could watch the consequences without knowing who decided what. The agreed sequence is now legible actions and a fourth benchmark, then the core’s harness integration, then offers and binding refusals. Those are future acceptance gates, not extra conclusions from phase 1."
+      ]
+    },
+    {
+      "heading": "The line follows the receipt",
+      "paragraphs": [
+        "The action layer now records the core as decision-maker after the game answers. It says blueprint placed, bill added or bed assigned—not building finished, meal cooked or pawn asleep. Ordinary bed assignment reads back displaced owners and the released previous bed; forbid and allow report the actual state and no-change repeats.",
+        "Independent review found that native messages silently combine identical wording, the full journal hid harness-only records, and mining uses a cell designation rather than a thing designation. Fixes preserve distinct request lines, render both journals and read the right native outcome. Undiscovered-cell narration never names hidden ore or rooms; unsupported deathrest ownership is rejected before mutation."
+      ]
+    },
+    {
+      "heading": "What actually ran",
+      "paragraphs": [
+        "Authored normal controls built a separate two-bed-and-campfire fixture. The recorded paused check exercised 15 distinct narrated requests, two same-ID retries, real reassignment/displacement, previous-bed release, identical-worded bills, mining/cancellation and save/load preservation. On-screen inspection showed records in both journal layouts and native messages while paused and running. No model was called.",
+        "The first log audit still found a redundant mining-index lookup and a compressed-rock message target that did not restore cleanly. Both warnings were corrected and a bounded recorded verification passed. The original recording and an extra failed fog-location diagnostic remain retained. All 443 original saves survived the first run; all 445 then-existing saves survived the repair. The prior mod was restored and staging stopped."
+      ]
+    },
+    {
+      "heading": "The next reader still has work",
+      "paragraphs": [
+        "These are scripted and UI checks, not the sealed four-of-five viewer-legibility verdict. Fable next reviews the project, documentation and website as a whole and owns the sealed rubric/key. T4 still needs its completed-tending witness and simultaneous roofed-sleep fixture, followed by an authored viability check and freeze.",
+        "The older construction-consent slice retires unmerged with its partial evidence and reuse inventory intact. No construction-contribution ledger comes back through this work. The existing character/core architecture remains distinct from the benchmark controller until the public-core knowledge boundary and integration are reviewed."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "label": "Phase 1: cooking comparison",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/98"
+    },
+    {
+      "label": "Phase 1: beds and indoor storage",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/101"
+    },
+    {
+      "label": "Agreed phase 2 plan",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/pull/102"
+    },
+    {
+      "label": "Narration and ownership acceptance evidence",
+      "url": "https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/harness-a1-2026-09-26/README.md"
+    }
+  ],
+  "author": {
+    "model": "gpt-6-astra",
+    "reviewer": "Independent Codex review"
+  }
+}

@@ -26,6 +26,7 @@ remain unchanged.
 | Eat, chosen by the pawn itself | yes | yes |
 | Agent harness (perceive and act like a player, minus draft) | [phase definition](docs/HARNESS.md); perception/actions v1 and [placement query verified](docs/evidence/placement-2026-09-26/README.md) | [Cold alerts/digest](docs/evidence/perception-alerts-2026-09-26/README.md), [scripted T1/API/save-load passed](docs/evidence/harness-actions-2026-09-26/README.md); [three scored T1 pairs](docs/evidence/benchmark-scored-three-2026-09-26/README.md): 6/6 complete; no consistent colony-time advantage; median 58.7s harness / 106.6s UI; limited to this task, billed USD unavailable |
 | T2/T3 benchmark | [frozen setup](docs/evidence/benchmark-colony-setup-2026-09-26/README.md) · [twelve scored arms](docs/evidence/benchmark-colony-scored-2026-09-26/README.md) | 12/12 primary goals met; T2 no consistent colony-time advantage, T3 harness earlier in all pairs; median wall H/UI 68.7/217.3s and 41.0/240.4s; tested interfaces only |
+| Phase 2 A: action narration and bed assignment | [agreed A→B→C plan](docs/PHASE2.md); ordinary native ownership, receipt-backed records | [Recorded scripted/UI checks](docs/evidence/harness-a1-2026-09-26/README.md); replay/restore and displacement exercised; sealed viewer legibility and T4 remain pending |
 | Annotate-only Jev grounding over live core replies | wired in the host runner (`--annotate-grounding`), [gates nothing](docs/trials/JEV_ANNOTATE.md) | not yet exercised; first use is the construction and cooking scene |
 | Offline Jev wake/grounding replay | no gameplay | [authorized retry: 29 valid answers](docs/trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first) and [E2 over the native-haul turns: 27 valid](docs/trials/JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation); transport failures retained; no threshold/routing decision |
 | Native tagged-zone haul spike (historical) | [scripted and live evidence](docs/trials/NATIVE_HAUL_LIVE.md) retained | Superseded by the ordinary-play migration below |
@@ -74,8 +75,10 @@ Not yet shown: the live core turning a need into a multi-step plan (build, then 
 long-run character consistency, automatic model escalation, the gravship
 campaign, or an installer for players.
 
-Next: moving the game side from hand-built ordered jobs to RimWorld's own planner
-(tagged zones, blueprints, bills); see [NATIVE_INTENTS](docs/NATIVE_INTENTS.md).
+**Current direction:** the [agreed phase-2 plan](docs/PHASE2.md): legible harness actions
+and T4, then public-core observe/act/wait integration and a frozen scene plus T1–T4
+regression, then binding offers/refusals. Phase 1 completed 18/18 scored arms; that is
+not yet a watchable, autonomous crew. The older construction slice #89 retires unmerged.
 
 What happened when: [HISTORY](docs/HISTORY.md) · every trial: [trial ledger](docs/trials/README.md) · what's next: [ROADMAP](docs/ROADMAP.md)
 
@@ -84,9 +87,13 @@ What happened when: [HISTORY](docs/HISTORY.md) · every trial: [trial ledger](do
 1. The C# mod observes the game and executes validated native jobs (`mod/`).
 2. A TypeScript coordinator owns characters, offers, consent, scheduling and
    checkpoints in SQLite (`src/`).
-3. Each model call gets a narrow, self-describing perspective and a menu of real
+3. Each **character-backend** call gets a narrow, self-describing perspective and a menu of real
    options, and returns one structured choice. No action tools, game handle or database.
 4. Consent, identity, deduplication and timeline safety are enforced below the models.
+
+The separate benchmark controller uses isolated player-equivalent harness or UI tools.
+It is not yet the in-world core; phase 2 B must define that wider view's public-core
+knowledge boundary before integration. Existing character calls remain tool-free.
 
 Details: [ARCHITECTURE](docs/ARCHITECTURE.md). All documentation: [docs/README.md](docs/README.md).
 

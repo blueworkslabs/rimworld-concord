@@ -84,6 +84,7 @@ namespace Concord {
             case "schedule":return "change a schedule";
             case "forbid":return r.flag?"forbid something":"allow something";
             case "allow_area":return "change an area restriction";
+            case "assign_bed":return "assign a bed";
             default:return "use an unknown control";
             }
         }

@@ -137,7 +137,7 @@ namespace Concord
     }
     [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing,target,bed,cancelKind,crewJson,intentId,variant,reason,hold,siteId,label; public int zoneId=-1; public int x,z,w,h,quota,ttlMs,count,meals,maxTicks,untilTick; public int mapId=-1;
         // Harness actions v1 (docs/HARNESS.md).
-        public string requestId,action,def,stuff,cells,mode,recipe,work,storage,world; public string[] allow; public int thingId=-1,rot=-1,hour=-1,radius=-1,suspend=-1,priority=-1; public bool flag,hasAllow; }
+        public string requestId,action,def,stuff,cells,mode,recipe,work,storage,world; public string[] allow; public int thingId=-1,pawnId=-1,rot=-1,hour=-1,radius=-1,suspend=-1,priority=-1; public bool flag,hasAllow; }
     [Serializable] public class Response { public string id,error; public bool ok; }
     [Serializable] public class PawnView { public string id,name,job,currentBed,carrying; public int x,z,jobId; public float health; public bool rescueReady,buildReady,cookReady,downed,haulingCapable; public int carryingCount; }
     [Serializable] public class Snapshot { public string world,epoch,clock; public int ticks,decisionPauses; public bool loaded,paused,manualPaused; }

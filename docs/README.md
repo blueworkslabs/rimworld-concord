@@ -12,12 +12,12 @@ code and a contract disagree, one of them is a bug.
 | Document | What it answers |
 |---|---|
 | [VISION](VISION.md) | What we're building, the principles, and the open questions |
-| [PHASE2](PHASE2.md) | Proposed post-benchmark sequence and measurable acceptance; not yet agreed for implementation |
+| [PHASE2](PHASE2.md) | Agreed A→B→C sequence, current implementation and separate trial freezes |
 | [ROADMAP](ROADMAP.md) | What's next and what's deliberately deferred |
 | [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md) | Gate B design for the first native-intent spike |
 | [MIGRATION_HAULING](MIGRATION_HAULING.md) | Hauling migration, game-side Gate C verdict and ordered-haul retirement |
 | [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md) | How RimWorld's jobs, think tree, hauling and events work, for the native-intents spike |
-| [MIGRATION_PRODUCTION](MIGRATION_PRODUCTION.md) | Construction/cooking: signed Gate A/B with scope-trim amendment; carrier implementation and scripted acceptance next |
+| [MIGRATION_PRODUCTION](MIGRATION_PRODUCTION.md) | Historical construction/cooking design, superseded by the harness phase; see [reuse inventory](CONSTRUCTION_REUSE.md) |
 | [NATIVE_INTENTS](NATIVE_INTENTS.md) | The agreed direction for the game side: steer RimWorld's own planner instead of driving pawns |
 | [HISTORY](HISTORY.md) | How we got here, one milestone per line |
 

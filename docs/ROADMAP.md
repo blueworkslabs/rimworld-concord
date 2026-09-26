@@ -2,16 +2,19 @@
 
 Forward-looking only; past results are in [HISTORY](HISTORY.md) and the
 [trial ledger](trials/README.md). Direction agreed with the project owner and team on
-2026-09-24.
+2026-09-26; older milestones below are retained as history.
 
-## Phase 2, proposed 2026-09-26
+## Phase 2, agreed 2026-09-26
 
 Phase 1 closed with eighteen of eighteen scored benchmark arms complete (nine pairs). The [phase 2 plan](PHASE2.md)
 has three steps: legible harness actions and the missing moves with a fourth task, the
 core integrated as the harness agent and judged on a ten-minute scene plus matched benchmark
 regression, then offers and refusals with separate enforcement and live-choice evidence.
-The plan is not yet agreed for implementation; concrete fixtures, knowledge boundaries
-and trial budgets must be frozen before their dependent work.
+[#102 is merged](https://github.com/blueworkslabs/rimworld-concord/pull/102). Narration and
+ordinary bed assignment are [scripted/UI-tested](evidence/harness-a1-2026-09-26/README.md).
+Next: Fable's project/docs review and sealed legibility rubric, then the T4 witness, fixture
+and authored viability check. Concrete knowledge boundaries and budgets precede B's freeze;
+no scored T4 or new story scene has started.
 
 ## Phase reset, 2026-09-25: the agent harness
 
@@ -32,9 +35,9 @@ This is task-local evidence, not general colony-management or billed-dollar adva
 Stalls remain uninstrumented and native USD unavailable. Placement query is now verified and merged; no interface change entered the scored T1 set.
 [T2/T3 scored results](evidence/benchmark-colony-scored-2026-09-26/README.md) now cover three alternating pairs per task: all twelve primary goals met. T2 has no consistent colony-time advantage; T3 harness completion precedes UI in all three pairs. Median wall H/UI is 68.7/217.3s and 41.0/240.4s respectively. Sleep, tending, food permissions, mixed storage and pause/filter recovery remain separate outcome columns. Interface granularity and plans differ; this is not pure perception or dollar-cost evidence.
 
-Next: interpretation and phase-2 planning from all three task sets. Action narration in the crew log remains planned; no new story-layer scene or broader performance claim follows automatically.
+The accepted phase-2 plan above supersedes the earlier migration sequence below. The old construction slice #89 is retired unmerged with a reuse inventory; no contribution ledger is revived. No new story-layer or general performance claim follows from benchmark completion.
 
-## Where we are
+## Earlier milestones (historical; current direction above)
 
 The "watchable scene" phase delivered the tools and a first recorded trial, not yet
 proof of sustained, understandable coordination:

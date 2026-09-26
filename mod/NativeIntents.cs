@@ -526,6 +526,14 @@ namespace Concord {
             var p=WorldState.FindActor(r.actor);
             if(r.op=="lab-draft-when"){if(p==null||p.drafter==null)throw new Exception("Unknown or undraftable pawn");draftWhen=r.actor;return "{\"armed\":true}";}
             if(r.op=="lab-undraft"){if(p==null||p.drafter==null)throw new Exception("Unknown or undraftable pawn");draftWhen=null;p.drafter.Drafted=false;return "{\"drafted\":false}";}
+            if(r.op=="lab-messages"){
+                // Lab-only: the game's own message lists, to confirm harness narration reached the screen
+                // and the history. Never offered to a controller (perception omits messages).
+                var live=HarmonyLib.Traverse.Create(typeof(Messages)).Field("liveMessages").GetValue<List<Message>>()??new List<Message>();
+                var archived=Find.Archive.ArchivablesListForReading.OfType<Message>().ToList();
+                var j=new Json();j.Obj().Arr("live");foreach(var m in live)j.Val(m.text);j.EndArr().Arr("archived");
+                foreach(var m in archived.Skip(Math.Max(0,archived.Count-64)))j.Val(m.text);j.EndArr().End();return j.ToString();
+            }
             if(r.op=="lab-speed"){if(r.count<0||r.count>4)throw new Exception("Speed must be 0-4");Find.TickManager.CurTimeSpeed=(TimeSpeed)r.count;return "{\"speed\":"+(int)Find.TickManager.CurTimeSpeed+",\"tick\":"+Find.TickManager.TicksGame+"}";}
             if(r.op=="lab-patch-cost"){
                 // 0 reset and stop timing, 1 reset and time every patch call, 2 read.

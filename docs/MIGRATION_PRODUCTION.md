@@ -1,5 +1,7 @@
 # Construction and cooking migration: native blueprints and bills (Gate A)
 
+**Historical design, superseded 2026-09-26:** the agreed [phase-2 plan](PHASE2.md) retires #89 unmerged. The signatures and implementation authority below describe that earlier slice, not current permission to resume it. See the [retained evidence and reuse inventory](CONSTRUCTION_REUSE.md).
+
 **Status: Gate B signed by Fable on 2026-09-25 at `e6ae274`, recorded in
 `cddd61c`; the five answers and six conditions below stand.** Gate A direction is
 signed too. Astra's pinned-assembly review and independent focused re-review have

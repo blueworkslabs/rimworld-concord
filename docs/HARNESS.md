@@ -607,10 +607,43 @@ Checked locally:
 - `scripts/test-mod-phrases.sh` runs the wording under mono (local only: it needs the built mod);
 - TS tests cover the schemas and the digest stripping.
 
-Recorded scripted/UI acceptance was performed jointly with [#104](https://github.com/blueworkslabs/rimworld-concord/pull/104):
-paused/running native messages, both journal layouts, distinct identical-worded requests,
-same-ID replay and saved receipt/message preservation. The initial warning-bearing run
-and corrected verification are retained in #104's evidence publication. Zero model calls;
-this is not a sealed viewer-legibility verdict.
+[Recorded scripted/UI checks](evidence/harness-a1-2026-09-26/README.md) verify native messages
+while paused/running, both journal layouts, distinct identical-worded actions, same-ID
+replay and saved receipt/message preservation. Zero model calls; not a legibility verdict.
 
 The legibility read (four of five sealed actions) needs Fable's rubric and a frozen run.
+
+## `assign_bed` and the A.1 scripted check (Clawd, 2026-09-26)
+
+`act {"action":"assign_bed","bed":id,"pawn":id}` is one row of the bed's owner dialog. It uses the
+same candidates, the same `CanAssignTo` check (body size, slave and colonist beds), the same
+ideology check (outside classic mode) and the same native `TryAssignPawn`.
+
+- **Refused:** medical, prisoner and animal beds, non-colony beds, and deathrest caskets (separate native ownership slot, rejected before mutation).
+- **Read-back:** the pawn must own the bed afterwards. The receipt's `detail` lists the owners now,
+  any owner the native claim displaced (a full bed drops its last owner), and the pawn's released
+  previous bed.
+- **Narration** says "assigned … to the …", never "slept". Sleep is read from later snapshots
+  (`asleep`, `currentBed`).
+- **Already an owner:** reported as "no change".
+- `forbid` now reads back the forbidden state. A change that did not take is an error, and a
+  repeat is "no change". Allowing stays `forbid … false`.
+
+`scripts/run-harness-a1-scripted.sh --save=lab-…` runs a paused, model-free check on staging:
+- a game refusal and a harness refusal, each with its line;
+- a placement at a cell the placement query offered, then the same request ID again (same
+  receipt, no second line);
+- a work priority line;
+- forbid, a no-change forbid and allow, each against the snapshot;
+- `assign_bed`, a no-change repeat and native displacement on a single bed;
+- save and reload: receipts identical, no line shown again, and a retry after the reload shows
+  nothing new.
+
+Each line's presence in the game's message history is read with the lab-only `lab-messages` op.
+The check requires **two built ordinary single beds, a campfire, visible mineable rock,
+a loose allowed item and a capable cook**; missing prerequisites fail rather than skip.
+The frozen T2 start has **no beds**. Use a separate native-built fixture, not that start
+save directly. Evidence is journaled incrementally; a failure does not erase earlier replies.
+The accepted-path test includes releasing a previous bed, effective priority read-back,
+mining/cancellation, distinct identical bills and stale-timeline rejection. Other unsuitable
+bed classes have source-backed guards; they are not all instantiated in this fixture.

@@ -143,3 +143,10 @@ wire receipts, full snapshot/digest and size counts. Not a benchmark or model ru
 ## 2026-09-26 — T2/T3 scored sets, recording-first review complete
 
 [Both tables and outcome columns](../evidence/benchmark-colony-scored-2026-09-26/README.md) · [measurements/source hashes](../evidence/benchmark-colony-scored-2026-09-26/measurements.json): three alternating pairs per task, twelve primary goals met. No consistent T2 colony-time advantage; T3 harness earlier in all pairs. Sleep is secondary; UI fungus allowing is not ingestion, tending is not a cure, and mixed stockpile contents remain visible. All 443 saves unchanged, prior mod restored, game/display stopped, original recordings retained. No replacement attempts or gameplay during publication.
+
+## 2026-09-26 — phase-2 action narration and bed assignment
+
+[Recorded scripted/UI evidence](../evidence/harness-a1-2026-09-26/README.md), #103/#104:
+15 distinct narrated requests; assignment/release/displacement, identical message text,
+replay/save-load, compact/full journal and paused/running messages. Native warning repairs
+verified; initial evidence retained. Zero model calls, no sealed legibility verdict.

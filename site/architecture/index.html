@@ -310,7 +310,7 @@
     <span class="eyebrow">06 · The core</span>
     <h3>A planner that waits to be needed</h3>
     <p>Each core turn picks one of four moves: <strong>propose</strong> a listed opportunity, <strong>adopt</strong> a counter for fresh consent, <strong>ask</strong> one pawn one question, or <strong>wait</strong>. It keeps up to eight sourced topics marked open, blocked, deferred, resolved or declined. "Resolved" requires completed linked work, so its prose can't close a topic that the receipts don't close.</p>
-    <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, and native-intent milestones or stalls. Opportunity churn alone does not wake it. A shared status band changing on its own, with no offerable opportunity or counter, is handled <strong>silently</strong>, with no model call and no crew-log entry, just a "waiting on…" status line, unless Food or Rest reaches urgent (including a first or previously unknown reading). Idle time and private needs never wake it, and a wait never writes to the log. Messages published after newer receipts carry an "as of" mark. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
+    <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, and native-intent milestones or stalls. Opportunity churn alone does not wake it. A shared status band changing on its own, with no offerable opportunity or counter, is handled <strong>silently</strong>, with no model call and no crew-log entry, just a "waiting on…" status line, unless Food or Rest reaches urgent (including a first or previously unknown reading). Private needs do not wake it. After an explicit wait while work remains offerable, at most two bounded reviews are allowed (2,500 ticks, then 5,000); otherwise idle time stays silent. A wait never writes to the log. Messages published after newer receipts carry an "as of" mark. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
     <p class="files">src/core-planner.ts · src/core-scheduler.ts · mod/SharedStatus.cs</p>
   </div>
   <figure class="anim window">
@@ -364,7 +364,8 @@
 <section class="block" id="status" aria-labelledby="status-h">
   <span class="eyebrow">Research tree</span>
   <h2 id="status-h">What's built, what's next</h2>
-  <p class="sub">Status as of 25 September 2026. "Verified slice" means bounded evidence for the named capability, not proven long-run reliability. Labels are qualitative, not completion percentages.</p>
+  <p class="sub">Status as of 26 September 2026. "Verified slice" means bounded evidence for the named capability, not proven long-run reliability. Labels are qualitative, not completion percentages.</p>
+  <p>The diagrams above explain the earlier character/core architecture. The separate player harness has completed its first three-task comparison; phase 2 will integrate the two only after defining the public-core knowledge boundary. <a href="https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PHASE2.md" rel="noopener">Current plan and evidence →</a></p>
   <p class="research-key"><span><span class="node done"></span>verified slice</span><span><span class="node part"></span>partly there</span><span><span class="node next"></span>not started</span></p>
   <div class="research">
     <div class="tier">
@@ -388,10 +389,10 @@
       <h3>Game side</h3>
       <div class="node done"><b>Harmony event hooks</b><span>job start/end, eating, placements</span></div>
       <div class="node done"><b>Native haul spike</b><span>live: 75/75, zero consent violations, unasked helper credited</span></div>
-      <div class="node part"><b>Hauling migration</b><span>merged, strict hold, scripted checks pass; live verdict pending</span></div>
+      <div class="node done"><b>Hauling migration</b><span>strict hold; game-side live verdict passed; growing hold parked</span></div>
       <div class="node done"><b>Pawn-owned eating</b><span>chosen by the pawn, never ordered; live-verified</span></div>
-      <div class="node part"><b>Ordered baseline</b><span>move, rescue, build, cook: working, to be replaced one at a time</span></div>
-      <div class="node next"><b>Build &amp; cook natively</b><span>blueprints and bills, then rescue through the native job</span></div>
+      <div class="node part"><b>Harness action records</b><span>scripted/UI-tested; ordinary bed assignment; sealed viewer read still pending</span></div>
+      <div class="node done"><b>Player harness: build &amp; cook</b><span>blueprints and bills; three scored pairs complete, not yet integrated core planning</span></div>
     </div>
     <div class="tier">
       <h3>Beyond</h3>
@@ -408,8 +409,9 @@
 <section class="block" aria-labelledby="missing-h">
   <h2 id="missing-h">Known gaps, stated plainly</h2>
   <div class="caveat">
-    <p><strong>The live build-and-cook chain remains unproved.</strong> Live runs show the core asking, waiting for receipts and closing follow-ups, colonists choosing to eat, and one native haul carried to its quota. No live run has yet produced a build or cooking offer; those move to blueprints and bills next.</p>
-    <p><strong>The native side won on the game, not yet on the crew.</strong> In the live native haul nobody refused, no plan formed between colonists, the three voices sounded alike, and a late yes was mislabelled as a withdrawal. The fixes (lapsed answers, observation ages, per-lane failure counts) are merged and checked in mocks/offline replay. The migration run is recorded in <a href="https://github.com/blueworkslabs/rimworld-concord/pull/75" rel="noopener">PR #75</a>; its recording-first review and live validation verdict are pending.</p>
+    <p><strong>A successful benchmark is not yet a watchable crew.</strong> Eighteen scored arms completed three frozen tasks. The isolated player controller can build and cook, but the in-world core has not yet been integrated with that harness. No new integrated multi-step scene or binding-refusal trial is claimed.</p>
+    <p><strong>The old native-haul verdict is complete, not pending.</strong> The game-side migration passed, while missing character conflict and narrative weaknesses remain explicit. The ordered hauling runtime was retired; the separate construction-consent slice is retired unmerged, with its partial evidence retained. <a href="https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PHASE2.md" rel="noopener">The agreed phase-2 plan</a> now governs what follows.</p>
+    <p><strong>What comes next is measured separately.</strong> Receipt-backed action narration has scripted/UI evidence, not a sealed four-of-five viewer verdict. T4 still needs completed-tending evidence and simultaneous actual sleep under roofs. Public-core knowledge limits and a versioned, opt-in annotation join precede the core integration; pawn-private views remain separate.</p>
     <p><strong>Hauling runs strict.</strong> The growing hold, which would keep RimWorld's extra pickups within the quota, is parked after its two fix rounds; the in-game clock is verified on one map only.</p>
     <p><strong>Character continuity is early.</strong> Outlooks form, persist and show up in later reasoning. Whether they add up to stable personalities over a long game is an open question.</p>
     <p><strong>It's a lab harness, not a player download.</strong> The mod only activates in a configured lab environment.</p>

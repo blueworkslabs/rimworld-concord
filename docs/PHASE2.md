@@ -1,10 +1,9 @@
 # Phase 2: the core on the harness, and the crew back on top
 
-**Status: proposed plan, Fable, 2026-09-26; technical review corrections by Astra.
-Not yet agreed for implementation.** Phase 1's three-task evaluation is closed by the
+**Status: agreed 2026-09-26; [#102 merged](https://github.com/blueworkslabs/rimworld-concord/pull/102).** Phase 1's three-task evaluation is closed by the
 [T1](evidence/benchmark-scored-three-2026-09-26/README.md) and
 [T2/T3](evidence/benchmark-colony-scored-2026-09-26/README.md) tables. A→B→C remains
-the proposed order; implementation and live trials are separate from this document review.
+the agreed order; individual live trials still require their concrete freezes.
 
 ## What phase 1 established
 
@@ -24,8 +23,8 @@ these observations do not isolate a single cause or prove identical post-configu
 engine throughput. They do not establish general strategic or pure perception superiority.
 
 Two things the tables do not flatter. The interfaces have different action granularity:
-UI is click-only, without drag; a harness command can bundle many native edits. Harness
-has no bed-owner action or Save menu, but **does** have work-priority and storage-filter
+UI is click-only, without drag; a harness command can bundle many native edits. The phase-1 harness
+had no bed-owner action or Save menu, but **does** have work-priority and storage-filter
 edits and `forbid(thing, forbidden:false)` already allows things. Fewer dispatched inputs
 is not a normalized count of native operations, and zero tool errors is not zero mistakes.
 The harness recording remains a time-lapse of consequences: a viewer sees a campfire
@@ -42,6 +41,11 @@ proofs after interface changes. Recording-first cold reads precede tables; no ou
 rerolls; preserve failed attempts. Interfaces change only between task sets.
 
 ## Step A: legible actions and the missing moves
+
+**Current implementation:** receipt narration and ordinary bed assignment are implemented
+and [scripted/UI-tested](evidence/harness-a1-2026-09-26/README.md). This does not pass the
+sealed four-of-five legibility measure below. Fable owns that rubric/key and the T4/scene
+freezes; T4 witness/fixture, stall instrumentation and the B/C integrations remain ahead.
 
 1. **Receipt-backed crew-log narration.** Every newly accepted game-editing `act` request
    writes one line in the colony's voice, after native acceptance: “Placed a campfire
@@ -67,7 +71,7 @@ rerolls; preserve failed attempts. Interfaces change only between task sets.
    things; `allow` need not become a duplicate API. Preserve former owners/slot constraints
    and distinguish assignment from actual sleeping. Add coverage of rejected/stale targets
    and replay/restore; no silent forced jobs. Nothing else until a task needs it.
-3. **T4: tend and shelter, proposed replacement for the earlier raid placeholder.**
+3. **T4: tend and shelter, agreed replacement for the earlier raid placeholder.**
    Beatrice receives completed tending of her initially untended asthma from an eligible
    doctor-enabled pawn, and all three original colonists are observed simultaneously asleep
    in suitable built beds under roofs by local 22h. Native roof completion is distinct from
@@ -109,7 +113,7 @@ coverage remains scripted, not newly proven by the regression scene. Keep acknow
 of addressed speech without implying an answer. Existing successful turn/receipt and
 failure-budget behavior must survive the replacement.
 
-One bounded persistent controller context **per scene** is the proposed default; reset
+One bounded persistent controller context **per scene** is the agreed policy; reset
 between matched benchmark arms/scenes, not every turn. Retain exact inputs/outputs and
 any compaction summary. Bound context growth and inference; restore/reconnect must rebase
 world facts before acting, not replay stale plans. Freeze model route and scene/token/wall
@@ -160,23 +164,22 @@ only cold read should identify who actually refused and their stated reason, not
 motive. No assumption that hauling filters already cover new construction/cooking carriers.
 Nothing in C starts before B's scene has been cold-read and its disposition recorded.
 
-## What retires and what remains proposed
+## What retires and what remains ahead
 
-After agreement, close [construction slice #89](https://github.com/blueworkslabs/rimworld-concord/pull/89)
-**unmerged**, with a reuse inventory and links to retained passing/failed evidence. Do not
+With the first step-A PR landing, close [construction slice #89](https://github.com/blueworkslabs/rimworld-concord/pull/89)
+**unmerged**, with the [reuse inventory](CONSTRUCTION_REUSE.md) and links to retained passing/failed evidence. Do not
 claim its incomplete carrier coverage passed. Generic harness actions already on main are
 separate from #89's unmerged construction consent/accounting; any reused pieces get their
-own review and acceptance. Keep branches and gate documents as history. No deletion or
-closure is performed merely by this proposal. No new or revived construction contribution/
+own review and acceptance. Keep branches and gate documents as history. Closure is authorized by the agreed plan; keep the unmerged branch and evidence. No new or revived construction contribution/
 attribution ledger, and no revival of the retired ordered-haul ledger. Preserve only the
 action receipts and minimal consent/ownership identities needed for truthful effects and
 binding refusal; selective reuse must not smuggle contribution accounting back in.
 
 ## Decisions before implementation/trial freezes
 
-- Agree the A→B→C order and the stronger T4 completed-tending + roofed-sleep goal.
+- **Decided:** A→B→C; T4 requires completed tending and actual simultaneous roofed sleep, not job starts.
 - Freeze T4's concrete witness/fixture, legibility key and stall/regression thresholds.
 - Set B's public-core knowledge projection, context/restore policy and finite inference/
-  annotation budgets. Per-scene context is proposed; per-day reset is not simultaneously assumed.
+  annotation budgets. Per-scene context is agreed, with fresh contexts between benchmark arms; no concurrent per-day reset policy.
 - Define C's matched refusal interface and carrier scope. Keep authored enforcement proof
   separate from live character choice and its recording-first interpretation.
