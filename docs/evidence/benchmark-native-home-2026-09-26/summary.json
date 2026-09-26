@@ -1,0 +1,193 @@
+{
+  "classification": "unscored real-controller rehearsal pair 2; permission failure",
+  "sourceCommit": "b91c7c56f8768434195924ea28586f22e3446295",
+  "pairId": "bench-pair-80824b44-c9ff-4900-8566-8764995beb89",
+  "receipts": [
+    {
+      "runId": "38cda90d-db27-47d4-ae70-d77b68c59e2f",
+      "rehearsal": false,
+      "label": "real-controller-rehearsal-pair-2-native-home",
+      "controllerHost": "remote",
+      "arm": "harness",
+      "task": {
+        "id": "T1",
+        "sha256": "edfd980f312a74ee20dbbf0e9fbe64e69071561530ee6ffdb6f76c57be8ec9dd"
+      },
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "controllerCodexHome": null,
+      "controllerCatalogSha256": "903bbd7e5884838eff6617a26d2ee556f04770fbaf1f6a177607abbdc5df8233",
+      "argsSha256": "0bec8abc8e1f0bb824876032dc3e5cb23edc16b65e3486fb16038bbf2fb82936",
+      "save": {
+        "name": "lab-concord-nh-helper-20260924",
+        "expectedSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c"
+      },
+      "at": "2026-09-26T10:40:13.938Z",
+      "preflight": {
+        "findings": []
+      },
+      "outcome": "controller-exit",
+      "failure": null,
+      "timer": {
+        "controllerStartMs": 1790419222910,
+        "stoppedAtMs": 1790419236397,
+        "firstRequestAtMs": null,
+        "firstRequestToStopMs": null,
+        "controllerWallMs": 13487,
+        "includesHiddenObserverOverhead": true,
+        "endSnapshotMayBeAfterDeadline": true
+      },
+      "counts": {
+        "inputs": 0,
+        "observations": 0,
+        "controls": 0,
+        "calls": 0,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 0
+      },
+      "tokens": {
+        "input_tokens": 17021,
+        "cached_input_tokens": 10880,
+        "uncached_input_tokens": 6141,
+        "output_tokens": 136,
+        "reasoning_output_tokens": 18,
+        "turns": 1,
+        "complete": true,
+        "malformedEvents": 0,
+        "actualBilledUsd": null,
+        "reason": "Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries."
+      },
+      "controllerExit": 0,
+      "checker": {
+        "task": "T1",
+        "completed": false,
+        "evidence": {
+          "campfires": [],
+          "configuredBills": [],
+          "completedBills": [],
+          "mealsCookedSinceStart": 0,
+          "startTick": 2,
+          "configuredTick": null,
+          "endTick": 2,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": [
+          "no campfire built during the run",
+          "no observed new three-iteration simple-meal bill on the new campfire",
+          "only 0 meals cooked since the start"
+        ]
+      },
+      "verifiedCompletion": false,
+      "auditStatus": "pending input/recording audit; timeout/failed runs cannot pass",
+      "hashes": {
+        "calls": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "events": "02f291c086c9682cf3f06e6386a7110fd67c3a8b21cc5868aac9c9cbb1310c31",
+        "recording": "d7d049fdf956b38704d21eddc937ba59c26359cf3f5273a92ae432af2ee5986a"
+      },
+      "stalls": {
+        "status": "not instrumented",
+        "measurements": null
+      },
+      "controllerPermissionRefusals": 2
+    },
+    {
+      "runId": "f83bb327-a899-4518-8f70-0fbe95591bef",
+      "rehearsal": false,
+      "label": "real-controller-rehearsal-pair-2-native-home",
+      "controllerHost": "remote",
+      "arm": "ui",
+      "task": {
+        "id": "T1",
+        "sha256": "edfd980f312a74ee20dbbf0e9fbe64e69071561530ee6ffdb6f76c57be8ec9dd"
+      },
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "controllerCodexHome": null,
+      "controllerCatalogSha256": "903bbd7e5884838eff6617a26d2ee556f04770fbaf1f6a177607abbdc5df8233",
+      "argsSha256": "36fc2a97a4d079a34c0ce517e8ee12c2abb18012115395aa862777f007893acd",
+      "save": {
+        "name": "lab-concord-nh-helper-20260924",
+        "expectedSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c"
+      },
+      "at": "2026-09-26T10:40:42.036Z",
+      "preflight": {
+        "findings": []
+      },
+      "outcome": "controller-exit",
+      "failure": null,
+      "timer": {
+        "controllerStartMs": 1790419249820,
+        "stoppedAtMs": 1790419260762,
+        "firstRequestAtMs": null,
+        "firstRequestToStopMs": null,
+        "controllerWallMs": 10942,
+        "includesHiddenObserverOverhead": true,
+        "endSnapshotMayBeAfterDeadline": true
+      },
+      "counts": {
+        "inputs": 0,
+        "observations": 0,
+        "controls": 0,
+        "calls": 0,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 0
+      },
+      "tokens": {
+        "input_tokens": 10503,
+        "cached_input_tokens": 4992,
+        "uncached_input_tokens": 5511,
+        "output_tokens": 113,
+        "reasoning_output_tokens": 27,
+        "turns": 1,
+        "complete": true,
+        "malformedEvents": 0,
+        "actualBilledUsd": null,
+        "reason": "Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries."
+      },
+      "controllerExit": 0,
+      "checker": {
+        "task": "T1",
+        "completed": false,
+        "evidence": {
+          "campfires": [],
+          "configuredBills": [],
+          "completedBills": [],
+          "mealsCookedSinceStart": 0,
+          "startTick": 2,
+          "configuredTick": null,
+          "endTick": 2,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": [
+          "no campfire built during the run",
+          "no observed new three-iteration simple-meal bill on the new campfire",
+          "only 0 meals cooked since the start"
+        ]
+      },
+      "verifiedCompletion": false,
+      "auditStatus": "pending input/recording audit; timeout/failed runs cannot pass",
+      "hashes": {
+        "calls": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "events": "3f26a42cae8638cf0f671c64c6068d762ad2da018868881c023a8e79bf6ac7ec",
+        "recording": "9128aba8848dcafeda62e07d598e26d29a6887206917ce71ca3962b88a5c6aa8"
+      },
+      "stalls": {
+        "status": "not instrumented",
+        "measurements": null
+      },
+      "controllerPermissionRefusals": 1
+    }
+  ],
+  "preservation": {
+    "saveCount": 440,
+    "unchanged": true,
+    "added": [],
+    "modRestored": true
+  }
+}

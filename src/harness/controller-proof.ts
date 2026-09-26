@@ -3,18 +3,18 @@ import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {buildLaunch,stopRemoteArm,controllerEnv,type LaunchOptions} from './controller-launch.js';
+import {buildLaunch,stopRemoteArm,controllerEnv,ARM_TOOLS,armPermissions,CONTROLLER_CODEX_HOME,type LaunchOptions} from './controller-launch.js';
 
 /** Controller isolation evidence (docs/HARNESS.md, benchmark): the exact scored command line
  * (buildLaunch) is pointed, by one appended provider override with the same auth mode and wire API,
  * at a local recorder that captures the first model request and answers with a short final message.
  * No game and no model. Headers (auth) are never recorded. */
-export const DECLARED:Record<'harness'|'ui',string[]>={harness:['observe','look','act','time','report_done'],ui:['screenshot','click','key','type','report_done']};
+export const DECLARED=ARM_TOOLS;
 /** Codex's built-in MCP resource readers: offered with any MCP server, identical in both arms; our
  * servers expose no resources. Nothing else may be offered besides the arm namespace. */
 export const SHARED_TOOLS=['list_mcp_resources','list_mcp_resource_templates','read_mcp_resource'];
 const sha=(s:string)=>createHash('sha256').update(s).digest('hex');
-export type ArmEvidence={arm:'harness'|'ui';controllerVersion:string;exit:number|null;responsesRequests:number;toolsCarrier:string;
+export type ArmEvidence={launchPolicy?:{codexHome:string;approval:unknown;sandbox:unknown;permissions:Record<string,unknown>};arm:'harness'|'ui';controllerVersion:string;exit:number|null;responsesRequests:number;toolsCarrier:string;
   tools:{type:string;name:string|null;sha256:string;tools?:(string|null)[]}[];instructionsSha256:string|null;instructionsBytes:number;
   input:{type:string;role:string|null;sha256:string;bytes:number}[];model:unknown;reasoning:unknown;toolChoice:unknown;parallelToolCalls:unknown;stderrTail:string};
 
@@ -34,7 +34,7 @@ export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Rec
   try{
     const port=(server.address() as {port:number}).port;
     const probe={model_provider:'probe','model_providers.probe':{name:'Concord controller proof',base_url:`http://127.0.0.1:${port}/backend-api/codex`,wire_api:'responses',requires_openai_auth:true,request_max_retries:0,stream_max_retries:0,supports_websockets:false}};
-    const {args,version}=buildLaunch(o,{...probe,...extra});
+    const {args,version,config,codexHome}=buildLaunch(o,{...probe,...extra});
     const out=await new Promise<{code:number|null;stderr:string}>(resolve=>{
       const c=spawn(o.codex,args,{cwd:o.dir+'/cwd',detached:true,stdio:['pipe','ignore','pipe'],env:controllerEnv()});let stderr='',settled=false;
       const finish=(code:number|null)=>{if(settled)return;settled=true;clearTimeout(t);signal?.removeEventListener('abort',abort);c.stderr.destroy();resolve({code,stderr});};
@@ -48,7 +48,7 @@ export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Rec
     // Tools arrive as the request's `tools` field or, for some catalog models (gpt-6-astra on
     // 0.153.4), as an `additional_tools` input item; both are collected and compared as tools.
     const offered=[...(first?.tools??[]),...(first?.input??[]).filter((i:any)=>i.type==='additional_tools').flatMap((i:any)=>i.tools??[])];
-    return {arm:o.arm,controllerVersion:version,exit:out.code,responsesRequests:mine.length,
+    return {launchPolicy:{codexHome,approval:config.approval_policy,sandbox:config.sandbox_mode,permissions:Object.fromEntries(Object.entries(config).filter(([k])=>k.startsWith('mcp_servers.arm.')&&(k.includes('approval_mode')||k.endsWith('enabled_tools'))))},arm:o.arm,controllerVersion:version,exit:out.code,responsesRequests:mine.length,
       toolsCarrier:first?.tools?'tools field':(first?.input??[]).some((i:any)=>i.type==='additional_tools')?'additional_tools input item':'none',
       tools:offered.map((t:any)=>({type:t.type,name:t.name??null,sha256:sha(JSON.stringify(t)),...(t.type==='namespace'?{tools:(t.tools??[]).map((x:any)=>x.name??x.function?.name??null)}:{})})),
       instructionsSha256:first?.instructions?sha(first.instructions):null,instructionsBytes:first?.instructions?.length??0,
@@ -61,12 +61,15 @@ const isArm=(t:{type:string;name:string|null})=>t.type==='namespace'&&t.name==='
 /** A pre-launch check against the proof: the arm came up alone and exactly as proven. */
 export function preflightFindings(pre:ArmEvidence,proven:ArmEvidence):string[]{
   const f=armFindings(pre);
+  if(JSON.stringify(pre.launchPolicy)!==JSON.stringify(proven.launchPolicy))f.push('launch policy differs from controller proof');
   if(JSON.stringify(pre.tools.map(t=>t.sha256))!==JSON.stringify(proven.tools.map(t=>t.sha256)))f.push('offered tools differ from the controller proof');
   if(JSON.stringify(pre.input.map(i=>i.sha256))!==JSON.stringify(proven.input.map(i=>i.sha256))||pre.instructionsSha256!==proven.instructionsSha256)f.push('context differs from the controller proof');
   return f;
 }
 export function armFindings(e:ArmEvidence):string[]{
   const f:string[]=[];
+  const expected={codexHome:CONTROLLER_CODEX_HOME,approval:'never',sandbox:'read-only',permissions:armPermissions(e.arm)};
+  if(JSON.stringify(e.launchPolicy)!==JSON.stringify(expected))f.push(`${e.arm}: missing or changed native-home/tool-permission policy`);
   if(e.exit!==0)f.push(`${e.arm}: controller proof did not exit successfully`);
   if(e.responsesRequests<1)f.push(`${e.arm}: the controller sent no model request (${e.stderrTail})`);
   const ns=e.tools.filter(isArm);

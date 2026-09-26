@@ -9,6 +9,14 @@ import {controllerCatalog,isolationConfig} from './controller-config.js';
  * controller proof both call it, so the proof covers exactly the argv a scored run uses; the proof
  * only appends a provider override pointing the same controller at a local request recorder. */
 export const CONTROLLER_VERSION='codex-cli 0.153.4';
+export const ARM_TOOLS:Record<'harness'|'ui',string[]>={harness:['observe','look','act','time','report_done'],ui:['screenshot','click','key','type','report_done']};
+/** Only the operator-authorized benchmark interface is noninteractive. Unknown tools stay blocked. */
+export function armPermissions(arm:'harness'|'ui'){
+ return {'mcp_servers.arm.enabled_tools':ARM_TOOLS[arm],
+  'mcp_servers.arm.default_tools_approval_mode':'prompt',
+  ...Object.fromEntries(ARM_TOOLS[arm].map(name=>['mcp_servers.arm.tools.'+name+'.approval_mode','approve']))};
+}
+
 // Pin the operator's native home, never an inherited per-agent CODEX_HOME.
 export const CONTROLLER_CODEX_HOME=join(homedir(),'.codex');
 export function controllerEnv():NodeJS.ProcessEnv{
@@ -54,7 +62,7 @@ export const toml=(v:unknown):string=>Array.isArray(v)?'['+v.map(toml).join(',')
 export function buildLaunch(o:LaunchOptions,extra:Record<string,unknown>={}){
   const version=execFileSync(o.codex,['--version'],{encoding:'utf8',env:controllerEnv()}).trim();
   if(version!==CONTROLLER_VERSION)throw Error('Controller version changed; re-review effective tool configuration');
-  const config:Record<string,unknown>={approval_policy:'never',sandbox_mode:'read-only',project_doc_max_bytes:0,include_environment_context:false,web_search:'disabled',model_reasoning_effort:o.reasoning,
+  const config:Record<string,unknown>={...armPermissions(o.arm),approval_policy:'never',sandbox_mode:'read-only',project_doc_max_bytes:0,include_environment_context:false,web_search:'disabled',model_reasoning_effort:o.reasoning,
     'tools.update_plan.enabled':false,'tools.experimental_request_user_input.enabled':false,
     'mcp_servers.arm.command':process.execPath,'mcp_servers.arm.args':[o.root+`/dist/trials/${o.arm==='ui'?'ui':'harness'}-mcp-server.js`],
     'mcp_servers.arm.env':armEnv(o),

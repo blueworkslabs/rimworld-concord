@@ -478,3 +478,12 @@ check is necessary but does not prove provider access. Local-recorder isolation 
 verify tools/context only and must not be presented as authentication verification.
 The [first actual SSH pair](evidence/benchmark-ssh-2026-09-26/README.md) records this limit:
 scripted lifecycle passed, while both real controllers failed authentication before input.
+
+
+The noninteractive controller also explicitly authorizes only the five declared tools of its
+selected benchmark arm, using `mcp_servers.arm.enabled_tools` and per-tool
+`approval_mode = "approve"`. Other tools retain `prompt`, which global `never` rejects.
+The filesystem sandbox stays read-only and no shell or additional tool is enabled.
+The native-home rehearsal exposed that listing tools in the isolation proof did not establish
+permission to execute them; a controlled local-provider/stub-tool check verifies execution
+without a game or live model. This does not itself establish gameplay success.

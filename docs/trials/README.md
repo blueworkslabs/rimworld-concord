@@ -123,3 +123,7 @@ wire receipts, full snapshot/digest and size counts. Not a benchmark or model ru
 ## 2026-09-26 — actual SSH benchmark lifecycle and first controller pair
 
 [Report](../evidence/benchmark-ssh-2026-09-26/README.md) · [summary](../evidence/benchmark-ssh-2026-09-26/summary.json): scripted harness T1 and UI controls passed over SSH. First real-controller pair retained: both arms failed authentication before tool calls, no usage or answers, no scored comparison. All 440 saves unchanged; staging stopped.
+
+## 2026-09-26 — native-home rehearsal and permission correction
+
+[Report](../evidence/benchmark-native-home-2026-09-26/README.md) · [receipts](../evidence/benchmark-native-home-2026-09-26/summary.json): second real-controller pair authenticated but MCP approval blocked both arms before game-tool execution. Recordings cold-read before metrics; all 440 saves unchanged. Exact per-tool permission repair passed independent review and a no-model execution probe; no task success claimed.

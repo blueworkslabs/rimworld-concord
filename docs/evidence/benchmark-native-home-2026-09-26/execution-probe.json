@@ -1,0 +1,52 @@
+{
+  "noModel": true,
+  "noGame": true,
+  "results": [
+    {
+      "arm": "harness",
+      "ok": true,
+      "exit": 0,
+      "requests": 7,
+      "actual": [
+        "observe",
+        "look",
+        "act",
+        "time",
+        "report_done"
+      ],
+      "offeredNames": [
+        "act",
+        "look",
+        "observe",
+        "report_done",
+        "time"
+      ],
+      "rogueBlocked": true,
+      "globalApproval": "never",
+      "sandbox": "read-only"
+    },
+    {
+      "arm": "ui",
+      "ok": true,
+      "exit": 0,
+      "requests": 7,
+      "actual": [
+        "screenshot",
+        "click",
+        "key",
+        "type",
+        "report_done"
+      ],
+      "offeredNames": [
+        "click",
+        "key",
+        "report_done",
+        "screenshot",
+        "type"
+      ],
+      "rogueBlocked": true,
+      "globalApproval": "never",
+      "sandbox": "read-only"
+    }
+  ]
+}
