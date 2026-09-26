@@ -214,6 +214,7 @@ namespace Concord {
             case "assign_bed": {
                 // The bed's owner dialog, one row: same candidates, same checks, same native assignment.
                 var bed=ThingById(r.thingId) as Building_Bed;if(bed==null)throw new HarnessRefusal("not a bed","harness");
+                if(bed.def==ThingDefOf.DeathrestCasket)throw new HarnessRefusal("deathrest caskets use separate ownership; ordinary beds only","harness");
                 var p=Colonist(r.pawnId);
                 if(bed.Faction!=Faction.OfPlayer)throw new HarnessRefusal("not a colony bed","harness");
                 if(!bed.def.building.bed_humanlike)throw new HarnessRefusal("an animal bed takes no colonist owner");
@@ -233,7 +234,7 @@ namespace Concord {
                     (displaced.Count>0?"; displaced: "+String.Join(", ",displaced.Select(o=>o.LabelShort).ToArray()):"")+(previous!=null&&previous!=bed?"; released bed "+previous.thingIDNumber:"");
                 receipt.narration=Phrase.Core("assigned "+p.LabelShort+" to the "+bed.LabelShort+" "+HarnessNarration.Where(bed.Position,bed)+
                     (displaced.Count>0?"; "+Phrase.List(displaced.Select(o=>o.LabelShort).ToList())+(displaced.Count==1?" no longer owns it":" no longer own it"):"")+
-                    (previous!=null&&previous!=bed?"; "+p.LabelShort+" gave up the "+previous.LabelShort:""));
+                    (previous!=null&&previous!=bed?"; "+p.LabelShort+" is no longer assigned to the previous "+previous.LabelShort:""));
                 return bed.thingIDNumber+":"+p.thingIDNumber;
             }
             case "allow_area": {
