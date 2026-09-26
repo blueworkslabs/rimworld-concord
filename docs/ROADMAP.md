@@ -17,6 +17,9 @@ Read-only perception has a [recorded staging capture](evidence/perception-2026-0
 Native actions v1 and the T1 checker have [recorded scripted evidence](evidence/harness-actions-2026-09-26/README.md).
 The matched fresh-context runner (including a hidden common configuration checkpoint),
 then the scored UI/harness comparison are next; no harness advantage is established.
+[Runner #96 is under review](evidence/benchmark-review-2026-09-26/README.md): UI wrapper and
+common observer implemented offline; effective controller isolation and lifecycle/UI rehearsal
+remain before scored launch.
 
 ## Where we are
 
