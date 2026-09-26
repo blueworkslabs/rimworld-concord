@@ -138,4 +138,8 @@ wire receipts, full snapshot/digest and size counts. Not a benchmark or model ru
 
 ## 2026-09-26 — T2/T3 frozen setup and scripted viability
 
-[Setup evidence](../evidence/benchmark-colony-setup-2026-09-26/README.md): both scripted checks passed with zero models; all 443 saves unchanged. [Frozen predicates](../HARNESS.md#t2t3-frozen-task-contract-2026-09-26), new task-specific isolation proofs, and retained room preparation. No scored T2/T3 results yet.
+[Setup evidence](../evidence/benchmark-colony-setup-2026-09-26/README.md): both scripted checks passed with zero models; all 443 saves unchanged. [Frozen predicates](../HARNESS.md#t2t3-frozen-task-contract-2026-09-26), new task-specific isolation proofs, and retained room preparation. This setup record predates the scored sets below.
+
+## 2026-09-26 — T2/T3 scored sets, recording-first review complete
+
+[Both tables and outcome columns](../evidence/benchmark-colony-scored-2026-09-26/README.md) · [measurements/source hashes](../evidence/benchmark-colony-scored-2026-09-26/measurements.json): three alternating pairs per task, twelve primary goals met. No consistent T2 colony-time advantage; T3 harness earlier in all pairs. Sleep is secondary; UI fungus allowing is not ingestion, tending is not a cure, and mixed stockpile contents remain visible. All 443 saves unchanged, prior mod restored, game/display stopped, original recordings retained. No replacement attempts or gameplay during publication.

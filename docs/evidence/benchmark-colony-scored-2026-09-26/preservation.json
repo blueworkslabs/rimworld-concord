@@ -1,0 +1,14 @@
+{
+  "registeredProcesses": 24,
+  "survivingGroupMembers": [],
+  "services": {
+    "game": "inactive",
+    "display": "inactive"
+  },
+  "preservation": {
+    "saveCount": 443,
+    "unchanged": true,
+    "added": [],
+    "modRestored": true
+  }
+}

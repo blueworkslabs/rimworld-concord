@@ -1,0 +1,59 @@
+{
+  "task": "T3",
+  "order": [
+    "harness\u2192UI",
+    "UI\u2192harness",
+    "harness\u2192UI"
+  ],
+  "recordings": [
+    {
+      "file": "T3-pair-1-1-harness.mp4",
+      "runId": "9bad089d-0057-4ee4-a125-0a1e39cc7c75",
+      "pair": 1,
+      "arm": "harness",
+      "sha256": "7c73dfc207ee411db94b04021fd73748a25acc2885549c3717f7ccd8bd1fa355",
+      "durationSeconds": 49.933333
+    },
+    {
+      "file": "T3-pair-1-2-ui.mp4",
+      "runId": "780dd499-308a-40c2-88cc-251039d2682f",
+      "pair": 1,
+      "arm": "ui",
+      "sha256": "ec7dbf74c1bc7df5f05a5c3940f964e9653bdc2dfff664233757f80f74e03a9e",
+      "durationSeconds": 321.533333
+    },
+    {
+      "file": "T3-pair-2-1-ui.mp4",
+      "runId": "ea9ad6ea-3193-4b07-a0cd-2b0c95199124",
+      "pair": 2,
+      "arm": "ui",
+      "sha256": "a3f8b57bae5720e2caef910d6ad2f54fc6e1bdf3f2ae996b45d66ed510d5b431",
+      "durationSeconds": 247.466667
+    },
+    {
+      "file": "T3-pair-2-2-harness.mp4",
+      "runId": "ed495dcf-98e2-4b52-9c8f-548cb5747398",
+      "pair": 2,
+      "arm": "harness",
+      "sha256": "639185f4381442ef2727cabb58756cfb32e91cc3ebba409cab8e7177b1e5f533",
+      "durationSeconds": 43.133333
+    },
+    {
+      "file": "T3-pair-3-1-harness.mp4",
+      "runId": "44ffd945-944e-4484-b6ac-d7ceb7a0cb0d",
+      "pair": 3,
+      "arm": "harness",
+      "sha256": "188f8a1ac5047d2f5998294d73d86c9d2ba17dbf4310a1008254b7b2e7cce13d",
+      "durationSeconds": 49.6
+    },
+    {
+      "file": "T3-pair-3-2-ui.mp4",
+      "runId": "3f9a1fa1-64a5-4d39-be59-2be0dc5842de",
+      "pair": 3,
+      "arm": "ui",
+      "sha256": "234573fb2e935b2f240169885aecc9f1b8361f7eaa896c9f1da272c1b6a07659",
+      "durationSeconds": 212.333333
+    }
+  ],
+  "qualification": "Original uncut bytes; duration includes setup/shutdown. No outcome metrics included. One attempt per arm; no replacements."
+}

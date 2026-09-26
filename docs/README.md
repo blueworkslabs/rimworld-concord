@@ -34,6 +34,8 @@ code and a contract disagree, one of them is a bug.
 
 ## Evidence
 
+Latest harness comparison: [T1](evidence/benchmark-scored-three-2026-09-26/README.md) and [T2/T3](evidence/benchmark-colony-scored-2026-09-26/README.md), with colony-time bounds, usage and observed side effects.
+
 | Document | Covers |
 |---|---|
 | [EVALUATION](EVALUATION.md) | How we test and what counts as evidence; scorers; running trials |
