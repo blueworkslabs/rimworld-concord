@@ -21,9 +21,9 @@ no consistent colony-time advantage; median wall 58.7s harness versus 106.6s UI 
 is separate from scoring, and both earlier infrastructure-failed pairs remain retained.
 This is task-local evidence, not general colony-management or billed-dollar advantage.
 Stalls remain uninstrumented and native USD unavailable. Placement query is now verified and merged; no interface change entered the scored T1 set.
-[T2/T3 fixtures and checkers](evidence/benchmark-colony-setup-2026-09-26/README.md)
-have scripted viability evidence. Their three alternating pairs per task are next;
-no scored T2/T3 result is claimed.
+[T2/T3 scored results](evidence/benchmark-colony-scored-2026-09-26/README.md) now cover three alternating pairs per task: all twelve primary goals met. T2 has no consistent colony-time advantage; T3 harness completion precedes UI in all three pairs. Median wall H/UI is 68.7/217.3s and 41.0/240.4s respectively. Sleep, tending, food permissions, mixed storage and pause/filter recovery remain separate outcome columns. Interface granularity and plans differ; this is not pure perception or dollar-cost evidence.
+
+Next: interpretation and phase-2 planning from all three task sets. Action narration in the crew log remains planned; no new story-layer scene or broader performance claim follows automatically.
 
 ## Where we are
 
