@@ -16,7 +16,7 @@ export function buildLaunch(o:LaunchOptions,extra:Record<string,unknown>={}){
   const config:Record<string,unknown>={approval_policy:'never',sandbox_mode:'read-only',project_doc_max_bytes:0,include_environment_context:false,web_search:'disabled',model_reasoning_effort:o.reasoning,
     'tools.update_plan.enabled':false,'tools.experimental_request_user_input.enabled':false,
     'mcp_servers.arm.command':process.execPath,'mcp_servers.arm.args':[o.root+`/dist/trials/${o.arm==='ui'?'ui':'harness'}-mcp-server.js`],
-    'mcp_servers.arm.env':{RIMWORLD_LAB_ROOT:env.RIMWORLD_LAB_ROOT??'',CONCORD_HARNESS_LOCKED:'1',CONCORD_BENCH_CALL_LOG:o.callLog,CONCORD_BENCH_PROCESS_FILE:o.callLog+'.process.json',CONCORD_BENCH_DIR:o.dir,CONCORD_UI_BACKEND:o.uiServer??'',PATH:env.PATH??'',DISPLAY:env.DISPLAY??'',XAUTHORITY:env.XAUTHORITY??''},
+    'mcp_servers.arm.env':{RIMWORLD_LAB_ROOT:env.RIMWORLD_LAB_ROOT??'',CONCORD_HARNESS_LOCKED:'1',CONCORD_BENCH_CALL_LOG:o.callLog,CONCORD_BENCH_PROCESS_FILE:o.callLog+'.process.json',CONCORD_BENCH_DIR:o.dir,CONCORD_UI_BACKEND:o.uiServer??'',PATH:env.PATH??'',DISPLAY:env.DISPLAY??'',XAUTHORITY:env.XAUTHORITY??'',XDG_RUNTIME_DIR:process.env.XDG_RUNTIME_DIR??'',DBUS_SESSION_BUS_ADDRESS:process.env.DBUS_SESSION_BUS_ADDRESS??''},
     'mcp_servers.arm.tool_timeout_sec':60};
   const catalog=controllerCatalog(JSON.parse(execFileSync(o.codex,['debug','models','--bundled'],{encoding:'utf8',maxBuffer:10*1024*1024})),o.model);
   writeFileSync(o.dir+'/controller-catalog.json',JSON.stringify(catalog));

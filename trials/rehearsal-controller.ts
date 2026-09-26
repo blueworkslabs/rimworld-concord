@@ -19,8 +19,8 @@ const server=spawn(command,args,{env,detached:true,stdio:['pipe','pipe','inherit
 const pending=new Map<number,(v:any)=>void>();let next=1;
 createInterface({input:server.stdout}).on('line',l=>{const m=JSON.parse(l);pending.get(m.id)?.(m);pending.delete(m.id);});
 const rpc=(method:string,params:object={})=>new Promise<any>(r=>{const id=next++;pending.set(id,r);server.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n');});
-const call=async(name:string,a:object={})=>{const r=await rpc('tools/call',{name,arguments:a});const text=r.result?.content?.find((c:any)=>c.type==='text')?.text;
-  emit({type:'item.completed',item:{type:'mcp_tool_call',server:'arm',tool:name,status:r.result?.isError?'failed':'completed'}});try{return JSON.parse(text);}catch{return text;}};
+const call=async(name:string,a:object={},allowRefusal=false)=>{const r=await rpc('tools/call',{name,arguments:a});const text=r.result?.content?.find((c:any)=>c.type==='text')?.text;
+  emit({type:'item.completed',item:{type:'mcp_tool_call',server:'arm',tool:name,status:r.result?.isError?'failed':'completed'}});if((r.error||r.result?.isError)&&!allowRefusal)throw Error('rehearsal tool failed: '+name+' '+(text??JSON.stringify(r.error)));try{return JSON.parse(text);}catch{return text;}};
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 await rpc('initialize',{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'concord-rehearsal',version:'1'}});
 server.stdin.write(JSON.stringify({jsonrpc:'2.0',method:'notifications/initialized'})+'\n');await rpc('tools/list');
@@ -31,7 +31,7 @@ try{
     const o=await call('observe');const pawns=o.colony.pawns as {x:number;z:number}[];
     const cx=Math.round(pawns.reduce((n,p)=>n+p.x,0)/pawns.length),cz=Math.round(pawns.reduce((n,p)=>n+p.z,0)/pawns.length);
     for(const p of o.colony.pawns)for(const [work,priority] of [['Construction',1],['Cooking',1],['Hauling',2]])if(!p.cannot.includes(work)){const a=await call('act',{action:{action:'work_priority',pawn:p.id,work,priority}});if(!a?.ok)throw Error('work priority refused');}
-    let fire:any;outer:for(let r=2;r<12;r++)for(let dx=-r;dx<=r;dx++)for(const dz of [-r,r]){const a=await call('act',{action:{action:'place_blueprint',def:'Campfire',x:cx+dx,z:cz+dz}});if(a?.ok){fire=a;break outer;}}
+    let fire:any;outer:for(let r=2;r<12;r++)for(let dx=-r;dx<=r;dx++)for(const dz of [-r,r]){const a=await call('act',{action:{action:'place_blueprint',def:'Campfire',x:cx+dx,z:cz+dz}},true);if(a?.ok){fire=a;break outer;}}
     if(!fire)throw Error('no placement accepted');
     await call('time',{control:'3'});
     let bench:any;for(let i=0;i<150&&!bench;i++){await sleep(2000);const s=await call('observe');bench=s.colony.map.things.find((t:any)=>t.def==='Campfire'&&t.kind==='building');}
