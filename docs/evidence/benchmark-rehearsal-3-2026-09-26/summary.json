@@ -1,0 +1,215 @@
+{
+  "classification": "unscored real-controller rehearsal pair 3",
+  "sourceCommit": "f411e2c6b4eb694528f3af9a36a26f0027e41d44",
+  "pairId": "ef54ff17-7681-4b11-9404-46a1f1a13cca",
+  "order": [
+    "harness",
+    "ui"
+  ],
+  "receipts": [
+    {
+      "runId": "7471f050-7f38-4282-92a6-911598c5c482",
+      "rehearsal": false,
+      "label": "real-controller-rehearsal-pair-3-tool-permissions",
+      "controllerHost": "remote",
+      "arm": "harness",
+      "task": {
+        "id": "T1",
+        "sha256": "edfd980f312a74ee20dbbf0e9fbe64e69071561530ee6ffdb6f76c57be8ec9dd"
+      },
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "controllerCodexHome": null,
+      "controllerCatalogSha256": "903bbd7e5884838eff6617a26d2ee556f04770fbaf1f6a177607abbdc5df8233",
+      "argsSha256": "e3fc38f2d57e4f6a20fd30e1237eae56ea7cfad02440782cf38a48921822322a",
+      "save": {
+        "name": "lab-concord-nh-helper-20260924",
+        "expectedSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c"
+      },
+      "at": "2026-09-26T10:52:07.458Z",
+      "preflight": {
+        "findings": []
+      },
+      "outcome": "done",
+      "failure": null,
+      "timer": {
+        "controllerStartMs": 1790419937567,
+        "stoppedAtMs": 1790419992887,
+        "firstRequestAtMs": 1790419943085,
+        "firstRequestToStopMs": 49802,
+        "controllerWallMs": 55320,
+        "includesHiddenObserverOverhead": true,
+        "endSnapshotMayBeAfterDeadline": false
+      },
+      "counts": {
+        "inputs": 6,
+        "observations": 11,
+        "controls": 4,
+        "calls": 18,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 22686
+      },
+      "tokens": {
+        "input_tokens": 207486,
+        "cached_input_tokens": 191232,
+        "uncached_input_tokens": 16254,
+        "output_tokens": 538,
+        "reasoning_output_tokens": 0,
+        "turns": 1,
+        "complete": true,
+        "malformedEvents": 0,
+        "actualBilledUsd": null,
+        "reason": "Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries."
+      },
+      "controllerExit": 0,
+      "checker": {
+        "task": "T1",
+        "completed": true,
+        "evidence": {
+          "campfires": [
+            5666
+          ],
+          "configuredBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "completedBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "mealsCookedSinceStart": 3,
+          "startTick": 2,
+          "configuredTick": 2708,
+          "endTick": 10064,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": []
+      },
+      "verifiedCompletion": false,
+      "auditStatus": "pending input/recording audit; timeout/failed runs cannot pass",
+      "hashes": {
+        "calls": "2ea6957515631e1d7fe4f585f9691100bc8d903fdaf0bcab1832dd2fc6dda752",
+        "events": "b7a49976a7f4dc089a3fdcc710e41aeced8970ded5c787b3b3666b399b26f23d",
+        "recording": "6b784f16fbea8cfe8892b3877e169baf79fb161799f66df89499603235b01d95"
+      },
+      "stalls": {
+        "status": "not instrumented",
+        "measurements": null
+      }
+    },
+    {
+      "runId": "7f7cc942-7a64-411e-a0b8-e341b7e45f0d",
+      "rehearsal": false,
+      "label": "real-controller-rehearsal-pair-3-tool-permissions",
+      "controllerHost": "remote",
+      "arm": "ui",
+      "task": {
+        "id": "T1",
+        "sha256": "edfd980f312a74ee20dbbf0e9fbe64e69071561530ee6ffdb6f76c57be8ec9dd"
+      },
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "controllerCodexHome": null,
+      "controllerCatalogSha256": "903bbd7e5884838eff6617a26d2ee556f04770fbaf1f6a177607abbdc5df8233",
+      "argsSha256": "748f0e99e1e5921aa90ef9f962098584a81e61eb6d5be827f53d57a08327449d",
+      "save": {
+        "name": "lab-concord-nh-helper-20260924",
+        "expectedSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c"
+      },
+      "at": "2026-09-26T10:53:21.854Z",
+      "preflight": {
+        "findings": []
+      },
+      "outcome": "done",
+      "failure": null,
+      "timer": {
+        "controllerStartMs": 1790420009387,
+        "stoppedAtMs": 1790420123085,
+        "firstRequestAtMs": 1790420014316,
+        "firstRequestToStopMs": 108769,
+        "controllerWallMs": 113698,
+        "includesHiddenObserverOverhead": true,
+        "endSnapshotMayBeAfterDeadline": false
+      },
+      "counts": {
+        "inputs": 15,
+        "observations": 15,
+        "controls": 3,
+        "calls": 31,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 19887705
+      },
+      "tokens": {
+        "input_tokens": 327577,
+        "cached_input_tokens": 305664,
+        "uncached_input_tokens": 21913,
+        "output_tokens": 718,
+        "reasoning_output_tokens": 0,
+        "turns": 1,
+        "complete": true,
+        "malformedEvents": 0,
+        "actualBilledUsd": null,
+        "reason": "Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries."
+      },
+      "controllerExit": 0,
+      "checker": {
+        "task": "T1",
+        "completed": true,
+        "evidence": {
+          "campfires": [
+            5668
+          ],
+          "configuredBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "completedBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "mealsCookedSinceStart": 3,
+          "startTick": 2,
+          "configuredTick": 6243,
+          "endTick": 15724,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": []
+      },
+      "verifiedCompletion": false,
+      "auditStatus": "pending input/recording audit; timeout/failed runs cannot pass",
+      "hashes": {
+        "calls": "db3118c42a8b7a0eb9628aa1757d8a6ae7ef102efa287de4b3f781994851af2e",
+        "events": "70250bf85fe1abb7b5192c9888ca9e2d3d7d2265c0efafcbe0fd7a48f0444c30",
+        "recording": "cc1c6702e2d80a0141057f8b15ac2139837e3b8f912b7c0350a6403398f9197a"
+      },
+      "stalls": {
+        "status": "not instrumented",
+        "measurements": null
+      }
+    }
+  ],
+  "recordings": [
+    {
+      "arm": "harness",
+      "runId": "7471f050-7f38-4282-92a6-911598c5c482",
+      "sha256": "6b784f16fbea8cfe8892b3877e169baf79fb161799f66df89499603235b01d95",
+      "seconds": 62.4,
+      "bytes": 2227811
+    },
+    {
+      "arm": "ui",
+      "runId": "7f7cc942-7a64-411e-a0b8-e341b7e45f0d",
+      "sha256": "cc1c6702e2d80a0141057f8b15ac2139837e3b8f912b7c0350a6403398f9197a",
+      "seconds": 119.8,
+      "bytes": 3756545
+    }
+  ],
+  "preservation": {
+    "saveCount": 440,
+    "unchanged": true,
+    "added": [],
+    "modRestored": true
+  }
+}

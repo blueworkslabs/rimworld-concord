@@ -1,0 +1,657 @@
+{
+  "method": "Offline derivation from retained hidden observer snapshots/journal and input journal; no new run. Completion tick interval is (last incomplete, first complete]; 2500 ticks per game hour. Wall milestones are first-observed, not exact engine transition times. Health is observation-window food poisoning only; no assertion of absence after shutdown. Source receipts untouched. previousWallSeconds is the preceding observation request-start conservative lower bound (at minus durationMs); wallSeconds is the current observation response-end detection timestamp.",
+  "arms": [
+    {
+      "runId": "34b1e7ba-a009-4973-baed-8f7add75992d",
+      "label": "scored-T1-pair-1-20260926",
+      "arm": "harness",
+      "startTick": 2,
+      "endTick": 11089,
+      "completionElapsedGameHoursBracket": [
+        3.7032,
+        4.0564
+      ],
+      "firstObservations": {
+        "blueprint": {
+          "file": "observer-6-4.json",
+          "sha256": "2017e57fa30fb94fbe84325b4001f35c936ee6439f141563d9f259adeee082e6",
+          "snapshotId": 6,
+          "tick": 2,
+          "wallSeconds": 9.87,
+          "previousFile": "observer-5-3.json",
+          "previousTick": 2,
+          "previousWallSeconds": 9.468
+        },
+        "built": {
+          "file": "observer-9-7.json",
+          "sha256": "6e125082667b0e18e0b3eb835e042e53294b8a238a1470505149d7bf89c27c48",
+          "snapshotId": 9,
+          "tick": 1122,
+          "wallSeconds": 19.262,
+          "previousFile": "observer-8-6.json",
+          "previousTick": 4,
+          "previousWallSeconds": 15.976
+        },
+        "configured": {
+          "file": "observer-18-14.json",
+          "sha256": "c039d25f4fe17c483e4a0b8f889e16cf47c23e2f1f06a1307f6e7c10508d476d",
+          "snapshotId": 18,
+          "tick": 3542,
+          "wallSeconds": 29.024,
+          "previousFile": "observer-17-13.json",
+          "previousTick": 3542,
+          "previousWallSeconds": 28.692
+        },
+        "complete": {
+          "file": "observer-42-31.json",
+          "sha256": "5018f0c5cfc33d97c3e46e681e5bc068c065de69ddc798a9c3d2ba9e6a219995",
+          "snapshotId": 42,
+          "tick": 10143,
+          "wallSeconds": 53.058,
+          "previousFile": "observer-41-30.json",
+          "previousTick": 9260,
+          "previousWallSeconds": 50.487
+        }
+      },
+      "unpauseCalls": [
+        {
+          "issuedSeconds": 15.804,
+          "completedSeconds": 16.134,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 34.462,
+          "completedSeconds": 34.703,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        }
+      ],
+      "timeControls": [
+        {
+          "issuedSeconds": 15.804,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 25.588,
+          "tool": "time",
+          "args": {
+            "control": "pause"
+          }
+        },
+        {
+          "issuedSeconds": 34.462,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 55.384,
+          "tool": "time",
+          "args": {
+            "control": "pause"
+          }
+        }
+      ],
+      "cooks": [
+        {
+          "name": "Beatrice",
+          "meals": 3
+        }
+      ],
+      "observedFoodPoisoning": {
+        "Pedro": {
+          "file": "observer-44-32.json",
+          "tick": 10226,
+          "hediffs": [
+            {
+              "label": "Food poisoning (initial)",
+              "part": null,
+              "severity": 0.9967,
+              "bleeding": 0
+            }
+          ]
+        }
+      },
+      "sourceHashes": {
+        "observer.jsonl": "cb5f005aa9c0cc77679b9e7981ac00aa44ce82a8db4c7f0e196e2be3ab504b0f",
+        "calls.jsonl": "a4fa646fa265f34110a40ae148e15b6f589345edb0b024b6e6aaf08f5f6276cb",
+        "start.json": "6cb44cd3f1eb8303a88b0eab0af6f2a2f5cfe7100a49fde6a312b9c55a6a72b3",
+        "end.json": "a976018d3c8c9ca015286a52b955f083f043dc78fd9cd66e15354b80bff47287"
+      }
+    },
+    {
+      "runId": "4c88081d-e6da-4df2-aa6a-58776a50a66e",
+      "label": "scored-T1-pair-2-20260926",
+      "arm": "harness",
+      "startTick": 2,
+      "endTick": 9373,
+      "completionElapsedGameHoursBracket": [
+        2.9328,
+        3.2616
+      ],
+      "firstObservations": {
+        "blueprint": {
+          "file": "observer-176-4.json",
+          "sha256": "8b28c2ac3c19a86ee036741c1152e3ce51a08e6ece123834d10eba81231ca4a4",
+          "snapshotId": 176,
+          "tick": 2,
+          "wallSeconds": 10.923,
+          "previousFile": "observer-175-3.json",
+          "previousTick": 2,
+          "previousWallSeconds": 10.568
+        },
+        "built": {
+          "file": "observer-179-7.json",
+          "sha256": "ceb63b4236a771c4592575a3b8b201611188fb579fd3be7418c305285378a9a1",
+          "snapshotId": 179,
+          "tick": 841,
+          "wallSeconds": 15.717,
+          "previousFile": "observer-178-6.json",
+          "previousTick": 55,
+          "previousWallSeconds": 13.361
+        },
+        "configured": {
+          "file": "observer-185-12.json",
+          "sha256": "24c2c9dd6d399a63ce8124793a8ddfd78ded71379f3f65850109a1b42f64eeb1",
+          "snapshotId": 185,
+          "tick": 1732,
+          "wallSeconds": 22.004,
+          "previousFile": "observer-184-11.json",
+          "previousTick": 1732,
+          "previousWallSeconds": 21.626
+        },
+        "complete": {
+          "file": "observer-206-27.json",
+          "sha256": "a0cc75781bd82dbc47206ea9996c7f0cb41ba05d8aa0f3c5bf1b393071f5ee17",
+          "snapshotId": 206,
+          "tick": 8156,
+          "wallSeconds": 46.26,
+          "previousFile": "observer-205-26.json",
+          "previousTick": 7334,
+          "previousWallSeconds": 43.901
+        }
+      },
+      "unpauseCalls": [
+        {
+          "issuedSeconds": 13.236,
+          "completedSeconds": 13.533,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 28.115,
+          "completedSeconds": 28.381,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        }
+      ],
+      "timeControls": [
+        {
+          "issuedSeconds": 13.236,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 17.737,
+          "tool": "time",
+          "args": {
+            "control": "pause"
+          }
+        },
+        {
+          "issuedSeconds": 28.115,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 49.266,
+          "tool": "time",
+          "args": {
+            "control": "pause"
+          }
+        }
+      ],
+      "cooks": [
+        {
+          "name": "Beatrice",
+          "meals": 3
+        }
+      ],
+      "observedFoodPoisoning": {},
+      "sourceHashes": {
+        "observer.jsonl": "fe63970d8d70db74628bd72dd3a7b13637c823a44dff7030ab9503544ff10025",
+        "calls.jsonl": "ed4555ab0603ca82e304afd1e176d67a990992e2d20be6374a988834d2131474",
+        "start.json": "bdd9984eeda602ec2511f42cb62977fdf06d88b2eb958401313de926f810fde7",
+        "end.json": "fc44c4fb2ce55a8a846928e30997c5ca2356ade4410a492a050c87042a41dd39"
+      }
+    },
+    {
+      "runId": "9f0c23cb-fe64-42aa-a549-54d50e8fb8f4",
+      "label": "scored-T1-pair-3-20260926",
+      "arm": "harness",
+      "startTick": 2,
+      "endTick": 11351,
+      "completionElapsedGameHoursBracket": [
+        3.7016,
+        4.1892
+      ],
+      "firstObservations": {
+        "blueprint": {
+          "file": "observer-218-4.json",
+          "sha256": "8949f3c30f2ffe9db1d844ca744412a4d62ed65d38d5ab88c9035ce03ed4d51c",
+          "snapshotId": 218,
+          "tick": 2,
+          "wallSeconds": 9.166,
+          "previousFile": "observer-217-3.json",
+          "previousTick": 2,
+          "previousWallSeconds": 8.802
+        },
+        "built": {
+          "file": "observer-221-7.json",
+          "sha256": "5aa7e306e628551d5762fe63a9a19117cf188a813cdc9dc4509b81e150556d1a",
+          "snapshotId": 221,
+          "tick": 1013,
+          "wallSeconds": 16.138,
+          "previousFile": "observer-220-6.json",
+          "previousTick": 9,
+          "previousWallSeconds": 13.231
+        },
+        "configured": {
+          "file": "observer-230-14.json",
+          "sha256": "bc366b07bb7fbd375417fc2957fff8ece482c337f1b1541a103a454ab26a95e2",
+          "snapshotId": 230,
+          "tick": 3255,
+          "wallSeconds": 25.673,
+          "previousFile": "observer-229-13.json",
+          "previousTick": 3255,
+          "previousWallSeconds": 25.188
+        },
+        "complete": {
+          "file": "observer-251-29.json",
+          "sha256": "6b51d8c10b8023a36c2ade6ac12930785e88330da0c889e13c11f2c8a56d9d90",
+          "snapshotId": 251,
+          "tick": 10475,
+          "wallSeconds": 52.131,
+          "previousFile": "observer-250-28.json",
+          "previousTick": 9256,
+          "previousWallSeconds": 48.612
+        }
+      },
+      "unpauseCalls": [
+        {
+          "issuedSeconds": 13.053,
+          "completedSeconds": 13.341,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 31.733,
+          "completedSeconds": 32.081,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        }
+      ],
+      "timeControls": [
+        {
+          "issuedSeconds": 13.053,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 22.099,
+          "tool": "time",
+          "args": {
+            "control": "pause"
+          }
+        },
+        {
+          "issuedSeconds": 31.733,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 54.153,
+          "tool": "time",
+          "args": {
+            "control": "pause"
+          }
+        }
+      ],
+      "cooks": [
+        {
+          "name": "Beatrice",
+          "meals": 3
+        }
+      ],
+      "observedFoodPoisoning": {},
+      "sourceHashes": {
+        "observer.jsonl": "1ad605341bb49c6fd9d58a08c194dd820dbd9d679f55eb8affbbd498957e7379",
+        "calls.jsonl": "dec2b37e7681659eb575ef4c77447ac854540dc8110166451482d2643c2c4547",
+        "start.json": "356717bb01328787e0a6c201e6b334ab697262bda1193318b386767c89c3ac99",
+        "end.json": "2669ca4ff3945d63a66bbebbc93b99a4db4d0ab1b58b85e4db9ba35590247f99"
+      }
+    },
+    {
+      "runId": "0aadaa69-7018-4cff-bda9-3264a1165ecb",
+      "label": "scored-T1-pair-2-20260926",
+      "arm": "ui",
+      "startTick": 2,
+      "endTick": 10387,
+      "completionElapsedGameHoursBracket": [
+        2.9868,
+        3.4388
+      ],
+      "firstObservations": {
+        "blueprint": {
+          "file": "observer-124-14.json",
+          "sha256": "d8eeaef32d516539b2525fa33368002a30c73182f066e1e0f33ca8e7409639e3",
+          "snapshotId": 124,
+          "tick": 2,
+          "wallSeconds": 26.646,
+          "previousFile": "observer-123-13.json",
+          "previousTick": 2,
+          "previousWallSeconds": 26.223
+        },
+        "built": {
+          "file": "observer-131-21.json",
+          "sha256": "252b5c73220f250c1b8489b175223b008841fbfd8e37372b4f42dd531817368d",
+          "snapshotId": 131,
+          "tick": 767,
+          "wallSeconds": 37.35,
+          "previousFile": "observer-130-20.json",
+          "previousTick": 22,
+          "previousWallSeconds": 35.176
+        },
+        "configured": {
+          "file": "observer-154-44.json",
+          "sha256": "98bd3ed8131d4e5869aa8132f7db7c4e59ffce66d2027fb1539e3c8a484e9e19",
+          "snapshotId": 154,
+          "tick": 2185,
+          "wallSeconds": 74.26,
+          "previousFile": "observer-153-43.json",
+          "previousTick": 2185,
+          "previousWallSeconds": 73.761
+        },
+        "complete": {
+          "file": "observer-167-57.json",
+          "sha256": "63f2ed7a43c3c15147169be8816963549d69405b81e980cbd1fd3035db1b66e2",
+          "snapshotId": 167,
+          "tick": 8599,
+          "wallSeconds": 101.441,
+          "previousFile": "observer-166-56.json",
+          "previousTick": 7469,
+          "previousWallSeconds": 98.148
+        }
+      },
+      "unpauseCalls": [
+        {
+          "issuedSeconds": 34.898,
+          "completedSeconds": 35.271,
+          "tool": "key",
+          "args": {
+            "key": "3"
+          }
+        }
+      ],
+      "timeControls": [
+        {
+          "issuedSeconds": 34.898,
+          "tool": "key",
+          "args": {
+            "key": "3"
+          }
+        },
+        {
+          "issuedSeconds": 41.05,
+          "tool": "key",
+          "args": {
+            "key": "space"
+          }
+        },
+        {
+          "issuedSeconds": 83.289,
+          "tool": "key",
+          "args": {
+            "key": "space"
+          }
+        }
+      ],
+      "cooks": [
+        {
+          "name": "Beatrice",
+          "meals": 3
+        }
+      ],
+      "observedFoodPoisoning": {},
+      "sourceHashes": {
+        "observer.jsonl": "87cbc79b5b1dae2685804a49cafd6933548500a32726fa1789fd4a7c75f57b23",
+        "calls.jsonl": "0d0d57743ad5a913adb828f377796d0e57f02be73d58d8bbfbf2d6b546c6bf6b",
+        "start.json": "ea68e5d0c128d71092005594723fc50380f9d1cbf9403ae49c5b2417e7e98780",
+        "end.json": "442dab22638d6bf8ca7ac7e235f05f2f7b99fbd660f861e362861d80922bf1e0"
+      }
+    },
+    {
+      "runId": "538ccb90-8108-4798-bd1b-bb7968051050",
+      "label": "scored-T1-pair-3-20260926",
+      "arm": "ui",
+      "startTick": 2,
+      "endTick": 11001,
+      "completionElapsedGameHoursBracket": [
+        3.7116,
+        3.8048
+      ],
+      "firstObservations": {
+        "blueprint": {
+          "file": "observer-272-14.json",
+          "sha256": "d0f3214454218d272ffb832dda7b1cf7bcb3b08f32a8e963c0fd4210ab09ae4c",
+          "snapshotId": 272,
+          "tick": 2,
+          "wallSeconds": 24.912,
+          "previousFile": "observer-271-13.json",
+          "previousTick": 2,
+          "previousWallSeconds": 24.436
+        },
+        "built": {
+          "file": "observer-279-21.json",
+          "sha256": "c7a95529de7493606380285dec966539852409694a00f61d74fccfcccfc744e2",
+          "snapshotId": 279,
+          "tick": 1336,
+          "wallSeconds": 35.814,
+          "previousFile": "observer-278-20.json",
+          "previousTick": 9,
+          "previousWallSeconds": 31.964
+        },
+        "configured": {
+          "file": "observer-302-44.json",
+          "sha256": "ceb917bfaefec7b8b3dc597277223955eaada6ba435889c66f4cb55a7db80461",
+          "snapshotId": 302,
+          "tick": 2738,
+          "wallSeconds": 74.34,
+          "previousFile": "observer-301-43.json",
+          "previousTick": 2738,
+          "previousWallSeconds": 73.822
+        },
+        "complete": {
+          "file": "observer-316-58.json",
+          "sha256": "64e4334da58c8f69bff3e88c5dd3310e7d2fd9242ad9c1b80a00280215a5b6aa",
+          "snapshotId": 316,
+          "tick": 9514,
+          "wallSeconds": 103.057,
+          "previousFile": "observer-315-57.json",
+          "previousTick": 9281,
+          "previousWallSeconds": 102.217
+        }
+      },
+      "unpauseCalls": [
+        {
+          "issuedSeconds": 31.673,
+          "completedSeconds": 32.036,
+          "tool": "key",
+          "args": {
+            "key": "3"
+          }
+        }
+      ],
+      "timeControls": [
+        {
+          "issuedSeconds": 31.673,
+          "tool": "key",
+          "args": {
+            "key": "3"
+          }
+        },
+        {
+          "issuedSeconds": 39.555,
+          "tool": "key",
+          "args": {
+            "key": "space"
+          }
+        },
+        {
+          "issuedSeconds": 83.79,
+          "tool": "key",
+          "args": {
+            "key": "space"
+          }
+        }
+      ],
+      "cooks": [
+        {
+          "name": "Beatrice",
+          "meals": 3
+        }
+      ],
+      "observedFoodPoisoning": {},
+      "sourceHashes": {
+        "observer.jsonl": "b24868a4bd4d2b0fc36cd40d78d5aef0b45cc4bdfe362da7bb08da60efef699c",
+        "calls.jsonl": "7deace418af3ec77a9520893ee7eab86f871c6e4f09dcfb1c531b23d988e2cb5",
+        "start.json": "0f204f4ab96ec380b4dfcdd7779c696981ab4f1faf78bafc811d9624130ef679",
+        "end.json": "6026dc5306e19f942470461ebc8e1e69112b37eaddb0e280725f3967f4b10d41"
+      }
+    },
+    {
+      "runId": "e632f029-8b07-487d-ad2d-156a25068922",
+      "label": "scored-T1-pair-1-20260926",
+      "arm": "ui",
+      "startTick": 2,
+      "endTick": 10911,
+      "completionElapsedGameHoursBracket": [
+        3.0532,
+        3.6704
+      ],
+      "firstObservations": {
+        "blueprint": {
+          "file": "observer-63-14.json",
+          "sha256": "80eac44a819bf612318a2dfb96854b7507577c7c64e426fb946c697e32ece5b3",
+          "snapshotId": 63,
+          "tick": 2,
+          "wallSeconds": 26.694,
+          "previousFile": "observer-62-13.json",
+          "previousTick": 2,
+          "previousWallSeconds": 26.202
+        },
+        "built": {
+          "file": "observer-70-21.json",
+          "sha256": "81271296110043fe2a62e56a4e9325d3725a824e38a86dd3efc756ecc392549a",
+          "snapshotId": 70,
+          "tick": 902,
+          "wallSeconds": 36.093,
+          "previousFile": "observer-69-20.json",
+          "previousTick": 34,
+          "previousWallSeconds": 33.543
+        },
+        "configured": {
+          "file": "observer-93-44.json",
+          "sha256": "6f998c8e8d83e7f27c50dd54b67e67f51f7eddcce56b5441c2ff3e36ec08eff2",
+          "snapshotId": 93,
+          "tick": 2117,
+          "wallSeconds": 73.785,
+          "previousFile": "observer-92-43.json",
+          "previousTick": 2117,
+          "previousWallSeconds": 73.293
+        },
+        "complete": {
+          "file": "observer-106-57.json",
+          "sha256": "9dcda1ac32492066731d38fb085acf8bbd81fc6fb22ebca49f7685d49ff25f31",
+          "snapshotId": 106,
+          "tick": 9178,
+          "wallSeconds": 101.217,
+          "previousFile": "observer-105-56.json",
+          "previousTick": 7635,
+          "previousWallSeconds": 96.764
+        }
+      },
+      "unpauseCalls": [
+        {
+          "issuedSeconds": 33.367,
+          "completedSeconds": 33.681,
+          "tool": "key",
+          "args": {
+            "key": "3"
+          }
+        }
+      ],
+      "timeControls": [
+        {
+          "issuedSeconds": 33.367,
+          "tool": "key",
+          "args": {
+            "key": "3"
+          }
+        },
+        {
+          "issuedSeconds": 39.294,
+          "tool": "key",
+          "args": {
+            "key": "space"
+          }
+        },
+        {
+          "issuedSeconds": 81.148,
+          "tool": "key",
+          "args": {
+            "key": "space"
+          }
+        }
+      ],
+      "cooks": [
+        {
+          "name": "Beatrice",
+          "meals": 3
+        }
+      ],
+      "observedFoodPoisoning": {},
+      "sourceHashes": {
+        "observer.jsonl": "4bb1cde648b7cf7b83306db31945fe2f4cfad56b8123a41cf7bce9df02e38a2b",
+        "calls.jsonl": "f3bc0939e01bea58aced531cfe5f8cafdd5700e35096885efaceece239c61b8e",
+        "start.json": "73df42c7d30449de66aa2772fef7f44ea390a7949ab95635b4b8ec2b60e29936",
+        "end.json": "fecf3a0b2bf5627b0ffa9b802724e336a2cb979f1bf75ec0fc0ab5e2bb453e80"
+      }
+    }
+  ]
+}

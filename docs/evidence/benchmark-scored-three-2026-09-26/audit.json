@@ -1,0 +1,31 @@
+{
+  "status": "independent audit clear for all six arms",
+  "originalReceiptsUnchanged": true,
+  "independentAudits": {
+    "pair1": "clear",
+    "pair2": "clear",
+    "pair3": "clear"
+  },
+  "parentVideoInspection": "sampled original endpoint frames corroborate campfire, native Bill complete and UI count0 in all6 arms",
+  "recordingHashes": "6/6 match runner receipts",
+  "processPreservation": "12/12 registered preflight/arm PIDs gone",
+  "savePreservation": "440 unchanged, no additions",
+  "modRestored": true,
+  "scope": "Frozen T1,3paired runs only; billedUSD unavailable; stalls uninstrumented",
+  "verifiedCompletion": {
+    "pair1": {
+      "harness": true,
+      "ui": true
+    },
+    "pair2": {
+      "harness": true,
+      "ui": true
+    },
+    "pair3": {
+      "harness": true,
+      "ui": true
+    }
+  },
+  "coldReadUrl": "https://discord.com/channels/1083662512806965308/1467116597645676546/1553367535070740532",
+  "offlineAdjunctReview": "independent check clear: completion intervals, sampled phases, per-pawn meal deltas and observation-window food poisoning; original receipts untouched"
+}
