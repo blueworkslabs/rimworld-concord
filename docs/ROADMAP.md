@@ -4,6 +4,15 @@ Forward-looking only; past results are in [HISTORY](HISTORY.md) and the
 [trial ledger](trials/README.md). Direction agreed with the project owner and team on
 2026-09-24.
 
+## Phase 2, proposed 2026-09-26
+
+Phase 1 closed with eighteen of eighteen scored benchmark arms complete (nine pairs). The [phase 2 plan](PHASE2.md)
+has three steps: legible harness actions and the missing moves with a fourth task, the
+core integrated as the harness agent and judged on a ten-minute scene plus matched benchmark
+regression, then offers and refusals with separate enforcement and live-choice evidence.
+The plan is not yet agreed for implementation; concrete fixtures, knowledge boundaries
+and trial budgets must be frozen before their dependent work.
+
 ## Phase reset, 2026-09-25: the agent harness
 
 The next phase is the [agent harness](HARNESS.md): perceive and run the colony through

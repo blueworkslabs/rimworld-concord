@@ -12,6 +12,7 @@ code and a contract disagree, one of them is a bug.
 | Document | What it answers |
 |---|---|
 | [VISION](VISION.md) | What we're building, the principles, and the open questions |
+| [PHASE2](PHASE2.md) | Proposed post-benchmark sequence and measurable acceptance; not yet agreed for implementation |
 | [ROADMAP](ROADMAP.md) | What's next and what's deliberately deferred |
 | [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md) | Gate B design for the first native-intent spike |
 | [MIGRATION_HAULING](MIGRATION_HAULING.md) | Hauling migration, game-side Gate C verdict and ordered-haul retirement |
