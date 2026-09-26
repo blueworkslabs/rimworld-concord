@@ -573,12 +573,14 @@ with the core as the decision-maker (`mod/HarnessNarration.cs`).
   - area restriction: the restriction now set.
 
   An accepted blueprint or bill is narrated as placed or added, never as built or cooked. An
-  accepted designation that left no designation on the thing says so. A forbid that changed
+  accepted designation uses the matching native thing/cell designation, not an unrelated order;
+  cancellations and immediate deconstruction report observed effects. Undiscovered-cell orders
+  never name hidden contents or rooms. An accepted order with no matching read-back says so. A forbid that changed
   nothing says "no change".
 - **Where.** Only what the map supports: the room role the game assigns (or "outdoors" or
   "indoors") and the nearest visible colony building within 4.5 cells.
 - **Refusals.** A refusal gets its own line with the actual reason, labelled as the game's refusal
-  or as a harness check that never reached the game. An unexpected native failure is narrated as
+  or as a harness-check rejection (this label does not establish whether native execution began). An unexpected native failure is narrated as
   "outcome uncertain". No line ever says a pawn agreed or refused.
 - **Once per request.** The line is stored on the saved receipt (`narration`, plus `narrated`:
   `shown`, `display failed: …` or `none`). A replayed or retried request, or one after a restore,
@@ -587,7 +589,13 @@ with the core as the decision-maker (`mod/HarnessNarration.cs`).
   history, pointing at the blueprint, bench, pawn or thing), which shows in the recording even
   while the game is paused. The Concord tab lists the lines as `Core · RECORD`, merged in game-time
   order with any coordinator entries. In a harness run, with no coordinator report, the tab shows
-  them alone.
+  them alone, in both compact and full-journal views. `shown` means that the native live-message
+  list accepted the line, not proof that a viewer read it. Native limits still apply (12 live
+  messages, roughly 13 seconds, archive culling); the saved receipt/journal is durable.
+  A narrowly scoped Harmony prefix on `Messages.AcceptsMessage` disables text coalescing only
+  during publication of the exact new receipt message, with scope restored in `finally`.
+  Thus distinct requests with identical wording remain distinct; normal game messages retain
+  native duplicate handling. The receipt checks native acceptance instead of assuming success.
 - **Not for the controller.** The snapshot's receipts carry the narration, but the controller's
   digest strips it: the controller already has each outcome and reason, and the top-left messages
   remain outside perception. The `act` reply is the receipt, narration included.
