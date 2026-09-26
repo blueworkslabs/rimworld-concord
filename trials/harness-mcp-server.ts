@@ -1,3 +1,4 @@
+import {registerArm} from '../src/harness/process-lifecycle.js';
 import {writeFileSync} from 'node:fs';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -5,6 +6,7 @@ import {LabBridge} from '../src/lab-bridge.js';
 import {HarnessMcp} from '../src/harness/mcp.js';
 import {observerFromEnv} from '../src/harness/benchmark-observer.js';
 if(process.env.CONCORD_HARNESS_LOCKED!=='1')throw Error('Exclusive lab lock required');
+registerArm();
 const log=process.env.CONCORD_BENCH_CALL_LOG;if(!log)throw Error('CONCORD_BENCH_CALL_LOG required');
 const b=new LabBridge(undefined,()=>Date.now()+60000),exec=promisify(execFile);
 let timeline:{world:string;epoch:string;mapId:number}|undefined;

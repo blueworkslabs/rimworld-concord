@@ -1,3 +1,4 @@
+import {stopArm} from './process-lifecycle.js';
 import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
@@ -17,7 +18,7 @@ export type ArmEvidence={arm:'harness'|'ui';controllerVersion:string;exit:number
   tools:{type:string;name:string|null;sha256:string;tools?:(string|null)[]}[];instructionsSha256:string|null;instructionsBytes:number;
   input:{type:string;role:string|null;sha256:string;bytes:number}[];model:unknown;reasoning:unknown;toolChoice:unknown;parallelToolCalls:unknown;stderrTail:string};
 
-export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Record<string,unknown>={},privateCopy?:string):Promise<ArmEvidence>{
+export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Record<string,unknown>={},privateCopy?:string,signal?:AbortSignal):Promise<ArmEvidence>{
   const bodies:{path:string;body:any}[]=[];
   const server=createServer((req,res)=>{let data='';req.on('data',d=>data+=d);req.on('end',()=>{
     let body:any=null;try{body=JSON.parse(data);}catch{}bodies.push({path:req.url??'',body});
@@ -35,9 +36,12 @@ export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Rec
     const probe={model_provider:'probe','model_providers.probe':{name:'Concord controller proof',base_url:`http://127.0.0.1:${port}/backend-api/codex`,wire_api:'responses',requires_openai_auth:true,request_max_retries:0,stream_max_retries:0,supports_websockets:false}};
     const {args,version}=buildLaunch(o,{...probe,...extra});
     const out=await new Promise<{code:number|null;stderr:string}>(resolve=>{
-      const c=spawn(o.codex,args,{cwd:o.dir+'/cwd',stdio:['pipe','ignore','pipe']});let stderr='';
-      c.stderr.on('data',d=>stderr+=d);c.stdin.end(prompt);
-      const t=setTimeout(()=>c.kill('SIGKILL'),90000);c.on('close',code=>{clearTimeout(t);resolve({code,stderr});});
+      const c=spawn(o.codex,args,{cwd:o.dir+'/cwd',detached:true,stdio:['pipe','ignore','pipe']});let stderr='',settled=false;
+      const finish=(code:number|null)=>{if(settled)return;settled=true;clearTimeout(t);signal?.removeEventListener('abort',abort);c.stderr.destroy();resolve({code,stderr});};
+      const abort=()=>{if(c.pid)try{process.kill(-c.pid,'SIGKILL');}catch{}finish(null);};
+      const t=setTimeout(abort,90000);signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();
+      c.stderr.on('data',d=>stderr+=d);c.stdin.on('error',()=>{});c.on('error',e=>{stderr+=String(e);finish(null);});
+      c.on('exit',finish);c.stdin.end(prompt);
     });
     const mine=bodies.filter(r=>/\/responses$/.test(r.path));const first=mine[0]?.body;
     if(privateCopy)writeFileSync(privateCopy,JSON.stringify(first??null));
@@ -48,14 +52,15 @@ export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Rec
       toolsCarrier:first?.tools?'tools field':(first?.input??[]).some((i:any)=>i.type==='additional_tools')?'additional_tools input item':'none',
       tools:offered.map((t:any)=>({type:t.type,name:t.name??null,sha256:sha(JSON.stringify(t)),...(t.type==='namespace'?{tools:(t.tools??[]).map((x:any)=>x.name??x.function?.name??null)}:{})})),
       instructionsSha256:first?.instructions?sha(first.instructions):null,instructionsBytes:first?.instructions?.length??0,
-      input:(first?.input??[]).filter((i:any)=>i.type!=='additional_tools').map((i:any)=>({type:i.type,role:i.role??null,sha256:sha(JSON.stringify(i.content??i)),bytes:JSON.stringify(i.content??i).length})),
+      input:(first?.input??[]).filter((i:any)=>i.type!=='additional_tools').map(({id,...i}:any)=>({type:i.type,role:i.role??null,sha256:sha(JSON.stringify(i)),bytes:Buffer.byteLength(JSON.stringify(i))})),
       model:first?.model??null,reasoning:first?.reasoning??null,toolChoice:first?.tool_choice??null,parallelToolCalls:first?.parallel_tool_calls??null,stderrTail:out.stderr.slice(-400)};
-  }finally{server.close();}
+  }finally{await stopArm(o.callLog+'.process.json');server.closeAllConnections();server.close();}
 }
 const isArm=(t:{type:string;name:string|null})=>t.type==='namespace'&&t.name==='mcp__arm';
 /** One arm: the arm namespace is exactly the declared set; everything else is a shared built-in. */
 export function armFindings(e:ArmEvidence):string[]{
   const f:string[]=[];
+  if(e.exit!==0)f.push(`${e.arm}: controller proof did not exit successfully`);
   if(e.responsesRequests<1)f.push(`${e.arm}: the controller sent no model request (${e.stderrTail})`);
   const ns=e.tools.filter(isArm);
   if(ns.length!==1)f.push(`${e.arm}: expected one mcp__arm namespace, got ${ns.length} (did the arm server start?)`);

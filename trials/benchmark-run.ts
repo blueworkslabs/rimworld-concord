@@ -1,3 +1,4 @@
+import {stopArm} from '../src/harness/process-lifecycle.js';
 /** One retained attempt. Shared hidden observer runs synchronously around tools, never through
  * controller-visible replies. UI and harness use identical timing and checker policy. */
 import {mkdirSync,writeFileSync,readFileSync,appendFileSync,existsSync} from 'node:fs';
@@ -55,7 +56,8 @@ let start:Snapshot|undefined,end:Snapshot|undefined,configured:Snapshot|undefine
 let t0:number|undefined,t1:number|undefined,outcome='setup-failed',failure:string|undefined,naturalExit=false,stoppedBySignal=false;
 const log=():CallLog[]=>readFileSync(callLog,'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l));
 const kill=(p:ChildProcess|undefined,s:NodeJS.Signals)=>{if(p?.pid)try{process.kill(-p.pid,s);}catch{}};
-const onSignal=()=>{stoppedBySignal=true;kill(child,'SIGTERM');};process.on('SIGTERM',onSignal);process.on('SIGINT',onSignal);
+const setupAbort=new AbortController();
+const onSignal=()=>{stoppedBySignal=true;setupAbort.abort();kill(child,'SIGTERM');};process.on('SIGTERM',onSignal);process.on('SIGINT',onSignal);
 const assertNotInterrupted=()=>{if(stoppedBySignal)throw Error('Operator interrupted setup');};
 try{
  assertNotInterrupted();await b.verify(save,task.saveSha256);assertNotInterrupted();await b.load(save);assertNotInterrupted();await b.admin('pause');assertNotInterrupted();start=await b.perceive();assertNotInterrupted();writeFileSync(dir+'/start.json',JSON.stringify(start));
@@ -63,7 +65,7 @@ try{
   // Pre-launch check of this exact command line against the local recorder (no model, no tool calls;
   // its own journal), outside the task timer.
   const pre=await recordFirstRequest({codex,root,dir,arm,model,reasoning,callLog:dir+'/preflight-calls.jsonl',uiServer,
-   env:{RIMWORLD_LAB_ROOT:process.env.RIMWORLD_LAB_ROOT,PATH:process.env.PATH,DISPLAY:process.env.DISPLAY,XAUTHORITY:process.env.XAUTHORITY}},task.prompt);
+   env:{RIMWORLD_LAB_ROOT:process.env.RIMWORLD_LAB_ROOT,PATH:process.env.PATH,DISPLAY:process.env.DISPLAY,XAUTHORITY:process.env.XAUTHORITY}},task.prompt,{},undefined,setupAbort.signal);
   const proven=proof.evidence[arm];const f=armFindings(pre);
   if(JSON.stringify(pre.tools.map(t=>t.sha256))!==JSON.stringify(proven.tools.map((t:any)=>t.sha256)))f.push('offered tools differ from the controller proof');
   if(JSON.stringify(pre.input.map(i=>i.sha256))!==JSON.stringify(proven.input.map((i:any)=>i.sha256))||pre.instructionsSha256!==proven.instructionsSha256)f.push('context differs from the controller proof');
@@ -98,6 +100,7 @@ finally{
  t1??=Date.now();naturalExit ||= closed&&exitCode===0;
  // On timeout/failure stop dispatch immediately, not after a gameplay grace interval.
  kill(child,'SIGKILL');
+ try{await stopArm(callLog+'.process.json');}catch(e){failure=(failure??'')+' Arm cleanup failed: '+String(e);}
  const until=Date.now()+1000;while(child&&!closed&&Date.now()<until)await delay(10);
  try{await new LabBridge().admin('pause');if(!end&&start)end=await new LabBridge().perceive();}catch(e){failure=(failure??'')+' Cleanup failed: '+String(e);}
  kill(recording,'SIGINT');if(recording){await Promise.race([new Promise<void>(r=>recording!.once('close',()=>r())),delay(5000)]);if(recording.exitCode===null)kill(recording,'SIGKILL');}
