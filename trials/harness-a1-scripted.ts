@@ -38,7 +38,7 @@ try{
   const cook=s.pawns.find(p=>p.work.some(w=>w.def==='Cooking'&&!w.disabled));
   if(s.pawns.length<2||beds.length<2||!bench||!rock||!item||!cook)throw Error('Fixture requires two colonists, two ordinary built single beds, campfire, visible mineable rock, loose allowed item and capable cook; no coverage is skipped');
   for(const text of (await messages()).archived)expected.set(text,(expected.get(text)??0)+1);
-  const refused=await act({action:'place_blueprint',def:'Campfire',x:rock.x,z:rock.z});check(!refused.ok&&refused.source==='game','occupied placement must be game-refused');await narrated(refused,/^The game refused/,'game refusal');
+  const refused=await act({action:'place_blueprint',def:'Campfire',x:rock.x,z:rock.z});check(!refused.ok&&refused.source==='game','native placement refusal missing');await narrated(refused,/^The game refused/,'game refusal');
   const notBed=await act({action:'assign_bed',bed:bench.id,pawn:s.pawns[0]!.id});check(!notBed.ok&&notBed.source==='harness','non-bed must be harness-refused');await narrated(notBed,/was rejected \(harness check\)/,'harness refusal');
   const stale=await b.act({action:'assign_bed',bed:beds[0]!.id,pawn:s.pawns[0]!.id},{...timeline,epoch:'stale'},randomUUID());await record('stale-receipt',stale);
   check(!stale.ok&&!stale.narration,'stale request must not narrate or assign');check((await read()).receipts.length===s.receipts.length+2,'stale request created a saved receipt');

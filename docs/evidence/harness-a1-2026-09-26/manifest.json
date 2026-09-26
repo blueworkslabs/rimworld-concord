@@ -1,0 +1,69 @@
+{
+  "recordings": [
+    {
+      "path": "diary/assets/recordings/harness-a1-initial-2026-09-26.mp4",
+      "sha256": "a5947e285c5384a4662923c1eac50dfb0f1b5981ac411fa70bf58b3dd36f0995",
+      "bytes": 4927331,
+      "durationSeconds": 148.466667,
+      "uncut": true
+    },
+    {
+      "path": "diary/assets/recordings/harness-a1-repair-2026-09-26.mp4",
+      "sha256": "5128a99f8ecaeb6ef99b61ec3918e003019ff8e17638300d3ac2195f147e001b",
+      "bytes": 1878611,
+      "durationSeconds": 22.6,
+      "uncut": true
+    }
+  ],
+  "gameAssemblySha256": "082db1dd4f7f1d0b72960d7e1beead8fbfe6957200e8627f65bda0dbbe1dd8f8",
+  "finalModSha256": "84d54703e35862e7b1a933ce4ee1a19cc22e6098e33aa95e92e8bf05cf271120",
+  "fixture": {
+    "checkpoint": "lab-concord-a1-fixture-20260926",
+    "sha256": "fc8c42346495a02aeac0ab34f36253fea7a8abd0e02ecb60f3a638f9fc15cb0d",
+    "tick": 1898,
+    "beds": [
+      {
+        "id": 5675,
+        "kind": "building",
+        "def": "Bed",
+        "label": "wooden bed (good)",
+        "x": 79,
+        "z": 81,
+        "rot": 0,
+        "stack": 1,
+        "forbidden": false,
+        "faction": "player",
+        "quality": "Good",
+        "hp": 91,
+        "maxHp": 91,
+        "slots": 1,
+        "prisoner": false,
+        "slave": false,
+        "bed": true,
+        "medical": false,
+        "owners": 1
+      },
+      {
+        "id": 5676,
+        "kind": "building",
+        "def": "Bed",
+        "label": "wooden bed (normal)",
+        "x": 77,
+        "z": 81,
+        "rot": 0,
+        "stack": 1,
+        "forbidden": false,
+        "faction": "player",
+        "quality": "Normal",
+        "hp": 91,
+        "maxHp": 91,
+        "slots": 1,
+        "prisoner": false,
+        "slave": false,
+        "bed": true,
+        "medical": false,
+        "owners": 0
+      }
+    ]
+  }
+}
