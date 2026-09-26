@@ -20,8 +20,10 @@ completed in both interfaces: six successful arms, alternating H→UI/UI→H/H�
 no consistent colony-time advantage; median wall 58.7s harness versus 106.6s UI on this task. [The successful rehearsal](evidence/benchmark-rehearsal-3-2026-09-26/README.md)
 is separate from scoring, and both earlier infrastructure-failed pairs remain retained.
 This is task-local evidence, not general colony-management or billed-dollar advantage.
-Stalls remain uninstrumented and native USD unavailable. Placement query remains a
-post-benchmark read-only follow-up; no interface change entered the scored set.
+Stalls remain uninstrumented and native USD unavailable. Placement query is now verified and merged; no interface change entered the scored T1 set.
+[T2/T3 fixtures and checkers](evidence/benchmark-colony-setup-2026-09-26/README.md)
+have scripted viability evidence. Their three alternating pairs per task are next;
+no scored T2/T3 result is claimed.
 
 ## Where we are
 

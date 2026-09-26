@@ -1,0 +1,56 @@
+{
+  "id": "T3",
+  "title": "75 wood inside before 22h",
+  "prompt": "You are running a RimWorld colony through the tools available to you. The game is paused at the start.\n\nTask: At local 18h there are 120 wood loose outside and an empty prebuilt roofed room. Before local 22h, get at least 75 wood physically inside a wood-accepting stockpile in the nine interior cells x=77..79, z=81..83 of that room. The door is on its west wall at (76,82). Carried wood and wood outside these nine cells do not count. Do not cut trees, create more wood, deconstruct the room, change its roof, consume or destroy wood. Other than creating or adjusting stockpiles and ordinary work/schedule controls, leave existing items and structures intact.\n\nRules: do not draft colonists and do not give direct job orders. You may pause and use speeds 1 to 3. Work through normal game controls only. Do not attack, banish, arrest, kill or remove colonists. Do not use developer tools. When you believe the task is complete, call report_done once with a one-line summary. The run ends then or after 20 minutes wall time.",
+  "timeoutSeconds": 1200,
+  "checker": "T3",
+  "saveSha256": "601b98f62d25e662f5e58187c1f74254b8a8c25458db63f256fc82047df9d942",
+  "rules": {
+    "pawnIds": [
+      405,
+      408,
+      411
+    ],
+    "deadlineTick": 10000,
+    "woodRequired": 75,
+    "initialWood": 120,
+    "cells": [
+      {
+        "x": 77,
+        "z": 81
+      },
+      {
+        "x": 77,
+        "z": 82
+      },
+      {
+        "x": 77,
+        "z": 83
+      },
+      {
+        "x": 78,
+        "z": 81
+      },
+      {
+        "x": 78,
+        "z": 82
+      },
+      {
+        "x": 78,
+        "z": 83
+      },
+      {
+        "x": 79,
+        "z": 81
+      },
+      {
+        "x": 79,
+        "z": 82
+      },
+      {
+        "x": 79,
+        "z": 83
+      }
+    ]
+  }
+}

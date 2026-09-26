@@ -135,3 +135,7 @@ wire receipts, full snapshot/digest and size counts. Not a benchmark or model ru
 ## 2026-09-26 — placement query acceptance
 
 [Recorded scripted acceptance](../evidence/placement-2026-09-26/README.md): occupied/free queries, suggested-cell action and two fog-footprint rotations passed; paused full snapshots unchanged across queries. Private cleanup verification recovered from a filename collision; all 440 saves and prior mod preserved. No model calls; T1 closed.
+
+## 2026-09-26 — T2/T3 frozen setup and scripted viability
+
+[Setup evidence](../evidence/benchmark-colony-setup-2026-09-26/README.md): both scripted checks passed with zero models; all 443 saves unchanged. [Frozen predicates](../HARNESS.md#t2t3-frozen-task-contract-2026-09-26), new task-specific isolation proofs, and retained room preparation. No scored T2/T3 results yet.

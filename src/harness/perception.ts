@@ -14,6 +14,7 @@ export const Thing=z.object({id,kind:z.string(),def:z.string(),label:z.string().
   stack:z.number().int(),forbidden:z.boolean(),faction:z.string().nullable(),quality:z.string().optional(),hp:z.number().int().optional(),maxHp:z.number().int().optional(),
   builds:z.string().nullable().optional(),workDone:z.number().nullable().optional(),workToBuild:z.number().nullable().optional(),
   held:z.array(z.object({def:z.string(),count:z.number().int()})).optional(),growth:z.number().nullable().optional(),harvestable:z.boolean().optional(),
+  roofed:z.boolean().optional(),outdoors:z.boolean().optional(),slots:z.number().int().optional(),prisoner:z.boolean().optional(),slave:z.boolean().optional(),
   nutrition:z.number().nullable().optional(),bed:z.boolean().optional(),medical:z.boolean().optional(),owners:z.number().int().optional(),workbench:z.boolean().optional()});
 const Pawn=z.object({id,loadId:z.string(),name:z.string(),x:z.number().int(),z:z.number().int(),drafted:z.boolean(),downed:z.boolean(),
   job:z.object({def:z.string().nullable(),report:z.string().nullable(),target:id.optional()}),
@@ -22,7 +23,7 @@ const Pawn=z.object({id,loadId:z.string(),name:z.string(),x:z.number().int(),z:z
   mood:z.object({level:z.number().nullable().optional(),thoughts:z.array(z.object({label:z.string(),mood:z.number().nullable()})).optional()}),
   traits:z.array(z.string()),skills:z.array(z.object({def:z.string(),level:z.number().int(),passion:z.string(),disabled:z.boolean()})),
   work:z.array(z.object({def:z.string(),priority:z.number().int(),disabled:z.boolean()})),schedule:z.array(z.string()),
-  carrying:z.object({id,def:z.string(),count:z.number().int()}).optional(),inventory:z.array(z.object({id,def:z.string(),count:z.number().int()})),bed:id,
+  carrying:z.object({id,def:z.string(),count:z.number().int()}).optional(),inventory:z.array(z.object({id,def:z.string(),count:z.number().int()})),bed:id,currentBed:id.optional(),asleep:z.boolean().optional(),
   /** The Records tab: counts the game keeps per colonist (checker evidence for T1). */
   records:z.object({mealsCooked:z.number(),thingsConstructed:z.number()}).optional()});
 export const Snapshot=z.object({
@@ -164,7 +165,7 @@ export function compactPawn(p:SnapshotPawn){
     traits:p.traits,skills:Object.fromEntries(p.skills.filter(k=>!k.disabled).map(k=>[k.def,k.level+(k.passion==='None'?'':` ${k.passion}`)])),
     work:Object.fromEntries(p.work.filter(w=>w.priority>0).map(w=>[w.def,w.priority])),cannot:p.work.filter(w=>w.disabled).map(w=>w.def),
     schedule:runs,...(p.carrying?{carrying:`${p.carrying.count} ${p.carrying.def}`}:{}),...(p.inventory.length?{inventory:p.inventory.map(i=>`${i.count} ${i.def}`)}:{}),
-    bed:p.bed>=0?p.bed:null};
+    bed:p.bed>=0?p.bed:null,currentBed:p.currentBed??null,asleep:p.asleep??null};
 }
 const individual=(t:SnapshotThing)=>t.kind==='blueprint'||t.kind==='frame'||t.faction==='player'||!!t.bed||!!t.workbench;
 export function digest(s:Snapshot,limit=DIGEST_LIMIT){

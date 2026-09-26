@@ -7,7 +7,8 @@ import {randomUUID,createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {z} from 'zod';
 import {LabBridge} from '../src/lab-bridge.js';
-import {checkT1} from '../src/harness/checker.js';
+import {BenchmarkTask,TaskId} from '../src/harness/benchmark-task.js';
+import {retainedCheck} from '../src/harness/benchmark-check.js';
 import {assertNativeSubscriptionLogin,buildLaunch,armEnv,controllerEnv} from '../src/harness/controller-launch.js';
 import {recordFirstRequest,preflightFindings} from '../src/harness/controller-proof.js';
 import {counts,usageFromEvents} from '../src/harness/benchmark-metrics.js';
@@ -20,12 +21,12 @@ const root=new URL('../..',import.meta.url).pathname;
 const options=new Map<string,string>();
 for(const a of process.argv.slice(2)){const m=/^--([a-z-]+)=(.+)$/.exec(a);if(!m||options.has(m[1]!))throw Error('Unique --key=value arguments required');options.set(m[1]!,m[2]!);}
 for(const k of options.keys())if(!['arm','task','save','model','reasoning','ui-server','prepare-only','controller-proof','rehearsal','controller'].includes(k))throw Error('Unknown argument '+k);
-const arm=z.enum(['harness','ui']).parse(options.get('arm')),taskId=z.literal('T1').parse(options.get('task'));
+const arm=z.enum(['harness','ui']).parse(options.get('arm')),taskId=TaskId.parse(options.get('task'));
 const save=z.string().regex(/^lab-concord-[a-zA-Z0-9-]{1,40}$/).parse(options.get('save'));
 const model=z.string().min(1).parse(options.get('model')),reasoning=z.enum(['low','medium','high']).parse(options.get('reasoning')??'medium');
 const uiServer=options.get('ui-server');if(arm==='ui'&&(!uiServer||!uiServer.startsWith('/')))throw Error('UI requires absolute --ui-server backend JSON');
-const taskText=readFileSync(root+'/benchmark/tasks/T1.json','utf8');
-const task=z.object({id:z.literal('T1'),title:z.string(),prompt:z.string(),timeoutSeconds:z.number().int().min(1).max(1200),checker:z.literal('T1'),saveSha256:z.string().regex(/^[a-f0-9]{64}$/)}).strict().parse(JSON.parse(taskText));
+const taskText=readFileSync(root+'/benchmark/tasks/'+taskId+'.json','utf8');
+const task=BenchmarkTask.parse(JSON.parse(taskText));if(task.id!==taskId)throw Error('Task file ID mismatch');
 const sha=(s:string|Buffer)=>createHash('sha256').update(s).digest('hex');
 const runId=randomUUID(),dir=root+`/.runtime/bench-${taskId}-${arm}-${runId}`;mkdirSync(dir+'/cwd',{recursive:true});
 const callLog=dir+'/calls.jsonl',events=dir+'/codex.jsonl';writeFileSync(callLog,'');writeFileSync(events,'');
@@ -67,7 +68,7 @@ if(!rehearsal&&!hostMode){
 /* Lifecycle retained below for review and fake-controller tests; scored launch is held above. */
 const b=new LabBridge(undefined,()=>Date.now()+130000);
 let child:ChildProcess|undefined,recording:ChildProcess|undefined,closed=false,exitCode:number|null=null,spawnError:string|undefined;
-let start:Snapshot|undefined,end:Snapshot|undefined,configured:Snapshot|undefined;
+let start:Snapshot|undefined,end:Snapshot|undefined;
 let t0:number|undefined,t1:number|undefined,outcome='setup-failed',failure:string|undefined,naturalExit=false,stoppedBySignal=false;
 const log=():CallLog[]=>readFileSync(callLog,'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l));
 const kill=(p:ChildProcess|undefined,s:NodeJS.Signals)=>{if(p?.pid)try{process.kill(-p.pid,s);}catch{}};
@@ -130,13 +131,15 @@ finally{
  const until=Date.now()+(wire?5000:1000);while((child||wire)&&t0!==undefined&&!closed&&Date.now()<until)await delay(10);
  try{await new LabBridge().admin('pause');if(!end&&start)end=await new LabBridge().perceive();}catch(e){failure=(failure??'')+' Cleanup failed: '+String(e);}
  kill(recording,'SIGINT');if(recording){await Promise.race([new Promise<void>(r=>recording!.once('close',()=>r())),delay(5000)]);if(recording.exitCode===null)kill(recording,'SIGKILL');}
- if(existsSync(dir+'/configured.json'))configured=JSON.parse(readFileSync(dir+'/configured.json','utf8'));
+
  if(end)writeFileSync(dir+'/end.json',JSON.stringify(end));
  let calls:CallLog[]=[];try{calls=log();}catch(e){failure=(failure??'')+' Call journal parse failed: '+String(e);}
  const issued=calls.filter(c=>c.event==='issued');
+ const checked=retainedCheck(task,start,end,dir);
+ if(checked.checkerFailure)failure=(failure??'')+' Checker failed: '+checked.checkerFailure;
  const receipt={...metadata,outcome,failure:failure??null,timer:{controllerStartMs:t0??null,stoppedAtMs:t1,firstRequestAtMs:issued[0]?.at??null,firstRequestToStopMs:issued[0]?t1-issued[0].at:null,controllerWallMs:t0?t1-t0:null,includesHiddenObserverOverhead:true,endSnapshotMayBeAfterDeadline:outcome!=='done'},
   counts:counts(calls),tokens:usageFromEvents(readFileSync(events,'utf8'),naturalExit),controllerExit:exitCode,
-  checker:start&&end?checkT1(start,end,configured):null,verifiedCompletion:false,auditStatus:'pending input/recording audit; timeout/failed runs cannot pass',
+  ...checked,verifiedCompletion:false,auditStatus:'pending input/recording audit; timeout/failed runs cannot pass',
   hashes:{calls:sha(readFileSync(callLog)),events:sha(readFileSync(events)),recording:existsSync(dir+'/recording.mp4')?sha(readFileSync(dir+'/recording.mp4')):null},stalls:{status:'not instrumented',measurements:null}};
  writeFileSync(dir+'/receipt.json',JSON.stringify(receipt,null,2));
  if(wire)wire.send({type:'receipt',runId,receipt});else console.log(JSON.stringify(receipt));

@@ -1,0 +1,28 @@
+[
+  {
+    "runId": "4c4028bd-fe5a-4492-8a36-588286593633",
+    "at": "2026-09-26T12:23:59.114Z",
+    "model": "gpt-6-astra",
+    "reasoning": "medium",
+    "controllerVersion": "codex-cli 0.153.4",
+    "task": {
+      "id": "T2",
+      "sha256": "06a932062ba9ce41c8fccfcbdbe74c7b0bdd1f6597900c89e3ed9f97161db3c3"
+    },
+    "verified": true,
+    "findings": []
+  },
+  {
+    "runId": "32ae4ac5-8967-4419-90bc-c87d57330417",
+    "at": "2026-09-26T12:24:31.003Z",
+    "model": "gpt-6-astra",
+    "reasoning": "medium",
+    "controllerVersion": "codex-cli 0.153.4",
+    "task": {
+      "id": "T3",
+      "sha256": "06250b796a37e7f5a75d5e1dcad886602157a27d520c5ced2d6a4e4dcc140cb6"
+    },
+    "verified": true,
+    "findings": []
+  }
+]

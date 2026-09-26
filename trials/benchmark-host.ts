@@ -1,3 +1,4 @@
+import {BenchmarkTask,TaskId} from '../src/harness/benchmark-task.js';
 /** Controller-host side of one cross-host benchmark pair (docs/HARNESS.md). The controller stays
  * here, where it is authenticated; the game side (scripts/run-benchmark-pair.sh on the game host)
  * is reached over `ssh -o BatchMode=yes` with the wire (src/harness/controller-wire.ts) on stdio,
@@ -26,13 +27,14 @@ const options=new Map<string,string>();
 for(const a of rest){const m=/^--([a-z-]+)=(.+)$/.exec(a);if(!m||options.has(m[1]!))throw Error('Unique --key=value arguments required');options.set(m[1]!,m[2]!);}
 for(const k of options.keys())if(!['order','task','save','model','reasoning','ui-server','controller-proof','rehearsal'].includes(k))throw Error('Unknown argument '+k);
 const order=z.enum(['harness,ui','ui,harness']).parse(options.get('order')).split(',') as ('harness'|'ui')[];
-z.literal('T1').parse(options.get('task'));
+const taskId=TaskId.parse(options.get('task'));
 const save=z.string().regex(/^lab-concord-[a-zA-Z0-9-]{1,40}$/).parse(options.get('save'));
 const model=z.string().regex(/^[a-zA-Z0-9._:-]+$/).parse(options.get('model')),reasoning=z.enum(['low','medium','high']).parse(options.get('reasoning')??'medium');
 const uiServer=z.string().regex(/^\/[a-zA-Z0-9_./-]+$/).parse(options.get('ui-server'));
 const rehearsal=options.get('rehearsal')==='true';
 const sha=(s:string|Buffer)=>createHash('sha256').update(s).digest('hex');
-const taskText=readFileSync(root+'/benchmark/tasks/T1.json','utf8'),prompt=z.object({prompt:z.string()}).passthrough().parse(JSON.parse(taskText)).prompt;
+const taskText=readFileSync(root+'/benchmark/tasks/'+taskId+'.json','utf8'),task=BenchmarkTask.parse(JSON.parse(taskText)),prompt=task.prompt;
+if(task.id!==taskId)throw Error('Task file ID mismatch');
 const codex=rehearsal?(process.env.CONCORD_REHEARSAL_CONTROLLER??(()=>{throw Error('Rehearsal needs CONCORD_REHEARSAL_CONTROLLER');})()):(process.env.CODEX_BIN??'codex');
 
 // Isolation gate, here because the controller is here: the proof must come from this host's controller.
@@ -50,15 +52,15 @@ if(!rehearsal){
 // Same code on both hosts: the arm servers and the game-side runner come from the remote build.
 const quote=(s:string)=>"'"+s.replaceAll("'","'\\''")+"'";
 const sshEnv=Object.fromEntries(['PATH','HOME','LANG','SSH_AUTH_SOCK'].filter(k=>process.env[k]).map(k=>[k,process.env[k]!]));
-const digestCode="const fs=require('fs'),p=require('path'),h=require('crypto').createHash('sha256'),d=process.argv[1];const walk=r=>fs.readdirSync(p.join(d,r),{withFileTypes:true}).sort((a,b)=>a.name<b.name?-1:1).flatMap(e=>e.isDirectory()?walk(p.join(r,e.name)):e.name.endsWith('.js')?[p.join(r,e.name)]:[]);for(const f of [...walk('src'),...walk('trials')]){h.update(f);h.update(fs.readFileSync(p.join(d,f)));}for(const f of ['scripts/run-benchmark-pair.sh','benchmark/tasks/T1.json']){h.update(f);h.update(fs.readFileSync(p.resolve(d,'..',f)));}console.log(h.digest('hex'));";
-const local=execFileSync(process.execPath,['-e',digestCode,root+'/dist'],{env:sshEnv,encoding:'utf8'}).trim();
-const remote=execFileSync('ssh',['-o','BatchMode=yes',config.sshTarget,'node -e '+quote(digestCode)+' '+quote(config.remoteRepo+'/dist')],{env:sshEnv,timeout:15000,encoding:'utf8'}).trim();
+const digestCode="const fs=require('fs'),p=require('path'),h=require('crypto').createHash('sha256'),d=process.argv[1];const walk=r=>fs.readdirSync(p.join(d,r),{withFileTypes:true}).sort((a,b)=>a.name<b.name?-1:1).flatMap(e=>e.isDirectory()?walk(p.join(r,e.name)):e.name.endsWith('.js')?[p.join(r,e.name)]:[]);for(const f of [...walk('src'),...walk('trials')]){h.update(f);h.update(fs.readFileSync(p.join(d,f)));}for(const f of ['scripts/run-benchmark-pair.sh','benchmark/tasks/'+process.argv[2]+'.json']){h.update(f);h.update(fs.readFileSync(p.resolve(d,'..',f)));}console.log(h.digest('hex'));";
+const local=execFileSync(process.execPath,['-e',digestCode,root+'/dist',taskId],{env:sshEnv,encoding:'utf8'}).trim();
+const remote=execFileSync('ssh',['-o','BatchMode=yes',config.sshTarget,'node -e '+quote(digestCode)+' '+quote(config.remoteRepo+'/dist')+' '+quote(taskId)],{env:sshEnv,timeout:15000,encoding:'utf8'}).trim();
 if(local!==remote)throw Error('Game-host build differs from the local build');
 
 const pairId=randomUUID(),hostDir=root+`/.runtime/bench-pair-${pairId}`;mkdirSync(hostDir,{recursive:true});
 writeFileSync(hostDir+'/pair.json',JSON.stringify({pairId,order,save,model,reasoning,rehearsal,readiness,controllerProof:options.get('controller-proof')??null,build:local,label:config.label,sshTarget:config.sshTarget,at:new Date().toISOString()},null,2));
 const command=`env RIMWORLD_LAB_ROOT=${quote(config.labRoot)} DISPLAY=${quote(config.display)} XAUTHORITY=${quote(config.xauthority)} CONCORD_BENCH_LABEL=${quote(config.label)} bash ${quote(config.remoteRepo+'/scripts/run-benchmark-pair.sh')} `+
-  [`--order=${order.join(',')}`,'--task=T1',`--save=${save}`,`--model=${model}`,`--reasoning=${reasoning}`,`--ui-server=${uiServer}`,...(rehearsal?['--rehearsal=true']:[])].map(quote).join(' ');
+  [`--order=${order.join(',')}`,`--task=${taskId}`,`--save=${save}`,`--model=${model}`,`--reasoning=${reasoning}`,`--ui-server=${uiServer}`,...(rehearsal?['--rehearsal=true']:[])].map(quote).join(' ');
 const game=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env:sshEnv,stdio:['pipe','pipe','pipe']});
 game.stderr.on('data',d=>appendFileSync(hostDir+'/game-stderr.log',d));game.stdin.on('error',()=>{});
 const wire=new LineChannel<GameToHost,HostToGame>(game.stdout,game.stdin);

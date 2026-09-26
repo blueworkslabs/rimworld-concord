@@ -1,3 +1,4 @@
+import {BenchmarkTask,TaskId} from '../src/harness/benchmark-task.js';
 /** Controller isolation proof for the benchmark (docs/HARNESS.md): no game, no model. Runs the exact
  * scored command line for both arms against a local request recorder and requires that the arms
  * differ only in the arm server's declared tools (src/harness/controller-proof.ts). A verified
@@ -13,7 +14,9 @@ const model=process.argv.find(a=>a.startsWith('--model='))?.slice(8);if(!model)t
 const reasoning=(process.argv.find(a=>a.startsWith('--reasoning='))?.slice(12)??'medium') as 'low'|'medium'|'high';
 if(!['low','medium','high'].includes(reasoning))throw Error('reasoning must be low, medium or high');
 const codex=process.env.CODEX_BIN??'codex';
-const taskText=readFileSync(root+'/benchmark/tasks/T1.json','utf8'),task=JSON.parse(taskText);
+const taskId=TaskId.parse(process.argv.find(a=>a.startsWith('--task='))?.slice(7)??'T1');
+const taskText=readFileSync(root+'/benchmark/tasks/'+taskId+'.json','utf8'),task=BenchmarkTask.parse(JSON.parse(taskText));
+if(task.id!==taskId)throw Error('Task file ID mismatch');
 const lab=mkdtempSync(join(tmpdir(),'concord-proof-lab-'));mkdirSync(lab+'/concord');
 // The arm servers serve only while the lab lock is held; hold this scratch lab's lock for the proof.
 const holder=spawn('flock',['-n',lab+'/concord/coordinator.lock','sleep','900'],{stdio:'ignore'});await new Promise(r=>setTimeout(r,200));
