@@ -28,7 +28,9 @@ export type Action=z.infer<typeof Action>;
 export const Timeline=z.object({world:z.string().min(1),epoch:z.string().min(1),mapId:id});
 export type Timeline=z.infer<typeof Timeline>;
 export const Receipt=z.object({seq:z.number().int(),tick:z.number().int(),requestId:z.string(),action:z.string().nullable(),ok:z.boolean(),
-  id:z.string().nullable(),reason:z.string().nullable(),source:z.string().nullable(),detail:z.string().nullable()});
+  id:z.string().nullable(),reason:z.string().nullable(),source:z.string().nullable(),detail:z.string().nullable(),
+  // Receipt-backed narration (docs/PHASE2.md A.1): the line the game showed, and whether it showed.
+  narration:z.string().nullable().optional(),narrated:z.string().nullable().optional()});
 export type Receipt=z.infer<typeof Receipt>;
 
 /** The mod's Request fields for one action (the wire is flat, as for every bridge op). */
