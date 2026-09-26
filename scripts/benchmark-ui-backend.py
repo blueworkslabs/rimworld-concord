@@ -5,8 +5,8 @@ DISPLAY/XAUTHORITY are supplied by the trusted staging wrapper, never by the mod
 """
 import base64,json,os,subprocess,sys
 
-def run(args):
- return subprocess.run(args,check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=8).stdout
+def run(args,timeout=8):
+ return subprocess.run(args,check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=timeout).stdout
 
 def main(a):
  op=a['op']
@@ -24,7 +24,7 @@ def main(a):
  elif op=='type':
   text=a['text']
   if not isinstance(text,str) or len(text)>120 or not text.isprintable():raise ValueError('Printable text, at most 120 characters required')
-  run(['xdotool','type','--clearmodifiers','--delay','70','--',text])
+  run(['xdotool','type','--clearmodifiers','--delay','70','--',text],timeout=12)
  else:raise ValueError('Unknown UI operation')
  return {'ok':True,'gameAcceptance':'not inferred; inspect the next screenshot'}
 

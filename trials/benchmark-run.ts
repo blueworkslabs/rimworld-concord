@@ -55,12 +55,13 @@ let t0:number|undefined,t1:number|undefined,outcome='setup-failed',failure:strin
 const log=():CallLog[]=>readFileSync(callLog,'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l));
 const kill=(p:ChildProcess|undefined,s:NodeJS.Signals)=>{if(p?.pid)try{process.kill(-p.pid,s);}catch{}};
 const onSignal=()=>{stoppedBySignal=true;kill(child,'SIGTERM');};process.on('SIGTERM',onSignal);process.on('SIGINT',onSignal);
+const assertNotInterrupted=()=>{if(stoppedBySignal)throw Error('Operator interrupted setup');};
 try{
- await b.verify(save,task.saveSha256);await b.load(save);await b.admin('pause');start=await b.perceive();writeFileSync(dir+'/start.json',JSON.stringify(start));
+ assertNotInterrupted();await b.verify(save,task.saveSha256);assertNotInterrupted();await b.load(save);assertNotInterrupted();await b.admin('pause');assertNotInterrupted();start=await b.perceive();assertNotInterrupted();writeFileSync(dir+'/start.json',JSON.stringify(start));
  // One uncut recording for either arm. No overwrite: each attempt owns a new directory.
  recording=spawn('ffmpeg',['-nostdin','-f','x11grab','-framerate','15','-video_size','1280x800','-i',process.env.DISPLAY??':91','-an','-c:v','libx264','-preset','ultrafast','-crf','28','-pix_fmt','yuv420p',dir+'/recording.mp4'],{detached:true,stdio:['ignore','ignore','pipe']});
  let recordingError:string|undefined;recording.on('error',e=>{recordingError=String(e);});recording.on('exit',()=>{recordingError??='Recording exited before task end';});recording.stderr?.on('data',d=>appendFileSync(dir+'/recording.log',d));
- await delay(500);if(recordingError)throw Error(recordingError);
+ await delay(500);assertNotInterrupted();if(recordingError)throw Error(recordingError);
  t0=Date.now();child=spawn(codex,args,{cwd:dir+'/cwd',stdio:['pipe','pipe','pipe'],detached:true,env:process.env});
  child.on('error',e=>{spawnError=String(e);closed=true;});child.on('close',c=>{exitCode=c;closed=true;});
  child.stdout?.on('data',d=>appendFileSync(events,d));child.stderr?.on('data',d=>appendFileSync(dir+'/stderr.log',d));child.stdin?.on('error',()=>{});child.stdin?.end(task.prompt);
@@ -68,6 +69,7 @@ try{
   if(stoppedBySignal)throw Error('Operator interrupted run');
   if(recordingError)throw Error(recordingError);
   if(spawnError)throw Error(spawnError);
+  if(log().some(c=>c.observerFailure))throw Error('Hidden observer failed; see original action replies in journal');
   if(existsSync(dir+'/done.json')){outcome='done';break;}
   if(closed){outcome='controller-exit';break;}
   await delay(50);
@@ -81,14 +83,17 @@ try{
  }
 } catch(e){failure=String(e);outcome='failed';}
 finally{
- t1??=Date.now();kill(child,'SIGTERM');const until=Date.now()+1500;while(child&&!closed&&Date.now()<until)await delay(50);if(!closed)kill(child,'SIGKILL');
+ t1??=Date.now();naturalExit ||= closed&&exitCode===0;
+ // On timeout/failure stop dispatch immediately, not after a gameplay grace interval.
+ kill(child,'SIGKILL');
+ const until=Date.now()+1000;while(child&&!closed&&Date.now()<until)await delay(10);
  try{await new LabBridge().admin('pause');if(!end&&start)end=await new LabBridge().perceive();}catch(e){failure=(failure??'')+' Cleanup failed: '+String(e);}
  kill(recording,'SIGINT');if(recording){await Promise.race([new Promise<void>(r=>recording!.once('close',()=>r())),delay(5000)]);if(recording.exitCode===null)kill(recording,'SIGKILL');}
  if(existsSync(dir+'/configured.json'))configured=JSON.parse(readFileSync(dir+'/configured.json','utf8'));
  if(end)writeFileSync(dir+'/end.json',JSON.stringify(end));
  let calls:CallLog[]=[];try{calls=log();}catch(e){failure=(failure??'')+' Call journal parse failed: '+String(e);}
  const issued=calls.filter(c=>c.event==='issued');
- const receipt={...metadata,outcome,failure:failure??null,timer:{controllerStartMs:t0??null,stoppedAtMs:t1,firstRequestAtMs:issued[0]?.at??null,firstRequestToStopMs:issued[0]?t1-issued[0].at:null,controllerWallMs:t0?t1-t0:null,includesHiddenObserverOverhead:true},
+ const receipt={...metadata,outcome,failure:failure??null,timer:{controllerStartMs:t0??null,stoppedAtMs:t1,firstRequestAtMs:issued[0]?.at??null,firstRequestToStopMs:issued[0]?t1-issued[0].at:null,controllerWallMs:t0?t1-t0:null,includesHiddenObserverOverhead:true,endSnapshotMayBeAfterDeadline:outcome!=='done'},
   counts:counts(calls),tokens:usageFromEvents(readFileSync(events,'utf8'),naturalExit),controllerExit:exitCode,
   checker:start&&end?checkT1(start,end,configured):null,verifiedCompletion:false,auditStatus:'pending input/recording audit; timeout/failed runs cannot pass',
   hashes:{calls:sha(readFileSync(callLog)),events:sha(readFileSync(events)),recording:existsSync(dir+'/recording.mp4')?sha(readFileSync(dir+'/recording.mp4')):null},stalls:{status:'not instrumented',measurements:null}};

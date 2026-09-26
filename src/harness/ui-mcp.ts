@@ -9,7 +9,7 @@ export const UI_TOOLS=[
 ] as const;
 export class UiMcp extends ToolServer{
  constructor(backend:(arg:unknown)=>Promise<any>,logPath?:string,hooks?:ObserverHooks){
-  super('concord-ui',UI_TOOLS,{screenshot:'observation',click:'input',key:'input',type:'input',report_done:'done'},async(name,a):Promise<ToolResult>=>{
+  super('concord-ui',UI_TOOLS,{screenshot:'observation',click:'input',key:(a:any)=>['space','1','2','3'].includes(a.key)?'control':'input',type:'input',report_done:'done'},async(name,a):Promise<ToolResult>=>{
    if(name==='report_done'){if(typeof a.summary!=='string')return result('summary required',true);return result({ok:true,message:'Run ended.'});}
    const r=await backend({...a,op:name});
    if(r.error)return result(r.error,true);

@@ -6,7 +6,7 @@ terminating immediately after `report_done`. Rejected inputs were missing from i
 numerical speed was reset to Normal; failed attempts lacked unconditional cleanup/durable
 records; state after the timed window could be scored as completion.
 
-Corrections and a UI backend wrapper are implemented with **474 passing offline tests**.
+Corrections and a UI backend wrapper are implemented with **475 passing offline tests**.
 The common hidden observer captures count-three configuration without exposing it in UI
 responses. Commands are journalled before dispatch; exact tool replies are retained; failed
 inputs still count. Finish seals the tool server and pauses before the checker snapshot.

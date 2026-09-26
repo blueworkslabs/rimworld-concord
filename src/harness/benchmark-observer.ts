@@ -9,9 +9,11 @@ export function configuredCandidate(start:Snapshot,s:Snapshot):boolean{
 }
 /** Identical trusted hidden observer for both arms; never returns state to the UI controller. */
 export class BenchmarkObserver implements ObserverHooks {
+ private sequence=0;
  constructor(private bridge:{perceive():Promise<Snapshot>;admin(op:string):Promise<unknown>},private dir:string,private start:Snapshot){}
  private async sample(){
   const t=Date.now(),s=await this.bridge.perceive();
+  writeFileSync(this.dir+'/observer-'+s.meta.snapshotId+'-'+(++this.sequence)+'.json',JSON.stringify(s),{flag:'wx'});
   appendFileSync(this.dir+'/observer.jsonl',JSON.stringify({at:Date.now(),durationMs:Date.now()-t,meta:s.meta,bills:s.bills,records:s.pawns.map(p=>({id:p.id,records:p.records}))})+'\n');
   if(configuredCandidate(this.start,s)&&!existsSync(this.dir+'/configured.json'))writeFileSync(this.dir+'/configured.json',JSON.stringify(s),{flag:'wx'});
   return s;

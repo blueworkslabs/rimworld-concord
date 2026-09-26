@@ -2,7 +2,7 @@
   "classification": "offline review and launch-plan preparation only",
   "reviewedRevision": "4d7d0d6",
   "tests": {
-    "passed": 474,
+    "passed": 475,
     "initialFixtureTestFailure": "new observer test assumed retained fixture already had a bill; corrected test creates its own bill; failed output retained privately"
   },
   "plans": [

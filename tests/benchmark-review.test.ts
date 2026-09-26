@@ -65,3 +65,16 @@ test('benchmark and UI entrypoints reject direct calls before game access; launc
   const held=spawnSync('flock',[dir+'/concord/coordinator.lock','bash',script],{env:{...process.env,RIMWORLD_LAB_ROOT:dir},encoding:'utf8'});assert.notEqual(held.status,0);assert.equal(held.stdout,'');
  }finally{rmSync(dir,{recursive:true});}
 });
+
+test('observer failures retain accepted receipt and seal the server; thrown execution still gets post-observation',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'bench-')),log=join(dir,'calls');let executed=0,after=0;
+ try{
+  const server=new ToolServer('fake',[],{act:'input'},async()=>{executed++;return result({ok:true,id:'accepted'});},log,{before:async()=>{},after:async()=>{after++;throw Error('observer unavailable');}});
+  const r:any=await server.handle(call('act'));assert(r.result.isError);assert.match(r.result.content[0].text,/accepted/);
+  await server.handle(call('act'));assert.equal(executed,1);assert.equal(after,1);
+  const row=readFileSync(log,'utf8').split('\n').filter(Boolean).map(x=>JSON.parse(x)).find(x=>x.observerFailure);
+  assert.match(row.actionResponse.content[0].text,/accepted/);
+  const thrown=new ToolServer('fake',[],{act:'input'},async()=>{throw Error('transport uncertain');},undefined,{before:async()=>{},after:async()=>{after++;}});
+  await thrown.handle(call('act'));assert.equal(after,2);
+ }finally{rmSync(dir,{recursive:true});}
+});

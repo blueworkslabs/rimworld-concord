@@ -11,6 +11,6 @@ const config=z.object({command:z.string().min(1),args:z.array(z.string()).defaul
 const exec=promisify(execFile),b=new LabBridge(undefined,()=>Date.now()+60000);
 // Only this trusted observer can inspect the game; its data never enters UI replies.
 await new UiMcp(async a=>{
- const {stdout}=await exec(config.command,[...config.args,JSON.stringify(a)],{env:{PATH:process.env.PATH,...config.env},timeout:10000,maxBuffer:8*1024*1024});
+ const {stdout}=await exec(config.command,[...config.args,JSON.stringify(a)],{env:{PATH:process.env.PATH,...config.env},timeout:15000,maxBuffer:8*1024*1024});
  return JSON.parse(stdout);
 },log,observerFromEnv(b)).serve();

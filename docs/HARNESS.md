@@ -353,8 +353,9 @@ post-stop scoring, missing failure records and a speed-control reset. Added comp
   speed uses the standard game key, avoiding the former `run` call resetting it to Normal.
   This still needs a recorded speed/paused-state check on staging.
 - **Lifecycle:** save hash checked against the frozen task before load; setup/start saved
-  before inference; stdout/stderr retained incrementally; stop freezes the game before a
-  bounded final-response/usage grace. Failures enter cleanup and retain a receipt. Missing
+  before inference; stdout/stderr retained incrementally; successful report_done freezes the game before a
+  bounded final-response/usage grace. Timeout/failure kills dispatch then pauses; its end snapshot
+  can be after the deadline and never certifies completion. Failures enter cleanup and retain a receipt. Missing
   usage and unsupported reasoning-token fields are null, not zero. Timeout/failed runs do
   not certify completion from a later snapshot. Stalls remain **unmeasured**, not an empty
   claim of zero. The process lifecycle has not yet been exercised with a real controller.
