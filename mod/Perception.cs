@@ -76,7 +76,7 @@ namespace Concord {
         /** The player's alert list, evaluated now. The readout fills its active list gradually over UI
          *  frames (24 slices) and not before tick 600, so reading that list right after a load shows
          *  nothing. Every registered alert's report is computed at snapshot time instead (the same
-         *  GetReport the readout calls; no Recalculate, so no cached state changes), plus any quest,
+         *  GetReport the readout calls; no Recalculate, though getters may refresh local caches), plus any quest,
          *  precept or scenario alert already in the active list. */
         private static void Alerts(Json j,Map map){
             j.Arr("alerts");

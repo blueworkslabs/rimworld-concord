@@ -1,8 +1,9 @@
 # The agent harness: play RimWorld better than through the human UI
 
 **Status: phase definition, Fable, 2026-09-25, agreed with the owner in #secret-lab.**
-This replaces the construction and cooking migration as the next phase. Nothing here is
-built; the baseline below is Astra's UI-only pilot and is provisional until frozen.
+This replaces the construction and cooking migration as the next phase. Read-only perception
+is implemented and has a [bounded staging capture](evidence/perception-2026-09-25/README.md);
+actions and the matched benchmark are in progress. The UI runs below are calibration, not scored arms.
 
 ## The goal, in one sentence
 
@@ -65,13 +66,24 @@ the core is linked to each pawn (lore) and because the player can open the needs
 | `threats` | player-visible hostiles and warnings, not hidden storyteller plans or fogged enemies; animals nearby with danger |
 | `receipts` | outcomes of harness actions since the last read (see Actions) |
 
-Sizes: the snapshot is complete and kept in the record; the model is shown a digest
+Sizes: the full exported snapshot is kept in the record (v1 coverage gaps are explicit); the model is shown a digest
 (fitted like today's core input, oldest and least relevant trimmed first) plus the diff.
 Retain the full snapshot and the exact model-visible digest/query responses as separate
 artifacts. Mark omissions and provide `look` access; a full snapshot is not evidence
 that the model saw every field. Player-visible scope excludes unrevealed map contents
 and hidden future events. Export on the game thread from one coherent state; inspect
 UI getters for side effects rather than assuming every getter is read-only.
+
+**Requirements from the first capture (2026-09-25, #92):** alerts are evaluated from the
+readout's full alert list with `GetReport()` at snapshot time, never from the
+incrementally filled active list, so the first read after load already shows the
+player's to-do list; the digest has its own byte budget (about 14 KB) below the prompt
+limit, leaving room for instructions, task, history and receipts; loose items and
+plants appear in the digest aggregated by def (label, total, stacks, rough location),
+with individual stacks left to `look`. Every colonist's exported mood-thought groups stay in the
+digest: all twelve groups of the fixture fit in under 500 bytes. If required fields alone exceed
+the budget, report that the digest does not fit; never silently drop thoughts or exceed
+the final prompt budget.
 
 **Diff (`since`)**: things appeared, disappeared or changed def or position; alerts
 raised or cleared; letters arrived; bills or zones changed; pawn job, need band, health
@@ -138,7 +150,13 @@ Same save, same task, same model, same timing rules, three arms:
 | model cost | input/cached/output tokens per controller run; actual billed USD when provided, otherwise null with reason; any priced estimate separately labelled |
 | stalls | adapter or transport stalls, reported separately, never subtracted silently |
 
-**Rules.** No rerolls; failed runs are retained; the recording and its hash are kept as
+**Rules.** Both arms start from an identical, clean controller context: the same
+model revision and reasoning settings, the same task text, no history from any earlier run of the task. Model
+cost is reported as the token triplet (uncached input, cached input, output) plus the
+call count; billed USD is recorded only where the route reports it; any separate priced estimate
+must be labelled as an estimate, never as a bill.
+Astra's 2026-09-25 runs are calibration, not scored arms, because their context held
+the project session. No rerolls; failed runs are retained; the recording and its hash are kept as
 today; the same task spec and checker for both arms; three runs per arm per task once
 the harness exists, one until then. Publish every run plus completion rate and timing/cost summaries, including failures.
 Prefer task success first; compare speed/cost among successful runs without hiding failed
@@ -151,7 +169,7 @@ an agent cannot generate that arm.
 
 **Automation.** Scripted save per task, a task spec file, a checker script reading the
 state, the recording pipeline, the run receipt with hashes. Existing lab components can be reused, but the matched benchmark runner, checker and
-UI usage capture are not yet established. A hidden checker must not feed structured
+matched UI usage capture are not yet established. A hidden checker must not feed structured
 state or hints to the UI controller. Record checker overhead separately.
 
 ## Task set v1
@@ -159,7 +177,7 @@ state or hints to the UI controller. Record checker overhead separately.
 | Task | Start | Done when | Notes |
 |---|---|---|---|
 | T1 campfire and meals | the pilot save | one campfire built; a newly configured three-iteration simple-meal bill completed (consumption afterward is allowed) | Astra's UI pilot is the first UI data point |
-| T2 fed and in bed | three colonists, evening, raw food on the map, no beds | provisional: fed and using suitable beds by 22h; exact food/bed predicates must be frozen before this task runs | needs beds designated and built; tests priorities and time pressure |
+| T2 fed and in bed | three colonists, evening, raw food on the map, no beds | provisional: fed with suitable beds assigned by 22h; actual sleeping reported separately; exact food/bed predicates frozen before running | needs beds designated and built; tests priorities and time pressure |
 | T3 wood inside | 120 wood loose, fixed disclosed deadline | provisional: 75 wood moved into the specified indoor stockpile before the deadline; initial contents and cells frozen | the hauling scene, as a task |
 | T4 (later) | a raid warning | no colonist downed at the end of the raid | after v1 |
 
@@ -210,49 +228,23 @@ prompt fitting, the Jev grounding annotator (a narration checker fits a harness)
 (#89 on hold; its bridge and blueprint placement code is reused by action 1), and the
 gate process. The migration pages stay as history.
 
-## Open questions
+## Open questions, resolved 2026-09-25
 
-- Whether the digest should include the full thought list per pawn or the mood total
-  with the top three thoughts; decide from prompt size on the first fixture.
-- Capture controller token usage on the actual route; subscription access may not expose
-  per-run billed USD. Never call unknown cost zero or switch billing routes to obtain a number.
-  A token/time comparison can proceed, but “cheaper in USD” remains unproven without comparable pricing.
-- T2/T3 exact success predicates and fixtures are deferred until after T1. Assignment
-  alone does not prove a pawn slept; stockpile membership alone does not prove indoors.
+- **Thoughts in the digest:** the full list per pawn. The first capture measured all
+  twelve mood-thought groups at 493 bytes; trimming is unnecessary for this fixture.
+- **UI-arm cost:** the token triplet and call count, captured per run, same for both
+  arms; no USD on the subscription route and none invented. Fresh controller context
+  per scored run (see Benchmark rules).
+- **T2's bed:** the game's own bed assignment, read by the checker, with "slept in a bed
+  tonight" as a second column. Assignment is what a player can see and set.
 
-## Implementation status: perception (Clawd, 2026-09-25)
+## Perception follow-up implementation (#94)
 
-**Scripted-captured on staging; not a paired benchmark.** [Evidence](evidence/perception-2026-09-25/README.md): two paused raw receipts round-trip unchanged, 325,064-byte snapshot and 23,946-byte digest. All 12 mood thought groups fit. Empty alert/bill/zone/threat sections remain runtime-unexercised. `perceive` is a bridge op (mod `Perception.cs`, no patches):
-one snapshot per request, built on the game thread from the game's own structures, fogged
-cells excluded, written by a small JSON writer (Unity's serializer drops nested arrays).
-Sections as in the table above, plus `meta` (world, load epoch, map, tick, snapshot ID) and an
-`omitted` list stating what v1 does not export yet: transient top-left messages, home-area
-cells, and weather forecasts (not player-visible). `receipts` is empty until actions v1.
-Getters used and why they are safe to call outside the UI: `Alert.GetReport`/`GetLabel`
-(what the alert readout calls every frame; read through its private active list, no patch),
-`Letter.Label`/`ChoiceLetter.Text`, `JobDriver.GetReport`, `ThoughtHandler`'s distinct mood
-groups, `ResourceCounter.AllCountedAmounts`, `GenDate` for the clock. These may refresh UI/thought caches; they must not reconcile jobs or issue gameplay actions.
-The perception response bypasses legacy `StateJson` reconciliation, including rejected reads.
-Paused capture checks exported state stability, not the absence of every internal cache write.
+Implemented and offline-tested; the new cold-load alert path still needs staging.
 
-On the coordinator side (`src/harness/perception.ts`): the `Snapshot` schema, `since` (things
-appeared, disappeared or changed def, position, stack, forbidden; alerts raised/cleared;
-letters; bills and zones added/removed/changed; pawn job, need band, mood band, health and
-downed; resource thresholds 1/10/25/50/100/250/500/1000 crossed; designation counts; a reset,
-never a comparison, across a world, load or map change), `look` (area around a cell or thing,
-category, capability, pawn, or named section) and `digest`. The digest uses the core's fitting loop, now shared
-as `trimToFit` (core and reflection use it unchanged): plants, filth, corpses, then far items,
-old letters, far things, zone geometry and each pawn's weakest thoughts go first, and it states what it left
-out and that `look` reaches it. `trials/harness-perceive.ts` captures a real snapshot, digest
-and size summary on staging; its first run supplements the synthetic fixture with actual wire round-trip evidence and
-answers the thought-list question from real numbers. Hidden/invisible enemies are excluded;
-bill worker restrictions and skill ranges are exported. Zone changes compare contents and
-settings, not just their counts; pawn changes include job targets and individual injuries.
-
-**After the first capture (Fable's two fixes and the aggregation).**
 - *Alerts:* the readout fills its active list over UI frames (24 slices) and not before tick
   600, so a snapshot right after a load saw none. The exporter now evaluates every registered
-  alert's `GetReport()` at snapshot time (no `Recalculate`, so the readout's cache is untouched),
+  alert's `GetReport()` at snapshot time (no `Recalculate`; getters may refresh their own caches),
   plus any quest, precept or scenario alert already active; storyteller-disabled alerts stay off;
   targets in fog are dropped. Staging should confirm "Need colonist beds" and "Medical treatment
   needed" appear on the first read of the T1 save.
