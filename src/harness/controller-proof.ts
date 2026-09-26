@@ -58,6 +58,13 @@ export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Rec
 }
 const isArm=(t:{type:string;name:string|null})=>t.type==='namespace'&&t.name==='mcp__arm';
 /** One arm: the arm namespace is exactly the declared set; everything else is a shared built-in. */
+/** A pre-launch check against the proof: the arm came up alone and exactly as proven. */
+export function preflightFindings(pre:ArmEvidence,proven:ArmEvidence):string[]{
+  const f=armFindings(pre);
+  if(JSON.stringify(pre.tools.map(t=>t.sha256))!==JSON.stringify(proven.tools.map(t=>t.sha256)))f.push('offered tools differ from the controller proof');
+  if(JSON.stringify(pre.input.map(i=>i.sha256))!==JSON.stringify(proven.input.map(i=>i.sha256))||pre.instructionsSha256!==proven.instructionsSha256)f.push('context differs from the controller proof');
+  return f;
+}
 export function armFindings(e:ArmEvidence):string[]{
   const f:string[]=[];
   if(e.exit!==0)f.push(`${e.arm}: controller proof did not exit successfully`);
