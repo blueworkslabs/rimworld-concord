@@ -57,6 +57,9 @@ export class LabBridge implements GameBridge {
     return Receipt.parse((await this.request(wire(action,timeline,requestId))).receipt);}
   /** Harness perception (docs/HARNESS.md): the read-only player's-picture snapshot, validated. */
   async perceiveRaw(epoch?:string):Promise<unknown>{return (await this.request({op:'perceive',...(epoch?{epoch}:{})})).receipt;}
+  /** Harness placement query (docs/HARNESS.md): the game's own placement check, read-only. */
+  async placement(query:import('./harness/placement.js').PlacementQuery,epoch?:string){const {placementWire,PlacementResult}=await import('./harness/placement.js');
+    return PlacementResult.parse((await this.request(placementWire(query,epoch))).receipt);}
   async perceive(epoch?:string){const {Snapshot}=await import('./harness/perception.js');return Snapshot.parse(await this.perceiveRaw(epoch));}
   /** Native-intent and lab-only intent operations (docs/SPIKE_NATIVE_HAUL.md). */
   async intent(payload:{op:'intent-accept'|'intent-exclude'|'intent-stop'|`lab-${string}`}&Record<string,unknown>):Promise<{state:GameState;receipt:unknown}> {return this.request(payload);}

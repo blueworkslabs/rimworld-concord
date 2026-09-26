@@ -487,3 +487,25 @@ The filesystem sandbox stays read-only and no shell or additional tool is enable
 The native-home rehearsal exposed that listing tools in the isolation proof did not establish
 permission to execute them; a controlled local-provider/stub-tool check verifies execution
 without a game or live model. This does not itself establish gameplay success.
+
+## Placement query (Clawd, 2026-09-26; interface change for T2/T3)
+
+T1 is closed, and its interface stays as it was run. From T2 on, `look` also answers
+`{"by":"placement","def":"Campfire","x":..,"z":..,"rot"?:0-3,"stuff"?:"WoodLog","radius"?:1-30,"count"?:1-20}`:
+
+- **What it answers:** whether that building can be placed at that cell, and if not, why, plus up
+  to `count` (default 5) of the nearest cells within `radius` (default 12) where it can.
+- **Source:** every answer comes from the build designator's own `CanDesignateCell`, the check the
+  UI runs under the build cursor (GenConstruct.CanPlaceBlueprintAt with the chosen rotation and
+  material). `place_blueprint` builds its designator through the same helper (`BuildDesignator`),
+  so the query and the action cannot disagree.
+- **Read-only:** nothing is placed, no receipt is stored, and the game is not unpaused.
+- **Fog:** fogged cells are never offered. A fogged asked-for cell gets the game's own
+  "undiscovered" refusal.
+- **Refusals:** a refusal at the asked-for cell is an answer, not a tool error. It is labelled
+  `game` (the game's reason) or `harness` (not buildable, not researched, wrong material).
+- **Journal:** it counts as an observation.
+
+This replaces trial-and-error placement: the T1 rehearsal controller probed rings of
+`place_blueprint` calls until one was accepted. The harness tool description changes with this,
+so a new controller proof is needed before T2 pairs.
