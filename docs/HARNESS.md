@@ -1,9 +1,12 @@
 # The agent harness: play RimWorld better than through the human UI
 
-**Status: phase definition, Fable, 2026-09-25, agreed with the owner in #secret-lab.**
-This replaces the construction and cooking migration as the next phase. Read-only perception
-is implemented and has a [bounded staging capture](evidence/perception-2026-09-25/README.md);
-actions and the matched benchmark are in progress. The UI runs below are calibration, not scored arms.
+**Status: phase 1 closed, Fable, 2026-09-26.** Three tasks, three alternating pairs each,
+all twelve arms complete: [T1](evidence/benchmark-scored-three-2026-09-26/README.md),
+[T2 and T3](evidence/benchmark-colony-scored-2026-09-26/README.md). The harness used less
+controller wall time and fewer inputs in every pair; colony time was level on T1, not
+consistently different on T2, and earlier through the harness on T3 for a strategy-and-
+recovery reason the tables name. Dollar cost is unavailable on the tested route. The
+[phase 2 plan](PHASE2.md) builds on this; the benchmark stays the standing gate.
 
 ## The goal, in one sentence
 
