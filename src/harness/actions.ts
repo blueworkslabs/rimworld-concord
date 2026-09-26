@@ -19,6 +19,7 @@ export const Action=z.discriminatedUnion('action',[
   z.object({action:z.literal('schedule'),pawn:id,hour:z.number().int().min(0).max(23),assignment:z.enum(['Anything','Work','Joy','Sleep','Meditate'])}).strict(),
   z.object({action:z.literal('forbid'),thing:id,forbidden:z.boolean()}).strict(),
   z.object({action:z.literal('allow_area'),pawn:id,area:z.string().min(1).nullable()}).strict(),
+  z.object({action:z.literal('assign_bed'),bed:id,pawn:id}).strict(),
 ]).superRefine((a,ctx)=>{
   if(a.action==='designate'&&a.thing===undefined&&(a.x===undefined||a.z===undefined))ctx.addIssue({code:'custom',message:'designate needs a thing or a cell'});
   if(a.action==='zone'&&a.zone===undefined&&(a.kind===undefined||a.cells.length===0))ctx.addIssue({code:'custom',message:'a new zone needs a kind and cells'});
@@ -49,6 +50,7 @@ export function wire(raw:unknown,timeline:Timeline,requestId:string=randomUUID()
     case 'schedule':return {...base,thingId:a.pawn,hour:a.hour,mode:a.assignment};
     case 'forbid':return {...base,thingId:a.thing,flag:a.forbidden};
     case 'allow_area':return {...base,thingId:a.pawn,label:a.area??''};
+    case 'assign_bed':return {...base,thingId:a.bed,pawnId:a.pawn};
   }
   throw Error('unreachable');
 }

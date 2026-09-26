@@ -20,6 +20,8 @@ test('actions v1 validate strictly and map to the flat bridge request',()=>{
   for(const bad of [{action:'draft',pawn:201},{action:'designate',kind:'mine'},{action:'zone',cells:[]},{action:'bill',bench:1,recipe:'X',repeat:'count'},
     {action:'place_blueprint',def:'Campfire',x:-1,z:0},{action:'schedule',pawn:1,hour:24,assignment:'Sleep'},{action:'forbid',thing:1,forbidden:true,extra:1}])
     assert.throws(()=>Action.parse(bad),JSON.stringify(bad));
+  assert.deepEqual(wire({action:'assign_bed',bed:310,pawn:201},context,'r6'),{...context,op:'act',requestId:'r6',action:'assign_bed',thingId:310,pawnId:201});
+  for(const bad of [{action:'assign_bed',bed:310},{action:'assign_bed',bed:310,pawn:201,force:true},{action:'assign_bed',bed:-1,pawn:201}])assert.throws(()=>wire(bad,context,'r7'));
   assert.throws(()=>wire({action:'forbid',thing:1,forbidden:true},context,''),/requestId/);
   assert.throws(()=>wire({action:'forbid',thing:1,forbidden:true},undefined as any),/./);
   assert.equal(wire({action:'bill_edit',bill:'B',count:5},context).count,5);
