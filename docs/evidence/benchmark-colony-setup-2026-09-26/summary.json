@@ -1,0 +1,130 @@
+{
+  "kind": "scripted viability; zero model calls",
+  "recording": {
+    "sha256": "fa4313921b769e7d4c5d8e10edcc21b9bb9087c54482af757e8d4bdd1fd6c3a0",
+    "durationSeconds": 31.266667
+  },
+  "preservation": {
+    "saveCount": 443,
+    "unchanged": true,
+    "added": [],
+    "modRestored": true
+  },
+  "tasks": {
+    "T2": {
+      "start": {
+        "tick": 2,
+        "localHour": 18
+      },
+      "end": {
+        "tick": 5223,
+        "localHour": 20
+      },
+      "checker": {
+        "task": "T2",
+        "completed": true,
+        "evidence": {
+          "startTick": 2,
+          "deadlineTick": 10000,
+          "completionObservedTick": 5115,
+          "foodMinimum": 0.5,
+          "pawns": [
+            {
+              "id": 405,
+              "food": 0.876,
+              "assignedBed": 5680
+            },
+            {
+              "id": 408,
+              "food": 0.876,
+              "assignedBed": 5677
+            },
+            {
+              "id": 411,
+              "food": 0.879,
+              "assignedBed": 5682
+            }
+          ],
+          "observedAsleepInBed": [
+            408
+          ],
+          "unobservedSleep": [
+            405,
+            411
+          ],
+          "qualification": "Sleep is observed-only, not a continuous history or a primary requirement."
+        },
+        "missing": []
+      },
+      "actions": 9
+    },
+    "T3": {
+      "start": {
+        "tick": 2,
+        "localHour": 18
+      },
+      "end": {
+        "tick": 1250,
+        "localHour": 18
+      },
+      "checker": {
+        "task": "T3",
+        "completed": true,
+        "evidence": {
+          "startTick": 2,
+          "deadlineTick": 10000,
+          "completionObservedTick": 1162,
+          "woodRequired": 75,
+          "woodInside": 80,
+          "initialWood": 120,
+          "cells": [
+            {
+              "x": 77,
+              "z": 81
+            },
+            {
+              "x": 77,
+              "z": 82
+            },
+            {
+              "x": 77,
+              "z": 83
+            },
+            {
+              "x": 78,
+              "z": 81
+            },
+            {
+              "x": 78,
+              "z": 82
+            },
+            {
+              "x": 78,
+              "z": 83
+            },
+            {
+              "x": 79,
+              "z": 81
+            },
+            {
+              "x": 79,
+              "z": 82
+            },
+            {
+              "x": 79,
+              "z": 83
+            }
+          ],
+          "qualification": "Physical roofed, non-outdoor stockpile contents; excludes carried wood. Input audit excludes prohibited interventions."
+        },
+        "missing": []
+      },
+      "actions": 1
+    }
+  },
+  "testedBuild": {
+    "perceptionSourceSha256": "3905da094752b5fa484902685be629d73d89fbfd8900001f43fb32324a564d27",
+    "modDllSha256": "ceb8e9ab90cb18a758d309c78a983806ed77b0cfeb1b4e2b76c6f4ad3ded94a6",
+    "localMatchesDeployed": true
+  }
+}

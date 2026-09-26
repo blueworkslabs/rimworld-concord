@@ -1,0 +1,30 @@
+{
+  "sourceSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+  "roomTemplateSha256": "a922576a841fd1847838806009e007ace9c15de54e82ace6469089e47c598611",
+  "fixtures": {
+    "T2": {
+      "name": "lab-concord-t2-20260926",
+      "sha256": "74baff64a24ef6c593bac90dfade07eb77d5d68b8af02d88e65485af0ffd6154",
+      "startLocalHour": 18,
+      "deadlineTick": 10000,
+      "deadlineLocalHour": 22,
+      "pawnIds": [
+        405,
+        408,
+        411
+      ]
+    },
+    "T3": {
+      "name": "lab-concord-t3-20260926",
+      "sha256": "601b98f62d25e662f5e58187c1f74254b8a8c25458db63f256fc82047df9d942",
+      "startLocalHour": 18,
+      "deadlineTick": 10000,
+      "deadlineLocalHour": 22,
+      "pawnIds": [
+        405,
+        408,
+        411
+      ]
+    }
+  }
+}

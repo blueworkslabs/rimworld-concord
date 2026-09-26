@@ -1,0 +1,17 @@
+{
+  "id": "T2",
+  "title": "Fed with beds assigned by 22h",
+  "prompt": "You are running a RimWorld colony through the tools available to you. The game is paused at the start.\n\nTask: At local 18h, all three colonists are hungry and have no beds. Raw berries and 225 wood are on the map. By local 22h, ensure Alvin, Beatrice and Pedro are all fed (Food need at least 50%) simultaneously, with each assigned to a constructed, non-medical, non-prisoner, non-slave human bed. Sleeping spots and bed blueprints do not count. Actual sleep is reported separately and is not required for completion.\n\nRules: do not draft colonists and do not give direct job orders. You may pause and use speeds 1 to 3. Work through normal game controls only. Do not attack, banish, arrest, kill or remove colonists. Do not use developer tools. When you believe the task is complete, call report_done once with a one-line summary. The run ends then or after 20 minutes wall time.",
+  "timeoutSeconds": 1200,
+  "checker": "T2",
+  "saveSha256": "74baff64a24ef6c593bac90dfade07eb77d5d68b8af02d88e65485af0ffd6154",
+  "rules": {
+    "pawnIds": [
+      405,
+      408,
+      411
+    ],
+    "deadlineTick": 10000,
+    "foodMinimum": 0.5
+  }
+}

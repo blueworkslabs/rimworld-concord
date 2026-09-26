@@ -133,9 +133,10 @@ namespace Concord {
                 var bp=t as Blueprint;if(bp!=null)j.S("builds",bp.def.entityDefToBuild==null?null:bp.def.entityDefToBuild.defName);
                 var fr=t as Frame;if(fr!=null){j.S("builds",fr.def.entityDefToBuild==null?null:fr.def.entityDefToBuild.defName).F("workDone",fr.workDone).F("workToBuild",fr.WorkToBuild);
                     j.Arr("held");foreach(var h in fr.resourceContainer)j.Obj().S("def",h.def.defName).I("count",h.stackCount).End();j.EndArr();}
-                var bed=t as Building_Bed;if(bed!=null)j.B("bed",true).B("medical",bed.Medical).I("owners",bed.OwnersForReading.Count);
+                var bed=t as Building_Bed;if(bed!=null)j.B("bed",true).B("medical",bed.Medical).I("owners",bed.OwnersForReading.Count).I("slots",bed.SleepingSlotsCount).B("prisoner",bed.ForPrisoners).B("slave",bed.ForSlaves);
                 var bench=t as Building_WorkTable;if(bench!=null)j.B("workbench",true);
                 var pl=t as Plant;if(pl!=null)j.F("growth",pl.Growth).B("harvestable",pl.HarvestableNow);
+                if(t.def.category==ThingCategory.Item){var room=t.Position.GetRoom(map);j.B("roofed",t.Position.Roofed(map)).B("outdoors",room==null||room.PsychologicallyOutdoors);}
                 if(t.def.IsNutritionGivingIngestible)j.F("nutrition",t.GetStatValue(StatDefOf.Nutrition));
                 j.End();
             }
@@ -216,6 +217,7 @@ namespace Concord {
                 j.Arr("inventory");if(p.inventory!=null)foreach(var t in p.inventory.innerContainer)j.Obj().I("id",t.thingIDNumber).S("def",t.def.defName).I("count",t.stackCount).End();j.EndArr();
                 if(p.records!=null)j.Obj("records").F("mealsCooked",p.records.GetValue(RecordDefOf.MealsCooked)).F("thingsConstructed",p.records.GetValue(RecordDefOf.ThingsConstructed)).End();
                 var bed=p.ownership==null?null:p.ownership.OwnedBed;j.I("bed",bed==null?-1:bed.thingIDNumber);
+                var currentBed=p.CurrentBed();j.I("currentBed",currentBed==null?-1:currentBed.thingIDNumber).B("asleep",currentBed!=null&&p.jobs!=null&&p.jobs.curDriver!=null&&p.jobs.curDriver.asleep);
                 j.End();
             }
             j.EndArr();

@@ -512,3 +512,45 @@ T1 is closed, and its interface stays as it was run. From T2 on, `look` also ans
 This supports placement discovery without trial-and-error action calls. The historical 53
 rejected cell probes were post-task zone checks, not campfire placement by a T1 controller. The harness tool description changes with this,
 so a new controller proof is needed before T2 pairs.
+
+## T2/T3 frozen task contract (2026-09-26)
+
+T1 is closed. Placement and the following read-only observations enter only the
+new task sets: native bed slot count/medical/prisoner/slave status, current bed and
+job-driver sleep flag, plus loose items' roof and `Room.PsychologicallyOutdoors`
+status. The latter is the game's room classification, not a general proof of
+architectural enclosure. Health and production records remain available unchanged.
+
+- [T2 task](../benchmark/tasks/T2.json): paused at 18h; Alvin, Beatrice and Pedro,
+  Food 0.1, Rest 0.4, 225 berries and 225 wood, no beds. By tick **10,000 inclusive**
+  (local 22h), one observed simultaneous state must show all three alive/present,
+  not downed, Food ≥0.5 and assigned to constructed player Bed/DoubleBed/RoyalBed
+  objects that are not forbidden, medical, prisoner or slave beds. Assignments and
+  native owners must fit native sleeping slots. Blueprints and sleeping spots do
+  not count. Actual job-driver sleep in a suitable bed is an observed-only secondary
+  column; not observing sleep is not proof it never happened. Controllers may use
+  normal work/schedule controls; native bed claiming suffices without direct orders.
+- [T3 task](../benchmark/tasks/T3.json): paused at 18h, 120 loose wood outside an
+  empty native-built roofed room. Before tick **10,000 exclusive**, at least 75
+  WoodLog units must be physical loose stacks in the nine disclosed cells
+  x=77..79/z=81..83, inside a wood-accepting stockpile, roofed and psychologically
+  non-outdoor. Room doorway (76,82). No carried/inventory wood counts. Cutting,
+  manufacturing, consuming/destroying wood, room/roof alteration and removing
+  crew are disallowed and checked in the input/recording audit. This is a net
+  contents target, not a haul intent, receipt sum or exact shared quota.
+
+Both checkers fail closed on wrong world/load/map, chronological tick regression,
+invalid initial roster/resources or corrupt observation files. Observation order
+is the recorded sequence, never repaired by sorting game ticks. A witnessed success
+by the game deadline may count even if reported later; timeout/failed runs cannot
+be verified successes. Final receipts retain checker errors rather than disappearing.
+The original T1 checker and its task/save bytes remain unchanged.
+
+[Private fixture construction, hashes and scripted viability](evidence/benchmark-colony-setup-2026-09-26/README.md)
+are reproducible from operator-owned saves; licensed saves are not committed.
+Freeze task text, save hash and interfaces within each three-pair set. Use fresh
+`gpt-6-astra`/medium contexts, H→UI / UI→H / H→UI, one attempt per arm,
+20-minute wall caps, new task-specific proofs and exact launch preflights.
+Recording-first cold reads and all original failures remain required. Preserve the
+T1 reporting columns and qualify sampled game-time/phase milestones; there are no
+T2/T3 scored results in this setup evidence.
