@@ -7,7 +7,8 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {z} from 'zod';
 import {LabBridge} from '../src/lab-bridge.js';
 import {checkT1} from '../src/harness/checker.js';
-import {controllerCatalog,isolationConfig} from '../src/harness/controller-config.js';
+import {buildLaunch} from '../src/harness/controller-launch.js';
+import {recordFirstRequest,armFindings} from '../src/harness/controller-proof.js';
 import {counts,usageFromEvents} from '../src/harness/benchmark-metrics.js';
 import type {CallLog} from '../src/harness/tool-server.js';
 import type {Snapshot} from '../src/harness/perception.js';
@@ -15,7 +16,7 @@ if(process.env.CONCORD_HARNESS_LOCKED!=='1')throw Error('Exclusive lab lock requ
 const root=new URL('../..',import.meta.url).pathname;
 const options=new Map<string,string>();
 for(const a of process.argv.slice(2)){const m=/^--([a-z-]+)=(.+)$/.exec(a);if(!m||options.has(m[1]!))throw Error('Unique --key=value arguments required');options.set(m[1]!,m[2]!);}
-for(const k of options.keys())if(!['arm','task','save','model','reasoning','ui-server','prepare-only'].includes(k))throw Error('Unknown argument '+k);
+for(const k of options.keys())if(!['arm','task','save','model','reasoning','ui-server','prepare-only','controller-proof','rehearsal'].includes(k))throw Error('Unknown argument '+k);
 const arm=z.enum(['harness','ui']).parse(options.get('arm')),taskId=z.literal('T1').parse(options.get('task'));
 const save=z.string().regex(/^lab-concord-[a-zA-Z0-9-]{1,40}$/).parse(options.get('save'));
 const model=z.string().min(1).parse(options.get('model')),reasoning=z.enum(['low','medium','high']).parse(options.get('reasoning')??'medium');
@@ -25,27 +26,27 @@ const task=z.object({id:z.literal('T1'),title:z.string(),prompt:z.string(),timeo
 const sha=(s:string|Buffer)=>createHash('sha256').update(s).digest('hex');
 const runId=randomUUID(),dir=root+`/.runtime/bench-${taskId}-${arm}-${runId}`;mkdirSync(dir+'/cwd',{recursive:true});
 const callLog=dir+'/calls.jsonl',events=dir+'/codex.jsonl';writeFileSync(callLog,'');writeFileSync(events,'');
-const codex=process.env.CODEX_BIN??'codex';
-const config:Record<string,unknown>={approval_policy:'never',sandbox_mode:'read-only',project_doc_max_bytes:0,include_environment_context:false,web_search:'disabled',model_reasoning_effort:reasoning,
- 'tools.update_plan.enabled':false,'tools.experimental_request_user_input.enabled':false,
- 'mcp_servers.arm.command':process.execPath,'mcp_servers.arm.args':[root+`/dist/trials/${arm==='ui'?'ui':'harness'}-mcp-server.js`],
- 'mcp_servers.arm.env':{RIMWORLD_LAB_ROOT:process.env.RIMWORLD_LAB_ROOT??'',CONCORD_HARNESS_LOCKED:'1',CONCORD_BENCH_CALL_LOG:callLog,CONCORD_BENCH_DIR:dir,CONCORD_UI_BACKEND:uiServer??'',PATH:process.env.PATH??'',DISPLAY:process.env.DISPLAY??'',XAUTHORITY:process.env.XAUTHORITY??''},'mcp_servers.arm.tool_timeout_sec':60};
-const version=execFileSync(codex,['--version'],{encoding:'utf8'}).trim();
-if(version!=='codex-cli 0.153.4')throw Error('Controller version changed; re-review effective tool configuration');
-const catalog=controllerCatalog(JSON.parse(execFileSync(codex,['debug','models','--bundled'],{encoding:'utf8',maxBuffer:10*1024*1024})),model);
-writeFileSync(dir+'/controller-catalog.json',JSON.stringify(catalog));
-Object.assign(config,isolationConfig,{model_catalog_json:dir+'/controller-catalog.json'});
-const toml=(v:unknown):string=>Array.isArray(v)?'['+v.map(toml).join(',')+']':v&&typeof v==='object'?'{'+Object.entries(v).map(([k,x])=>JSON.stringify(k)+'='+toml(x)).join(',')+'}':JSON.stringify(v);
-const args=['exec','--strict-config','--json','--ephemeral','--ignore-user-config','--ignore-rules','--skip-git-repo-check','-C',dir+'/cwd','-m',model,...Object.entries(config).flatMap(([k,v])=>['-c',k+'='+toml(v)]),'-'];
-const metadata={runId,arm,task:{id:task.id,sha256:sha(taskText)},modelRequested:model,modelResolved:null,reasoning,controllerVersion:version,controllerCatalogSha256:sha(JSON.stringify(catalog)),argsSha256:sha(JSON.stringify(args)),save:{name:save,expectedSha256:task.saveSha256},at:new Date().toISOString()};
+// A rehearsal swaps in the scripted stand-in controller (trials/rehearsal-controller.ts) to exercise
+// the lifecycle with the real game; its receipt is labelled and can never count as a scored run.
+const rehearsal=options.get('rehearsal')==='true';
+const codex=rehearsal?(process.env.CONCORD_REHEARSAL_CONTROLLER??(()=>{throw Error('Rehearsal needs CONCORD_REHEARSAL_CONTROLLER');})()):(process.env.CODEX_BIN??'codex');
+const {version,catalog,config,args}=buildLaunch({codex,root,dir,arm,model,reasoning,callLog,uiServer,
+ env:{RIMWORLD_LAB_ROOT:process.env.RIMWORLD_LAB_ROOT,PATH:process.env.PATH,DISPLAY:process.env.DISPLAY,XAUTHORITY:process.env.XAUTHORITY}});
+const metadata={runId,rehearsal,arm,task:{id:task.id,sha256:sha(taskText)},modelRequested:model,modelResolved:null,reasoning,controllerVersion:version,controllerCatalogSha256:sha(JSON.stringify(catalog)),argsSha256:sha(JSON.stringify(args)),save:{name:save,expectedSha256:task.saveSha256},at:new Date().toISOString()};
 writeFileSync(dir+'/setup.json',JSON.stringify(metadata,null,2));
-// Explicit technical hold: CLI feature flags are NOT an effective built-in-tool allowlist.
-// Preparation is useful without model/game access. Remove only after a concrete reviewed
-// controller tool-surface mechanism and matched context proof replace this check.
-writeFileSync(dir+'/launch-plan.json',JSON.stringify({args,config,task:task.prompt,isolationVerified:false},null,2));
-if(options.get('prepare-only')==='true'){console.log(JSON.stringify({dir,prepared:true,isolationVerified:false}));process.exit(0);}
-function assertControllerReady():void { throw new Error('Benchmark controller isolation unverified: projected catalog/settings need effective-tool/context verification. Use --prepare-only=true; no game or model started.'); }
-assertControllerReady();
+// Isolation gate (replaces the earlier hard hold). Feature flags are not an allowlist, so a scored
+// run needs recorded evidence: a verified controller proof (trials/benchmark-controller-proof.ts) for
+// this model, reasoning, controller version and task, and, just before launch, a pre-launch check of
+// this very command line showing its arm server came up with exactly the proven tool surface.
+let proof:any=null;
+if(!rehearsal){
+ const p=options.get('controller-proof');if(!p||!p.startsWith('/'))throw Error('Scored runs need --controller-proof=/abs/receipt.json from trials/benchmark-controller-proof.ts');
+ proof=JSON.parse(readFileSync(p,'utf8'));
+ const mismatch=[proof.verified!==true&&'not verified',proof.model!==model&&'model',proof.reasoning!==reasoning&&'reasoning',proof.controllerVersion!==version&&'controller version',proof.task?.sha256!==sha(taskText)&&'task'].filter(Boolean);
+ if(mismatch.length)throw Error('Controller proof does not match this run: '+mismatch.join(', '));
+}
+writeFileSync(dir+'/launch-plan.json',JSON.stringify({args,config,task:task.prompt,rehearsal,controllerProof:options.get('controller-proof')??null},null,2));
+if(options.get('prepare-only')==='true'){console.log(JSON.stringify({dir,prepared:true,rehearsal,controllerProof:!!proof}));process.exit(0);}
 
 /* Lifecycle retained below for review and fake-controller tests; scored launch is held above. */
 const b=new LabBridge(undefined,()=>Date.now()+130000);
@@ -58,6 +59,17 @@ const onSignal=()=>{stoppedBySignal=true;kill(child,'SIGTERM');};process.on('SIG
 const assertNotInterrupted=()=>{if(stoppedBySignal)throw Error('Operator interrupted setup');};
 try{
  assertNotInterrupted();await b.verify(save,task.saveSha256);assertNotInterrupted();await b.load(save);assertNotInterrupted();await b.admin('pause');assertNotInterrupted();start=await b.perceive();assertNotInterrupted();writeFileSync(dir+'/start.json',JSON.stringify(start));
+ if(!rehearsal){
+  // Pre-launch check of this exact command line against the local recorder (no model, no tool calls;
+  // its own journal), outside the task timer.
+  const pre=await recordFirstRequest({codex,root,dir,arm,model,reasoning,callLog:dir+'/preflight-calls.jsonl',uiServer,
+   env:{RIMWORLD_LAB_ROOT:process.env.RIMWORLD_LAB_ROOT,PATH:process.env.PATH,DISPLAY:process.env.DISPLAY,XAUTHORITY:process.env.XAUTHORITY}},task.prompt);
+  const proven=proof.evidence[arm];const f=armFindings(pre);
+  if(JSON.stringify(pre.tools.map(t=>t.sha256))!==JSON.stringify(proven.tools.map((t:any)=>t.sha256)))f.push('offered tools differ from the controller proof');
+  if(JSON.stringify(pre.input.map(i=>i.sha256))!==JSON.stringify(proven.input.map((i:any)=>i.sha256))||pre.instructionsSha256!==proven.instructionsSha256)f.push('context differs from the controller proof');
+  writeFileSync(dir+'/preflight.json',JSON.stringify({findings:f,evidence:pre},null,2));
+  if(f.length)throw Error('Pre-launch controller check failed: '+f.join('; '));
+ }
  // One uncut recording for either arm. No overwrite: each attempt owns a new directory.
  recording=spawn('ffmpeg',['-nostdin','-f','x11grab','-framerate','15','-video_size','1280x800','-i',process.env.DISPLAY??':91','-an','-c:v','libx264','-preset','ultrafast','-crf','28','-pix_fmt','yuv420p',dir+'/recording.mp4'],{detached:true,stdio:['ignore','ignore','pipe']});
  let recordingError:string|undefined;recording.on('error',e=>{recordingError=String(e);});recording.on('exit',()=>{recordingError??='Recording exited before task end';});recording.stderr?.on('data',d=>appendFileSync(dir+'/recording.log',d));

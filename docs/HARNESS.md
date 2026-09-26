@@ -321,10 +321,34 @@ evidence, not a scored harness arm or a claim of fresh-process restore.
 
 ## Matched benchmark runner — review status (#96)
 
-**Draft, not scored.** The runner now supports `--prepare-only=true` (same arm/task/save/model
-arguments): this writes a launch plan without game access or inference. Actual launches are
-held in code pending effective controller-tool/context verification and lifecycle rehearsal.
-Do not remove that hold by treating feature flags or a successful unit test as runtime proof.
+**Draft, not scored.** The runner supports `--prepare-only=true` (same arm/task/save/model
+arguments): this writes a launch plan without game access or inference.
+
+**Controller isolation: recorded, not assumed (Clawd, 2026-09-26).** Feature flags are not an
+allowlist, so the hard hold is replaced by evidence. `scripts/run-benchmark-controller-proof.sh
+--model=<alias> [--reasoning=…]` runs the **exact scored command line** (`buildLaunch`, shared
+with the runner) for both arms with one appended provider override: the same auth mode and wire
+API, pointed at a local recorder that captures the first model request and answers with a short
+final message. No game, no model; headers are never recorded. It requires that the arms differ
+**only** in the arm server's declared tools, under one `mcp__arm` namespace, and that everything
+else offered is codex's three built-in MCP-resource readers (`list_mcp_resources`,
+`list_mcp_resource_templates`, `read_mcp_resource`; our servers expose no resources), byte-identical
+across arms, with identical instructions, context items, model, reasoning, tool choice and
+parallel-call setting. Verified locally on codex 0.153.4 for `gpt-6-astra` (tools travel as an
+`additional_tools` input item, built-ins in a `functions` namespace; context = base instructions,
+the permissions/collaboration message and the task) and for `gpt-5.5` (a `tools` field and an
+`instructions` string). The first proof attempt also showed that an arm server which fails to start
+leaves the controller with no arm tools at all, silently.
+
+The gate in the runner: a scored run needs `--controller-proof=/abs/receipt.json` whose
+`verified` is true and whose model, reasoning, controller version and task hash match the run;
+and just before the timer starts, a **pre-launch check** of that run's own command line against
+the recorder (its own journal, no tool calls) must show the arm server up with exactly the proven
+tool surface and context. Either failure stops the run before the controller starts.
+`--rehearsal=true` instead swaps in `scripts/rehearsal-controller.sh`, a scripted stand-in (real
+codex for `--version` and the catalog; `exec` drives the arm server over MCP: the T1
+walk-through for the harness arm, screenshots and a pause toggle for the UI arm), to rehearse the
+lifecycle with the real game. Rehearsal receipts are labelled and never count as scored runs.
 
 The review corrected missing configured-state capture, input undercounting, final-usage loss,
 post-stop scoring, missing failure records and a speed-control reset. Added components:
