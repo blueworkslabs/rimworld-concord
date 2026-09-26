@@ -1,6 +1,7 @@
 # Benchmark runner review — 2026-09-26
 
-PR #96 remains **draft**. No game or inference run was made. The original runner could
+PR #96 remains **draft**. Independent source re-review is clear for the held preparation
+changes at behavioral revision `2396f21`; this is not scored-launch clearance. No game or inference run was made. The original runner could
 never pass T1 because it omitted the configured checkpoint, and could lose final usage by
 terminating immediately after `report_done`. Rejected inputs were missing from input counts;
 numerical speed was reset to Normal; failed attempts lacked unconditional cleanup/durable

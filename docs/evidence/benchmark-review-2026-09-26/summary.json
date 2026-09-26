@@ -1,6 +1,5 @@
 {
   "classification": "offline review and launch-plan preparation only",
-  "reviewedRevision": "4d7d0d6",
   "tests": {
     "passed": 475,
     "initialFixtureTestFailure": "new observer test assumed retained fixture already had a bill; corrected test creates its own bill; failed output retained privately"
@@ -41,5 +40,8 @@
     "lifecycle failure/timeout/usage rehearsal with actual controller or controlled subprocess fixture",
     "recorded UI transport and numerical speed/paused-state check",
     "common input/recording audit before scoring"
-  ]
+  ],
+  "originalReviewedRevision": "4d7d0d6",
+  "finalBehavioralRevision": "2396f21",
+  "reviewDisposition": "Independent source review and final delta clear for held draft preparation; not launch clearance"
 }
