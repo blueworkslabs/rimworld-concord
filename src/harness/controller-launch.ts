@@ -1,3 +1,5 @@
+import {homedir} from 'node:os';
+import {join} from 'node:path';
 import {promisify} from 'node:util';
 import {execFileSync,execFile,spawnSync} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
@@ -7,12 +9,20 @@ import {controllerCatalog,isolationConfig} from './controller-config.js';
  * controller proof both call it, so the proof covers exactly the argv a scored run uses; the proof
  * only appends a provider override pointing the same controller at a local request recorder. */
 export const CONTROLLER_VERSION='codex-cli 0.153.4';
+// Pin the operator's native home, never an inherited per-agent CODEX_HOME.
+export const CONTROLLER_CODEX_HOME=join(homedir(),'.codex');
+export function controllerEnv():NodeJS.ProcessEnv{
+ const env:NodeJS.ProcessEnv={...process.env,CODEX_HOME:CONTROLLER_CODEX_HOME};
+ delete env.OPENAI_API_KEY;delete env.CODEX_API_KEY;
+ return env;
+}
 /** Non-inference readiness gate; never falls back to API billing or copies credentials.
  * A successful cached-login status is necessary, not proof that a provider request will succeed. */
 export function assertNativeSubscriptionLogin(codex:string){
- const r=spawnSync(codex,['login','status'],{encoding:'utf8',timeout:10000});
+ const r=spawnSync(codex,['login','status'],{encoding:'utf8',timeout:10000,env:controllerEnv()});
  if(r.error||r.status!==0||!/^Logged in using ChatGPT\s*$/m.test(r.stdout+'\n'+r.stderr))
   throw Error('Benchmark requires an existing native ChatGPT login in this launch environment; no model started and no API fallback');
+ return {codexHome:CONTROLLER_CODEX_HOME,authentication:'ChatGPT' as const};
 }
 export type LaunchOptions={codex:string;root:string;dir:string;arm:'harness'|'ui';model:string;reasoning:'low'|'medium'|'high';callLog:string;uiServer?:string;
   env?:{RIMWORLD_LAB_ROOT?:string;PATH?:string;DISPLAY?:string;XAUTHORITY?:string};
@@ -42,7 +52,7 @@ export function armEnv(o:Pick<LaunchOptions,'dir'|'callLog'|'uiServer'|'env'>):R
 }
 export const toml=(v:unknown):string=>Array.isArray(v)?'['+v.map(toml).join(',')+']':v&&typeof v==='object'?'{'+Object.entries(v).map(([k,x])=>JSON.stringify(k)+'='+toml(x)).join(',')+'}':JSON.stringify(v);
 export function buildLaunch(o:LaunchOptions,extra:Record<string,unknown>={}){
-  const version=execFileSync(o.codex,['--version'],{encoding:'utf8'}).trim();
+  const version=execFileSync(o.codex,['--version'],{encoding:'utf8',env:controllerEnv()}).trim();
   if(version!==CONTROLLER_VERSION)throw Error('Controller version changed; re-review effective tool configuration');
   const config:Record<string,unknown>={approval_policy:'never',sandbox_mode:'read-only',project_doc_max_bytes:0,include_environment_context:false,web_search:'disabled',model_reasoning_effort:o.reasoning,
     'tools.update_plan.enabled':false,'tools.experimental_request_user_input.enabled':false,
@@ -50,9 +60,9 @@ export function buildLaunch(o:LaunchOptions,extra:Record<string,unknown>={}){
     'mcp_servers.arm.env':armEnv(o),
     'mcp_servers.arm.tool_timeout_sec':60};
   if(o.remote){const r=remoteArmCommand(o.remote,o.arm);config['mcp_servers.arm.command']=r.command;config['mcp_servers.arm.args']=r.args;config['mcp_servers.arm.env']=r.env;}
-  const catalog=controllerCatalog(JSON.parse(execFileSync(o.codex,['debug','models','--bundled'],{encoding:'utf8',maxBuffer:10*1024*1024})),o.model);
+  const catalog=controllerCatalog(JSON.parse(execFileSync(o.codex,['debug','models','--bundled'],{encoding:'utf8',env:controllerEnv(),maxBuffer:10*1024*1024})),o.model);
   writeFileSync(o.dir+'/controller-catalog.json',JSON.stringify(catalog));
   Object.assign(config,isolationConfig,{model_catalog_json:o.dir+'/controller-catalog.json'},extra);
   const args=['exec','--strict-config','--json','--ephemeral','--ignore-user-config','--ignore-rules','--skip-git-repo-check','-C',o.dir+'/cwd','-m',o.model,...Object.entries(config).flatMap(([k,v])=>['-c',k+'='+toml(v)]),'-'];
-  return {version,config,catalog,args};
+  return {version,config,catalog,args,codexHome:CONTROLLER_CODEX_HOME};
 }

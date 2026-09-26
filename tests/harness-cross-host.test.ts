@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn,spawnSync} from 'node:child_process';
 import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,existsSync} from 'node:fs';
-import {tmpdir} from 'node:os';
+import {tmpdir,homedir} from 'node:os';
 import {PassThrough} from 'node:stream';
 import {setTimeout as delay} from 'node:timers/promises';
-import {remoteArmCommand,assertNativeSubscriptionLogin} from '../src/harness/controller-launch.js';
+import {remoteArmCommand,assertNativeSubscriptionLogin,controllerEnv,CONTROLLER_CODEX_HOME} from '../src/harness/controller-launch.js';
 import {assertLabLockHeld} from '../src/harness/process-lifecycle.js';
 import {LineChannel} from '../src/harness/controller-wire.js';
 const lab=()=>{const d=mkdtempSync(tmpdir()+'/concord-xhost-lab-');mkdirSync(d+'/concord');return d;};
@@ -83,3 +83,25 @@ test('stdin EOF interrupts an in-flight arm and its tool subprocess',async()=>{
   else assert.throws(()=>assertNativeSubscriptionLogin(bin),e=>e instanceof Error&&e.message.includes('native ChatGPT login')&&!e.message.includes('private-value'));
  }
  });
+
+
+test('controller pins native home despite inherited agent home; readiness uses the same environment',()=>{
+ const keys=['CODEX_HOME','OPENAI_API_KEY','CODEX_API_KEY'] as const;
+ const previous=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
+ const d=mkdtempSync(tmpdir()+'/concord-native-home-'),bin=d+'/codex';
+ try{
+  process.env.CODEX_HOME='/unavailable/per-agent/codex-home';
+  process.env.OPENAI_API_KEY='test-only-not-a-credential';
+  process.env.CODEX_API_KEY='test-only-not-a-credential';
+  const env=controllerEnv();
+  assert.equal(CONTROLLER_CODEX_HOME,homedir()+'/.codex');
+  assert.equal(env.CODEX_HOME,CONTROLLER_CODEX_HOME);
+  assert.equal(env.OPENAI_API_KEY,undefined);assert.equal(env.CODEX_API_KEY,undefined);
+  writeFileSync(bin,`#!${process.execPath}
+if(process.env.CODEX_HOME!==${JSON.stringify(CONTROLLER_CODEX_HOME)}||process.env.OPENAI_API_KEY||process.env.CODEX_API_KEY)process.exit(1);
+console.error('Logged in using ChatGPT');
+`,{mode:0o700});
+  assert.deepEqual(assertNativeSubscriptionLogin(bin),{codexHome:CONTROLLER_CODEX_HOME,authentication:'ChatGPT'});
+  assert.equal(process.env.CODEX_HOME,'/unavailable/per-agent/codex-home');
+ }finally{for(const k of keys){if(previous[k]===undefined)delete process.env[k];else process.env[k]=previous[k];}}
+});

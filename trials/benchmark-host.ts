@@ -13,7 +13,7 @@ import {spawn,execFileSync,type ChildProcess} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {randomUUID,createHash} from 'node:crypto';
 import {z} from 'zod';
-import {buildLaunch,assertNativeSubscriptionLogin,type LaunchOptions} from '../src/harness/controller-launch.js';
+import {buildLaunch,assertNativeSubscriptionLogin,controllerEnv,type LaunchOptions} from '../src/harness/controller-launch.js';
 import {recordFirstRequest,preflightFindings} from '../src/harness/controller-proof.js';
 import {LineChannel,type GameToHost,type HostToGame} from '../src/harness/controller-wire.js';
 
@@ -37,11 +37,12 @@ const codex=rehearsal?(process.env.CONCORD_REHEARSAL_CONTROLLER??(()=>{throw Err
 
 // Isolation gate, here because the controller is here: the proof must come from this host's controller.
 let proof:any=null;
+let readiness:ReturnType<typeof assertNativeSubscriptionLogin>|null=null;
 if(!rehearsal){
-  assertNativeSubscriptionLogin(codex);
+  readiness=assertNativeSubscriptionLogin(codex);
   const p=options.get('controller-proof');if(!p?.startsWith('/'))throw Error('Scored pairs need --controller-proof=/abs/receipt.json from trials/benchmark-controller-proof.ts');
   proof=JSON.parse(readFileSync(p,'utf8'));
-  const version=execFileSync(codex,['--version'],{encoding:'utf8'}).trim();
+  const version=execFileSync(codex,['--version'],{encoding:'utf8',env:controllerEnv()}).trim();
   const mismatch=[proof.verified!==true&&'not verified',proof.model!==model&&'model',proof.reasoning!==reasoning&&'reasoning',proof.controllerVersion!==version&&'controller version',proof.task?.sha256!==sha(taskText)&&'task'].filter(Boolean);
   if(mismatch.length)throw Error('Controller proof does not match this pair: '+mismatch.join(', '));
 }
@@ -55,7 +56,7 @@ const remote=execFileSync('ssh',['-o','BatchMode=yes',config.sshTarget,'node -e 
 if(local!==remote)throw Error('Game-host build differs from the local build');
 
 const pairId=randomUUID(),hostDir=root+`/.runtime/bench-pair-${pairId}`;mkdirSync(hostDir,{recursive:true});
-writeFileSync(hostDir+'/pair.json',JSON.stringify({pairId,order,save,model,reasoning,rehearsal,controllerProof:options.get('controller-proof')??null,build:local,label:config.label,sshTarget:config.sshTarget,at:new Date().toISOString()},null,2));
+writeFileSync(hostDir+'/pair.json',JSON.stringify({pairId,order,save,model,reasoning,rehearsal,readiness,controllerProof:options.get('controller-proof')??null,build:local,label:config.label,sshTarget:config.sshTarget,at:new Date().toISOString()},null,2));
 const command=`env RIMWORLD_LAB_ROOT=${quote(config.labRoot)} DISPLAY=${quote(config.display)} XAUTHORITY=${quote(config.xauthority)} CONCORD_BENCH_LABEL=${quote(config.label)} bash ${quote(config.remoteRepo+'/scripts/run-benchmark-pair.sh')} `+
   [`--order=${order.join(',')}`,'--task=T1',`--save=${save}`,`--model=${model}`,`--reasoning=${reasoning}`,`--ui-server=${uiServer}`,...(rehearsal?['--rehearsal=true']:[])].map(quote).join(' ');
 const game=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env:sshEnv,stdio:['pipe','pipe','pipe']});
@@ -88,12 +89,12 @@ async function launch(m:Extract<GameToHost,{type:'ready'}>){
     if(preflight.findings.length)throw Error('Pre-launch controller check failed: '+preflight.findings.join('; '));
   }
   assertActive();
-  const {version,catalog,args,config:launchConfig}=buildLaunch(opts(m.armEnv));
-  writeFileSync(dir+'/launch-plan.json',JSON.stringify({args,config:launchConfig,task:prompt,rehearsal},null,2));
+  const {version,catalog,args,config:launchConfig,codexHome}=buildLaunch(opts(m.armEnv));
+  writeFileSync(dir+'/launch-plan.json',JSON.stringify({args,config:launchConfig,task:prompt,rehearsal,codexHome,readiness},null,2));
   const prepared={runId:m.runId,at:Date.now(),version,catalogSha256:sha(JSON.stringify(catalog)),argsSha256:sha(JSON.stringify(args)),preflight};
   const start=wire.next(x=>x.type==='start'&&x.runId===m.runId,30000,signal);
   wire.send({type:'prepared',...prepared});await start;assertActive();
-  const c=spawn(codex,args,{cwd:dir+'/cwd',stdio:['pipe','pipe','pipe'],detached:true,env:process.env});controllers.set(m.runId,c);
+  const c=spawn(codex,args,{cwd:dir+'/cwd',stdio:['pipe','pipe','pipe'],detached:true,env:controllerEnv()});controllers.set(m.runId,c);
   let spawnError:string|undefined;c.on('error',e=>{spawnError=String(e);});
   const lines=createInterface({input:c.stdout!,crlfDelay:Infinity});
   lines.on('line',line=>{appendFileSync(dir+'/codex.jsonl',line+'\n');wire.send({type:'controller-event',runId:m.runId,line});});

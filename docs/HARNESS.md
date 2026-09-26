@@ -467,7 +467,12 @@ left behind. Actual SSH scripted and real-controller attempt evidence is linked 
 ### Native controller readiness (2026-09-26)
 
 Before real local/cross-host execution, the launcher requires an existing native ChatGPT
-login in its own environment (`codex login status`). Logged-out and API-key modes fail
+login in the operator’s native home (`codex login status`). The readiness guard, isolation
+proof and both standalone launch paths explicitly set `CODEX_HOME` to the operator’s
+`~/.codex` (`/home/clawd/.codex` on our controller host), ignoring inherited per-agent
+homes. Launch/readiness metadata records that path, never credentials. API-key environment
+variables are removed from the controller environment; no credentials are copied or symlinked.
+Logged-out and API-key modes fail
 before game access; this benchmark never changes billing routes automatically. This
 check is necessary but does not prove provider access. Local-recorder isolation proofs
 verify tools/context only and must not be presented as authentication verification.

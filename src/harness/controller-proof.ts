@@ -3,7 +3,7 @@ import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {buildLaunch,stopRemoteArm,type LaunchOptions} from './controller-launch.js';
+import {buildLaunch,stopRemoteArm,controllerEnv,type LaunchOptions} from './controller-launch.js';
 
 /** Controller isolation evidence (docs/HARNESS.md, benchmark): the exact scored command line
  * (buildLaunch) is pointed, by one appended provider override with the same auth mode and wire API,
@@ -36,7 +36,7 @@ export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Rec
     const probe={model_provider:'probe','model_providers.probe':{name:'Concord controller proof',base_url:`http://127.0.0.1:${port}/backend-api/codex`,wire_api:'responses',requires_openai_auth:true,request_max_retries:0,stream_max_retries:0,supports_websockets:false}};
     const {args,version}=buildLaunch(o,{...probe,...extra});
     const out=await new Promise<{code:number|null;stderr:string}>(resolve=>{
-      const c=spawn(o.codex,args,{cwd:o.dir+'/cwd',detached:true,stdio:['pipe','ignore','pipe']});let stderr='',settled=false;
+      const c=spawn(o.codex,args,{cwd:o.dir+'/cwd',detached:true,stdio:['pipe','ignore','pipe'],env:controllerEnv()});let stderr='',settled=false;
       const finish=(code:number|null)=>{if(settled)return;settled=true;clearTimeout(t);signal?.removeEventListener('abort',abort);c.stderr.destroy();resolve({code,stderr});};
       const abort=()=>{if(c.pid)try{process.kill(-c.pid,'SIGKILL');}catch{}finish(null);};
       const t=setTimeout(abort,90000);signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();

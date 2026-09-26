@@ -8,7 +8,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {z} from 'zod';
 import {LabBridge} from '../src/lab-bridge.js';
 import {checkT1} from '../src/harness/checker.js';
-import {assertNativeSubscriptionLogin,buildLaunch,armEnv} from '../src/harness/controller-launch.js';
+import {assertNativeSubscriptionLogin,buildLaunch,armEnv,controllerEnv} from '../src/harness/controller-launch.js';
 import {recordFirstRequest,preflightFindings} from '../src/harness/controller-proof.js';
 import {counts,usageFromEvents} from '../src/harness/benchmark-metrics.js';
 import {LineChannel,type GameToHost,type HostToGame} from '../src/harness/controller-wire.js';
@@ -43,7 +43,7 @@ const codex=hostMode?'':rehearsal?(process.env.CONCORD_REHEARSAL_CONTROLLER??(()
 const launch=hostMode?undefined:buildLaunch({codex,root,dir,arm,model,reasoning,callLog,uiServer,
  env:{RIMWORLD_LAB_ROOT:process.env.RIMWORLD_LAB_ROOT,PATH:process.env.PATH,DISPLAY:process.env.DISPLAY,XAUTHORITY:process.env.XAUTHORITY}});
 const args=launch?.args??[],config=launch?.config??null;
-const metadata:Record<string,unknown>={runId,rehearsal,label:process.env.CONCORD_BENCH_LABEL??'unscored',controllerHost:hostMode?'remote':'local',arm,task:{id:task.id,sha256:sha(taskText)},modelRequested:model,modelResolved:null,reasoning,controllerVersion:launch?.version??null,controllerCatalogSha256:launch?sha(JSON.stringify(launch.catalog)):null,argsSha256:launch?sha(JSON.stringify(args)):null,save:{name:save,expectedSha256:task.saveSha256},at:new Date().toISOString()};
+const metadata:Record<string,unknown>={runId,rehearsal,label:process.env.CONCORD_BENCH_LABEL??'unscored',controllerHost:hostMode?'remote':'local',arm,task:{id:task.id,sha256:sha(taskText)},modelRequested:model,modelResolved:null,reasoning,controllerVersion:launch?.version??null,controllerCodexHome:launch?.codexHome??null,controllerCatalogSha256:launch?sha(JSON.stringify(launch.catalog)):null,argsSha256:launch?sha(JSON.stringify(args)):null,save:{name:save,expectedSha256:task.saveSha256},at:new Date().toISOString()};
 writeFileSync(dir+'/setup.json',JSON.stringify(metadata,null,2));
 // Isolation gate (replaces the earlier hard hold). Feature flags are not an allowlist, so a scored
 // run needs recorded evidence: a verified controller proof (trials/benchmark-controller-proof.ts) for
@@ -56,10 +56,13 @@ if(!rehearsal&&!hostMode){
  const mismatch=[proof.verified!==true&&'not verified',proof.model!==model&&'model',proof.reasoning!==reasoning&&'reasoning',proof.controllerVersion!==launch!.version&&'controller version',proof.task?.sha256!==sha(taskText)&&'task'].filter(Boolean);
  if(mismatch.length)throw Error('Controller proof does not match this run: '+mismatch.join(', '));
 }
-writeFileSync(dir+'/launch-plan.json',JSON.stringify({args,config,task:task.prompt,rehearsal,controllerProof:options.get('controller-proof')??null},null,2));
+writeFileSync(dir+'/launch-plan.json',JSON.stringify({args,config,codexHome:launch?.codexHome??null,task:task.prompt,rehearsal,controllerProof:options.get('controller-proof')??null},null,2));
 if(options.get('prepare-only')==='true'){console.log(JSON.stringify({dir,prepared:true,rehearsal,controllerProof:!!proof}));process.exit(0);}
 
-if(!rehearsal&&!hostMode)assertNativeSubscriptionLogin(codex);
+if(!rehearsal&&!hostMode){
+ const readiness=assertNativeSubscriptionLogin(codex);
+ writeFileSync(dir+'/readiness.json',JSON.stringify(readiness,null,2));
+}
 
 /* Lifecycle retained below for review and fake-controller tests; scored launch is held above. */
 const b=new LabBridge(undefined,()=>Date.now()+130000);
@@ -96,7 +99,7 @@ try{
   // across hosts and no controller action can precede this boundary.
   if(answer.type==='prepared'){assertNotInterrupted();t0=Date.now();wire.send({type:'start',runId});Object.assign(metadata,{controllerVersion:answer.version,controllerCatalogSha256:answer.catalogSha256,argsSha256:answer.argsSha256,preflight:answer.preflight});}
  }else{
-  t0=Date.now();child=spawn(codex,args,{cwd:dir+'/cwd',stdio:['pipe','pipe','pipe'],detached:true,env:process.env});
+  t0=Date.now();child=spawn(codex,args,{cwd:dir+'/cwd',stdio:['pipe','pipe','pipe'],detached:true,env:controllerEnv()});
   child.on('error',e=>{spawnError=String(e);closed=true;});child.on('close',c=>{exitCode=c;closed=true;});
   child.stdout?.on('data',d=>appendFileSync(events,d));child.stderr?.on('data',d=>appendFileSync(dir+'/stderr.log',d));child.stdin?.on('error',()=>{});child.stdin?.end(task.prompt);
  }
