@@ -31,4 +31,12 @@ export function assertLabLockHeld(labRoot=process.env.RIMWORLD_LAB_ROOT){
  if(!labRoot||!labRoot.startsWith('/'))throw Error('Absolute RIMWORLD_LAB_ROOT required');
  const r=spawnSync('flock',['-n',labRoot+'/concord/coordinator.lock','true']);
  if(r.error)throw r.error;if(r.status===0)throw Error('Lab lock is not held: the arm server runs only inside a benchmark run');
+ if(r.status!==1)throw Error('Cannot verify lab lock: flock failed');
+}
+
+/** End a disconnected session even while a tool awaits I/O; kill its same-group tool children. */
+export function exitArmOnDisconnect(){
+ const stop=()=>{try{process.kill(-process.pid,'SIGKILL');}finally{process.exit(1);}};
+ process.stdin.once('end',stop);process.stdin.once('error',stop);
+ process.stdout.once('error',stop);process.once('SIGHUP',stop);process.once('SIGTERM',stop);
 }

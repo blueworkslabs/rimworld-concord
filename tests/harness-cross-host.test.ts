@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn,spawnSync} from 'node:child_process';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,existsSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {PassThrough} from 'node:stream';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -36,7 +36,7 @@ test('arm server refuses without the lock and exits on stdin EOF with it',async(
  const env={...process.env,RIMWORLD_LAB_ROOT:d,CONCORD_HARNESS_LOCKED:'1',CONCORD_BENCH_CALL_LOG:d+'/calls.jsonl',CONCORD_BENCH_PROCESS_FILE:d+'/calls.jsonl.process.json',CONCORD_BENCH_DIR:d};
  const run=()=>new Promise<number|null>(r=>{const c=spawn(process.execPath,[server],{env,detached:true,stdio:['pipe','ignore','ignore']});c.stdin.end();c.on('exit',r);setTimeout(()=>{c.kill('SIGKILL');r(-1);},10000).unref();});
  assert.notEqual(await run(),0);
- const h=await hold(d);try{assert.equal(await run(),0);}finally{h.kill();}
+ const h=await hold(d);try{assert.equal(await run(),null);}finally{h.kill();}
 });
 
 test('wire: correlated waits, stray lines kept aside, close rejects pending waits',async()=>{
@@ -49,4 +49,27 @@ test('wire: correlated waits, stray lines kept aside, close rejects pending wait
  ch.send({type:'ready'});assert.equal(sent,'{"type":"ready"}\n');
  assert.deepEqual(seen,['controller-event','launched']);assert.deepEqual(ch.noise,['npm warn something']);
  const pending=ch.next(()=>false,5000);a.end();await assert.rejects(pending,/Wire closed/);assert.equal(ch.closed,true);
+});
+
+test('lock validation rejects missing directories, not only unlocked files',()=>{
+ assert.throws(()=>assertLabLockHeld('/tmp/concord-missing-'+Date.now()),/Cannot verify lab lock/);
+});
+
+test('wire timeout removes its waiter so a later wait receives the message',async()=>{
+ const a=new PassThrough(),b=new PassThrough(),ch=new LineChannel<{type:string},{type:string}>(a,b);
+ await assert.rejects(ch.next(m=>m.type==='go',10),/timeout/);
+ const pending=ch.next(m=>m.type==='go',1000);a.write('{"type":"go"}\n');assert.deepEqual(await pending,{type:'go'});ch.close();
+});
+
+test('stdin EOF interrupts an in-flight arm and its tool subprocess',async()=>{
+ const d=lab(),file=d+'/process.json';
+ const life=new URL('../src/harness/process-lifecycle.js',import.meta.url).href;
+ const server=new URL('../src/harness/tool-server.js',import.meta.url).href;
+ const script=`import {registerArm,exitArmOnDisconnect} from ${JSON.stringify(life)};import {ToolServer,result} from ${JSON.stringify(server)};import {spawn} from 'node:child_process';import {writeFileSync} from 'node:fs';registerArm();exitArmOnDisconnect();await new ToolServer('test',[],{slow:'input'},async()=>{writeFileSync(${JSON.stringify(d+'/started')},'yes');spawn(process.execPath,['-e',${JSON.stringify(`setTimeout(()=>require('fs').writeFileSync(${JSON.stringify(d+'/escaped')},'bad'),500)`)}]);await new Promise(r=>setTimeout(r,2000));return result('done');}).serve();`;
+ const c=spawn(process.execPath,['--input-type=module','-e',script],{detached:true,stdio:['pipe','ignore','ignore'],env:{...process.env,CONCORD_BENCH_PROCESS_FILE:file}});
+ const ended=new Promise<number|null>(r=>c.once('exit',r));
+ c.stdin.write('{"id":1,"method":"tools/call","params":{"name":"slow"}}\n');
+ const until=Date.now()+3000;while(!existsSync(d+'/started')&&Date.now()<until)await delay(10);
+ try{assert.ok(existsSync(d+'/started'));c.stdin.end();assert.equal(await Promise.race([ended,delay(1000).then(()=>-99)]),null);await delay(600);assert.equal(existsSync(d+'/escaped'),false);}
+ finally{if(c.pid)try{process.kill(-c.pid,'SIGKILL');}catch{}}
 });

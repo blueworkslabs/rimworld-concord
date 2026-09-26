@@ -43,7 +43,7 @@ const codex=hostMode?'':rehearsal?(process.env.CONCORD_REHEARSAL_CONTROLLER??(()
 const launch=hostMode?undefined:buildLaunch({codex,root,dir,arm,model,reasoning,callLog,uiServer,
  env:{RIMWORLD_LAB_ROOT:process.env.RIMWORLD_LAB_ROOT,PATH:process.env.PATH,DISPLAY:process.env.DISPLAY,XAUTHORITY:process.env.XAUTHORITY}});
 const args=launch?.args??[],config=launch?.config??null;
-const metadata:Record<string,unknown>={runId,rehearsal,controllerHost:hostMode?'remote':'local',arm,task:{id:task.id,sha256:sha(taskText)},modelRequested:model,modelResolved:null,reasoning,controllerVersion:launch?.version??null,controllerCatalogSha256:launch?sha(JSON.stringify(launch.catalog)):null,argsSha256:launch?sha(JSON.stringify(args)):null,save:{name:save,expectedSha256:task.saveSha256},at:new Date().toISOString()};
+const metadata:Record<string,unknown>={runId,rehearsal,label:process.env.CONCORD_BENCH_LABEL??'unscored',controllerHost:hostMode?'remote':'local',arm,task:{id:task.id,sha256:sha(taskText)},modelRequested:model,modelResolved:null,reasoning,controllerVersion:launch?.version??null,controllerCatalogSha256:launch?sha(JSON.stringify(launch.catalog)):null,argsSha256:launch?sha(JSON.stringify(args)):null,save:{name:save,expectedSha256:task.saveSha256},at:new Date().toISOString()};
 writeFileSync(dir+'/setup.json',JSON.stringify(metadata,null,2));
 // Isolation gate (replaces the earlier hard hold). Feature flags are not an allowlist, so a scored
 // run needs recorded evidence: a verified controller proof (trials/benchmark-controller-proof.ts) for
@@ -68,7 +68,7 @@ const log=():CallLog[]=>readFileSync(callLog,'utf8').split('\n').filter(Boolean)
 const kill=(p:ChildProcess|undefined,s:NodeJS.Signals)=>{if(p?.pid)try{process.kill(-p.pid,s);}catch{}};
 const setupAbort=new AbortController();
 const onSignal=()=>{stoppedBySignal=true;setupAbort.abort();};process.on('SIGTERM',onSignal);process.on('SIGINT',onSignal);
-const assertNotInterrupted=()=>{if(stoppedBySignal)throw Error('Operator interrupted setup');};
+const assertNotInterrupted=()=>{if(stoppedBySignal||wire?.closed)throw Error('Operator interrupted setup or controller channel closed');};
 try{
  assertNotInterrupted();await b.verify(save,task.saveSha256);assertNotInterrupted();await b.load(save);assertNotInterrupted();await b.admin('pause');assertNotInterrupted();start=await b.perceive();assertNotInterrupted();writeFileSync(dir+'/start.json',JSON.stringify(start));
  if(!rehearsal&&!hostMode){
@@ -88,11 +88,11 @@ try{
   const env=(log:string)=>armEnv({dir,callLog:log,uiServer,env:{RIMWORLD_LAB_ROOT:process.env.RIMWORLD_LAB_ROOT,PATH:process.env.PATH,DISPLAY:process.env.DISPLAY,XAUTHORITY:process.env.XAUTHORITY}});
   wire.on(m=>{if(m.runId!==runId)return;if(m.type==='controller-event')appendFileSync(events,m.line+'\n');if(m.type==='controller-exit'){exitCode=m.code;closed=true;}});
   wire.send({type:'ready',runId,arm,rehearsal,model,reasoning,taskSha256:sha(taskText),armEnv:env(callLog),preflightEnv:env(dir+'/preflight-calls.jsonl')});
-  const answer=await wire.next(m=>m.runId===runId&&(m.type==='launched'||m.type==='launch-failed'),180000);
+  const answer=await wire.next(m=>m.runId===runId&&(m.type==='prepared'||m.type==='launch-failed'),180000,setupAbort.signal);
   if(answer.type==='launch-failed')throw Error('Controller host: '+answer.error);
-  // The timer starts when the controller host reports the controller spawned; the ssh hop is
-  // inside it for both arms alike.
-  if(answer.type==='launched'){t0=Date.now();Object.assign(metadata,{controllerVersion:answer.version,controllerCatalogSha256:answer.catalogSha256,argsSha256:answer.argsSha256,preflight:answer.preflight});}
+  // Game-host clock starts before permission to spawn crosses SSH. No clock subtraction
+  // across hosts and no controller action can precede this boundary.
+  if(answer.type==='prepared'){assertNotInterrupted();t0=Date.now();wire.send({type:'start',runId});Object.assign(metadata,{controllerVersion:answer.version,controllerCatalogSha256:answer.catalogSha256,argsSha256:answer.argsSha256,preflight:answer.preflight});}
  }else{
   t0=Date.now();child=spawn(codex,args,{cwd:dir+'/cwd',stdio:['pipe','pipe','pipe'],detached:true,env:process.env});
   child.on('error',e=>{spawnError=String(e);closed=true;});child.on('close',c=>{exitCode=c;closed=true;});
@@ -119,9 +119,9 @@ try{
 finally{
  t1??=Date.now();naturalExit ||= closed&&exitCode===0;
  // On timeout/failure stop dispatch immediately, not after a gameplay grace interval.
- try{await stopArm(callLog+'.process.json');}catch(e){failure=(failure??'')+' Arm cleanup failed: '+String(e);}
+ try{await stopArm(dir+'/preflight-calls.jsonl.process.json');await stopArm(callLog+'.process.json');}catch(e){failure=(failure??'')+' Arm cleanup failed: '+String(e);}
  kill(child,'SIGKILL');
- if(wire&&t0!==undefined&&!closed){wire.send({type:'stop',runId});}
+ if(wire){wire.send({type:'stop',runId});}
  const until=Date.now()+(wire?5000:1000);while((child||wire)&&t0!==undefined&&!closed&&Date.now()<until)await delay(10);
  try{await new LabBridge().admin('pause');if(!end&&start)end=await new LabBridge().perceive();}catch(e){failure=(failure??'')+' Cleanup failed: '+String(e);}
  kill(recording,'SIGINT');if(recording){await Promise.race([new Promise<void>(r=>recording!.once('close',()=>r())),delay(5000)]);if(recording.exitCode===null)kill(recording,'SIGKILL');}
@@ -134,7 +134,7 @@ finally{
   checker:start&&end?checkT1(start,end,configured):null,verifiedCompletion:false,auditStatus:'pending input/recording audit; timeout/failed runs cannot pass',
   hashes:{calls:sha(readFileSync(callLog)),events:sha(readFileSync(events)),recording:existsSync(dir+'/recording.mp4')?sha(readFileSync(dir+'/recording.mp4')):null},stalls:{status:'not instrumented',measurements:null}};
  writeFileSync(dir+'/receipt.json',JSON.stringify(receipt,null,2));
- if(wire)wire.send(start?{type:'receipt',runId,receipt}:{type:'setup-failed',runId,error:failure??'setup failed'});else console.log(JSON.stringify(receipt));
+ if(wire)wire.send({type:'receipt',runId,receipt});else console.log(JSON.stringify(receipt));
  process.removeListener('SIGTERM',onSignal);process.removeListener('SIGINT',onSignal);
  // The pair script's next run reads the same stdin: stop reading so nothing of its wire is consumed here.
  wire?.close();

@@ -3,7 +3,7 @@ import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {buildLaunch,type LaunchOptions} from './controller-launch.js';
+import {buildLaunch,stopRemoteArm,type LaunchOptions} from './controller-launch.js';
 
 /** Controller isolation evidence (docs/HARNESS.md, benchmark): the exact scored command line
  * (buildLaunch) is pointed, by one appended provider override with the same auth mode and wire API,
@@ -54,7 +54,7 @@ export async function recordFirstRequest(o:LaunchOptions,prompt:string,extra:Rec
       instructionsSha256:first?.instructions?sha(first.instructions):null,instructionsBytes:first?.instructions?.length??0,
       input:(first?.input??[]).filter((i:any)=>i.type!=='additional_tools').map(({id,...i}:any)=>({type:i.type,role:i.role??null,sha256:sha(JSON.stringify(i)),bytes:Buffer.byteLength(JSON.stringify(i))})),
       model:first?.model??null,reasoning:first?.reasoning??null,toolChoice:first?.tool_choice??null,parallelToolCalls:first?.parallel_tool_calls??null,stderrTail:out.stderr.slice(-400)};
-  }finally{await stopArm(o.callLog+'.process.json');server.closeAllConnections();server.close();}
+  }finally{try{if(o.remote)await stopRemoteArm(o.remote,o.callLog+'.process.json');else await stopArm(o.callLog+'.process.json');}finally{server.closeAllConnections();server.close();}}
 }
 const isArm=(t:{type:string;name:string|null})=>t.type==='namespace'&&t.name==='mcp__arm';
 /** One arm: the arm namespace is exactly the declared set; everything else is a shared built-in. */

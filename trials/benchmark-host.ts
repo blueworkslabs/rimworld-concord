@@ -20,7 +20,7 @@ import {LineChannel,type GameToHost,type HostToGame} from '../src/harness/contro
 const root=new URL('../..',import.meta.url).pathname;
 const [configPath,...rest]=process.argv.slice(2);
 if(!configPath?.startsWith('/'))throw Error('Absolute config path required');
-const config=z.object({sshTarget:z.string().regex(/^[a-zA-Z0-9_.@-]+$/).refine(s=>!s.startsWith('-')),remoteRepo:z.string().startsWith('/'),labRoot:z.string().startsWith('/')}).strict()
+const config=z.object({sshTarget:z.string().regex(/^[a-zA-Z0-9_.@-]+$/).refine(s=>!s.startsWith('-')),remoteRepo:z.string().startsWith('/'),labRoot:z.string().startsWith('/'),display:z.string().min(1),xauthority:z.string().startsWith('/'),label:z.string().max(80).default('unscored')}).strict()
   .parse(JSON.parse(readFileSync(configPath,'utf8')));
 const options=new Map<string,string>();
 for(const a of rest){const m=/^--([a-z-]+)=(.+)$/.exec(a);if(!m||options.has(m[1]!))throw Error('Unique --key=value arguments required');options.set(m[1]!,m[2]!);}
@@ -54,17 +54,24 @@ const remote=execFileSync('ssh',['-o','BatchMode=yes',config.sshTarget,'node -e 
 if(local!==remote)throw Error('Game-host build differs from the local build');
 
 const pairId=randomUUID(),hostDir=root+`/.runtime/bench-pair-${pairId}`;mkdirSync(hostDir,{recursive:true});
-writeFileSync(hostDir+'/pair.json',JSON.stringify({pairId,order,save,model,reasoning,rehearsal,controllerProof:options.get('controller-proof')??null,build:local,sshTarget:config.sshTarget,at:new Date().toISOString()},null,2));
-const command=`env RIMWORLD_LAB_ROOT=${quote(config.labRoot)} bash ${quote(config.remoteRepo+'/scripts/run-benchmark-pair.sh')} `+
+writeFileSync(hostDir+'/pair.json',JSON.stringify({pairId,order,save,model,reasoning,rehearsal,controllerProof:options.get('controller-proof')??null,build:local,label:config.label,sshTarget:config.sshTarget,at:new Date().toISOString()},null,2));
+const command=`env RIMWORLD_LAB_ROOT=${quote(config.labRoot)} DISPLAY=${quote(config.display)} XAUTHORITY=${quote(config.xauthority)} CONCORD_BENCH_LABEL=${quote(config.label)} bash ${quote(config.remoteRepo+'/scripts/run-benchmark-pair.sh')} `+
   [`--order=${order.join(',')}`,'--task=T1',`--save=${save}`,`--model=${model}`,`--reasoning=${reasoning}`,`--ui-server=${uiServer}`,...(rehearsal?['--rehearsal=true']:[])].map(quote).join(' ');
 const game=spawn('ssh',['-o','BatchMode=yes',config.sshTarget,command],{env:sshEnv,stdio:['pipe','pipe','pipe']});
 game.stderr.on('data',d=>appendFileSync(hostDir+'/game-stderr.log',d));game.stdin.on('error',()=>{});
 const wire=new LineChannel<GameToHost,HostToGame>(game.stdout,game.stdin);
 const runs:{runId:string;arm:string;dir:string;outcome?:string;receipt?:unknown;error?:string}[]=[];
+const launchAbort=new AbortController();
+const assertRunning=()=>{if(launchAbort.signal.aborted||wire.closed)throw Error('Pair stopped before controller launch');};
+const runStops=new Map<string,AbortController>();
 const controllers=new Map<string,ChildProcess>();
 const kill=(c:ChildProcess|undefined)=>{if(c?.pid)try{process.kill(-c.pid,'SIGKILL');}catch{}};
 
 async function launch(m:Extract<GameToHost,{type:'ready'}>){
+  const runStop=new AbortController();runStops.set(m.runId,runStop);
+  const signal=AbortSignal.any([launchAbort.signal,runStop.signal]);
+  const assertActive=()=>{assertRunning();if(signal.aborted)throw Error('Run cancelled before controller launch');};
+  assertActive();
   const expected=order[runs.length-1];
   const mismatch=[m.arm!==expected&&'arm order',m.model!==model&&'model',m.reasoning!==reasoning&&'reasoning',m.taskSha256!==sha(taskText)&&'task',m.rehearsal!==rehearsal&&'rehearsal'].filter(Boolean);
   if(mismatch.length)throw Error('Game side disagrees: '+mismatch.join(', '));
@@ -74,13 +81,17 @@ async function launch(m:Extract<GameToHost,{type:'ready'}>){
   let preflight:{findings:string[]}|null=null;
   if(!rehearsal){
     // Pre-launch check of this exact command line, remote arm included, outside the task timer.
-    const pre=await recordFirstRequest(opts(m.preflightEnv),prompt,{});
+    const pre=await recordFirstRequest(opts(m.preflightEnv),prompt,{},undefined,signal);
     preflight={findings:preflightFindings(pre,proof.evidence[m.arm])};
     writeFileSync(dir+'/preflight.json',JSON.stringify({...preflight,evidence:pre},null,2));
     if(preflight.findings.length)throw Error('Pre-launch controller check failed: '+preflight.findings.join('; '));
   }
+  assertActive();
   const {version,catalog,args,config:launchConfig}=buildLaunch(opts(m.armEnv));
   writeFileSync(dir+'/launch-plan.json',JSON.stringify({args,config:launchConfig,task:prompt,rehearsal},null,2));
+  const prepared={runId:m.runId,at:Date.now(),version,catalogSha256:sha(JSON.stringify(catalog)),argsSha256:sha(JSON.stringify(args)),preflight};
+  const start=wire.next(x=>x.type==='start'&&x.runId===m.runId,30000,signal);
+  wire.send({type:'prepared',...prepared});await start;assertActive();
   const c=spawn(codex,args,{cwd:dir+'/cwd',stdio:['pipe','pipe','pipe'],detached:true,env:process.env});controllers.set(m.runId,c);
   let spawnError:string|undefined;c.on('error',e=>{spawnError=String(e);});
   const lines=createInterface({input:c.stdout!,crlfDelay:Infinity});
@@ -93,18 +104,20 @@ async function launch(m:Extract<GameToHost,{type:'ready'}>){
 }
 
 wire.on(m=>{
-  const run=runs.find(r=>r.runId===m.runId);
+  let run=runs.find(r=>r.runId===m.runId);
   if(m.type==='ready'){
     if(run||runs.length>=order.length||!/^[0-9a-f-]{36}$/.test(m.runId))return void game.stdin.end();
     runs.push({runId:m.runId,arm:m.arm,dir:hostDir+`/${runs.length+1}-${m.arm}`});
-    launch(m).catch(e=>{runs.at(-1)!.error=String(e);wire.send({type:'launch-failed',runId:m.runId,error:String(e).slice(0,2000)});});
+    launch(m).catch(e=>{runs.find(r=>r.runId===m.runId)!.error=String(e);wire.send({type:'launch-failed',runId:m.runId,error:String(e).slice(0,2000)});});
   }
+  if(!run&&m.type==='receipt'){const receipt=m.receipt as {arm:string};run={runId:m.runId,arm:receipt.arm,dir:hostDir+`/${runs.length+1}-${receipt.arm}`};runs.push(run);mkdirSync(run.dir,{recursive:true});}
   if(!run)return;
-  if(m.type==='stop')kill(controllers.get(m.runId));
+  if(m.type==='stop'){runStops.get(m.runId)?.abort();kill(controllers.get(m.runId));}
   if(m.type==='receipt'){run.receipt=m.receipt;run.outcome=(m.receipt as {outcome?:string})?.outcome;writeFileSync(run.dir+'/receipt.json',JSON.stringify(m.receipt,null,2));}
   if(m.type==='setup-failed'){run.outcome='setup-failed';run.error=m.error;}
 });
-const stop=()=>{for(const c of controllers.values())kill(c);game.stdin.end();};
+const stop=()=>{launchAbort.abort();for(const c of controllers.values())kill(c);game.stdin.end();};
+wire.onClose(stop);
 process.once('SIGTERM',stop);process.once('SIGINT',stop);
 const deadline=setTimeout(()=>{stop();game.kill();},2*3600*1000);
 const code=await new Promise<number|null>(r=>{game.on('error',()=>r(-1));game.on('close',r);});

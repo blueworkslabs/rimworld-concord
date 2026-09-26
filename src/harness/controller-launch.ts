@@ -1,4 +1,5 @@
-import {execFileSync} from 'node:child_process';
+import {promisify} from 'node:util';
+import {execFileSync,execFile} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
 import {controllerCatalog,isolationConfig} from './controller-config.js';
 
@@ -11,13 +12,20 @@ export type LaunchOptions={codex:string;root:string;dir:string;arm:'harness'|'ui
   /** Cross-host (docs/HARNESS.md): the controller runs here, the arm server on the game host over
    * `ssh -o BatchMode=yes`, its stdio being the MCP channel. `armEnv` carries the game host's paths. */
   remote?:{sshTarget:string;remoteRepo:string;armEnv:Record<string,string>}};
-const sq=(s:string)=>"'"+s.replaceAll("'","'\\''")+"'";
+export const sq=(s:string)=>"'"+s.replaceAll("'","'\\''")+"'";
 /** The remote arm command: `exec` keeps the server the ssh session's process-group leader. */
 export function remoteArmCommand(r:NonNullable<LaunchOptions['remote']>,arm:'harness'|'ui'){
   if(!/^[a-zA-Z0-9_.@-]+$/.test(r.sshTarget)||r.sshTarget.startsWith('-')||!r.remoteRepo.startsWith('/'))throw Error('Invalid remote target');
   const env=Object.entries({...r.armEnv,CONCORD_HARNESS_LOCKED:'1'}).map(([k,v])=>{if(!/^[A-Z_][A-Z0-9_]*$/.test(k))throw Error('Invalid env name '+k);return k+'='+sq(v);}).join(' ');
   return {command:'ssh',args:['-o','BatchMode=yes','-o','ConnectTimeout=10','-T',r.sshTarget,`cd ${sq(r.remoteRepo)} && exec env ${env} node dist/trials/${arm==='ui'?'ui':'harness'}-mcp-server.js`],
     env:Object.fromEntries(['PATH','HOME','SSH_AUTH_SOCK','LANG'].filter(k=>process.env[k]).map(k=>[k,process.env[k]!]))};
+}
+/** Cleanup executes where the owned process receipt lives, never against remote paths locally. */
+export async function stopRemoteArm(r:NonNullable<LaunchOptions['remote']>,file:string){
+ const command=remoteArmCommand(r,'harness');
+ const code="const m=await import('./dist/src/harness/process-lifecycle.js');await m.stopArm(process.argv[1]);";
+ const args=[...command.args.slice(0,-1),`cd ${sq(r.remoteRepo)} && exec node --input-type=module -e ${sq(code)} ${sq(file)}`];
+ await promisify(execFile)('ssh',args,{env:command.env,timeout:15000,killSignal:'SIGKILL'});
 }
 /** The arm server's environment. Cross-host, the game-side runner computes it with its own paths
  * and sends it to the controller host (src/harness/controller-wire.ts). */
