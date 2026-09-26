@@ -5,14 +5,14 @@ import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,existsSync} from 'node:
 import {tmpdir} from 'node:os';
 import {PassThrough} from 'node:stream';
 import {setTimeout as delay} from 'node:timers/promises';
-import {remoteArmCommand} from '../src/harness/controller-launch.js';
+import {remoteArmCommand,assertNativeSubscriptionLogin} from '../src/harness/controller-launch.js';
 import {assertLabLockHeld} from '../src/harness/process-lifecycle.js';
 import {LineChannel} from '../src/harness/controller-wire.js';
 const lab=()=>{const d=mkdtempSync(tmpdir()+'/concord-xhost-lab-');mkdirSync(d+'/concord');return d;};
 const hold=async(d:string)=>{const h=spawn('flock',['-n',d+'/concord/coordinator.lock','sleep','30'],{stdio:'ignore'});await delay(200);return h;};
 
 test('remote arm command: validated target and repo, env survives the remote shell verbatim',()=>{
- const armEnv={CONCORD_BENCH_DIR:"/tmp/it's here; $HOME `id`",PATH:'/usr/bin:/bin'};
+ const armEnv={CONCORD_BENCH_DIR:"/tmp/it's here; $HOME `id`",PATH:process.execPath.slice(0,process.execPath.lastIndexOf('/'))+':/usr/bin:/bin'};
  for(const bad of [{sshTarget:'-oProxyCommand=x',remoteRepo:'/r'},{sshTarget:'a b',remoteRepo:'/r'},{sshTarget:'host',remoteRepo:'r'}])assert.throws(()=>remoteArmCommand({...bad,armEnv},'harness'));
  assert.throws(()=>remoteArmCommand({sshTarget:'host',remoteRepo:'/r',armEnv:{'BAD-NAME':'x'}},'harness'));
  const repo=mkdtempSync(tmpdir()+"/concord-xhost-repo-'q ");mkdirSync(repo+'/dist/trials',{recursive:true});
@@ -73,3 +73,13 @@ test('stdin EOF interrupts an in-flight arm and its tool subprocess',async()=>{
  try{assert.ok(existsSync(d+'/started'));c.stdin.end();assert.equal(await Promise.race([ended,delay(1000).then(()=>-99)]),null);await delay(600);assert.equal(existsSync(d+'/escaped'),false);}
  finally{if(c.pid)try{process.kill(-c.pid,'SIGKILL');}catch{}}
 });
+
+ test('native subscription readiness refuses logged-out and API modes without echoing status',()=>{
+ const d=mkdtempSync(tmpdir()+'/concord-auth-check-'),bin=d+'/codex';
+ const cases=[['Logged in using ChatGPT',0,true],['Not logged in',1,false],['Logged in using an API key: private-value',0,false],['',0,false]] as const;
+ for(const [status,exit,ok] of cases){
+  writeFileSync(bin,`#!/bin/sh\n[ "$1" = login ] && [ "$2" = status ] || exit 88\nprintf '%s\\n' '${status}' >&2\nexit ${exit}\n`,{mode:0o700});
+  if(ok)assert.doesNotThrow(()=>assertNativeSubscriptionLogin(bin));
+  else assert.throws(()=>assertNativeSubscriptionLogin(bin),e=>e instanceof Error&&e.message.includes('native ChatGPT login')&&!e.message.includes('private-value'));
+ }
+ });

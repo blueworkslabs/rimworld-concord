@@ -1,5 +1,5 @@
 import {promisify} from 'node:util';
-import {execFileSync,execFile} from 'node:child_process';
+import {execFileSync,execFile,spawnSync} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
 import {controllerCatalog,isolationConfig} from './controller-config.js';
 
@@ -7,6 +7,13 @@ import {controllerCatalog,isolationConfig} from './controller-config.js';
  * controller proof both call it, so the proof covers exactly the argv a scored run uses; the proof
  * only appends a provider override pointing the same controller at a local request recorder. */
 export const CONTROLLER_VERSION='codex-cli 0.153.4';
+/** Non-inference readiness gate; never falls back to API billing or copies credentials.
+ * A successful cached-login status is necessary, not proof that a provider request will succeed. */
+export function assertNativeSubscriptionLogin(codex:string){
+ const r=spawnSync(codex,['login','status'],{encoding:'utf8',timeout:10000});
+ if(r.error||r.status!==0||!/^Logged in using ChatGPT\s*$/m.test(r.stdout+'\n'+r.stderr))
+  throw Error('Benchmark requires an existing native ChatGPT login in this launch environment; no model started and no API fallback');
+}
 export type LaunchOptions={codex:string;root:string;dir:string;arm:'harness'|'ui';model:string;reasoning:'low'|'medium'|'high';callLog:string;uiServer?:string;
   env?:{RIMWORLD_LAB_ROOT?:string;PATH?:string;DISPLAY?:string;XAUTHORITY?:string};
   /** Cross-host (docs/HARNESS.md): the controller runs here, the arm server on the game host over

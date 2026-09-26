@@ -13,7 +13,7 @@ import {spawn,execFileSync,type ChildProcess} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {randomUUID,createHash} from 'node:crypto';
 import {z} from 'zod';
-import {buildLaunch,type LaunchOptions} from '../src/harness/controller-launch.js';
+import {buildLaunch,assertNativeSubscriptionLogin,type LaunchOptions} from '../src/harness/controller-launch.js';
 import {recordFirstRequest,preflightFindings} from '../src/harness/controller-proof.js';
 import {LineChannel,type GameToHost,type HostToGame} from '../src/harness/controller-wire.js';
 
@@ -38,6 +38,7 @@ const codex=rehearsal?(process.env.CONCORD_REHEARSAL_CONTROLLER??(()=>{throw Err
 // Isolation gate, here because the controller is here: the proof must come from this host's controller.
 let proof:any=null;
 if(!rehearsal){
+  assertNativeSubscriptionLogin(codex);
   const p=options.get('controller-proof');if(!p?.startsWith('/'))throw Error('Scored pairs need --controller-proof=/abs/receipt.json from trials/benchmark-controller-proof.ts');
   proof=JSON.parse(readFileSync(p,'utf8'));
   const version=execFileSync(codex,['--version'],{encoding:'utf8'}).trim();

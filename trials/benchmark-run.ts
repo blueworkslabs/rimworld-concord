@@ -8,7 +8,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {z} from 'zod';
 import {LabBridge} from '../src/lab-bridge.js';
 import {checkT1} from '../src/harness/checker.js';
-import {buildLaunch,armEnv} from '../src/harness/controller-launch.js';
+import {assertNativeSubscriptionLogin,buildLaunch,armEnv} from '../src/harness/controller-launch.js';
 import {recordFirstRequest,preflightFindings} from '../src/harness/controller-proof.js';
 import {counts,usageFromEvents} from '../src/harness/benchmark-metrics.js';
 import {LineChannel,type GameToHost,type HostToGame} from '../src/harness/controller-wire.js';
@@ -58,6 +58,8 @@ if(!rehearsal&&!hostMode){
 }
 writeFileSync(dir+'/launch-plan.json',JSON.stringify({args,config,task:task.prompt,rehearsal,controllerProof:options.get('controller-proof')??null},null,2));
 if(options.get('prepare-only')==='true'){console.log(JSON.stringify({dir,prepared:true,rehearsal,controllerProof:!!proof}));process.exit(0);}
+
+if(!rehearsal&&!hostMode)assertNativeSubscriptionLogin(codex);
 
 /* Lifecycle retained below for review and fake-controller tests; scored launch is held above. */
 const b=new LabBridge(undefined,()=>Date.now()+130000);
