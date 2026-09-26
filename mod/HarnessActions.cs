@@ -177,7 +177,7 @@ namespace Concord {
                 if(r.priority>0&&p.WorkTypeIsDisabled(wt))throw new HarnessRefusal(p.LabelShort+" cannot do "+wt.labelShort);
                 // Numbered priorities are a player setting; the harness turns it on when it sets one.
                 if(r.priority>1&&!Verse.Find.PlaySettings.useWorkPriorities){Verse.Find.PlaySettings.useWorkPriorities=true;receipt.detail="manual priorities enabled";}
-                p.workSettings.SetPriority(wt,r.priority);var now=p.workSettings.GetPriority(wt);var work=wt.gerundLabel.ToLowerInvariant();receipt.look=p;
+                p.workSettings.SetPriority(wt,r.priority);var now=p.workSettings.GetPriority(wt);var work=(wt.gerundLabel??wt.labelShort??wt.defName).ToLowerInvariant();receipt.look=p;
                 receipt.narration=Phrase.Core((now==0?"took "+p.LabelShort+" off "+work:"set "+p.LabelShort+"'s "+work+" priority to "+now)+(receipt.detail!=null?" (numbered priorities turned on)":""));
                 return p.thingIDNumber+":"+wt.defName+"="+now;
             }
