@@ -19,7 +19,13 @@ await mkdir(root+'/.runtime',{recursive:true});
 const runId=randomUUID();const t0=Date.now();
 const log:{receipts:Receipt[];reads:number;findings:string[];notes:string[]}={receipts:[],reads:0,findings:[],notes:[]};
 let timeline:Snapshot['meta'];
-const act=async(action:unknown,requestId:string=randomUUID())=>{const r=await b.act(action,timeline,requestId);log.receipts.push(r);await appendFile(root+`/.runtime/harness-t1-scripted-${runId}.actions.jsonl`,JSON.stringify({action,requestId,timeline,receipt:r})+'\n');return r;};
+let issued=0;
+const act=async(action:unknown,requestId:string=randomUUID(),context=timeline)=>{
+ const journal=root+`/.runtime/harness-t1-scripted-${runId}.actions.jsonl`;
+ await appendFile(journal,JSON.stringify({event:'issued',at:new Date().toISOString(),action,requestId,timeline:context})+'\n');issued++;
+ try{const r=await b.act(action,context,requestId);log.receipts.push(r);await appendFile(journal,JSON.stringify({event:'receipt',at:new Date().toISOString(),requestId,receipt:r})+'\n');return r;}
+ catch(error){await appendFile(journal,JSON.stringify({event:'error',at:new Date().toISOString(),requestId,error:String(error),outcome:'may have executed; inspect state'})+'\n');throw error;}
+};
 const read=async()=>{log.reads++;return await b.perceive();};
 let start:Snapshot|undefined,end:Snapshot|undefined,configured:Snapshot|undefined,result:unknown,checkpoint:unknown,restored:unknown;
 try{
@@ -59,7 +65,7 @@ try{
   if(!(result as any).completed)log.findings.push('T1 not completed: '+(result as any).missing.join('; '));
   // Separate paused API checks after the task observation; not benchmark actions or T1 evidence.
   const staleAction={action:'work_priority',pawn:s.pawns[0]!.id,work:'Construction',priority:0};
-  const stale=await b.act(staleAction,{...timeline,epoch:'stale'});log.receipts.push(stale);await appendFile(root+`/.runtime/harness-t1-scripted-${runId}.actions.jsonl`,JSON.stringify({action:staleAction,timeline:{...timeline,epoch:'stale'},receipt:stale})+'\n');
+  const stale=await act(staleAction,randomUUID(),{...timeline,epoch:'stale'});
   assert(!stale.ok&&stale.seq===0,'stale command must be rejected without a durable mutation');
   const beforeZones=await read();
   const badZone=await act({action:'zone',kind:'stockpile',cells:[{x:cx,z:cz}],allow:['WoodLog','NoSuchDef']});
@@ -106,7 +112,7 @@ try{
 }catch(e){log.findings.push('error: '+String(e));}
 finally{
   try{await new LabBridge().admin('pause');}catch(e){log.findings.push('cleanup pause failed: '+String(e));}
-  const summary={runId,save,wallMs:Date.now()-t0,actions:log.receipts.length,refused:log.receipts.filter(r=>!r.ok).length,reads:log.reads,result,findings:log.findings,notes:log.notes,passed:log.findings.length===0};
+  const summary={runId,save,wallMs:Date.now()-t0,actions:issued,receivedReceipts:log.receipts.length,refused:log.receipts.filter(r=>!r.ok).length,reads:log.reads,result,findings:log.findings,notes:log.notes,passed:log.findings.length===0};
   await writeFile(root+`/.runtime/harness-t1-scripted-${runId}.json`,JSON.stringify({summary,receipts:log.receipts,start,configured,end,checkpoint,restored},null,1),{flag:'wx'});
   console.log(JSON.stringify(summary));if(!summary.passed)process.exitCode=1;
 }

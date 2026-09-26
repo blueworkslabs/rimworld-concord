@@ -148,10 +148,12 @@ namespace Concord {
             var allowed=new List<ThingDef>();
             if(r.hasAllow)foreach(var name in r.allow??new string[0]){var td=DefDatabase<ThingDef>.GetNamedSilentFail(name);if(td==null)throw new HarnessRefusal("unknown def "+name);allowed.Add(td);}
             var allCells=new HashSet<IntVec3>(zone==null?cells:zone.Cells.Concat(cells));
-            if(zone==null){ // One receipt names one zone; refuse disconnected creation before mutation.
-                var remaining=new HashSet<IntVec3>(cells);var queue=new Queue<IntVec3>();queue.Enqueue(cells[0]);remaining.Remove(cells[0]);
+            if(cells.Count>0){ // Each added cell must connect to this zone, not create an unreported one.
+                var remaining=new HashSet<IntVec3>(cells);var queue=new Queue<IntVec3>();
+                if(zone==null){queue.Enqueue(cells[0]);remaining.Remove(cells[0]);}
+                else foreach(var c in zone.Cells){queue.Enqueue(c);remaining.Remove(c);}
                 while(queue.Count>0){var c=queue.Dequeue();foreach(var dir in GenAdj.CardinalDirections){var n=c+dir;if(remaining.Remove(n))queue.Enqueue(n);}}
-                if(remaining.Count>0)throw new HarnessRefusal("new zone cells must be connected");
+                if(remaining.Count>0)throw new HarnessRefusal("added zone cells must connect to the requested zone");
             }
             ThingDef plant=null;
             if(growing&&!String.IsNullOrEmpty(r.def)){
