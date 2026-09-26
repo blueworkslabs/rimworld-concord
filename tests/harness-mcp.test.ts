@@ -48,8 +48,10 @@ test('the harness MCP server speaks JSON-RPC over stdio and logs every call in t
     assert.deepEqual(times,[3]);assert.equal(done,'campfire and meals done');assert.equal(server.done,true);
     assert.equal(byId(11).error.code,-32601);
     assert.equal(acts.length,2,'an invalid action never reaches the game');
-    const calls=readFileSync(log,'utf8').trim().split('\n').map(l=>JSON.parse(l));
-    assert.deepEqual(calls.map(c=>c.kind),['observation','observation','error','error','input','observation','control','done']);
+    const all=readFileSync(log,'utf8').trim().split('\n').map(l=>JSON.parse(l));
+    assert.equal(all.filter(c=>c.event==='issued').length,8);
+    const calls=all.filter(c=>c.event==='completed');
+    assert.deepEqual(calls.map(c=>c.kind),['observation','observation','input','input','input','observation','control','done']);
     assert.ok(calls.every(c=>typeof c.at==='number'&&typeof c.bytes==='number'&&typeof c.ok==='boolean'));
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
