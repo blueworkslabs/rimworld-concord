@@ -97,7 +97,7 @@ namespace Concord {
             var previous=publishing;
             try{
                 var msg=look!=null&&look.Spawned
-                    ?new Message(receipt.narration,MessageTypeDefOf.SilentInput,new LookTargets(look))
+                    ?new Message(receipt.narration,MessageTypeDefOf.SilentInput,look.def.saveCompressible?new LookTargets(new TargetInfo(look.Position,look.Map)):new LookTargets(look))
                     :new Message(receipt.narration,MessageTypeDefOf.SilentInput);
                 publishing=msg;Messages.Message(msg,true);
                 receipt.narrated=Messages.IsLive(msg)?"shown":"display failed: native message not accepted";

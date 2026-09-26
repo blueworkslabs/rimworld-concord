@@ -162,7 +162,7 @@ namespace Concord {
                 }else{
                     var def=DesignationKind(r.mode);
                     bool present=r.mode=="mine"?Map.designationManager.DesignationAt(c,def)!=null:affected.Any(t=>Map.designationManager.DesignationOn(t,def)!=null);
-                    var confirmed=affected.Select((t,i)=>new{thing=t,label=labels[i]}).Where(x=>Map.designationManager.DesignationOn(x.thing,def)!=null).Select(x=>x.label).ToList();
+                    var confirmed=r.mode=="mine"?new List<string>():affected.Select((t,i)=>new{thing=t,label=labels[i]}).Where(x=>Map.designationManager.DesignationOn(x.thing,def)!=null).Select(x=>x.label).ToList();
                     var destroyed=affected.Select((t,i)=>new{thing=t,label=labels[i]}).Where(x=>x.thing.Destroyed).Select(x=>x.label).ToList();
                     var named=r.mode=="mine"?labels:confirmed;var label=named.Count>0?Phrase.List(named):"ground";
                     if(r.mode=="deconstruct"&&destroyed.Count>0)receipt.narration=Phrase.Core("deconstructed the "+Phrase.List(destroyed)+(confirmed.Count>0?"; marked the "+Phrase.List(confirmed)+" for deconstruction":"")+" "+HarnessNarration.Where(c));
