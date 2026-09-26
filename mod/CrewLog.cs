@@ -91,7 +91,7 @@ namespace Concord {
      // Harness runs have no coordinator report: the core's receipt-backed action records alone.
      Widgets.Label(new Rect(0,80,rect.width,28),"Core actions · receipt-backed records");
      var list=new Rect(0,110,rect.width,Math.Max(40,rect.height-110));float lw=rect.width-22;
-     float lt=own.Sum(e=>Text.CalcHeight(Clock.At(e.tick,Clock.ForEntry(e)),lw)+Text.CalcHeight(e.text,lw)+10);
+     float lt=own.Sum(e=>Text.CalcHeight("Core · RECORD · "+Clock.At(e.tick,Clock.ForEntry(e)),lw)+Text.CalcHeight(e.text,lw)+10);
      Widgets.BeginScrollView(list,ref compactScroll,new Rect(0,0,lw,Math.Max(lt,list.height)));float ly=0;
      foreach(var e in own){var hd="Core · RECORD · "+Clock.At(e.tick,Clock.ForEntry(e));float hh=Text.CalcHeight(hd,lw),th=Text.CalcHeight(e.text,lw);GUI.color=new Color(.65f,.85f,1f);Widgets.Label(new Rect(0,ly,lw,hh),hd);GUI.color=Color.white;Widgets.Label(new Rect(0,ly+hh,lw,th),e.text);ly+=hh+th+10;}
      Widgets.EndScrollView();return;
@@ -128,9 +128,10 @@ namespace Concord {
    try {
     Text.Font=GameFont.Medium;Widgets.Label(new Rect(0,0,rect.width-125,32),"Concord — crew log");Text.Font=GameFont.Small;
     Widgets.Label(new Rect(0,38,rect.width,45),"Observer view: addressed messages are not shared thoughts. Statements may be mistaken; records report game outcomes.");
-    if(r==null){Widgets.Label(new Rect(0,100,rect.width,80),"No coordinator report yet. This panel is read-only; it does not start agents or change pawn work.");return;}
-    bool fresh=r.epoch==w.epoch&&Time.realtimeSinceStartup-w.crewReceived<10f;
-    Widgets.Label(new Rect(0,83,rect.width,28),(fresh?"Latest coordinator report":"Saved / last report — not live")+"  |  game tick "+r.tick);
+    bool hasReport=r!=null;
+    if(!hasReport)r=new CrewReport{tick=Find.TickManager.TicksGame,entries=new CrewEntry[0],agreements=new CrewAgreement[0],sharedStatus=new SharedStatus[0],waiting="No coordinator report",foodText="No coordinator sightings"};
+    bool fresh=hasReport&&r.epoch==w.epoch&&Time.realtimeSinceStartup-w.crewReceived<10f;
+    Widgets.Label(new Rect(0,83,rect.width,28),(!hasReport?"Core actions · receipt-backed records":fresh?"Latest coordinator report":"Saved / last report — not live")+"  |  game tick "+r.tick);
     Widgets.Label(new Rect(0,112,rect.width,42),"Shared link · "+String.Join(" | ",r.sharedStatus.Select(s=>s.name+": Food "+(fresh&&s.fresh&&Find.TickManager.TicksGame-s.tick<=120?s.food:"unknown")+", Rest "+(fresh&&s.fresh&&Find.TickManager.TicksGame-s.tick<=120?s.rest:"unknown")+" @"+s.tick).ToArray()));
     Widgets.Label(new Rect(0,155,rect.width,25),"Waiting: "+r.waiting);
     Widgets.Label(new Rect(0,180,rect.width,25),"Agreements — receipt-based progress (up to 12 recent / running)");
@@ -146,7 +147,7 @@ namespace Concord {
     if(Widgets.ButtonText(new Rect(120,296,110,28),"Messages")){filter="message";logScroll=Vector2.zero;}
     if(Widgets.ButtonText(new Rect(240,296,110,28),"Records")){filter="record";logScroll=Vector2.zero;}
     if(Widgets.ButtonText(new Rect(355,296,110,28),"Supplies")){filter="supplies";}
-    Widgets.Label(new Rect(475,299,rect.width-475,25),"Newest first · "+filter+" · last 128 entries");
+    Widgets.Label(new Rect(475,299,rect.width-475,25),"Newest first · "+filter+" · coordinator + core actions");
     if(filter=="supplies"){
      string text=(fresh&&Find.TickManager.TicksGame-r.tick<=120?"Shared local sightings":"Saved / stale sightings — current supplies unknown")+"\n"+r.foodText;
      float h=Text.CalcHeight(text,rect.width-24);Widgets.BeginScrollView(new Rect(0,334,rect.width,rect.height-334),ref supplyScroll,new Rect(0,0,rect.width-24,Math.Max(h,rect.height-340)));Widgets.Label(new Rect(0,0,rect.width-24,h),text);Widgets.EndScrollView();return;

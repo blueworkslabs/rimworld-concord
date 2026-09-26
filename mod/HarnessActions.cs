@@ -142,19 +142,32 @@ namespace Concord {
                     case "hunt":d=new Designator_Hunt();break;case "haul":d=new Designator_Haul();break;
                     default:throw new HarnessRefusal("unknown designation kind","harness");
                 }
-                if(r.thingId>=0){
-                    var t=ThingById(r.thingId);Game(d.CanDesignateThing(t),"cannot designate that");var label=t.LabelShort;var at=t.Position;d.DesignateThing(t);receipt.detail=r.mode;
-                    // Read back: an accepted order that left no designation is reported, not narrated as done.
-                    bool present=t.Spawned&&Map.designationManager.AllDesignationsOn(t).Any();
-                    if(r.mode!="cancel"&&!present){receipt.detail=r.mode+"; no designation present after accept";receipt.narration=Phrase.Core("gave "+Phrase.A(r.mode+" order")+" on the "+label+", but the game recorded no order");}
-                    else{receipt.look=t.Spawned?t:null;receipt.narration=Phrase.Core(Phrase.DesignationVerb(r.mode,label)+" "+HarnessNarration.Where(at,t));}
-                    return t.thingIDNumber.ToString();
+                var target=r.thingId>=0?ThingById(r.thingId):null;
+                var c=target!=null?target.Position:Cell(r.x,r.z);
+                if(target!=null)Game(d.CanDesignateThing(target),"cannot designate that");
+                else Game(d.CanDesignateCell(c),"cannot designate that cell");
+                // Mining a fogged cell is a native player control. Do not inspect/name hidden contents.
+                bool visible=!c.Fogged(Map);
+                var affected=target!=null?new List<Thing>{target}:visible?c.GetThingList(Map).Where(t=>d.CanDesignateThing(t).Accepted).ToList():new List<Thing>();
+                var labels=affected.Select(t=>t.LabelShort).ToList();
+                var before=DesignationScope(affected,c).Where(x=>x.def.designateCancelable).ToList();
+                var carriers=affected.Where(t=>t is Blueprint||t is Frame).ToList();
+                if(target!=null)d.DesignateThing(target);else d.DesignateSingleCell(c);
+                receipt.detail=r.mode;receipt.look=target!=null&&target.Spawned?target:null;
+                if(!visible){receipt.narration=Phrase.Core("issued "+Phrase.A(r.mode+" order")+" at an undiscovered location; contents not inspected");}
+                else if(r.mode=="cancel"){
+                    var after=DesignationScope(affected,c).ToList();int removed=before.Count(x=>!after.Contains(x)),cancelled=carriers.Count(t=>t.Destroyed);
+                    receipt.narration=Phrase.Core("cancelled "+removed+" recorded orders and "+cancelled+" blueprints or frames "+HarnessNarration.Where(c));
+                    receipt.detail+="; removed orders: "+removed+"; cancelled blueprints/frames: "+cancelled;
+                }else{
+                    var def=DesignationKind(r.mode);
+                    bool present=r.mode=="mine"?Map.designationManager.DesignationAt(c,def)!=null:affected.Any(t=>Map.designationManager.DesignationOn(t,def)!=null);
+                    var label=labels.Count>0?Phrase.List(labels):"ground";
+                    if(r.mode=="deconstruct"&&affected.Any(t=>t.Destroyed))receipt.narration=Phrase.Core("deconstructed the "+label+" "+HarnessNarration.Where(c));
+                    else if(present)receipt.narration=Phrase.Core(Phrase.DesignationVerb(r.mode,label)+" "+HarnessNarration.Where(c));
+                    else{receipt.detail+="; no matching designation present after accept";receipt.narration=Phrase.Core("gave "+Phrase.A(r.mode+" order")+", but the game recorded no matching order");}
                 }
-                var c=Cell(r.x,r.z);Game(d.CanDesignateCell(c),"cannot designate that cell");d.DesignateSingleCell(c);receipt.detail=r.mode;
-                var marked=c.GetThingList(Map).FirstOrDefault(x=>Map.designationManager.AllDesignationsOn(x).Any());
-                var cellTarget=marked!=null?marked.LabelShort:r.mode=="mine"&&c.GetFirstMineable(Map)!=null?c.GetFirstMineable(Map).LabelShort:"ground";
-                receipt.narration=Phrase.Core(Phrase.DesignationVerb(r.mode,cellTarget)+" "+HarnessNarration.Where(c));
-                return c.x+","+c.z;
+                return target!=null?target.thingIDNumber.ToString():c.x+","+c.z;
             }
             case "zone": return ZoneAction(r,receipt);
             case "bill": {
@@ -205,6 +218,14 @@ namespace Concord {
             }
             }
             throw new HarnessRefusal("unknown action","harness");
+        }
+        static IEnumerable<Designation> DesignationScope(List<Thing> things,IntVec3 cell){
+            return Map.designationManager.AllDesignationsAt(cell).Concat(things.SelectMany(t=>Map.designationManager.AllDesignationsOn(t))).Distinct();
+        }
+        static DesignationDef DesignationKind(string mode){
+            switch(mode){case "mine":return DesignationDefOf.Mine;case "deconstruct":return DesignationDefOf.Deconstruct;
+            case "harvest":return DesignationDefOf.HarvestPlant;case "cut":return DesignationDefOf.CutPlant;
+            case "hunt":return DesignationDefOf.Hunt;case "haul":return DesignationDefOf.Haul;default:throw new InvalidOperationException("unknown designation");}
         }
         // Native zone designators read global selection. Scope it to this command, then restore it.
         static string ZoneAction(Request r,HarnessReceipt receipt){

@@ -26,7 +26,7 @@ namespace Concord {
         public static string Refused(string attempt,string reason,string source){
             var why=String.IsNullOrEmpty(reason)?"no reason given":reason.TrimEnd('.');
             if(source=="game")return Sentence("The game refused the core's request to "+attempt+": "+why);
-            return Sentence("The core's request to "+attempt+" was not sent to the game (harness check): "+why);
+            return Sentence("The core's request to "+attempt+" was rejected (harness check): "+why);
         }
         public static string Uncertain(string attempt){return Sentence("The core's request to "+attempt+" hit an unexpected error; its outcome is uncertain");}
         public static string Repeat(string mode,int repeatCount,int targetCount){
@@ -46,12 +46,22 @@ namespace Concord {
         }
     }
 
+    [HarmonyLib.HarmonyPatch(typeof(Messages),"AcceptsMessage")]
+    public static class Patch_HarnessMessageIdentity {
+        static bool Prefix(string text,LookTargets lookTargets,ref bool __result){
+            var msg=HarnessNarration.publishing;
+            if(msg==null||msg.text!=text||!Object.ReferenceEquals(msg.lookTargets,lookTargets))return true;
+            __result=true;return false;
+        }
+    }
+
     public static class HarnessNarration {
         static Map Map{get{return Find.CurrentMap;}}
         /** Where, in the terms a viewer has: the room the game assigns (or outdoors), and the nearest
          *  visible colony building. Nothing that is not on the map is said. */
         public static string Where(IntVec3 c,Thing except=null){
             var map=Map;if(map==null||!c.InBounds(map))return "";
+            if(c.Fogged(map))return "at an undiscovered location";
             var room=c.GetRoom(map);string place;
             if(room==null||room.PsychologicallyOutdoors)place="outdoors";
             else if(room.Role!=null&&room.Role!=RoomRoleDefOf.None)place="in the "+room.Role.label;
@@ -77,14 +87,21 @@ namespace Concord {
             default:return "use an unknown control";
             }
         }
-        /** Shows the receipt's line as a native message; the outcome is kept on the receipt. */
+        // Scope the duplicate-text exception to exactly this synchronous receipt publication. Native
+        // messages otherwise coalesce two distinct requests with identical text and targets.
+        [ThreadStatic] internal static Message publishing;
+        /** "shown" means accepted into the native live list, not proof of a rendered/readable frame. */
         public static void Show(HarnessReceipt receipt,Thing look){
             if(String.IsNullOrEmpty(receipt.narration)){receipt.narrated="none";return;}
+            var previous=publishing;
             try{
-                if(look!=null&&look.Spawned)Messages.Message(receipt.narration,new LookTargets(look),MessageTypeDefOf.SilentInput,true);
-                else Messages.Message(receipt.narration,MessageTypeDefOf.SilentInput,true);
-                receipt.narrated="shown";
+                var msg=look!=null&&look.Spawned
+                    ?new Message(receipt.narration,MessageTypeDefOf.SilentInput,new LookTargets(look))
+                    :new Message(receipt.narration,MessageTypeDefOf.SilentInput);
+                publishing=msg;Messages.Message(msg,true);
+                receipt.narrated=Messages.IsLive(msg)?"shown":"display failed: native message not accepted";
             }catch(Exception e){receipt.narrated="display failed: "+e.GetType().Name;}
+            finally{publishing=previous;}
         }
         /** The narrated receipts as crew-log records for the Concord tab (actor: the core). */
         public static CrewEntry[] Entries(){
