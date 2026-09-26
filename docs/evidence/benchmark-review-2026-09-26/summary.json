@@ -1,0 +1,47 @@
+{
+  "classification": "offline review and launch-plan preparation only",
+  "tests": {
+    "passed": 475,
+    "initialFixtureTestFailure": "new observer test assumed retained fixture already had a bill; corrected test creates its own bill; failed output retained privately"
+  },
+  "plans": [
+    {
+      "arm": "ui",
+      "task": {
+        "id": "T1",
+        "sha256": "edfd980f312a74ee20dbbf0e9fbe64e69071561530ee6ffdb6f76c57be8ec9dd"
+      },
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "controllerCatalogSha256": "903bbd7e5884838eff6617a26d2ee556f04770fbaf1f6a177607abbdc5df8233"
+    },
+    {
+      "arm": "harness",
+      "task": {
+        "id": "T1",
+        "sha256": "edfd980f312a74ee20dbbf0e9fbe64e69071561530ee6ffdb6f76c57be8ec9dd"
+      },
+      "modelRequested": "gpt-6-astra",
+      "modelResolved": null,
+      "reasoning": "medium",
+      "controllerVersion": "codex-cli 0.153.4",
+      "controllerCatalogSha256": "903bbd7e5884838eff6617a26d2ee556f04770fbaf1f6a177607abbdc5df8233"
+    }
+  ],
+  "inferenceRequests": 0,
+  "gameplayRuns": 0,
+  "controllerIsolationRuntimeVerified": false,
+  "scoredLaunchEnabled": false,
+  "staging": "game and display inactive; no profile/mod/save writes this pass",
+  "remaining": [
+    "effective tool/context verification, including resolved model revision",
+    "lifecycle failure/timeout/usage rehearsal with actual controller or controlled subprocess fixture",
+    "recorded UI transport and numerical speed/paused-state check",
+    "common input/recording audit before scoring"
+  ],
+  "originalReviewedRevision": "4d7d0d6",
+  "finalBehavioralRevision": "2396f21",
+  "reviewDisposition": "Independent source review and final delta clear for held draft preparation; not launch clearance"
+}

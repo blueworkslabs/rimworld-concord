@@ -1,0 +1,8 @@
+{
+  "id": "T1",
+  "title": "Campfire and three simple meals",
+  "prompt": "You are running a RimWorld colony through the tools available to you. The game is paused at the start.\n\nTask: build one campfire, then add a new cooking bill for simple meals set to \"Do X times\" with X = 3 at that campfire, and let the colony finish it (three simple meals cooked).\n\nRules: do not draft colonists and do not give direct job orders to a colonist. You may pause the game and change its speed (1 to 3). Work through the game's normal controls only. Configure the cooking bill while paused. Once set to 3, do not edit, delete, suspend or replace it; do not create another cooking bill or cook elsewhere during this task.\n\nWhen you believe the task is complete, call the report_done tool once with a one-line summary. The run ends when you call it or when the time limit is reached.",
+  "timeoutSeconds": 1200,
+  "checker": "T1",
+  "saveSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c"
+}

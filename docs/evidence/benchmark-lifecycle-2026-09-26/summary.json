@@ -1,0 +1,183 @@
+{
+  "status": "scripted lifecycle evidence, not a matched model pair",
+  "tests": 479,
+  "proof": "controller-proof.json",
+  "runs": [
+    {
+      "runId": "22744371-130a-47b1-9ad8-230846bc78d7",
+      "arm": "harness",
+      "sourceRevision": "62a4665",
+      "rehearsal": true,
+      "controller": "scripted stand-in; zero inference",
+      "outcome": "failed",
+      "failure": "MCP environment omitted user service-bus paths; pause and finish failed",
+      "controllerExit": null,
+      "counts": {
+        "inputs": 13,
+        "observations": 10,
+        "controls": 3,
+        "calls": 24,
+        "errors": 2,
+        "unresolved": 0,
+        "observedBytes": 157415
+      },
+      "controllerWallMs": 27125,
+      "recordingSeconds": 28.066667,
+      "recordingBytes": 1709547,
+      "hashes": {
+        "calls": "7013df5f6bda6c5382ab4ce550c07d03dfeffc87972e49adf83dacf418c549b7",
+        "events": "e090d3dda3ec21d5465d775a60f9457986295eb948031211c54aed6ae0a084c6",
+        "recording": "97b56886ca9dcf5333c126f82166983105452c4455bcca498eda927ad76028f9"
+      },
+      "rawChecker": {
+        "task": "T1",
+        "completed": true,
+        "evidence": {
+          "campfires": [
+            5667
+          ],
+          "configuredBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "completedBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "mealsCookedSinceStart": 3,
+          "startTick": 2,
+          "configuredTick": 1191,
+          "endTick": 8214,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": []
+      },
+      "verifiedCompletion": false,
+      "audit": {}
+    },
+    {
+      "runId": "8afa60a1-1425-4614-b02c-57f5e96166fc",
+      "arm": "harness",
+      "sourceRevision": "cf43ac9",
+      "rehearsal": true,
+      "controller": "scripted stand-in; zero inference",
+      "outcome": "done",
+      "failure": null,
+      "controllerExit": 0,
+      "counts": {
+        "inputs": 13,
+        "observations": 10,
+        "controls": 3,
+        "calls": 24,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 159031
+      },
+      "controllerWallMs": 27994,
+      "recordingSeconds": 29.266667,
+      "recordingBytes": 1591017,
+      "hashes": {
+        "calls": "a8748f9507acbd3536a3734f8609b5e43d7e0d7297e5013df27896f72480d41a",
+        "events": "3607c5084184e5ad8c86e8a6d9be973589a9e2b4dffac80c1ec1f2f6cf80a738",
+        "recording": "03eb19129b9e8e75434d8ecb8c79788dba2ce2a694cf704eef9a57e6710360c6"
+      },
+      "rawChecker": {
+        "task": "T1",
+        "completed": true,
+        "evidence": {
+          "campfires": [
+            5665
+          ],
+          "configuredBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "completedBills": [
+            "Bill_CookMealSimple_0"
+          ],
+          "mealsCookedSinceStart": 3,
+          "startTick": 2,
+          "configuredTick": 1016,
+          "endTick": 8054,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": []
+      },
+      "verifiedCompletion": false,
+      "audit": {
+        "configuredWhilePaused": true,
+        "sameBillCount3To0": true,
+        "nativeMealDelta": 3,
+        "interveningBillEdits": 0,
+        "otherCookingBills": 0,
+        "rehearsalT1Completed": true
+      }
+    },
+    {
+      "runId": "cfe65980-f328-4941-b1e5-52d60b0518c7",
+      "arm": "ui",
+      "sourceRevision": "cf43ac9",
+      "rehearsal": true,
+      "controller": "scripted stand-in; zero inference",
+      "outcome": "done",
+      "failure": null,
+      "controllerExit": 0,
+      "counts": {
+        "inputs": 5,
+        "observations": 5,
+        "controls": 4,
+        "calls": 11,
+        "errors": 0,
+        "unresolved": 0,
+        "observedBytes": 7199483
+      },
+      "controllerWallMs": 9612,
+      "recordingSeconds": 10.866667,
+      "recordingBytes": 750023,
+      "hashes": {
+        "calls": "e2e0fe5efb2560ae169ce2b6e305aeb1549d36b0d867c95c95bf09d3706e2b77",
+        "events": "e6cc119ce9a3ff23b57a6d0f53ac80ae6f4e2243b6690b0a15ff637cee87feee",
+        "recording": "482d5e7573745cec9f80d0746f7cc88932e76447ca6f330ab9b0708aeacd068a"
+      },
+      "rawChecker": {
+        "task": "T1",
+        "completed": false,
+        "evidence": {
+          "campfires": [],
+          "configuredBills": [],
+          "completedBills": [],
+          "mealsCookedSinceStart": 0,
+          "startTick": 2,
+          "configuredTick": null,
+          "endTick": 1087,
+          "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+        },
+        "missing": [
+          "no campfire built during the run",
+          "no observed new three-iteration simple-meal bill on the new campfire",
+          "only 0 meals cooked since the start"
+        ]
+      },
+      "verifiedCompletion": false,
+      "audit": {
+        "screenshotRepliesOnlyImages": true,
+        "screenshots": 5,
+        "observedSpeeds": [
+          "Fast",
+          "Normal",
+          "Paused",
+          "Superfast"
+        ],
+        "t1Attempted": false,
+        "textEntryExercised": false
+      }
+    }
+  ],
+  "preservation": {
+    "saveCount": 440,
+    "unchanged": true,
+    "added": [],
+    "modRestored": true
+  },
+  "modelCalls": 0,
+  "scoredRuns": 0,
+  "realControllerRehearsalPairs": 0,
+  "remaining": "Trusted transport connecting the native-auth controller host to the separate game host; current runner assumes both are local."
+}

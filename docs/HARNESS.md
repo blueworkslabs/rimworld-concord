@@ -318,3 +318,95 @@ The scripted trial separates its T1 start/configuration/completion observations 
 post-task paused API checks and a same-game-process save/load receipt check. It records
 all commands/receipts incrementally and retains failures. Those extra checks are plumbing
 evidence, not a scored harness arm or a claim of fresh-process restore.
+
+## Matched benchmark runner — review status (#96)
+
+**Draft, not scored.** The runner supports `--prepare-only=true` (same arm/task/save/model
+arguments): this writes a launch plan without game access or inference.
+
+**Controller isolation: recorded, not assumed (Clawd, 2026-09-26).** Feature flags are not an
+allowlist, so the hard hold is replaced by evidence. `scripts/run-benchmark-controller-proof.sh
+--model=<alias> [--reasoning=…]` runs the **exact scored command line** (`buildLaunch`, shared
+with the runner) for both arms with one appended provider override: the same auth mode and wire
+API, pointed at a local recorder that captures the first model request and answers with a short
+final message. No game, no model; headers are never recorded. It requires that the arms differ
+**only** in the arm server's declared tools, under one `mcp__arm` namespace, and that everything
+else offered is codex's three built-in MCP-resource readers (`list_mcp_resources`,
+`list_mcp_resource_templates`, `read_mcp_resource`; our servers expose no resources), byte-identical
+across arms, with identical instructions, context items, model, reasoning, tool choice and
+parallel-call setting. Verified locally on codex 0.153.4 for `gpt-6-astra` (tools travel as an
+`additional_tools` input item, built-ins in a `functions` namespace; context = base instructions,
+the permissions/collaboration message and the task) and for `gpt-5.5` (a `tools` field and an
+`instructions` string). The first proof attempt also showed that an arm server which fails to start
+leaves the controller with no arm tools at all, silently.
+
+The gate in the runner: a scored run needs `--controller-proof=/abs/receipt.json` whose
+`verified` is true and whose model, reasoning, controller version and task hash match the run;
+and just before the timer starts, a **pre-launch check** of that run's own command line against
+the recorder (its own journal, no tool calls) must show the arm server up with exactly the proven
+tool surface and context. Either failure stops the run before the controller starts.
+`--rehearsal=true` instead swaps in `scripts/rehearsal-controller.sh`, a scripted stand-in (real
+codex for `--version` and the catalog; `exec` drives the arm server over MCP: the T1
+walk-through for the harness arm; screenshots, selection and pause/speed controls for the UI
+arm), to rehearse the lifecycle with the real game. Rehearsal receipts are labelled and never count as scored runs.
+
+The arm server now registers its own Linux process group and start time. The runner stops
+that group before terminating the controller and before game cleanup. A stop marker rejects
+late startup. The local-recorder helper uses bounded exit/abort handling rather than waiting
+indefinitely for inherited pipes to close. The explicit tool environment includes the user
+service-bus paths needed by the staging pause command.
+
+The review corrected missing configured-state capture, input undercounting, final-usage loss,
+post-stop scoring, missing failure records and a speed-control reset. Added components:
+
+- **Common observer:** `BenchmarkObserver` samples before/after each tool in either arm,
+  serially with that tool's game access. It preserves the first qualifying count-three
+  configuration, records bill/native-record observations, and pauses before recording done.
+  None of this data is returned in UI replies. Observer overhead is included in elapsed time
+  and separately logged; it is not silently subtracted. Completion remains **audit pending**
+  until the shared recording/input review excludes intervening edits or unrelated cooking.
+- **Common journal:** write issued input before dispatch, then exact returned content and
+  result. Failed commands still count as inputs; unresolved commands remain visible.
+  `inputs` includes game controls; `controls` is a labelled subset. UI clicks can be delivered
+  successfully yet refused by the game: game-level UI errors require recording audit, not
+  inference from xdotool exit status. Screenshot payload bytes and text bytes are not tokens.
+- **UI wrapper:** `trials/ui-mcp-server.ts` offers screenshot/click/key/type/report_done.
+  `--ui-server=/absolute/backend.json` now configures a **UI-only backend**, not an arbitrary
+  MCP server: `{command,args,env?}` receives one appended JSON argument and returns JSON.
+  `scripts/benchmark-ui-backend.py` derives from the corrected pilot's ffmpeg/xdotool adapter;
+  it contains no game bridge/save reads. Example on staging: command `python3`, args with the
+  absolute backend script path, env with DISPLAY `:91` and the staging XAUTHORITY path.
+  The trusted wrapper alone owns hidden observation; backend outputs are the only UI tool
+  observations sent to the controller. The wrapper has not yet been game-tested.
+- **Harness wrapper:** observe returns the fitted digest and a bounded change marker, not
+  an unbounded full diff appended to the digest. `look` requests detail explicitly. Numerical
+  speed uses the standard game key, avoiding the former `run` call resetting it to Normal.
+  This still needs a recorded speed/paused-state check on staging.
+- **Lifecycle:** save hash checked against the frozen task before load; setup/start saved
+  before inference; stdout/stderr retained incrementally; successful report_done freezes the game before a
+  bounded final-response/usage grace. Timeout/failure kills dispatch then pauses; its end snapshot
+  can be after the deadline and never certifies completion. Failures enter cleanup and retain a receipt. Missing
+  usage and unsupported reasoning-token fields are null, not zero. Timeout/failed runs do
+  not certify completion from a later snapshot. Stalls remain **unmeasured**, not an empty
+  claim of zero. The process lifecycle has not yet been exercised with a real controller.
+- **Controller projection:** pinned CLI `0.153.4` uses an authoritative copy of the selected
+  bundled catalog with patching, code-mode-only, multi-agent and model-advertised tools
+  removed. Config also disables agents, skills, plugins and orchestrator extensions. Native
+  auth/provider are unchanged. Three built-in MCP resource helpers remain; the sole `arm`
+  server returns empty lists and rejects resource reads. The effective provider tool/context
+  surface is recorded by the local-recorder proof above; that does not establish a live
+  provider-resolved model revision. Requested model alias is recorded;
+  actual resolved model revision remains unknown until captured. Both arms must match.
+
+Shared T1 text now explicitly requires configuring the bill while paused and prohibits
+subsequent edits or unrelated cooking. The new task hash supersedes prior calibration task
+text for a future matched run; historical evidence is untouched. No inference or scored
+comparison has run through this runner. The native-auth controller host and game host are
+separate; the runner currently assumes local game files and display. A trusted cross-host
+transport (or an operator-provided native-auth local controller) must be verified before a
+real-controller pair. Do not copy credentials or silently change the billing route.
+After that rehearsal, freeze the matched model/settings and alternate three runs per arm.
+
+[Recorded lifecycle evidence](evidence/benchmark-lifecycle-2026-09-26/README.md): initial
+failed harness attempt retained; corrected scripted T1 and UI/speed checks passed. These
+are not the real-controller rehearsal pair or a scored comparison.
