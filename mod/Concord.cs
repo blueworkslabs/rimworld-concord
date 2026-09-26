@@ -252,7 +252,7 @@ namespace Concord
             try {
                 var payload=File.ReadAllText(path); File.Delete(path);
                 var r=JsonUtility.FromJson<Request>(payload); response.id=r.id;
-                perceptionOnly=r.op=="perceive"||r.op=="act"; // Even rejected reads must not run legacy job reconciliation.
+                perceptionOnly=r.op=="perceive"||r.op=="act"||r.op=="placement"; // Even rejected reads must not run legacy job reconciliation.
                 if(r.op=="move"||r.op=="rescue"||r.op=="build"||r.op=="cook"||r.op=="eat") receipt=JsonUtility.ToJson(Move(r));
                 else if(r.op=="crew-log") {var w=World();CrewLog.Set(w,r.epoch,r.crewJson);}
                 else if(r.op=="cancel") receipt=JsonUtility.ToJson(Cancel(r));
@@ -270,6 +270,11 @@ namespace Concord
                     var w=World();if(!String.IsNullOrEmpty(r.epoch)&&r.epoch!=w.epoch) throw new Exception("Stale timeline");
                     if(Find.CurrentMap==null) throw new Exception("No map loaded");
                     receipt=Perception.Snapshot(w);
+                }
+                else if(r.op=="placement") {
+                    // Read-only placement query (docs/HARNESS.md): the game's own placement check, no side effects.
+                    var w=World();if(!String.IsNullOrEmpty(r.epoch)&&r.epoch!=w.epoch) throw new Exception("Stale timeline");
+                    receipt=HarnessActions.Placement(r);
                 }
                 else if(r.op.StartsWith("lab-")) {var w=World();if(r.epoch!=w.epoch) throw new Exception("Stale timeline");receipt=IntentState.Get().Lab(r);}
                 else if(r.op=="decision-pause") {World();DecisionPauses.Set(r.epoch,r.actor,r.leaseId,r.ttlMs);}

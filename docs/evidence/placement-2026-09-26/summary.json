@@ -1,0 +1,145 @@
+{
+  "passed": true,
+  "readOnlySnapshotsEqual": true,
+  "tick": 2,
+  "occupied": {
+    "def": "Campfire",
+    "stuff": null,
+    "x": 88,
+    "z": 130,
+    "rot": 0,
+    "size_x": 1,
+    "size_z": 1,
+    "ok": false,
+    "reason": "Space already occupied.",
+    "source": "game",
+    "searchedRadius": 4,
+    "nearest": [
+      {
+        "x": 87,
+        "z": 130,
+        "distance": 1
+      },
+      {
+        "x": 87,
+        "z": 131,
+        "distance": 1
+      },
+      {
+        "x": 90,
+        "z": 130,
+        "distance": 2
+      },
+      {
+        "x": 86,
+        "z": 130,
+        "distance": 2
+      },
+      {
+        "x": 87,
+        "z": 132,
+        "distance": 2
+      }
+    ]
+  },
+  "free": {
+    "def": "Campfire",
+    "stuff": null,
+    "x": 77,
+    "z": 81,
+    "rot": 0,
+    "size_x": 1,
+    "size_z": 1,
+    "ok": true,
+    "searchedRadius": 4,
+    "nearest": [
+      {
+        "x": 78,
+        "z": 81,
+        "distance": 1
+      },
+      {
+        "x": 77,
+        "z": 82,
+        "distance": 1
+      },
+      {
+        "x": 77,
+        "z": 80,
+        "distance": 1
+      },
+      {
+        "x": 76,
+        "z": 81,
+        "distance": 1
+      },
+      {
+        "x": 78,
+        "z": 82,
+        "distance": 1
+      }
+    ]
+  },
+  "placed": {
+    "seq": 1,
+    "tick": 2,
+    "requestId": "7d31896b-24a1-4cde-9c64-4f0e746c5677",
+    "action": "place_blueprint",
+    "ok": true,
+    "id": "5659",
+    "reason": null,
+    "source": null,
+    "detail": "Blueprint_Campfire"
+  },
+  "fogCases": 2,
+  "fogResults": [
+    {
+      "def": "Bed",
+      "stuff": "WoodLog",
+      "x": 146,
+      "z": 15,
+      "rot": 0,
+      "size_x": 1,
+      "size_z": 2,
+      "ok": false,
+      "reason": "placement footprint intersects undiscovered cells",
+      "source": "harness",
+      "searchedRadius": 4,
+      "nearest": []
+    },
+    {
+      "def": "Bed",
+      "stuff": "WoodLog",
+      "x": 148,
+      "z": 14,
+      "rot": 1,
+      "size_x": 1,
+      "size_z": 2,
+      "ok": false,
+      "reason": "placement footprint intersects undiscovered cells",
+      "source": "harness",
+      "searchedRadius": 4,
+      "nearest": []
+    }
+  ],
+  "recording": {
+    "seconds": 7.733333,
+    "sha256": "aa9ece7d44421e15ca39ac1ff9640e1de270bf8e29ea8a41a3753b68da0f8802",
+    "limit": "Includes loading; fixed camera does not show off-screen queried locations. Assertions use native wire snapshots, not video alone.",
+    "url": "https://discord.com/channels/1083662512806965308/1467116597645676546/1553376917812547774"
+  },
+  "preservation": {
+    "saveCount": 440,
+    "unchanged": true,
+    "added": [],
+    "modRestored": true,
+    "verificationRecovery": "Private probe overwrote its before.json preservation manifest with an observation. Restore completed; final hashes were verified against the independently retained immediately preceding scored-set manifest (same 440 saves and prior mod). Failure retained, no rerun."
+  },
+  "snapshotHashes": {
+    "before": "dbb5e8a34358d3e3cbb22151646da94ef849549e2e6749414ed14d2daf7d95a9",
+    "after-reads": "c33fbace4d6d6d1c9a7f178efaff995bc66abfa64ec0010f1746bc0393ea58f6",
+    "end": "320138e45b2ef33e202311449bde2252b3d91c350be2f2480415dcda6b8ab967"
+  },
+  "testedAssemblySha256": "e2b0050b20bf89f9441ca4f578687b15315f980424deb86708de20b6956cbce2",
+  "testedHarnessActionsSourceSha256": "dd8055c967bf913e44d17097aa15ff26cef1c3cca16299557e6ddfdc4d13a553"
+}

@@ -16,7 +16,7 @@ test('the harness MCP server speaks JSON-RPC over stdio and logs every call in t
     let tick=2500;const acts:unknown[]=[];const times:unknown[]=[];let done='';
     const bridge:HarnessBridge={perceive:async()=>{const s=snap();s.meta.tick=tick;s.time.tick=tick;tick+=100;return s;},
       act:async(a,id)=>{acts.push(a);return {seq:acts.length,tick,requestId:id!,action:(a as any).action,ok:(a as any).x!==0,id:(a as any).x!==0?'777':null,reason:(a as any).x!==0?null:'Cannot place here',source:(a as any).x!==0?null:'game',detail:null};},
-      time:async c=>{times.push(c);}};
+      time:async c=>{times.push(c);},placement:async()=>{throw Error('unused');}};
     const server=new HarnessMcp(bridge,log,s=>{done=s;});
     const input=new PassThrough(),output=new PassThrough();const replies:any[]=[];
     output.on('data',d=>{for(const l of String(d).split('\n').filter(Boolean))replies.push(JSON.parse(l));});
@@ -60,4 +60,29 @@ test('the T1 task text is one file shared by both arms and names the only tool b
   const task=JSON.parse(readFileSync(join(root,'benchmark/tasks/T1.json'),'utf8'));
   assert.equal(task.id,'T1');assert.equal(task.checker,'T1');assert.equal(task.timeoutSeconds,1200);
   assert.match(task.prompt,/report_done/);assert.doesNotMatch(task.prompt,/observe|look|act\b|screenshot|click/i,'no interface-specific wording in the shared task');
+});
+
+test('placement is a read-only look: validated before the game, answered by the game, journalled as an observation',async()=>{
+  const dir=mkdtempSync(join(tmpdir(),'concord-mcp-placement-'));const log=join(dir,'calls.jsonl');
+  try{
+    const asked:unknown[]=[];let acted=0,perceived=0;
+    const bridge:HarnessBridge={perceive:async()=>{perceived++;return snap();},act:async()=>{acted++;throw Error('no');},time:async()=>{},
+      placement:async q=>{asked.push(q);return {def:q.def,stuff:null,x:q.x,z:q.z,rot:0,size_x:1,size_z:1,ok:false,reason:'Space already occupied',source:'game',searchedRadius:12,nearest:[{x:q.x+1,z:q.z,distance:1}]};}};
+    const server=new HarnessMcp(bridge,log);
+    const input=new PassThrough(),output=new PassThrough();const replies:any[]=[];
+    output.on('data',d=>{for(const l of String(d).split('\n').filter(Boolean))replies.push(JSON.parse(l));});
+    const serving=server.serve(input,output);const send=(m:unknown)=>input.write(JSON.stringify(m)+'\n');
+    send({jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'look',arguments:{query:{by:'placement',def:'Campfire',x:40,z:41}}}});
+    send({jsonrpc:'2.0',id:2,method:'tools/call',params:{name:'look',arguments:{query:{by:'placement',def:'Campfire',x:40,z:41,place:true}}}});
+    send({jsonrpc:'2.0',id:3,method:'tools/call',params:{name:'look',arguments:{query:{by:'placement',def:'Campfire; rm',x:40,z:41}}}});
+    input.end();await serving;
+    const byId=(id:number)=>replies.find(r=>r.id===id);
+    const r1=JSON.parse(byId(1).result.content[0].text);
+    assert.equal(byId(1).result.isError,undefined,'a refused cell is an answer, not a tool error');
+    assert.equal(r1.ok,false);assert.equal(r1.source,'game');assert.deepEqual(r1.nearest,[{x:41,z:41,distance:1}]);
+    assert.equal(byId(2).result.isError,true);assert.equal(byId(3).result.isError,true);
+    assert.deepEqual(asked,[{by:'placement',def:'Campfire',x:40,z:41}]);assert.equal(acted,0);assert.equal(perceived,0);
+    const calls=readFileSync(log,'utf8').trim().split('\n').map(l=>JSON.parse(l)).filter(c=>c.event==='completed');
+    assert.deepEqual(calls.map(c=>c.kind),['observation','observation','observation']);
+  }finally{rmSync(dir,{recursive:true,force:true});}
 });

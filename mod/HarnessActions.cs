@@ -48,6 +48,56 @@ namespace Concord {
             if(list.Count>400)throw new HarnessRefusal("at most 400 cells per command","harness");return list;
         }
 
+        /** The native build designator configured for the harness: omitted rotation stays North,
+         *  omitted material uses GenStuff.DefaultStuffFor (not the UI's resource-count selection).
+         *  Shared by action and query; later game changes can invalidate a query. */
+        static Designator_Build BuildDesignator(Request r,out ThingDef def){
+            def=DefDatabase<ThingDef>.GetNamedSilentFail(r.def);if(def==null||def.blueprintDef==null)throw new HarnessRefusal("not a buildable def","harness");
+            var d=new Designator_Build(def);
+            if(!d.Visible)throw new HarnessRefusal("not available to build (research or prerequisites)");
+            if(def.MadeFromStuff){
+                var stuff=String.IsNullOrEmpty(r.stuff)?GenStuff.DefaultStuffFor(def):DefDatabase<ThingDef>.GetNamedSilentFail(r.stuff);
+                if(stuff==null||stuff.stuffProps==null||!stuff.stuffProps.CanMake(def))throw new HarnessRefusal("that material cannot make this");
+                HarmonyLib.Traverse.Create(d).Field("stuffDef").SetValue(stuff);
+            }
+            if(r.rot>=0)HarmonyLib.Traverse.Create(d).Field("placingRot").SetValue(new Rot4(r.rot));
+            return d;
+        }
+
+        // Native placement only checks fog at the anchor before inspecting the whole footprint.
+        // Do not let multi-cell queries/actions probe hidden terrain or occupants at its edges.
+        static bool FootprintHidden(Designator_Build d,ThingDef def,IntVec3 c){
+            var rot=(Rot4)HarmonyLib.Traverse.Create(d).Field("placingRot").GetValue();
+            return GenAdj.OccupiedRect(c,rot,def.size).Any(n=>n.InBounds(Map)&&n.Fogged(Map));
+        }
+
+        /** Read-only placement query (docs/HARNESS.md): can this def go at this cell, and if not, the
+         *  nearest cells where it can. Every answer is the designator's own CanDesignateCell, the check the
+         *  UI runs under the mouse; nothing is placed and no receipt is stored. Fogged cells are never
+         *  offered; hidden footprints receive an explicit harness refusal before native inspection. */
+        public static string Placement(Request r){
+            if(Map==null)throw new Exception("No map loaded");
+            int radius=r.radius<0?12:Math.Min(Math.Max(r.radius,1),30),limit=r.count<=0?5:Math.Min(r.count,20);
+            var j=new Json();j.Obj().S("def",r.def).S("stuff",r.stuff).I("x",r.x).I("z",r.z);
+            try{
+                ThingDef def;var d=BuildDesignator(r,out def);
+                var rot=(Rot4)HarmonyLib.Traverse.Create(d).Field("placingRot").GetValue();
+                j.I("rot",rot.AsInt).I("size_x",def.size.x).I("size_z",def.size.z);
+                var c=Cell(r.x,r.z);bool hidden=FootprintHidden(d,def,c);
+                var here=hidden?new AcceptanceReport("placement footprint intersects undiscovered cells"):d.CanDesignateCell(c);
+                j.B("ok",here.Accepted);
+                if(!here.Accepted){j.S("reason",String.IsNullOrEmpty(here.Reason)?"cannot place here":here.Reason.StripTags()).S("source",hidden||String.IsNullOrEmpty(here.Reason)?"harness":"game");}
+                j.I("searchedRadius",radius).Arr("nearest");int found=0;
+                foreach(var n in GenRadial.RadialCellsAround(c,radius,false)){
+                    if(found>=limit)break;
+                    if(!n.InBounds(Map)||FootprintHidden(d,def,n))continue;
+                    if(d.CanDesignateCell(n).Accepted){j.Obj().I("x",n.x).I("z",n.z).I("distance",(long)Math.Round(n.DistanceTo(c))).End();found++;}
+                }
+                j.EndArr();
+            }catch(HarnessRefusal e){j.B("ok",false).S("reason",e.Message).S("source",e.source).Arr("nearest").EndArr();}
+            return j.End().ToString();
+        }
+
         /** One command; returns its receipt JSON. A known request ID returns the stored receipt. */
         public static string Act(WorldState w,Request r) {
             var state=HarnessState.Get();
@@ -68,16 +118,8 @@ namespace Concord {
         static string Run(Request r,HarnessReceipt receipt) {
             switch(r.action){
             case "place_blueprint": {
-                var def=DefDatabase<ThingDef>.GetNamedSilentFail(r.def);if(def==null||def.blueprintDef==null)throw new HarnessRefusal("not a buildable def","harness");
-                var d=new Designator_Build(def);
-                if(!d.Visible)throw new HarnessRefusal("not available to build (research or prerequisites)");
-                if(def.MadeFromStuff){
-                    var stuff=String.IsNullOrEmpty(r.stuff)?GenStuff.DefaultStuffFor(def):DefDatabase<ThingDef>.GetNamedSilentFail(r.stuff);
-                    if(stuff==null||stuff.stuffProps==null||!stuff.stuffProps.CanMake(def))throw new HarnessRefusal("that material cannot make this");
-                    HarmonyLib.Traverse.Create(d).Field("stuffDef").SetValue(stuff);
-                }
-                if(r.rot>=0)HarmonyLib.Traverse.Create(d).Field("placingRot").SetValue(new Rot4(r.rot));
-                var c=Cell(r.x,r.z);Game(d.CanDesignateCell(c),"cannot place here");
+                ThingDef def;var d=BuildDesignator(r,out def);
+                var c=Cell(r.x,r.z);if(FootprintHidden(d,def,c))throw new HarnessRefusal("placement footprint intersects undiscovered cells");Game(d.CanDesignateCell(c),"cannot place here");
                 d.DesignateSingleCell(c);
                 var bp=c.GetThingList(Map).FirstOrDefault(t=>(t is Blueprint||t is Frame||t.def==def)&&(t.def.entityDefToBuild==def||t.def==def));
                 if(bp==null)throw new HarnessRefusal("the designator placed nothing");
