@@ -57,7 +57,7 @@ let t0:number|undefined,t1:number|undefined,outcome='setup-failed',failure:strin
 const log=():CallLog[]=>readFileSync(callLog,'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l));
 const kill=(p:ChildProcess|undefined,s:NodeJS.Signals)=>{if(p?.pid)try{process.kill(-p.pid,s);}catch{}};
 const setupAbort=new AbortController();
-const onSignal=()=>{stoppedBySignal=true;setupAbort.abort();kill(child,'SIGTERM');};process.on('SIGTERM',onSignal);process.on('SIGINT',onSignal);
+const onSignal=()=>{stoppedBySignal=true;setupAbort.abort();};process.on('SIGTERM',onSignal);process.on('SIGINT',onSignal);
 const assertNotInterrupted=()=>{if(stoppedBySignal)throw Error('Operator interrupted setup');};
 try{
  assertNotInterrupted();await b.verify(save,task.saveSha256);assertNotInterrupted();await b.load(save);assertNotInterrupted();await b.admin('pause');assertNotInterrupted();start=await b.perceive();assertNotInterrupted();writeFileSync(dir+'/start.json',JSON.stringify(start));
@@ -99,8 +99,8 @@ try{
 finally{
  t1??=Date.now();naturalExit ||= closed&&exitCode===0;
  // On timeout/failure stop dispatch immediately, not after a gameplay grace interval.
- kill(child,'SIGKILL');
  try{await stopArm(callLog+'.process.json');}catch(e){failure=(failure??'')+' Arm cleanup failed: '+String(e);}
+ kill(child,'SIGKILL');
  const until=Date.now()+1000;while(child&&!closed&&Date.now()<until)await delay(10);
  try{await new LabBridge().admin('pause');if(!end&&start)end=await new LabBridge().perceive();}catch(e){failure=(failure??'')+' Cleanup failed: '+String(e);}
  kill(recording,'SIGINT');if(recording){await Promise.race([new Promise<void>(r=>recording!.once('close',()=>r())),delay(5000)]);if(recording.exitCode===null)kill(recording,'SIGKILL');}
