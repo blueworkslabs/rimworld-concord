@@ -274,7 +274,7 @@ request ID, so a repeated request returns its first receipt and creates nothing.
 receipts are in every snapshot's `receipts`.
 
 Coordinator side: `src/harness/actions.ts` (strict action schema and the flat wire mapping,
-`LabBridge.act`) and `src/harness/checker.ts` (`checkT1(start, end)`: a player campfire that did
+`LabBridge.act`) and `src/harness/checker.ts` (`checkT1(start, end, configured)`: a player campfire that did
 not exist at the start; a simple-meal bill created during the run, in repeat-count mode, counted
 down to zero; and at least three meals cooked since the start by the colonists' own Records tab,
 which the snapshot now exports as `records.mealsCooked`). The checker reads only the two
@@ -283,3 +283,38 @@ the controller never sees it. `trials/harness-t1-scripted.ts` walks T1 through t
 fixed script (priorities, a refused and an accepted placement, the idempotency repeat, an
 unknown-recipe refusal, the bill, the checker) as plumbing evidence; it is not the benchmark's
 harness arm. Staging should confirm the designators behave off-screen exactly as on screen.
+
+## Action review corrections (#95)
+
+Every `act` supplies the observed world, load epoch and map ID. Missing/stale identity
+is refused before execution and does not enter the saved receipt history. Known IDs
+return their first durable receipt even after save/load; the full dedup history is
+retained, while snapshots display only the last 64 receipts. Unexpected native
+exceptions get a durable **outcome uncertain** refusal: inspect state, do not create a
+new request ID to blindly retry. `source:game` means a native acceptance report supplied
+the text; validation messages authored by the harness are labelled `source:harness`.
+Neither perception nor action responses invoke legacy job reconciliation.
+
+Zone commands prevalidate every cell and setting, isolate/restore UI selection and
+use the native zone-kind designator. New zones must be connected and cannot silently
+merge into existing zones. Plant research/pollution rules apply. Empty `allow:[]`
+means Disallow all. Bill edits apply count-only updates to the current mode; mode-only
+updates retain its stored count. Unsupported combinations refuse before mutation.
+The native 15-bill UI limit applies.
+
+**T1 checker evidence:** a start snapshot, a hidden observer's configured snapshot
+showing the new campfire's new `CookMealSimple` bill at count 3, and an end snapshot
+showing the same bill at zero plus at least three native meal products since start.
+All snapshots share one world/load/map and ordered ticks; missing or changed-roster
+records cannot create progress. Neither arm can supply action receipts as proof.
+The native game has no per-bill completed-iteration counter. Therefore the common
+recording/input audit must exclude intervening count edits, removal/replacement of the
+configured bill, or unrelated cooking. An ambiguous run is unverified, not a success.
+The matched runner must collect that hidden configured checkpoint for both arms without
+feeding structured state to the UI controller. This is not implemented by two endpoints
+alone and is not a universal edit-proof checker.
+
+The scripted trial separates its T1 start/configuration/completion observations from
+post-task paused API checks and a same-game-process save/load receipt check. It records
+all commands/receipts incrementally and retains failures. Those extra checks are plumbing
+evidence, not a scored harness arm or a claim of fresh-process restore.

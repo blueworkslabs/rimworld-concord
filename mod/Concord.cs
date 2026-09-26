@@ -137,7 +137,7 @@ namespace Concord
     }
     [Serializable] public class Request { public string id,actionId,op,epoch,actor,activityId,leaseId,thing,target,bed,cancelKind,crewJson,intentId,variant,reason,hold,siteId,label; public int zoneId=-1; public int x,z,w,h,quota,ttlMs,count,meals,maxTicks,untilTick; public int mapId=-1;
         // Harness actions v1 (docs/HARNESS.md).
-        public string requestId,action,def,stuff,cells,mode,recipe,work,storage; public string[] allow; public int thingId=-1,rot=-1,hour=-1,radius=-1,suspend=-1,priority=-1; public bool flag; }
+        public string requestId,action,def,stuff,cells,mode,recipe,work,storage,world; public string[] allow; public int thingId=-1,rot=-1,hour=-1,radius=-1,suspend=-1,priority=-1; public bool flag,hasAllow; }
     [Serializable] public class Response { public string id,error; public bool ok; }
     [Serializable] public class PawnView { public string id,name,job,currentBed,carrying; public int x,z,jobId; public float health; public bool rescueReady,buildReady,cookReady,downed,haulingCapable; public int carryingCount; }
     [Serializable] public class Snapshot { public string world,epoch,clock; public int ticks,decisionPauses; public bool loaded,paused,manualPaused; }
@@ -252,7 +252,7 @@ namespace Concord
             try {
                 var payload=File.ReadAllText(path); File.Delete(path);
                 var r=JsonUtility.FromJson<Request>(payload); response.id=r.id;
-                perceptionOnly=r.op=="perceive"; // Even rejected reads must not run legacy job reconciliation.
+                perceptionOnly=r.op=="perceive"||r.op=="act"; // Even rejected reads must not run legacy job reconciliation.
                 if(r.op=="move"||r.op=="rescue"||r.op=="build"||r.op=="cook"||r.op=="eat") receipt=JsonUtility.ToJson(Move(r));
                 else if(r.op=="crew-log") {var w=World();CrewLog.Set(w,r.epoch,r.crewJson);}
                 else if(r.op=="cancel") receipt=JsonUtility.ToJson(Cancel(r));

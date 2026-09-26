@@ -25,21 +25,23 @@ export const Action=z.discriminatedUnion('action',[
   if(a.action==='bill'&&a.repeat!=='forever'&&a.count===undefined)ctx.addIssue({code:'custom',message:'count and until bills need a count'});
 });
 export type Action=z.infer<typeof Action>;
+export const Timeline=z.object({world:z.string().min(1),epoch:z.string().min(1),mapId:id});
+export type Timeline=z.infer<typeof Timeline>;
 export const Receipt=z.object({seq:z.number().int(),tick:z.number().int(),requestId:z.string(),action:z.string().nullable(),ok:z.boolean(),
   id:z.string().nullable(),reason:z.string().nullable(),source:z.string().nullable(),detail:z.string().nullable()});
 export type Receipt=z.infer<typeof Receipt>;
 
 /** The mod's Request fields for one action (the wire is flat, as for every bridge op). */
-export function wire(raw:unknown,requestId:string=randomUUID()):Record<string,unknown>{
+export function wire(raw:unknown,timeline:Timeline,requestId:string=randomUUID()):Record<string,unknown>{
   if(!requestId||requestId.length>80)throw Error('requestId must be 1-80 characters');
-  const a=Action.parse(raw);const base={op:'act',requestId,action:a.action};
+  const a=Action.parse(raw);const base={op:'act',requestId,action:a.action,...Timeline.parse(timeline)};
   switch(a.action){
     case 'place_blueprint':return {...base,def:a.def,x:a.x,z:a.z,rot:a.rot??-1,...(a.stuff?{stuff:a.stuff}:{})};
     case 'designate':return {...base,mode:a.kind,thingId:a.thing??-1,x:a.x??0,z:a.z??0};
     case 'zone':return {...base,mode:a.kind??'',zoneId:a.zone??-1,cells:a.cells.map((c:{x:number;z:number})=>`${c.x},${c.z}`).join(';'),...(a.label?{label:a.label}:{}),
-      ...(a.priority?{storage:a.priority}:{}),...(a.allow?{allow:a.allow}:{}),...(a.plant?{def:a.plant}:{})};
-    case 'bill':return {...base,thingId:a.bench,recipe:a.recipe,mode:a.repeat,count:a.count??0,radius:a.radius??-1};
-    case 'bill_edit':return {...base,target:a.bill,mode:a.repeat??'',count:a.count??0,radius:a.radius??-1,suspend:a.suspended===undefined?-1:a.suspended?1:0};
+      ...(a.priority?{storage:a.priority}:{}),...(a.allow!==undefined?{allow:a.allow,hasAllow:true}:{}),...(a.plant?{def:a.plant}:{})};
+    case 'bill':return {...base,thingId:a.bench,recipe:a.recipe,mode:a.repeat,count:a.count??-1,radius:a.radius??-1};
+    case 'bill_edit':return {...base,target:a.bill,mode:a.repeat??'',count:a.count??-1,radius:a.radius??-1,suspend:a.suspended===undefined?-1:a.suspended?1:0};
     case 'bill_delete':return {...base,target:a.bill};
     case 'work_priority':return {...base,thingId:a.pawn,work:a.work,priority:a.priority};
     case 'schedule':return {...base,thingId:a.pawn,hour:a.hour,mode:a.assignment};
