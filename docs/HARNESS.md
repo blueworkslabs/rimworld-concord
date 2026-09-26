@@ -347,8 +347,14 @@ the recorder (its own journal, no tool calls) must show the arm server up with e
 tool surface and context. Either failure stops the run before the controller starts.
 `--rehearsal=true` instead swaps in `scripts/rehearsal-controller.sh`, a scripted stand-in (real
 codex for `--version` and the catalog; `exec` drives the arm server over MCP: the T1
-walk-through for the harness arm, screenshots and a pause toggle for the UI arm), to rehearse the
-lifecycle with the real game. Rehearsal receipts are labelled and never count as scored runs.
+walk-through for the harness arm; screenshots, selection and pause/speed controls for the UI
+arm), to rehearse the lifecycle with the real game. Rehearsal receipts are labelled and never count as scored runs.
+
+The arm server now registers its own Linux process group and start time. The runner stops
+that group before terminating the controller and before game cleanup. A stop marker rejects
+late startup. The local-recorder helper uses bounded exit/abort handling rather than waiting
+indefinitely for inherited pipes to close. The explicit tool environment includes the user
+service-bus paths needed by the staging pause command.
 
 The review corrected missing configured-state capture, input undercounting, final-usage loss,
 post-stop scoring, missing failure records and a speed-control reset. Added components:
@@ -387,12 +393,20 @@ post-stop scoring, missing failure records and a speed-control reset. Added comp
   bundled catalog with patching, code-mode-only, multi-agent and model-advertised tools
   removed. Config also disables agents, skills, plugins and orchestrator extensions. Native
   auth/provider are unchanged. Three built-in MCP resource helpers remain; the sole `arm`
-  server returns empty lists and rejects resource reads. This is source-reviewed preparation,
-  **not yet an observed effective provider tool list**. Requested model alias is recorded;
+  server returns empty lists and rejects resource reads. The effective provider tool/context
+  surface is recorded by the local-recorder proof above; that does not establish a live
+  provider-resolved model revision. Requested model alias is recorded;
   actual resolved model revision remains unknown until captured. Both arms must match.
 
 Shared T1 text now explicitly requires configuring the bill while paused and prohibits
 subsequent edits or unrelated cooking. The new task hash supersedes prior calibration task
 text for a future matched run; historical evidence is untouched. No inference or scored
-comparison has run through this runner. Next: effective-surface/context proof, lifecycle and
-UI/speed rehearsal, then freeze the matched model/settings and alternate three runs per arm.
+comparison has run through this runner. The native-auth controller host and game host are
+separate; the runner currently assumes local game files and display. A trusted cross-host
+transport (or an operator-provided native-auth local controller) must be verified before a
+real-controller pair. Do not copy credentials or silently change the billing route.
+After that rehearsal, freeze the matched model/settings and alternate three runs per arm.
+
+[Recorded lifecycle evidence](evidence/benchmark-lifecycle-2026-09-26/README.md): initial
+failed harness attempt retained; corrected scripted T1 and UI/speed checks passed. These
+are not the real-controller rehearsal pair or a scored comparison.
