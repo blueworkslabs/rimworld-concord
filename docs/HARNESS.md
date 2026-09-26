@@ -240,14 +240,13 @@ gate process. The migration pages stay as history.
 
 ## Perception follow-up implementation (#94)
 
-Implemented and offline-tested; the new cold-load alert path still needs staging.
+[Recorded cold-load capture passed](evidence/perception-alerts-2026-09-26/README.md): all three current alerts appear at tick 2; paired reads match; digest 11,230 bytes with all thoughts retained.
 
 - *Alerts:* the readout fills its active list over UI frames (24 slices) and not before tick
   600, so a snapshot right after a load saw none. The exporter now evaluates every registered
   alert's `GetReport()` at snapshot time (no `Recalculate`; getters may refresh their own caches),
   plus any quest, precept or scenario alert already active; storyteller-disabled alerts stay off;
-  targets in fog are dropped. Staging should confirm "Need colonist beds" and "Medical treatment
-  needed" appear on the first read of the T1 save.
+  targets in fog are dropped. The first T1 read confirmed "Need colonist beds", "Medical treatment needed" and "Animal starvation".
 - *Digest budget:* `DIGEST_LIMIT` = 14,000 bytes, leaving the rest of the 24,000-byte prompt for
   instructions, task, history and receipts.
 - *Aggregation:* loose items, plants, filth, corpses and unowned structures (natural rock, ruins)
