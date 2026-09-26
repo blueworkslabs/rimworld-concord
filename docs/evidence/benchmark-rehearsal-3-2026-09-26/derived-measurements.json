@@ -1,0 +1,231 @@
+{
+  "method": "Offline derivation from retained hidden observer snapshots/journal and input journal; no new run. Completion tick interval is (last incomplete, first complete]; 2500 ticks per game hour. Wall milestones are first-observed, not exact engine transition times. Health is observation-window food poisoning only; no assertion of absence after shutdown. Source receipts untouched. previousWallSeconds is the preceding observation request-start conservative lower bound (at minus durationMs); wallSeconds is the current observation response-end detection timestamp.",
+  "arms": [
+    {
+      "runId": "7471f050-7f38-4282-92a6-911598c5c482",
+      "label": "real-controller-rehearsal-pair-3-tool-permissions",
+      "arm": "harness",
+      "startTick": 2,
+      "endTick": 10064,
+      "completionElapsedGameHoursBracket": [
+        3.6176,
+        3.6508
+      ],
+      "firstObservations": {
+        "blueprint": {
+          "file": "observer-6-4.json",
+          "sha256": "5c31bd06a46be2cafdae8c4a55c576cf46d7ad4b42b46287ea8fc18224e30f2b",
+          "snapshotId": 6,
+          "tick": 2,
+          "wallSeconds": 9.32,
+          "previousFile": "observer-5-3.json",
+          "previousTick": 2,
+          "previousWallSeconds": 8.942
+        },
+        "built": {
+          "file": "observer-9-7.json",
+          "sha256": "9eaef599928f0665386d5c0fc4741f36128993ecbaff136f4978766fa2920c3a",
+          "snapshotId": 9,
+          "tick": 808,
+          "wallSeconds": 13.5,
+          "previousFile": "observer-8-6.json",
+          "previousTick": 4,
+          "previousWallSeconds": 11.12
+        },
+        "configured": {
+          "file": "observer-18-14.json",
+          "sha256": "6a53f699c06c228bf69ef6da851d17e775160bcb99476bc0526d9de72c37b402",
+          "snapshotId": 18,
+          "tick": 2708,
+          "wallSeconds": 21.681,
+          "previousFile": "observer-17-13.json",
+          "previousTick": 2708,
+          "previousWallSeconds": 21.284
+        },
+        "complete": {
+          "file": "observer-41-30.json",
+          "sha256": "2ddeec26118fb4b63208b0bc2e323f9700d9b2155bc87e851923df7b63a3dd38",
+          "snapshotId": 41,
+          "tick": 9129,
+          "wallSeconds": 44.593,
+          "previousFile": "observer-39-29.json",
+          "previousTick": 9046,
+          "previousWallSeconds": 44.296
+        }
+      },
+      "unpauseCalls": [
+        {
+          "issuedSeconds": 10.992,
+          "completedSeconds": 11.289,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 26.504,
+          "completedSeconds": 26.787,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        }
+      ],
+      "timeControls": [
+        {
+          "issuedSeconds": 10.992,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 18.453,
+          "tool": "time",
+          "args": {
+            "control": "pause"
+          }
+        },
+        {
+          "issuedSeconds": 26.504,
+          "tool": "time",
+          "args": {
+            "control": "3"
+          }
+        },
+        {
+          "issuedSeconds": 46.789,
+          "tool": "time",
+          "args": {
+            "control": "pause"
+          }
+        }
+      ],
+      "cooks": [
+        {
+          "name": "Beatrice",
+          "meals": 3
+        }
+      ],
+      "observedFoodPoisoning": {},
+      "sourceHashes": {
+        "observer.jsonl": "8b66ddbac0089a19f86e2c9a1047d0923ec7bce34a2055b7b6ecdaabc4d38d96",
+        "calls.jsonl": "2ea6957515631e1d7fe4f585f9691100bc8d903fdaf0bcab1832dd2fc6dda752",
+        "start.json": "dfaa449501a69e632d437e1105523b6951f7eafaf4bab9015854320e8e7fafd3",
+        "end.json": "6776a8cd17e4789820492e93b4e7b7099daf4ffb6513a6732b2ea25bc58caf65"
+      }
+    },
+    {
+      "runId": "7f7cc942-7a64-411e-a0b8-e341b7e45f0d",
+      "label": "real-controller-rehearsal-pair-3-tool-permissions",
+      "arm": "ui",
+      "startTick": 2,
+      "endTick": 15724,
+      "completionElapsedGameHoursBracket": [
+        5.0312,
+        5.1292
+      ],
+      "firstObservations": {
+        "blueprint": {
+          "file": "observer-63-14.json",
+          "sha256": "09307905f1a3e6ee64c3171129378143edac4058169bd9225edfa2426bc268b2",
+          "snapshotId": 63,
+          "tick": 2,
+          "wallSeconds": 26.713,
+          "previousFile": "observer-62-13.json",
+          "previousTick": 2,
+          "previousWallSeconds": 26.241
+        },
+        "built": {
+          "file": "observer-71-22.json",
+          "sha256": "535ef2c59660c4f6c3bb74e317fca568ad9d988af6a2edc0a615645e71fc425a",
+          "snapshotId": 71,
+          "tick": 891,
+          "wallSeconds": 36.201,
+          "previousFile": "observer-70-21.json",
+          "previousTick": 693,
+          "previousWallSeconds": 35.594
+        },
+        "configured": {
+          "file": "observer-93-44.json",
+          "sha256": "73e1eaffcce460aac1a30f411ec83ce670df09d28cd93a0c3e7e87c692d3bdd4",
+          "snapshotId": 93,
+          "tick": 6243,
+          "wallSeconds": 77.529,
+          "previousFile": "observer-92-43.json",
+          "previousTick": 6243,
+          "previousWallSeconds": 76.951
+        },
+        "complete": {
+          "file": "observer-107-58.json",
+          "sha256": "467e5cf14df0ceacfbce40dc17f06e3836f239250ff80df81a7864b1a9098a7d",
+          "snapshotId": 107,
+          "tick": 12825,
+          "wallSeconds": 105.411,
+          "previousFile": "observer-106-57.json",
+          "previousTick": 12580,
+          "previousWallSeconds": 104.596
+        }
+      },
+      "unpauseCalls": [
+        {
+          "issuedSeconds": 33.473,
+          "completedSeconds": 33.848,
+          "tool": "key",
+          "args": {
+            "key": "3"
+          }
+        }
+      ],
+      "timeControls": [
+        {
+          "issuedSeconds": 33.473,
+          "tool": "key",
+          "args": {
+            "key": "3"
+          }
+        },
+        {
+          "issuedSeconds": 50.934,
+          "tool": "key",
+          "args": {
+            "key": "space"
+          }
+        },
+        {
+          "issuedSeconds": 86.659,
+          "tool": "key",
+          "args": {
+            "key": "space"
+          }
+        }
+      ],
+      "cooks": [
+        {
+          "name": "Beatrice",
+          "meals": 3
+        }
+      ],
+      "observedFoodPoisoning": {
+        "Pedro": {
+          "file": "observer-105-56.json",
+          "tick": 11689,
+          "hediffs": [
+            {
+              "label": "Food poisoning (initial)",
+              "part": null,
+              "severity": 0.9967,
+              "bleeding": 0
+            }
+          ]
+        }
+      },
+      "sourceHashes": {
+        "observer.jsonl": "46cc177b649a5b7cecce165a5e14a5469afa3148ffc3fd831e5093da33d5eee1",
+        "calls.jsonl": "db3118c42a8b7a0eb9628aa1757d8a6ae7ef102efa287de4b3f781994851af2e",
+        "start.json": "d2d5479ad56808671f6ba1061bc0a812fb146182d86b0b5f4e956981a0425e3c",
+        "end.json": "00fc17e8c8478b4282ddfe9da5e407c1371fe23863741a109ca51af3c6ad54cf"
+      }
+    }
+  ]
+}

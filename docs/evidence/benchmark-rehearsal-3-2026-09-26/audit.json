@@ -1,6 +1,6 @@
 {
   "independentReceiptReview": "clear",
-  "videoInspection": "sampled frames corroborate built campfire and native completion; Fable separate cold read pending",
+  "videoInspection": "sampled frames corroborate built campfire and native completion; Fable separate cold read completed before metrics release",
   "originalReceiptsUnchanged": true,
   "verifiedCompletion": {
     "harness": true,
@@ -24,5 +24,7 @@
     "model alias not immutable revision",
     "one fixed-order unscored rehearsal",
     "initial decorative stone rotations vary on reload"
-  ]
+  ],
+  "coldReadUrl": "https://discord.com/channels/1083662512806965308/1467116597645676546/1553366861901602900",
+  "offlineAdjunctReview": "independent check clear: completion intervals, sampled phases, per-pawn meal deltas and observation-window food poisoning; original receipts untouched"
 }
