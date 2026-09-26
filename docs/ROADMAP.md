@@ -15,13 +15,13 @@ Consent, offers and refusals are kept as phase 2.
 
 Read-only perception has a [recorded staging capture](evidence/perception-2026-09-25/README.md).
 Native actions v1 and the T1 checker have [recorded scripted evidence](evidence/harness-actions-2026-09-26/README.md).
-The matched fresh-context runner (including a hidden common configuration checkpoint),
-then the scored UI/harness comparison are next; no harness advantage is established.
-[Runners #96/#97 remain draft](evidence/benchmark-native-home-2026-09-26/README.md):
-scripted SSH lifecycle and tool/context isolation passed. Real-controller rehearsals retained
-first authentication and then MCP-permission failures before game-tool execution. Native-home
-and exact tool permissions are now pinned; controlled local execution passed. A named-cause
-third rehearsal precedes any scored comparison.
+The matched fresh-context runners #96/#97 are merged. [Three scored T1 pairs](evidence/benchmark-scored-three-2026-09-26/README.md)
+completed in both interfaces: six successful arms, alternating H→UI/UI→H/H→UI,
+median wall 58.7s harness versus 106.6s UI on this task. [The successful rehearsal](evidence/benchmark-rehearsal-3-2026-09-26/README.md)
+is separate from scoring, and both earlier infrastructure-failed pairs remain retained.
+This is task-local evidence, not general colony-management or billed-dollar advantage.
+Stalls remain uninstrumented and native USD unavailable. Placement query remains a
+post-benchmark read-only follow-up; no interface change entered the scored set.
 
 ## Where we are
 

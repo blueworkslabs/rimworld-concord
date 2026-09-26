@@ -1,0 +1,28 @@
+{
+  "independentReceiptReview": "clear",
+  "videoInspection": "sampled frames corroborate built campfire and native completion; Fable separate cold read pending",
+  "originalReceiptsUnchanged": true,
+  "verifiedCompletion": {
+    "harness": true,
+    "ui": true
+  },
+  "checks": [
+    "sole new bill configured3 while paused",
+    "same bill3 to0 with native meals+3",
+    "no post-configuration bill edits",
+    "no other cooking bills",
+    "no drafting or direct pawn orders",
+    "all calls paired with completions",
+    "no post-done issued calls",
+    "end snapshot matches done snapshot",
+    "matching task/home/CLI/catalog/model alias/reasoning/context",
+    "all recording and journal hashes match"
+  ],
+  "limits": [
+    "stalls not instrumented",
+    "native USD unavailable",
+    "model alias not immutable revision",
+    "one fixed-order unscored rehearsal",
+    "initial decorative stone rotations vary on reload"
+  ]
+}
