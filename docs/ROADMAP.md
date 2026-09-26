@@ -14,7 +14,9 @@ reused); Gates A–C are retired for this phase and the benchmark table is the g
 Consent, offers and refusals are kept as phase 2.
 
 Read-only perception has a [recorded staging capture](evidence/perception-2026-09-25/README.md).
-Native actions v1 and the T1 checker are next; no harness advantage is established.
+Native actions v1 and the T1 checker have [recorded scripted evidence](evidence/harness-actions-2026-09-26/README.md).
+The matched fresh-context runner (including a hidden common configuration checkpoint),
+then the scored UI/harness comparison are next; no harness advantage is established.
 
 ## Where we are
 

@@ -52,6 +52,9 @@ export class LabBridge implements GameBridge {
     throw Error('Bridge timeout; command may have executed: reconcile before retry');
   }
   async state():Promise<GameState> {return (await this.request({op:'state'})).state;}
+  /** Harness action (docs/HARNESS.md): one player control, answered by the game's receipt. */
+  async act(action:unknown,timeline:import('./harness/actions.js').Timeline,requestId?:string){const {wire,Receipt}=await import('./harness/actions.js');
+    return Receipt.parse((await this.request(wire(action,timeline,requestId))).receipt);}
   /** Harness perception (docs/HARNESS.md): the read-only player's-picture snapshot, validated. */
   async perceiveRaw(epoch?:string):Promise<unknown>{return (await this.request({op:'perceive',...(epoch?{epoch}:{})})).receipt;}
   async perceive(epoch?:string){const {Snapshot}=await import('./harness/perception.js');return Snapshot.parse(await this.perceiveRaw(epoch));}

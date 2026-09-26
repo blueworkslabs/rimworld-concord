@@ -113,3 +113,7 @@ wire receipts, full snapshot/digest and size counts. Not a benchmark or model ru
 ## 2026-09-26 — cold-load alerts and compact digest
 
 [Recorded capture](../evidence/perception-alerts-2026-09-26/README.md): three alerts at tick 2, matched paused raw receipts, 11.23 KB digest, no model run.
+
+## 2026-09-26 — actions v1 scripted T1
+
+[Report](../evidence/harness-actions-2026-09-26/README.md) · [summary](../evidence/harness-actions-2026-09-26/summary.json): fixed-script campfire + three-iteration bill, paused API checks and same-game-process save/load passed. 467 tests; all 439 original saves unchanged, one checkpoint retained. Zero model calls; no scored comparison.

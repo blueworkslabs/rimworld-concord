@@ -56,7 +56,7 @@ namespace Concord {
                 .I("snapshotId",++snapshotSeq).S("format","concord-perception-v1").End();
             Time(j,map);Weather(j,map);Alerts(j,map);Letters(j);Resources(j,map);Things(j,map);Zones(j,map);Bills(j,map);
             Designations(j,map);Research(j);Pawns(j,map);Threats(j,map);
-            j.Arr("receipts").EndArr();
+            var hs=HarnessState.Get();if(hs!=null)hs.Write(j);else j.Arr("receipts").EndArr();
             // Sections this build does not export yet, stated rather than silently absent.
             j.Arr("omitted").Val("messages (transient top-left messages)").Val("home area cells").Val("weather forecast (not player-visible)").EndArr();
             j.End();
@@ -214,6 +214,7 @@ namespace Concord {
                 var carried=p.carryTracker==null?null:p.carryTracker.CarriedThing;
                 if(carried!=null)j.Obj("carrying").I("id",carried.thingIDNumber).S("def",carried.def.defName).I("count",carried.stackCount).End();
                 j.Arr("inventory");if(p.inventory!=null)foreach(var t in p.inventory.innerContainer)j.Obj().I("id",t.thingIDNumber).S("def",t.def.defName).I("count",t.stackCount).End();j.EndArr();
+                if(p.records!=null)j.Obj("records").F("mealsCooked",p.records.GetValue(RecordDefOf.MealsCooked)).F("thingsConstructed",p.records.GetValue(RecordDefOf.ThingsConstructed)).End();
                 var bed=p.ownership==null?null:p.ownership.OwnedBed;j.I("bed",bed==null?-1:bed.thingIDNumber);
                 j.End();
             }
