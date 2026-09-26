@@ -2,7 +2,7 @@
 
 **Scripted game evidence, zero model calls. Not a benchmark result.**
 The [machine-readable summary](summary.json) retains the exact results and recording hash.
-The original uncut recording and full action/observation journals are retained privately.
+[Original uncut calibration recording](https://discord.com/channels/1083662512806965308/1467116597645676546/1553383375673368689); full action/observation journals are retained privately.
 
 T2's three wooden beds were placed, then all three pawns were scheduled to Sleep at
 20h and 21h. Ordinary native jobs ate berries, built beds and claimed them. At tick
