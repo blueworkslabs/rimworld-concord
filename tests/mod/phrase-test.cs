@@ -9,7 +9,7 @@ Eq(Phrase.Repeat("count",1,0),"once");Eq(Phrase.Repeat("until",0,10),"until ther
 Eq(Phrase.A("oak table"),"an oak table");
 Eq(Phrase.List(new List<string>{"wood"}),"wood");Eq(Phrase.List(new List<string>{"wood","steel"}),"wood and steel");Eq(Phrase.List(new List<string>{"a","b","c","d","e"}),"a, b, c and 2 more");Eq(Phrase.List(new List<string>()),"nothing");
 Eq(Phrase.Refused("place a campfire blueprint","Space already occupied by Beatrice.","game"),"The game refused the core's request to place a campfire blueprint: Space already occupied by Beatrice.");
-Eq(Phrase.Refused("add a bill","not a colony workbench","harness"),"The core's request to add a bill was not sent to the game (harness check): not a colony workbench.");
+Eq(Phrase.Refused("add a bill","not a colony workbench","harness"),"The core's request to add a bill was rejected (harness check): not a colony workbench.");
 Eq(Phrase.Uncertain("change a zone"),"The core's request to change a zone hit an unexpected error; its outcome is uncertain.");
 Eq(Phrase.Core(Phrase.DesignationVerb("cut","oak tree")+" outdoors"),"The core marked the oak tree to be cut outdoors.");
 Environment.Exit(fail);}}
