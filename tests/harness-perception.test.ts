@@ -7,7 +7,7 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {setTimeout as delay} from 'node:timers/promises';
 import {LabBridge} from '../src/lab-bridge.js';
-import {Snapshot,since,look,digest} from '../src/harness/perception.js';
+import {Snapshot,since,look,digest,DIGEST_LIMIT} from '../src/harness/perception.js';
 const root=fileURLToPath(new URL('../..',import.meta.url));
 const fixtureText=readFileSync(join(root,'tests/fixtures/perception-snapshot.json'),'utf8');
 const fixture=()=>Snapshot.parse(JSON.parse(fixtureText));
@@ -58,16 +58,17 @@ test('look answers area, category, capability and pawn queries as slices of one 
   assert.throws(()=>look(s,{by:'area',radius:5}),/needs a known thing or a cell/);assert.throws(()=>look(s,{by:'weather'}));
 });
 
-test('the digest fits with the shared loop: plants and far clutter go first, omissions are counted',()=>{
+test('the digest shows items and plants aggregated by def, keeps its own budget and counts omissions',()=>{
   const s=fixture();
   for(let i=0;i<2000;i++)s.map.things.push({id:1000+i,kind:'plant',def:'Plant_Grass',label:'grass',x:i%250,z:Math.floor(i/250),rot:0,stack:1,forbidden:false,faction:null,growth:0.5,harvestable:false});
-  const full=digest(s,10_000_000);assert.deepEqual(full.fitted,{omitted:{},fits:true});
-  const d=digest(s,6000);
-  assert.ok(d.fitted.fits&&Buffer.byteLength(JSON.stringify(d))<=6000);
-  assert.deepEqual(Object.keys(d.fitted.omitted),['plants'],'only plants go while plants remain');assert.ok(d.fitted.omitted.plants!>1900);assert.match(d.fitted.note!,/Use look/);
-  const kept=d.map.plants.map((p:any)=>p.id);assert.ok(!kept.includes(106),'the farthest plants go first');
-  assert.deepEqual(d.map.things.map((t:any)=>t.id).sort(),[104,105],'buildings and blueprints stay');assert.deepEqual(d.map.items.map((t:any)=>t.id).sort(),[101,102,103]);assert.equal(d.pawns.length,2);
-  const tight=digest(s,1500);assert.equal(tight.fitted.fits,false,'a limit below the floors is reported, never hidden');
+  const d=digest(s);assert.equal(DIGEST_LIMIT,14000);
+  assert.ok(d.fitted.fits&&Buffer.byteLength(JSON.stringify(d))<=DIGEST_LIMIT);assert.deepEqual(d.fitted,{omitted:{},fits:true});
+  assert.deepEqual(d.map.items.map((g:any)=>[g.def,g.total,g.stacks]),[['WoodLog',120,2],['RawBerries',48,1]],'the wood by the wall is visible without asking');
+  assert.deepEqual(d.map.items[0].box,{minX:40,minZ:42,maxX:41,maxZ:42});
+  assert.deepEqual(d.map.plants.map((g:any)=>[g.def,g.total,g.harvestable]),[['Plant_Grass',2000,0],['Plant_TreeOak',1,1]],'plants are counts by def, not a list');
+  assert.deepEqual(d.map.things.map((t:any)=>t.id).sort(),[104,105],'buildings and blueprints stay individual');assert.equal(d.pawns.length,2);
+  assert.deepEqual(look(s,{by:'def',def:'WoodLog'}).things!.map(t=>t.id),[101,102],'look gives the individual stacks');
+  const tight=digest(s,1500);assert.equal(tight.fitted.fits,false,'a limit below the floors is reported, never hidden');assert.match(tight.fitted.note!,/look/);
   assert.equal(s.map.things.length,2006,'the snapshot itself is untouched');
 });
 
@@ -98,7 +99,10 @@ test('retained game receipt preserves all real wire fields and fits without losi
  const s=Snapshot.parse(raw);assert.deepEqual(s,raw,'actual mod fields must not be stripped');
  assert.equal(s.map.things.length,2072);assert.deepEqual(s.pawns.map(p=>p.mood.thoughts?.length),[5,4,3]);
  assert.equal(s.pawns.find(p=>p.name==='Beatrice')!.health.hediffs.filter(h=>h.label.startsWith('Asthma')).length,2);
- const d=digest(s);assert(d.fitted.fits);assert(Buffer.byteLength(JSON.stringify(d))<=24000);
- assert.deepEqual(d.pawns.map(p=>p.mood.thoughts?.length),[5,4,3]);
+ const d=digest(s);assert(d.fitted.fits);assert(Buffer.byteLength(JSON.stringify(d))<=DIGEST_LIMIT);
+ assert(d.map.items.some((g:any)=>g.def==='WoodLog'&&g.total>0),'loose wood is in the digest as a group');
+ assert.deepEqual(d.pawns.map((p:any)=>p.thoughts.length),[5,4,3],'every thought is kept');assert.deepEqual(d.fitted.omitted,{},'the real capture fits whole');
+ assert(d.map.structures.some((g:any)=>g.def==='Sandstone'&&g.total===257),'unowned rock is grouped, not listed');
+ assert.deepEqual(look(s,{by:'pawn',pawn:'Alvin'}).pawn,s.pawns.find(p=>p.name==='Alvin'),'look by pawn returns the full entry');
  assert.deepEqual(since(s,{...s,meta:{...s.meta,snapshotId:s.meta.snapshotId+1}}).reset,false);
 });

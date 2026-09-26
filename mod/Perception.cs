@@ -73,16 +73,28 @@ namespace Concord {
             var cur=map.weatherManager.curWeather;
             j.Obj("weather").S("def",cur==null?null:cur.defName).S("label",Label(cur)).F("outdoorTemp",map.mapTemperature.OutdoorTemp).End();
         }
+        /** The player's alert list, evaluated now. The readout fills its active list gradually over UI
+         *  frames (24 slices) and not before tick 600, so reading that list right after a load shows
+         *  nothing. Every registered alert's report is computed at snapshot time instead (the same
+         *  GetReport the readout calls; no Recalculate, though getters may refresh local caches), plus any quest,
+         *  precept or scenario alert already in the active list. */
         private static void Alerts(Json j,Map map){
             j.Arr("alerts");
             var ui=Find.UIRoot as UIRoot_Play;
-            var list=ui==null?null:HarmonyLib.Traverse.Create(ui.alerts).Field("activeAlerts").GetValue<List<Alert>>();
-            if(list!=null)foreach(var a in list.ToList()){
-                AlertReport rep;try{rep=a.GetReport();}catch{continue;}
-                if(!rep.active)continue;
-                j.Obj().S("label",a.GetLabel()).S("priority",a.Priority.ToString()).S("type",a.GetType().Name);
-                j.Arr("targets");foreach(var t in rep.AllCulprits){if(t.HasThing)j.Val(t.Thing.thingIDNumber);}j.EndArr();
-                j.End();
+            if(ui!=null&&(Find.Storyteller==null||!Find.Storyteller.def.disableAlerts)){
+                var t=HarmonyLib.Traverse.Create(ui.alerts);
+                var all=t.Field("AllAlerts").GetValue<List<Alert>>()??new List<Alert>();
+                var active=t.Field("activeAlerts").GetValue<List<Alert>>()??new List<Alert>();
+                var seen=new HashSet<Alert>();
+                foreach(var a in all.Concat(active).ToList()){
+                    if(a==null||!seen.Add(a))continue;
+                    AlertReport rep;try{rep=a.GetReport();}catch{continue;}
+                    if(!rep.active)continue;
+                    string label;try{label=a.GetLabel();}catch{continue;}
+                    j.Obj().S("label",label).S("priority",a.Priority.ToString()).S("type",a.GetType().Name);
+                    j.Arr("targets");try{foreach(var c in rep.AllCulprits){if(c.HasThing&&c.Thing.Spawned&&!c.Thing.Position.Fogged(c.Thing.Map))j.Val(c.Thing.thingIDNumber);}}catch{}j.EndArr();
+                    j.End();
+                }
             }
             j.EndArr();
         }

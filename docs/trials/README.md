@@ -109,3 +109,7 @@ wire receipts, full snapshot/digest and size counts. Not a benchmark or model ru
 ## 2026-09-25 — corrected-adapter T1 UI calibration
 
 [Report](../evidence/ui-baseline-clean-2026-09-25/REPORT.md) · [metrics](../evidence/ui-baseline-clean-2026-09-25/metrics.json): 150.399s, 19 controls, 11 screenshots, no rejected game inputs. Native usage captured; subscription USD unknown; existing-context calibration, not a paired harness score. Original pilot preserved.
+
+## 2026-09-26 — cold-load alerts and compact digest
+
+[Recorded capture](../evidence/perception-alerts-2026-09-26/README.md): three alerts at tick 2, matched paused raw receipts, 11.23 KB digest, no model run.

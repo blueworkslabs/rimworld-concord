@@ -1,5 +1,8 @@
 import {z} from 'zod';
-import {PROMPT_LIMIT,trimToFit} from '../prompt-limit.js';
+import {trimToFit} from '../prompt-limit.js';
+/** The digest's own budget: the rest of the 24,000-byte prompt carries instructions, the task,
+ * history and receipts (Fable, after the first capture). */
+export const DIGEST_LIMIT=14000;
 
 /** The harness's perception half (docs/HARNESS.md): the mod's read-only snapshot of the player's
  * picture (`perceive`), and the two conveniences computed here from snapshots, never from engine
@@ -101,6 +104,7 @@ export const Look=z.discriminatedUnion('by',[
   z.object({by:z.literal('category'),category:z.enum(['food','wood','beds','workbenches','blueprints','items','buildings','plants','corpses'])}).strict(),
   z.object({by:z.literal('capability'),work:z.string().min(1)}).strict(),
   z.object({by:z.literal('pawn'),pawn:z.union([id,z.string().min(1)])}).strict(),
+  z.object({by:z.literal('def'),def:z.string().min(1)}).strict(),
 ]);
 export type Look=z.infer<typeof Look>;
 const CATEGORY:Record<string,(t:SnapshotThing)=>boolean>={
@@ -117,6 +121,7 @@ export function look(s:Snapshot,raw:unknown){
     return {query:q,things:s.map.things.filter(near),pawns:s.pawns.filter(near).map(p=>({id:p.id,name:p.name,x:p.x,z:p.z,job:p.job.def})),threats:s.threats.filter(near)};
   }
   if(q.by==='category'){const f=CATEGORY[q.category]!;return {query:q,things:s.map.things.filter(f)};}
+  if(q.by==='def')return {query:q,things:s.map.things.filter(t=>t.def===q.def)};
   if(q.by==='capability'){
     const who=s.pawns.map(p=>({p,w:p.work.find(w=>w.def===q.work)})).filter(x=>x.w&&!x.w.disabled);
     return {query:q,pawns:who.map(({p,w})=>({id:p.id,name:p.name,priority:w!.priority,skill:p.skills.find(sk=>sk.def===q.work||(q.work==='Construction'&&sk.def==='Construction')||(q.work==='Cooking'&&sk.def==='Cooking'))?.level??null}))};
@@ -126,26 +131,60 @@ export function look(s:Snapshot,raw:unknown){
 }
 
 // ---- digest ---------------------------------------------------------------------------------
-/** What the model is shown: the snapshot, fitted with the shared loop (least relevant first:
- * plants, filth, corpses, far items, letters, then other things), with the omission counts and a
- * note that `look` reaches the rest. The caller keeps the full snapshot in the record. */
+/** What the model is shown, within DIGEST_LIMIT. Loose items and plants are shown the way a player
+ * sees them at a glance, aggregated by def (total, stacks, rough location), never as individual
+ * stacks; `look` (by def, category or area) gives the stacks. Everything else is kept and fitted
+ * with the shared loop, least relevant first (filth and corpse groups, far things, old letters,
+ * zone cells; full thoughts remain); the fitted note states what was left out. The caller
+ * keeps the full snapshot in the record. */
 const fitted=(t:Record<string,number>,fits:boolean,changed:boolean)=>({omitted:Object.fromEntries(Object.entries(t).filter(([,n])=>n>0)),fits,
-  ...(changed?{note:'State was omitted to fit. Use look (by area, category, capability, pawn or section) to retrieve it.'}:{})});
-export function digest(s:Snapshot,limit=PROMPT_LIMIT){
+  ...(changed?{note:'State was omitted to fit. Use look (by area, category, def, capability, pawn or section) to retrieve it.'}:{})});
+type Group={def:string;label:string|null;total:number;stacks:number;forbidden:number;center:{x:number;z:number};box:{minX:number;minZ:number;maxX:number;maxZ:number};harvestable?:number};
+export function aggregate(things:SnapshotThing[]):Group[]{
+  const by=new Map<string,SnapshotThing[]>();for(const t of things){const l=by.get(t.def);if(l)l.push(t);else by.set(t.def,[t]);}
+  return [...by.entries()].map(([def,l])=>{
+    const g:Group={def,label:l[0]!.label,total:l.reduce((n,t)=>n+t.stack,0),stacks:l.length,forbidden:l.filter(t=>t.forbidden).length,
+      center:{x:Math.round(l.reduce((n,t)=>n+t.x,0)/l.length),z:Math.round(l.reduce((n,t)=>n+t.z,0)/l.length)},
+      box:{minX:Math.min(...l.map(t=>t.x)),minZ:Math.min(...l.map(t=>t.z)),maxX:Math.max(...l.map(t=>t.x)),maxZ:Math.max(...l.map(t=>t.z))}};
+    if(l[0]!.kind==='plant')g.harvestable=l.filter(t=>t.harvestable).length;
+    return g;
+  }).sort((a,b)=>b.total-a.total||a.def.localeCompare(b.def));
+}
+/** A colonist the way the needs, health, character and work tabs show them, compacted for the
+ * digest: every need and every thought is kept; `look` by pawn returns the full entry. */
+export function compactPawn(p:SnapshotPawn){
+  const r2=(n:number|null|undefined)=>n==null?null:Math.round(n*100)/100;
+  const runs:string[]=[];p.schedule.forEach((a,h)=>{const last=runs.at(-1);const m=last?/^(\d+)-(\d+) (.+)$/.exec(last):null;
+    if(m&&m[3]===a&&Number(m[2])===h-1)runs[runs.length-1]=`${m[1]}-${h} ${a}`;else runs.push(`${h}-${h} ${a}`);});
+  return {id:p.id,name:p.name,x:p.x,z:p.z,...(p.drafted?{drafted:true}:{}),...(p.downed?{downed:true}:{}),
+    job:p.job.report??p.job.def,health:r2(p.health.summary),hediffs:p.health.hediffs.map(h=>h.label+(h.part?` (${h.part})`:'')+((h.bleeding??0)>0?' bleeding':'')),
+    needs:Object.fromEntries(p.needs.map(n=>[n.def,r2(n.level)])),mood:r2(p.mood.level??null),thoughts:(p.mood.thoughts??[]).map(t=>`${t.label} ${t.mood==null?'':(t.mood>0?'+':'')+Math.round(t.mood)}`.trim()),
+    traits:p.traits,skills:Object.fromEntries(p.skills.filter(k=>!k.disabled).map(k=>[k.def,k.level+(k.passion==='None'?'':` ${k.passion}`)])),
+    work:Object.fromEntries(p.work.filter(w=>w.priority>0).map(w=>[w.def,w.priority])),cannot:p.work.filter(w=>w.disabled).map(w=>w.def),
+    schedule:runs,...(p.carrying?{carrying:`${p.carrying.count} ${p.carrying.def}`}:{}),...(p.inventory.length?{inventory:p.inventory.map(i=>`${i.count} ${i.def}`)}:{}),
+    bed:p.bed>=0?p.bed:null};
+}
+const individual=(t:SnapshotThing)=>t.kind==='blueprint'||t.kind==='frame'||t.faction==='player'||!!t.bed||!!t.workbench;
+export function digest(s:Snapshot,limit=DIGEST_LIMIT){
   const d:any=structuredClone(s);d.fitted=fitted({},true,false);
   const colony=d.pawns.length?{x:d.pawns.reduce((n:number,p:any)=>n+p.x,0)/d.pawns.length,z:d.pawns.reduce((n:number,p:any)=>n+p.z,0)/d.pawns.length}:{x:0,z:0};
   const dist=(t:{x:number;z:number})=>(t.x-colony.x)**2+(t.z-colony.z)**2;
-  const split=(k:string)=>d.map.things.filter((t:any)=>t.kind===k).sort((a:any,b:any)=>dist(b)-dist(a));
-  d.map.plants=split('plant');d.map.filth=split('filth');d.map.corpses=split('corpse');d.map.items=split('item');
-  d.map.things=d.map.things.filter((t:any)=>!['plant','filth','corpse','item'].includes(t.kind)).sort((a:any,b:any)=>dist(b)-dist(a));
+  const of=(k:string)=>s.map.things.filter(t=>t.kind===k);
+  d.map.items=aggregate(of('item'));d.map.plants=aggregate(of('plant'));
+  // Least relevant groups first: the ones farthest from the colony.
+  d.map.filth=aggregate(of('filth')).sort((a,b)=>dist(b.center)-dist(a.center));d.map.corpses=aggregate(of('corpse')).sort((a,b)=>dist(b.center)-dist(a.center));
+  const rest=s.map.things.filter(t=>!['plant','filth','corpse','item'].includes(t.kind));
+  // Unowned structures (natural rock, ruins) are scenery at a glance: grouped by def, farthest first.
+  d.map.structures=aggregate(rest.filter(t=>!individual(t))).sort((a,b)=>dist(b.center)-dist(a.center));
+  d.map.things=rest.filter(individual).sort((a,b)=>dist(b)-dist(a));
+  d.map.note='items, plants and unowned structures are aggregated by def; look by def, category or area for individual things';
+  d.pawns=s.pawns.map(compactPawn);
   // Zone geometry remains unless budget trimming explicitly removes cells.
   for(const z of d.zones)z.cellCount=z.cells.length;
   d.letters.sort((a:any,b:any)=>a.tick-b.tick);
-  // Least significant thoughts first, so trimming keeps each pawn's strongest mood effects.
-  for(const p of d.pawns)p.mood.thoughts?.sort((a:any,b:any)=>Math.abs(a.mood??0)-Math.abs(b.mood??0));
-  const r=trimToFit([['plants',()=>d.map.plants,0],['filth',()=>d.map.filth,0],['corpses',()=>d.map.corpses,0],['items',()=>d.map.items,20],
-    ['letters',()=>d.letters,3],['things',()=>d.map.things,20],['zoneCells',()=>d.zones.find((z:any)=>z.cells.length)?.cells,0],['thoughts',()=>d.pawns.flatMap((p:any)=>p.mood.thoughts?.length>3?[p.mood.thoughts]:[]).sort((a:any,b:any)=>b.length-a.length)[0],0]] as const,
+  const r=trimToFit([['filthGroups',()=>d.map.filth,0],['corpseGroups',()=>d.map.corpses,0],['structureGroups',()=>d.map.structures,0],['plantGroups',()=>d.map.plants,5],
+    ['things',()=>d.map.things,20],['letters',()=>d.letters,3],['zoneCells',()=>d.zones.find((z:any)=>z.cells.length)?.cells,0],['itemGroups',()=>d.map.items,10]] as const,
     ()=>Buffer.byteLength(JSON.stringify(d)),limit,{},t=>{d.fitted=fitted(t,false,true);});
   d.fitted=fitted(r.trimmed,r.fits,r.changed);
-  return d as Omit<Snapshot,'map'>&{map:any;fitted:{omitted:Record<string,number>;fits:boolean;note?:string}};
+  return d as Omit<Snapshot,'map'|'pawns'>&{map:any;pawns:ReturnType<typeof compactPawn>[];fitted:{omitted:Record<string,number>;fits:boolean;note?:string}};
 }

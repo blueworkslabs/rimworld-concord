@@ -237,3 +237,22 @@ gate process. The migration pages stay as history.
   per scored run (see Benchmark rules).
 - **T2's bed:** the game's own bed assignment, read by the checker, with "slept in a bed
   tonight" as a second column. Assignment is what a player can see and set.
+
+## Perception follow-up implementation (#94)
+
+[Recorded cold-load capture passed](evidence/perception-alerts-2026-09-26/README.md): all three current alerts appear at tick 2; paired reads match; digest 11,230 bytes with all thoughts retained.
+
+- *Alerts:* the readout fills its active list over UI frames (24 slices) and not before tick
+  600, so a snapshot right after a load saw none. The exporter now evaluates every registered
+  alert's `GetReport()` at snapshot time (no `Recalculate`; getters may refresh their own caches),
+  plus any quest, precept or scenario alert already active; storyteller-disabled alerts stay off;
+  targets in fog are dropped. The first T1 read confirmed "Need colonist beds", "Medical treatment needed" and "Animal starvation".
+- *Digest budget:* `DIGEST_LIMIT` = 14,000 bytes, leaving the rest of the 24,000-byte prompt for
+  instructions, task, history and receipts.
+- *Aggregation:* loose items, plants, filth, corpses and unowned structures (natural rock, ruins)
+  are grouped by def with total, stacks, forbidden count, centre and bounding box; the player's
+  buildings, blueprints, frames, beds and workbenches stay individual; pawns take a compact form
+  (every need and thought, skills with passions, non-zero work priorities, disabled work, schedule
+  as runs). `look` by def, category, area or pawn returns the individual entries. On the retained
+  staging capture the digest is 10.9 KB with nothing omitted (325 KB snapshot; pawns 2.8 KB,
+  items 2.7 KB, structures 3.1 KB).

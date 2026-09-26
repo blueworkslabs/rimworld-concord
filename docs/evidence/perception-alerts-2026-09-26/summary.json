@@ -1,0 +1,108 @@
+{
+  "runId": "c92d0185-8ce5-4dbf-bab7-23334c6e3d78",
+  "save": "lab-concord-nh-helper-20260924",
+  "at": "2026-09-26T06:20:44.758Z",
+  "perceiveMs": 278,
+  "fullBytes": 325361,
+  "digestBytes": 11230,
+  "digestFitted": {
+    "omitted": {},
+    "fits": true
+  },
+  "counts": {
+    "things": 2072,
+    "byKind": {
+      "item": 505,
+      "plant": 136,
+      "filth": 921,
+      "building": 510
+    },
+    "alerts": 3,
+    "letters": 0,
+    "zones": 0,
+    "bills": 0,
+    "designations": 0,
+    "pawns": 3,
+    "threats": 0,
+    "thoughtsPerPawn": [
+      {
+        "name": "Alvin",
+        "thoughts": 5,
+        "bytes": 206
+      },
+      {
+        "name": "Beatrice",
+        "thoughts": 4,
+        "bytes": 165
+      },
+      {
+        "name": "Pedro",
+        "thoughts": 3,
+        "bytes": 122
+      }
+    ]
+  },
+  "pausedDiff": {
+    "reset": false,
+    "fromTick": 2,
+    "toTick": 2,
+    "things": {
+      "appeared": [],
+      "disappeared": [],
+      "changed": []
+    },
+    "alerts": {
+      "raised": [],
+      "cleared": []
+    },
+    "letters": [],
+    "bills": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "zones": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "pawns": [],
+    "resources": [],
+    "designations": {
+      "added": 0,
+      "removed": 0
+    }
+  },
+  "sha256": "0512f5ac85dc793d602de6a4a7dc10f41cb0592339ed338b9858cfc97056b653",
+  "alerts": [
+    {
+      "label": "Need colonist beds",
+      "priority": "High",
+      "type": "Alert_NeedColonistBeds",
+      "targets": []
+    },
+    {
+      "label": "Medical treatment needed",
+      "priority": "High",
+      "type": "Alert_ColonistNeedsTend",
+      "targets": [
+        408
+      ]
+    },
+    {
+      "label": "Animal starvation",
+      "priority": "Medium",
+      "type": "Alert_StarvationAnimals",
+      "targets": [
+        1874
+      ]
+    }
+  ],
+  "videoSha256": "0bb394f15feb52de9f4be40df3e1d63333172312178c6b7d632a5cc1c7ac5a1c",
+  "preservation": {
+    "saveCount": 439,
+    "unchanged": true,
+    "added": [],
+    "modRestored": true
+  }
+}
