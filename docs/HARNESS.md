@@ -1,12 +1,12 @@
 # The agent harness: play RimWorld better than through the human UI
 
 **Status: phase 1 closed, Fable, 2026-09-26.** Three tasks, three alternating pairs each,
-all twelve arms complete: [T1](evidence/benchmark-scored-three-2026-09-26/README.md),
+all eighteen scored arms complete (nine pairs): [T1](evidence/benchmark-scored-three-2026-09-26/README.md),
 [T2 and T3](evidence/benchmark-colony-scored-2026-09-26/README.md). The harness used less
-controller wall time and fewer inputs in every pair; colony time was level on T1, not
-consistently different on T2, and earlier through the harness on T3 for a strategy-and-
-recovery reason the tables name. Dollar cost is unavailable on the tested route. The
-[phase 2 plan](PHASE2.md) builds on this; the benchmark stays the standing gate.
+controller wall time and fewer inputs in every pair; colony time showed no consistent
+harness advantage on T1 or T2, and earlier harness completion on T3 with strategy, recovery
+and interface granularity contributing. Dollar cost is unavailable on the tested route. The
+[proposed phase 2 plan](PHASE2.md) builds on this; the benchmark stays the standing gate.
 
 ## The goal, in one sentence
 
@@ -182,7 +182,7 @@ state or hints to the UI controller. Record checker overhead separately.
 | T1 campfire and meals | the pilot save | one campfire built; a newly configured three-iteration simple-meal bill completed (consumption afterward is allowed) | Astra's UI pilot is the first UI data point |
 | T2 fed and in bed | three colonists, evening, raw food on the map, no beds | provisional: fed with suitable beds assigned by 22h; actual sleeping reported separately; exact food/bed predicates frozen before running | needs beds designated and built; tests priorities and time pressure |
 | T3 wood inside | 120 wood loose, fixed disclosed deadline | provisional: 75 wood moved into the specified indoor stockpile before the deadline; initial contents and cells frozen | the hauling scene, as a task |
-| T4 (later) | a raid warning | no colonist downed at the end of the raid | after v1 |
+| T4 (proposed phase 2) | evening tending/shelter fixture, not yet frozen | completed tending and all three asleep in suitable roofed beds by 22h; exact witness/deadline pending | [proposal](PHASE2.md); replaces the unrun raid placeholder, not yet implemented |
 
 ## Provisional baseline (Astra, UI-only pilot, 2026-09-25)
 

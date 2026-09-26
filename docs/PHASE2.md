@@ -1,89 +1,182 @@
 # Phase 2: the core on the harness, and the crew back on top
 
-**Status: plan, Fable, 2026-09-26, from the three-task benchmark. Not yet agreed.**
-Phase 1 is closed by the [T1](evidence/benchmark-scored-three-2026-09-26/README.md) and
-[T2/T3](evidence/benchmark-colony-scored-2026-09-26/README.md) tables.
+**Status: proposed plan, Fable, 2026-09-26; technical review corrections by Astra.
+Not yet agreed for implementation.** Phase 1's three-task evaluation is closed by the
+[T1](evidence/benchmark-scored-three-2026-09-26/README.md) and
+[T2/T3](evidence/benchmark-colony-scored-2026-09-26/README.md) tables. A→B→C remains
+the proposed order; implementation and live trials are separate from this document review.
 
 ## What phase 1 established
 
-Twelve of twelve arms completed their tasks. The harness used less controller wall time
-than the UI in every pair, and the gap grew with the task: about 45 % lower on T1, 68 % on
-T2, 83 % on T3. Inputs went from 6 against 15 on T1 to 5 against 39 to 55 on T3. Total
-tokens were lower on the harness in all twelve arms; uncached tokens were not uniformly
-lower; dollar cost is unavailable on the subscription route.
+**Eighteen of eighteen scored arms, nine pairs**, completed their frozen primary tasks:
+six arms each for T1, T2 and T3. The twelve-arm total belongs to T2/T3 alone.
+Harness controller wall time was lower in every pair; median reductions were about
+45% on T1, 68% on T2 and 83% on T3. Inputs were 6 versus 15, then 10–11 versus
+26–38, then 5 versus 39–55. Total input tokens were lower in all nine harness/UI
+comparisons; uncached tokens were mixed and billed USD unavailable on the subscription route.
 
-Colony time is the honest column. On T1 it was level. On T2 no consistent advantage. On T3
-the harness finished earlier in every pair, and the receipts say why: the UI arms cleared
-their stockpile's wood filter and briefly ran the game while recovering, losing one to two
-and a half game hours; the harness's one zone action bundles cells, filter and priority, so
-there was no filter to clear. That is a strategy-and-recovery difference. The game's own
-pace was the same through both interfaces once the work existed.
+Colony time comes first. T1 and T2 show **no consistent harness advantage**, not proven
+equality. T3 harness completion bounds precede UI in every pair. UI configuration was
+mostly paused, with brief running periods while wood filters were empty; final recovery
+came after 0.9664–2.4556 game hours. The harness bundled cells, filter and priority while
+paused. Different plans, recovery, command granularity and native work contribute;
+these observations do not isolate a single cause or prove identical post-configuration
+engine throughput. They do not establish general strategic or pure perception superiority.
 
-Two things the tables do not flatter. The harness arms made fewer mistakes partly because
-they had fewer moves: no bed-owner action, no allow-all button, no priorities grid to
-rewrite, no Save menu to wander into. Fewer inputs is partly a smaller action set. And the
-harness arm's recording is a time-lapse of consequences: a viewer sees a campfire appear
-and cannot say who decided it or why. That gap is real, unmeasured, and the first thing
-phase 2 has to close, because a viewer is who Concord is for.
+Two things the tables do not flatter. The interfaces have different action granularity:
+UI is click-only, without drag; a harness command can bundle many native edits. Harness
+has no bed-owner action or Save menu, but **does** have work-priority and storage-filter
+edits and `forbid(thing, forbidden:false)` already allows things. Fewer dispatched inputs
+is not a normalized count of native operations, and zero tool errors is not zero mistakes.
+The harness recording remains a time-lapse of consequences: a viewer sees a campfire
+appear and cannot say who decided it or why. That gap is real, unmeasured, and the first
+thing phase 2 should close, because a viewer is who Concord is for.
 
 ## Ground rules carried forward
 
-No draft. The game is the ground truth. Native carriers. Measured, not assumed: every new
-action or capability lands with a benchmark task that uses it, run three pairs alternating,
-same rules as phase 1. Recording-first cold reads before any table. No rerolls. Interfaces
-change only between task sets.
+No drafting or direct pawn jobs. The game is ground truth; ordinary native jobs do the
+work. Every new capability gets scripted receipt/failure coverage and a task exercising
+it, then three matched pairs with alternating order. Freeze save, rules, model/reasoning,
+context policy, tools and success predicates before scoring. Refresh effective-tool/context
+proofs after interface changes. Recording-first cold reads precede tables; no outcome
+rerolls; preserve failed attempts. Interfaces change only between task sets.
 
-## The plan, in three steps
+## Step A: legible actions and the missing moves
 
-### Step A: legible actions and the missing moves
+1. **Receipt-backed crew-log narration.** Every newly accepted game-editing `act` request
+   writes one line in the colony's voice, after native acceptance: “Placed a campfire
+   blueprint by the east wall”, “Set up a wood stockpile in the room”. Render effective
+   results, not merely requested values; an accepted blueprint or bill is not a completed
+   building or meal. Identify the core as decision-maker, never invent pawn agreement or
+   reasons. Only use spatial descriptions supported by the receipt/view. Rejections show
+   the actual reason and are not confused with a pawn's refusal. Persist request-ID/world
+   provenance so replay/retry/restore cannot duplicate the line. Reads and transport retries
+   are not actions; time controls have a separate count/log category. No-op/partial-result
+   handling and log delivery failures must remain visible in receipts.
 
-1. **Crew-log narration of harness actions.** Every accepted action writes one line in the
-   colony's own voice at the moment it is accepted: "Placed a campfire blueprint by the
-   east wall", "Set up a wood stockpile in the room", "Assigned the middle bed to Pedro".
-   Refusals write their reason. The line is the game's receipt in words, nothing more.
-   Measure: a cold read of a harness recording names at least four of every five actions
-   taken. This is a viewer feature and a benchmark column at once.
-2. **The moves the UI arms had and the harness lacked:** `assign_bed`, and `allow`/`forbid`
-   verified on loose things. Nothing else until a task asks for it.
-3. **T4: tend and shelter.** Beatrice's asthma is tended by someone with a doctor
-   priority and everyone sleeps under a roof by 22h. It uses priorities, a blueprint with
-   walls and a roof, bed assignment, and the medical alert that stood for three days.
-4. Benchmark additions: the legibility column above; stall instrumentation; the dollar
-   column whenever a route reports it.
+   **Legibility measure:** before the run, freeze five distinct consequential action
+   opportunities and a matching rubric (action, target and decision-maker). The reader sees
+   only the uncut recording, not task/action lists or metrics, and lists what happened.
+   Compare that read against the sealed receipt key afterward: at least four of five
+   correctly identified, with false/invented attributions reported separately. Missing or
+   rejected planned actions stay in the denominator, not replaced by easier examples.
+   Full-run coverage includes every accepted action, not only those five. This is a viewer
+   measure, not a replacement for task success; line injection alone does not prove visibility.
+2. **Missing move:** add `assign_bed` with native suitability/ownership checks and a
+   read-back receipt. Verify the existing `forbid` operation in both directions on loose
+   things; `allow` need not become a duplicate API. Preserve former owners/slot constraints
+   and distinguish assignment from actual sleeping. Add coverage of rejected/stale targets
+   and replay/restore; no silent forced jobs. Nothing else until a task needs it.
+3. **T4: tend and shelter, proposed replacement for the earlier raid placeholder.**
+   Beatrice receives completed tending of her initially untended asthma from an eligible
+   doctor-enabled pawn, and all three original colonists are observed simultaneously asleep
+   in suitable built beds under roofs by local 22h. Native roof completion is distinct from
+   a roof plan; this is a stronger sleep predicate than T2. Use effective Doctor settings
+   at the tending event, not a requested priority number. A starting `TendPatient` job or
+   alert clearance alone is insufficient proof of completed treatment, and treatment is
+   not cure. Add a read-only completion witness joined to patient, condition, actor and
+   event time; quality is reported when available, not invented or an implicit threshold.
 
-### Step B: the core becomes the harness agent
+   Before freeze, specify initial untended conditions, Doctor settings, resources, bed/roof
+   state, deadline tick/inclusivity and exact sleep/roof predicates; prove viability through
+   authored normal controls without changing traits/health to force success. The existing
+   fixture already tends spontaneously, so the new setup must actually require the intended
+   configuration. Generic wall/door blueprints plus **native auto-roofing** are the first
+   candidate: no explicit roof action exists today. Test that path or specify/review the
+   minimal player-equivalent roof operation before scoring. Hidden checker evidence is
+   identical across arms and must not leak structured state to UI. Include bed assignment
+   and forbid/unforbid exercises in matched task variants if T4 alone does not exercise them.
+4. **Measurement additions:** freeze stall definitions before trials. Separate controller/
+   transport latency from native waiting: record call start/end, active/suspended controller
+   time, wait reason and game tick progress. Label any threshold-based stall count with
+   its threshold and report unknown gaps; normal deliberate waits are not automatically
+   failures. Keep game time, phase timings, effective edits and compound command size.
+   Record billed dollars only when supplied by the route; pricing estimates and unavailable
+   subscription cost stay distinct. No billing-route switch just to populate a column.
 
-The old core loop (eight topics, wake causes, the bounded review) is replaced by the
-harness loop: observe the digest and the diff, act or wait, sleep until a public event or
-a time budget. What survives from the old core is what the regression proved: wake on
-public events, never on telemetry churn; one bounded review after a deliberate wait;
-"heard <name>" whenever a pawn spoke and got no reply. The core keeps one persistent
-context across a scene instead of a fresh one per turn, and its token cost is reported per
-game day.
+## Step B: the core becomes the harness agent
 
-Measure: one ten-minute ordinary-play scene on the helper save, recorded and cold-read
-against the four beats from [VISION](VISION.md): a need surfaces, a plan emerges in
-pieces with a reason, quiet execution reads as patience, a rethink on interruption. Plus
-the T1 to T4 regression through the same agent, three pairs each, so the scene cannot
-regress the benchmark. The Jev grounding annotator rides the scene as wired.
+Replace the eight-topic planning interface with observe/act/wait over the digest and
+bounded diff, sleeping until eligible public events or an explicitly bounded review.
+This is an integration, not permission to discard action receipts, fresh-state validation,
+request deduplication, cancellation ownership or world/epoch/restore boundaries.
 
-### Step C: the crew gets their wills back
+Retain the existing wake semantics unless separately amended: suppress unproductive
+telemetry churn, **preserve worsening-to-urgent and offerable-work exceptions**, and retain
+up to two reviews after a deliberate wait with work offerable (2,500 ticks, then 5,000,
+then silence without new cause). The first review is live-observed; second-review/stop
+coverage remains scripted, not newly proven by the regression scene. Keep acknowledgment
+of addressed speech without implying an answer. Existing successful turn/receipt and
+failure-budget behavior must survive the replacement.
 
-Offers and refusals return as one action pair: the core offers a piece of shared work to
-a pawn, the pawn answers through its own model with the consent filters already built,
-and a refusal binds. The measure is a task, not a gate: "Alvin refuses the haul; the plan
-still gets the wood inside by the deadline", three pairs, plus a cold read that can name
-who refused and why from the crew log alone. Nothing in step C starts before step B's
-scene has been read.
+One bounded persistent controller context **per scene** is the proposed default; reset
+between matched benchmark arms/scenes, not every turn. Retain exact inputs/outputs and
+any compaction summary. Bound context growth and inference; restore/reconnect must rebase
+world facts before acting, not replay stale plans. Freeze model route and scene/token/wall
+limits before a live trial. Report total/cached/uncached tokens per elapsed game day,
+raw totals and elapsed ticks; a zero-day run has an undefined ratio, not zero cost.
 
-## What retires
+**Knowledge boundary:** the player harness exposes more than the in-world core was
+permitted to know. Before B's implementation freeze, specify the field-level public-core
+projection and any deliberate changes to [VISION](VISION.md)/[CORE](CORE.md); do not silently
+share private pawn thoughts or testimony as game truth. Pawn backends in C retain scoped
+views and never inherit the controller's persistent transcript or operator diagnostics.
 
-The construction slice #89 is closed with a note on the pieces that step A reuses. The
-gate documents stay as history. The attribution ledger does not return.
+**Measure:** one frozen ten-minute ordinary-play scene, recorded and cold-read against
+VISION's four beats: an open need, a reasoned plan in pieces, legible quiet execution,
+and a rethink on interruption. Freeze a viable scene setup and rubric; an unobserved
+beat stays unobserved, with no extension/reroll to manufacture it. Also run T1–T4 through
+the new controller against the matched UI controller: three alternating pairs per task,
+fresh context per arm, identical task rules and budgets within each pair. Preserve the
+original phase-1 numbers as history, not as new-build control runs. Freeze regression
+acceptance and any timing tolerances before seeing results; successful tasks alone do not
+prove unchanged speed. A's verified action/logging layer and T4 contract precede B's trial.
 
-## Open questions
+The Jev grounding annotator remains **opt-in, annotate-only**, with explicit model/route
+and bounded spend in the trial setup, not a new wake/action authority. It is not drop-in:
+the existing adapter recognizes old `CoreReply`/grounding inputs. Adapt/version that join
+for harness decisions and the exact retained model-visible scene context, including prior
+facts actually supplied; do not score missing projected history as the core's error.
+Retain paid outputs incrementally and unknown billing/transport failures. Disabled mode
+and annotation failure must not change the controller's actions or sampling.
 
-- Whether the core's persistent context should be reset per game day or per scene.
-- Whether T4's "tend" should accept the game's own tending job or require a tend
-  receipt; the tables show the job and the cleared alert, not the quality.
-- How to measure legibility without the reader knowing the action list beforehand.
+## Step C: the crew gets their wills back
+
+The core offers shared work; the bound pawn answers through its own model; an actual
+refusal binds through the relevant native carrier's consent checks. Capability failure,
+API rejection and pawn refusal are different. **Alvin cannot haul**, so he is not a valid
+hauling-refusal fixture: use a capable pawn such as Beatrice, leaving Pedro able to help.
+Do not force a live model to refuse or reroll until conflict appears.
+
+First use an explicitly **authored mechanics fixture**, separately labelled, to establish
+a binding refusal with the same visible refusal state in both harness/UI arms; complete
+75 wood with the remaining capable pawn in three matched pairs. Verify refusal applies
+to the chosen carrier and ordinary job boundaries, not merely to the offer text, and cannot
+be bypassed through another harness action. The UI half must receive equivalent visible
+consent state and a legal way to proceed; define that interface before scoring.
+Then retain the natural pawn-model choices in a bounded scene: acceptance is legitimate,
+and absent refusal is unexercised coverage, not an excuse to manufacture drama. A crew-log-
+only cold read should identify who actually refused and their stated reason, not an invented
+motive. No assumption that hauling filters already cover new construction/cooking carriers.
+Nothing in C starts before B's scene has been cold-read and its disposition recorded.
+
+## What retires and what remains proposed
+
+After agreement, close [construction slice #89](https://github.com/blueworkslabs/rimworld-concord/pull/89)
+**unmerged**, with a reuse inventory and links to retained passing/failed evidence. Do not
+claim its incomplete carrier coverage passed. Generic harness actions already on main are
+separate from #89's unmerged construction consent/accounting; any reused pieces get their
+own review and acceptance. Keep branches and gate documents as history. No deletion or
+closure is performed merely by this proposal. No new or revived construction contribution/
+attribution ledger, and no revival of the retired ordered-haul ledger. Preserve only the
+action receipts and minimal consent/ownership identities needed for truthful effects and
+binding refusal; selective reuse must not smuggle contribution accounting back in.
+
+## Decisions before implementation/trial freezes
+
+- Agree the A→B→C order and the stronger T4 completed-tending + roofed-sleep goal.
+- Freeze T4's concrete witness/fixture, legibility key and stall/regression thresholds.
+- Set B's public-core knowledge projection, context/restore policy and finite inference/
+  annotation budgets. Per-scene context is proposed; per-day reset is not simultaneously assumed.
+- Define C's matched refusal interface and carrier scope. Keep authored enforcement proof
+  separate from live character choice and its recording-first interpretation.
