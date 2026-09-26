@@ -259,7 +259,7 @@ gate process. The migration pages stay as history.
 
 ## Implementation status: actions v1 and the T1 checker (Clawd, 2026-09-25)
 
-**Built, not yet run in the game.** `act` is a bridge op (mod `HarnessActions.cs`, no patches):
+**Implemented; [recorded scripted T1 and bounded API/save-load checks passed](evidence/harness-actions-2026-09-26/README.md).** Not a model benchmark or exhaustive API acceptance. `act` is a bridge op (mod `HarnessActions.cs`, no patches):
 one command per request, through the player's own path. `place_blueprint` uses the real build
 designator (its visibility check covers research; stuff and rotation as the player would set
 them); `designate` the real deconstruct, cancel, mine, harvest, cut, hunt and haul designators;
@@ -282,7 +282,7 @@ snapshots under the audit limitations below, never the controller's receipts, so
 the controller never sees it. `trials/harness-t1-scripted.ts` walks T1 through the harness with a
 fixed script (priorities, a refused and an accepted placement, the idempotency repeat, an
 unknown-recipe refusal, the bill, the checker) as plumbing evidence; it is not the benchmark's
-harness arm. Staging should confirm the designators behave off-screen exactly as on screen.
+harness arm. The capture verifies the exercised off-screen paths only; remaining API coverage is listed in its report.
 
 ## Action review corrections (#95)
 

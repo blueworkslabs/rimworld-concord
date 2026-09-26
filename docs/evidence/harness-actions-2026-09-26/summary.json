@@ -1,0 +1,362 @@
+{
+  "revision": "73978727d0eb3e67a10786aa94736583246439cf",
+  "classification": "fixed-script plumbing, not model benchmark",
+  "gameVersion": "1.6.4871 rev600",
+  "fixtureSha256": "f59c261f0737c999a6923dde87d01ce565d4b61083f41566a3b2af79feb86f0c",
+  "script": {
+    "runId": "3214a6f1-a54d-440f-9b83-b9a7800ee5b8",
+    "save": "lab-concord-nh-helper-20260924",
+    "wallMs": 157154,
+    "actions": 83,
+    "receivedReceipts": 83,
+    "refused": 60,
+    "reads": 80,
+    "result": {
+      "task": "T1",
+      "completed": true,
+      "evidence": {
+        "campfires": [
+          5672
+        ],
+        "configuredBills": [
+          "Bill_CookMealSimple_0"
+        ],
+        "completedBills": [
+          "Bill_CookMealSimple_0"
+        ],
+        "mealsCookedSinceStart": 3,
+        "startTick": 2,
+        "configuredTick": 1568,
+        "endTick": 7950,
+        "qualification": "Native state observations; the common recording/input audit must exclude intervening count edits and unrelated cooking."
+      },
+      "missing": []
+    },
+    "findings": [],
+    "notes": [
+      "Post-task paused API checks and same-game-process save/load passed; checkpoint lab-concord-harness-1790404452816"
+    ],
+    "passed": true
+  },
+  "recording": {
+    "file": "actions-1790404300.mp4",
+    "durationSeconds": 158.4,
+    "bytes": 7704605,
+    "sha256": "34b42c4ab92cb0b32aa04db529ef9b368b643a1d914aea322a10919fc55573e7"
+  },
+  "rawArtifactSha256": "6f9eb53975b58c58c566c7d1fefd4fa79d4b9113cc518fb74a3d840505c373e7",
+  "journalSha256": "ad858ba24ceacada75b94c34fae3fb5f745845f1863adae788fa9da872f20453",
+  "preservation": {
+    "saveCount": 439,
+    "unchanged": true,
+    "added": [
+      "lab-concord-harness-1790404452816.rws"
+    ],
+    "modRestored": true
+  },
+  "observations": {
+    "start": {
+      "meta": {
+        "world": "9bdb7961b7a74e76bf06b04f6e92a966",
+        "epoch": "a4bc4d61093f4b2a97899285a11e69f3",
+        "mapId": 0,
+        "tick": 2,
+        "snapshotId": 1,
+        "format": "concord-perception-v1"
+      },
+      "bills": [],
+      "nativeRecords": [
+        {
+          "pawn": 405,
+          "mealsCooked": 0,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 408,
+          "mealsCooked": 0,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 411,
+          "mealsCooked": 0,
+          "thingsConstructed": 0
+        }
+      ],
+      "zoneCount": 0
+    },
+    "configured": {
+      "meta": {
+        "world": "9bdb7961b7a74e76bf06b04f6e92a966",
+        "epoch": "a4bc4d61093f4b2a97899285a11e69f3",
+        "mapId": 0,
+        "tick": 1568,
+        "snapshotId": 16,
+        "format": "concord-perception-v1"
+      },
+      "bills": [
+        {
+          "bench": 5672,
+          "benchDef": "Campfire",
+          "x": 78,
+          "z": 79,
+          "bills": [
+            {
+              "loadId": "Bill_CookMealSimple_0",
+              "recipe": "CookMealSimple",
+              "suspended": false,
+              "ingredientRadius": 999,
+              "restrictedTo": -1,
+              "slavesOnly": false,
+              "mechsOnly": false,
+              "nonMechsOnly": false,
+              "skillRange": {
+                "min": 0,
+                "max": 20
+              },
+              "repeatMode": "RepeatCount",
+              "repeatCount": 3,
+              "targetCount": 10,
+              "paused": false
+            }
+          ]
+        }
+      ],
+      "nativeRecords": [
+        {
+          "pawn": 405,
+          "mealsCooked": 0,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 408,
+          "mealsCooked": 0,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 411,
+          "mealsCooked": 0,
+          "thingsConstructed": 1
+        }
+      ],
+      "zoneCount": 0
+    },
+    "end": {
+      "meta": {
+        "world": "9bdb7961b7a74e76bf06b04f6e92a966",
+        "epoch": "a4bc4d61093f4b2a97899285a11e69f3",
+        "mapId": 0,
+        "tick": 7950,
+        "snapshotId": 67,
+        "format": "concord-perception-v1"
+      },
+      "bills": [
+        {
+          "bench": 5672,
+          "benchDef": "Campfire",
+          "x": 78,
+          "z": 79,
+          "bills": [
+            {
+              "loadId": "Bill_CookMealSimple_0",
+              "recipe": "CookMealSimple",
+              "suspended": false,
+              "ingredientRadius": 999,
+              "restrictedTo": -1,
+              "slavesOnly": false,
+              "mechsOnly": false,
+              "nonMechsOnly": false,
+              "skillRange": {
+                "min": 0,
+                "max": 20
+              },
+              "repeatMode": "RepeatCount",
+              "repeatCount": 0,
+              "targetCount": 10,
+              "paused": false
+            }
+          ]
+        }
+      ],
+      "nativeRecords": [
+        {
+          "pawn": 405,
+          "mealsCooked": 2,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 408,
+          "mealsCooked": 0,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 411,
+          "mealsCooked": 1,
+          "thingsConstructed": 1
+        }
+      ],
+      "zoneCount": 0
+    },
+    "checkpoint": {
+      "meta": {
+        "world": "9bdb7961b7a74e76bf06b04f6e92a966",
+        "epoch": "a4bc4d61093f4b2a97899285a11e69f3",
+        "mapId": 0,
+        "tick": 7966,
+        "snapshotId": 77,
+        "format": "concord-perception-v1"
+      },
+      "bills": [
+        {
+          "bench": 5672,
+          "benchDef": "Campfire",
+          "x": 78,
+          "z": 79,
+          "bills": [
+            {
+              "loadId": "Bill_CookMealSimple_0",
+              "recipe": "CookMealSimple",
+              "suspended": false,
+              "ingredientRadius": 999,
+              "restrictedTo": -1,
+              "slavesOnly": false,
+              "mechsOnly": false,
+              "nonMechsOnly": false,
+              "skillRange": {
+                "min": 0,
+                "max": 20
+              },
+              "repeatMode": "RepeatCount",
+              "repeatCount": 0,
+              "targetCount": 10,
+              "paused": false
+            }
+          ]
+        }
+      ],
+      "nativeRecords": [
+        {
+          "pawn": 405,
+          "mealsCooked": 2,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 408,
+          "mealsCooked": 0,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 411,
+          "mealsCooked": 1,
+          "thingsConstructed": 1
+        }
+      ],
+      "zoneCount": 2
+    },
+    "restored": {
+      "meta": {
+        "world": "9bdb7961b7a74e76bf06b04f6e92a966",
+        "epoch": "f88e02d056b7445e8a327d21638d21ce",
+        "mapId": 0,
+        "tick": 7967,
+        "snapshotId": 78,
+        "format": "concord-perception-v1"
+      },
+      "bills": [
+        {
+          "bench": 5672,
+          "benchDef": "Campfire",
+          "x": 78,
+          "z": 79,
+          "bills": [
+            {
+              "loadId": "Bill_CookMealSimple_0",
+              "recipe": "CookMealSimple",
+              "suspended": false,
+              "ingredientRadius": 999,
+              "restrictedTo": -1,
+              "slavesOnly": false,
+              "mechsOnly": false,
+              "nonMechsOnly": false,
+              "skillRange": {
+                "min": 0,
+                "max": 20
+              },
+              "repeatMode": "RepeatCount",
+              "repeatCount": 0,
+              "targetCount": 10,
+              "paused": false
+            }
+          ]
+        }
+      ],
+      "nativeRecords": [
+        {
+          "pawn": 405,
+          "mealsCooked": 2,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 408,
+          "mealsCooked": 0,
+          "thingsConstructed": 0
+        },
+        {
+          "pawn": 411,
+          "mealsCooked": 1,
+          "thingsConstructed": 1
+        }
+      ],
+      "zoneCount": 2
+    }
+  },
+  "refusals": [
+    {
+      "action": "work_priority",
+      "reason": "Alvin cannot do haul",
+      "source": "harness",
+      "count": 1
+    },
+    {
+      "action": "place_blueprint",
+      "reason": "Space already occupied.",
+      "source": "game",
+      "count": 1
+    },
+    {
+      "action": "bill",
+      "reason": "unknown recipe",
+      "source": "harness",
+      "count": 1
+    },
+    {
+      "action": "work_priority",
+      "reason": "Stale or missing world/load/map identity",
+      "source": "harness",
+      "count": 1
+    },
+    {
+      "action": "zone",
+      "reason": "unknown def NoSuchDef",
+      "source": "harness",
+      "count": 2
+    },
+    {
+      "action": "zone",
+      "reason": "cell belongs to another zone",
+      "source": "harness",
+      "count": 1
+    },
+    {
+      "action": "zone",
+      "reason": "cell cannot be zoned",
+      "source": "harness",
+      "count": 52
+    },
+    {
+      "action": "bill_edit",
+      "reason": "a forever bill has no count",
+      "source": "harness",
+      "count": 1
+    }
+  ]
+}
