@@ -162,8 +162,10 @@ namespace Concord {
                 }else{
                     var def=DesignationKind(r.mode);
                     bool present=r.mode=="mine"?Map.designationManager.DesignationAt(c,def)!=null:affected.Any(t=>Map.designationManager.DesignationOn(t,def)!=null);
-                    var label=labels.Count>0?Phrase.List(labels):"ground";
-                    if(r.mode=="deconstruct"&&affected.Any(t=>t.Destroyed))receipt.narration=Phrase.Core("deconstructed the "+label+" "+HarnessNarration.Where(c));
+                    var confirmed=affected.Select((t,i)=>new{thing=t,label=labels[i]}).Where(x=>Map.designationManager.DesignationOn(x.thing,def)!=null).Select(x=>x.label).ToList();
+                    var destroyed=affected.Select((t,i)=>new{thing=t,label=labels[i]}).Where(x=>x.thing.Destroyed).Select(x=>x.label).ToList();
+                    var named=r.mode=="mine"?labels:confirmed;var label=named.Count>0?Phrase.List(named):"ground";
+                    if(r.mode=="deconstruct"&&destroyed.Count>0)receipt.narration=Phrase.Core("deconstructed the "+Phrase.List(destroyed)+(confirmed.Count>0?"; marked the "+Phrase.List(confirmed)+" for deconstruction":"")+" "+HarnessNarration.Where(c));
                     else if(present)receipt.narration=Phrase.Core(Phrase.DesignationVerb(r.mode,label)+" "+HarnessNarration.Where(c));
                     else{receipt.detail+="; no matching designation present after accept";receipt.narration=Phrase.Core("gave "+Phrase.A(r.mode+" order")+", but the game recorded no matching order");}
                 }
