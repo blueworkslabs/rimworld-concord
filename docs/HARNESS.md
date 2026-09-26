@@ -498,14 +498,17 @@ T1 is closed, and its interface stays as it was run. From T2 on, `look` also ans
 - **Source:** every answer comes from the build designator's own `CanDesignateCell`, the check the
   UI runs under the build cursor (GenConstruct.CanPlaceBlueprintAt with the chosen rotation and
   material). `place_blueprint` builds its designator through the same helper (`BuildDesignator`),
-  so the query and the action cannot disagree.
+  so they use the same validation at the same game state; later changes can invalidate an earlier suggestion.
+- **Defaults:** omitted rotation is North; omitted material uses `GenStuff.DefaultStuffFor`,
+  not the UI selection based on available resource counts. Supply `rot`/`stuff` to override.
 - **Read-only:** nothing is placed, no receipt is stored, and the game is not unpaused.
-- **Fog:** fogged cells are never offered. A fogged asked-for cell gets the game's own
-  "undiscovered" refusal.
+- **Fog:** every cell in the rotated footprint must be revealed before native inspection.
+  A footprint crossing fog receives a `harness` refusal; candidates crossing fog are excluded.
+  This guard is shared with `place_blueprint`, since the native check only guards the anchor.
 - **Refusals:** a refusal at the asked-for cell is an answer, not a tool error. It is labelled
   `game` (the game's reason) or `harness` (not buildable, not researched, wrong material).
 - **Journal:** it counts as an observation.
 
-This replaces trial-and-error placement: the T1 rehearsal controller probed rings of
-`place_blueprint` calls until one was accepted. The harness tool description changes with this,
+This supports placement discovery without trial-and-error action calls. The historical 53
+rejected cell probes were post-task zone checks, not campfire placement by a T1 controller. The harness tool description changes with this,
 so a new controller proof is needed before T2 pairs.

@@ -131,3 +131,7 @@ wire receipts, full snapshot/digest and size counts. Not a benchmark or model ru
 ## 2026-09-26 — completed real-controller rehearsal and three scored pairs
 
 [Third rehearsal](../evidence/benchmark-rehearsal-3-2026-09-26/README.md) · [three scored T1 pairs](../evidence/benchmark-scored-three-2026-09-26/README.md): separate fresh-context sets, unchanged frozen save/task/settings. All scored arms completed; alternating order, full input/usage receipts, recordings and earlier failures retained. All 440 saves unchanged; prior mod restored and staging stopped. Task-specific measurements, not billed cost or general gameplay claims.
+
+## 2026-09-26 — placement query acceptance
+
+[Recorded scripted acceptance](../evidence/placement-2026-09-26/README.md): occupied/free queries, suggested-cell action and two fog-footprint rotations passed; paused full snapshots unchanged across queries. Private cleanup verification recovered from a filename collision; all 440 saves and prior mod preserved. No model calls; T1 closed.
