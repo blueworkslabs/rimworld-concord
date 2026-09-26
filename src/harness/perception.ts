@@ -137,7 +137,7 @@ export function look(s:Snapshot,raw:unknown){
  * sees them at a glance, aggregated by def (total, stacks, rough location), never as individual
  * stacks; `look` (by def, category or area) gives the stacks. Everything else is kept and fitted
  * with the shared loop, least relevant first (filth and corpse groups, far things, old letters,
- * zone cells, each pawn's weakest thoughts); the fitted note states what was left out. The caller
+ * zone cells; full thoughts remain); the fitted note states what was left out. The caller
  * keeps the full snapshot in the record. */
 const fitted=(t:Record<string,number>,fits:boolean,changed:boolean)=>({omitted:Object.fromEntries(Object.entries(t).filter(([,n])=>n>0)),fits,
   ...(changed?{note:'State was omitted to fit. Use look (by area, category, def, capability, pawn or section) to retrieve it.'}:{})});
@@ -188,5 +188,5 @@ export function digest(s:Snapshot,limit=DIGEST_LIMIT){
     ['things',()=>d.map.things,20],['letters',()=>d.letters,3],['zoneCells',()=>d.zones.find((z:any)=>z.cells.length)?.cells,0],['itemGroups',()=>d.map.items,10]] as const,
     ()=>Buffer.byteLength(JSON.stringify(d)),limit,{},t=>{d.fitted=fitted(t,false,true);});
   d.fitted=fitted(r.trimmed,r.fits,r.changed);
-  return d as Omit<Snapshot,'map'>&{map:any;fitted:{omitted:Record<string,number>;fits:boolean;note?:string}};
+  return d as Omit<Snapshot,'map'|'pawns'>&{map:any;pawns:ReturnType<typeof compactPawn>[];fitted:{omitted:Record<string,number>;fits:boolean;note?:string}};
 }
