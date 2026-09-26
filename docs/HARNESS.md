@@ -557,3 +557,51 @@ Freeze task text, save hash and interfaces within each three-pair set. Use fresh
 Recording-first cold reads and all original failures remain required. Preserve the
 T1 reporting columns and qualify sampled game-time/phase milestones; there are no
 T2/T3 scored results in this setup evidence.
+
+## Receipt-backed narration (Clawd, 2026-09-26; phase 2 step A.1)
+
+Every game-editing `act` request that reaches the game now leaves one line in the colony's voice,
+with the core as the decision-maker (`mod/HarnessNarration.cs`).
+
+- **When and from what.** The line is written after the game has answered, from what the game
+  reads back, not from the request:
+  - blueprint: the def and material label;
+  - bill: recipe, repeat mode and count as stored;
+  - zone: cell count after the change, and the allowed defs the filter actually holds;
+  - work priority: the priority read back;
+  - forbid: the forbidden state before and after;
+  - area restriction: the restriction now set.
+
+  An accepted blueprint or bill is narrated as placed or added, never as built or cooked. An
+  accepted designation that left no designation on the thing says so. A forbid that changed
+  nothing says "no change".
+- **Where.** Only what the map supports: the room role the game assigns (or "outdoors" or
+  "indoors") and the nearest visible colony building within 4.5 cells.
+- **Refusals.** A refusal gets its own line with the actual reason, labelled as the game's refusal
+  or as a harness check that never reached the game. An unexpected native failure is narrated as
+  "outcome uncertain". No line ever says a pawn agreed or refused.
+- **Once per request.** The line is stored on the saved receipt (`narration`, plus `narrated`:
+  `shown`, `display failed: …` or `none`). A replayed or retried request, or one after a restore,
+  returns its stored receipt without showing it again. A stale world/map identity writes nothing.
+- **Seen by the viewer.** It appears as a native top-left message (silent, kept in the message
+  history, pointing at the blueprint, bench, pawn or thing), which shows in the recording even
+  while the game is paused. The Concord tab lists the lines as `Core · RECORD`, merged in game-time
+  order with any coordinator entries. In a harness run, with no coordinator report, the tab shows
+  them alone.
+- **Not for the controller.** The snapshot's receipts carry the narration, but the controller's
+  digest strips it: the controller already has each outcome and reason, and the top-left messages
+  remain outside perception. The `act` reply is the receipt, narration included.
+- **Time controls.** Pause, play and speed are not narrated. They stay a separate `control`
+  category in the call journal.
+
+Checked locally:
+- the mod compiles against the staging assemblies, and the offline Harmony check is clean;
+- `scripts/test-mod-phrases.sh` runs the wording under mono (local only: it needs the built mod);
+- TS tests cover the schemas and the digest stripping.
+
+Not yet checked in a live game. A staging check is needed for:
+- the messages in a recording;
+- a repeat request ID showing nothing new;
+- a save/load keeping the lines without re-showing them.
+
+The legibility read (four of five sealed actions) needs Fable's rubric and a frozen run.

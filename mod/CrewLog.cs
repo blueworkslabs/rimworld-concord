@@ -61,6 +61,8 @@ namespace Concord {
   private bool expanded=false,topics=false;
   private Vector2 compactScroll,boardScroll;
   private CrewEntry[] heldEntries;private string heldEpoch;
+  /** Coordinator entries plus the core's receipt-backed harness action records, in game-time order. */
+  private static CrewEntry[] WithCore(CrewEntry[] entries){return entries.Concat(HarnessNarration.Entries()).OrderBy(e=>e.tick).ToArray();}
   private static string ActivityLabel(Pawn pawn){
    if(pawn==null)return "not on this map";if(pawn.CurJobDef==null)return "idle";
    switch(pawn.CurJobDef.defName){case "Concord_Eat":return "eating chosen food";case "Concord_Rescue":return "agreed rescue";case "Concord_Cook":return "agreed cooking";case "Concord_BuildMaterials":return "delivering building materials";case "Concord_BuildFinish":return "agreed construction";case "Wait_Wander":case "GotoWander":return "wandering";case "Ingest":return "native eating";case "LayDown":return "resting";case "Wait":case "Wait_MaintainPosture":return "waiting";default:return "other native activity";}
@@ -83,7 +85,17 @@ namespace Concord {
     string clock=Find.TickManager.Paused?(DecisionPauses.Count>0?"Paused for deliberation":"Paused · game / operator"):"Game running";
     Widgets.Label(new Rect(0,30,rect.width,42),clock+" · tick "+Find.TickManager.TicksGame+"\n"+(fresh?"Current report":"Saved / stale report — not current"));
     if(heldEpoch!=(w==null?null:w.epoch)){heldEntries=null;heldEpoch=w==null?null:w.epoch;compactScroll=Vector2.zero;}
-    if(r==null){Widgets.Label(new Rect(0,80,rect.width,90),"No coordinator report. This observer view cannot start agents or issue jobs.");return;}
+    if(r==null){
+     var own=HarnessNarration.Entries().Reverse().ToArray();
+     if(own.Length==0){Widgets.Label(new Rect(0,80,rect.width,90),"No coordinator report. This observer view cannot start agents or issue jobs.");return;}
+     // Harness runs have no coordinator report: the core's receipt-backed action records alone.
+     Widgets.Label(new Rect(0,80,rect.width,28),"Core actions · receipt-backed records");
+     var list=new Rect(0,110,rect.width,Math.Max(40,rect.height-110));float lw=rect.width-22;
+     float lt=own.Sum(e=>Text.CalcHeight(Clock.At(e.tick,Clock.ForEntry(e)),lw)+Text.CalcHeight(e.text,lw)+10);
+     Widgets.BeginScrollView(list,ref compactScroll,new Rect(0,0,lw,Math.Max(lt,list.height)));float ly=0;
+     foreach(var e in own){var hd="Core · RECORD · "+Clock.At(e.tick,Clock.ForEntry(e));float hh=Text.CalcHeight(hd,lw),th=Text.CalcHeight(e.text,lw);GUI.color=new Color(.65f,.85f,1f);Widgets.Label(new Rect(0,ly,lw,hh),hd);GUI.color=Color.white;Widgets.Label(new Rect(0,ly+hh,lw,th),e.text);ly+=hh+th+10;}
+     Widgets.EndScrollView();return;
+    }
     float y=78;
     foreach(var s in r.sharedStatus.Take(3)){
      bool current=fresh&&s.fresh&&Find.TickManager.TicksGame-s.tick<=120;
@@ -96,12 +108,12 @@ namespace Concord {
     Widgets.BeginScrollView(new Rect(0,y,rect.width,76),ref boardScroll,new Rect(0,0,rect.width-20,Math.Max(76,statusHeight)));
     Widgets.Label(new Rect(0,0,rect.width-20,statusHeight),status);Widgets.EndScrollView();y+=80;
     if(Widgets.ButtonText(new Rect(0,y,105,27),topics?"Events":"Core topics")){topics=!topics;compactScroll=Vector2.zero;}
-    if(!topics&&Widgets.ButtonText(new Rect(112,y,90,27),heldEntries==null?"Hold feed":"Live feed")){heldEntries=heldEntries==null?r.entries.ToArray():null;compactScroll=Vector2.zero;}
+    if(!topics&&Widgets.ButtonText(new Rect(112,y,90,27),heldEntries==null?"Hold feed":"Live feed")){heldEntries=heldEntries==null?WithCore(r.entries):null;compactScroll=Vector2.zero;}
     Widgets.Label(new Rect(210,y,rect.width-210,27),topics?"Core interpretation":heldEntries==null?"Speech ≠ outcome":"Feed held");y+=33;
     var area=new Rect(0,y,rect.width,Math.Max(40,rect.height-y));float width=rect.width-22;
     if(topics){string board="Core-authored topic board\n"+(String.IsNullOrEmpty(r.topicText)?"No topics reported.":r.topicText);float h=Text.CalcHeight(board,width);Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(h,area.height)));Widgets.Label(new Rect(0,0,width,h),board);Widgets.EndScrollView();}
     else{
-     var entries=(heldEntries??r.entries).Reverse().ToArray();
+     var entries=(heldEntries??WithCore(r.entries)).Reverse().ToArray();
      Func<CrewEntry,string> heading=e=>(e.kind=="message"?e.actor+" → "+e.recipient:e.actor+" · RECORD")+" · "+Clock.At(e.tick,Clock.ForEntry(e));
      float total=entries.Sum(e=>Text.CalcHeight(heading(e),width)+Text.CalcHeight(e.text,width)+14);
      Widgets.BeginScrollView(area,ref compactScroll,new Rect(0,0,width,Math.Max(total,area.height)));float ey=0;
@@ -139,7 +151,7 @@ namespace Concord {
      string text=(fresh&&Find.TickManager.TicksGame-r.tick<=120?"Shared local sightings":"Saved / stale sightings — current supplies unknown")+"\n"+r.foodText;
      float h=Text.CalcHeight(text,rect.width-24);Widgets.BeginScrollView(new Rect(0,334,rect.width,rect.height-334),ref supplyScroll,new Rect(0,0,rect.width-24,Math.Max(h,rect.height-340)));Widgets.Label(new Rect(0,0,rect.width-24,h),text);Widgets.EndScrollView();return;
     }
-    var entries=r.entries.Where(e=>filter=="all"||e.kind==filter).Reverse().ToArray();float width=rect.width-24;
+    var entries=WithCore(r.entries).Where(e=>filter=="all"||e.kind==filter).Reverse().ToArray();float width=rect.width-24;
     float total=entries.Sum(e=>36+Text.CalcHeight(e.text,width));
     Widgets.BeginScrollView(new Rect(0,334,rect.width,rect.height-334),ref logScroll,new Rect(0,0,width,Math.Max(total,rect.height-340)));
     y=0;

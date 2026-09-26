@@ -42,7 +42,7 @@ export const Snapshot=z.object({
   research:z.object({project:z.string().nullable(),label:z.string().nullable(),progress:z.number().nullable()}),
   pawns:z.array(Pawn),
   threats:z.array(z.object({id,def:z.string(),label:z.string(),x:id,z:id,hostile:z.boolean(),manhunter:z.boolean(),predator:z.boolean(),downed:z.boolean()})),
-  receipts:z.array(z.object({seq:z.number().int(),tick:z.number().int(),requestId:z.string(),action:z.string().nullable(),ok:z.boolean(),id:z.string().nullable(),reason:z.string().nullable(),source:z.string().nullable(),detail:z.string().nullable()})),
+  receipts:z.array(z.object({seq:z.number().int(),tick:z.number().int(),requestId:z.string(),action:z.string().nullable(),ok:z.boolean(),id:z.string().nullable(),reason:z.string().nullable(),source:z.string().nullable(),detail:z.string().nullable(),narration:z.string().nullable().optional(),narrated:z.string().nullable().optional()})),
   omitted:z.array(z.string()),
 });
 export type Snapshot=z.infer<typeof Snapshot>;
@@ -185,6 +185,8 @@ export function digest(s:Snapshot,limit=DIGEST_LIMIT){
   // Zone geometry remains unless budget trimming explicitly removes cells.
   for(const z of d.zones)z.cellCount=z.cells.length;
   d.letters.sort((a:any,b:any)=>a.tick-b.tick);
+  // Narration is for the viewer; the controller already has each receipt's outcome and reason.
+  for(const r of d.receipts){delete r.narration;delete r.narrated;}
   const r=trimToFit([['filthGroups',()=>d.map.filth,0],['corpseGroups',()=>d.map.corpses,0],['structureGroups',()=>d.map.structures,0],['plantGroups',()=>d.map.plants,5],
     ['things',()=>d.map.things,20],['letters',()=>d.letters,3],['zoneCells',()=>d.zones.find((z:any)=>z.cells.length)?.cells,0],['itemGroups',()=>d.map.items,10]] as const,
     ()=>Buffer.byteLength(JSON.stringify(d)),limit,{},t=>{d.fitted=fitted(t,false,true);});
