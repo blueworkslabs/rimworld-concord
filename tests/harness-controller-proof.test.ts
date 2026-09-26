@@ -1,8 +1,9 @@
+import {armPermissions,CONTROLLER_CODEX_HOME} from '../src/harness/controller-launch.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {armFindings,compareArms,DECLARED,type ArmEvidence} from '../src/harness/controller-proof.js';
 
-const ev=(arm:'harness'|'ui',over:Partial<ArmEvidence>={}):ArmEvidence=>({arm,controllerVersion:'codex-cli 0.153.4',exit:0,responsesRequests:1,toolsCarrier:'additional_tools input item',
+const ev=(arm:'harness'|'ui',over:Partial<ArmEvidence>={}):ArmEvidence=>({launchPolicy:{codexHome:CONTROLLER_CODEX_HOME,approval:'never',sandbox:'read-only',permissions:armPermissions(arm)},arm,controllerVersion:'codex-cli 0.153.4',exit:0,responsesRequests:1,toolsCarrier:'additional_tools input item',
   tools:[{type:'namespace',name:'functions',sha256:'shared',tools:['list_mcp_resources','list_mcp_resource_templates','read_mcp_resource']},{type:'namespace',name:'mcp__arm',sha256:arm,tools:[...DECLARED[arm]]}],
   instructionsSha256:null,instructionsBytes:0,input:[{type:'message',role:'developer',sha256:'base',bytes:21521},{type:'message',role:'user',sha256:'task',bytes:834}],
   model:'gpt-6-astra',reasoning:{effort:'medium'},toolChoice:'auto',parallelToolCalls:true,stderrTail:'',...over});
@@ -22,4 +23,20 @@ test('the controller proof rejects an extra built-in, a missing arm server, a ch
   assert.match(compareArms(ev('harness'),ev('ui',{input:[{type:'message',role:'developer',sha256:'other',bytes:1},ev('ui').input[1]!]})).join(),/context/);
   assert.match(compareArms(ev('harness'),ev('ui',{reasoning:{effort:'high'}})).join(),/reasoning differs/);
   assert.match(compareArms(ev('harness'),ev('ui',{tools:[{...ev('ui').tools[0]!,sha256:'changed'},ev('ui').tools[1]!]})).join(),/non-arm tools differ/);
+});
+
+
+test('noninteractive permissions cover exactly the declared arm tools, with unknown tools blocked',()=>{
+ for(const arm of ['harness','ui'] as const){
+  const permissions=armPermissions(arm);
+  assert.deepEqual(permissions['mcp_servers.arm.enabled_tools'],DECLARED[arm]);
+  assert.equal(permissions['mcp_servers.arm.default_tools_approval_mode'],'prompt');
+  const approved=Object.entries(permissions).filter(([,value])=>value==='approve').map(([key])=>key);
+  assert.deepEqual(approved.sort(),DECLARED[arm].map(name=>'mcp_servers.arm.tools.'+name+'.approval_mode').sort());
+  assert.equal(approved.length,5);
+ }
+});
+
+test('proof rejects old receipts without the explicit permission policy',()=>{
+ assert.match(armFindings(ev('harness',{launchPolicy:undefined})).join(),/missing or changed.*policy/);
 });

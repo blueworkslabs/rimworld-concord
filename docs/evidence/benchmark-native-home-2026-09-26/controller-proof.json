@@ -1,0 +1,177 @@
+{
+  "runId": "9ddcc464-a3a0-4314-984c-57e5148b7333",
+  "at": "2026-09-26T10:49:44.228Z",
+  "model": "gpt-6-astra",
+  "reasoning": "medium",
+  "controllerVersion": "codex-cli 0.153.4",
+  "task": {
+    "id": "T1",
+    "sha256": "edfd980f312a74ee20dbbf0e9fbe64e69071561530ee6ffdb6f76c57be8ec9dd"
+  },
+  "verified": true,
+  "findings": [],
+  "evidence": {
+    "harness": {
+      "launchPolicy": {
+        "codexHome": "/home/clawd/.codex",
+        "approval": "never",
+        "sandbox": "read-only",
+        "permissions": {
+          "mcp_servers.arm.enabled_tools": [
+            "observe",
+            "look",
+            "act",
+            "time",
+            "report_done"
+          ],
+          "mcp_servers.arm.default_tools_approval_mode": "prompt",
+          "mcp_servers.arm.tools.observe.approval_mode": "approve",
+          "mcp_servers.arm.tools.look.approval_mode": "approve",
+          "mcp_servers.arm.tools.act.approval_mode": "approve",
+          "mcp_servers.arm.tools.time.approval_mode": "approve",
+          "mcp_servers.arm.tools.report_done.approval_mode": "approve"
+        }
+      },
+      "arm": "harness",
+      "controllerVersion": "codex-cli 0.153.4",
+      "exit": 0,
+      "responsesRequests": 1,
+      "toolsCarrier": "additional_tools input item",
+      "tools": [
+        {
+          "type": "namespace",
+          "name": "functions",
+          "sha256": "186b6722b85513b8980ceef81802764f62d4abfafcf0f5c5dbd929fed435f26a",
+          "tools": [
+            "list_mcp_resources",
+            "list_mcp_resource_templates",
+            "read_mcp_resource"
+          ]
+        },
+        {
+          "type": "namespace",
+          "name": "mcp__arm",
+          "sha256": "ad86f0c75f99759dc2c66a81bac66c91e31c26cc7c15c5b24e5a99fdb543f196",
+          "tools": [
+            "act",
+            "look",
+            "observe",
+            "report_done",
+            "time"
+          ]
+        }
+      ],
+      "instructionsSha256": null,
+      "instructionsBytes": 0,
+      "input": [
+        {
+          "type": "message",
+          "role": "developer",
+          "sha256": "c281f982b44ac3e67d81bdcc3672076531b183a292c8fe58524044af157949e6",
+          "bytes": 21577
+        },
+        {
+          "type": "message",
+          "role": "developer",
+          "sha256": "510aff651d47a5f582ee7f6c486a487ac7c9e510bba9622101cb38e8bb787636",
+          "bytes": 1803
+        },
+        {
+          "type": "message",
+          "role": "user",
+          "sha256": "6e1443f7895c80f8c783f9d1516094b1ef54eac875b2b28c44adb4f6a482ac8e",
+          "bytes": 877
+        }
+      ],
+      "model": "gpt-6-astra",
+      "reasoning": {
+        "effort": "medium",
+        "context": "all_turns"
+      },
+      "toolChoice": "auto",
+      "parallelToolCalls": false,
+      "stderrTail": ""
+    },
+    "ui": {
+      "launchPolicy": {
+        "codexHome": "/home/clawd/.codex",
+        "approval": "never",
+        "sandbox": "read-only",
+        "permissions": {
+          "mcp_servers.arm.enabled_tools": [
+            "screenshot",
+            "click",
+            "key",
+            "type",
+            "report_done"
+          ],
+          "mcp_servers.arm.default_tools_approval_mode": "prompt",
+          "mcp_servers.arm.tools.screenshot.approval_mode": "approve",
+          "mcp_servers.arm.tools.click.approval_mode": "approve",
+          "mcp_servers.arm.tools.key.approval_mode": "approve",
+          "mcp_servers.arm.tools.type.approval_mode": "approve",
+          "mcp_servers.arm.tools.report_done.approval_mode": "approve"
+        }
+      },
+      "arm": "ui",
+      "controllerVersion": "codex-cli 0.153.4",
+      "exit": 0,
+      "responsesRequests": 1,
+      "toolsCarrier": "additional_tools input item",
+      "tools": [
+        {
+          "type": "namespace",
+          "name": "functions",
+          "sha256": "186b6722b85513b8980ceef81802764f62d4abfafcf0f5c5dbd929fed435f26a",
+          "tools": [
+            "list_mcp_resources",
+            "list_mcp_resource_templates",
+            "read_mcp_resource"
+          ]
+        },
+        {
+          "type": "namespace",
+          "name": "mcp__arm",
+          "sha256": "adbb79daa9d95e7dfd1cdcafaeecdda8f4a22ebdb744f3306b458188509b80c1",
+          "tools": [
+            "click",
+            "key",
+            "report_done",
+            "screenshot",
+            "type"
+          ]
+        }
+      ],
+      "instructionsSha256": null,
+      "instructionsBytes": 0,
+      "input": [
+        {
+          "type": "message",
+          "role": "developer",
+          "sha256": "c281f982b44ac3e67d81bdcc3672076531b183a292c8fe58524044af157949e6",
+          "bytes": 21577
+        },
+        {
+          "type": "message",
+          "role": "developer",
+          "sha256": "510aff651d47a5f582ee7f6c486a487ac7c9e510bba9622101cb38e8bb787636",
+          "bytes": 1803
+        },
+        {
+          "type": "message",
+          "role": "user",
+          "sha256": "6e1443f7895c80f8c783f9d1516094b1ef54eac875b2b28c44adb4f6a482ac8e",
+          "bytes": 877
+        }
+      ],
+      "model": "gpt-6-astra",
+      "reasoning": {
+        "effort": "medium",
+        "context": "all_turns"
+      },
+      "toolChoice": "auto",
+      "parallelToolCalls": false,
+      "stderrTail": ""
+    }
+  }
+}

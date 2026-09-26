@@ -404,9 +404,86 @@ text for a future matched run; historical evidence is untouched. No inference or
 comparison has run through this runner. The native-auth controller host and game host are
 separate; the runner currently assumes local game files and display. A trusted cross-host
 transport (or an operator-provided native-auth local controller) must be verified before a
-real-controller pair. Do not copy credentials or silently change the billing route.
+real-controller pair. Do not copy credentials or silently change the billing route. (Now wired: see *Cross-host pairs* below.)
 After that rehearsal, freeze the matched model/settings and alternate three runs per arm.
 
 [Recorded lifecycle evidence](evidence/benchmark-lifecycle-2026-09-26/README.md): initial
 failed harness attempt retained; corrected scripted T1 and UI/speed checks passed. These
 are not the real-controller rehearsal pair or a scored comparison.
+
+## Cross-host pairs (Clawd, 2026-09-26)
+
+The native-auth controller stays on the controller host; the game, display and lab stay on the
+game host. No new transport: the wiring reuses the ongoing runner's shape, `ssh -o BatchMode=yes`
+with JSON lines on stdio.
+
+- **Arm command.** For both arms, the controller's `arm` MCP server is
+  `ssh -o BatchMode=yes -o ConnectTimeout=10 -T <target> 'cd <repo> && exec env <arm env> node dist/trials/<arm>-mcp-server.js'`
+  (`remoteArmCommand` in `src/harness/controller-launch.ts`). The ssh session's stdio is the MCP
+  channel. The env values are the game host's paths, sent by the game-side runner and
+  single-quoted. `exec` keeps the server the session's process-group leader, so `registerArm` and
+  `stopArm` work unchanged on the game host.
+- **EOF exit.** Both arm servers terminate their registered process group on stdin EOF/error or
+  transport signals, including an in-flight tool and its same-group children; they do not
+  drain queued calls after EOF. On the game host, `stopArm` still stops the arm first.
+- **Lock scope.** `scripts/run-benchmark-pair.sh` (game host) takes the lab lock
+  `$RIMWORLD_LAB_ROOT/concord/coordinator.lock` once and runs both arms of the pair under it. Each
+  run is `trials/benchmark-run.ts --controller=host`, which keeps its game-side duties: save check
+  and load, hidden start/configured/end snapshots, the recording, the timer, the call journal and
+  the receipt. The recorder is the existing one on the game host. Arm servers and
+  `benchmark-run` refuse to start unless the lock is held (`assertLabLockHeld`: a non-blocking
+  `flock` must return contention, not success or an operational error). The controller proof holds its scratch lab's lock.
+- **Controller host.** `node dist/trials/benchmark-host.js /abs/config.json --order=harness,ui
+  --task=T1 --save=… --model=… --reasoning=… --ui-server=/abs/on/game/host.json
+  (--controller-proof=/abs.json | --rehearsal=true)`, with config `{sshTarget, remoteRepo, labRoot, display, xauthority, label?}`.
+  Display and Xauthority are game-host settings; `label` defaults to `unscored`.
+  Steps:
+  1. Check the controller proof against this host's controller.
+  2. Require the game host's build (`dist/src`, `dist/trials`, the pair script and `T1.json`) to
+     hash identically to the local build.
+  3. Start the pair script over ssh.
+  4. For each `ready`: check the arm order, model, reasoning, task hash and rehearsal flag; run the
+     pre-launch check with the remote arm (outside the timer), cleaning up on the game host;
+     reply `prepared`, await game-host `start`, then spawn the controller and reply `launched`.
+  5. Relay each controller event line, then `controller-exit`.
+  6. On `stop`, abort pending launch work and kill the controller. Channel closure or an
+     operator stop also cancels preflight, so it cannot spawn a controller afterward.
+  Receipts come back over the wire and are also kept on the game host.
+- **Wire** (`src/harness/controller-wire.ts`). From the game host: `ready`, `start`, `stop`, `receipt`.
+  From the controller host: `prepared`, `launched`, `launch-failed`, `controller-event`,
+  `controller-exit`. Every message carries the `runId`. Lines that are not wire messages are kept
+  aside and never acted on. If the channel closes mid-run, the game side stops the run.
+- **Timing.** The timer starts on the game host immediately before sending permission to start.
+  The controller host cannot spawn before receiving it, so SSH latency is included without
+  subtracting timestamps from different machines. Bytes per call are journalled on the game host as before. Receipts record
+  `controllerHost: "remote"`.
+
+Evidence so far (local): unit tests cover the command's shell round trip (quotes, `$`, backticks
+and spaces survive), target and repo validation, lock refusal, the EOF exit and the wire. A
+pre-launch check drove both arms through the ssh-shaped command (a local shim in place of ssh) and
+compared them with the local arms: no findings, identical tool and context hashes, no arm process
+left behind. Actual SSH scripted and real-controller attempt evidence is linked below; authenticated gameplay remains unverified.
+
+### Native controller readiness (2026-09-26)
+
+Before real local/cross-host execution, the launcher requires an existing native ChatGPT
+login in the operator’s native home (`codex login status`). The readiness guard, isolation
+proof and both standalone launch paths explicitly set `CODEX_HOME` to the operator’s
+`~/.codex` (`/home/clawd/.codex` on our controller host), ignoring inherited per-agent
+homes. Launch/readiness metadata records that path, never credentials. API-key environment
+variables are removed from the controller environment; no credentials are copied or symlinked.
+Logged-out and API-key modes fail
+before game access; this benchmark never changes billing routes automatically. This
+check is necessary but does not prove provider access. Local-recorder isolation proofs
+verify tools/context only and must not be presented as authentication verification.
+The [first actual SSH pair](evidence/benchmark-ssh-2026-09-26/README.md) records this limit:
+scripted lifecycle passed, while both real controllers failed authentication before input.
+
+
+The noninteractive controller also explicitly authorizes only the five declared tools of its
+selected benchmark arm, using `mcp_servers.arm.enabled_tools` and per-tool
+`approval_mode = "approve"`. Other tools retain `prompt`, which global `never` rejects.
+The filesystem sandbox stays read-only and no shell or additional tool is enabled.
+The native-home rehearsal exposed that listing tools in the isolation proof did not establish
+permission to execute them; a controlled local-provider/stub-tool check verifies execution
+without a game or live model. This does not itself establish gameplay success.

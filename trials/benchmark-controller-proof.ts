@@ -4,6 +4,7 @@
  * receipt for the same model, reasoning, controller version and task is required by scored runs. */
 import {mkdirSync,mkdtempSync,writeFileSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
+import {spawn} from 'node:child_process';
 import {join} from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
 import {recordFirstRequest,compareArms,type ArmEvidence} from '../src/harness/controller-proof.js';
@@ -14,6 +15,8 @@ if(!['low','medium','high'].includes(reasoning))throw Error('reasoning must be l
 const codex=process.env.CODEX_BIN??'codex';
 const taskText=readFileSync(root+'/benchmark/tasks/T1.json','utf8'),task=JSON.parse(taskText);
 const lab=mkdtempSync(join(tmpdir(),'concord-proof-lab-'));mkdirSync(lab+'/concord');
+// The arm servers serve only while the lab lock is held; hold this scratch lab's lock for the proof.
+const holder=spawn('flock',['-n',lab+'/concord/coordinator.lock','sleep','900'],{stdio:'ignore'});await new Promise(r=>setTimeout(r,200));
 const uiBackend=join(lab,'ui-backend.json');writeFileSync(uiBackend,JSON.stringify({command:'/bin/false',args:[],env:{}}));
 const evidence:Partial<Record<'harness'|'ui',ArmEvidence>>={};
 for(const arm of ['harness','ui'] as const){
@@ -23,6 +26,7 @@ for(const arm of ['harness','ui'] as const){
   evidence[arm]=await recordFirstRequest({codex,root,dir,arm,model,reasoning,callLog:dir+'/calls.jsonl',uiServer:arm==='ui'?uiBackend:undefined,env:{RIMWORLD_LAB_ROOT:lab,PATH:process.env.PATH}},
     task.prompt,{},join(lab,`first-request-${arm}.json`));
 }
+holder.kill();
 const findings=compareArms(evidence.harness!,evidence.ui!);
 const receipt={runId:randomUUID(),at:new Date().toISOString(),model,reasoning,controllerVersion:evidence.harness!.controllerVersion,
   task:{id:task.id,sha256:createHash('sha256').update(taskText).digest('hex')},verified:findings.length===0,findings,evidence,privateFirstRequests:lab};
