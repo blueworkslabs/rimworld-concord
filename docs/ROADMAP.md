@@ -77,6 +77,8 @@ The hauling migration uses the signed [strict fallback](trials/HAULING_MIGRATION
 
 The [post-Gate-C follow-up verification](trials/POST_GATE_C_FOLLOWUPS.md) covers items 1–5, including core/reflection evidence matching their fitted inputs. Item 7 is [diagnosed](trials/ATTENTION_EVICTIONS.md) (job churn plus appraisal items that the appraiser-less runner never picks up; a replay of the fixes loses 0 of 17). Per Fable, pawn need bands are now native texture (urgent Food/Rest is queued deliberation). Item 6 is [implemented](CORE.md#a-bounded-review-after-a-wait-post-gate-c-item-6): at most two review wakes per deliberate wait. The later [same-setup pipeline regression](trials/PIPELINE_REGRESSION.md) observed zero attention losses, the heard-message UI and three open-meal recipient exclusions. Two separate first-review nudges fired, but neither chain reached its second review; stop-at-two remains unexercised live. Three fresh-state application rejections remain in the evidence. No new scene verdict or construction/cooking acceptance.
 
+**2026-09-27 documentation-review follow-up:** implemented and mock-tested: all currently emitted haul-hook kinds have explicit native attention routes, so appraiser-less runs can settle new hook batches without model calls. The regression also preserves a pending urgent need through pickup churn. Core capability text no longer offers hauling without configured hauls. Historical saved routes and diagnostics are not rewritten; no new game or live-model evidence ([contract](ATTENTION.md#routing)).
+
 ## Native-intent phase, 2026-09-24 to 2026-09-26 (historical)
 
 Retained as written when agreed on 2026-09-24, with outcomes noted. The 2026-09-25

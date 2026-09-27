@@ -35,6 +35,8 @@ remain unchanged.
 
 Post-Gate-C [follow-ups 6–7](docs/trials/ATTENTION_EVICTIONS.md) add bounded review nudges and preserve pending attention over native churn. The historical replay reproduces 17 losses and predicts 0 under the two buffer corrections with recorded cursors fixed; the later [same-setup live regression](docs/trials/PIPELINE_REGRESSION.md) records zero losses, visible heard-message acknowledgment and open-meal question exclusion. Two separate first-review nudges fired; a complete two-review stop chain remains unexercised live.
 
+The documentation-review follow-up explicitly native-routes all currently emitted haul-hook events and removes unconfigured hauling from the core capability text. Status: implemented and mock-tested; diagnostic events stay archived, unknown kinds still require appraisal, and no new gameplay or live-model run is claimed ([attention routing](docs/ATTENTION.md#routing)).
+
 Post-Gate-C [follow-ups 1–5](docs/trials/POST_GATE_C_FOLLOWUPS.md) add archive removals, request acknowledgments, meal-answer protection and recorded trimmed inputs. Initial verification is split between offline checks and scripted eating; the later [pipeline regression](docs/trials/PIPELINE_REGRESSION.md) adds scoped live evidence, not a new scene verdict.
 
 Also built and exercised in bounded trials: counteroffers with fresh consent, "not

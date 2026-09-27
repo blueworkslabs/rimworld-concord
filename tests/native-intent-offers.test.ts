@@ -43,6 +43,25 @@ class IntentGame implements GameBridge {
   async save(){return {sha256:'hash'};}async load(){}async verify(){}
 }
 async function setup(configure=true){const game=new IntentGame(),store=new Store(':memory:'),c=new Coordinator(store,game);await c.open();await c.initializeCore('Wood needs a home.');if(configure)await c.configureNativeHaul(cfg);return {game,c,store};}
+
+test('core capabilities do not advertise unconfigured hauling but retain configured stockpile work',async()=>{
+ for(const emptyList of [false,true]){
+  const {c,store}=await setup(false);
+  try{
+   if(emptyList)await c.configureNativeHauls([]);
+   const perspective=await c.corePerspective();
+   assert(!perspective.capabilities.some(s=>/haul/i.test(s)));
+   assert(perspective.capabilities.some(s=>s.includes('rescue/campfire construction/simple meals')));
+   assert(!perspective.opportunities.some(o=>o.action.kind==='haul-zone'));
+  }finally{store.close();}
+ }
+ const {c,store}=await setup();
+ try{
+  const perspective=await c.corePerspective();
+  assert(perspective.capabilities.some(s=>s.includes('shared stockpile hauls')));
+  assert(perspective.opportunities.some(o=>o.action.kind==='haul-zone'));
+ }finally{store.close();}
+});
 const say=(kind:'accept'|'refuse'|'defer',reason='because')=>scripted({kind,reason});
 
 test('a pawn the game says cannot haul is not offered, with the reason visible',async()=>{

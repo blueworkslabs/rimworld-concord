@@ -35,6 +35,40 @@ const action={kind:'move' as const,x:8,z:8};
 async function setup(){const game=new Game(),store=new Store(':memory:'),c=new Coordinator(store,game);await c.open();return {game,store,c};}
 async function until(check:()=>boolean){for(let i=0;i<200;i++){if(check())return;await delay(2);}assert.fail('condition not reached');}
 
+test('haul hook batches settle without an appraiser and keep diagnostic events in the archive',async()=>{
+ const kinds=['intent-pretag','intent-pretag-marked','intent-retarget','intent-retarget-unadmitted',
+  'intent-pickup','intent-pickup-skipped','intent-pickup-bound-violation','intent-duplicate-admitted',
+  'intent-nested-end','intent-ledger-violation'];
+ const {game,store,c}=await setup();let calls=0;
+ const backend:AttentionBackend={name:'must-not-call',async reflect(){calls++;return {kind:'continue',reason:'Unexpected model call'};}};
+ try{
+  for(const kind of kinds){
+   game.event(kind,'A','retained diagnostic');
+   assert.equal((await c.attend('A',backend)).status,'native',kind);
+  }
+  const state=c.inspect();
+  assert.equal(state.characters.A!.attention!.cursor,kinds.length);
+  assert.deepEqual(state.characters.A!.experiences!.map(e=>e.event.kind),kinds);
+  assert.equal(store.events().filter(e=>e.event.kind==='native-event').length,kinds.length);
+  assert.equal(calls,0);assert.equal(game.moves,0);
+  assert.equal((await c.attend('A',backend)).status,'idle');
+ }finally{store.close();}
+});
+
+test('haul pickup churn cannot evict a pending urgent need or leak into the reflection event batch',async()=>{
+ const {game,store,c}=await setup();let calls=0,seen:AttentionView|undefined;
+ try{
+  game.event('food','A','0');
+  for(let i=0;i<80;i++)game.event('intent-pickup');
+  await c.observe();
+  assert.equal(c.inspect().diagnostics?.attentionGaps??0,0);
+  assert(c.inspect().characters.A!.experiences!.some(e=>e.event.kind==='food'));
+  const result=await c.attend('A',{name:'urgent',async reflect(view){calls++;seen=view;return {kind:'continue',reason:'Consider hunger'};}});
+  assert.equal(result.status,'continued');assert.equal(calls,1);
+  assert.deepEqual(seen!.events.map(e=>[e.kind,e.detail]),[['food','0']]);
+ }finally{store.close();}
+});
+
 test('routine events do not call a model; need bursts coalesce; significant events bypass appraisal',async()=>{
  const {game,store,c}=await setup();let reflected=0,appraised=0;
  const backend={name:'count',async reflect(view:AttentionView){reflected++;assert(view.events.every(e=>e.pawn==='A'));return {kind:'continue',reason:'Remember this'};}};
