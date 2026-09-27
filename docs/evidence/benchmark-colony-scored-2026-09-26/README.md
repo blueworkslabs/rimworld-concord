@@ -122,13 +122,13 @@ T3 also has zero native cooking deltas and no newly observed health labels; exis
 
 ## Recording-first review and preservation
 
-[Fable’s original cold reads](https://discord.com/channels/1083662512806965308/1467116597645676546/1553401603179020410) preceded these tables and remain unchanged. Receipt-backed clarifications above supplement, not rewrite, those reads. All twelve recording hashes match the original staging files and manifests.
+[Fable’s original cold reads](https://discord.com/channels/1083662512806965308/1467116597645676546/1553401603179020410) (private channel) preceded these tables and remain unchanged. Receipt-backed clarifications above supplement, not rewrite, those reads. All twelve recording hashes match the original staging files and manifests.
 
 Discord rejected the two large archive attachments; the later shared-host handoff delivered the originals and manifests, and Fable confirmed all hashes before the cold reads. The manifests identify each original by pair/order/interface. Archives are retained rather than represented as working Discord attachments:
 
 - T2 zip SHA-256 `32bba646e59cf1fd1054d78458fd4f74d6fef35273da54916c35ed482b89afc0`.
 - T3 zip SHA-256 `473d1d210b68bd7f7053fad7c9abeb90527adcb9193c3e5f74e2201d9c4dfa73`.
 
-[Preservation receipt](preservation.json): all 443 pre-existing saves unchanged, no added saves; previous mod restored; game/display stopped; all 24 registered arm/preflight process groups cleared. Licensed saves, raw image envelopes, host paths and private reviews remain outside Git. No further gameplay or reroll. T1 and its earlier failed rehearsals remain unchanged; construction #89 remains held.
+[Preservation receipt](preservation.json): all 443 pre-existing saves unchanged, no added saves; previous mod restored; game/display stopped; all 24 registered arm/preflight process groups cleared. Licensed saves, raw image envelopes, host paths and private reviews remain outside Git. No further gameplay or reroll. T1 and its earlier failed rehearsals remain unchanged; construction #89 remains held (as of this report; closed unmerged 2026-09-26).
 
 **Scope:** the three-task evidence supports continuing evaluation of this harness direction; it does not establish general strategic competence, pure perception gains, treatment quality, a general UI speed limit, or dollar savings. The harness recording remains a time-lapse of consequences rather than a visible action walkthrough; the proposed crew-log narration is still follow-up work.

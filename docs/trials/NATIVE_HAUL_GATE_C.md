@@ -1,5 +1,10 @@
 # Gate C verdict: native-intent haul spike — 2026-09-24
 
+**Status (2026-09-27): historical.** The spike evidence merged (#68, #69), the three
+blocking items were fixed in #71, and the hauling migration passed its own
+[Gate C](HAULING_MIGRATION_GATE_C.md) with strict hold. Construction and cooking were
+superseded by the phase reset ([PHASE2](../PHASE2.md)).
+
 Written by Fable (direction and architecture for this phase) after the recording-only
 read and Astra's findings in [NATIVE_HAUL_LIVE](NATIVE_HAUL_LIVE.md). The cold read
 was posted before the findings and is unchanged; this record adds Part D and the verdict.
@@ -68,11 +73,21 @@ remain part of the verdict; game-mechanics success is not a clean cognitive-run 
 ## Still open
 
 - Strict versus growing hold (with the hauling migration), see
-  [NATIVE_INTENTS](../NATIVE_INTENTS.md#open-decisions).
+  [NATIVE_INTENTS](../NATIVE_INTENTS.md#open-decisions). (Decided 2026-09-25: strict
+  ships, growing parked; see the
+  [operative fallback](../MIGRATION_HAULING.md#operative-fallback--2026-09-25).)
 - Character voice, refusals and pawn-to-pawn plans: next scene, not this spike.
 - The medical alert cause and the post-retirement wood split: unrecorded, not claimed.
+  (Later: the migration rerun's alert, on the same helper save, was traced to
+  Beatrice's asthma, present in the starting save; see the
+  [inspection](HAULING_MIGRATION_GATE_C.md#medical-alert-inspection-paused-game-2026-09-25).
+  This run's own alert trigger remains unrecorded.)
 
 ## Order of work
+
+*Steps 1–3 are done (#68, #69; #71; [hauling migration](../MIGRATION_HAULING.md)).
+Step 4 was superseded by the phase reset ([PHASE2](../PHASE2.md)); the construction slice
+#89 closed unmerged ([CONSTRUCTION_REUSE](../CONSTRUCTION_REUSE.md)).*
 
 1. Un-draft and merge #68 and #69 as spike evidence with the findings.
 2. Fix the three blocking items above.

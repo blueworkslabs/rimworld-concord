@@ -1,5 +1,7 @@
 # Native-haul staging smoke — partial, 2026-09-24
 
+Superseded by: [offers/meal staging](NATIVE_HAUL_OFFERS.md) and later reports; the verdict is [Gate C](NATIVE_HAUL_GATE_C.md).
+
 **Not a Gate C verdict.** Tested code `40589bd`, RimWorld 1.6.4871 rev600, assembly
 SHA-256 beginning `082db1dd4f7f`. All game cases were scripted and recorded, with zero
 character-model calls. [Aggregate evidence](../evidence/native-haul-smoke.json).

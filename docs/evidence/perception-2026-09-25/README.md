@@ -52,5 +52,6 @@ memory is unchanged. No new engine patches were added. The public snapshot is a 
 terrain/roof grids, apparel/equipment detail, non-colonist non-threat pawns and some treatment
 settings are not represented. These limitations remain explicit; this is not a whole-UI parity claim.
 
-Next: native actions v1 and T1 completion checker, then matched fresh-context benchmark arms.
+Next: native actions v1 and T1 completion checker, then matched fresh-context benchmark arms
+(as of this report; since done in #95 and #96).
 No speed, token or dollar-cost advantage over the UI has been measured.

@@ -2,9 +2,10 @@
 
 **Historical direction note (2026-09-24), not current implementation status.** Native hauling subsequently merged and the ordered hauling runtime retired. The [phase-2 plan](PHASE2.md) and [roadmap](ROADMAP.md) now govern the player harness and later core/consent integration; the description below is retained as history.
 
-**Status: agreed direction, not implemented.** This describes where the game side of
-Concord is heading and how we get there. The current behaviour is still the
-ordered-job model in [ACTIONS](ACTIONS.md). Based on Fable's review of `mod/` after the
+**Status when written (2026-09-24): agreed direction, not implemented.** This described where the game side of
+Concord was heading and how we get there. At that time the behaviour was still the
+ordered-job model in [ACTIONS](ACTIONS.md); hauling has since moved to native intents
+([MIGRATION_HAULING](MIGRATION_HAULING.md)). Based on Fable's review of `mod/` after the
 recorded scene (2026-09-24); RimWorld internals cited from memory must be confirmed
 in the 1.6 assemblies before we build on them.
 
@@ -220,10 +221,19 @@ with a tag is part of the migration.
 - **Decided 2026-09-24: the wait action is silent.** A core turn with nothing new yields a
   "waiting on…" status line, never a crew-log entry.
 - Whether the core may propose untagged colony designations or only tagged agreements.
-- How topic closure works on aggregate receipts.
-- Whether checkpoints during running agreements become allowed.
+- ~~How topic closure works on aggregate receipts.~~ **Decided in the Gate B spike design:**
+  *resolved* only when the quota is met; on expiry with a partial total the intent is
+  *expired* and the topic stays open
+  ([SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md#coordinator-changes-named-nothing-else)).
+- ~~Whether checkpoints during running agreements become allowed.~~ **Decided in the
+  same design:** allowed while an intent is open, since no Concord job is in flight;
+  paired and cold restore passed in the spike ([Gate C](trials/NATIVE_HAUL_GATE_C.md)).
 - When refusals and broken promises become native thought memories.
-- **Hold direction decided conditionally, 2026-09-24:** growing hold **within the quota**
+- **Superseded 2026-09-25: strict hold ships; growing hold is parked** after B1's two
+  fix-and-recheck rounds did not yield a clean result
+  ([operative fallback](MIGRATION_HAULING.md#operative-fallback--2026-09-25)). The
+  conditional decision it replaced:
+  **Hold direction decided conditionally, 2026-09-24:** growing hold **within the quota**
   for the [hauling migration](MIGRATION_HAULING.md#1-strict-hold-or-a-hold-that-grows),
   not growing hold with reported overshoot. Fable requires a verified pre-pickup
   reservation boundary with no alternate pickup escape, and measured patch cost.

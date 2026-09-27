@@ -18,6 +18,7 @@ Code: `src/model-perspective.ts`, `src/reflection-choice.ts`, `src/claude-decisi
 | Core and pawn decisions (ongoing mode) | `gpt-5.6-luna` | Native Codex app-server, ChatGPT login | live core/answers/reflections in one continuous check; work decisions and encounters not exercised through this adapter |
 | Recorded-session feedback | `google/gemini-3.8-flash` | Protected OpenRouter, MP4 `video_url` | two offline responses on one scripted clip; not a character backend |
 | Diary drafts | `moonshotai/kimi-k2` | OpenRouter via OpenClaw `llm-task` | editorial only |
+| Harness benchmark controller (not a character) | `gpt-6-astra` / medium | Native Codex CLI 0.153.4, ChatGPT login, the arm MCP server's five tools plus Codex's three built-in resource readers ([HARNESS](HARNESS.md)) | scored phase-1 arms; never sees character perspectives or the coordinator |
 
 Claude and Luna use no bare API mode, Agent SDK or extracted OAuth tokens. Their subscription logins are
 used through their native clients. Claude subscription figures are API-equivalent estimates; the ongoing Luna route records native token usage, not per-call cash charges. Missing usage stays unknown. Jev and the Gemini video reviewer use the paid OpenRouter API: their reported usage cost
@@ -39,9 +40,12 @@ contract. All pawn calls share a short fixed system prompt (`pawnInstructions`, 
   A missing, conflicting or invalid reading is `known: false` with a reason, never
   zero.
 - **Contracts**: short rules. `knowledge`, `identity`, `evidence` and `sharedStatus`
-  always; `move`, `haul`, `rescue` and `production` whenever the pawn has that
-  observation (in the live game, always); `progress` when agreement progress is
-  present; `offers` when offers are in view.
+  always; `move`, `rescue` and `production` whenever the pawn has that observation (in
+  the live game, always), `move` and `rescue` also when an offer of that kind is in
+  view; `stockpileHaul` (scope,
+  consent, counters, execution: no Food/Rest stop) only when a `haul-zone` offer is in
+  view or, in a reflection, the pawn's current agreement is one; `progress` when
+  agreement progress is present; `offers` when offers are in view.
 - **Choices**: every option carries its effect in words, e.g. counter: "Suggest
   different implemented work; execute nothing. Adoption requires another offer and
   fresh consent."
@@ -66,7 +70,7 @@ characters). A counter must be an implemented action; it executes nothing.
 |---|---|---|
 | `keep_current_activity` | always | nothing |
 | `withdraw_current_agreement` | the pawn has a running agreement | stops it (persisted first) |
-| `request_rescue_alternative` | running haul, no request yet, a casualty observed | asks the core for a rescue instead |
+| `request_rescue_alternative` | running stockpile haul, no request yet, a casualty observed | asks the core for a rescue instead |
 | `answer_pending_proposal` | no commitment or agreement; up to 8 own pending offers | accept, refuse, defer or counter |
 | `request_fresh_offer` | a deferred offer and nothing pending or running | invites one fresh offer |
 | `revise_private_outlook` | own evidence, received messages or an existing outlook | replaces the outlook ([SOCIAL](SOCIAL.md#private-outlook)) |
@@ -110,7 +114,9 @@ may span several stream events, but identities must be complete and consistent, 
 message may reopen, and anything else (a third message, malformed blocks, unmatched
 tool results, events after the result) rejects the answer. `--max-turns` stays 2.
 
-**Luna** runs through the native Codex app-server with a pinned per-process provider
+**Luna** (`src/codex-decision.ts`, one helper process per call via
+`scripts/run-codex-decision.py`; the same core, decision, reflection, encounter and
+core-answer prompts as Claude) runs through the native Codex app-server with a pinned per-process provider
 (ChatGPT endpoint, zero retries), a local catalog copy with tools and multi-agent
 disabled, and a mock preflight that rejects any advertised tool before each real call.
 The ongoing backend uses an ephemeral thread, replacement instructions, no dynamic

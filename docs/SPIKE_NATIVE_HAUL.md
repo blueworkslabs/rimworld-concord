@@ -1,9 +1,16 @@
 # Spike design: one native-intent haul (Gate B)
 
-**Status: architecture sign-off given by Fable at `4eba938`; Astra's assembly-backed
+**Status (2026-09-27): historical.** The spike ran: scripted staging, the
+[signed live freeze](trials/NATIVE_HAUL_FREEZE.md) and the
+[live run](trials/NATIVE_HAUL_LIVE.md). [Gate C](trials/NATIVE_HAUL_GATE_C.md) (2026-09-24)
+passed it on the game side and approved migration; hauling then migrated
+([MIGRATION_HAULING](MIGRATION_HAULING.md)) and the ordered haul was retired in #80.
+The design below is kept as the Gate B record.
+
+**Status at sign-off: architecture sign-off given by Fable at `4eba938`; Astra's assembly-backed
 testability review confirmed after the start-boundary corrections below.** Written by
 Clawd, reviewed by Astra. This approves implementation, not a gameplay verdict; all
-scripted and live checks below remain to be run.
+scripted and live checks below remained to be run at that point.
 Builds on [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md) (pinned: RimWorld 1.6.4871 rev600)
 and [NATIVE_INTENTS](NATIVE_INTENTS.md).
 
@@ -127,6 +134,8 @@ with reservations keyed by job `loadID`.
   a tagged trip. Ordinary hauling elsewhere is unchanged. "Credited beyond quota = 0"
   stays a frozen measure. The growing hold with reported overshoot is an open decision
   for the hauling migration ([NATIVE_INTENTS](NATIVE_INTENTS.md#open-decisions)).
+  (Since decided: strict hold ships and the growing hold is parked; see the
+  [operative fallback](MIGRATION_HAULING.md#operative-fallback--2026-09-25).)
 - **Already-carried loads** (re-targets in the drop toil): the zone is admitted only if
   the carried stack is at most `remaining` plus the job's own existing reservation.
   Admission is a pure check with no side effects, because storage searches also run
@@ -398,7 +407,8 @@ or character rewrite has been made.
   state per case. Event gaps fail the run. These private runtime files are not published.
   - `core-offers` covers the coordinator path end to end: not offered, refusal, a
     pre-acceptance counter adopted, acceptance, and a paired checkpoint mid-intent.
-  - The matched ordered-job halves are `ordered-main` (stale rejections) and
+  - (Retired in #80, commit `1a724b0`; results kept in evidence.) The matched
+    ordered-job halves were `ordered-main` (stale rejections) and
     `ordered-meal`. Each uses the same save and area as an ordinary stockpile, with
     native Hauling off so only ordered jobs haul, as the ordered model always ran.
     They record authored offers as estimated core offer-turns, not actual model calls.
@@ -440,12 +450,14 @@ or character rewrite has been made.
   listed as unimplemented in run receipts and observed from events rather than forced;
   a run without such an event is not evidence for either case.
 
-## Live run: freeze record (draft for Fable's sign-off)
+## Live run: freeze record (signed)
 
-Astra's [reviewed setup fingerprint and rehearsal](trials/NATIVE_HAUL_FREEZE.md) are
+**Signed by Fable at `fc06842` on 2026-09-24; see the
+[signed freeze](trials/NATIVE_HAUL_FREEZE.md).** The text below is the pre-signature
+draft. Astra's [reviewed setup fingerprint and rehearsal](trials/NATIVE_HAUL_FREEZE.md) were
 ready for sign-off. The proposed live fixture is **helper geometry / quota 75**, a
-change from the original quota-30 main fixture; it remains unapproved until Fable
-signs the setup hash. Two failed coverage rehearsals are retained. All character
+change from the original quota-30 main fixture; it remained unapproved until Fable
+signed the setup hash. Two failed coverage rehearsals are retained. All character
 state, strict holds and the zero-escape success measure remain unchanged.
 
 The live run executes through the ongoing runner in native-haul mode:
@@ -476,7 +488,8 @@ pawns.
   host and runner process (`--cold`) restores the paired checkpoint from the store and
   compares the actual restored game intent/ledger with the paired checkpoint, preserving
   the original baseline on failure. This must be demonstrated for the live run before
-  Gate C. The game process itself continues and loads the checkpoint save.
+  Gate C (done: passed in the [live run](trials/NATIVE_HAUL_LIVE.md)). The game process
+  itself continues and loads the checkpoint save.
 
 ## Out of scope
 

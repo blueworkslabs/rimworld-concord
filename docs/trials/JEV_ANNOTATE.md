@@ -4,7 +4,9 @@
 [E2 interpretation](JEV_REPLAY.md#e2-interpretation-and-decisions--fable-2026-09-25):
 the seven grounding questions run over every returned core reply during a live run and
 their scores are journaled. **Nothing is gated, delayed, rewritten or rejected.** The
-first run that carries it is the construction and cooking scene; its flags are then
+first run that carries it was to be the construction and cooking scene (now not yet
+scheduled; see [PHASE2](../PHASE2.md#step-b-the-core-becomes-the-harness-agent) step B:
+the join must be adapted to harness decisions first); its flags are then
 adjudicated by hand against the recording, the way E1 and E2 were, and reported here.
 
 ## What runs

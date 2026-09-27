@@ -39,6 +39,7 @@
     <li><a href="#consent">Consent loop</a></li>
     <li><a href="#knowledge">Who knows what</a></li>
     <li><a href="#intents">Native intents</a></li>
+    <li><a href="#harness">Player harness</a></li>
     <li><a href="#minds">Model minds</a></li>
     <li><a href="#attention">Attention &amp; time</a></li>
     <li><a href="#core">The core</a></li>
@@ -50,90 +51,102 @@
 
 <section class="block" id="map" aria-labelledby="map-h">
   <h2 id="map-h">The system map</h2>
-  <p class="sub">Four layers. Authority flows downward only as validated actions, and truth flows upward as observations and receipts.</p>
+  <p class="sub">Two paths into one game. The character path runs through the coordinator, where consent and memory live. The player harness is a separate, narrower path that a benchmark controller uses today and the core is meant to take over in phase 2. On both, authority flows downward only as validated actions, and truth flows upward as observations and receipts.</p>
   <figure class="diagram" aria-labelledby="map-cap">
-    <svg viewBox="0 0 1000 600" role="img" aria-labelledby="map-title map-desc">
+    <svg viewBox="0 0 1000 610" role="img" aria-labelledby="map-title map-desc">
       <title id="map-title">Concord architecture</title>
-      <desc id="map-desc">Model minds at the top receive perspectives and return validated choices. The TypeScript coordinator with SQLite handles perspectives, consent and agreements, attention, the core scheduler and checkpoints. A lab bridge connects it to the C# Concord mod inside RimWorld, which opens tagged native intents, runs the remaining ordered jobs, hooks game events and returns receipts. RimWorld's own work givers, zones and reservations carry out the intents.</desc>
+      <desc id="map-desc">Model minds at the top: colonist minds, the core planner and the optional Jev appraisal receive perspectives and return validated choices to the TypeScript coordinator with SQLite, which handles perspectives, consent and agreements, attention, the core scheduler and checkpoints. A benchmark controller instead uses the player harness through MCP tools: observe, look, act and time. Both reach the C# Concord mod inside RimWorld through a lab bridge. The mod opens tagged native intents, runs the remaining ordered jobs, hooks game events, exports player-visible perception, applies player-equivalent harness actions with narrated receipts, and returns receipts. RimWorld's own work givers, zones and reservations carry out the work.</desc>
       <defs>
         <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7C8894"/></marker>
       </defs>
       <!-- Minds -->
-      <text x="20" y="28" fill="#E3A33A" font-size="15" font-weight="700" letter-spacing="1">MINDS · replaceable, tool-free</text>
+      <text x="20" y="28" fill="#E3A33A" font-size="15" font-weight="700" letter-spacing="1">MINDS · replaceable</text>
       <g font-size="14" fill="#E7E3D9">
-        <rect x="20" y="40" width="228" height="78" rx="3" fill="#1E252C" stroke="#E3A33A"/>
+        <rect x="20" y="40" width="222" height="78" rx="3" fill="#1E252C" stroke="#E3A33A"/>
         <text x="34" y="66" font-weight="700">Colonist minds</text>
-        <text x="34" y="87" fill="#B4B0A6" font-size="12.5">one isolated call per decision</text>
-        <text x="34" y="105" fill="#B4B0A6" font-size="12.5">Luna in continuous play · Claude</text>
-        <rect x="264" y="40" width="228" height="78" rx="3" fill="#1E252C" stroke="#E3A33A"/>
-        <text x="278" y="66" font-weight="700">Core planner</text>
-        <text x="278" y="87" fill="#B4B0A6" font-size="12.5">propose · counter · ask · wait</text>
-        <text x="278" y="105" fill="#B4B0A6" font-size="12.5">silent when nothing has changed</text>
-        <rect x="508" y="40" width="228" height="78" rx="3" fill="#1E252C" stroke="#7C8894"/>
-        <text x="522" y="66" font-weight="700">Fast appraisal</text>
-        <text x="522" y="87" fill="#B4B0A6" font-size="12.5">Jev: is this worth a thought?</text>
-        <text x="522" y="105" fill="#B4B0A6" font-size="12.5">optional; offline replay next</text>
-        <rect x="752" y="40" width="228" height="78" rx="3" fill="#1E252C" stroke="#7C8894" stroke-dasharray="5 4"/>
-        <text x="766" y="66" font-weight="700">Scripted backends</text>
-        <text x="766" y="87" fill="#B4B0A6" font-size="12.5">deterministic regression</text>
-        <text x="766" y="105" fill="#B4B0A6" font-size="12.5">baseline for every mechanic</text>
+        <text x="34" y="87" fill="#B4B0A6" font-size="12.5">one tool-free call per decision</text>
+        <text x="34" y="105" fill="#B4B0A6" font-size="12.5">Luna · Claude · scripted</text>
+        <rect x="256" y="40" width="222" height="78" rx="3" fill="#1E252C" stroke="#E3A33A"/>
+        <text x="270" y="66" font-weight="700">Core planner</text>
+        <text x="270" y="87" fill="#B4B0A6" font-size="12.5">propose · counter · ask · wait</text>
+        <text x="270" y="105" fill="#B4B0A6" font-size="12.5">silent when nothing changed</text>
+        <rect x="492" y="40" width="222" height="78" rx="3" fill="#1E252C" stroke="#7C8894" stroke-dasharray="5 4"/>
+        <text x="506" y="66" font-weight="700">Fast appraisal</text>
+        <text x="506" y="87" fill="#B4B0A6" font-size="12.5">Jev: is this worth a thought?</text>
+        <text x="506" y="105" fill="#B4B0A6" font-size="12.5">optional; not in recent runs</text>
+        <rect x="738" y="40" width="242" height="78" rx="3" fill="#1E252C" stroke="#E3A33A"/>
+        <text x="752" y="66" font-weight="700">Benchmark controller</text>
+        <text x="752" y="87" fill="#B4B0A6" font-size="12.5">Codex agent, fresh context per arm</text>
+        <text x="752" y="105" fill="#B4B0A6" font-size="12.5">phase 2 B: the core takes over</text>
       </g>
       <!-- arrows minds <-> coordinator -->
-      <line x1="300" y1="126" x2="300" y2="176" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
-      <line x1="700" y1="176" x2="700" y2="126" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
-      <text x="312" y="156" fill="#B4B0A6" font-size="12.5">validated choice</text>
-      <text x="566" y="156" fill="#B4B0A6" font-size="12.5">perspective + menu</text>
+      <line x1="250" y1="126" x2="250" y2="176" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
+      <line x1="560" y1="176" x2="560" y2="126" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="262" y="156" fill="#B4B0A6" font-size="12.5">validated choice</text>
+      <text x="572" y="156" fill="#B4B0A6" font-size="12.5">perspective + menu</text>
+      <line x1="859" y1="126" x2="859" y2="176" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)" marker-start="url(#ah)"/>
+      <text x="871" y="156" fill="#B4B0A6" font-size="12.5">MCP tools</text>
       <!-- Coordinator -->
-      <rect x="20" y="184" width="960" height="176" rx="4" fill="#161B20" stroke="#8DB9E8"/>
+      <rect x="20" y="184" width="694" height="176" rx="4" fill="#161B20" stroke="#8DB9E8"/>
       <text x="36" y="210" fill="#8DB9E8" font-size="15" font-weight="700" letter-spacing="1">COORDINATOR · TypeScript + SQLite</text>
       <g font-size="14" fill="#E7E3D9">
-        <rect x="36" y="224" width="220" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="50" y="250" font-weight="700">Perspectives</text>
-        <text x="50" y="272" fill="#B4B0A6" font-size="12.5">owner-only views</text>
-        <text x="50" y="291" fill="#B4B0A6" font-size="12.5">self-describing needs</text>
-        <text x="50" y="310" fill="#B4B0A6" font-size="12.5">menus of current options</text>
-        <text x="50" y="329" fill="#B4B0A6" font-size="12.5">schema = available IDs</text>
-        <rect x="270" y="224" width="220" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="284" y="250" font-weight="700">Consent &amp; agreements</text>
-        <text x="284" y="272" fill="#B4B0A6" font-size="12.5">identity-bound decisions</text>
-        <text x="284" y="291" fill="#B4B0A6" font-size="12.5">counters → fresh offers</text>
-        <text x="284" y="310" fill="#B4B0A6" font-size="12.5">intents: quota, helper credit</text>
-        <text x="284" y="329" fill="#B4B0A6" font-size="12.5">withdrawal, late answers lapse</text>
-        <rect x="504" y="224" width="220" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="518" y="250" font-weight="700">Attention &amp; scheduling</text>
-        <text x="518" y="272" fill="#B4B0A6" font-size="12.5">event routing per pawn</text>
-        <text x="518" y="291" fill="#B4B0A6" font-size="12.5">coalescing, pacing</text>
-        <text x="518" y="310" fill="#B4B0A6" font-size="12.5">event-driven core wake</text>
-        <text x="518" y="329" fill="#B4B0A6" font-size="12.5">failures counted per lane</text>
-        <rect x="738" y="224" width="226" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="752" y="250" font-weight="700">State &amp; checkpoints</text>
-        <text x="752" y="272" fill="#B4B0A6" font-size="12.5">characters, outlooks, audit</text>
-        <text x="752" y="291" fill="#B4B0A6" font-size="12.5">epochs, action IDs</text>
-        <text x="752" y="310" fill="#B4B0A6" font-size="12.5">paired save + state pairs</text>
-        <text x="752" y="329" fill="#B4B0A6" font-size="12.5">cold restore</text>
+        <rect x="36" y="224" width="214" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
+        <text x="50" y="250" font-weight="700">Perspectives &amp; consent</text>
+        <text x="50" y="272" fill="#B4B0A6" font-size="12.5">owner-only views, real menus</text>
+        <text x="50" y="291" fill="#B4B0A6" font-size="12.5">identity-bound decisions</text>
+        <text x="50" y="310" fill="#B4B0A6" font-size="12.5">counters → fresh offers</text>
+        <text x="50" y="329" fill="#B4B0A6" font-size="12.5">intents: quota, helper credit</text>
+        <rect x="260" y="224" width="214" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
+        <text x="274" y="250" font-weight="700">Attention &amp; the core</text>
+        <text x="274" y="272" fill="#B4B0A6" font-size="12.5">event routing per pawn</text>
+        <text x="274" y="291" fill="#B4B0A6" font-size="12.5">coalescing, pacing</text>
+        <text x="274" y="310" fill="#B4B0A6" font-size="12.5">event-driven core wake</text>
+        <text x="274" y="329" fill="#B4B0A6" font-size="12.5">failures counted per lane</text>
+        <rect x="484" y="224" width="214" height="118" rx="3" fill="#1E252C" stroke="#46525E"/>
+        <text x="498" y="250" font-weight="700">State &amp; checkpoints</text>
+        <text x="498" y="272" fill="#B4B0A6" font-size="12.5">characters, outlooks, audit</text>
+        <text x="498" y="291" fill="#B4B0A6" font-size="12.5">epochs, action IDs</text>
+        <text x="498" y="310" fill="#B4B0A6" font-size="12.5">paired save + state</text>
+        <text x="498" y="329" fill="#B4B0A6" font-size="12.5">cold restore</text>
+      </g>
+      <!-- Player harness -->
+      <rect x="738" y="184" width="242" height="176" rx="4" fill="#161B20" stroke="#8DB9E8"/>
+      <text x="754" y="210" fill="#8DB9E8" font-size="15" font-weight="700" letter-spacing="1">PLAYER HARNESS</text>
+      <g font-size="12.5" fill="#B4B0A6">
+        <text x="754" y="236"><tspan fill="#E7E3D9" font-weight="700">observe</tspan>  digest + changes</text>
+        <text x="754" y="258"><tspan fill="#E7E3D9" font-weight="700">look</tspan>  queries, placement check</text>
+        <text x="754" y="280"><tspan fill="#E7E3D9" font-weight="700">act</tspan>  player controls only</text>
+        <text x="754" y="302"><tspan fill="#E7E3D9" font-weight="700">time</tspan>  pause, speed</text>
+        <text x="754" y="332">no draft · no direct jobs</text>
+        <text x="754" y="350">bypasses the coordinator</text>
       </g>
       <!-- bridge -->
-      <line x1="300" y1="368" x2="300" y2="418" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
-      <line x1="700" y1="418" x2="700" y2="368" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
-      <text x="312" y="398" fill="#B4B0A6" font-size="12.5">intents + actions (with IDs)</text>
-      <text x="712" y="398" fill="#B4B0A6" font-size="12.5">hooked events, receipts (with ticks)</text>
+      <line x1="250" y1="368" x2="250" y2="418" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
+      <line x1="560" y1="418" x2="560" y2="368" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="262" y="398" fill="#B4B0A6" font-size="12.5">intents + actions (with IDs)</text>
+      <text x="572" y="398" fill="#B4B0A6" font-size="12.5">events, receipts (with ticks)</text>
+      <line x1="859" y1="368" x2="859" y2="418" stroke="#7C8894" stroke-width="2" marker-end="url(#ah)" marker-start="url(#ah)"/>
+      <text x="871" y="398" fill="#B4B0A6" font-size="12.5">acts ↓ receipts ↑</text>
       <!-- Mod -->
-      <rect x="20" y="426" width="960" height="104" rx="4" fill="#161B20" stroke="#8FBF5A"/>
-      <text x="36" y="452" fill="#8FBF5A" font-size="15" font-weight="700" letter-spacing="1">CONCORD MOD · C# inside RimWorld</text>
-      <g font-size="13" fill="#E7E3D9">
-        <rect x="36" y="464" width="180" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="48" y="494">Action bridge + ledger</text>
-        <rect x="226" y="464" width="180" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="238" y="494">Harmony event hooks</text>
-        <rect x="416" y="464" width="180" height="50" rx="3" fill="#1E252C" stroke="#46525E"/>
-        <text x="428" y="494">Observer + crew log</text>
-        <rect x="606" y="464" width="358" height="50" rx="3" fill="#1E252C" stroke="#8FBF5A"/>
-        <text x="618" y="485" font-weight="700">Native intents: tagged stockpiles, quota</text>
-        <text x="618" y="504" fill="#B4B0A6" font-size="12">ordered baseline: move · rescue · build · cook · eat</text>
+      <rect x="20" y="426" width="960" height="112" rx="4" fill="#161B20" stroke="#8FBF5A"/>
+      <text x="36" y="452" fill="#8FBF5A" font-size="15" font-weight="700" letter-spacing="1">CONCORD MOD · C# inside RimWorld, lab-only</text>
+      <g font-size="12.5" fill="#E7E3D9">
+        <rect x="36" y="464" width="124" height="58" rx="3" fill="#1E252C" stroke="#46525E"/>
+        <text x="48" y="488">Action bridge</text><text x="48" y="506" fill="#B4B0A6" font-size="12">+ saved ledger</text>
+        <rect x="168" y="464" width="162" height="58" rx="3" fill="#1E252C" stroke="#46525E"/>
+        <text x="180" y="488">Harmony hooks</text><text x="180" y="506" fill="#B4B0A6" font-size="12">jobs, meals, placements</text>
+        <rect x="338" y="464" width="118" height="58" rx="3" fill="#1E252C" stroke="#46525E"/>
+        <text x="350" y="488">Observer</text><text x="350" y="506" fill="#B4B0A6" font-size="12">+ crew log tab</text>
+        <rect x="466" y="464" width="276" height="58" rx="3" fill="#1E252C" stroke="#8FBF5A"/>
+        <text x="478" y="488" font-weight="700">Native intents: tagged stockpiles</text>
+        <text x="478" y="506" fill="#B4B0A6" font-size="12">ordered: move, rescue, build, cook, eat</text>
+        <rect x="752" y="464" width="212" height="58" rx="3" fill="#1E252C" stroke="#8FBF5A"/>
+        <text x="764" y="488" font-weight="700">Harness: perceive + act</text>
+        <text x="764" y="506" fill="#B4B0A6" font-size="12">narrated, receipt-backed</text>
       </g>
       <!-- RimWorld -->
-      <rect x="20" y="546" width="960" height="44" rx="4" fill="#3A3024" stroke="#8A7456"/>
-      <text x="36" y="574" fill="#E7E3D9" font-size="14"><tspan font-weight="700" fill="#E3A33A">RIMWORLD</tspan>  work givers, zones, reservations, native jobs, needs, pathing, storyteller</text>
+      <rect x="20" y="552" width="960" height="44" rx="4" fill="#3A3024" stroke="#8A7456"/>
+      <text x="36" y="580" fill="#E7E3D9" font-size="14"><tspan font-weight="700" fill="#E3A33A">RIMWORLD</tspan>  work givers, zones, bills, blueprints, reservations, native jobs, needs, pathing</text>
     </svg>
     <figcaption id="map-cap" class="legend">
       <span><i class="lg-amber"></i>decides or proposes</span><span><i class="lg-blue"></i>enforces and remembers</span><span><i class="lg-green"></i>executes and observes</span><span><i class="lg-sand"></i>the game, unchanged</span>
@@ -147,13 +160,13 @@
   <div class="dive-text">
     <span class="eyebrow">01 · Consent loop</span>
     <h3>Offers, answers, fresh consent</h3>
-    <p>The core never touches a colonist. It creates a <strong>proposal</strong> bound to one pawn, and only that pawn's decision handle can answer it: <strong>accept, refuse, counter</strong> or <strong>not now</strong>. Anything else, like a forged actor or an extra field, is rejected before it reaches the game.</p>
-    <p>A counter executes nothing. If the core adopts it, it comes back as a revised offer that needs a <strong>fresh yes</strong>, with at most two revisions per thread. Replacing running work needs its own consent, and the old job has to be confirmed stopped first. An answer that arrives after the work is already done <strong>lapses</strong>: it is kept as given, but starts nothing.</p>
-    <p>What an agreement turns into is changing. The older <em>ordered</em> model issues one hand-built job per trip and stops on low needs; it remains the regression baseline for rescue, building and cooking. Hauling now runs as a <a href="#intents">native intent</a>.</p>
+    <p>The core never touches a colonist. It creates a <strong>proposal</strong> bound to one pawn, and only that pawn's decision handle can answer it: <strong>accept, refuse, counter</strong> or <strong>not now</strong>. Anything else, like a forged actor or an extra field, is rejected before it reaches the game. This is the character path; the player harness below has no consent step yet, which is what phase 2 C restores.</p>
+    <p>A counter executes nothing. If the core adopts it, it comes back as a revised offer that needs a <strong>fresh yes</strong>, with at most two revisions per thread. Replacing a stockpile haul with rescue needs fresh consent, confirmed exclusion from the haul, and an empty-handed pawn off the captured haul trip; already-carried cargo finishes natively before rescue can start. An answer that arrives after the work is already done <strong>lapses</strong>: it is kept as given, but starts nothing.</p>
+    <p>An accepted haul becomes a <a href="#intents">native intent</a>; the ordered haul was retired. Rescue, building and cooking still use the older <em>ordered</em> model, one hand-built job that stops on low needs.</p>
     <p class="files">src/coordinator.ts · src/protocol.ts · src/native-intents.ts · mod/NativeIntents.cs · mod/Rescue.cs · mod/Production.cs</p>
   </div>
   <figure class="anim window">
-    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/consent-loop.jpg" width="1280" height="720" aria-label="Animation of the consent loop: offer, counter, revised offer, acceptance, native job and receipt.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/consent-loop.jpg" width="1280" height="720" aria-label="Animation of the consent loop: the core offers Beatrice a haul of up to 30 wood; she counters with 15 because her food is low; the core re-offers 15 and she accepts; the agreement becomes a tagged stockpile, native work fills it, and the game records the quota met.">
       <source src="../media/consent-loop.mp4" type="video/mp4">
     </video>
     <figcaption><b>Speech is testimony. Receipts are what happened.</b></figcaption>
@@ -274,11 +287,45 @@
 
 </section>
 
+<section class="block" aria-label="Player harness">
+
+<article class="dive" id="harness">
+  <div class="dive-text">
+    <span class="eyebrow">04 · Player harness</span>
+    <h3>Play like a player, minus the mouse</h3>
+    <p>The core kept failing to turn available opportunities into action. Its narrow view is a strong, testable explanation, though not a proven sole cause: no campfire, no beds, a medical alert and 120 wood by the wall were all things a player could see and it couldn't. So phase 1 asked a plainer question: can an agent run the colony better through a structured interface than through the human UI?</p>
+    <p>The harness <strong>reads what a player can read</strong>: one coherent snapshot per read with stable IDs, a byte-bounded digest with a change marker, and queries such as a placement check that uses the game's own build designator. Hidden weather schedules, fogged cells and storyteller plans stay out. It <strong>acts through what a player can use</strong>: blueprints, designations, zones, bills, work priorities, schedules, forbid and allow, area restrictions, bed assignment and time controls. No drafting and no direct pawn jobs; the game's own work givers do the work.</p>
+    <p>Every action returns an <strong>acceptance receipt or refusal reason</strong>, identifying whether it came from the game or harness validation. An accepted blueprint is not a built campfire, and assigning a bed is not sleeping: completion is read later from game state. Since phase 2 A, each accepted edit also writes one narrated record naming the core as decision-maker, never an invented pawn agreement. That narration is scripted-tested with zero model calls; the sealed viewer-legibility test is still ahead.</p>
+    <p class="files">src/harness/ · trials/harness-mcp-server.ts · trials/ui-mcp-server.ts · mod/Perception.cs · mod/HarnessActions.cs · mod/HarnessNarration.cs · docs/HARNESS.md · docs/PHASE2.md</p>
+  </div>
+  <figure class="anim window">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/player-harness.jpg" width="1280" height="720" aria-label="Animation: an agent reads a player-visible digest of the map, then places a campfire blueprint through the harness. The game returns an acceptance receipt, and the crew log records 'The core placed a campfire blueprint outdoors.' A colonist builds it through a native construction job, and a later read shows it built. A cooking bill is added and narrated. A wall blueprint at the map edge is refused with the game's own reason, which is also recorded.">
+      <source src="../media/player-harness.mp4" type="video/mp4">
+    </video>
+    <figcaption><b>Accepted is not built.</b> Illustrative. The narrated lines match the mod's wording; the refusal reason is the one recorded in the phase 2 A scripted check.</figcaption>
+  </figure>
+</article>
+
+  <figure class="diagram" aria-labelledby="bench-cap">
+    <svg viewBox="0 0 1000 410" role="img" aria-labelledby="bench-title bench-desc">
+      <title id="bench-title">Phase 1 benchmark: controller wall time, harness versus UI</title>
+      <desc id="bench-desc">Nine matched pairs, all eighteen arms completed their frozen task. Median controller wall time: T1 58.7 s harness versus 106.6 s UI; T2 68.7 versus 217.3 s; T3 41.0 versus 240.4 s. The harness arm was faster in every pair.</desc>
+      <line x1="90.0" y1="78" x2="90.0" y2="366" stroke="#262D34" stroke-width="1"/><text x="90.0" y="384" fill="#B4B0A6" font-size="12" text-anchor="middle">0</text><line x1="248.2" y1="78" x2="248.2" y2="366" stroke="#262D34" stroke-width="1"/><text x="248.2" y="384" fill="#B4B0A6" font-size="12" text-anchor="middle">1 min</text><line x1="406.4" y1="78" x2="406.4" y2="366" stroke="#262D34" stroke-width="1"/><text x="406.4" y="384" fill="#B4B0A6" font-size="12" text-anchor="middle">2 min</text><line x1="564.5" y1="78" x2="564.5" y2="366" stroke="#262D34" stroke-width="1"/><text x="564.5" y="384" fill="#B4B0A6" font-size="12" text-anchor="middle">3 min</text><line x1="722.7" y1="78" x2="722.7" y2="366" stroke="#262D34" stroke-width="1"/><text x="722.7" y="384" fill="#B4B0A6" font-size="12" text-anchor="middle">4 min</text><line x1="880.9" y1="78" x2="880.9" y2="366" stroke="#262D34" stroke-width="1"/><text x="880.9" y="384" fill="#B4B0A6" font-size="12" text-anchor="middle">5 min</text><text x="960" y="406" fill="#B4B0A6" font-size="12" text-anchor="end">controller wall time per arm, including start-up and inference</text>
+      <g font-size="13" fill="#B4B0A6"><circle cx="26" cy="24" r="5" fill="#BD8726"/><text x="38" y="28">Harness arm</text><circle cx="150" cy="24" r="5" fill="#5891D4"/><text x="162" y="28">UI arm (screenshots, clicks, keys)</text></g>
+      <text x="20" y="70" fill="#E7E3D9" font-size="14" font-weight="700">T1 · campfire and meals <tspan fill="#B4B0A6" font-weight="400" font-size="12.5">  median 58.7 s harness · 106.6 s UI</tspan></text><text x="76" y="96" fill="#B4B0A6" font-size="12" text-anchor="end">pair 1</text><line x1="246.7" y1="92" x2="370.2" y2="92" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T1 pair 1, harness arm: 59.5 s controller wall time; task completed</title><circle cx="246.7" cy="92" r="11" fill="transparent"/><circle cx="246.7" cy="92" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T1 pair 1, UI arm: 106.3 s controller wall time; task completed</title><circle cx="370.2" cy="92" r="11" fill="transparent"/><circle cx="370.2" cy="92" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g><text x="76" y="118" fill="#B4B0A6" font-size="12" text-anchor="end">pair 2</text><line x1="231.7" y1="114" x2="371.0" y2="114" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T1 pair 2, harness arm: 53.7 s controller wall time; task completed</title><circle cx="231.7" cy="114" r="11" fill="transparent"/><circle cx="231.7" cy="114" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T1 pair 2, UI arm: 106.6 s controller wall time; task completed</title><circle cx="371.0" cy="114" r="11" fill="transparent"/><circle cx="371.0" cy="114" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g><text x="76" y="140" fill="#B4B0A6" font-size="12" text-anchor="end">pair 3</text><line x1="244.8" y1="136" x2="373.3" y2="136" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T1 pair 3, harness arm: 58.7 s controller wall time; task completed</title><circle cx="244.8" cy="136" r="11" fill="transparent"/><circle cx="244.8" cy="136" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T1 pair 3, UI arm: 107.5 s controller wall time; task completed</title><circle cx="373.3" cy="136" r="11" fill="transparent"/><circle cx="373.3" cy="136" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g><text x="20" y="178" fill="#E7E3D9" font-size="14" font-weight="700">T2 · fed and assigned beds <tspan fill="#B4B0A6" font-weight="400" font-size="12.5">  median 68.7 s harness · 217.3 s UI</tspan></text><text x="76" y="204" fill="#B4B0A6" font-size="12" text-anchor="end">pair 1</text><line x1="271.0" y1="200" x2="742.2" y2="200" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T2 pair 1, harness arm: 68.7 s controller wall time; task completed</title><circle cx="271.0" cy="200" r="11" fill="transparent"/><circle cx="271.0" cy="200" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T2 pair 1, UI arm: 247.4 s controller wall time; task completed</title><circle cx="742.2" cy="200" r="11" fill="transparent"/><circle cx="742.2" cy="200" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g><text x="76" y="226" fill="#B4B0A6" font-size="12" text-anchor="end">pair 2</text><line x1="283.5" y1="222" x2="494.2" y2="222" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T2 pair 2, harness arm: 73.4 s controller wall time; task completed</title><circle cx="283.5" cy="222" r="11" fill="transparent"/><circle cx="283.5" cy="222" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T2 pair 2, UI arm: 153.3 s controller wall time; task completed</title><circle cx="494.2" cy="222" r="11" fill="transparent"/><circle cx="494.2" cy="222" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g><text x="76" y="248" fill="#B4B0A6" font-size="12" text-anchor="end">pair 3</text><line x1="245.0" y1="244" x2="662.8" y2="244" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T2 pair 3, harness arm: 58.8 s controller wall time; task completed</title><circle cx="245.0" cy="244" r="11" fill="transparent"/><circle cx="245.0" cy="244" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T2 pair 3, UI arm: 217.3 s controller wall time; task completed</title><circle cx="662.8" cy="244" r="11" fill="transparent"/><circle cx="662.8" cy="244" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g><text x="20" y="286" fill="#E7E3D9" font-size="14" font-weight="700">T3 · wood inside <tspan fill="#B4B0A6" font-weight="400" font-size="12.5">  median 41.0 s harness · 240.4 s UI</tspan></text><text x="76" y="312" fill="#B4B0A6" font-size="12" text-anchor="end">pair 1</text><line x1="204.1" y1="308" x2="913.5" y2="308" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T3 pair 1, harness arm: 43.3 s controller wall time; task completed</title><circle cx="204.1" cy="308" r="11" fill="transparent"/><circle cx="204.1" cy="308" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T3 pair 1, UI arm: 312.4 s controller wall time; task completed</title><circle cx="913.5" cy="308" r="11" fill="transparent"/><circle cx="913.5" cy="308" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g><text x="76" y="334" fill="#B4B0A6" font-size="12" text-anchor="end">pair 2</text><line x1="188.4" y1="330" x2="723.7" y2="330" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T3 pair 2, harness arm: 37.3 s controller wall time; task completed</title><circle cx="188.4" cy="330" r="11" fill="transparent"/><circle cx="188.4" cy="330" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T3 pair 2, UI arm: 240.4 s controller wall time; task completed</title><circle cx="723.7" cy="330" r="11" fill="transparent"/><circle cx="723.7" cy="330" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g><text x="76" y="356" fill="#B4B0A6" font-size="12" text-anchor="end">pair 3</text><line x1="198.2" y1="352" x2="631.5" y2="352" stroke="#46525E" stroke-width="2" stroke-linecap="round"/><g><title>T3 pair 3, harness arm: 41.0 s controller wall time; task completed</title><circle cx="198.2" cy="352" r="11" fill="transparent"/><circle cx="198.2" cy="352" r="5.5" fill="#BD8726" stroke="#15191D" stroke-width="2"/></g><g><title>T3 pair 3, UI arm: 205.4 s controller wall time; task completed</title><circle cx="631.5" cy="352" r="11" fill="transparent"/><circle cx="631.5" cy="352" r="5.5" fill="#5891D4" stroke="#15191D" stroke-width="2"/></g>
+    </svg>
+    <figcaption id="bench-cap" class="legend">
+      <span><b>Harness vs UI: controller wall time.</b> Nine matched pairs, alternating order, the same save and task within each pair, and the same controller model; all 18 arms met their frozen goal. T2 required food and suitable assigned beds, not sleep. Fewer inputs in every pair, too. Colony time showed no consistent harness advantage on T1 or T2; T3 finished earlier in game time through the harness, with plan, recovery and command size all contributing. Billed dollars were unavailable on the route used. <a href="https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/benchmark-scored-three-2026-09-26/README.md" rel="noopener">T1 table</a> · <a href="https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/evidence/benchmark-colony-scored-2026-09-26/README.md" rel="noopener">T2/T3 tables</a></span>
+    </figcaption>
+  </figure>
+
+</section>
+
 <section class="block" aria-label="More deep dives">
 
 <article class="dive" id="minds">
   <div class="dive-text">
-    <span class="eyebrow">04 · Model minds</span>
+    <span class="eyebrow">05 · Model minds</span>
     <h3>Small views, real menus, no tools</h3>
     <p>A decision is one bounded call. The model gets its perspective, where every need says what its scale means, plus a <strong>menu of executable choices</strong> with their effects spelled out. Contextual schemas constrain choices and supplied IDs where supported; runtime validation still checks every reply. Counterproposal actions have additional execution-time checks. Shared instructions are supplemented by relevant action and knowledge contracts.</p>
     <p>The Claude route runs with <strong>no tools, no MCP servers, no plugins</strong>, and checks that at start-up before every call. Every trial has a durable attempt ledger and no rerolls. Failures keep their reserved attempt and a bounded diagnostic stage. Backends are swappable: scripted, Claude, Luna (now the core and pawn model in continuous play) and Jev for fast appraisal. A failed request records its cause, including prompts that are too large before any model is called.</p>
@@ -293,9 +340,9 @@
 
 <article class="dive" id="attention">
   <div class="dive-text">
-    <span class="eyebrow">05 · Attention and time</span>
+    <span class="eyebrow">06 · Attention and time</span>
     <h3>Three speeds of thought</h3>
-    <p>In continuous mode, <strong>native habits</strong> such as eating, sleeping and ordinary jobs can continue while a colonist deliberates, with a thinking badge over their head. Explicit inference pauses stop simulation. <strong>Fast appraisal</strong> decides whether an event deserves a thought. <strong>Deliberation</strong> handles negotiation, reconsideration and planning.</p>
+    <p>In continuous mode, <strong>native habits</strong> such as eating, sleeping and ordinary jobs can continue while a colonist deliberates, with a thinking badge over their head. Explicit inference pauses stop simulation. <strong>Fast appraisal</strong> decides whether an event deserves a thought (bounded live trials so far; not in recent runs). <strong>Deliberation</strong> handles negotiation, reconsideration and planning.</p>
     <p>Native events are archived and routed only to the pawn who experienced them. Repeated signals coalesce, health events bypass cooldowns, and mundane chatter waits instead of cancelling a thought in progress. Reflection pacing spreads thinking over the observation window. Failures are counted <strong>per lane</strong> (core, decisions, answers, reflections), so a success in one lane can't hide repeated failures in another, and oversized reflection views are trimmed oldest-first rather than raising the limit. Play is continuous by default; pausing at decisions is an explicit test mode.</p>
     <p class="files">src/routing.ts · src/attention.ts · src/reflection-pacing.ts · mod/Awareness.cs · mod/DecisionPause.cs</p>
   </div>
@@ -307,14 +354,14 @@
 
 <article class="dive" id="core">
   <div class="dive-text">
-    <span class="eyebrow">06 · The core</span>
+    <span class="eyebrow">07 · The core</span>
     <h3>A planner that waits to be needed</h3>
     <p>Each core turn picks one of four moves: <strong>propose</strong> a listed opportunity, <strong>adopt</strong> a counter for fresh consent, <strong>ask</strong> one pawn one question, or <strong>wait</strong>. It keeps up to eight sourced topics marked open, blocked, deferred, resolved or declined. "Resolved" requires completed linked work, so its prose can't close a topic that the receipts don't close.</p>
     <p>It <strong>wakes on public changes</strong>: finished or stopped work, requests, messages, answers, and native-intent milestones or stalls. Opportunity churn alone does not wake it. A shared status band changing on its own, with no offerable opportunity or counter, is handled <strong>silently</strong>, with no model call and no crew-log entry, just a "waiting on…" status line, unless Food or Rest reaches urgent (including a first or previously unknown reading). Private needs do not wake it. After an explicit wait while work remains offerable, at most two bounded reviews are allowed (2,500 ticks, then 5,000); otherwise idle time stays silent. A wait never writes to the log. Messages published after newer receipts carry an "as of" mark. Refused work isn't pushed again; a colonist who said "not now" can invite exactly one fresh offer.</p>
     <p class="files">src/core-planner.ts · src/core-scheduler.ts · mod/SharedStatus.cs</p>
   </div>
   <figure class="anim window">
-    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of game events. A finished haul, a not-now answer, a Rest band turning urgent and a request for work each wake the core. A Food band changing with no offerable opportunity or counter is consumed silently and only updates a 'waiting on' status line; idle time and private needs never call the core, and a wait never adds a crew-log entry.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="../media/core-wakes.jpg" width="1280" height="720" aria-label="Animation: a timeline of game events with a count of core turns, not a budget. A met haul quota wakes the core and it proposes to Beatrice. Her Food band turning low, with nothing offerable, is consumed silently and only updates a status line. Her not-now wakes it, and it waits. 2,500 ticks later, with work still offerable, one bounded review ends in another wait, with no crew-log entry. Alvin's Rest band turning urgent wakes it to check in; a private need never calls it; Pedro asking for work gets an offer.">
       <source src="../media/core-wakes.mp4" type="video/mp4">
     </video>
     <figcaption><b>Public events wake it. Status-only changes wait quietly unless work is offerable or someone turns urgent.</b></figcaption>
@@ -323,7 +370,7 @@
 
 <article class="dive" id="timeline">
   <div class="dive-text">
-    <span class="eyebrow">07 · Timeline safety</span>
+    <span class="eyebrow">08 · Timeline safety</span>
     <h3>Saves, reloads and slow thoughts</h3>
     <p>Model calls take seconds; players save, load and rewind. Every loaded game gets a fresh <strong>epoch</strong>, so an answer from before a reload can't act in the new timeline. Each accepted action gets an ID <strong>before</strong> dispatch, and the game's saved ledger makes a duplicate a no-op.</p>
     <p><strong>Paired checkpoints</strong> save the paused game, hash it and store the matching character state together. Restoring checks the hash and forks the timeline. Gameplay reports distinguish paired restore from a <strong>cold coordinator restore</strong>: a new coordinator process (not necessarily a game restart), with retained results and no extra model calls. Some experiments left restore gaps; offline checks do not demonstrate native persistence.</p>
@@ -339,7 +386,7 @@
 
 <article class="dive" id="evidence">
   <div class="dive-text">
-    <span class="eyebrow">08 · Evidence culture</span>
+    <span class="eyebrow">09 · Evidence culture</span>
     <h3>Every claim has a receipt</h3>
     <ul>
       <li><strong>Scripted game tests</strong> for every mechanic, including refusal, withdrawal and restore.</li>
@@ -347,6 +394,7 @@
       <li><strong>Three gates per migration</strong>: an internals note from the game's own assemblies, a signed design before code, and a verdict after runs.</li>
       <li><strong>Offline snapshot banks</strong>: the same situation, varied one thing at a time, across models.</li>
       <li><strong>Offline typed-claims prototype</strong> that distinguishes submitted facts, forecasts and preferences; it is not a production truth checker.</li>
+      <li><strong>Uncut recordings</strong>: <a href="../watch/native-haul/">the first native haul</a>, the hauling migration's <a href="../watch/hauling-migration-live/">first run</a> and <a href="../watch/hauling-migration-rerun/">Gate C rerun</a>, a <a href="../watch/pipeline-regression/">pipeline regression</a>, <a href="../watch/luna-continuous/">ten minutes of choosing to eat</a> and a scripted <a href="../watch/harness-actions/">harness-actions check</a>.</li>
       <li><strong>Independent code review</strong> on every nontrivial PR and fact-checked diary entries for selected milestones.</li>
     </ul>
     <p>Well-formed output and grounded understanding are measured separately. Passing the schema doesn't count as understanding.</p>
@@ -364,8 +412,8 @@
 <section class="block" id="status" aria-labelledby="status-h">
   <span class="eyebrow">Research tree</span>
   <h2 id="status-h">What's built, what's next</h2>
-  <p class="sub">Status as of 26 September 2026. "Verified slice" means bounded evidence for the named capability, not proven long-run reliability. Labels are qualitative, not completion percentages.</p>
-  <p>The diagrams above explain the earlier character/core architecture. The separate player harness has completed its first three-task comparison; phase 2 will integrate the two only after defining the public-core knowledge boundary. <a href="https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PHASE2.md" rel="noopener">Current plan and evidence →</a></p>
+  <p class="sub">Status as of 27 September 2026. "Verified slice" means bounded evidence for the named capability, not proven long-run reliability. Labels are qualitative, not completion percentages.</p>
+  <p>Phase 2 runs in an agreed order: A, legible harness actions and a tending/roofed-sleep task (T4); B, the core becomes the harness agent, after its public knowledge boundary is written down, tested in a frozen ten-minute scene and a T1–T4 regression; C, offers and binding refusals come back on top. <a href="https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PHASE2.md" rel="noopener">Current plan and evidence →</a></p>
   <p class="research-key"><span><span class="node done"></span>verified slice</span><span><span class="node part"></span>partly there</span><span><span class="node next"></span>not started</span></p>
   <div class="research">
     <div class="tier">
@@ -373,7 +421,7 @@
       <div class="node done"><b>Consent protocol</b><span>identity-bound proposals, accept / refuse / counter / not now; late answers lapse</span></div>
       <div class="node done"><b>State &amp; audit</b><span>SQLite characters, commitments, ordered audit trail</span></div>
       <div class="node done"><b>Timeline safety</b><span>epochs, action ledger, paired and new-process cold restore</span></div>
-      <div class="node done"><b>Isolated model route</b><span>tool-free calls, no rerolls, failures counted per lane</span></div>
+      <div class="node done"><b>Isolated model route</b><span>tool-free character calls, no rerolls, failures counted per lane</span></div>
       <div class="node done"><b>Observer &amp; recordings</b><span>compact public sidebar, uncut ten-minute recordings</span></div>
     </div>
     <div class="tier">
@@ -391,13 +439,15 @@
       <div class="node done"><b>Native haul spike</b><span>live: 75/75, zero consent violations, unasked helper credited</span></div>
       <div class="node done"><b>Hauling migration</b><span>strict hold; game-side live verdict passed; growing hold parked</span></div>
       <div class="node done"><b>Pawn-owned eating</b><span>chosen by the pawn, never ordered; live-verified</span></div>
-      <div class="node part"><b>Harness action records</b><span>scripted/UI-tested; ordinary bed assignment; sealed viewer read still pending</span></div>
-      <div class="node done"><b>Player harness: build &amp; cook</b><span>blueprints and bills; three scored pairs complete, not yet integrated core planning</span></div>
+      <div class="node part"><b>Harness action records</b><span>narration and bed assignment scripted-tested; sealed viewer read pending</span></div>
+      <div class="node done"><b>Player harness benchmark</b><span>T1–T3: 18/18 arms met their goals; less wall time in every pair</span></div>
     </div>
     <div class="tier">
       <h3>Beyond</h3>
-      <div class="node part"><b>Multi-step plans</b><span>need → build → cook, live, with refusals possible</span></div>
+      <div class="node part"><b>Multi-step plans</b><span>a controller builds then cooks in T1; the in-world core hasn't yet</span></div>
       <div class="node part"><b>A scene worth watching</b><span>continuous ten-minute runs; no plan between colonists yet</span></div>
+      <div class="node next"><b>Core on the harness</b><span>phase 2 B: observe, act, wait; public-core view first</span></div>
+      <div class="node next"><b>Binding refusals</b><span>phase 2 C: a no that holds through native carriers</span></div>
       <div class="node next"><b>Standing commitments</b><span>a think-tree node that prefers agreed work, no model call per tick</span></div>
       <div class="node next"><b>More work from the game</b><span>mining, growing, treatment, defence via work givers</span></div>
       <div class="node next"><b>Human contact</b><span>core suggestions, letters, comms console</span></div>
@@ -414,7 +464,7 @@
     <p><strong>What comes next is measured separately.</strong> Receipt-backed action narration has scripted/UI evidence, not a sealed four-of-five viewer verdict. T4 still needs completed-tending evidence and simultaneous actual sleep under roofs. Public-core knowledge limits and a versioned, opt-in annotation join precede the core integration; pawn-private views remain separate.</p>
     <p><strong>Hauling runs strict.</strong> The growing hold, which would keep RimWorld's extra pickups within the quota, is parked after its two fix rounds; the in-game clock is verified on one map only.</p>
     <p><strong>Character continuity is early.</strong> Outlooks form, persist and show up in later reasoning. Whether they add up to stable personalities over a long game is an open question.</p>
-    <p><strong>It's a lab harness, not a player download.</strong> The mod only activates in a configured lab environment.</p>
+    <p><strong>It's a lab build, not a player download.</strong> The mod only activates in a configured lab environment.</p>
   </div>
   <div class="btns"><a class="btn" href="https://github.com/blueworkslabs/rimworld-concord" rel="noopener">Read the source</a><a class="btn ghost" href="../log/index.html">Follow the ship log</a></div>
 </section>

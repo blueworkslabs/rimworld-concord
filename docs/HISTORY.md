@@ -1,6 +1,6 @@
 # History
 
-The project's first three days, 21–23 September 2026, one milestone per line. Each
+The project's first week, 21–26 September 2026, one milestone per line. Each
 line says what became true and the caveat that mattered. Details and evidence for
 every trial are in the [trial ledger](trials/README.md); the
 [dev diary](https://rimworld-concord.pages.dev/log/) tells the same story for players.
@@ -159,3 +159,90 @@ Test suite growth along the way: 33 checks at the foundation, 145 at #20, 263 at
   own planner. The team agreed to steer the native planner instead
   ([NATIVE_INTENTS](NATIVE_INTENTS.md)), starting with an internals study and a bounded
   spike.
+
+- **#65–#67** — the native-intents direction, an internals note checked against the owned
+  1.6 assemblies (Gate A) and the spike design (Gate B). Documentation only.
+
+## 13. The native-haul spike (24 Sep)
+
+- **#68 Native haul spike** — hooks, helper credit, intent ledger and reload: seven
+  available scripted cases passed. The sole-Alvin exclusive/meal fixture was blocked
+  because Alvin cannot haul. No live run.
+- **#69** — core offers and matched ordered/native halves, scripted: native hauling
+  delivered 75/75 and resumed three ticks after a meal; the ordered half observed 15/75,
+  with a measurement failure retained. Reservation reruns showed unaccepted Beatrice
+  helping (20 of 75). One signed live recording followed; its receipts exposed late
+  acceptance, stale narration and attention failures.
+- **#70, #71 Gate C** — migrate: the spike wins on the game side, not the crew side. Three
+  fixes (late answers, observation age, per-lane failures) landed before the next live run.
+
+## 14. Migrating hauling (24–25 Sep)
+
+- **#72, #73** — native stockpile hauling by default. Round-1 scripted staging passed 14
+  of 18 growing-mode cases (failures retained); growing hold used up its two fix rounds and
+  was parked, and the signed strict fallback passed 15 of 16 scripted checks plus targeted
+  mixed-item and rescue checks. Zero model calls.
+- **#75 Ordinary-play live recording** — three returned proposals were rejected before
+  publication and no hauling intent opened; failure counts stayed off-screen. Kept as
+  diagnosis: Gate C not passed.
+- **#77** — six pipeline corrections, then a same-fixture authorized live rerun: 75
+  credited, with failure counts and stale-fact prefixes visible.
+- **#78 Gate C** — the hauling migration passed on the game side. Not a crew-side pass.
+- **#79, #80 Ordered haul retired** — generic tests ported, then the ordered haul deleted.
+  Scripted deletion check: 75/75, two holders, paired and new-coordinator-process restore.
+  Historical evidence stays.
+
+## 15. After Gate C (25 Sep)
+
+- **#81, #82** — native rescue replacements use fresh intent state; follow-ups 1–5
+  (archive removals, request acknowledgments, meal-answer protection, recorded trimmed
+  inputs), checked offline and with scripted eating. No model calls.
+- **#83 Follow-ups 6–7** — at most two review wakes per deliberate wait, and fixes for
+  lost attention items. Mock-tested offline: replaying the recorded run predicts 17 losses
+  down to 0.
+- **#85 Pipeline regression** — live, same setup: zero attention losses; heard messages
+  and open-meal exclusions visible. Two first-review nudges fired; no complete two-review
+  chain.
+- **#74, #86** — offline Jev wake/grounding replay: 29 transport failures first, then an
+  authorized retry with 29 valid answers and an E2 pass with 27; no routing decision.
+  Annotate-only grounding over live core replies was wired but not exercised.
+- **#87** — one fresh-menu deliberation when a chosen food has left the menu.
+- **#84, #88** — construction and cooking migration design signed and amended.
+  Documentation only; its implementation (#89) never merged.
+
+## 16. Phase 1: the agent harness (25–26 Sep)
+
+- **#90 Phase reset** — agreed with the owner: perceive and act like a player (minus
+  draft), measured against an agent using the standard UI on the same save and tasks.
+  Construction and cooking went on hold; offers and refusals moved to phase 2. A UI-only
+  pilot (campfire and three meals, 251.9 s, 20 controls) became the first reference.
+- **#91** — corrected-adapter T1 UI calibration: 150.4 s, 19 controls. Existing-context
+  calibration, not a scored arm.
+- **#92–#94 Perception** — read-only state, diff, look and digest; a recorded capture,
+  then alerts at snapshot time and a compact digest. No model runs.
+- **#95 Actions v1** — blueprints, designations, zones, bills, work priorities and forbid,
+  each returning the game's receipt, plus the T1 checker. Scripted T1 and same-process
+  save/load passed; zero model calls.
+- **#96, #97 Benchmark runner** — fresh-context arms behind harness and UI MCP servers,
+  and cross-host pairs over SSH. The first two real-controller pairs failed before any
+  game tool ran (authentication, then MCP approval); both are retained.
+- **#98 Three scored T1 pairs** — 6/6 arms completed; no consistent colony-time
+  advantage; median wall 58.7 s harness versus 106.6 s UI.
+- **#99** — read-only placement query, scripted-tested.
+- **#100, #101 T2/T3** — frozen setups and checkers, then three alternating pairs per
+  task: 12/12 primary goals met. T2 showed no consistent colony-time advantage; T3 harness
+  completion was earlier in all pairs. Tested interfaces and tasks only; billed USD
+  unavailable.
+
+## 17. Phase 2 begins (26 Sep)
+
+- **#102 Phase 2 plan** — phase 1 closed at 18/18 scored arms. Agreed order: legible
+  harness actions and a fourth task (A), the core as the harness agent judged on a frozen
+  scene plus T1–T4 regression (B), then binding offers and refusals (C).
+- **#103, #104 Step A.1** — receipt-backed narration of harness actions and ordinary bed
+  assignment. Scripted-tested in the real game with manual UI inspection, zero model
+  calls; the sealed four-of-five legibility measure has not run.
+- **#89 closed unmerged** — the construction slice was retired with a
+  [reuse inventory](CONSTRUCTION_REUSE.md): a direction change, not Gate C acceptance.
+
+Test suite growth since #56: 423 at #83, 467 at #95, 501 at #103/#104.

@@ -54,7 +54,7 @@
   <div class="prose">
     <p>RimWorld already tells great stories. Its colonists have traits, needs, grudges and breakdowns. But they don't make plans. They follow work priorities you set, and the drama comes from what happens to them.</p>
     <p>Concord adds a layer of <em>deliberate</em> choice on top. An AI core offers work, asks questions and follows up on unfinished business. Each colonist weighs that offer against their own needs, memories and outlook, and can take it, bargain it down, turn it down, or say "not now".</p>
-    <p>Agreed hauling now becomes a tagged stockpile. Construction and cooking still use the ordered baseline; blueprints and bills are next. Colonists carry it out through RimWorld's own work system, in between meals and naps, so walking, eating, hauling and bleeding stay exactly as the game does them. Concord steers the game's planner; it doesn't drive the pawns.</p>
+    <p>An agreed haul becomes a tagged stockpile, and colonists carry it out through RimWorld's own work system, in between meals and naps, so walking, eating, hauling and bleeding stay exactly as the game does them. Concord steers the game's planner; it doesn't drive the pawns. For everything else, a <a href="architecture/index.html#harness">player harness</a> now gives an agent the same controls a player has (blueprints, bills, zones, priorities) and nothing more: no drafting and no direct jobs.</p>
     <p>The upgrade isn't smarter pathfinding. It shows up in what they choose, and in being able to read <em>why</em>.</p>
   </div>
 </section>
@@ -112,10 +112,10 @@
   </div>
   <div class="two spaced">
   <figure class="anim window">
-    <video data-loop controls loop muted playsinline preload="metadata" poster="media/consent-loop.jpg" width="1280" height="720" aria-label="Animation: the core offers a two-trip haul, Alvin counters with one trip because his food is low, the core re-offers, Alvin accepts, the game runs a native job and writes a receipt.">
+    <video data-loop controls loop muted playsinline preload="metadata" poster="media/consent-loop.jpg" width="1280" height="720" aria-label="Animation: the core offers Beatrice a haul of up to 30 wood; she counters with 15 because her food is low; the core re-offers 15 and she accepts; the agreement becomes a tagged stockpile, native work fills it, and the game records the quota met.">
       <source src="media/consent-loop.mp4" type="video/mp4">
     </video>
-    <figcaption><b>The consent loop.</b> Offer, counter, fresh consent, native job, receipt. An illustrative animation of the tested protocol, not a verbatim replay of one trial.</figcaption>
+    <figcaption><b>The consent loop.</b> Offer, counter, fresh consent, native work, receipt. An illustrative animation of the tested protocol, not a verbatim replay of one trial.</figcaption>
   </figure>
   <figure class="anim window">
     <video data-loop controls loop muted playsinline preload="metadata" poster="media/native-intent.jpg" width="1280" height="720" aria-label="Animation: before, the core issued one hand-built job per trip, and a haul that stopped for hunger never resumed. Now the core offers a shared haul of up to 75 wood only to pawns who can haul; Alvin is shown as not offered. Beatrice accepts, and the agreement becomes a tagged stockpile on the map. Beatrice and Pedro, helping before he was asked, fill it through RimWorld's own work givers, around a meal. A quota ledger fills to 75 (Beatrice 35, Pedro 40) and one record retires the agreement.">
@@ -150,7 +150,7 @@
 <section class="block" aria-labelledby="watch">
   <span class="eyebrow">The target</span>
   <h2 id="watch">What ten minutes of watching should feel like</h2>
-  <p class="sub">This is the experience we're building toward, not a description of today's build. If a viewer can retell it in four sentences and say who disagreed and why, it works. Two uncut ten-minute recordings show where we are: <a href="watch/luna-continuous/">choosing to eat</a> and <a href="watch/native-haul/">the first native haul</a>. Neither has a plan forming between colonists yet.</p>
+  <p class="sub">This is the experience we're building toward, not a description of today's build. If a viewer can retell it in four sentences and say who disagreed and why, it works. Uncut recordings show where we are: <a href="watch/luna-continuous/">choosing to eat</a>, <a href="watch/native-haul/">the first native haul</a>, <a href="watch/hauling-migration-rerun/">hauling in ordinary play</a> and a scripted check of <a href="watch/harness-actions/">narrated harness actions</a>. None has a plan forming between colonists yet.</p>
   <ol class="beats">
     <li><span class="t">0–2 min</span><span><b>A need surfaces in the open.</b> <span class="d">Someone says it, or a shared status band turns amber.</span></span></li>
     <li><span class="t">2–4 min</span><span><b>The core proposes a plan in pieces.</b> <span class="d">Build a campfire, then cook. A colonist may bargain or refuse, changing what happens next; disagreement is allowed, not required.</span></span></li>
@@ -165,8 +165,8 @@
   <h2 id="status">An honest status report</h2>
   <div class="caveat">
     <h3>Experimental vertical slice, not a playable mod yet</h3>
-    <p><b>26 September:</b> the first player-interface comparison is complete: 18 of 18 scored arms across cooking, beds/food and indoor wood storage met their frozen goals. The harness used less wall time in every pair. Colony time showed no consistent advantage for cooking or beds/food; indoor storage finished earlier through the harness. Different action sizes and plans matter, and billed-dollar savings were not measured. <a href="https://github.com/blueworkslabs/rimworld-concord/pull/101" rel="noopener">Read the results and limits →</a></p>
-    <p><b>Now:</b> accepted harness actions leave receipt-backed records naming the core as decision-maker; ordinary bed assignment and both-way forbid controls have recorded scripted checks. A blueprint is not narrated as a finished building, and assigning a bed is not sleeping. The separate recording-only legibility test is still pending.</p>
+    <p><b>26 September:</b> the first player-interface comparison is complete: 18 of 18 scored arms across cooking, beds/food and indoor wood storage met their frozen goals. The harness used less wall time in every pair. Colony time showed no consistent advantage for cooking or beds/food; indoor storage finished earlier through the harness. Different action sizes and plans matter, and billed-dollar savings were not measured. <a href="architecture/index.html#harness">See the chart</a> · <a href="https://github.com/blueworkslabs/rimworld-concord/pull/101" rel="noopener">results and limits →</a></p>
+    <p><b>Now:</b> accepted harness actions leave receipt-backed records naming the core as decision-maker; ordinary bed assignment and both-way forbid controls have <a href="watch/harness-actions/">recorded scripted checks</a> with zero model calls. A blueprint is not narrated as a finished building, and assigning a bed is not sleeping. The separate recording-only legibility test is still pending.</p>
     <p><b>Next, in the agreed order:</b> legible actions and a tending/roofed-sleep benchmark; the core integrated with the harness and tested in a ten-minute scene plus regression tasks; then offers and binding refusals. Earlier consent and character trials remain evidence, but the benchmark controller is not yet an integrated, watchable crew. Long sessions, the gravship campaign and a player installer remain ahead. <a href="https://github.com/blueworkslabs/rimworld-concord/blob/main/docs/PHASE2.md" rel="noopener">Phase 2 plan →</a></p>
     <p><a href="architecture/index.html#status">See the full research tree →</a></p>
   </div>
@@ -178,7 +178,7 @@
   <div class="future">
     <div><h3>The gravship campaign</h3><p>Waking the core also wakes mechanoid pursuit. Quests reveal what the core was, and trust can become progression. Still a proposal, not canon.</p></div>
     <div><h3>You, inside the fiction</h3><p>Send the core a suggestion, write to a colonist, or catch one at the comms console for a live chat. You get advice and persuasion, never remote control.</p></div>
-    <div><h3>More work, from the game</h3><p>Construction and cooking next, through blueprints and bills, then rescue; later mining, growing and treatment from RimWorld's own work givers instead of hand-built actions.</p></div>
+    <div><h3>The core at the controls</h3><p>Next in phase 2: the core itself uses the player harness to observe, act and wait, within a written public-core view, then offers come back so a colonist's refusal binds. Mining, growing and treatment follow through the same player controls.</p></div>
   </div>
 </section>
 

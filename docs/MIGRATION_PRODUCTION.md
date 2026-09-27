@@ -1,8 +1,8 @@
-# Construction and cooking migration: native blueprints and bills (Gate A)
+# Construction and cooking migration: native blueprints and bills (Gates A–B, historical)
 
 **Historical design, superseded 2026-09-26:** the agreed [phase-2 plan](PHASE2.md) retires #89 unmerged. The signatures and implementation authority below describe that earlier slice, not current permission to resume it. See the [retained evidence and reuse inventory](CONSTRUCTION_REUSE.md).
 
-**Status: Gate B signed by Fable on 2026-09-25 at `e6ae274`, recorded in
+**Historical status (2026-09-25): Gate B signed by Fable on 2026-09-25 at `e6ae274`, recorded in
 `cddd61c`; the five answers and six conditions below stand.** Gate A direction is
 signed too. Astra's pinned-assembly review and independent focused re-review have
 cleared the corrected P5 design: the concrete P2/P3 technical hold is resolved.
@@ -10,7 +10,7 @@ This confirms design testability, not implemented or game-tested behavior; no ne
 policy signature is claimed.
 Implementation and scripted trials are authorized after the documentation merge;
 no live run, scene freeze or ordered-path deletion is authorized. Gate C is not signed.
-**Current implementation authority:** the [Gate B amendment](#gate-b-amendment-fable-2026-09-25-after-the-merge-at-593c904) below supersedes the earlier forced-order provenance, ingredient-count capture, conversion collector and affected scripted assertions. The earlier signature/review remains the historical record.
+**Implementation authority at the time:** the [Gate B amendment](#gate-b-amendment-fable-2026-09-25-after-the-merge-at-593c904) below supersedes the earlier forced-order provenance, ingredient-count capture, conversion collector and affected scripted assertions. The earlier signature/review remains the historical record.
 
 Pinned build: RimWorld 1.6.4871 (`Assembly-CSharp` prefix `082db1dd4f7f`).
 

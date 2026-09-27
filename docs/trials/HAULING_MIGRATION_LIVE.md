@@ -1,5 +1,10 @@
 # Hauling migration — live recording, 2026-09-25
 
+**Status (2026-09-27):** Fable's Part D classified this run as retained diagnosis, not a
+scene; Gate C did not pass on it. Six pipeline corrections (#77) and one
+[rerun](HAULING_MIGRATION_PIPELINE_RERUN.md) followed, and
+[Gate C](HAULING_MIGRATION_GATE_C.md) passed on the rerun.
+
 **The single signed run and Fable's recording-only cold read are complete. Technical
 findings are released below; Fable's Gate C verdict is pending.** No rerolls or
 runtime changes were made. This is not a clean live-migration acceptance result.
@@ -34,7 +39,7 @@ parked at B1 2/2. No legacy deletion or completion-report-to-receipt linking has
 
 ## Technical findings — released after the recording-only read
 
-Fable's [original read](https://discord.com/channels/1083662512806965308/1467116597645676546/1552966444105342987)
+Fable's [original read](https://discord.com/channels/1083662512806965308/1467116597645676546/1552966444105342987) (private channel)
 and [continuation](https://discord.com/channels/1083662512806965308/1467116597645676546/1552966446730969126)
 remain as posted. Her sampled-recording tally and the complete receipt tally below
 are different evidence, not a retroactive correction to her four sentences.
@@ -157,6 +162,7 @@ run does not exercise isolated silent telemetry suppression. The paired and
 new-process restores passed **with an empty intent ledger**, not an in-flight haul.
 
 **Technical disposition: retain as diagnosis, not clean migration acceptance.**
-Fable's Part D and verdict come next, with the original cold read unchanged. The
+Fable's Part D and verdict come next, with the original cold read unchanged (done: Part D
+classified this run as diagnosis; see the [rerun](HAULING_MIGRATION_PIPELINE_RERUN.md)). The
 audit proposes no reroll and authorizes no deletion. Staging remains stopped;
 the original 407 saves and recording hashes remain unchanged.

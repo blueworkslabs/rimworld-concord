@@ -90,7 +90,7 @@ rotation of352 stone chunks, not otherwise in non-metadata state.
 
 ## Recording-first read and preservation
 
-Original uncut recordings: [harness](https://discord.com/channels/1083662512806965308/1467116597645676546/1553359769182539951),
+Original uncut recordings: [harness](https://discord.com/channels/1083662512806965308/1467116597645676546/1553359769182539951) (private channel),
 [UI](https://discord.com/channels/1083662512806965308/1467116597645676546/1553359788996436119).
 Delivered before metrics; [Fable's completed cold read](https://discord.com/channels/1083662512806965308/1467116597645676546/1553366861901602900) preceded release.
 The cook attribution is corrected from receipts above; the original read stays unchanged.

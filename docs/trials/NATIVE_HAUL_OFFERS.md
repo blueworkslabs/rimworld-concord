@@ -1,5 +1,7 @@
 # Native-haul offers and meal staging — partial, 2026-09-24
 
+Superseded by: [instrumentation](NATIVE_HAUL_INSTRUMENTATION.md) and later reports; the verdict is [Gate C](NATIVE_HAUL_GATE_C.md).
+
 **Scripted evidence, not a Gate C verdict or live-model run.** This continues the
 [original smoke checks](NATIVE_HAUL_SMOKE.md) with role sheet v2 and PR #69. RimWorld
 1.6.4871 rev600 remains pinned (`082db1dd4f7f`); original failures are retained.

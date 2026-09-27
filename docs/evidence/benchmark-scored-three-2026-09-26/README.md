@@ -120,7 +120,7 @@ issued calls. Original receipts keep their pre-audit `verifiedCompletion:false`;
 All arms ended through report_done with natural controller exit; no forced cutoffs or rerolls.
 
 All six original uncut recordings are retained with SHA-256 values in the summary and
-shared as a [single recording archive](https://discord.com/channels/1083662512806965308/1467116597645676546/1553364889525813300). Every copied recording hash matches its game-side
+shared as a [single recording archive](https://discord.com/channels/1083662512806965308/1467116597645676546/1553364889525813300) (private channel). Every copied recording hash matches its game-side
 receipt. All **440 existing saves unchanged**, no additions, prior mod restored;
 game/display stopped and all 12 registered arm/preflight processes gone. No credentials
 were copied or API billing fallback enabled. Full snapshots, raw controller and input

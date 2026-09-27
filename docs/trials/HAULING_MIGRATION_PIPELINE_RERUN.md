@@ -1,5 +1,10 @@
 # Hauling migration — pipeline-corrected rerun, 2026-09-25
 
+**Status (2026-09-27):** Fable's Part D and verdict followed: [Gate C](HAULING_MIGRATION_GATE_C.md)
+passed on the game side on this rerun. The medical alert was later identified as
+Beatrice's asthma ([inspection](HAULING_MIGRATION_GATE_C.md#medical-alert-inspection-paused-game-2026-09-25)).
+The Discord links in this record point to a private channel.
+
 ## Authorization and unchanged setup
 
 Fable’s [Part D disposition](https://discord.com/channels/1083662512806965308/1467116597645676546/1552972709065924719)
@@ -199,9 +204,10 @@ ordinary speech does not automatically dispatch food, rest or another conversati
 - **Attention:** 17 unprocessed-event evictions remain: memory 1, rest 6, mood 2,
   food 5, intent-ordinary 3. Fifteen successful reflections do not erase those losses.
 - Message-map provenance and the topic-text/character-quality follow-ups remain
-  open. The medical alert’s cause remains **unresolved**: no alert-source telemetry
+  open. The medical alert’s cause remains **unresolved** (resolved later: Beatrice's asthma, see
+[Gate C](HAULING_MIGRATION_GATE_C.md#medical-alert-inspection-paused-game-2026-09-25)): no alert-source telemetry
   was retained, and the visual alert alone does not identify a patient or condition.
 
-**Fable’s Part D/verdict next.** This establishes live mechanism evidence and names
+**Fable’s Part D/verdict next** (done: [Gate C](HAULING_MIGRATION_GATE_C.md)). This establishes live mechanism evidence and names
 remaining presentation/cognition limitations; it does not pre-empt her Gate C
 verdict or authorize a deletion PR or another run.

@@ -49,9 +49,15 @@ viewer follow it".
 
 ## Direction (Fable, 2026-09-24; implementation still gated)
 
+*Historical: the gate was later passed and this section is superseded where it
+conflicts with the [operative fallback](#operative-fallback--2026-09-25) (strict (a)
+ships; growing (b) is parked).*
+
 ### 1. Strict hold, or a hold that grows
 
-**Selected conditionally: (b), growing hold within the quota.** Fable requires a
+**Selected conditionally: (b), growing hold within the quota** (superseded 2026-09-25:
+strict (a) is the migration configuration; see the
+[operative fallback](#operative-fallback--2026-09-25)). Fable requires a
 verified admission boundary before additional pickup, no alternate pickup escape, and
 measurement of the new wrapper's cost. **Fallback: (a), strict hold**, not reported
 overshoot, if that boundary cannot be established. Q2's original after-action wrapper
@@ -567,8 +573,9 @@ parity. Retain invalid fixture attempts; no frozen live rerolls. The measures ar
 
 ## Implementation status (round 0)
 
-Built on `feat/hauling-migration`. **Not run in the game yet.** The B1 round ledger
-starts here at round 0; Astra keeps it.
+*(Historical, round 0. This work, the review fixes and both B1 rounds below merged in
+#73; Gate C follows below.)* Built on `feat/hauling-migration`. **Not run in the game yet.** The B1
+round ledger starts here at round 0; Astra keeps it.
 
 - **Mod** (`7440ecc`):
   - (map, zone, def) lookups everywhere (B3);
@@ -593,7 +600,9 @@ starts here at round 0; Astra keeps it.
   - the durable rescue handover (B7).
 - **Scripted runs:** `scripts/run-hauling-migration-lab.sh [--strict] [--case=<name>]`
   with the B1 checks, the mixed zone, the archive, zone edits, re-tagging, legibility,
-  and the matched pair (native and ordered). It runs with `--strict` for the fallback.
+  and the matched pair (native and ordered; the ordered half was removed with the
+  ordered haul in #80, and its results stay in `docs/evidence`). It runs with
+  `--strict` for the fallback.
   Not forced by the runner, and listed as unimplemented in its receipt:
   - full-load retarget with insufficient destination quota;
   - pending-extra retarget;
@@ -759,7 +768,9 @@ or reopens growing.
 **Passed on the game side, 2026-09-25.** Verdict, deletion scope and follow-ups:
 [HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md).
 
-## Gate C will measure
+## Gate C criteria (frozen)
+
+These are the criteria as frozen before the run; the result is above.
 
 **Signed condition: #71's fixes must be measured live in this migration.** The
 [post-read audit](trials/HAULING_MIGRATION_LIVE.md#technical-findings--released-after-the-recording-only-read)
@@ -791,7 +802,8 @@ failure to satisfy a count.
 
 ### Implementation handoff and complexity record
 
-After this signed documentation is merged, Clawd proceeds in order: mod, lab,
+(Historical; this handoff is complete: implemented, reviewed and staged in #73,
+then Gate C.) After this signed documentation is merged, Clawd proceeds in order: mod, lab,
 coordinator, scripted runs, then Astra's review/staging handoff. No frozen live run
 starts merely because the design is signed.
 

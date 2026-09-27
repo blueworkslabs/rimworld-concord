@@ -1,7 +1,7 @@
 """Explainer animations for the Concord project site.
 
 Render (from this directory):
-    manim render -qm --format mp4 concord_scenes.py ConsentLoop WhoKnowsWhat TimelineGuard CoreWakes NativeIntent
+    manim render -qm --format mp4 concord_scenes.py ConsentLoop WhoKnowsWhat TimelineGuard CoreWakes NativeIntent PlayerHarness
 
 Then run ./export.sh to copy the videos and poster frames into ../media/.
 Palette matches site/assets/site.css: steel panels, paper text, one amber accent.
@@ -81,42 +81,42 @@ class ConsentLoop(Scene):
         self.add(heading("The consent loop"))
         core = core_mark().move_to(LEFT * 4.6 + UP * 1.1)
         core_lbl = T("CORE", 18, AMBER, weight=BOLD).next_to(core, DOWN, buff=0.18)
-        alvin = pawn("Alvin").move_to(RIGHT * 3.6 + UP * 1.2)
-        others = VGroup(pawn("Beatrice"), pawn("Pedro")).arrange(RIGHT, buff=0.5).scale(0.7).next_to(alvin, RIGHT, buff=0.45).set_opacity(0.45)
+        bea = pawn("Beatrice").move_to(RIGHT * 3.6 + UP * 1.2)
+        others = VGroup(pawn("Alvin"), pawn("Pedro")).arrange(RIGHT, buff=0.5).scale(0.7).next_to(bea, RIGHT, buff=0.45).set_opacity(0.45)
         world = panel(12.4, 1.15, PANEL).move_to(DOWN * 2.2)
-        world_lbl = T("RimWorld: native jobs, needs, pathing", 18, DIM).move_to(world).align_to(world, LEFT).shift(RIGHT * 0.3)
-        self.play(FadeIn(core, scale=0.6), FadeIn(core_lbl), FadeIn(alvin, shift=LEFT * 0.3), FadeIn(others), FadeIn(world), FadeIn(world_lbl), run_time=1.2)
+        world_lbl = T("RimWorld: work givers, native jobs, needs", 18, DIM).move_to(world).align_to(world, LEFT).shift(RIGHT * 0.3)
+        self.play(FadeIn(core, scale=0.6), FadeIn(core_lbl), FadeIn(bea, shift=LEFT * 0.3), FadeIn(others), FadeIn(world), FadeIn(world_lbl), run_time=1.2)
 
-        offer = card("Offer: haul 10 wood, 2 trips").move_to(core.get_center() + RIGHT * 2.9)
+        offer = card("Offer: haul up to 30 wood").move_to(core.get_center() + RIGHT * 2.9)
         tag = T("proposal", 16, DIM).next_to(offer, UP, buff=0.12)
         self.play(FadeIn(offer, shift=RIGHT * 0.4), FadeIn(tag), run_time=0.8)
-        self.play(offer.animate.move_to(alvin.get_center() + LEFT * 3.1), tag.animate.next_to(alvin.get_center() + LEFT * 3.1 + UP * 0.35, UP, buff=0.12), run_time=0.9)
+        self.play(offer.animate.move_to(bea.get_center() + LEFT * 3.1), tag.animate.next_to(bea.get_center() + LEFT * 3.1 + UP * 0.35, UP, buff=0.12), run_time=0.9)
 
-        choices = VGroup(chip("accept", GREEN), chip("counter", AMBER), chip("refuse", RED), chip("not now", BLUE)).arrange(RIGHT, buff=0.18).next_to(alvin, DOWN, buff=0.35).shift(LEFT * 1.2)
+        choices = VGroup(chip("accept", GREEN), chip("counter", AMBER), chip("refuse", RED), chip("not now", BLUE)).arrange(RIGHT, buff=0.18).next_to(bea, DOWN, buff=0.35).shift(LEFT * 1.2)
         self.play(LaggedStart(*[FadeIn(c, shift=UP * 0.15) for c in choices], lag_ratio=0.15), run_time=0.9)
         self.play(Indicate(choices[1], color=AMBER, scale_factor=1.15), run_time=0.8)
 
-        counter = card("Counter: 1 trip. My food is low.", AMBER).move_to(alvin.get_center() + LEFT * 3.1)
+        counter = card("Counter: 15 wood. Food is low.", AMBER).move_to(bea.get_center() + LEFT * 3.1)
         self.play(FadeOut(offer), FadeOut(tag), FadeIn(counter), run_time=0.5)
-        self.play(counter.animate.move_to(core.get_center() + RIGHT * 3.0), run_time=0.9)
+        self.play(counter.animate.next_to(core, RIGHT, buff=0.45), run_time=0.9)
         self.wait(0.4)
 
-        fresh = card("Offer: haul 10 wood, 1 trip").move_to(core.get_center() + RIGHT * 2.9)
+        fresh = card("Offer: haul up to 15 wood").move_to(core.get_center() + RIGHT * 2.9)
         ftag = T("revised offer, fresh consent", 16, DIM).next_to(fresh, UP, buff=0.12)
         self.play(FadeOut(counter), FadeIn(fresh), FadeIn(ftag), run_time=0.5)
-        self.play(fresh.animate.move_to(alvin.get_center() + LEFT * 3.1), ftag.animate.next_to(alvin.get_center() + LEFT * 3.1 + UP * 0.35, UP, buff=0.12), run_time=0.9)
+        self.play(fresh.animate.move_to(bea.get_center() + LEFT * 3.1), ftag.animate.next_to(bea.get_center() + LEFT * 3.1 + UP * 0.35, UP, buff=0.12), run_time=0.9)
         self.play(Indicate(choices[0], color=GREEN, scale_factor=1.15), run_time=0.8)
 
-        # Native execution: a wood stack travels to the stockpile inside the world band.
+        # Native execution: the agreement becomes a tagged stockpile; a work giver fills it.
         stack = Square(0.32, fill_color="#8A6A43", fill_opacity=1, stroke_color="#5E4529", stroke_width=2).move_to(world.get_left() + RIGHT * 6.2)
-        pile = DashedVMobject(Square(0.55, color=DIM, stroke_width=2), num_dashes=16).move_to(world.get_right() + LEFT * 1.3)
-        pile_lbl = T("stockpile", 14, DIM).next_to(pile, UP, buff=0.08)
-        down = Arrow(alvin.get_bottom() + DOWN * 0.9, world.get_top() + RIGHT * 3.6, buff=0.1, color=GREEN, stroke_width=3)
-        dtag = T("native job", 16, GREEN).next_to(down, LEFT, buff=0.1)
+        pile = Rectangle(width=0.9, height=0.62, fill_color=AMBER, fill_opacity=0.12, stroke_color=AMBER, stroke_width=2).move_to(world.get_right() + LEFT * 1.3)
+        pile_lbl = T("tagged stockpile · 15", 14, AMBER).next_to(pile, UP, buff=0.08)
+        down = Arrow(bea.get_bottom() + DOWN * 0.9, world.get_top() + RIGHT * 3.6, buff=0.1, color=GREEN, stroke_width=3)
+        dtag = T("native work", 16, GREEN).next_to(down, LEFT, buff=0.1)
         self.play(FadeOut(fresh), FadeOut(ftag), GrowArrow(down), FadeIn(dtag), FadeIn(stack), Create(pile), FadeIn(pile_lbl), run_time=0.9)
         self.play(stack.animate.move_to(pile), run_time=1.3)
 
-        receipt = card("RECORD  Alvin · haul completed 1/1 · 10 wood", BLUE, size=18).move_to(LEFT * 3.2 + DOWN * 0.8)
+        receipt = card("RECORD  Game · quota met: 15/15 wood (Beatrice 15)", BLUE, size=18).move_to(LEFT * 2.9 + DOWN * 0.8)
         self.play(FadeIn(receipt, shift=UP * 0.3), run_time=0.7)
         cap = caption("Speech is testimony. Receipts are what happened.")
         self.play(FadeIn(cap), run_time=0.7)
@@ -165,11 +165,11 @@ class WhoKnowsWhat(Scene):
         msg = T("Alvin: \"I'm getting hungry\"", 17, PAPER)
         msg.next_to(note, DOWN, buff=0.35).align_to(band, LEFT)
         msg_log = T("MESSAGE Alvin → Core", 16, AMBER)
-        rec_log = T("RECORD haul 1/1 · 10 wood", 16, BLUE)
+        rec_log = T("RECORD quota met: 15/15 wood", 16, BLUE)
         logrows = VGroup(msg_log, rec_log).arrange(DOWN, aligned_edge=LEFT, buff=0.25).next_to(cols[2].get_top(), DOWN, buff=1.45).align_to(cols[2], LEFT).shift(RIGHT * 0.3)
         self.play(FadeIn(msg, shift=RIGHT * 0.2), run_time=0.6)
         self.play(TransformFromCopy(msg, msg_log), run_time=0.8)
-        progress = T("Agreement: 1/1 trips", 16, PAPER).next_to(msg, DOWN, buff=0.25).align_to(msg, LEFT)
+        progress = T("Beatrice's haul: 15/15 wood", 16, PAPER).next_to(msg, DOWN, buff=0.25).align_to(msg, LEFT)
         self.play(FadeIn(progress), FadeIn(rec_log, shift=UP * 0.15), run_time=0.7)
 
         eye = core_mark(0.28).next_to(cols[1], UP, buff=0.12)
@@ -236,22 +236,23 @@ class CoreWakes(Scene):
     def construct(self):
         self.add(heading("The core wakes on shared events"))
         y = 0.35
-        axis = Line(LEFT * 6.2 + UP * y, RIGHT * 6.2 + UP * y, color=EDGE, stroke_width=3)
+        axis = Line(LEFT * 6.4 + UP * y, RIGHT * 6.4 + UP * y, color=EDGE, stroke_width=3)
         tl = T("game time →", 14, DIM).next_to(axis.get_left(), DOWN, buff=0.75).align_to(axis, LEFT)
         core = core_mark(0.45).move_to(LEFT * 5 + UP * 2.3)
         core[0].set_stroke(opacity=0.35)
         core[1:].set_fill(opacity=0.35)
         clbl = T("core: asleep", 18, DIM).next_to(core, RIGHT, buff=0.3)
-        budget_lbl = T("turn budget", 16, DIM).move_to(RIGHT * 3.6 + UP * 2.6)
-        pips = VGroup(*[Square(0.26, fill_color=AMBER, fill_opacity=1, stroke_width=0) for _ in range(5)]).arrange(RIGHT, buff=0.1).next_to(budget_lbl, DOWN, buff=0.15)
-        rule = T("Wakes it: messages · answers · work outcomes · requests · native-intent milestones", 15, DIM).move_to(UP * 1.35)
+        # Ongoing play has no turn ceiling: count the turns spent instead of drawing a budget.
+        turns_lbl = T("core turns", 16, DIM).move_to(RIGHT * 3.9 + UP * 2.6)
+        turns = T("0", 22, AMBER, weight=BOLD).next_to(turns_lbl, DOWN, buff=0.12)
+        rule = T("Wakes it: messages · answers · work outcomes · requests · self-care · native-intent milestones", 15, DIM).move_to(UP * 1.35)
 
         status_box = panel(5.4, 1.75).move_to(LEFT * 3.6 + DOWN * 1.98)
         log_box = panel(6.9, 1.75).move_to(RIGHT * 2.85 + DOWN * 1.98)
         status_t = T("Status line", 16, AMBER, weight=BOLD).next_to(status_box.get_corner(UL), DR, buff=0.2)
         log_t = T("Crew log", 16, BLUE, weight=BOLD).next_to(log_box.get_corner(UL), DR, buff=0.2)
         status = T("Core: idle", 17, DIM).next_to(status_t, DOWN, buff=0.35, aligned_edge=LEFT)
-        self.play(Create(axis), FadeIn(tl), FadeIn(core), FadeIn(clbl), FadeIn(budget_lbl), FadeIn(pips),
+        self.play(Create(axis), FadeIn(tl), FadeIn(core), FadeIn(clbl), FadeIn(turns_lbl), FadeIn(turns),
                   FadeIn(VGroup(status_box, log_box, status_t, log_t, status)), run_time=1.0)
         self.play(FadeIn(rule, shift=DOWN * 0.1), run_time=0.6)
 
@@ -270,33 +271,33 @@ class CoreWakes(Scene):
 
         # (x, label, kind, turn, status line after, crew-log entry or None)
         events = [
-            (-4.8, "haul finished", "wake", "propose", "Core: waiting on Alvin's answer", "PROPOSAL Core → Alvin: haul 20 wood"),
-            (-3.1, "Food band: ok → low", "silent", "silent: status only", "Core: waiting on Alvin (Food: low)", None),
-            (-1.4, "Alvin: \"not now\"", "wake", "wait", "Core: waiting on Alvin, deferred", None),
-            (0.3, "idle hour", "none", "no call", None, None),
-            (2.0, "Rest band → URGENT", "urgent", "check in", "Core: waiting on Beatrice", "MESSAGE Core → Beatrice: rest first"),
-            (3.7, "private need", "none", "no call", None, None),
-            (5.4, "Pedro asks for work", "wake", "offer", "Core: waiting on Pedro's answer", "OFFER Core → Pedro: cook dinner"),
+            (-5.3, "haul quota met", "wake", "propose", "Core: waiting on Beatrice's answer", "PROPOSAL Core → Beatrice: haul 20 wood"),
+            (-3.55, "Food band: ok → low", "silent", "silent: status only", "Core: waiting on Beatrice (Food: low)", None),
+            (-1.8, "Beatrice: not now", "wake", "wait", "Core: waiting; work still offerable", None),
+            (-0.05, "2,500 ticks, no news", "review", "review 1 of 2: wait", "Core: reviewed; still waiting", None),
+            (1.7, "Rest band → URGENT", "urgent", "check in", "Core: waiting on Alvin", "MESSAGE Core → Alvin: rest first"),
+            (3.45, "private need", "none", "no call", None, None),
+            (5.2, "Pedro asks for work", "wake", "offer", "Core: waiting on Pedro's answer", "OFFER Core → Pedro: cook dinner"),
         ]
         used = 0
-        for x, label, kind, turn, stat, entry in events:
-            wakes = kind in ("wake", "urgent")
-            col = RED if kind == "urgent" else (AMBER if wakes else EDGE)
+        for i, (x, label, kind, turn, stat, entry) in enumerate(events):
+            wakes = kind in ("wake", "urgent", "review")
+            col = RED if kind == "urgent" else (BLUE if kind == "review" else (AMBER if wakes else EDGE))
             mark = Dot(RIGHT * x + UP * y, color=col, radius=0.12)
-            lbl = T(label, 16, RED if kind == "urgent" else (PAPER if wakes else DIM)).next_to(mark, DOWN, buff=0.25 if wakes else 0.7)
+            lbl = T(label, 15, RED if kind == "urgent" else (PAPER if wakes else DIM)).next_to(mark, DOWN, buff=0.25 if i % 2 == 0 else 0.7)
             self.play(FadeIn(mark, scale=0.4), FadeIn(lbl), run_time=0.5)
             if wakes:
-                awake = T("core: awake", 18, AMBER).move_to(clbl, aligned_edge=LEFT)
+                awake = T("core: awake" if kind != "review" else "core: bounded review", 18, AMBER).move_to(clbl, aligned_edge=LEFT)
                 beam = DashedLine(mark.get_center(), core.get_bottom(), color=col, stroke_width=2)
                 self.play(Create(beam), dim(core, 1), Transform(clbl, awake), run_time=0.5)
-                act = T(turn, 16, AMBER).next_to(mark, UP, buff=0.3)
-                self.play(FadeIn(act, shift=UP * 0.1), pips[used].animate.set_fill(EDGE), run_time=0.5)
                 used += 1
+                act = T(turn, 15, AMBER).next_to(mark, UP, buff=0.3)
+                self.play(FadeIn(act, shift=UP * 0.1), Transform(turns, T(str(used), 22, AMBER, weight=BOLD).move_to(turns)), run_time=0.5)
                 if entry:
                     self.play(FadeIn(log_row(entry), shift=RIGHT * 0.15), set_status(stat), run_time=0.6)
                 else:
                     note = T("wait turn: no log entry", 14, DIM).next_to(log_t, RIGHT, buff=0.4)
-                    self.play(set_status(stat), Indicate(status, color=AMBER, scale_factor=1.05), FadeIn(note), run_time=0.6)
+                    self.play(set_status(stat), FadeIn(note), run_time=0.6)
                     self.wait(0.3)
                     self.play(FadeOut(note), run_time=0.3)
                 asleep = T("core: asleep", 18, DIM).move_to(clbl, aligned_edge=LEFT)
@@ -306,6 +307,8 @@ class CoreWakes(Scene):
                 if stat:
                     quiet = T("no offer/counter: silent, no core call or log", 14, DIM).next_to(status_box.get_bottom(), UP, buff=0.2).align_to(status, LEFT)
                     self.play(FadeIn(z), set_status(stat, DIM), FadeIn(quiet), run_time=0.6)
+                    self.wait(0.3)
+                    self.play(FadeOut(quiet), run_time=0.3)
                 else:
                     self.play(FadeIn(z), run_time=0.4)
         cap = caption("Status-only: silent unless work is offerable or a band reaches urgent.")
@@ -455,4 +458,91 @@ class NativeIntent(Scene):
         self.play(FadeIn(done, shift=UP * 0.2), Transform(ztag, retired), zone.animate.set_stroke(DIM).set_fill(opacity=0.05), run_time=0.9)
         cap = caption("The intent is state on the map. Receipts decide the credit.")
         self.play(FadeIn(cap), run_time=0.7)
+        self.wait(2.6)
+
+
+class PlayerHarness(Scene):
+    """Phase 1/2: read what a player can see, act through player controls, receipts and narration."""
+
+    def construct(self):
+        self.add(heading("The player harness"))
+
+        agent = core_mark(0.4).move_to(LEFT * 5.7 + UP * 1.75)
+        agent_lbl = VGroup(T("Agent", 17, AMBER, weight=BOLD), T("benchmark controller now;", 13, DIM), T("the core in phase 2 B", 13, DIM)).arrange(DOWN, buff=0.06).next_to(agent, DOWN, buff=0.15)
+        harness = panel(3.0, 3.1).move_to(LEFT * 2.35 + UP * 0.85)
+        h_t = T("Harness", 17, BLUE, weight=BOLD).next_to(harness.get_top(), DOWN, buff=0.16)
+        reads = VGroup(T("read", 14, BLUE, weight=BOLD), T("digest · diff · look", 14, PAPER), T("placement query", 14, PAPER)).arrange(DOWN, aligned_edge=LEFT, buff=0.08)
+        acts = VGroup(T("act", 14, BLUE, weight=BOLD), T("blueprint · zone · bill", 14, PAPER), T("priority · forbid · bed", 14, PAPER), T("time controls", 14, PAPER)).arrange(DOWN, aligned_edge=LEFT, buff=0.08)
+        VGroup(reads, acts).arrange(DOWN, aligned_edge=LEFT, buff=0.25).next_to(h_t, DOWN, buff=0.22).align_to(harness, LEFT).shift(RIGHT * 0.25)
+        world = panel(5.6, 3.6).move_to(RIGHT * 3.7 + UP * 0.6)
+        w_t = T("RimWorld map", 15, DIM).next_to(world.get_corner(UL), DR, buff=0.15)
+        log_box = panel(12.6, 1.55).move_to(DOWN * 2.35)
+        log_t = T("Crew log · receipt-backed records", 15, BLUE, weight=BOLD).next_to(log_box.get_corner(UL), DR, buff=0.15)
+        rules = T("no draft · no direct jobs", 14, RED).next_to(world.get_corner(DR), UL, buff=0.15)
+        self.play(FadeIn(agent, scale=0.6), FadeIn(agent_lbl), FadeIn(VGroup(harness, h_t, reads, acts)), FadeIn(VGroup(world, w_t, rules)), FadeIn(VGroup(log_box, log_t)), run_time=1.2)
+
+        # Things on the map: loose wood, three colonists, an alert.
+        wood = VGroup(*[Square(0.26, fill_color="#8A6A43", fill_opacity=1, stroke_color="#5E4529", stroke_width=2) for _ in range(3)]).arrange(RIGHT, buff=0.06).move_to(RIGHT * 1.9 + DOWN * 0.6)
+        wood_l = T("wood ×120", 12, DIM).next_to(wood, DOWN, buff=0.06)
+        toks = VGroup(*[VGroup(Circle(0.18, fill_color=PANEL_2, fill_opacity=1, stroke_color=PAPER, stroke_width=2.5), T(n, 12, PAPER, weight=BOLD)) for n in "ABP"])
+        for t_, pos in zip(toks, (RIGHT * 5.6 + UP * 1.6, RIGHT * 5.9 + UP * 0.9, RIGHT * 5.3 + UP * 0.3)):
+            t_.move_to(pos)
+        alert = chip("Need meal source", AMBER).scale(0.85).next_to(w_t, DOWN, buff=0.15).align_to(w_t, LEFT)
+        self.play(FadeIn(wood), FadeIn(wood_l), FadeIn(toks), FadeIn(alert, shift=DOWN * 0.1), run_time=0.8)
+
+        # 1. Read: a bounded digest of what a player can see.
+        launch = LEFT * 2.35 + UP * 2.85
+        digest = card("digest: 18h · wood 120 · no campfire · 1 alert", BLUE, size=14).move_to(world.get_center() + DOWN * 0.2)
+        self.play(FadeIn(digest, scale=0.9), run_time=0.5)
+        self.play(digest.animate.move_to(launch), run_time=1.0)
+        seen = T("player-visible only, same as the UI", 13, DIM).next_to(digest, RIGHT, buff=0.2)
+        self.play(FadeIn(seen), run_time=0.4)
+        self.wait(0.4)
+        self.play(FadeOut(digest), FadeOut(seen), run_time=0.4)
+
+        # 2. Act: one command, one native acceptance receipt.
+        cmd = card("place_blueprint(campfire, cell)", AMBER, size=14).move_to(launch)
+        self.play(FadeIn(cmd, shift=RIGHT * 0.2), run_time=0.5)
+        spot = RIGHT * 3.65 + UP * 0.15
+        self.play(cmd.animate.scale(0.8).move_to(spot + UP * 0.75), run_time=1.0)
+        bp = DashedVMobject(Square(0.55, color=BLUE, stroke_width=3), num_dashes=16).move_to(spot)
+        rc = chip("receipt: ok · id · tick", GREEN).scale(0.85).next_to(bp, LEFT, buff=0.15)
+        self.play(FadeOut(cmd), Create(bp), FadeIn(rc), run_time=0.7)
+        note = T("accepted, not built", 13, DIM).next_to(rc, DOWN, buff=0.06)
+        line1 = T("RECORD Core · The core placed a campfire blueprint outdoors.", 15, PAPER).next_to(log_t, DOWN, buff=0.2, aligned_edge=LEFT)
+        self.play(FadeIn(note), FadeIn(line1, shift=RIGHT * 0.15), run_time=0.7)
+
+        # 3. The game's own work givers do the job.
+        bea = toks[1]
+        self.play(bea.animate.move_to(wood.get_center() + UP * 0.35), run_time=0.8)
+        self.play(bea.animate.move_to(spot + RIGHT * 0.5), wood[2].animate.move_to(spot + RIGHT * 0.1), run_time=1.0)
+        fire = VGroup(Square(0.55, fill_color="#5E4529", fill_opacity=1, stroke_color=AMBER, stroke_width=3),
+                      Triangle(fill_color=AMBER, fill_opacity=1, stroke_width=0).scale(0.16)).move_to(spot)
+        fire[1].move_to(spot)
+        wg = T("native construction job", 13, GREEN).next_to(bp, UP, buff=0.12)
+        self.play(FadeIn(wg), run_time=0.4)
+        self.play(ReplacementTransform(bp, fire), FadeOut(wood[2]), FadeOut(rc), FadeOut(note), FadeOut(alert), run_time=0.9)
+        later = T("later read: campfire built, alert cleared", 13, GREEN).next_to(fire, DOWN, buff=0.12)
+        self.play(FadeOut(wg), FadeIn(later), run_time=0.5)
+        self.wait(0.4)
+
+        # 4. A bill, then a refusal kept with the game's own reason.
+        bill = card("bill(campfire, simple meal ×3)", AMBER, size=14).move_to(launch)
+        self.play(FadeOut(later), FadeIn(bill, shift=RIGHT * 0.2), run_time=0.5)
+        self.play(bill.animate.scale(0.8).move_to(spot + UP * 0.75), run_time=0.9)
+        line2 = T("RECORD Core · The core added a bill at the campfire: cook simple meal, 3 times.", 15, PAPER).next_to(line1, DOWN, buff=0.12, aligned_edge=LEFT)
+        self.play(FadeOut(bill), Indicate(fire, color=GREEN, scale_factor=1.1), FadeIn(line2, shift=RIGHT * 0.15), run_time=0.8)
+
+        bad = card("place_blueprint(wall, map edge)", AMBER, size=14).move_to(launch)
+        self.play(FadeIn(bad, shift=RIGHT * 0.2), run_time=0.5)
+        edge = world.get_left() + RIGHT * 0.2 + UP * 0.55
+        self.play(bad.animate.scale(0.8).next_to(edge, RIGHT, buff=0.1).shift(UP * 0.45), run_time=0.9)
+        miss = VGroup(Line(UL * 0.16, DR * 0.16, color=RED, stroke_width=5), Line(UR * 0.16, DL * 0.16, color=RED, stroke_width=5)).move_to(edge)
+        no = chip("refused: Too close to map edge", RED).scale(0.85).next_to(miss, RIGHT, buff=0.12)
+        line3 = T("RECORD Core · The game refused the core's request to place a wall blueprint: Too close to map edge.", 15, PAPER).next_to(line2, DOWN, buff=0.12, aligned_edge=LEFT)
+        self.play(FadeIn(miss, scale=1.4), FadeIn(no), FadeIn(line3, shift=RIGHT * 0.15), run_time=0.7)
+        self.wait(0.6)
+
+        cap = caption("Read what a player can see. Act through what a player can use.")
+        self.play(FadeOut(bad), FadeOut(no), FadeOut(miss), FadeIn(cap), run_time=0.7)
         self.wait(2.6)

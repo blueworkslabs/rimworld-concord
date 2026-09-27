@@ -4,6 +4,7 @@ How a colonist notices things, decides whether they deserve a thought, thinks wi
 stopping the game, and gets interrupted when the world changes.
 
 Code: `mod/Awareness.cs`, `mod/Casualties.cs`, `mod/DecisionPause.cs`,
+`mod/IntentPatches.cs` and `mod/NativeIntents.cs` (hooked events),
 `src/routing.ts`, `src/attention.ts`, `src/reflection-pacing.ts`,
 `src/decision-validity.ts`, and ingest/attention in `src/coordinator.ts`.
 
@@ -12,7 +13,8 @@ Code: `mod/Awareness.cs`, `mod/Casualties.cs`, `mod/DecisionPause.cs`,
 1. **Native habits** never stop: eating, sleeping and ordinary jobs continue while a
    pawn thinks.
 2. **Fast appraisal** (optional, Jev) scores whether an event deserves a thought.
-3. **Deliberation** (Claude) handles offers, reconsideration and requests.
+3. **Deliberation** (Claude, or Luna in ongoing mode) handles offers, reconsideration
+   and requests.
 
 ## What a pawn perceives
 
@@ -20,11 +22,20 @@ Code: `mod/Awareness.cs`, `mod/Casualties.cs`, `mod/DecisionPause.cs`,
 thought memories (with whom they concern), and direct relations. Never another pawn's
 thoughts or opinions.
 
-**Native events**, sampled every 30 game ticks (and on every state request) for free
-colonists on the current map: job change, health change, Food/Rest/Mood band change,
-new memory, a downed colonist sighted (`casualty`) and that colonist later seen no
-longer downed (`casualty-recovered`). The first sample after a load is only a baseline.
-The mod keeps a saved ring of 256 events with a monotonic sequence number.
+**Native events** come from two sources into one saved ring of 256 events with a
+monotonic sequence number:
+
+- **Sampling**, every 30 game ticks (and on every state request) for free colonists on
+  the current map: job change (`job`), health change, Food/Rest/Mood band change, new
+  memory, a downed colonist sighted (`casualty`) and that colonist later seen no longer
+  downed (`casualty-recovered`). The first sample after a load is only a baseline.
+- **Harmony hooks**, written as they happen: `job-start` and `job-end` for colonists,
+  `ingested`, `interaction` (the interaction def, with the recipient as subject), and
+  the stockpile-haul ledger's `intent-*`, `haul-delivered` and `quota-escape` kinds.
+  Hooked events can be far more frequent than sampled ones; in the
+  [pipeline regression](trials/PIPELINE_REGRESSION.md) job start/end and job-change
+  churn accounted for 1,857 of 1,937 events. Events with no pawn (some intent
+  ledger events) reach no pawn's history.
 
 **Local sightings**: up to 8 visible colonists (those downed and not in bed are
 casualties) and up to 12 visible beds with a medical flag, within 12 tiles in line of
@@ -41,16 +52,29 @@ ingest.
 
 | Event | Route | Interrupts a pending thought? |
 |---|---|---|
-| Job change | native | no |
+| Job change (`job`, sampled) | native | no |
+| `NATIVE_KINDS`: `job-start`, `job-end`, `ingested`, `haul-delivered`, `quota-escape`, `intent-opened`, `intent-excluded`, `intent-incidental`, `intent-ordinary`, `intent-admitted-start`, `intent-rejected-start`, `intent-retired`, `intent-trued-up`, and the lab-only `lab-fault`, `lab-drafted` | native; texture and receipts, never a per-event wake (intent wakes for the core come from aggregate progress, [CORE](CORE.md#wake-ups)) | no |
 | Food, Rest, Mood band change | native (Fable, post-Gate-C item 7: the game feeds the pawn; the deliberate eating choice comes through the core's question) | no |
 | A pawn's own Food or Rest band reaching `urgent` (band 0, under 20%) | deliberation | no, queued for the next turn |
-| `intent-ordinary` (an ordinary arrival at a tagged zone) | native; the archive line reports it | no |
-| Any other kind without an entry | appraisal (kept defined for the day an appraiser has evidence) | no |
 | Health change | deliberation | yes |
 | `casualty` | deliberation | yes |
 | `casualty-recovered` | native | no |
+| `interaction` `Chitchat`, `DeepTalk` | deliberation | no |
+| Any other `interaction` | deliberation | yes |
 | Memory `Chitchat`, `DeepTalk` | deliberation | no, queued for the next turn |
 | Any other new memory | deliberation | yes |
+| Any other kind | appraisal (kept defined for the day an appraiser has evidence) | no |
+
+"Any other kind" currently includes hooked stockpile-haul kinds that are not in
+`NATIVE_KINDS`: `intent-pretag`, `intent-pretag-marked`, `intent-retarget`,
+`intent-retarget-unadmitted`, `intent-pickup`, `intent-pickup-skipped`,
+`intent-pickup-bound-violation`, `intent-duplicate-admitted`, `intent-nested-end` and
+`intent-ledger-violation`. They route to appraisal, not native. Without an appraiser,
+a pawn's pending batch that contains one can neither be settled natively nor start a
+model turn until a deliberation event joins it (then they are shown to the model with
+it). As non-native experiences they are not preferred for eviction, and an unconsidered
+one that is evicted counts as an attention gap. This is current behaviour, not a
+decided policy.
 
 The core has one telemetry rule of its own (details in [CORE](CORE.md)):
 

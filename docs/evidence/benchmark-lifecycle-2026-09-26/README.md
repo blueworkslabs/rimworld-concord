@@ -1,6 +1,6 @@
 # Controller proof and lifecycle rehearsals — 2026-09-26
 
-PR #96 remains **draft**. Independent source review covers the corrected behavior through
+PR #96 remains **draft** (as of this report; merged 2026-09-26 as `aa6513d`). Independent source review covers the corrected behavior through
 `cf43ac9`; **479 tests pass**. [Machine-readable evidence](summary.json) retains both the
 initial failure and corrected checks. These are **zero-model scripted rehearsals**, not the
 real-controller rehearsal pair requested for the benchmark, and not scored trials.
@@ -59,6 +59,6 @@ The cross-host controller/MCP/recording/lock/stop lifecycle has **not** been ver
 
 Staging game and display stopped; previous mod restored; **all 440 pre-existing saves
 unchanged, no new saves**. All three recorded arm processes stopped and all local recording
-copies match the runner hashes. #89 stays held. The earlier 53 rejected cell probes were
+copies match the runner hashes. #89 stays held (as of this report; closed unmerged 2026-09-26). The earlier 53 rejected cell probes were
 **post-task zone API checks**, not campfire-placement attempts; a placement-query follow-up
 must not be justified by mislabelling that evidence.

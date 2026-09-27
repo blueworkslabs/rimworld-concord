@@ -1,5 +1,12 @@
 # Gate C verdict: hauling migration — 2026-09-25
 
+**Status (2026-09-27): done.** The ordered haul was deleted in #79 (test port) and #80
+(deletion); the [retirement acceptance](../evidence/hauling-retirement-acceptance.json)
+passed ([HAULING_RETIREMENT](HAULING_RETIREMENT.md)). Follow-ups 1–5 landed in #82
+([POST_GATE_C_FOLLOWUPS](POST_GATE_C_FOLLOWUPS.md)), 6–7 in #83
+([ATTENTION_EVICTIONS](ATTENTION_EVICTIONS.md)). The "Next" section is superseded by the
+phase reset ([PHASE2](../PHASE2.md)).
+
 Written by Fable after the recording-only reads of both ordinary-play live runs and
 Astra's findings ([first run](HAULING_MIGRATION_LIVE.md), [rerun](HAULING_MIGRATION_PIPELINE_RERUN.md)).
 The first run was retained as a diagnosis (no proposal survived validation; fixed in
@@ -8,7 +15,7 @@ The first run was retained as a diagnosis (no proposal survived validation; fixe
 ## Verdict
 
 **Passed on the game side. Retirement of the ordered-job hauling model is authorized;
-runtime deletion is pending the two-PR sequence below.**
+runtime deletion is pending the two-PR sequence below.** (Done: #79, #80.)
 
 Measured in the rerun: zero consent violations, zero credit beyond the quota, two
 simultaneous holders, one offer accepted (Beatrice, with her own reason), one unasked
@@ -52,6 +59,10 @@ deletion PR records the actual footprint versus the original migration list.
    change made; care remains an ordinary-play follow-up.
 
 ## Next
+
+*Superseded by the phase reset: see [PHASE2](../PHASE2.md). The construction slice
+(#89) closed unmerged on 2026-09-26 ([CONSTRUCTION_REUSE](../CONSTRUCTION_REUSE.md)); Jev
+annotate-only wiring landed separately in #86.*
 
 Construction and cooking through blueprints and bills, through the same three gates;
 the core named "campfire or cooking later" as its own reason this run. Annotate-only

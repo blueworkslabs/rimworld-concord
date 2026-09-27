@@ -97,7 +97,7 @@ Stop and diagnose if unsupported capability or consent can reach execution, an
 invariant fails, or repeated invalid output/non-progress blocks the run. Do not
 classify valid refusal, quiet waiting or an unmet quota as a retry reason.
 
-Gate C retains [every migration measure](../MIGRATION_HAULING.md#gate-c-will-measure):
+Gate C retains [every migration measure](../MIGRATION_HAULING.md#gate-c-criteria-frozen):
 zero consent/quota escapes; who was asked/helped/when it ended/what followed;
 matched trips/ticks and simulation-cost evidence kept distinct from scene findings.
 **#71 must be checked live** against saved input ticks, intervening receipts and

@@ -1,7 +1,8 @@
 # Documentation
 
-For the current harness phase, start with [HARNESS](HARNESS.md); its phase-specific
-input/action rules supersede the older story-layer contracts below, not their historical evidence.
+For the current phase, start with [PHASE2](PHASE2.md) (the plan) and [HARNESS](HARNESS.md)
+(the interface contract); the harness's phase-specific input/action rules supersede the older
+story-layer contracts below, not their historical evidence.
 
 Start with the [project README](../README.md), then [VISION](VISION.md) and
 [ARCHITECTURE](ARCHITECTURE.md). The topic documents are the current contracts: if
@@ -13,12 +14,13 @@ code and a contract disagree, one of them is a bug.
 |---|---|
 | [VISION](VISION.md) | What we're building, the principles, and the open questions |
 | [PHASE2](PHASE2.md) | Agreed A→B→C sequence, current implementation and separate trial freezes |
+| [HARNESS](HARNESS.md) | Player harness interface contract: perception, actions, benchmark rules, tasks T1–T3 and phase-1 results |
 | [ROADMAP](ROADMAP.md) | What's next and what's deliberately deferred |
 | [SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md) | Gate B design for the first native-intent spike |
 | [MIGRATION_HAULING](MIGRATION_HAULING.md) | Hauling migration, game-side Gate C verdict and ordered-haul retirement |
 | [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md) | How RimWorld's jobs, think tree, hauling and events work, for the native-intents spike |
 | [MIGRATION_PRODUCTION](MIGRATION_PRODUCTION.md) | Historical construction/cooking design, superseded by the harness phase; see [reuse inventory](CONSTRUCTION_REUSE.md) |
-| [NATIVE_INTENTS](NATIVE_INTENTS.md) | The agreed direction for the game side: steer RimWorld's own planner instead of driving pawns |
+| [NATIVE_INTENTS](NATIVE_INTENTS.md) | Native-intent design (steer RimWorld's own planner instead of driving pawns); hauling implemented, the rest superseded by phase 2 |
 | [HISTORY](HISTORY.md) | How we got here, one milestone per line |
 
 ## How it works (current contracts)
@@ -26,7 +28,7 @@ code and a contract disagree, one of them is a bug.
 | Document | Covers |
 |---|---|
 | [ARCHITECTURE](ARCHITECTURE.md) | Components, data flow, and the invariants everything else relies on |
-| [ACTIONS](ACTIONS.md) | Offers, consent and agreements; move, haul, rescue, build, cook, eat |
+| [ACTIONS](ACTIONS.md) | Offers, consent and agreements; move, rescue, build, cook, eat; ordered haul retired in #80 (native stockpile hauling: [NATIVE_INTENTS](NATIVE_INTENTS.md), [MIGRATION_HAULING](MIGRATION_HAULING.md)) |
 | [CORE](CORE.md) | The core planner: what it sees, what it may do, topics, wake-ups |
 | [ATTENTION](ATTENTION.md) | Perception, event routing, interruptions, reflection, pacing, pauses |
 | [SOCIAL](SOCIAL.md) | Negotiation, requests, pawn-to-pawn speech, private outlooks, who knows what |
@@ -36,11 +38,14 @@ code and a contract disagree, one of them is a bug.
 ## Evidence
 
 Latest harness comparison: [T1](evidence/benchmark-scored-three-2026-09-26/README.md) and [T2/T3](evidence/benchmark-colony-scored-2026-09-26/README.md), with colony-time bounds, usage and observed side effects.
+Phase 2 step A.1 (narration and bed assignment): [scripted evidence](evidence/harness-a1-2026-09-26/README.md), zero model calls.
 
 | Document | Covers |
 |---|---|
 | [EVALUATION](EVALUATION.md) | How we test and what counts as evidence; scorers; running trials |
 | [Trial ledger](trials/README.md) | Every trial: question, limits, result, evidence file |
+| [ONGOING_GROUNDING](ONGOING_GROUNDING.md) | Continuous-play diagnosis and the offline Luna/Terra grounding comparison |
+| [RECORDED_SCENE](RECORDED_SCENE.md) | The first ten-minute recorded Luna scene: protocol, recording and findings |
 | [evidence/](evidence/) | Sanitized JSON evidence referenced by the ledger |
 
 ## Project housekeeping
