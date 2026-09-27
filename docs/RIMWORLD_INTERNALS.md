@@ -1,5 +1,12 @@
 # RimWorld internals for native intents
 
+**Status (2026-09-27): historical Gate A record.** The disposition below was resolved
+at Gate B: Fable signed the spike design at `4eba938`
+([SPIKE_NATIVE_HAUL](SPIKE_NATIVE_HAUL.md)), which defines the admission, cleanup,
+placement and quota safeguards this note asked for. The routing table is the Gate A
+proposal; the current contract is `NATIVE_KINDS` and `nativeAttention` in
+`src/routing.ts` and the wake causes in [CORE](CORE.md#wake-ups).
+
 Gate A of the [native-intents phase](NATIVE_INTENTS.md): the six questions whose answers
 shape the spike design. Written by Clawd on 2026-09-24; checked by Astra against
 the pinned assembly and Core defs. **Architecture disposition pending:** the review
@@ -202,8 +209,15 @@ path. **Not measured yet**; the spike measures it for three pawns.
 
 ## Routing for new event kinds
 
-`src/routing.ts` today sends unknown kinds to appraisal without interrupting. New kinds
-therefore need explicit entries before they are emitted:
+**Gate A proposal, not the current contract.** As built, the mod never emits `downed`
+or `seized` (it emits `casualty` for a locally observed downed colonist and
+`lab-drafted` for the lab draft), and these kinds never wake the core per event: core
+wakes come from the causes in [CORE](CORE.md#wake-ups) plus the aggregate
+`native-intent` wakes in `src/core-scheduler.ts`. See `NATIVE_KINDS` and
+`nativeAttention` in `src/routing.ts`.
+
+`src/routing.ts` then sent unknown kinds to appraisal without interrupting. New kinds
+therefore needed explicit entries before they were emitted:
 
 | New kind | Source hook | Route | Interrupts? |
 |---|---|---|---|
@@ -213,11 +227,14 @@ therefore need explicit entries before they are emitted:
 | `ingested` (eater, def, count, nutrition) | `Thing.Ingested` | native; feeds self-care receipts | no |
 | `interaction` (initiator, recipient, def) | `TryInteractWith` postfix | Chitchat and DeepTalk queued as today; others by def | only as the matching memory rules say |
 | `downed` | `MakeDowned` | deliberation (like `casualty`) | yes |
-| `intent-ordinary` (an ordinary arrival at a tagged zone) | `NativeIntents` ledger | native; feeds the archive line | no |
+| `intent-ordinary` (an ordinary arrival at a tagged zone) | the intent ledger (as built: `mod/NativeIntents.cs`, `IntentState`/`HaulIntent`) | native; feeds the archive line | no |
 | `seized` (drafted, mental break, constant-tree job) | the handlers above | native, recorded for receipts | no (the pawn can't act anyway) |
 
 Only `haul-delivered`, `ingested`, `downed` and linked job ends should wake the core
-(public, receipt-backed changes). Everything else is native texture.
+(public, receipt-backed changes). Everything else is native texture. (Superseded: as
+built, none of these kinds wakes the core per event; intent wakes come from aggregate
+progress (`src/native-intents.ts`, `src/core-scheduler.ts`), eating from the
+`self-care` cause.)
 
 ## Inputs for Gate B
 

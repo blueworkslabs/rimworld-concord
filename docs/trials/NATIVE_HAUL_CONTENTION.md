@@ -1,5 +1,7 @@
 # Native-haul reservation and contention reruns — 2026-09-24
 
+Superseded by: the [signed live freeze](NATIVE_HAUL_FREEZE.md) and [live run](NATIVE_HAUL_LIVE.md); the verdict is [Gate C](NATIVE_HAUL_GATE_C.md).
+
 **Scripted staging, not Gate C or a live freeze.** Continues the
 [instrumentation report](NATIVE_HAUL_INSTRUMENTATION.md) after Fable's reservation-policy
 correction. RimWorld 1.6.4871 rev600, assembly `082db1dd4f7f`, Harmony 2.4.2.

@@ -10,20 +10,20 @@ Phase 1 closed with eighteen of eighteen scored benchmark arms complete (nine pa
 has three steps: legible harness actions and the missing moves with a fourth task, the
 core integrated as the harness agent and judged on a ten-minute scene plus matched benchmark
 regression, then offers and refusals with separate enforcement and live-choice evidence.
-[#102 is merged](https://github.com/blueworkslabs/rimworld-concord/pull/102). Narration and
-ordinary bed assignment are [scripted/UI-tested](evidence/harness-a1-2026-09-26/README.md).
+[#102 is merged](https://github.com/blueworkslabs/rimworld-concord/pull/102). Step A's narration and
+ordinary bed assignment ([#103](https://github.com/blueworkslabs/rimworld-concord/pull/103), [#104](https://github.com/blueworkslabs/rimworld-concord/pull/104)) are [scripted-tested (real game, zero model calls), with manual UI inspection](evidence/harness-a1-2026-09-26/README.md).
 Next: Fable's project/docs review and sealed legibility rubric, then the T4 witness, fixture
 and authored viability check. Concrete knowledge boundaries and budgets precede B's freeze;
 no scored T4 or new story scene has started.
 
-## Phase reset, 2026-09-25: the agent harness
+## Phase reset, 2026-09-25: the agent harness (phase 1, closed 2026-09-26)
 
-The next phase is the [agent harness](HARNESS.md): perceive and run the colony through
+Phase 1 was the [agent harness](HARNESS.md): perceive and run the colony through
 a read-only snapshot with diffs and queries, and act through the player's own controls
 minus draft, measured against an agent playing the standard UI on the same save and
-tasks. The construction and cooking migration below is on hold (its bridge work is
-reused); Gates A–C are retired for this phase and the benchmark table is the gate.
-Consent, offers and refusals are kept as phase 2.
+tasks. The construction and cooking migration below was put on hold (its bridge work
+could be reused); Gates A–C were retired for this phase and the benchmark table was the gate.
+Consent, offers and refusals were kept for phase 2.
 
 Read-only perception has a [recorded staging capture](evidence/perception-2026-09-25/README.md).
 Native actions v1 and the T1 checker have [recorded scripted evidence](evidence/harness-actions-2026-09-26/README.md).
@@ -35,7 +35,7 @@ This is task-local evidence, not general colony-management or billed-dollar adva
 Stalls remain uninstrumented and native USD unavailable. Placement query is now verified and merged; no interface change entered the scored T1 set.
 [T2/T3 scored results](evidence/benchmark-colony-scored-2026-09-26/README.md) now cover three alternating pairs per task: all twelve primary goals met. T2 has no consistent colony-time advantage; T3 harness completion precedes UI in all three pairs. Median wall H/UI is 68.7/217.3s and 41.0/240.4s respectively. Sleep, tending, food permissions, mixed storage and pause/filter recovery remain separate outcome columns. Interface granularity and plans differ; this is not pure perception or dollar-cost evidence.
 
-The accepted phase-2 plan above supersedes the earlier migration sequence below. The old construction slice #89 is retired unmerged with a reuse inventory; no contribution ledger is revived. No new story-layer or general performance claim follows from benchmark completion.
+The accepted phase-2 plan above supersedes the earlier migration sequence below. The old construction slice [#89](https://github.com/blueworkslabs/rimworld-concord/pull/89) was closed unmerged on 2026-09-26 with a [reuse inventory](CONSTRUCTION_REUSE.md); no contribution ledger is revived. No new story-layer or general performance claim follows from benchmark completion.
 
 ## Earlier milestones (historical; current direction above)
 
@@ -77,7 +77,10 @@ The hauling migration uses the signed [strict fallback](trials/HAULING_MIGRATION
 
 The [post-Gate-C follow-up verification](trials/POST_GATE_C_FOLLOWUPS.md) covers items 1–5, including core/reflection evidence matching their fitted inputs. Item 7 is [diagnosed](trials/ATTENTION_EVICTIONS.md) (job churn plus appraisal items that the appraiser-less runner never picks up; a replay of the fixes loses 0 of 17). Per Fable, pawn need bands are now native texture (urgent Food/Rest is queued deliberation). Item 6 is [implemented](CORE.md#a-bounded-review-after-a-wait-post-gate-c-item-6): at most two review wakes per deliberate wait. The later [same-setup pipeline regression](trials/PIPELINE_REGRESSION.md) observed zero attention losses, the heard-message UI and three open-meal recipient exclusions. Two separate first-review nudges fired, but neither chain reached its second review; stop-at-two remains unexercised live. Three fresh-state application rejections remain in the evidence. No new scene verdict or construction/cooking acceptance.
 
-## Next phase: work with RimWorld's planner
+## Native-intent phase, 2026-09-24 to 2026-09-26 (historical)
+
+Retained as written when agreed on 2026-09-24, with outcomes noted. The 2026-09-25
+harness reset and the phase-2 plan above supersede its remaining steps.
 
 ### Ground rules
 
@@ -102,7 +105,7 @@ The [post-Gate-C follow-up verification](trials/POST_GATE_C_FOLLOWUPS.md) covers
   restraint without arbitrary caps, the setup frozen before live runs, and recordings
   for review.
 
-### Committed next work, in order
+### Committed work, in order (as planned 2026-09-24)
 
 **1. Learn the internals (about a week)**
 
@@ -148,12 +151,12 @@ and successful raw-food alternatives are valid, not stop conditions.
 fixes before the next live run, and closed decisions:
 [NATIVE_HAUL_GATE_C](trials/NATIVE_HAUL_GATE_C.md). The hauling migration goes through
 the same three gates: [MIGRATION_HAULING](MIGRATION_HAULING.md). **Gate B signed
-2026-09-24**; implementation is next. Growing hold has a two-fix-round bound with strict
+2026-09-24**; the migration was implemented in [#73](https://github.com/blueworkslabs/rimworld-concord/pull/73). Growing hold has a two-fix-round bound with strict
 fallback, and the migration's live run must measure the #71 corrections.
 
 **Decided 2026-09-25: the hauling migration passed Gate C on the game side; the ordered-job
 hauling model is retired in #80 after the #79 test port.** Verdict, deletion scope and follow-ups:
-[HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md). Next: [construction and cooking](MIGRATION_PRODUCTION.md) through blueprints and bills (Gate A/B direction signed; corrected P5 boundary design and scope-trim amendment: scanner-forced exception, unrecorded ingredient quantities and patch ledger; carrier implementation/scripted acceptance next, separate scene freeze before live inference).
+[HAULING_MIGRATION_GATE_C](trials/HAULING_MIGRATION_GATE_C.md). The planned next migration, [construction and cooking](MIGRATION_PRODUCTION.md) through blueprints and bills (Gate A/B signed; corrected P5 boundary design and the [#88](https://github.com/blueworkslabs/rimworld-concord/pull/88) scope-trim amendment), was put on hold by the 2026-09-25 harness reset. Its slice [#89](https://github.com/blueworkslabs/rimworld-concord/pull/89) was closed unmerged on 2026-09-26; see [CONSTRUCTION_REUSE](CONSTRUCTION_REUSE.md).
 
 If the spike wins: hauling, then campfire construction and cooking through blueprints
 and bills, then rescue through the native rescue job. Each migration keeps the
@@ -200,9 +203,11 @@ coordinator bookkeeping.
   instead of new hand-built capabilities.
 - **Core planning pauses** for substantial planning, under an operator policy: visible,
   released on completion or timeout, never bypassing consent.
-- **Jev in the loop**, one use at a time and only after offline evidence. First use:
-  [annotate-only grounding](trials/JEV_ANNOTATE.md) over live core replies on the
-  construction and cooking scene; scores journaled, nothing gated.
+- **Jev in the loop**, one use at a time and only after offline evidence. The
+  [annotate-only grounding](trials/JEV_ANNOTATE.md) wiring over live core replies is not
+  yet exercised; planned first use is phase 2 B's frozen scene, after adapting the join to
+  harness decisions ([PHASE2 step B](PHASE2.md#step-b-the-core-becomes-the-harness-agent));
+  scores journaled, nothing gated.
 - **Pawn-to-pawn offers**, **human contact** (suggestions to the core, letters,
   comms-station conversations), **unattended operation** (after its own scope and
   spending decision), the gravship campaign, an installer and an OpenClaw operator
@@ -212,7 +217,9 @@ coordinator bookkeeping.
 
 - The live core has not yet proposed construction or cooking; no live work has
   followed self-care.
-- Agreements don't survive interruptions: after a meal, stopped work doesn't resume.
+- Ordered agreements (build, cook, rescue) don't survive interruptions: after a meal,
+  stopped work doesn't resume. Native stockpile hauling resumed after a meal in scripted staging
+  (see [NATIVE_HAUL_GATE_C](trials/NATIVE_HAUL_GATE_C.md)).
 - Options are limited to what a pawn sees within 12 tiles; food visible but not
   locally available caused rejections.
 - Explanations still carry stale facts at times; prose grounding is unscored in

@@ -51,23 +51,28 @@ and queries. Every snapshot identifies the world, map, load generation, tick and
 A diff across a load/world reset requests a fresh snapshot instead of comparing stale IDs. All of it is what the player can see; the pawn's own data is included because
 the core is linked to each pawn (lore) and because the player can open the needs tab.
 
-**Snapshot (`state`)**
+**Snapshot (`state`; bridge op `perceive`, `mod/Perception.cs`)**
 
 | Section | Contents (from the game's own structures) |
 |---|---|
 | `time` | tick, day, hour, season, year; game speed and paused |
-| `weather` | current weather, outdoor temperature, only forecasts actually exposed to the player, not hidden weather schedules |
+| `weather` | current weather, outdoor temperature; no forecast in v1 (hidden weather schedules are never exported) |
 | `alerts` | the active alert list as the game shows it: label, severity, the things or pawns it points at |
 | `letters` | recent letters and messages: label, text, tick, linked things |
 | `resources` | the resource readout by category and def, with counts, as the top-left panel shows it |
-| `map` | size, biome, home area cells; buildings, blueprints, frames, plants, items and filth as `things` with def, position, stack count, quality where present, forbidden flag, faction |
+| `map` | size, biome (home area cells not in v1); buildings, blueprints, frames, plants, items and filth as `things` with def, position, stack count, quality where present, forbidden flag, faction |
 | `zones` | stockpiles and growing zones: id, label, cells, settings summary, contents |
 | `bills` | per workbench: bill load id, recipe, repeat mode and count, suspended, ingredient radius, allowed workers |
 | `designations` | pending build, deconstruct, mine, harvest, hunt, haul designations with targets |
 | `research` | current project and progress |
 | `pawns` | per colonist: id, name, position, current job and target, health summary and injuries, needs (all bars), mood and its thoughts, traits, skills and passions, work settings and disabled work types, schedule, carried thing, drafted flag, inventory |
 | `threats` | player-visible hostiles and warnings, not hidden storyteller plans or fogged enemies; animals nearby with danger |
-| `receipts` | outcomes of harness actions since the last read (see Actions) |
+| `receipts` | the last 64 harness-action receipts, saved with the game (see Actions) |
+| `omitted` | sections this build does not export, stated rather than silently absent |
+
+**v1 gaps** (listed in every snapshot's `omitted`, `mod/Perception.cs`): transient
+top-left messages, home-area cells and the weather forecast (which the exporter labels
+not player-visible).
 
 Sizes: the full exported snapshot is kept in the record (v1 coverage gaps are explicit); the model is shown a digest
 (fitted like today's core input, oldest and least relevant trimmed first) plus the diff.
@@ -91,12 +96,16 @@ the final prompt budget.
 **Diff (`since`)**: things appeared, disappeared or changed def or position; alerts
 raised or cleared; letters arrived; bills or zones changed; pawn job, need band, health
 or mood changed; resources crossed a threshold. Computed from two snapshots; no engine
-hooks.
+hooks. The benchmark's `observe` tool does not return this diff: it returns the digest
+plus a bounded change marker (reset flag, from and to tick); detail comes through `look`.
 
 **Queries (`look`)**: by area (cells within a radius of a point or a thing), by
-category (all food, all wood, all beds), by capability (who can cook, who can build), by
-pawn (everything about one pawn). A query is a filter over the snapshot; the model asks
-for it by name and gets the slice.
+category (all food, all wood, all beds, …), by def, by capability (who can cook, who
+can build), by pawn (everything about one pawn), and by section (one snapshot section:
+zones, letters, bills, designations, research, weather, time, alerts, resources,
+threats, omitted or receipts). A query is a filter over the snapshot; the model asks
+for it by name and gets the slice. From T2 on, `look` also answers placement queries
+([below](#placement-query-clawd-2026-09-26-interface-change-for-t2t3)).
 
 ## Actions
 
@@ -112,8 +121,8 @@ Repeated request IDs must not create duplicate bills or blueprints.
 
 1. `place_blueprint(def, cell, rotation, stuff?)`: the build designator; returns the
    blueprint ID.
-2. `designate(kind, target)`: deconstruct, cancel, mine, harvest, hunt, haul; returns
-   the designation.
+2. `designate(kind, target)`: deconstruct, cancel, mine, harvest, cut, hunt, haul;
+   returns the designation.
 3. `zone(kind, cells, label?, settings?)`: create or edit a stockpile or growing zone;
    returns the zone ID.
 4. `bill(bench, recipe, repeat, count?, settings?)` and `bill_edit(loadId, ...)`,
@@ -138,7 +147,7 @@ Same save, same task, same model, same timing rules, three arms:
 | Arm | What runs |
 |---|---|
 | **UI** | the agent plays through the standard UI by screenshots, mouse and keyboard (Astra's pilot adapter, frozen after its stall fixes) |
-| **Harness** | the same agent, same instructions, through `state`, `since`, `look` and the actions above |
+| **Harness** | the same agent, same instructions, through the arm's MCP tools `observe` (digest plus change marker), `look`, `act` (the actions above), `time` and `report_done` (`src/harness/mcp.ts`) |
 | **Reference** | one human play-through per task, once, for scale |
 
 **Metrics per task run**
@@ -227,7 +236,8 @@ hashes, cold restore and world-state persistence, the crew log, the Codex backen
 prompt fitting, the Jev grounding annotator (a narration checker fits a harness), and
 [RIMWORLD_INTERNALS](RIMWORLD_INTERNALS.md).
 
-**Stops:** the attribution ledger and its patches, the construction slice as drafted
+**Stops:** further development of the attribution ledger and its patches (they still
+run native stockpile hauling on the character path; [ACTIONS](ACTIONS.md#stockpile-haul)), the construction slice as drafted
 (#89 on hold; its bridge and blueprint placement code is reused by action 1), and the
 gate process. The migration pages stay as history.
 
@@ -262,7 +272,8 @@ gate process. The migration pages stay as history.
 
 ## Implementation status: actions v1 and the T1 checker (Clawd, 2026-09-25)
 
-**Implemented; [recorded scripted T1 and bounded API/save-load checks passed](evidence/harness-actions-2026-09-26/README.md).** Not a model benchmark or exhaustive API acceptance. `act` is a bridge op (mod `HarnessActions.cs`, no patches):
+**Implemented; [recorded scripted T1 and bounded API/save-load checks passed](evidence/harness-actions-2026-09-26/README.md).** Not a model benchmark or exhaustive API acceptance. `act` is a bridge op (mod `HarnessActions.cs`; the actions themselves use no patches,
+the later narration adds one narrow Harmony prefix, see below):
 one command per request, through the player's own path. `place_blueprint` uses the real build
 designator (its visibility check covers research; stuff and rotation as the player would set
 them); `designate` the real deconstruct, cancel, mine, harvest, cut, hunt and haul designators;
@@ -276,8 +287,8 @@ by name. Receipts are `{ok, id, reason, source: game|harness, detail}`, saved wi
 request ID, so a repeated request returns its first receipt and creates nothing. The last 64
 receipts are in every snapshot's `receipts`.
 
-Coordinator side: `src/harness/actions.ts` (strict action schema and the flat wire mapping,
-`LabBridge.act`) and `src/harness/checker.ts` (`checkT1(start, end, configured)`: a player campfire that did
+Coordinator side: `src/harness/actions.ts` (strict action schema and the flat wire mapping),
+`LabBridge.act` in `src/lab-bridge.ts`, and `src/harness/checker.ts` (`checkT1(start, end, configured)`: a player campfire that did
 not exist at the start; a simple-meal bill created during the run, in repeat-count mode, counted
 down to zero; and at least three meals cooked since the start by the colonists' own Records tab,
 which the snapshot now exports as `records.mealsCooked`). The checker reads start/configured/end
@@ -569,6 +580,7 @@ with the core as the decision-maker (`mod/HarnessNarration.cs`).
   - bill: recipe, repeat mode and count as stored;
   - zone: cell count after the change, and the allowed defs the filter actually holds;
   - work priority: the priority read back;
+  - schedule: the assignment read back at that hour;
   - forbid: the forbidden state before and after;
   - area restriction: the restriction now set.
 

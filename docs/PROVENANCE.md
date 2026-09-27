@@ -5,3 +5,5 @@
 New coordinator/protocol/game bridge code is separate; this repository does not import the older Shellmaster HTTP mod or assume it has RimWorld 1.6 compatibility.
 
 No proprietary RimWorld/Unity reference DLLs, game/DLC assets, private saves, account files or model credentials are included. Build against an owned local installation. Generated artifacts and runtime state stay ignored.
+
+Selected screenshots and recordings captured from an owned installation are published as evidence and diary/site assets (`docs/evidence/`, `diary/`, `site/`); they show gameplay only and include no game files.

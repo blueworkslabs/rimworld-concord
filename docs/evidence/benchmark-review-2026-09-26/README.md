@@ -1,6 +1,6 @@
 # Benchmark runner review — 2026-09-26
 
-PR #96 remains **draft**. Independent source re-review is clear for the held preparation
+PR #96 remains **draft** (as of this report; merged 2026-09-26 as `aa6513d`). Independent source re-review is clear for the held preparation
 changes at behavioral revision `2396f21`; this is not scored-launch clearance. No game or inference run was made. The original runner could
 never pass T1 because it omitted the configured checkpoint, and could lose final usage by
 terminating immediately after `report_done`. Rejected inputs were missing from input counts;

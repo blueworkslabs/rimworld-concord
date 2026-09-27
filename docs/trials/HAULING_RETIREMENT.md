@@ -24,6 +24,9 @@ Clean build: **400 passing tests, zero failures, two pre-existing native freshne
 TODOs**. Both TODOs remain through deletion; no claim that those runtime defects or
 the duplicate-exclusion delay are fixed. The mod compiles against the pinned 4871
 assemblies; no proprietary assemblies are distributed.
+(Later fixed in [#81](https://github.com/blueworkslabs/rimworld-concord/pull/81), mock/offline
+verified: both freshness TODOs became passing tests and the duplicate-exclusion delay
+was removed.)
 
 ## Focused staging — scripted, zero model calls
 

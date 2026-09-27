@@ -82,6 +82,6 @@ and `docs/ROADMAP.md`, and link evidence for quoted model output. Animations use
 
 ```sh
 cd site/animations
-manim render -qm --format mp4 concord_scenes.py ConsentLoop WhoKnowsWhat TimelineGuard CoreWakes NativeIntent
+manim render -qm --format mp4 concord_scenes.py ConsentLoop WhoKnowsWhat TimelineGuard CoreWakes NativeIntent PlayerHarness
 ./export.sh   # H.264 + poster frames into site/media/
 ```

@@ -21,17 +21,17 @@ remain unchanged.
 | Move to a nearby grounded cell | yes | yes |
 | Ordered exact-stack hauling | retired in [#80](https://github.com/blueworkslabs/rimworld-concord/pull/80) | historical evidence retained; not an executable capability |
 | Rescue a downed colonist into an exact medical bed | yes | yes, with a scripted core |
-| Build a campfire (20 wood) | yes | scripted game tests only |
-| Cook simple meals on a campfire (≤3) | yes | scripted game tests only |
+| Build a campfire (20 wood) | yes | coordinator: scripted game tests only; separately, a benchmark controller (not the in-world core) built a campfire through the harness and the UI in all six scored T1 arms |
+| Cook simple meals on a campfire (≤3) | yes | coordinator: scripted game tests only; separately, a benchmark controller (not the in-world core) completed three simple meals through the harness and the UI in all six scored T1 arms |
 | Eat, chosen by the pawn itself | yes | yes |
 | Agent harness (perceive and act like a player, minus draft) | [phase definition](docs/HARNESS.md); perception/actions v1 and [placement query verified](docs/evidence/placement-2026-09-26/README.md) | [Cold alerts/digest](docs/evidence/perception-alerts-2026-09-26/README.md), [scripted T1/API/save-load passed](docs/evidence/harness-actions-2026-09-26/README.md); [three scored T1 pairs](docs/evidence/benchmark-scored-three-2026-09-26/README.md): 6/6 complete; no consistent colony-time advantage; median 58.7s harness / 106.6s UI; limited to this task, billed USD unavailable |
 | T2/T3 benchmark | [frozen setup](docs/evidence/benchmark-colony-setup-2026-09-26/README.md) · [twelve scored arms](docs/evidence/benchmark-colony-scored-2026-09-26/README.md) | 12/12 primary goals met; T2 no consistent colony-time advantage, T3 harness earlier in all pairs; median wall H/UI 68.7/217.3s and 41.0/240.4s; tested interfaces only |
-| Phase 2 A: action narration and bed assignment | [agreed A→B→C plan](docs/PHASE2.md); ordinary native ownership, receipt-backed records | [Recorded scripted/UI checks](docs/evidence/harness-a1-2026-09-26/README.md); replay/restore and displacement exercised; sealed viewer legibility and T4 remain pending |
-| Annotate-only Jev grounding over live core replies | wired in the host runner (`--annotate-grounding`), [gates nothing](docs/trials/JEV_ANNOTATE.md) | not yet exercised; first use is the construction and cooking scene |
+| Phase 2 A: action narration and bed assignment | [agreed A→B→C plan](docs/PHASE2.md); ordinary native ownership, receipt-backed records | None (zero model calls); scripted-tested (real game), with manual UI inspection: [A.1 evidence](docs/evidence/harness-a1-2026-09-26/README.md); replay, same-process save/load and displacement exercised, no process-cold restore claimed; sealed viewer legibility and T4 remain pending |
+| Annotate-only Jev grounding over live core replies | wired in the host runner (`--annotate-grounding`), [gates nothing](docs/trials/JEV_ANNOTATE.md) | not yet exercised; planned first use is phase 2 B's frozen scene, after adapting the join to harness decisions ([PHASE2 step B](docs/PHASE2.md#step-b-the-core-becomes-the-harness-agent)) |
 | Offline Jev wake/grounding replay | no gameplay | [authorized retry: 29 valid answers](docs/trials/JEV_REPLAY.md#authorized-retry--2026-09-25-report-first) and [E2 over the native-haul turns: 27 valid](docs/trials/JEV_REPLAY.md#e2-result--astra-2026-09-25-report-before-interpretation); transport failures retained; no threshold/routing decision |
 | Native tagged-zone haul spike (historical) | [scripted and live evidence](docs/trials/NATIVE_HAUL_LIVE.md) retained | Superseded by the ordinary-play migration below |
 | Native stockpile hauling | strict holds; ordered implementation retired; [deletion check](docs/trials/HAULING_RETIREMENT.md): 75/75, two holders, paired/new-coordinator restore | [Migration Gate C passed on the game side](docs/trials/HAULING_MIGRATION_GATE_C.md); crew-side follow-ups remain; growing parked at B1 2/2 |
-| Native construction/cooking | [Gate A/B design](docs/MIGRATION_PRODUCTION.md) signed; corrected boundaries independently reviewed | planned: implementation and scripted acceptance next; no gameplay proof or live freeze |
+| Native construction/cooking | superseded by [phase 2](docs/PHASE2.md); [historical Gate A/B design](docs/MIGRATION_PRODUCTION.md); slice [#89](https://github.com/blueworkslabs/rimworld-concord/pull/89) closed unmerged 2026-09-26 ([reuse inventory](docs/CONSTRUCTION_REUSE.md)) | none; no gameplay proof; the unmerged slice's partial scripted evidence is retained, not accepted |
 
 Post-Gate-C [follow-ups 6–7](docs/trials/ATTENTION_EVICTIONS.md) add bounded review nudges and preserve pending attention over native churn. The historical replay reproduces 17 losses and predicts 0 under the two buffer corrections with recorded cursors fixed; the later [same-setup live regression](docs/trials/PIPELINE_REGRESSION.md) records zero losses, visible heard-message acknowledgment and open-meal question exclusion. Two separate first-review nudges fired; a complete two-review stop chain remains unexercised live.
 
@@ -78,7 +78,9 @@ campaign, or an installer for players.
 **Current direction:** the [agreed phase-2 plan](docs/PHASE2.md): legible harness actions
 and T4, then public-core observe/act/wait integration and a frozen scene plus T1–T4
 regression, then binding offers/refusals. Phase 1 completed 18/18 scored arms; that is
-not yet a watchable, autonomous crew. The older construction slice #89 retires unmerged.
+not yet a watchable, autonomous crew. The older construction slice
+[#89](https://github.com/blueworkslabs/rimworld-concord/pull/89) was closed unmerged on
+2026-09-26 when step A's first PRs (#103, #104) merged; see the [reuse inventory](docs/CONSTRUCTION_REUSE.md).
 
 What happened when: [HISTORY](docs/HISTORY.md) · every trial: [trial ledger](docs/trials/README.md) · what's next: [ROADMAP](docs/ROADMAP.md)
 
@@ -92,7 +94,8 @@ What happened when: [HISTORY](docs/HISTORY.md) · every trial: [trial ledger](do
 4. Consent, identity, deduplication and timeline safety are enforced below the models.
 
 The separate benchmark controller uses isolated player-equivalent harness or UI tools.
-It is not yet the in-world core; phase 2 B must define that wider view's public-core
+It reaches the game through `src/harness/` (served by the MCP arm servers in `trials/`),
+not through the coordinator. It is not yet the in-world core; phase 2 B must define that wider view's public-core
 knowledge boundary before integration. Existing character calls remain tool-free.
 
 Details: [ARCHITECTURE](docs/ARCHITECTURE.md). All documentation: [docs/README.md](docs/README.md).
@@ -153,9 +156,14 @@ Feature trials have their own launchers; see [EVALUATION](docs/EVALUATION.md#run
 ## Layout
 
 ```text
-mod/               C# mod: observation, native jobs, action ledger, crew-log tab
-src/               Coordinator, perspectives, core planner, attention, model adapters
-trials/            Trial runners, fixtures and offline scorers
+mod/               C# mod: observation, native jobs, action ledger, crew-log tab;
+                   harness perception, actions and narration (Perception.cs,
+                   HarnessActions.cs, HarnessNarration.cs)
+src/               Coordinator, perspectives, core planner, attention, model adapters;
+                   src/harness/ is the player harness, benchmark runner and checkers
+trials/            Trial runners, fixtures, offline scorers and benchmark MCP arm servers
+benchmark/         Frozen benchmark tasks (T1–T3) and the builder for private T2/T3 fixture saves
+config/            Example runtime configuration (planning example; not loaded by code)
 tests/             Node test suite
 scripts/           Launchers, fixtures, mod build; scripts/lab/ is the lab harness
 docs/              Documentation; docs/evidence/ holds sanitized trial evidence

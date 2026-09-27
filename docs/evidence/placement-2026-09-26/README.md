@@ -18,7 +18,7 @@ independent source review is clear. Defaults remain North and GenStuff default m
 not the UI's resource-count-dependent material selection. Query results are not reservations:
 subsequent state changes can invalidate a suggested cell.
 
-A [7.73-second original recording](https://discord.com/channels/1083662512806965308/1467116597645676546/1553376917812547774) is retained, mostly loading plus the paused fixed camera;
+A [7.73-second original recording](https://discord.com/channels/1083662512806965308/1467116597645676546/1553376917812547774) (private channel) is retained, mostly loading plus the paused fixed camera;
 it does not show off-screen queried locations. It is not a visual placement walkthrough or
 benchmark arm. The private cleanup verifier encountered a before.json filename collision;
 restore had completed and verification was recovered against the independently retained

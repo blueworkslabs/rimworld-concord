@@ -81,4 +81,4 @@ All four recording copies match the runner's SHA-256 values. All six registered 
 processes (including both preflights) were verified gone. Game and display stopped;
 previous mod restored; **440 original saves unchanged, no new saves**. Private saves,
 full model/controller logs, host configuration and raw review reports remain outside Git.
-#89 remains held. No harness advantage is claimed.
+#89 remains held (as of this report; closed unmerged 2026-09-26). No harness advantage is claimed.

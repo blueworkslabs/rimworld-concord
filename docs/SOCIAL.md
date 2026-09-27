@@ -18,11 +18,14 @@ Code: `src/social.ts`, `src/outlook.ts`, `src/observed-names.ts`, `src/reoffers.
 | Own offers, agreements and progress | yes | no | yes | yes | yes |
 | Nearby grounded options | own shortlist | no | as opportunities | no | yes |
 | Local food sightings | own | no | everyone's | yes | yes |
-| In-game clock (day and hour) | yes | yes | yes | yes | yes |
-| Colony stockpiles (label, location) | yes | yes | yes | yes | yes |
+| In-game clock (day and hour) | no | no | yes (`clock`) | yes (entry times) | yes |
+| Colony stockpiles (label, location) | only a stockpile named in its own offer or agreement | no | only the configured stockpile hauls | only as named in haul records | yes |
 
-The clock and the colony's stockpiles are colony-public: the clock is the shared sky,
-and a stockpile exists because someone placed it ([MIGRATION_HAULING](MIGRATION_HAULING.md)).
+The game state exports the clock and the colony's stockpiles as colony-public facts
+(the clock is the shared sky, and a stockpile exists because someone placed it;
+[MIGRATION_HAULING](MIGRATION_HAULING.md)). Today only the core's view carries the
+clock, and stockpiles reach a model only through the operator's frozen list of
+stockpile hauls. A pawn's perspective (`src/grounded-pawn.ts`) carries neither.
 
 "Operator" means `inspect()` and the audit log. None of it reaches a model.
 
@@ -32,7 +35,7 @@ Offers, counters, revisions and "not now" are part of the agreement lifecycle in
 [ACTIONS](ACTIONS.md#offers-and-answers). A pawn's answer reason is a deliberate reply
 to the core. Two kinds of request originate with the pawn:
 
-- **Rescue alternative**: while hauling, ask for one rescue of an observed casualty
+- **Rescue alternative**: during a stockpile haul, ask for one rescue of an observed casualty
   ([ACTIONS](ACTIONS.md#rescue-alternative-requests)).
 - **Fresh offer**: after "not now", invite the core to offer that work once more
   ([CORE](CORE.md#not-now-and-fresh-offers)).

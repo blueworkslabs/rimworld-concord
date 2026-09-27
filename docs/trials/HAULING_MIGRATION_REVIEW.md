@@ -1,5 +1,10 @@
 # Hauling migration: pre-staging review
 
+**Historical pre-staging review.** The round ledger at the end predates the re-review
+section; both B1 rounds were later used (2/2). See the
+[final round / strict fallback](HAULING_MIGRATION_STRICT.md) and the
+[Gate C verdict](HAULING_MIGRATION_GATE_C.md) for the outcome.
+
 2026-09-24, [PR #73](https://github.com/blueworkslabs/rimworld-concord/pull/73).
 Author revision `0f7e10f`; base `61817af`. This is a **source/offline review**, not a
 scripted-game result. The [signed freeze](../MIGRATION_HAULING.md) is unchanged.
@@ -93,6 +98,9 @@ The staging assembly hash still matches the pinned build.
   geometry, not proof of duplicate pickup.
 
 ## Round ledger and next step
+
+*(As of the original review; superseded by the re-review above and by
+[STRICT](HAULING_MIGRATION_STRICT.md): rounds used 2/2.)*
 
 **Initial scripted run: not started. B1 fix-and-scripted-recheck rounds used: 0/2.**
 These are pre-staging review corrections, not a passing round 0. No safety or consent

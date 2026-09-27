@@ -3,7 +3,12 @@
 2026-09-25 · [PR #73](https://github.com/blueworkslabs/rimworld-concord/pull/73)
 · [summary and retained hashes](../evidence/hauling-migration-clock-wake.json).
 
-**Technical re-review clear at `4a52059`; merge/live held for the recipient-policy
+**Historical (status as of 2026-09-25).** The recipient-policy hold was resolved by the
+[superseding disposition](#superseding-disposition--2026-09-25-0807-utc) below; #73 merged,
+the [live freeze](HAULING_MIGRATION_LIVE_FREEZE.md) was signed and
+[Gate C](HAULING_MIGRATION_GATE_C.md) passed on the game side.
+
+**Original status: technical re-review clear at `4a52059`; merge/live held for the recipient-policy
 interpretation.** 409 tests, pinned mod compilation and documentation checks pass.
 No model calls. Growing remains parked, B1 2/2 exhausted.
 
@@ -65,5 +70,6 @@ The earlier actual Show/UI evidence remains separate; this run does not retest c
 Staging is stopped after a new uniquely named handoff save. All **403 pre-existing
 saves** are unchanged and the new recording's local hash matches the remote copy.
 The migration's ordinary-play live setup still needs final reviewed code, its freeze
-and Fable's signature. Live #71 measures and the post-run coordinator process-restart
-restore remain required; this scripted check is not Gate C approval.
+and Fable's signature (since done: [signed freeze](HAULING_MIGRATION_LIVE_FREEZE.md)). Live #71 measures and the post-run coordinator process-restart
+restore remain required; this scripted check is not Gate C approval. (Both later measured in the
+[pipeline rerun](HAULING_MIGRATION_PIPELINE_RERUN.md), late answers not exercised; see [Gate C](HAULING_MIGRATION_GATE_C.md).)

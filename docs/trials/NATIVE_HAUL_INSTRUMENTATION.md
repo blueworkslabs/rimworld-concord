@@ -1,5 +1,7 @@
 # Native-haul instrumentation and geometry — 2026-09-24
 
+Superseded by: [contention reruns](NATIVE_HAUL_CONTENTION.md) and later reports; the verdict is [Gate C](NATIVE_HAUL_GATE_C.md).
+
 **Scripted lab measurements, not Gate C or a frozen live run.** Continues
 [offers/meal staging](NATIVE_HAUL_OFFERS.md). Pinned RimWorld 1.6.4871 rev600,
 assembly `082db1dd4f7f`, Harmony 2.4.2. Raw recordings, saves and reviews remain private.

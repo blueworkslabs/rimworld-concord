@@ -37,7 +37,7 @@ Harness attempted `observe` and `look`; UI attempted `screenshot`. Game tick sta
 
 ## Recording-first read and preservation
 
-Fable's [cold read](https://discord.com/channels/1083662512806965308/1467116597645676546/1553356409813467178)
+Fable's [cold read](https://discord.com/channels/1083662512806965308/1467116597645676546/1553356409813467178) (private channel)
 preceded these metrics: both loaded games were never played. He noted empty screenshot
 alert areas at this paused first-read tick, unlike later gameplay. Preserve that timing
 observation; the exporter cold-alert fix does not populate native screenshot UI.

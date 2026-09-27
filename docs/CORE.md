@@ -2,13 +2,15 @@
 
 The core is a bounded planner, not a controller. It sees attributed local observations, explicitly shared telemetry and
 addressed communication, proposes listed work, asks questions, remembers open topics, and wakes
-only when something public changes. It is opt-in per trial; the scripted core remains
+only when something public changes, plus two bounded time-based nudges (a stalled
+stockpile haul, a review after a wait). It is opt-in per trial; the scripted core remains
 the regression baseline.
 
 Code: `src/core-planner.ts` (view, choices, validation, topics),
 `src/core-scheduler.ts` (wake-ups), `Coordinator.planCore`/`planCoreWhenDue`/
 `answerCoreQuestion` in `src/coordinator.ts`, `src/shared-status.ts`,
-`src/food-observation.ts`, `src/self-care-followup.ts`, `src/reoffers.ts`.
+`src/food-observation.ts`, `src/self-care-followup.ts`, `src/reoffers.ts`,
+`src/native-intents.ts` (stockpile-haul entries, offers and progress).
 
 ## Setup
 
@@ -24,8 +26,11 @@ An explicit projection (`coreView`); nothing is spread in from internal state.
 | Field | Contents |
 |---|---|
 | `brief`, `crew` | The operator's brief; crew IDs and names |
-| `opportunities` | Up to 6 per pawn: grounded haul, rescue, campfire and cook options, each with a stable ID, excluding work this pawn refused or whose offer was withdrawn or agreement stopped. Haul options carry `supply {sourceThingId, label, sourceCount, destinationFree}` |
-| `availability` | Per pawn, why it has options or not (busy, deferred, no grounded option) |
+| `opportunities` | Per available pawn, each with a stable ID and `observedTick`: up to 6 grounded rescue, campfire and cook options (none in intent-only mode), excluding work this pawn refused or whose offer was withdrawn or agreement stopped; then, added after that cut, one `haul-zone` per configured stockpile haul whose intent is pending or open and which this pawn has not been offered before (not for a pawn that cannot haul or has deferred). With several configured hauls a pawn can therefore have more than 6 |
+| `availability` | Per pawn, why it has options or not (busy, deferred, cannot haul, no grounded option) |
+| `nativeIntents` | When stockpile hauls are configured: each intent's label, def, status, created and last-delivery ticks, accepted and excluded pawns, delivered/quota, overshoot, incidental arrivals and per-pawn credit |
+| `clock` | The colony's in-game day and hour, when the game reports it |
+| `wakeReasons` | On scheduled turns: the wake causes that admitted this turn ([below](#wake-ups)) |
 | `agreements` | The last 24 offers with status, reply and receipt-based progress |
 | `counters` | Countered offers the core may adopt (round < 2) |
 | `messages`, `requests`, `reoffers` | Addressed speech, alternative requests and fresh-offer invitations, all labelled `attributed-speech` |
@@ -62,11 +67,12 @@ limits say so in native-haul modes.
 **Native hauling modes.** `configureNativeHauls(entries)` freezes the operator's list of
 stockpile hauls: an existing colony stockpile (`zoneId`) or a candidate site, one per
 (stockpile, def). The list is shown in a fixed order: label, then def, then ids.
-- **Ordinary play:** ordered hauling is replaced by these offers; rescue, construction
-  and cooking stay available.
+- **Ordinary play:** these offers are the only hauling; rescue, construction and
+  cooking stay available. Without `configureNativeHauls` there is no hauling to offer
+  (the ordered haul was retired in #80).
 - **Intent-only scenes** (`{intentOnly: true}`, and the spike's frozen live harness):
   the stockpile hauls are the only proposable work.
-- The view carries the colony `clock`.
+- The view carries the colony `clock` in every mode.
 - A wait produces no crew-log entry; the status line reads "Core: waiting on <first
   open topic>", cut at a word. **A wait after a pawn spoke is never silent:** when the
   wake carried a pawn's message to the core, the line reads "Core: heard Beatrice;
@@ -210,7 +216,8 @@ With a schedule, the core runs only when admitted:
   cause may admit another attempt within the remaining allowance, or without a count
   ceiling in ongoing mode. Waiting is a valid success, not a non-progress failure.
 
-Wake causes are public changes, plus the explicitly bounded review nudge:
+Wake causes are public changes, plus the native-intent stall and the bounded review
+nudge:
 
 | Cause | When |
 |---|---|
@@ -221,11 +228,18 @@ Wake causes are public changes, plus the explicitly bounded review nudge:
 | `answer` | A question is answered, stays silent or fails |
 | `telemetry` | A pawn's Food or Rest band changes (including to `unknown`) |
 | `self-care` | Eating completes, fails or is interrupted |
+| `native-intent` | A stockpile haul's first delivery; the intent becoming met, expired or stopped; a stall: open with no delivery for 2,500 ticks (`NATIVE_INTENT_STALL_TICKS`) since its creation or last delivery, once per quiet period |
 | `review` | Nothing new, after a wait with work offerable (below; at most twice per wait) |
 
-Apart from the bounded review below, passing time, private needs, changing
-opportunities, food sightings and the core's own prose never wake it. Consumed causes stay consumed even if the observation later
-disappears.
+Two causes are time-based: the native-intent stall and the bounded review below. Apart
+from those, passing time, private needs, changing opportunities, food sightings,
+per-trip deliveries and the core's own prose never wake it. Consumed causes stay
+consumed even if the observation later disappears.
+
+Status: the wake causes, the bounded review and silent telemetry wakes are implemented
+and mock-tested (review in `tests/core-planner.test.ts`, silent wakes in
+`tests/native-intent-offers.test.ts`, intent wakes in `tests/native-intents.test.ts`).
+Live evidence is partial and noted in each section.
 
 ### A bounded review after a wait (post-Gate-C item 6)
 
@@ -251,6 +265,11 @@ no second look. Fable's rule:
 
 Applied to the rerun, this would have added reviews at about t11,600 and t16,600, with
 the pile offerable both times.
+
+Evidence: mock-tested, including the stop after two. In the
+[pipeline regression](trials/PIPELINE_REGRESSION.md) two separate first reviews fired
+live (t11415, t30416), both followed by a wait; a second review and the stop-at-two
+have not been observed live.
 
 ## Shared status bands
 
@@ -281,6 +300,11 @@ self-care, native intent) still wakes the core.
 Replaying the E2 native-haul run's exported inputs through the admission silences turns
 3, 6 and 13. Turns 4, 5 and 7 stay awake (Alvin, Pedro, then Beatrice reaching urgent
 food). Turn 7 is where the core asked Beatrice and she chose her own meal.
+
+Evidence: mock-tested and replayed offline on those exact inputs
+([HAULING_MIGRATION_CLOCK_WAKE](trials/HAULING_MIGRATION_CLOCK_WAKE.md)). The live
+migration runs recorded no `core-wake-silent` event, because offerable work stayed in
+view; an isolated silent wake has not been observed live.
 
 ## Food sightings
 

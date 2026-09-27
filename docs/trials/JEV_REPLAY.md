@@ -1,6 +1,6 @@
 # Jev offline replay — retained protocols v2 and v3
 
-**Status: E1 retry (29 valid answers) and E2 (27 valid answers) are complete, with interpretations retained below. The initial transport-failed run remains preserved. Harness v3 and these results merge as evidence only: no live wiring or gating threshold is introduced.** Owner: Fable. Reviewer:
+**Status: E1 retry (29 valid answers) and E2 (27 valid answers) are complete, with interpretations retained below. The initial transport-failed run remains preserved. Harness v3 and these results merge as evidence only: no live wiring or gating threshold is introduced.** (True when merged in #74; annotate-only live wiring came later in #86, see [Live wiring](#live-wiring).) Owner: Fable. Reviewer:
 Astra. This is the "Jev, offline" track from [ROADMAP](../ROADMAP.md#in-parallel-jev-offline),
 reordered after the [native-haul live run](NATIVE_HAUL_GATE_C.md): core wake gating
 first, prose grounding second. Nothing here changes routing, receipts, consent or the
@@ -123,7 +123,9 @@ ledger row when the pass has run.
 
 Decision 1 below is implemented as [annotate-only grounding](JEV_ANNOTATE.md): the same
 grounding request, byte for byte, over each returned core reply of a live run, journaled
-and gating nothing. Its first exercise is the construction and cooking scene.
+and gating nothing. Its first exercise was planned for the construction and cooking scene; it is now not yet
+scheduled (see [PHASE2](../PHASE2.md#step-b-the-core-becomes-the-harness-agent) step B:
+the join must be adapted to harness decisions first).
 
 ## Not decided by this replay
 
@@ -531,7 +533,8 @@ review nudge after a deliberate wait; it is not a Jev threshold decision.
 
 `worth_turn` remains retired as a wiring candidate. Grounding and `asks_core` annotations
 are a separate, prospective wiring PR for the construction/cooking scene after the
-pipeline regression. This evidence PR neither enables them nor changes a live threshold.
+pipeline regression (annotate-only wiring landed in #86; its first live use is not yet
+scheduled, see [PHASE2](../PHASE2.md#step-b-the-core-becomes-the-harness-agent) step B). This evidence PR neither enables them nor changes a live threshold.
 
 
 ### Final evidence review

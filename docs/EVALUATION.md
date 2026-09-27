@@ -98,6 +98,10 @@ The [first recording review](evidence/video-feedback-pilot.json) recovered the m
 sequence but invented dialogue and misread ticks/quotes. Receipt checking helped but
 also introduced an unsupported explanation. General legibility is not claimed.
 
+Phase 2 adds a sealed viewer measure for harness actions: at least four of five frozen
+consequential actions identified from the uncut recording alone
+([PHASE2 step A](PHASE2.md#step-a-legible-actions-and-the-missing-moves)); planned, not yet run.
+
 ## Running trials
 
 All real-game runs go through launchers that hold the exclusive lab lock for their
@@ -107,8 +111,11 @@ emulation and RimWorld never run at the same time on the shared host.
 - **Scripted game checks**: `RIMWORLD_LAB_ROOT=/abs/lab bash scripts/run-<name>-lab.sh
   game [<run-uuid>]`, then after a full stop/start `... cold` (the pawn-eating,
   food-observation and native-food launchers require a run UUID). Examples:
-  `run-crew-log-lab.sh`, `run-pawn-eating-lab.sh`, and `run-rescue-lab.sh`, which
+  `run-campfire-lab.sh`, `run-pawn-eating-lab.sh`, and `run-rescue-lab.sh`, which
   also has `interruptions`, `native-log` and `outlook` modes.
+- **Harness and benchmark runs**: `scripts/run-harness-*-scripted.sh --save=lab-…` for
+  zero-model harness checks, and `scripts/run-benchmark-pair.sh` for one cross-host scored
+  pair; see [HARNESS](HARNESS.md).
 - **Live split-host trials**: `node scripts/run-<name>.mjs <private config>` on the
   inference host, which reaches the lab over SSH and runs the matching
   `run-<name>-lab.sh` there. `--scripted` rehearses without models; `--cold` verifies

@@ -28,7 +28,7 @@ exercised. This is not a four-check clean pass.**
 | Check | Live evidence | Limit |
 |---|---|---|
 | Old-class attention loss | **0 gaps** while 1,937 native events arrived: Alvin 638, Beatrice 636, Pedro 663. Job-start/end/job churn accounted for 1,857. | One trajectory, not a universal losslessness claim or appraisal-quality proof. |
-| Bounded idle review | First-review nudges at t11415 and t30416, both followed by wait. Status reads “reviewed; still waiting on new events” at 10:00. | **Two separate first reviews**, not one two-review chain. Neither reached review 2; stop-at-two remains scripted-tested, not established live. |
+| Bounded idle review | First-review nudges at t11415 and t30416, both followed by wait. Status reads “reviewed; still waiting on new events” at 10:00. | **Two separate first reviews**, not one two-review chain. Neither reached review 2; stop-at-two remains mock-tested offline (#83; [evidence](../evidence/attention-rewake-review.json), zero game runs), not established live. |
 | Heard without replying | Pedro’s food/access report at t4741 reached input t5310; the core asked Beatrice instead. **“Core: heard Pedro; no reply to them yet” visible at 1:40**, alongside her pending question. | This exercises ordinary pawn speech, the earlier failure case. No typed Request record was created; that distinct branch remains unexercised. |
 | No question during an open meal receipt | Inputs t1682 (Alvin), t6435 (Beatrice), t20089 (Alvin) show started/zero-consumed receipts and exclude that pawn from questionRecipients. Across 16 inputs: zero leaks. The three meals completed 12/10/10 food-items. | No consumption-report follow-up was chosen at all, including after completion. The gate is exercised; the post-completion question branch is not. |
 
@@ -82,6 +82,7 @@ remain preserved privately. No further run occurred.
 
 This additive report changes no runtime or frozen evidence. Independent read-only
 receipt audit checked the coverage classifications and retained failures. Fable’s
-next planned step is annotate-only grounding wiring; construction/cooking Gate A
+next planned step is annotate-only grounding wiring (since landed in #86,
+[JEV_ANNOTATE](JEV_ANNOTATE.md)); construction/cooking Gate A
 remains separate. A live two-review stop proof is still outstanding, not silently
 replaced by the mock result.

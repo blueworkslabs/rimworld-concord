@@ -1,5 +1,11 @@
 # Hauling migration — final B1 round and strict fallback
 
+**Historical final-round report (status as of 2026-09-25, before merge).** Since then #73
+merged, the recipient policy was settled ([CLOCK_WAKE](HAULING_MIGRATION_CLOCK_WAKE.md#superseding-disposition--2026-09-25-0807-utc)),
+the [live freeze](HAULING_MIGRATION_LIVE_FREEZE.md) was signed, [Gate C](HAULING_MIGRATION_GATE_C.md)
+passed on the game side and the ordered haul was [retired](HAULING_RETIREMENT.md) in #79/#80.
+Strict remains the configuration; growing remains parked. Original text below is preserved.
+
 2026-09-25 · [PR #73](https://github.com/blueworkslabs/rimworld-concord/pull/73) ·
 [receipts and recording hashes](../evidence/hauling-migration-strict-fallback.json).
 

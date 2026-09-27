@@ -43,7 +43,8 @@ rerolls; preserve failed attempts. Interfaces change only between task sets.
 ## Step A: legible actions and the missing moves
 
 **Current implementation:** receipt narration and ordinary bed assignment are implemented
-and [scripted/UI-tested](evidence/harness-a1-2026-09-26/README.md). This does not pass the
+and [scripted-tested (real game, zero model calls), with manual UI inspection](evidence/harness-a1-2026-09-26/README.md)
+([#103](https://github.com/blueworkslabs/rimworld-concord/pull/103), [#104](https://github.com/blueworkslabs/rimworld-concord/pull/104)). This does not pass the
 sealed four-of-five legibility measure below. Fable owns that rubric/key and the T4/scene
 freezes; T4 witness/fixture, stall instrumentation and the B/C integrations remain ahead.
 
@@ -109,7 +110,8 @@ Retain the existing wake semantics unless separately amended: suppress unproduct
 telemetry churn, **preserve worsening-to-urgent and offerable-work exceptions**, and retain
 up to two reviews after a deliberate wait with work offerable (2,500 ticks, then 5,000,
 then silence without new cause). The first review is live-observed; second-review/stop
-coverage remains scripted, not newly proven by the regression scene. Keep acknowledgment
+coverage is mock-tested offline in #83 ([evidence](evidence/attention-rewake-review.json)), not exercised
+in the game and not newly proven by the regression scene. Keep acknowledgment
 of addressed speech without implying an answer. Existing successful turn/receipt and
 failure-budget behavior must survive the replacement.
 
@@ -166,12 +168,14 @@ Nothing in C starts before B's scene has been cold-read and its disposition reco
 
 ## What retires and what remains ahead
 
-With the first step-A PR landing, close [construction slice #89](https://github.com/blueworkslabs/rimworld-concord/pull/89)
-**unmerged**, with the [reuse inventory](CONSTRUCTION_REUSE.md) and links to retained passing/failed evidence. Do not
-claim its incomplete carrier coverage passed. Generic harness actions already on main are
+[Construction slice #89](https://github.com/blueworkslabs/rimworld-concord/pull/89) was closed
+**unmerged** on 2026-09-26, when the first step-A PRs (#103, #104) merged, with the
+[reuse inventory](CONSTRUCTION_REUSE.md) and links to retained passing/failed evidence. Its
+incomplete carrier coverage is not claimed as passed. Generic harness actions already on main are
 separate from #89's unmerged construction consent/accounting; any reused pieces get their
-own review and acceptance. Keep branches and gate documents as history. Closure is authorized by the agreed plan; keep the unmerged branch and evidence. No new or revived construction contribution/
-attribution ledger, and no revival of the retired ordered-haul ledger. Preserve only the
+own review and acceptance. The closure was authorized by the agreed plan; the unmerged branch,
+gate documents and evidence are kept as history. There is no new or revived construction
+contribution/attribution ledger, and no revival of the retired ordered-haul ledger. Preserve only the
 action receipts and minimal consent/ownership identities needed for truthful effects and
 binding refusal; selective reuse must not smuggle contribution accounting back in.
 
