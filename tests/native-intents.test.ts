@@ -1,11 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import { IntentView, HaulZone, intentWakes, topicOutcome, invariantFindings, counterAdoptable, progress } from '../src/native-intents.js';
 import { nativeAttention } from '../src/routing.js';
 
 const base=(o:Partial<IntentView>={}):IntentView=>IntentView.parse({intentId:'i1',thingDef:'WoodLog',variant:'attribution',status:'open',zoneId:7,
   quota:30,delivered:0,reserved:0,remaining:30,overshoot:0,incidental:0,unattributed:0,removed:0,violations:0,rejectedStarts:0,
   finishedAfterExclusion:0,createdTick:1000,untilTick:31000,lastDeliveryTick:-1,accepted:['A'],excluded:[],byPawn:[],drops:[],...o});
+
+test('every mod-emitted intent event has an explicit native attention route',()=>{
+  const emitted=new Set(['mod/NativeIntents.cs','mod/IntentPatches.cs'].flatMap(path=>
+    [...readFileSync(path,'utf8').matchAll(/\bEmit\([^,\n]+,"(intent-[^"]+)"/g)].map(match=>match[1]!)));
+  assert(emitted.has('intent-pickup')&&emitted.has('intent-ledger-violation'),'scan must include pickup and diagnostic emissions');
+  for(const kind of emitted)assert.deepEqual(nativeAttention({kind,detail:''}),{next:'native',interrupt:false},kind);
+  assert.deepEqual(nativeAttention({kind:'intent-unknown-future-kind',detail:''}),{next:'appraisal',interrupt:false});
+});
 
 test('new native kinds route without waking or interrupting per event',()=>{
   for(const kind of ['job-start','job-end','ingested','haul-delivered','quota-escape','intent-admitted-start','intent-retired','intent-incidental','intent-trued-up','lab-drafted'])

@@ -69,7 +69,7 @@ stockpile hauls: an existing colony stockpile (`zoneId`) or a candidate site, on
 (stockpile, def). The list is shown in a fixed order: label, then def, then ids.
 - **Ordinary play:** these offers are the only hauling; rescue, construction and
   cooking stay available. Without `configureNativeHauls` there is no hauling to offer
-  (the ordered haul was retired in #80).
+  (the ordered haul was retired in #80); the capability text no longer advertises it.
 - **Intent-only scenes** (`{intentOnly: true}`, and the spike's frozen live harness):
   the stockpile hauls are the only proposable work.
 - The view carries the colony `clock` in every mode.

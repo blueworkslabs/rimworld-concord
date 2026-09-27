@@ -53,7 +53,7 @@ ingest.
 | Event | Route | Interrupts a pending thought? |
 |---|---|---|
 | Job change (`job`, sampled) | native | no |
-| `NATIVE_KINDS`: `job-start`, `job-end`, `ingested`, `haul-delivered`, `quota-escape`, `intent-opened`, `intent-excluded`, `intent-incidental`, `intent-ordinary`, `intent-admitted-start`, `intent-rejected-start`, `intent-retired`, `intent-trued-up`, and the lab-only `lab-fault`, `lab-drafted` | native; texture and receipts, never a per-event wake (intent wakes for the core come from aggregate progress, [CORE](CORE.md#wake-ups)) | no |
+| `NATIVE_KINDS`: `job-start`, `job-end`, `ingested`, `haul-delivered`, `quota-escape`, `intent-opened`, `intent-excluded`, `intent-incidental`, `intent-ordinary`, `intent-admitted-start`, `intent-rejected-start`, `intent-retired`, `intent-trued-up`, `intent-pretag`, `intent-pretag-marked`, `intent-retarget`, `intent-retarget-unadmitted`, `intent-pickup`, `intent-pickup-skipped`, `intent-pickup-bound-violation`, `intent-duplicate-admitted`, `intent-nested-end`, `intent-ledger-violation`, and the lab-only `lab-fault`, `lab-drafted` | native; texture and receipts, never a per-event wake (intent wakes for the core come from aggregate progress, [CORE](CORE.md#wake-ups)) | no |
 | Food, Rest, Mood band change | native (Fable, post-Gate-C item 7: the game feeds the pawn; the deliberate eating choice comes through the core's question) | no |
 | A pawn's own Food or Rest band reaching `urgent` (band 0, under 20%) | deliberation | no, queued for the next turn |
 | Health change | deliberation | yes |
@@ -65,16 +65,19 @@ ingest.
 | Any other new memory | deliberation | yes |
 | Any other kind | appraisal (kept defined for the day an appraiser has evidence) | no |
 
-"Any other kind" currently includes hooked stockpile-haul kinds that are not in
-`NATIVE_KINDS`: `intent-pretag`, `intent-pretag-marked`, `intent-retarget`,
-`intent-retarget-unadmitted`, `intent-pickup`, `intent-pickup-skipped`,
-`intent-pickup-bound-violation`, `intent-duplicate-admitted`, `intent-nested-end` and
-`intent-ledger-violation`. They route to appraisal, not native. Without an appraiser,
-a pawn's pending batch that contains one can neither be settled natively nor start a
-model turn until a deliberation event joins it (then they are shown to the model with
-it). As non-native experiences they are not preferred for eviction, and an unconsidered
-one that is evicted counts as an attention gap. This is current behaviour, not a
-decided policy.
+All currently emitted stockpile-haul hook kinds are explicitly native-routed at
+ingestion. They remain in the event archive, including pickup-bound and ledger
+violation diagnostics; routing them natively does not change game accounting or
+aggregate core wakes. Unknown kinds, including future `intent-*` kinds, still go to
+appraisal. A source-contract regression checks the mod's emitted intent kinds against
+the route table so a new kind needs an explicit routing decision.
+
+Status: implemented and mock-tested. The coordinator regression verifies that hook
+batches settle without an appraiser or model call, retain their diagnostic archive,
+and cannot crowd an unconsidered urgent need out of the attention buffer. No new
+game run or live-model acceptance is claimed. Already-persisted experiences keep
+their historical route; this correction applies when new events are ingested, not
+as a migration of saved attention or past gap counts.
 
 The core has one telemetry rule of its own (details in [CORE](CORE.md)):
 
