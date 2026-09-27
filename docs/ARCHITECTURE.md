@@ -51,9 +51,10 @@ never bundled); `Concord.cs` applies the patches at startup. Files:
   placement query, saved receipts), `HarnessNarration.cs` (receipt-backed narration).
 
 **The bridge** (`src/lab-bridge.ts`) is a file mailbox under
-`$RIMWORLD_LAB_ROOT/concord/`: one JSON request, one response, serialized. Operator
-actions (save, load, pause, fixtures) go through the lab's control script
-(`bin/lab.py`), never through a model. Exactly one process holds the lab lock
+`$RIMWORLD_LAB_ROOT/concord/`: one JSON request, one response, serialized. Operator-only
+actions (save, load, fixtures) go through the lab's control script
+(`bin/lab.py`), never through a model. The benchmark controller separately gets
+bounded pause and speed controls through its `time` tool. Exactly one process holds the lab lock
 (`concord/coordinator.lock`): a coordinator, or a benchmark pair script whose harness
 arm servers refuse to start without it.
 

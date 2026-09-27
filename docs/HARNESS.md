@@ -238,7 +238,7 @@ prompt fitting, the Jev grounding annotator (a narration checker fits a harness)
 
 **Stops:** further development of the attribution ledger and its patches (they still
 run native stockpile hauling on the character path; [ACTIONS](ACTIONS.md#stockpile-haul)), the construction slice as drafted
-(#89 on hold; its bridge and blueprint placement code is reused by action 1), and the
+(#89 closed unmerged on 2026-09-26; its bridge and blueprint placement code is reused by action 1), and the
 gate process. The migration pages stay as history.
 
 ## Open questions, resolved 2026-09-25

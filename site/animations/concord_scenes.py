@@ -297,7 +297,7 @@ class CoreWakes(Scene):
                     self.play(FadeIn(log_row(entry), shift=RIGHT * 0.15), set_status(stat), run_time=0.6)
                 else:
                     note = T("wait turn: no log entry", 14, DIM).next_to(log_t, RIGHT, buff=0.4)
-                    self.play(set_status(stat), Indicate(status, color=AMBER, scale_factor=1.05), FadeIn(note), run_time=0.6)
+                    self.play(set_status(stat), FadeIn(note), run_time=0.6)
                     self.wait(0.3)
                     self.play(FadeOut(note), run_time=0.3)
                 asleep = T("core: asleep", 18, DIM).move_to(clbl, aligned_edge=LEFT)
