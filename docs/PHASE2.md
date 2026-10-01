@@ -46,7 +46,10 @@ rerolls; preserve failed attempts. Interfaces change only between task sets.
 and [scripted-tested (real game, zero model calls), with manual UI inspection](evidence/harness-a1-2026-09-26/README.md)
 ([#103](https://github.com/blueworkslabs/rimworld-concord/pull/103), [#104](https://github.com/blueworkslabs/rimworld-concord/pull/104)). This does not pass the
 sealed four-of-five legibility measure below. Fable owns that rubric/key and the T4/scene
-freezes; T4 witness/fixture, stall instrumentation and the B/C integrations remain ahead.
+freezes. A.4 now has an [implemented, offline mock-tested timing foundation](HARNESS.md#phase-2-a4-timing-evidence-implemented-offline-mock-tested),
+covering tool/observer phases and tick joins; native model/controller/wait boundaries
+and staging acceptance remain ahead. T4 witness/fixture, frozen stall definitions and
+the B/C integrations remain ahead.
 
 1. **Receipt-backed crew-log narration.** Every newly accepted game-editing `act` request
    writes one line in the colony's voice, after native acceptance: “Placed a campfire

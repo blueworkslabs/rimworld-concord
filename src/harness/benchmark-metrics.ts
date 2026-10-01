@@ -19,3 +19,5 @@ export function usageFromEvents(raw:string,naturalExit:boolean){
   complete:naturalExit&&!!last&&malformed===0,malformedEvents:malformed,actualBilledUsd:null,
   reason:'Native subscription billing unavailable; missing fields/unfinished-turn usage are unknown. Latest completed turn is retained, not assumed cumulative across retries.'};
 }
+
+export {timingFromEvents} from './timing-metrics.js';
