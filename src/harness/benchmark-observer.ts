@@ -1,6 +1,7 @@
 import {appendFileSync,existsSync,readFileSync,writeFileSync} from 'node:fs';
 import type {Snapshot} from './perception.js';
 import type {ObserverHooks} from './tool-server.js';
+import type {GameSample} from './timing-journal.js';
 export function configuredCandidate(start:Snapshot,s:Snapshot):boolean{
  if(s.meta.world!==start.meta.world||s.meta.epoch!==start.meta.epoch||s.meta.mapId!==start.meta.mapId)return false;
  const oldThings=new Set(start.map.things.map(t=>t.id)),oldBills=new Set(start.bills.flatMap(b=>b.bills.map(x=>x.loadId)));
@@ -18,8 +19,9 @@ export class BenchmarkObserver implements ObserverHooks {
   if(configuredCandidate(this.start,s)&&!existsSync(this.dir+'/configured.json'))writeFileSync(this.dir+'/configured.json',JSON.stringify(s),{flag:'wx'});
   return s;
  }
- async before(){await this.sample();}
- async after(done:boolean){if(done)await this.bridge.admin('pause');const s=await this.sample();if(done)writeFileSync(this.dir+'/done.json',JSON.stringify({at:Date.now(),snapshot:s}),{flag:'wx'});}
+ private timingSample(s:Snapshot):GameSample{const {world,epoch,mapId,tick,snapshotId}=s.meta;return {world,epoch,mapId,tick,snapshotId,paused:s.time.paused,speed:s.time.speed};}
+ async before(){return this.timingSample(await this.sample());}
+ async after(done:boolean){if(done)await this.bridge.admin('pause');const s=await this.sample();if(done)writeFileSync(this.dir+'/done.json',JSON.stringify({at:Date.now(),snapshot:s}),{flag:'wx'});return this.timingSample(s);}
 }
 export function observerFromEnv(bridge:ConstructorParameters<typeof BenchmarkObserver>[0]){
  const dir=process.env.CONCORD_BENCH_DIR;if(!dir)throw Error('CONCORD_BENCH_DIR required');

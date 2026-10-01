@@ -11,7 +11,7 @@ import {BenchmarkTask,TaskId} from '../src/harness/benchmark-task.js';
 import {retainedCheck} from '../src/harness/benchmark-check.js';
 import {assertNativeSubscriptionLogin,buildLaunch,armEnv,controllerEnv} from '../src/harness/controller-launch.js';
 import {recordFirstRequest,preflightFindings} from '../src/harness/controller-proof.js';
-import {counts,usageFromEvents} from '../src/harness/benchmark-metrics.js';
+import {counts,usageFromEvents,timingFromEvents} from '../src/harness/benchmark-metrics.js';
 import {LineChannel,type GameToHost,type HostToGame} from '../src/harness/controller-wire.js';
 import type {CallLog} from '../src/harness/tool-server.js';
 import type {Snapshot} from '../src/harness/perception.js';
@@ -30,6 +30,7 @@ const task=BenchmarkTask.parse(JSON.parse(taskText));if(task.id!==taskId)throw E
 const sha=(s:string|Buffer)=>createHash('sha256').update(s).digest('hex');
 const runId=randomUUID(),dir=root+`/.runtime/bench-${taskId}-${arm}-${runId}`;mkdirSync(dir+'/cwd',{recursive:true});
 const callLog=dir+'/calls.jsonl',events=dir+'/codex.jsonl';writeFileSync(callLog,'');writeFileSync(events,'');
+const timingLog=callLog+'.timing.jsonl';writeFileSync(timingLog,'');
 // A rehearsal swaps in the scripted stand-in controller (trials/rehearsal-controller.ts) to exercise
 // the lifecycle with the real game; its receipt is labelled and can never count as a scored run.
 const rehearsal=options.get('rehearsal')==='true';
@@ -138,9 +139,9 @@ finally{
  const checked=retainedCheck(task,start,end,dir);
  if(checked.checkerFailure)failure=(failure??'')+' Checker failed: '+checked.checkerFailure;
  const receipt={...metadata,outcome,failure:failure??null,timer:{controllerStartMs:t0??null,stoppedAtMs:t1,firstRequestAtMs:issued[0]?.at??null,firstRequestToStopMs:issued[0]?t1-issued[0].at:null,controllerWallMs:t0?t1-t0:null,includesHiddenObserverOverhead:true,endSnapshotMayBeAfterDeadline:outcome!=='done'},
-  counts:counts(calls),tokens:usageFromEvents(readFileSync(events,'utf8'),naturalExit),controllerExit:exitCode,
+  counts:counts(calls),timing:timingFromEvents(readFileSync(timingLog,'utf8'),calls.filter(c=>c.timingFailure).map(c=>({callId:c.id,reason:c.timingFailure!}))),tokens:usageFromEvents(readFileSync(events,'utf8'),naturalExit),controllerExit:exitCode,
   ...checked,verifiedCompletion:false,auditStatus:'pending input/recording audit; timeout/failed runs cannot pass',
-  hashes:{calls:sha(readFileSync(callLog)),events:sha(readFileSync(events)),recording:existsSync(dir+'/recording.mp4')?sha(readFileSync(dir+'/recording.mp4')):null},stalls:{status:'not instrumented',measurements:null}};
+  hashes:{calls:sha(readFileSync(callLog)),timing:sha(readFileSync(timingLog)),events:sha(readFileSync(events)),recording:existsSync(dir+'/recording.mp4')?sha(readFileSync(dir+'/recording.mp4')):null},stalls:{status:'unscored: stall definitions and thresholds not frozen',thresholdMs:null,measurements:null}};
  writeFileSync(dir+'/receipt.json',JSON.stringify(receipt,null,2));
  if(wire)wire.send({type:'receipt',runId,receipt});else console.log(JSON.stringify(receipt));
  process.removeListener('SIGTERM',onSignal);process.removeListener('SIGINT',onSignal);

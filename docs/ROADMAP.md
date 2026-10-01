@@ -15,6 +15,10 @@ ordinary bed assignment ([#103](https://github.com/blueworkslabs/rimworld-concor
 Next: Fable's project/docs review and sealed legibility rubric, then the T4 witness, fixture
 and authored viability check. Concrete knowledge boundaries and budgets precede B's freeze;
 no scored T4 or new story scene has started.
+A.4 has an [implemented, offline mock-tested timing foundation](HARNESS.md#phase-2-a4-timing-evidence-implemented-offline-mock-tested):
+tool/observer phases, tick joins and explicit trusted span support. Native model-call,
+controller activity and deliberate-wait boundaries remain unavailable; adapter wiring,
+staging acceptance and pre-trial stall definitions remain ahead.
 
 ## Phase reset, 2026-09-25: the agent harness (phase 1, closed 2026-09-26)
 
@@ -32,7 +36,7 @@ completed in both interfaces: six successful arms, alternating H→UI/UI→H/H�
 no consistent colony-time advantage; median wall 58.7s harness versus 106.6s UI on this task. [The successful rehearsal](evidence/benchmark-rehearsal-3-2026-09-26/README.md)
 is separate from scoring, and both earlier infrastructure-failed pairs remain retained.
 This is task-local evidence, not general colony-management or billed-dollar advantage.
-Stalls remain uninstrumented and native USD unavailable. Placement query is now verified and merged; no interface change entered the scored T1 set.
+Those scored runs have no stall instrumentation and native USD remains unavailable. Placement query is now verified and merged; no interface change entered the scored T1 set.
 [T2/T3 scored results](evidence/benchmark-colony-scored-2026-09-26/README.md) now cover three alternating pairs per task: all twelve primary goals met. T2 has no consistent colony-time advantage; T3 harness completion precedes UI in all three pairs. Median wall H/UI is 68.7/217.3s and 41.0/240.4s respectively. Sleep, tending, food permissions, mixed storage and pause/filter recovery remain separate outcome columns. Interface granularity and plans differ; this is not pure perception or dollar-cost evidence.
 
 The accepted phase-2 plan above supersedes the earlier migration sequence below. The old construction slice [#89](https://github.com/blueworkslabs/rimworld-concord/pull/89) was closed unmerged on 2026-09-26 with a [reuse inventory](CONSTRUCTION_REUSE.md); no contribution ledger is revived. No new story-layer or general performance claim follows from benchmark completion.

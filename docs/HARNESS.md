@@ -659,3 +659,97 @@ save directly. Evidence is journaled incrementally; a failure does not erase ear
 The accepted-path test includes releasing a previous bed, effective priority read-back,
 mining/cancellation, distinct identical bills and stale-timeline rejection. Other unsuitable
 bed classes have source-backed guards; they are not all instantiated in this fixture.
+
+## Phase 2 A.4 timing evidence (implemented, offline mock-tested)
+
+This is the **measurement foundation**, not completion of A.4 or a scored stall result.
+The current harness and UI servers both retain `calls.jsonl.timing.jsonl` alongside the
+unchanged call/response journal. The benchmark receipt includes its SHA-256 and a
+`timing` reduction. Existing receipts without this file remain historical evidence;
+no new labels are inferred for old runs. No tool, tool schema, model-visible reply,
+provider route or game behavior is added by this instrumentation.
+
+### Evidence collected now
+
+- One `tool_call` span, joined by the existing call UUID, runs from server dispatch
+  entry to response construction. Independent `observer_before`, `tool_dispatch`
+  and `observer_after` spans separate hidden observer overhead from dispatch. A
+  dispatch includes backend/bridge transport and execution; it is **not** an isolated
+  network-latency or native-work measurement. Client-side MCP transport is outside
+  the server span. Failed, unknown, post-done and interrupted calls stay visible.
+- The trusted observer returns only world, load epoch, map, tick, snapshot ID, paused
+  flag and speed to the timing recorder after each existing sample. This adds no game
+  reads and feeds nothing to the UI controller. Tick deltas require matching
+  world/epoch/map and nondecreasing ticks. Otherwise the delta is null with its reason.
+  Endpoints do not prove continuous pause or progress between samples; zero ticks do
+  not establish a stall. Sample timestamps are host receipt boundaries, not exact
+  engine-event timestamps.
+- Each append-only event has format version 1, a process-local random clock domain,
+  producer `source`, Unix wall time for correlation and monotonic milliseconds for
+  duration. Each start/end is retained separately so a killed call has a missing end,
+  not an invented timeout duration. Legacy `durationMs` now also uses monotonic time.
+  Wall-clock rollback cannot make negative durations. Independent processes/hosts are
+  never aligned by subtracting their wall or monotonic timestamps.
+- The offline reducer validates the schema, retains parse/pairing issues, excludes
+  regressed or mixed-source clock domains, and invalidates duplicate boundaries.
+  Completed interval unions give coverage; summed durations are also retained for
+  concurrency inspection. Kind totals overlap (the outer call contains its phases)
+  and must not be added. Unknown gaps cover only the observed first-to-last-event
+  window of each clock. Leading/trailing run gaps and unfinished span tails remain
+  unbounded/unknown; these are not a decomposition of `timer.controllerWallMs`.
+  The summary includes all retained server events (including post-done rejection and
+  response-flush overhead), not a clipping to the scored timer/deadline.
+  Diagnostic-write failure disables timing for that server, preserves the original
+  tool response, and appears as `timingFailure` in completed call records and as
+  `timing.writeFailures` in the receipt.
+
+### Explicit adapter boundaries, still unavailable on the current native route
+
+`TimingJournal` accepts trusted `model_call`, `controller_active`,
+`controller_suspended` and `intentional_wait` spans. The adapter must open a span at
+its actual boundary and close that same ID, with a stable producer identity; wait
+and suspension require an explicit reason at the start. These are operator APIs,
+not model tools; sinks must append synchronously. They do not parse model prose or retroactively label silence.
+Active means the adapter explicitly reports its control loop active; suspension
+means it explicitly yields that loop. Neither means OS CPU time. Tool execution
+alone does not establish either state.
+
+The existing native Codex benchmark route supplies **none of those boundaries**.
+Its provider/model latency, active/suspended controller time and intentional wait
+reasons therefore remain unavailable (null), even though tool timing is recorded.
+Wiring a future controller/route to this API needs its own review and acceptance.
+Do not use a process's launch-to-exit lifetime or gaps between tool calls as a proxy.
+If explicit active and suspended spans overlap, the conflicting interval is reported
+and excluded from both exclusive controller totals; it belongs to controller unknown
+coverage. Unresolved or invalid controller spans keep their earliest start through the
+last observed point unknown, even when a closed state span overlaps them. Multiple model calls may overlap: per-kind union and sum differ by design.
+
+`stalls.measurements` and `stalls.thresholdMs` remain null. Definitions, thresholds,
+exclusions and acceptance tolerances must be frozen **before** a trial; normal
+intentional waits are not failures. No automatic threshold, billing estimate,
+provider switch, controller behavior or phase-1 rescore is introduced.
+
+### Verification and staging acceptance still required
+
+`tests/harness-timing.test.ts` deterministically exercises phase separation, returned
+receipt fidelity, native/UI hidden-data isolation, wait reasons, overlapping calls,
+conflicting controller states, wall-clock rollback, separate clock domains,
+restores/map changes, regressed ticks, failures, interruption and malformed journals.
+This is offline mock evidence, not real-game, transport-speed or live-model validation.
+No new trial is entered in the trial ledger because no game trial was run.
+
+Before relying on new timing in staging:
+
+1. Run the existing bounded scripted/rehearsal path for both arms on the same build;
+   retain calls, timing JSONL, observer snapshots, receipt and recording. Confirm call
+   IDs and before/after snapshots join, including a rejected input and report-done.
+2. Confirm UI replies still contain only their authorized output, observer pause-on-done
+   is unchanged, and successful actions keep their authoritative receipt.
+3. Exercise an interrupted call and a load/epoch boundary in an authorized fixture;
+   verify incomplete spans/unknown tick deltas rather than manufactured completion.
+4. Inspect local and cross-host journals independently. Do not subtract controller-host
+   clocks from game-host clocks. Quantify recording/instrumentation overhead before
+   any frozen regression tolerance is evaluated.
+5. Keep model/controller/wait coverage unavailable until the relevant adapter is wired
+   and independently verified. Freeze any stall definition and threshold before scoring;
+   refresh effective-tool/context proofs if a later change alters the interface.
